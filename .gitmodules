@@ -1,0 +1,36 @@
+[submodule "src/vendor/boost/variant"]
+	path = src/vendor/boost/variant
+	url = https://github.com/boostorg/variant.git
+[submodule "src/vendor/boost/type_index"]
+	path = src/vendor/boost/type_index
+	url = https://github.com/boostorg/type_index.git
+[submodule "src/vendor/boost/config"]
+	path = src/vendor/boost/config
+	url = https://github.com/boostorg/config.git
+[submodule "src/vendor/boost/container_hash"]
+	path = src/vendor/boost/container_hash
+	url = https://github.com/boostorg/container_hash.git
+[submodule "src/vendor/boost/static_assert"]
+	path = src/vendor/boost/static_assert
+	url = https://github.com/boostorg/static_assert.git
+[submodule "src/vendor/boost/throw_exception"]
+	path = src/vendor/boost/throw_exception
+	url = https://github.com/boostorg/throw_exception.git
+[submodule "src/vendor/libosmium"]
+	path = src/vendor/libosmium
+	url = https://github.com/osmcode/libosmium.git
+[submodule "src/vendor/protozero"]
+	path = src/vendor/protozero
+	url = https://github.com/mapbox/protozero.git
+[submodule "src/vendor/boost/assert"]
+	path = src/vendor/boost/assert
+	url = https://github.com/boostorg/assert.git
+[submodule "src/vendor/boost/core"]
+	path = src/vendor/boost/core
+	url = https://github.com/boostorg/core.git
+[submodule "src/vendor/boost/type_traits"]
+	path = src/vendor/boost/type_traits
+	url = https://github.com/boostorg/type_traits.git
+[submodule "src/vendor/boost/mpl"]
+	path = src/vendor/boost/mpl
+	url = https://github.com/boostorg/mpl.git
