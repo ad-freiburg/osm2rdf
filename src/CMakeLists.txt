@@ -1,0 +1,11 @@
+set(OSM2NT_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+
+if (COMMAND cpplint_add_subdirectory)
+	cpplint_add_subdirectory(osm2nt)
+endif()
+
+include_directories(
+	${OSM2NT_INCLUDE_DIR}
+)
+
+add_subdirectory(osm2nt)

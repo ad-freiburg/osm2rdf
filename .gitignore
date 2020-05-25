@@ -1,0 +1,6 @@
+Makefile
+CMakeCache.txt
+*.a
+*.o
+*.pyc
+/build/
