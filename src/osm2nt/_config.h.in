@@ -1,0 +1,13 @@
+// Copyright 2020, University of Freiburg
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+
+#ifndef SRC_OSM2NT_CONFIG_H_
+#define SRC_OSM2NT_CONFIG_H_
+
+// version number from cmake version module
+#define VERSION_FULL "@VERSION_GIT_FULL@"
+
+// install prefix from cmake
+#define INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
+
+#endif  // SRC_OSM2NT_CONFIG_H_N
