@@ -20,5 +20,8 @@ include_directories(SYSTEM ${BOOSTASSERT_INCLUDE_DIRS})
 include_directories(SYSTEM ${BOOSTCORE_INCLUDE_DIRS})
 include_directories(SYSTEM ${BOOSTTYPETRAITS_INCLUDE_DIRS})
 include_directories(SYSTEM ${BOOSTMPL_INCLUDE_DIRS})
+include_directories(SYSTEM ${EXPAT_INCLUDE_DIRS})
+include_directories(SYSTEM ${BZIP2_INCLUDE_DIR})
+include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS})
 
 add_subdirectory(osm2nt)

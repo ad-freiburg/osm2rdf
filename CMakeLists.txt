@@ -1,6 +1,10 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.6)
 
-project (osm2nt)
+project (osm2nt CXX)
+
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 if (CMAKE_BUILD_TYPE)
 	string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
@@ -78,12 +82,30 @@ if (NOT BOOSTMPL_FOUND)
 	message(WARNING "No global boost::mpl found, using local copy")
 endif()
 
-# set compiler flags, see http://stackoverflow.com/questions/7724569/debug-vs-release-in-cmake
-set(CMAKE_CXX_FLAGS                "-lpthread -lz")
+find_package(EXPAT REQUIRED)
+if (NOT EXPAT_FOUND)
+	message(WARNING "No global expat found")
+endif()
+
+find_package(BZip2 REQUIRED)
+if (NOT BZIP2_FOUND)
+	message(WARNING "No global bzip2 found")
+endif()
+
+find_package(ZLIB REQUIRED)
+if (NOT ZLIB_FOUND)
+	message(WARNING "No global zlib found")
+endif()
+
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0")
 set(CMAKE_CXX_FLAGS_DEBUG          "-Og -g -DLOGLEVEL=3 -DOSM2NT_DBG=1")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2")
 set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -g -DLOGLEVEL=3")
+set(CMAKE_CXX_CLANG_TIDY           "clang-tidy;-checks=-*,readability-*")
 
 # export compile commands to tools like clang
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
