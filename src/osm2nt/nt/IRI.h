@@ -6,7 +6,9 @@
 
 #include <string>
 
+#include "osmium/osm/node_ref.hpp"
 #include "osmium/osm/object.hpp"
+#include "osmium/osm/relation.hpp"
 
 #include "osm2nt/nt/Object.h"
 #include "osm2nt/nt/Predicate.h"
@@ -17,8 +19,10 @@ namespace nt {
 
 struct IRI : public Subject, public Predicate, public Object {
  public:
-  explicit IRI(const std::string& prefix, const osmium::OSMObject& object);
   explicit IRI(const std::string& prefix, const std::string& s);
+  explicit IRI(const std::string& prefix, const osmium::NodeRef& n);
+  explicit IRI(const std::string& prefix, const osmium::OSMObject& o);
+  explicit IRI(const std::string& prefix, const osmium::RelationMember& m);
   std::string toString() const;
   std::string prefix;
   std::string value;

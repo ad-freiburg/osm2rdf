@@ -6,13 +6,32 @@
 #include <sstream>
 #include <ostream>
 
+#include "osmium/osm/node_ref.hpp"
 #include "osmium/osm/object.hpp"
+#include "osmium/osm/relation.hpp"
+
+// ____________________________________________________________________________
+osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n) {
+  this->prefix = prefix;
+  std::stringstream tmp;
+  tmp << n.positive_ref();
+  value = tmp.str();
+}
 
 // ____________________________________________________________________________
 osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o) {
   this->prefix = prefix;
   std::stringstream tmp;
   tmp << o.positive_id();
+  value = tmp.str();
+}
+
+// ____________________________________________________________________________
+osm2nt::nt::IRI::IRI(const std::string& prefix,
+                     const osmium::RelationMember& m) {
+  this->prefix = prefix;
+  std::stringstream tmp;
+  tmp << m.positive_ref();
   value = tmp.str();
 }
 

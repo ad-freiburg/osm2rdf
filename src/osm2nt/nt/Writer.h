@@ -24,15 +24,20 @@ class Writer {
   explicit Writer(std::ostream* os);
   void writeTriple(const osm2nt::nt::Triple& t);
   void writeOsmArea(const osmium::Area& area);
+  void writeOsmBox(const osm2nt::nt::Subject* s,
+                   const osm2nt::nt::Predicate* p, const osmium::Box& box);
   void writeOsmLocation(const osm2nt::nt::Subject* s,
-                        const osm2nt::nt::Predicate* p,
                         const osmium::Location& l);
   void writeOsmNode(const osmium::Node& node);
   void writeOsmRelation(const osmium::Relation& relation);
+  void writeOsmRelationMembers(const osm2nt::nt::Subject* s,
+                               const osmium::RelationMemberList& members);
   void writeOsmTag(const osm2nt::nt::Subject* s, const osmium::Tag& tag);
   void writeOsmTagList(const osm2nt::nt::Subject* s,
                        const osmium::TagList& tags);
   void writeOsmWay(const osmium::Way& way);
+  void writeOsmWayNodeList(const osm2nt::nt::Subject* s,
+                           const osmium::WayNodeList& nodes);
  protected:
   std::ostream* out;
   osmium::geom::WKTFactory<> wktFactory;
