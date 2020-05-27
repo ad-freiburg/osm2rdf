@@ -48,8 +48,7 @@ void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
 
   p = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/area/", "from_way");
-  o = new osm2nt::nt::Literal(
-    area.from_way()?"yes":"no");
+  o = new osm2nt::nt::Literal(area.from_way()?"yes":"no");
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
@@ -205,17 +204,20 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
 
   osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/way/", "is_closed");
-  osm2nt::nt::Object* o = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/node/", way.is_closed()?"yes":"no");
+  osm2nt::nt::Object* o = new osm2nt::nt::Literal(way.is_closed()?"yes":"no");
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
 
   p = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/way/", "WKT");
-  o = new osm2nt::nt::Literal(way.is_closed()?
-    wktFactory.create_polygon(way) :
-    wktFactory.create_linestring(way));
+  if (way.nodes().size() > 3 && way.is_closed()) {
+    o = new osm2nt::nt::Literal(wktFactory.create_polygon(way));
+  } else if (way.nodes().size() > 1) {
+    o = new osm2nt::nt::Literal(wktFactory.create_linestring(way));
+  } else {
+    o = new osm2nt::nt::Literal(wktFactory.create_point(way.nodes()[0]));
+  }
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
