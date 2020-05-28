@@ -51,9 +51,9 @@ int main(int argc, char** argv) {
     {
       osmium::io::Reader reader{input_file};
       osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
-      std::cout << "Pass 1 ... (Relations for areas)" << std::endl;
+      std::cerr << "Pass 1 ... (Relations for areas)" << std::endl;
       osmium::relations::read_relations(progress, input_file, mp_manager);
-      std::cout << "... done" << std::endl;
+      std::cerr << "... done" << std::endl;
     }
 
     std::cerr << "Memory:\n";
@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     location_handler.ignore_errors();
 
     {
-      std::cout << "Pass 2 ... (all)" << std::endl;
+      std::cerr << "Pass 2 ... (all)" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
         osmium::osm_entity_bits::object};
       osmium::apply(reader, location_handler,
@@ -85,11 +85,11 @@ int main(int argc, char** argv) {
           osmium::apply(buffer, dump_handler);
       }), dump_handler);
       reader.close();
-      std::cout << "... done" << std::endl;
+      std::cerr << "... done" << std::endl;
     }
 
     osmium::MemoryUsage memory;
-    std::cout << "Memory used: " << memory.peak() << " MBytes" << std::endl;
+    std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
     std::cerr << e.what() << std::endl;
