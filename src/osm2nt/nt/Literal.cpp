@@ -38,6 +38,9 @@ std::string osm2nt::nt::Literal::toString() const {
   // Escape value
   for (size_t pos = 0; pos < value.size(); ++pos) {
     switch (value[pos]) {
+      case '\\':
+        tmp << "\\\\";
+        break;
       case '\n':
         tmp << "\\n";
         break;

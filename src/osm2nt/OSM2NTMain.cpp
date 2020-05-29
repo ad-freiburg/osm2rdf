@@ -20,9 +20,6 @@
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
-  setbuf(stdout, NULL);
-  std::setlocale(LC_ALL, "en_US.UTF-8");
-
   if (argc < 2 || argc > 3) {
     std::cerr << "Usage: osm2nt <pbf_input> [<outfile>]" << std::endl;
     std::cerr << VERSION_FULL << std::endl;
@@ -87,6 +84,9 @@ int main(int argc, char** argv) {
       reader.close();
       std::cerr << "... done" << std::endl;
     }
+
+    std::cerr << "Memory:\n";
+    osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
 
     osmium::MemoryUsage memory;
     std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;
