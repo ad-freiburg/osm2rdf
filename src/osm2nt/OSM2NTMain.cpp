@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
     }
 
     osmium::MemoryUsage memory;
-    std::cout << "Memory used: " << memory.peak() << " MBytes" << std::endl;
+    std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
     std::cerr << e.what() << std::endl;
