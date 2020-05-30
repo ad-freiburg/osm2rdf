@@ -178,8 +178,20 @@ void osm2nt::nt::Writer::writeOsmRelationMembers(
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmTag(const osm2nt::nt::Subject* s,
                                      const osmium::Tag& tag) {
+  // No spaces allowed in tag keys (see 002.problem.nt)
+  std::string key = std::string(tag.key());
+  std::stringstream tmp;
+  for (size_t pos = 0; pos < key.size(); ++pos) {
+    switch (key[pos]) {
+      case ' ':
+        tmp << "_";
+        break;
+      default:
+        tmp << key[pos];
+    }
+  }
   osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/wiki/key:", tag.key());
+    "https://www.openstreetmap.org/wiki/key:", tmp.str());
   osm2nt::nt::Object* o = new osm2nt::nt::Literal(tag.value());
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
