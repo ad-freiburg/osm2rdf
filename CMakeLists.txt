@@ -22,79 +22,164 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/build")
 
 
+# Detect dependencies, download submodules if needed
 find_package(Osmium)
 if (NOT OSMIUM_FOUND)
 	message(WARNING "No global libosmium found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/libosmium/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/libosmium)
+		find_package(Osmium)
+		if (NOT OSMIUM_FOUND)
+			message(FATAL_ERROR "libosmium not found")
+		endif()
+	endif()
 endif()
 
 find_package(Protozero)
 if (NOT PROTOZERO_FOUND)
 	message(WARNING "No global protozero found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/protozero/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/protozero)
+		find_package(Protozero)
+		if (NOT PROTOZERO_FOUND)
+			message(FATAL_ERROR "protozero not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostVariant)
 if (NOT BOOSTVARIANT_FOUND)
 	message(WARNING "No global boost::variant found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/variant/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/variant)
+		find_package(BoostVariant)
+		if (NOT BOOSTVARIANT_FOUND)
+			message(FATAL_ERROR "boost::variant not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostTypeIndex)
 if (NOT BOOSTTYPEINDEX_FOUND)
 	message(WARNING "No global boost::type_index found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_index/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_index)
+		find_package(BoostTypeIndex)
+		if (NOT BOOSTTYPEINDEX_FOUND)
+			message(FATAL_ERROR "boost::type_index not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostConfig)
 if (NOT BOOSTCONFIG_FOUND)
 	message(WARNING "No global boost::config found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/config/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/config)
+		find_package(BoostConfig)
+		if (NOT BOOSTCONFIG_FOUND)
+			message(FATAL_ERROR "boost::config not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostContainerHash)
 if (NOT BOOSTCONTAINERHASH_FOUND)
 	message(WARNING "No global boost::container_hash found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/container_hash/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/container_hash)
+		find_package(BoostContainerHash)
+		if (NOT BOOSTCONTAINERHASH_FOUND)
+			message(FATAL_ERROR "boost::container_hash not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostStaticAssert)
 if (NOT BOOSTSTATICASSERT_FOUND)
 	message(WARNING "No global boost::static_assert found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/static_assert/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/static_assert)
+		find_package(BoostStaticAssert)
+		if (NOT BOOSTSTATICASSERT_FOUND)
+			message(FATAL_ERROR "boost::static_assert not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostThrowException)
 if (NOT BOOSTTHROWEXCEPTION_FOUND)
 	message(WARNING "No global boost::throw_exception found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/throw_exception/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/throw_exception)
+		find_package(BoostThrowException)
+		if (NOT BOOSTTHROWEXCEPTION_FOUND)
+			message(FATAL_ERROR "boost::throw_exception not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostAssert)
 if (NOT BOOSTASSERT_FOUND)
 	message(WARNING "No global boost::assert found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/assert/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/assert)
+		find_package(BoostAssert)
+		if (NOT BOOSTASSERT_FOUND)
+			message(FATAL_ERROR "boost::assert not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostCore)
 if (NOT BOOSTCORE_FOUND)
 	message(WARNING "No global boost::core found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/core/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/core)
+		find_package(BoostCore)
+		if (NOT BOOSTCORE_FOUND)
+			message(FATAL_ERROR "boost::core not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostTypeTraits)
 if (NOT BOOSTTYPETRAITS_FOUND)
 	message(WARNING "No global boost::type_traits found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_traits/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_traits)
+		find_package(BoostTypeTraits)
+		if (NOT BOOSTTYPETRAITS_FOUND)
+			message(FATAL_ERROR "boost::type_traits not found")
+		endif()
+	endif()
 endif()
 
 find_package(BoostMPL)
 if (NOT BOOSTMPL_FOUND)
 	message(WARNING "No global boost::mpl found, using local copy")
+	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/mpl/.git)
+		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/mpl)
+		find_package(BoostMPL)
+		if (NOT BOOSTMPL_FOUND)
+			message(FATAL_ERROR "boost::mpl not found")
+		endif()
+	endif()
 endif()
 
 find_package(EXPAT REQUIRED)
 if (NOT EXPAT_FOUND)
-	message(WARNING "No global expat found")
+	message(FATAL_ERROR "No global expat found")
 endif()
 
 find_package(BZip2 REQUIRED)
 if (NOT BZIP2_FOUND)
-	message(WARNING "No global bzip2 found")
+	message(FATAL_ERROR "No global bzip2 found")
 endif()
 
 find_package(ZLIB REQUIRED)
 if (NOT ZLIB_FOUND)
-	message(WARNING "No global zlib found")
+	message(FATAL_ERROR "No global zlib found")
 endif()
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -138,67 +223,11 @@ endif()
 
 # Download submodules if needed
 
-if(NOT OSMIUM_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/libosmium/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/libosmium
-    )
-endif()
-if(NOT PROTOZERO_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/protozero/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/protozero
-    )
-endif()
-if(NOT BOOSTVARIANT_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/variant/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/variant
-    )
-	find_package(BoostVariant)
-endif()
-if(NOT BOOSTTYPEINDEX_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_index/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_index
-    )
-endif()
-if(NOT BOOSTCONFIG_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/config/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/config
-    )
-endif()
-if(NOT BOOSTCONTAINERHASH_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/container_hash/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/container_hash
-    )
-endif()
-if(NOT BOOSTSTATICASSERT_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/static_assert/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/static_assert
-    )
-endif()
-if(NOT BOOSTTHROWEXCEPTION_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/throw_exception/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/throw_exception
-    )
-endif()
-if(NOT BOOSTASSERT_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/assert/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/assert
-    )
-endif()
-if(NOT BOOSTCORE_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/core/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/core
-    )
-endif()
-if(NOT BOOSTTYPETRAITS_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_traits/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_traits
-    )
-endif()
-if(NOT BOOSTMPL_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/mpl/.git)
-    execute_process(
-		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/mpl
-    )
-endif()
+#if(NOT OSMIUM_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/libosmium/.git)
+#    execute_process(
+#		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/libosmium
+#    )
+#endif()
 
 add_subdirectory(src)
 
