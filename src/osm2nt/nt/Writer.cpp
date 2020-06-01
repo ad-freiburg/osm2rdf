@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "osmium/geom/factory.hpp"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/item_type.hpp"
 #include "osmium/osm/location.hpp"
@@ -226,7 +227,8 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
   if (way.nodes().size() > 3 && way.is_closed()) {
     o = new osm2nt::nt::Literal(wktFactory.create_polygon(way));
   } else if (way.nodes().size() > 1) {
-    o = new osm2nt::nt::Literal(wktFactory.create_linestring(way));
+    o = new osm2nt::nt::Literal(
+      wktFactory.create_linestring(way, osmium::geom::use_nodes::all));
   } else {
     o = new osm2nt::nt::Literal(wktFactory.create_point(way.nodes()[0]));
   }
