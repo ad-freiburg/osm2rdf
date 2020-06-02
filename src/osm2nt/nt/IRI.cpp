@@ -50,6 +50,9 @@ std::string osm2nt::nt::IRI::toString() const {
       case '|':
         tmp << "%7C";
         break;
+      case '>':
+        tmp << "%3E";
+        break;
       default:
         tmp << value[pos];
     }
