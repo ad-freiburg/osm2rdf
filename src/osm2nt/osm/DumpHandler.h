@@ -21,12 +21,13 @@ class DumpHandler : public osmium::handler::Handler {
  public:
   explicit DumpHandler(std::ostream* os);
   ~DumpHandler();
-  void area(const osmium::Area& area) const;
-  void node(const osmium::Node& node) const;
-  void relation(const osmium::Relation& relation) const;
-  void way(const osmium::Way& way) const;
+  void area(const osmium::Area& area);
+  void node(const osmium::Node& node);
+  void relation(const osmium::Relation& relation);
+  void way(const osmium::Way& way);
  protected:
   osm2nt::nt::Writer* w;
+  bool ignoreUnnamed = true;
 };
 
 }  // namespace osm
