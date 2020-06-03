@@ -22,6 +22,7 @@ namespace nt {
 class Writer {
  public:
   explicit Writer(std::ostream* os);
+  static bool tagKeyEndsWith(const osmium::Tag& tag, const std::string& needle);
   void writeTriple(const osm2nt::nt::Triple& t);
   void writeOsmArea(const osmium::Area& area);
   void writeOsmBox(const osm2nt::nt::Subject* s,
@@ -39,6 +40,8 @@ class Writer {
   void writeOsmWayNodeList(const osm2nt::nt::Subject* s,
                            const osmium::WayNodeList& nodes);
  protected:
+  bool ignoreUnnamed = true;
+  bool addWikiLinks = true;
   std::ostream* out;
   osmium::geom::WKTFactory<> wktFactory;
 };

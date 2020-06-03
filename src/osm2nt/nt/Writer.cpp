@@ -1,6 +1,6 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
-//
+
 #include "osm2nt/nt/Writer.h"
 
 #include <string>
@@ -30,12 +30,36 @@ osm2nt::nt::Writer::Writer(std::ostream* os) {
 }
 
 // ____________________________________________________________________________
+bool osm2nt::nt::Writer::tagKeyEndsWith(const osmium::Tag& tag,
+                                        const std::string& needle) {
+  std::string hay{tag.key()};
+  // Everything shall match the empty string.
+  if (needle.empty()) {
+    return true;
+  }
+  // If searchstring is longer than the text, it can never match.
+  if (hay.size() < needle.size()) {
+    return false;
+  }
+  int offset = hay.size() - needle.size();
+  for (int i = hay.size() - 1; i - offset >= 0; --i) {
+    if (hay[i] != needle[i - offset]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// ____________________________________________________________________________
 void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::Triple& t) {
   *out << t << '\n';
 }
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
+  if (ignoreUnnamed && area.tags()["name"] == nullptr) {
+    return;
+  }
   osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/area/", area);
 
@@ -143,6 +167,9 @@ void osm2nt::nt::Writer::writeOsmLocation(const osm2nt::nt::Subject* s,
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmNode(const osmium::Node& node) {
+  if (ignoreUnnamed && node.tags()["name"] == nullptr) {
+    return;
+  }
   osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/node/", node);
   writeOsmLocation(s, node.location());
@@ -152,6 +179,9 @@ void osm2nt::nt::Writer::writeOsmNode(const osmium::Node& node) {
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmRelation(const osmium::Relation& relation) {
+  if (ignoreUnnamed && relation.tags()["name"] == nullptr) {
+    return;
+  }
   osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/relation/", relation);
   writeOsmTagList(s, relation.tags());
@@ -204,11 +234,34 @@ void osm2nt::nt::Writer::writeOsmTagList(const osm2nt::nt::Subject* s,
                                          const osmium::TagList& tags) {
   for (const osmium::Tag& tag : tags) {
     writeOsmTag(s, tag);
+    if (addWikiLinks) {
+      if (Writer::tagKeyEndsWith(tag, "wikidata")) {
+        osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
+        "https://www.openstreetmap.org/way/", "wikidata");
+        osm2nt::nt::Object* o = new osm2nt::nt::IRI(
+        "https://www.wikidata.org/wiki/", tag.value());
+        writeTriple(osm2nt::nt::Triple(s, p, o));
+        delete o;
+        delete p;
+      }
+      if (Writer::tagKeyEndsWith(tag, "wikipedia")) {
+        osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
+        "https://www.openstreetmap.org/way/", "wikidata");
+        osm2nt::nt::Object* o = new osm2nt::nt::IRI(
+        "https://www.wikipedia.org/wiki/", tag.value());
+        writeTriple(osm2nt::nt::Triple(s, p, o));
+        delete o;
+        delete p;
+      }
+    }
   }
 }
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
+  if (ignoreUnnamed && way.tags()["name"] == nullptr) {
+    return;
+  }
   osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/way/", way);
 

@@ -3,11 +3,14 @@
 
 #include "osm2nt/osm/DumpHandler.h"
 
+#include <iostream>
 #include <ostream>
+#include <string>
 
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/relation.hpp"
+#include "osmium/osm/tag.hpp"
 #include "osmium/osm/way.hpp"
 
 #include "osm2nt/nt/Writer.h"
@@ -24,28 +27,20 @@ osm2nt::osm::DumpHandler::~DumpHandler() {
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::area(const osmium::Area& area) {
-  if (!ignoreUnnamed || area.tags()["name"] != nullptr) {
-    w->writeOsmArea(area);
-  }
+  w->writeOsmArea(area);
 }
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::node(const osmium::Node& node) {
-  if (!ignoreUnnamed || node.tags()["name"] != nullptr) {
-    w->writeOsmNode(node);
-  }
+  w->writeOsmNode(node);
 }
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::relation(const osmium::Relation& relation) {
-  if (!ignoreUnnamed || relation.tags()["name"] != nullptr) {
-    w->writeOsmRelation(relation);
-  }
+  w->writeOsmRelation(relation);
 }
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::way(const osmium::Way& way) {
-  if (!ignoreUnnamed || way.tags()["name"] != nullptr) {
-    w->writeOsmWay(way);
-  }
+  w->writeOsmWay(way);
 }

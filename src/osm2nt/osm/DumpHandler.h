@@ -27,7 +27,6 @@ class DumpHandler : public osmium::handler::Handler {
   void way(const osmium::Way& way);
  protected:
   osm2nt::nt::Writer* w;
-  bool ignoreUnnamed = true;
 };
 
 }  // namespace osm
