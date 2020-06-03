@@ -47,11 +47,38 @@ std::string osm2nt::nt::IRI::toString() const {
   tmp << "<" << prefix;
   for (size_t pos = 0; pos < value.size(); ++pos) {
     switch (value[pos]) {
-      case '|':
-        tmp << "%7C";
+      case ' ':
+        tmp << "%20";
+        break;
+      case '\"':
+        tmp << "%22";
+        break;
+      case '\'':
+        tmp << "%24";
+        break;
+      case '%':
+        tmp << "%25";
+        break;
+      case '&':
+        tmp << "%26";
+        break;
+      case '(':
+        tmp << "%28";
+        break;
+      case ')':
+        tmp << "%29";
+        break;
+      case ',':
+        tmp << "%2C";
+        break;
+      case '<':
+        tmp << "%3C";
         break;
       case '>':
         tmp << "%3E";
+        break;
+      case '|':
+        tmp << "%7C";
         break;
       default:
         tmp << value[pos];
