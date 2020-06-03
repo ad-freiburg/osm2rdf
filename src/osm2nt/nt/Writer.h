@@ -5,6 +5,7 @@
 #define OSM2NT_NT_WRITER_H_
 
 #include <ostream>
+#include <string>
 
 #include "osmium/geom/wkt.hpp"
 #include "osmium/osm/area.hpp"
@@ -39,6 +40,7 @@ class Writer {
   void writeOsmWay(const osmium::Way& way);
   void writeOsmWayNodeList(const osm2nt::nt::Subject* s,
                            const osmium::WayNodeList& nodes);
+
  protected:
   bool ignoreUnnamed = true;
   bool addWikiLinks = true;
