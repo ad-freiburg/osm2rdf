@@ -24,6 +24,8 @@
 #include "osm2nt/nt/IRI.h"
 #include "osm2nt/nt/Literal.h"
 
+#include "osm2nt/osm/SimplifyingWKTFactory.h"
+
 // ____________________________________________________________________________
 osm2nt::nt::Writer::Writer(std::ostream* os) {
   out = os;
@@ -60,33 +62,35 @@ void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
   if (ignoreUnnamed && area.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/area/", area);
+  osm2nt::nt::Subject* s;
+  osm2nt::nt::Predicate* p;
+  osm2nt::nt::Object* o;
 
-  osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/area/", "WKT");
-  osm2nt::nt::Object* o = new osm2nt::nt::Literal(
-    wktFactory.create_multipolygon(area));
+  s = new osm2nt::nt::IRI("https://www.openstreetmap.org/area/", area);
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/area/", "WKT");
+  if (simplifyWkt) {
+    o = new osm2nt::nt::Literal(
+      simplifyingWktFactory.create_multipolygon(area));
+  } else {
+    o = new osm2nt::nt::Literal(wktFactory.create_multipolygon(area));
+  }
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
 
-  p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/area/", "from_way");
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/area/", "from_way");
   o = new osm2nt::nt::Literal(area.from_way()?"yes":"no");
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
 
-  p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/area/", "orig_id");
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/area/", "orig_id");
   o = new osm2nt::nt::Literal(std::to_string(area.orig_id()));
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
 
-  p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/area/", "orig");
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/area/", "orig");
   o = new osm2nt::nt::IRI(
     std::string("https://www.openstreetmap.org/")
     +std::string(area.from_way()?"way":"relation")
@@ -146,20 +150,24 @@ void osm2nt::nt::Writer::writeOsmBox(const osm2nt::nt::Subject* s,
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmLocation(const osm2nt::nt::Subject* s,
                                           const osmium::Location& location) {
+  osm2nt::nt::Predicate* p;
+  osm2nt::nt::Object* o;
+
   std::stringstream loc;
   location.as_string_without_check(std::ostream_iterator<char>(loc));
 
-  osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/Location/", "direct");
-  osm2nt::nt::Object* o = new osm2nt::nt::Literal(loc.str());
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/Location/", "direct");
+  o = new osm2nt::nt::Literal(loc.str());
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
 
-  p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/Location/", "WKT");
-  o = new osm2nt::nt::Literal(
-    wktFactory.create_point(location));
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/Location/", "WKT");
+  if (simplifyWkt) {
+    o = new osm2nt::nt::Literal(simplifyingWktFactory.create_point(location));
+  } else {
+    o = new osm2nt::nt::Literal(wktFactory.create_point(location));
+  }
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
@@ -170,8 +178,9 @@ void osm2nt::nt::Writer::writeOsmNode(const osmium::Node& node) {
   if (ignoreUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/node/", node);
+  osm2nt::nt::Subject* s;
+
+  s = new osm2nt::nt::IRI("https://www.openstreetmap.org/node/", node);
   writeOsmLocation(s, node.location());
   writeOsmTagList(s, node.tags());
   delete s;
@@ -182,7 +191,9 @@ void osm2nt::nt::Writer::writeOsmRelation(const osmium::Relation& relation) {
   if (ignoreUnnamed && relation.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
+  osm2nt::nt::Subject* s;
+
+  s = new osm2nt::nt::IRI(
     "https://www.openstreetmap.org/relation/", relation);
   writeOsmTagList(s, relation.tags());
   writeOsmRelationMembers(s, relation.members());
@@ -193,12 +204,12 @@ void osm2nt::nt::Writer::writeOsmRelation(const osmium::Relation& relation) {
 void osm2nt::nt::Writer::writeOsmRelationMembers(
     const osm2nt::nt::Subject* s,
     const osmium::RelationMemberList& members) {
-  osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/relation/", "member");
+  osm2nt::nt::Predicate* p;
   osm2nt::nt::Object* o;
+
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/relation/", "member");
   for (const osmium::RelationMember& member : members) {
-    o = new osm2nt::nt::IRI(
-      "https://www.openstreetmap.org/"
+    o = new osm2nt::nt::IRI("https://www.openstreetmap.org/"
       + std::string(osmium::item_type_to_name(member.type()))  + "/", member);
     writeTriple(osm2nt::nt::Triple(s, p, o));
     delete o;
@@ -209,6 +220,8 @@ void osm2nt::nt::Writer::writeOsmRelationMembers(
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmTag(const osm2nt::nt::Subject* s,
                                      const osmium::Tag& tag) {
+  osm2nt::nt::Predicate* p;
+  osm2nt::nt::Object* o;
   // No spaces allowed in tag keys (see 002.problem.nt)
   std::string key = std::string(tag.key());
   std::stringstream tmp;
@@ -221,9 +234,8 @@ void osm2nt::nt::Writer::writeOsmTag(const osm2nt::nt::Subject* s,
         tmp << key[pos];
     }
   }
-  osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/wiki/key:", tmp.str());
-  osm2nt::nt::Object* o = new osm2nt::nt::Literal(tag.value());
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/wiki/key:", tmp.str());
+  o = new osm2nt::nt::Literal(tag.value());
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
@@ -232,23 +244,24 @@ void osm2nt::nt::Writer::writeOsmTag(const osm2nt::nt::Subject* s,
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmTagList(const osm2nt::nt::Subject* s,
                                          const osmium::TagList& tags) {
+  osm2nt::nt::Predicate* p;
+  osm2nt::nt::Object* o;
+
   for (const osmium::Tag& tag : tags) {
     writeOsmTag(s, tag);
     if (addWikiLinks) {
       if (Writer::tagKeyEndsWith(tag, "wikidata")) {
-        osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-        "https://www.openstreetmap.org/way/", "wikidata");
-        osm2nt::nt::Object* o = new osm2nt::nt::IRI(
-        "https://www.wikidata.org/wiki/", tag.value());
+        p = new osm2nt::nt::IRI("https://www.openstreetmap.org/way/",
+                                "wikidata");
+        o = new osm2nt::nt::IRI("https://www.wikidata.org/wiki/", tag.value());
         writeTriple(osm2nt::nt::Triple(s, p, o));
         delete o;
         delete p;
       }
       if (Writer::tagKeyEndsWith(tag, "wikipedia")) {
-        osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-        "https://www.openstreetmap.org/way/", "wikidata");
-        osm2nt::nt::Object* o = new osm2nt::nt::IRI(
-        "https://www.wikipedia.org/wiki/", tag.value());
+        p = new osm2nt::nt::IRI("https://www.openstreetmap.org/way/",
+                                "wikidata");
+        o = new osm2nt::nt::IRI("https://www.wikipedia.org/wiki/", tag.value());
         writeTriple(osm2nt::nt::Triple(s, p, o));
         delete o;
         delete p;
@@ -262,28 +275,44 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
   if (ignoreUnnamed && way.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::Subject* s = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/way/", way);
+  osm2nt::nt::Subject* s;
+  osm2nt::nt::Predicate* p;
+  osm2nt::nt::Object* o;
+
+  s = new osm2nt::nt::IRI("https://www.openstreetmap.org/way/", way);
 
   writeOsmTagList(s, way.tags());
   writeOsmWayNodeList(s, way.nodes());
 
-  osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/way/", "is_closed");
-  osm2nt::nt::Object* o = new osm2nt::nt::Literal(way.is_closed()?"yes":"no");
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/way/", "is_closed");
+  o = new osm2nt::nt::Literal(way.is_closed()?"yes":"no");
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
   delete p;
 
-  p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/way/", "WKT");
+  p = new osm2nt::nt::IRI("https://www.openstreetmap.org/way/", "WKT");
   if (way.nodes().size() > 3 && way.is_closed()) {
-    o = new osm2nt::nt::Literal(wktFactory.create_polygon(way));
+    if (simplifyWkt) {
+      o = new osm2nt::nt::Literal(simplifyingWktFactory.create_polygon(way));
+    } else {
+      o = new osm2nt::nt::Literal(wktFactory.create_polygon(way));
+    }
   } else if (way.nodes().size() > 1) {
-    o = new osm2nt::nt::Literal(
-      wktFactory.create_linestring(way, osmium::geom::use_nodes::all));
+    if (simplifyWkt) {
+      o = new osm2nt::nt::Literal(
+        simplifyingWktFactory.create_linestring(
+          way, osmium::geom::use_nodes::all));
+    } else {
+      o = new osm2nt::nt::Literal(
+        wktFactory.create_linestring(way, osmium::geom::use_nodes::all));
+    }
   } else {
-    o = new osm2nt::nt::Literal(wktFactory.create_point(way.nodes()[0]));
+    if (simplifyWkt) {
+      o = new osm2nt::nt::Literal(
+        simplifyingWktFactory.create_point(way.nodes()[0]));
+    } else {
+      o = new osm2nt::nt::Literal(wktFactory.create_point(way.nodes()[0]));
+    }
   }
   writeTriple(osm2nt::nt::Triple(s, p, o));
   delete o;
@@ -299,9 +328,11 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmWayNodeList(const osm2nt::nt::Subject* s,
                                              const osmium::WayNodeList& nodes) {
-  osm2nt::nt::Predicate* p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/way/", "node");
+  osm2nt::nt::Predicate* p;
   osm2nt::nt::Object* o;
+
+  p = new osm2nt::nt::IRI(
+    "https://www.openstreetmap.org/way/", "node");
   for (const osmium::NodeRef& nodeRef : nodes) {
     o = new osm2nt::nt::IRI(
       "https://www.openstreetmap.org/node/", nodeRef);

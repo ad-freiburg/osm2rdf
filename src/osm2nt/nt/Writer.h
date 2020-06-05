@@ -16,6 +16,7 @@
 #include "osmium/osm/way.hpp"
 
 #include "osm2nt/nt/Triple.h"
+#include "osm2nt/osm/SimplifyingWKTFactory.h"
 
 namespace osm2nt {
 namespace nt {
@@ -44,8 +45,10 @@ class Writer {
  protected:
   bool ignoreUnnamed = true;
   bool addWikiLinks = true;
+  bool simplifyWkt = true;
   std::ostream* out;
   osmium::geom::WKTFactory<> wktFactory;
+  osm2nt::osm::SimplifyingWKTFactory<> simplifyingWktFactory;
 };
 
 }  // namespace nt
