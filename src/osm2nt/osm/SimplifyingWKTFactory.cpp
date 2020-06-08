@@ -72,7 +72,8 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::simplifyByAngle(const bool closed,
     }
   }
   // handle indizes 0 1 2, ... n-3 n-2 n-1
-  for (size_t pos = 1; pos < (coordinates.size() - 2); ++pos) {
+  for (size_t pos = 1; coordinates.size() > 2 && pos < (coordinates.size() - 2);
+       ++pos) {
     while (true) {
       if (coordinates.size() < 3) {
         break;
