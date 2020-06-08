@@ -13,11 +13,12 @@
 #include "osmium/osm/tag.hpp"
 #include "osmium/osm/way.hpp"
 
+#include "osm2nt/config/Config.h"
 #include "osm2nt/nt/Writer.h"
 
 // ____________________________________________________________________________
-osm2nt::osm::DumpHandler::DumpHandler(std::ostream* os) {
-  w = new osm2nt::nt::Writer(os);
+osm2nt::osm::DumpHandler::DumpHandler(const osm2nt::config::Config& config) {
+  w = new osm2nt::nt::Writer(config);
 }
 
 // ____________________________________________________________________________

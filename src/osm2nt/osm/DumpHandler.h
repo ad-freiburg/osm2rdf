@@ -12,6 +12,7 @@
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/way.hpp"
 
+#include "osm2nt/config/Config.h"
 #include "osm2nt/nt/Writer.h"
 
 namespace osm2nt {
@@ -19,7 +20,7 @@ namespace osm {
 
 class DumpHandler : public osmium::handler::Handler {
  public:
-  explicit DumpHandler(std::ostream* os);
+  explicit DumpHandler(const osm2nt::config::Config& config);
   ~DumpHandler();
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);

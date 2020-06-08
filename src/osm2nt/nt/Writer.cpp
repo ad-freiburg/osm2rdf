@@ -3,9 +3,10 @@
 
 #include "osm2nt/nt/Writer.h"
 
-#include <string>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
 
 #include "osmium/geom/factory.hpp"
 #include "osmium/osm/area.hpp"
@@ -17,6 +18,8 @@
 #include "osmium/osm/tag.hpp"
 #include "osmium/osm/way.hpp"
 
+#include "osm2nt/config/Config.h"
+
 #include "osm2nt/nt/Triple.h"
 #include "osm2nt/nt/Subject.h"
 #include "osm2nt/nt/Predicate.h"
@@ -27,8 +30,13 @@
 #include "osm2nt/osm/SimplifyingWKTFactory.h"
 
 // ____________________________________________________________________________
-osm2nt::nt::Writer::Writer(std::ostream* os) {
-  out = os;
+osm2nt::nt::Writer::Writer(const osm2nt::config::Config& config) {
+  this->config = config;
+  out = &std::cout;
+  if (!config.output.empty()) {
+    outFile.open(config.output);
+    out = &outFile;
+  }
 }
 
 // ____________________________________________________________________________
@@ -59,7 +67,7 @@ void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::Triple& t) {
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
-  if (ignoreUnnamed && area.tags()["name"] == nullptr) {
+  if (config.ignoreUnnamed && area.tags()["name"] == nullptr) {
     return;
   }
   osm2nt::nt::Subject* s;
@@ -68,7 +76,7 @@ void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
 
   s = new osm2nt::nt::IRI("https://www.openstreetmap.org/area/", area);
   p = new osm2nt::nt::IRI("https://www.openstreetmap.org/area/", "WKT");
-  if (simplifyWkt) {
+  if (config.simplifyWKT) {
     o = new osm2nt::nt::Literal(
       simplifyingWktFactory.create_multipolygon(area));
   } else {
@@ -163,7 +171,7 @@ void osm2nt::nt::Writer::writeOsmLocation(const osm2nt::nt::Subject* s,
   delete p;
 
   p = new osm2nt::nt::IRI("https://www.openstreetmap.org/Location/", "WKT");
-  if (simplifyWkt) {
+  if (config.simplifyWKT) {
     o = new osm2nt::nt::Literal(simplifyingWktFactory.create_point(location));
   } else {
     o = new osm2nt::nt::Literal(wktFactory.create_point(location));
@@ -175,7 +183,7 @@ void osm2nt::nt::Writer::writeOsmLocation(const osm2nt::nt::Subject* s,
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmNode(const osmium::Node& node) {
-  if (ignoreUnnamed && node.tags()["name"] == nullptr) {
+  if (config.ignoreUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
   osm2nt::nt::Subject* s;
@@ -188,7 +196,7 @@ void osm2nt::nt::Writer::writeOsmNode(const osmium::Node& node) {
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmRelation(const osmium::Relation& relation) {
-  if (ignoreUnnamed && relation.tags()["name"] == nullptr) {
+  if (config.ignoreUnnamed && relation.tags()["name"] == nullptr) {
     return;
   }
   osm2nt::nt::Subject* s;
@@ -249,7 +257,7 @@ void osm2nt::nt::Writer::writeOsmTagList(const osm2nt::nt::Subject* s,
 
   for (const osmium::Tag& tag : tags) {
     writeOsmTag(s, tag);
-    if (addWikiLinks) {
+    if (config.addWikiLinks) {
       if (Writer::tagKeyEndsWith(tag, "wikidata")) {
         p = new osm2nt::nt::IRI("https://www.openstreetmap.org/way/",
                                 "wikidata");
@@ -272,7 +280,7 @@ void osm2nt::nt::Writer::writeOsmTagList(const osm2nt::nt::Subject* s,
 
 // ____________________________________________________________________________
 void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
-  if (ignoreUnnamed && way.tags()["name"] == nullptr) {
+  if (config.ignoreUnnamed && way.tags()["name"] == nullptr) {
     return;
   }
   osm2nt::nt::Subject* s;
@@ -292,13 +300,13 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
 
   p = new osm2nt::nt::IRI("https://www.openstreetmap.org/way/", "WKT");
   if (way.nodes().size() > 3 && way.is_closed()) {
-    if (simplifyWkt) {
+    if (config.simplifyWKT) {
       o = new osm2nt::nt::Literal(simplifyingWktFactory.create_polygon(way));
     } else {
       o = new osm2nt::nt::Literal(wktFactory.create_polygon(way));
     }
   } else if (way.nodes().size() > 1) {
-    if (simplifyWkt) {
+    if (config.simplifyWKT) {
       o = new osm2nt::nt::Literal(
         simplifyingWktFactory.create_linestring(
           way, osmium::geom::use_nodes::all));
@@ -307,7 +315,7 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
         wktFactory.create_linestring(way, osmium::geom::use_nodes::all));
     }
   } else {
-    if (simplifyWkt) {
+    if (config.simplifyWKT) {
       o = new osm2nt::nt::Literal(
         simplifyingWktFactory.create_point(way.nodes()[0]));
     } else {

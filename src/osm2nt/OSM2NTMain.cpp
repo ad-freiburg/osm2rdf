@@ -15,28 +15,20 @@
 #include "osmium/util/memory.hpp"
 
 #include "osm2nt/_config.h"
+#include "osm2nt/config/Config.h"
+#include "osm2nt/config/ConfigParser.h"
 #include "osm2nt/nt/Writer.h"
 #include "osm2nt/osm/DumpHandler.h"
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
-  if (argc < 2 || argc > 3) {
-    std::cerr << "Usage: osm2nt <pbf_input> [<outfile>]" << std::endl;
-    std::cerr << VERSION_FULL << std::endl;
-    std::exit(1);
-  }
-
-  std::ostream* os = &std::cout;
-  std::ofstream outFile;
-  if (argc == 3) {
-    outFile.open(argv[2]);
-    os = &outFile;
-  }
+  osm2nt::config::Config config;
+  osm2nt::config::ConfigParser::parse(&config, argc, argv);
 
   try {
     // Input file reference
-    osmium::io::File input_file{argv[1], "pbf"};
-    osm2nt::osm::DumpHandler dump_handler{os};
+    osmium::io::File input_file{config.input};
+    osm2nt::osm::DumpHandler dump_handler{config};
 
     // Do not create empty areas
     osmium::area::Assembler::config_type assembler_config;
@@ -56,11 +48,10 @@ int main(int argc, char** argv) {
     std::cerr << "Memory:\n";
     osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
 
-    std::string cache_filename = "/tmp/osmcache";
-    const int fd = ::open(cache_filename.c_str(), O_RDWR | O_CREAT | O_TRUNC,
+    const int fd = ::open(config.cache.c_str(), O_RDWR | O_CREAT | O_TRUNC,
           0666);
     if (fd == -1) {
-      std::cerr << "Can not open location cache file '" << cache_filename
+      std::cerr << "Can not open location cache file '" << config.cache
         << "': " << std::strerror(errno) << "\n";
       std::exit(1);
     }

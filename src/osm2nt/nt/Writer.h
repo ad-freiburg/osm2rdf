@@ -4,6 +4,7 @@
 #ifndef OSM2NT_NT_WRITER_H_
 #define OSM2NT_NT_WRITER_H_
 
+#include <fstream>
 #include <ostream>
 #include <string>
 
@@ -15,6 +16,7 @@
 #include "osmium/osm/tag.hpp"
 #include "osmium/osm/way.hpp"
 
+#include "osm2nt/config/Config.h"
 #include "osm2nt/nt/Triple.h"
 #include "osm2nt/osm/SimplifyingWKTFactory.h"
 
@@ -23,7 +25,7 @@ namespace nt {
 
 class Writer {
  public:
-  explicit Writer(std::ostream* os);
+  explicit Writer(const osm2nt::config::Config& config);
   static bool tagKeyEndsWith(const osmium::Tag& tag, const std::string& needle);
   void writeTriple(const osm2nt::nt::Triple& t);
   void writeOsmArea(const osmium::Area& area);
@@ -43,10 +45,9 @@ class Writer {
                            const osmium::WayNodeList& nodes);
 
  protected:
-  bool ignoreUnnamed = true;
-  bool addWikiLinks = true;
-  bool simplifyWkt = true;
+  osm2nt::config::Config config;
   std::ostream* out;
+  std::ofstream outFile;
   osmium::geom::WKTFactory<> wktFactory;
   osm2nt::osm::SimplifyingWKTFactory<> simplifyingWktFactory;
 };
