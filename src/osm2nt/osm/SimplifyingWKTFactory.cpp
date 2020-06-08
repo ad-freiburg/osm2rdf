@@ -10,7 +10,7 @@
 
 // ____________________________________________________________________________
 osm2nt::osm::SimplifyingWKTFactoryImpl::SimplifyingWKTFactoryImpl(
-  int srid, int precision) {
+  int /*unused*/, int precision) {
   this->precision = precision;
 }
 
@@ -202,7 +202,7 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_add_location(
 
 // ____________________________________________________________________________
 osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_type
-osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_finish(size_t numPoints) {
+osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_finish(size_t /*unused*/) {
   std::string str{"LINESTRING("};
   simplify(false);
   for (const osmium::geom::Coordinates& c : coordinates) {
@@ -226,7 +226,7 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_add_location(
 
 // ____________________________________________________________________________
 osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_type
-osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_finish(size_t numNodes) {
+osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_finish(size_t /*unused*/) {
   std::string str{"POLYGON(("};
   simplify(true);
   for (const osmium::geom::Coordinates& c : coordinates) {

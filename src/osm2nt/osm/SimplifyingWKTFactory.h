@@ -28,17 +28,17 @@ class SimplifyingWKTFactoryImpl {
   using polygon_type = std::string;
   using ring_type = std::string;
 
-  explicit SimplifyingWKTFactoryImpl(int srid, int precision = 7);
+  explicit SimplifyingWKTFactoryImpl(int, int precision = 7);
 
   point_type make_point(const osmium::geom::Coordinates& xy) const;
 
   void linestring_start();
   void linestring_add_location(const osmium::geom::Coordinates& xy);
-  linestring_type linestring_finish(size_t numPoints);
+  linestring_type linestring_finish(size_t);
 
   void polygon_start();
   void polygon_add_location(const osmium::geom::Coordinates& xy);
-  polygon_type polygon_finish(size_t numNodes);
+  polygon_type polygon_finish(size_t);
 
   void multipolygon_start();
   void multipolygon_add_location(const osmium::geom::Coordinates& xy);
