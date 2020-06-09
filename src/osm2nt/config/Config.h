@@ -10,6 +10,9 @@ namespace osm2nt {
 namespace config {
 
 struct Config {
+  void load(const std::string& filename);
+  void save(const std::string& filename);
+
   bool simplifyWKT = false;
   bool addWikiLinks = false;
   bool ignoreUnnamed = false;

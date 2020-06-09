@@ -10,15 +10,10 @@
 #include "osmium/geom/coordinates.hpp"
 #include "osmium/geom/factory.hpp"
 
+#include "osm2nt/osm/MergeMode.h"
 
 namespace osm2nt {
 namespace osm {
-
-enum MergeMode {
-  DELETE_FIRST,
-  DELETE_SECOND,
-  MERGE
-};
 
 class SimplifyingWKTFactoryImpl {
  public:

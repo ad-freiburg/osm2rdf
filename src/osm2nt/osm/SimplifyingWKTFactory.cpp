@@ -33,13 +33,13 @@ double osm2nt::osm::SimplifyingWKTFactoryImpl::getAngle(
 void osm2nt::osm::SimplifyingWKTFactoryImpl::merge(const size_t index1,
   const size_t index2) {
   switch (mergeMode) {
-  case DELETE_FIRST:
+  case MergeMode::DELETE_FIRST:
     coordinates.erase(coordinates.begin() + index1);
     break;
-  case DELETE_SECOND:
+  case MergeMode::DELETE_SECOND:
     coordinates.erase(coordinates.begin() + index2);
     break;
-  case MERGE:
+  case MergeMode::MERGE:
     const double x = (coordinates[index1].x + coordinates[index2].x) / 2;
     const double y = (coordinates[index1].y + coordinates[index2].y) / 2;
     coordinates.erase(coordinates.begin() + index2);

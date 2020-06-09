@@ -23,7 +23,8 @@ void osm2nt::config::ConfigParser::parse(Config* config,
   };
 
   char c;
-  while ((c = getopt_long(argc, argv, "t:c:o:u", opts, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, ":c:t:o:u", opts, 0)) != -1) {
+    std::cout << "getopt_long: " << c << std::endl;
     switch (c) {
     case 'o':
       config->output = std::string(optarg);
