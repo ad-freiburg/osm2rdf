@@ -27,6 +27,7 @@ class Writer {
  public:
   explicit Writer(const osm2nt::config::Config& config);
   static bool tagKeyEndsWith(const osmium::Tag& tag, const std::string& needle);
+  void writeHeader();
   void writeTriple(const osm2nt::nt::Triple& t);
   void writeOsmArea(const osmium::Area& area);
   void writeOsmBox(const osm2nt::nt::Subject* s,
@@ -45,11 +46,11 @@ class Writer {
                            const osmium::WayNodeList& nodes);
 
  protected:
-  osm2nt::config::Config config;
-  std::ostream* out;
-  std::ofstream outFile;
-  osmium::geom::WKTFactory<> wktFactory;
-  osm2nt::osm::SimplifyingWKTFactory<> simplifyingWktFactory;
+  osm2nt::config::Config _config;
+  std::ostream* _out;
+  std::ofstream _outFile;
+  osmium::geom::WKTFactory<> _wktFactory;
+  osm2nt::osm::SimplifyingWKTFactory<> _simplifyingWktFactory;
 };
 
 }  // namespace nt

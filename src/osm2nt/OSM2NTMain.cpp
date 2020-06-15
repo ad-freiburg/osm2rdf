@@ -27,7 +27,8 @@ int main(int argc, char** argv) {
   try {
     // Input file reference
     osmium::io::File input_file{config.input};
-    osm2nt::osm::DumpHandler dump_handler{config};
+    osm2nt::nt::Writer* writer = new osm2nt::nt::Writer(config);
+    osm2nt::osm::DumpHandler dump_handler{writer};
 
     // Do not create empty areas
     osmium::area::Assembler::config_type assembler_config;
@@ -80,6 +81,7 @@ int main(int argc, char** argv) {
 
     osmium::MemoryUsage memory;
     std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;
+    delete writer;
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
     std::cerr << e.what() << std::endl;

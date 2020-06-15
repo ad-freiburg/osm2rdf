@@ -20,14 +20,13 @@ namespace osm {
 
 class DumpHandler : public osmium::handler::Handler {
  public:
-  explicit DumpHandler(const osm2nt::config::Config& config);
-  ~DumpHandler();
+  explicit DumpHandler(osm2nt::nt::Writer* writer);
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
  protected:
-  osm2nt::nt::Writer* w;
+  osm2nt::nt::Writer* _w;
 };
 
 }  // namespace osm

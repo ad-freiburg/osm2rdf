@@ -17,31 +17,26 @@
 #include "osm2nt/nt/Writer.h"
 
 // ____________________________________________________________________________
-osm2nt::osm::DumpHandler::DumpHandler(const osm2nt::config::Config& config) {
-  w = new osm2nt::nt::Writer(config);
-}
-
-// ____________________________________________________________________________
-osm2nt::osm::DumpHandler::~DumpHandler() {
-  delete w;
+osm2nt::osm::DumpHandler::DumpHandler(osm2nt::nt::Writer* writer) {
+  _w = writer;
 }
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::area(const osmium::Area& area) {
-  w->writeOsmArea(area);
+  _w->writeOsmArea(area);
 }
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::node(const osmium::Node& node) {
-  w->writeOsmNode(node);
+  _w->writeOsmNode(node);
 }
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::relation(const osmium::Relation& relation) {
-  w->writeOsmRelation(relation);
+  _w->writeOsmRelation(relation);
 }
 
 // ____________________________________________________________________________
 void osm2nt::osm::DumpHandler::way(const osmium::Way& way) {
-  w->writeOsmWay(way);
+  _w->writeOsmWay(way);
 }
