@@ -4,15 +4,13 @@
 #include "osm2nt/nt/LangTag.h"
 
 #include <string>
-#include <sstream>
 
 // ____________________________________________________________________________
 osm2nt::nt::LangTag::LangTag(const std::string& s) {
-  value = s;
+  _value = s;
 }
 
 // ____________________________________________________________________________
-std::string osm2nt::nt::LangTag::toString() const {
-  return value;
+std::string osm2nt::nt::LangTag::value() const {
+  return _value;
 }
-

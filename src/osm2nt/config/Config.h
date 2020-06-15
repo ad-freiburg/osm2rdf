@@ -6,6 +6,8 @@
 
 #include <string>
 
+#include "osm2nt/nt/OutputFormat.h"
+
 namespace osm2nt {
 namespace config {
 
@@ -18,8 +20,9 @@ struct Config {
   bool addWikiLinks = false;
   bool ignoreUnnamed = false;
   std::string output;
+  osm2nt::nt::OutputFormat outputFormat;
   std::string input;
-  std::string cache = "/tmp/osm2nt-cache";
+  std::string cache;
 };
 }  // namespace config
 }  // namespace osm2nt

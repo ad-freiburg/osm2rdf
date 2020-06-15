@@ -10,22 +10,18 @@
 #include "osmium/osm/object.hpp"
 #include "osmium/osm/relation.hpp"
 
-#include "osm2nt/nt/Object.h"
-#include "osm2nt/nt/Predicate.h"
-#include "osm2nt/nt/Subject.h"
-
 namespace osm2nt {
 namespace nt {
 
-struct IRI : public Subject, public Predicate, public Object {
+struct IRI {
  public:
-  explicit IRI(const std::string& prefix, const std::string& s);
-  explicit IRI(const std::string& prefix, const osmium::NodeRef& n);
-  explicit IRI(const std::string& prefix, const osmium::OSMObject& o);
-  explicit IRI(const std::string& prefix, const osmium::RelationMember& m);
-  std::string toString() const;
+  IRI(const std::string& prefix, const std::string& s);
+  IRI(const std::string& prefix, const osmium::NodeRef& n);
+  IRI(const std::string& prefix, const osmium::OSMObject& o);
+  IRI(const std::string& prefix, const osmium::RelationMember& m);
+  std::string prefix() const;
+  std::string value() const;
  protected:
-  static std::string urlencode(const std::string& s);
   std::string _prefix;
   std::string _value;
 };

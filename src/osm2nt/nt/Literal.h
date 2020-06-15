@@ -6,23 +6,27 @@
 
 #include <string>
 
+#include "osmium/osm/box.hpp"
+
 #include "osm2nt/nt/IRI.h"
 #include "osm2nt/nt/LangTag.h"
-#include "osm2nt/nt/Object.h"
 
 namespace osm2nt {
 namespace nt {
 
-struct Literal : public Object {
+struct Literal {
  public:
   explicit Literal(const std::string& s);
-  Literal(const std::string& s, const osm2nt::nt::IRI* i);
-  Literal(const std::string& s, const osm2nt::nt::LangTag* l);
-  std::string toString() const;
+  explicit Literal(const osmium::Box& b);
+  Literal(const std::string& s, const osm2nt::nt::IRI& i);
+  Literal(const std::string& s, const osm2nt::nt::LangTag& l);
+  std::string value() const;
+  std::optional<osm2nt::nt::IRI> iri() const;
+  std::optional<osm2nt::nt::LangTag> langTag() const;
  protected:
-  const osm2nt::nt::IRI* iri;
-  const osm2nt::nt::LangTag* langTag;
-  std::string value;
+  std::optional<osm2nt::nt::IRI> _iri;
+  std::optional<osm2nt::nt::LangTag> _langTag;
+  std::string _value;
 };
 
 }  // namespace nt

@@ -12,9 +12,9 @@ namespace nt {
 struct LangTag {
  public:
   explicit LangTag(const std::string& s);
-  std::string toString() const;
+  std::string value() const;
  protected:
-  std::string value;
+  std::string _value;
 };
 
 }  // namespace nt

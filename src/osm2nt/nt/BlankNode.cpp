@@ -1,21 +1,19 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2nt/nt/BlankNodeLabel.h"
+#include "osm2nt/nt/BlankNode.h"
 
-#include <sstream>
-
-// ____________________________________________________________________________
-uint64_t osm2nt::nt::BlankNodeLabel::_idCounter;
+#include <cstdint>
 
 // ____________________________________________________________________________
-osm2nt::nt::BlankNodeLabel::BlankNodeLabel() {
+std::uint64_t osm2nt::nt::BlankNode::_idCounter;
+
+// ____________________________________________________________________________
+osm2nt::nt::BlankNode::BlankNode() {
   _id = _idCounter++;
 }
 
 // ____________________________________________________________________________
-std::string osm2nt::nt::BlankNodeLabel::toString() const {
-  std::stringstream tmp;
-  tmp << "_:" << _id;
-  return tmp.str();
+std::uint64_t osm2nt::nt::BlankNode::getId() const {
+  return _id;
 }

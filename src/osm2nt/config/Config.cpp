@@ -8,6 +8,8 @@
 
 #include "popl.hpp"
 
+#include "osm2nt/nt/OutputFormat.h"
+
 // ____________________________________________________________________________
 void osm2nt::config::Config::load(const std::string& filename) {
 }
@@ -25,10 +27,16 @@ void osm2nt::config::Config::fromArgs(int argc, char** argv) {
     "c", "config", "Config file");
   auto outputOp = op.add<popl::Value<std::string>>(
     "o", "output", "Output file", "");
+  auto outputFormatOp = op.add<popl::Value<std::string>>(
+    "", "output-format", "Output format, valid values: nt, ttl", "ttl");
   auto cacheOp = op.add<popl::Value<std::string>>(
-    "t", "cache", "Path to cache file");
+    "t", "cache", "Path to cache file", "/tmp/osm2nt-cache");
   auto ignoreUnnamedOp = op.add<popl::Switch>(
     "u", "ignore-unnamed", "Only add named entities to the result.");
+  auto addWikiLinksOp = op.add<popl::Switch>(
+    "w", "add-wiki-links", "Add links to wikipedia and wikidata.");
+  auto simplifyWKTOp = op.add<popl::Switch>(
+    "s", "simplify-wkt", "Simplify WKT-Geometry");
   auto storeConfigOp = op.add<popl::Value<std::string>,
        popl::Attribute::advanced>(
     "", "store-config", "Path to store calculated config.");
@@ -53,11 +61,17 @@ void osm2nt::config::Config::fromArgs(int argc, char** argv) {
     }
     // Set values
     output = outputOp->value();
-    if (cacheOp->is_set()) {
+    if (cacheOp->is_set() || cache.empty()) {
       cache = cacheOp->value();
     }
     if (ignoreUnnamedOp->is_set()) {
       ignoreUnnamed = true;
+    }
+    if (addWikiLinksOp->is_set()) {
+      addWikiLinks = true;
+    }
+    if (simplifyWKTOp->is_set()) {
+      simplifyWKT = true;
     }
 
     // Handle input
