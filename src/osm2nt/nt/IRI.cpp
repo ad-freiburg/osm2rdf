@@ -12,41 +12,40 @@
 
 // ____________________________________________________________________________
 osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n) {
-  this->prefix = prefix;
+  _prefix = prefix;
   std::stringstream tmp;
   tmp << n.positive_ref();
-  value = tmp.str();
+  _value = tmp.str();
 }
 
 // ____________________________________________________________________________
 osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o) {
-  this->prefix = prefix;
+  _prefix = prefix;
   std::stringstream tmp;
   tmp << o.positive_id();
-  value = tmp.str();
+  _value = tmp.str();
 }
 
 // ____________________________________________________________________________
 osm2nt::nt::IRI::IRI(const std::string& prefix,
                      const osmium::RelationMember& m) {
-  this->prefix = prefix;
+  _prefix = prefix;
   std::stringstream tmp;
   tmp << m.positive_ref();
-  value = tmp.str();
+  _value = tmp.str();
 }
 
 // ____________________________________________________________________________
 osm2nt::nt::IRI::IRI(const std::string& prefix, const std::string& s) {
-  this->prefix = prefix;
-  value = s;
+  _prefix = prefix;
+  _value = s;
 }
 
 // ____________________________________________________________________________
-std::string osm2nt::nt::IRI::toString() const {
+std::string osm2nt::nt::IRI::urlencode(const std::string& s) {
   std::stringstream tmp;
-  tmp << "<" << prefix;
-  for (size_t pos = 0; pos < value.size(); ++pos) {
-    switch (value[pos]) {
+  for (size_t pos = 0; pos < s.size(); ++pos) {
+    switch (s[pos]) {
       case ' ':
         tmp << "%20";
         break;
@@ -81,9 +80,13 @@ std::string osm2nt::nt::IRI::toString() const {
         tmp << "%7C";
         break;
       default:
-        tmp << value[pos];
+        tmp << s[pos];
     }
   }
-  tmp << ">";
   return tmp.str();
+}
+
+// ____________________________________________________________________________
+std::string osm2nt::nt::IRI::toString() const {
+  return "<" + _prefix + urlencode(_value) + ">";
 }

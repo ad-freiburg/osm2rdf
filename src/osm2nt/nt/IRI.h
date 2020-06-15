@@ -24,8 +24,10 @@ struct IRI : public Subject, public Predicate, public Object {
   explicit IRI(const std::string& prefix, const osmium::OSMObject& o);
   explicit IRI(const std::string& prefix, const osmium::RelationMember& m);
   std::string toString() const;
-  std::string prefix;
-  std::string value;
+ protected:
+  static std::string urlencode(const std::string& s);
+  std::string _prefix;
+  std::string _value;
 };
 
 }  // namespace nt
