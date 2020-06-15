@@ -10,6 +10,7 @@ include_directories(
 
 include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIRS})
+include_directories(SYSTEM ${POPL_INCLUDE_DIRS})
 include_directories(SYSTEM ${BOOSTVARIANT_INCLUDE_DIRS})
 include_directories(SYSTEM ${BOOSTTYPEINDEX_INCLUDE_DIRS})
 include_directories(SYSTEM ${BOOSTCONFIG_INCLUDE_DIRS})

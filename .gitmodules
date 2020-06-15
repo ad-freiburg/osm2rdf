@@ -34,3 +34,6 @@
 [submodule "src/vendor/boost/mpl"]
 	path = src/vendor/boost/mpl
 	url = https://github.com/boostorg/mpl.git
+[submodule "src/vendor/popl"]
+	path = src/vendor/popl
+	url = https://github.com/badaix/popl.git

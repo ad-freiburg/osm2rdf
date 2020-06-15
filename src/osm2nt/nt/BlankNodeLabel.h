@@ -14,8 +14,11 @@ namespace nt {
 
 struct BlankNodeLabel : public Subject, public Object {
  public:
-  std::string value;
+  BlankNodeLabel();
   std::string toString() const;
+ protected:
+  uint64_t _id;
+  static uint64_t _idCounter;
 };
 
 }  // namespace nt

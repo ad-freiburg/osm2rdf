@@ -12,6 +12,7 @@ namespace config {
 struct Config {
   void load(const std::string& filename);
   void save(const std::string& filename);
+  void fromArgs(int argc, char** argv);
 
   bool simplifyWKT = false;
   bool addWikiLinks = false;

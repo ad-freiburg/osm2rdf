@@ -24,6 +24,7 @@
 #include "osm2nt/nt/Subject.h"
 #include "osm2nt/nt/Predicate.h"
 #include "osm2nt/nt/Object.h"
+#include "osm2nt/nt/BlankNodeLabel.h"
 #include "osm2nt/nt/IRI.h"
 #include "osm2nt/nt/Literal.h"
 
@@ -339,13 +340,31 @@ void osm2nt::nt::Writer::writeOsmWayNodeList(const osm2nt::nt::Subject* s,
   osm2nt::nt::Predicate* p;
   osm2nt::nt::Object* o;
 
-  p = new osm2nt::nt::IRI(
-    "https://www.openstreetmap.org/way/", "node");
+  uint32_t i = 0;
   for (const osmium::NodeRef& nodeRef : nodes) {
+    p = new osm2nt::nt::IRI(
+      "https://www.openstreetmap.org/way/", "node");
+    osm2nt::nt::BlankNodeLabel* b = new osm2nt::nt::BlankNodeLabel();
+    writeTriple(osm2nt::nt::Triple(s, p, b));
+    delete p;
+
+    p = new osm2nt::nt::IRI(
+      "https://www.openstreetmap.org/way/", "node");
     o = new osm2nt::nt::IRI(
       "https://www.openstreetmap.org/node/", nodeRef);
-    writeTriple(osm2nt::nt::Triple(s, p, o));
+    writeTriple(osm2nt::nt::Triple(b, p, o));
     delete o;
+    delete p;
+
+    osm2nt::nt::IRI* t = new osm2nt::nt::IRI(
+      "http://www.w3.org/2001/XMLSchema#", "integer");
+    p = new osm2nt::nt::IRI(
+      "https://www.openstreetmap.org/way/", "node/pos");
+    o = new osm2nt::nt::Literal(std::to_string(++i), t);
+    writeTriple(osm2nt::nt::Triple(b, p, o));
+    delete t;
+    delete o;
+    delete p;
+    delete b;
   }
-  delete p;
 }

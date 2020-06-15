@@ -3,10 +3,19 @@
 
 #include "osm2nt/nt/BlankNodeLabel.h"
 
-#include <ostream>
+#include <sstream>
 
 // ____________________________________________________________________________
-std::ostream &operator<<(std::ostream& os,
-                         const osm2nt::nt::BlankNodeLabel& b) {
-  return os << "_:" << b.value;
+uint64_t osm2nt::nt::BlankNodeLabel::_idCounter;
+
+// ____________________________________________________________________________
+osm2nt::nt::BlankNodeLabel::BlankNodeLabel() {
+  _id = _idCounter++;
+}
+
+// ____________________________________________________________________________
+std::string osm2nt::nt::BlankNodeLabel::toString() const {
+  std::stringstream tmp;
+  tmp << "_:" << _id;
+  return tmp.str();
 }

@@ -16,14 +16,13 @@
 
 #include "osm2nt/_config.h"
 #include "osm2nt/config/Config.h"
-#include "osm2nt/config/ConfigParser.h"
 #include "osm2nt/nt/Writer.h"
 #include "osm2nt/osm/DumpHandler.h"
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
   osm2nt::config::Config config;
-  osm2nt::config::ConfigParser::parse(&config, argc, argv);
+  config.fromArgs(argc, argv);
 
   try {
     // Input file reference
