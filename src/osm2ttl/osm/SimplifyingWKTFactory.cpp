@@ -1,7 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2nt/osm/SimplifyingWKTFactory.h"
+#include "osm2ttl/osm/SimplifyingWKTFactory.h"
 
 #include <cmath>
 #include <algorithm>
@@ -9,13 +9,13 @@
 #include <utility>
 
 // ____________________________________________________________________________
-osm2nt::osm::SimplifyingWKTFactoryImpl::SimplifyingWKTFactoryImpl(
+osm2ttl::osm::SimplifyingWKTFactoryImpl::SimplifyingWKTFactoryImpl(
   int /*unused*/, int precision) {
   this->precision = precision;
 }
 
 // ____________________________________________________________________________
-double osm2nt::osm::SimplifyingWKTFactoryImpl::getDistance(
+double osm2ttl::osm::SimplifyingWKTFactoryImpl::getDistance(
   const osmium::geom::Coordinates& x, const osmium::geom::Coordinates& y) {
   const double a = x.x - y.x;
   const double b = x.y - y.y;
@@ -23,14 +23,14 @@ double osm2nt::osm::SimplifyingWKTFactoryImpl::getDistance(
 }
 
 // ____________________________________________________________________________
-double osm2nt::osm::SimplifyingWKTFactoryImpl::getAngle(
+double osm2ttl::osm::SimplifyingWKTFactoryImpl::getAngle(
   const osmium::geom::Coordinates& a, const osmium::geom::Coordinates& b,
   const osmium::geom::Coordinates& c) {
   return atan2(b.y - a.y, b.x - a.x) - atan2(c.y - a.y, c.x - a.x);
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::merge(const size_t index1,
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::merge(const size_t index1,
   const size_t index2) {
   switch (mergeMode) {
   case MergeMode::DELETE_FIRST:
@@ -50,7 +50,7 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::merge(const size_t index1,
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::simplifyByAngle(const bool closed,
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::simplifyByAngle(const bool closed,
   const double angleDiff) {
   const double halfCircle = 180.0;
   // Close -> handle indizes n-1 0 1
@@ -111,7 +111,7 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::simplifyByAngle(const bool closed,
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::simplifyByDistance(
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::simplifyByDistance(
   const bool closed, const double distanceDiff) {
   if (closed) {
     while (true) {
@@ -143,7 +143,7 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::simplifyByDistance(
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::simplify(const bool closed) {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::simplify(const bool closed) {
   size_t oldCount = coordinates.size();
   double minX = coordinates[0].x;
   double minY = coordinates[0].y;
@@ -182,8 +182,8 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::simplify(const bool closed) {
 }
 
 // ____________________________________________________________________________
-osm2nt::osm::SimplifyingWKTFactoryImpl::point_type
-osm2nt::osm::SimplifyingWKTFactoryImpl::make_point(
+osm2ttl::osm::SimplifyingWKTFactoryImpl::point_type
+osm2ttl::osm::SimplifyingWKTFactoryImpl::make_point(
     const osmium::geom::Coordinates& xy) const {
   std::string str{"POINT"};
   xy.append_to_string(str, '(', ' ', ')', precision);
@@ -191,19 +191,19 @@ osm2nt::osm::SimplifyingWKTFactoryImpl::make_point(
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_start() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::linestring_start() {
   coordinates.clear();
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_add_location(
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::linestring_add_location(
   const osmium::geom::Coordinates& xy) {
   coordinates.push_back(xy);
 }
 
 // ____________________________________________________________________________
-osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_type
-osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_finish(size_t /*unused*/) {
+osm2ttl::osm::SimplifyingWKTFactoryImpl::linestring_type
+osm2ttl::osm::SimplifyingWKTFactoryImpl::linestring_finish(size_t /*unused*/) {
   std::string str{"LINESTRING("};
   simplify(false);
   for (const osmium::geom::Coordinates& c : coordinates) {
@@ -215,19 +215,19 @@ osm2nt::osm::SimplifyingWKTFactoryImpl::linestring_finish(size_t /*unused*/) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_start() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::polygon_start() {
   coordinates.clear();
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_add_location(
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::polygon_add_location(
   const osmium::geom::Coordinates& xy) {
   coordinates.push_back(xy);
 }
 
 // ____________________________________________________________________________
-osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_type
-osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_finish(size_t /*unused*/) {
+osm2ttl::osm::SimplifyingWKTFactoryImpl::polygon_type
+osm2ttl::osm::SimplifyingWKTFactoryImpl::polygon_finish(size_t /*unused*/) {
   std::string str{"POLYGON(("};
   simplify(true);
   for (const osmium::geom::Coordinates& c : coordinates) {
@@ -240,24 +240,24 @@ osm2nt::osm::SimplifyingWKTFactoryImpl::polygon_finish(size_t /*unused*/) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_start() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_start() {
   buffer.clear();
   buffer = "MULTIPOLYGON(";
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_add_location(
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_add_location(
   const osmium::geom::Coordinates& xy) {
   coordinates.push_back(xy);
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_inner_ring_start() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_inner_ring_start() {
   coordinates.clear();
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_inner_ring_finish() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_inner_ring_finish() {
   simplify(true);
   buffer += ",(";
   for (const osmium::geom::Coordinates& c : coordinates) {
@@ -269,13 +269,13 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_inner_ring_finish() {
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_outer_ring_start() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_outer_ring_start() {
   coordinates.clear();
   buffer += '(';
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_outer_ring_finish() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_outer_ring_finish() {
   simplify(true);
   for (const osmium::geom::Coordinates& c : coordinates) {
     c.append_to_string(buffer, ' ', precision);
@@ -285,18 +285,18 @@ void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_outer_ring_finish() {
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_polygon_start() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_polygon_start() {
   buffer += '(';
 }
 
 // ____________________________________________________________________________
-void osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_polygon_finish() {
+void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_polygon_finish() {
   buffer += "),";
 }
 
 // ____________________________________________________________________________
-osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_type
-osm2nt::osm::SimplifyingWKTFactoryImpl::multipolygon_finish() {
+osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_type
+osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_finish() {
   buffer.back() = ')';
   std::string str;
   std::swap(str, buffer);

@@ -1,13 +1,13 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2NT_NT_LANGTAG_H_
-#define OSM2NT_NT_LANGTAG_H_
+#ifndef OSM2TTL_TTL_LANGTAG_H_
+#define OSM2TTL_TTL_LANGTAG_H_
 
 #include <string>
 
-namespace osm2nt {
-namespace nt {
+namespace osm2ttl {
+namespace ttl {
 
 struct LangTag {
  public:
@@ -17,9 +17,9 @@ struct LangTag {
   std::string _value;
 };
 
-}  // namespace nt
-}  // namespace osm2nt
+}  // namespace ttl
+}  // namespace osm2ttl
 
-#endif  // OSM2NT_NT_LANGTAG_H_
+#endif  // OSM2TTL_TTL_LANGTAG_H_
 
 

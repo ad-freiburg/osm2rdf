@@ -1,7 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2nt/nt/Writer.h"
+#include "osm2ttl/ttl/Writer.h"
 
 #include <fstream>
 #include <iostream>
@@ -18,16 +18,16 @@
 #include "osmium/osm/tag.hpp"
 #include "osmium/osm/way.hpp"
 
-#include "osm2nt/config/Config.h"
+#include "osm2ttl/config/Config.h"
 
-#include "osm2nt/nt/BlankNode.h"
-#include "osm2nt/nt/IRI.h"
-#include "osm2nt/nt/Literal.h"
+#include "osm2ttl/ttl/BlankNode.h"
+#include "osm2ttl/ttl/IRI.h"
+#include "osm2ttl/ttl/Literal.h"
 
-#include "osm2nt/osm/SimplifyingWKTFactory.h"
+#include "osm2ttl/osm/SimplifyingWKTFactory.h"
 
 // ____________________________________________________________________________
-osm2nt::nt::Writer::Writer(const osm2nt::config::Config& config) {
+osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
   _config = config;
   _out = &std::cout;
   if (!_config.output.empty()) {
@@ -45,7 +45,7 @@ osm2nt::nt::Writer::Writer(const osm2nt::config::Config& config) {
 }
 
 // ____________________________________________________________________________
-bool osm2nt::nt::Writer::contains(std::string_view s,
+bool osm2ttl::ttl::Writer::contains(std::string_view s,
                                   std::string_view n) {
   if (n.empty()) {
     return true;
@@ -57,7 +57,7 @@ bool osm2nt::nt::Writer::contains(std::string_view s,
 }
 
 // ____________________________________________________________________________
-bool osm2nt::nt::Writer::endsWith(std::string_view s,
+bool osm2ttl::ttl::Writer::endsWith(std::string_view s,
                                   std::string_view n) {
   if (n.empty()) {
     return true;
@@ -69,7 +69,7 @@ bool osm2nt::nt::Writer::endsWith(std::string_view s,
 }
 
 // ____________________________________________________________________________
-bool osm2nt::nt::Writer::startsWith(std::string_view s,
+bool osm2ttl::ttl::Writer::startsWith(std::string_view s,
                                     std::string_view n) {
   if (n.empty()) {
     return true;
@@ -81,7 +81,7 @@ bool osm2nt::nt::Writer::startsWith(std::string_view s,
 }
 
 // ____________________________________________________________________________
-std::string osm2nt::nt::Writer::urlencode(std::string_view s) {
+std::string osm2ttl::ttl::Writer::urlencode(std::string_view s) {
   std::stringstream tmp;
   for (size_t pos = 0; pos < s.size(); ++pos) {
     switch (s[pos]) {
@@ -126,8 +126,8 @@ std::string osm2nt::nt::Writer::urlencode(std::string_view s) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeHeader() const {
-  if (_config.outputFormat != osm2nt::nt::OutputFormat::TTL) {
+void osm2ttl::ttl::Writer::writeHeader() const {
+  if (_config.outputFormat != osm2ttl::ttl::OutputFormat::TTL) {
     return;
   }
   for (const auto& p : _prefixes) {
@@ -137,13 +137,13 @@ void osm2nt::nt::Writer::writeHeader() const {
 
 // ____________________________________________________________________________
 template<typename S, typename O>
-void osm2nt::nt::Writer::writeTriple(const S& s, const osm2nt::nt::IRI& p,
+void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
                                      const O& o) {
-  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
-                || std::is_same<S, osm2nt::nt::IRI>::value);
-  static_assert(std::is_same<O, osm2nt::nt::BlankNode>::value
-                || std::is_same<O, osm2nt::nt::IRI>::value
-                ||std::is_same<O, osm2nt::nt::Literal>::value);
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  static_assert(std::is_same<O, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<O, osm2ttl::ttl::IRI>::value
+                || std::is_same<O, osm2ttl::ttl::Literal>::value);
   write(s);
   *_out << " ";
   write(p);
@@ -153,14 +153,14 @@ void osm2nt::nt::Writer::writeTriple(const S& s, const osm2nt::nt::IRI& p,
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::write(const osm2nt::nt::BlankNode& b) {
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::BlankNode& b) {
   *_out << "_:" << b.getId();
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::write(const osm2nt::nt::IRI& i) {
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::IRI& i) {
   switch (_config.outputFormat) {
-  case osm2nt::nt::OutputFormat::NT:
+  case osm2ttl::ttl::OutputFormat::NT:
     // Lookup prefix, if not defined print as long IRI
     if (_prefixes.find(i.prefix()) != _prefixes.end()) {
       *_out << "<" << _prefixes[i.prefix()] << urlencode(i.value()) << ">";
@@ -168,7 +168,7 @@ void osm2nt::nt::Writer::write(const osm2nt::nt::IRI& i) {
     }
     *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
     return;
-  case osm2nt::nt::OutputFormat::TTL:
+  case osm2ttl::ttl::OutputFormat::TTL:
     // Lookup prefix, if not defined print as long IRI
     if (_prefixes.find(i.prefix()) != _prefixes.end()) {
       *_out << i.prefix() << ":" << i.value();
@@ -182,12 +182,12 @@ void osm2nt::nt::Writer::write(const osm2nt::nt::IRI& i) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::write(const osm2nt::nt::LangTag& l) {
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::LangTag& l) {
   *_out << l.value();
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::write(const osm2nt::nt::Literal& l) {
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::Literal& l) {
   *_out << "\"";
   // Escape value
   std::string value = l.value();
@@ -221,103 +221,103 @@ void osm2nt::nt::Writer::write(const osm2nt::nt::Literal& l) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
+void osm2ttl::ttl::Writer::writeOsmArea(const osmium::Area& area) {
   if (_config.ignoreUnnamed && area.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::IRI s{"osma", area};
+  osm2ttl::ttl::IRI s{"osma", area};
 
   if (_config.simplifyWKT) {
     writeTriple(s,
-      osm2nt::nt::IRI("osma", "WKT"),
-      osm2nt::nt::Literal(_simplifyingWktFactory.create_multipolygon(area)));
+      osm2ttl::ttl::IRI("osma", "WKT"),
+      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_multipolygon(area)));
   } else {
     writeTriple(s,
-      osm2nt::nt::IRI("osma", "WKT"),
-      osm2nt::nt::Literal(_wktFactory.create_multipolygon(area)));
+      osm2ttl::ttl::IRI("osma", "WKT"),
+      osm2ttl::ttl::Literal(_wktFactory.create_multipolygon(area)));
   }
 
   writeTriple(s,
-    osm2nt::nt::IRI("osma", "from_way"),
-    osm2nt::nt::Literal(area.from_way()?"yes":"no"));
+    osm2ttl::ttl::IRI("osma", "from_way"),
+    osm2ttl::ttl::Literal(area.from_way()?"yes":"no"));
 
   writeTriple(s,
-    osm2nt::nt::IRI("osma", "orig_id"),
-    osm2nt::nt::Literal(std::to_string(area.orig_id())));
+    osm2ttl::ttl::IRI("osma", "orig_id"),
+    osm2ttl::ttl::Literal(std::to_string(area.orig_id())));
 
   writeTriple(s,
-    osm2nt::nt::IRI("osma", "orig"),
-    osm2nt::nt::IRI(area.from_way()?"osmw":"osmr",
+    osm2ttl::ttl::IRI("osma", "orig"),
+    osm2ttl::ttl::IRI(area.from_way()?"osmw":"osmr",
       std::to_string(area.orig_id())));
 
   writeTriple(s,
-    osm2nt::nt::IRI("osma", "num_outer_rings"),
-    osm2nt::nt::Literal(std::to_string(area.num_rings().first)));
+    osm2ttl::ttl::IRI("osma", "num_outer_rings"),
+    osm2ttl::ttl::Literal(std::to_string(area.num_rings().first)));
 
   writeTriple(s,
-    osm2nt::nt::IRI("osma", "num_inner_rings"),
-    osm2nt::nt::Literal(std::to_string(area.num_rings().second)));
+    osm2ttl::ttl::IRI("osma", "num_inner_rings"),
+    osm2ttl::ttl::Literal(std::to_string(area.num_rings().second)));
 
   writeTriple(s,
-    osm2nt::nt::IRI("osma", "is_multipolygon"),
-    osm2nt::nt::Literal(area.is_multipolygon()?"yes":"no"));
+    osm2ttl::ttl::IRI("osma", "is_multipolygon"),
+    osm2ttl::ttl::Literal(area.is_multipolygon()?"yes":"no"));
 
-  writeOsmBox(s, osm2nt::nt::IRI("osma", "bbox"), area.envelope());
+  writeOsmBox(s, osm2ttl::ttl::IRI("osma", "bbox"), area.envelope());
 
   writeOsmTagList(s, area.tags());
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2nt::nt::Writer::writeOsmBox(const S& s,
-                                     const osm2nt::nt::IRI& p,
+void osm2ttl::ttl::Writer::writeOsmBox(const S& s,
+                                     const osm2ttl::ttl::IRI& p,
                                      const osmium::Box& box) {
-  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
-                || std::is_same<S, osm2nt::nt::IRI>::value);
-  writeTriple(s, p, osm2nt::nt::Literal(box));
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  writeTriple(s, p, osm2ttl::ttl::Literal(box));
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2nt::nt::Writer::writeOsmLocation(const S& s,
+void osm2ttl::ttl::Writer::writeOsmLocation(const S& s,
                                           const osmium::Location& location) {
-  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
-                || std::is_same<S, osm2nt::nt::IRI>::value);
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
   std::stringstream loc;
   location.as_string_without_check(std::ostream_iterator<char>(loc));
 
   writeTriple(s,
-    osm2nt::nt::IRI("osml", "direct"),
-    osm2nt::nt::Literal(loc.str()));
+    osm2ttl::ttl::IRI("osml", "direct"),
+    osm2ttl::ttl::Literal(loc.str()));
 
   if (_config.simplifyWKT) {
     writeTriple(s,
-      osm2nt::nt::IRI("osml", "WKT"),
-      osm2nt::nt::Literal(_simplifyingWktFactory.create_point(location)));
+      osm2ttl::ttl::IRI("osml", "WKT"),
+      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_point(location)));
   } else {
     writeTriple(s,
-      osm2nt::nt::IRI("osml", "WKT"),
-      osm2nt::nt::Literal(_wktFactory.create_point(location)));
+      osm2ttl::ttl::IRI("osml", "WKT"),
+      osm2ttl::ttl::Literal(_wktFactory.create_point(location)));
   }
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmNode(const osmium::Node& node) {
+void osm2ttl::ttl::Writer::writeOsmNode(const osmium::Node& node) {
   if (_config.ignoreUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::IRI s{"osmn", node};
+  osm2ttl::ttl::IRI s{"osmn", node};
 
   writeOsmLocation(s, node.location());
   writeOsmTagList(s, node.tags());
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmRelation(const osmium::Relation& relation) {
+void osm2ttl::ttl::Writer::writeOsmRelation(const osmium::Relation& relation) {
   if (_config.ignoreUnnamed && relation.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::IRI s{"osmr", relation};
+  osm2ttl::ttl::IRI s{"osmr", relation};
 
   writeOsmTagList(s, relation.tags());
   writeOsmRelationMembers(s, relation.members());
@@ -325,38 +325,38 @@ void osm2nt::nt::Writer::writeOsmRelation(const osmium::Relation& relation) {
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2nt::nt::Writer::writeOsmRelationMembers(
+void osm2ttl::ttl::Writer::writeOsmRelationMembers(
     const S& s,
     const osmium::RelationMemberList& members) {
-  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
-                || std::is_same<S, osm2nt::nt::IRI>::value);
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
 
   std::uint32_t i = 0;
   for (const osmium::RelationMember& member : members) {
-    osm2nt::nt::BlankNode b;
+    osm2ttl::ttl::BlankNode b;
     writeTriple(s,
-      osm2nt::nt::IRI("osmr", "membership"),
+      osm2ttl::ttl::IRI("osmr", "membership"),
       b);
 
     writeTriple(b,
-      osm2nt::nt::IRI("osmr", "member"),
-      osm2nt::nt::IRI("osm"
+      osm2ttl::ttl::IRI("osmr", "member"),
+      osm2ttl::ttl::IRI("osm"
         + std::string(osmium::item_type_to_name(member.type()))  + "/",
         member));
 
     writeTriple(b,
-      osm2nt::nt::IRI("osmr", "pos"),
-      osm2nt::nt::Literal(std::to_string(++i),
-                          osm2nt::nt::IRI("w3s", "integer")));
+      osm2ttl::ttl::IRI("osmr", "pos"),
+      osm2ttl::ttl::Literal(std::to_string(++i),
+                          osm2ttl::ttl::IRI("w3s", "integer")));
   }
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2nt::nt::Writer::writeOsmTag(const S& s,
+void osm2ttl::ttl::Writer::writeOsmTag(const S& s,
                                      const osmium::Tag& tag) {
-  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
-                || std::is_same<S, osm2nt::nt::IRI>::value);
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
   // No spaces allowed in tag keys (see 002.problem.nt)
   std::string key = std::string(tag.key());
   std::stringstream tmp;
@@ -370,16 +370,16 @@ void osm2nt::nt::Writer::writeOsmTag(const S& s,
     }
   }
   writeTriple(s,
-    osm2nt::nt::IRI("https://www.openstreetmap.org/wiki/", "key:"+tmp.str()),
-    osm2nt::nt::Literal(tag.value()));
+    osm2ttl::ttl::IRI("https://www.openstreetmap.org/wiki/", "key:"+tmp.str()),
+    osm2ttl::ttl::Literal(tag.value()));
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2nt::nt::Writer::writeOsmTagList(const S& s,
+void osm2ttl::ttl::Writer::writeOsmTagList(const S& s,
                                          const osmium::TagList& tags) {
-  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
-                || std::is_same<S, osm2nt::nt::IRI>::value);
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
   for (const osmium::Tag& tag : tags) {
     writeOsmTag(s, tag);
     if (_config.addWikiLinks) {
@@ -391,18 +391,18 @@ void osm2nt::nt::Writer::writeOsmTagList(const S& s,
         if (pos2 != std::string::npos) {
           while (pos2 != std::string::npos) {
             writeTriple(s,
-              osm2nt::nt::IRI("osm", "wikidata"),
-              osm2nt::nt::IRI("wd", value.substr(pos1, pos2-pos1)));
+              osm2ttl::ttl::IRI("osm", "wikidata"),
+              osm2ttl::ttl::IRI("wd", value.substr(pos1, pos2-pos1)));
             pos1 = pos2 + 1;
             pos2 = value.find(";", pos1);
           }
           writeTriple(s,
-            osm2nt::nt::IRI("osm", "wikidata"),
-            osm2nt::nt::IRI("wd", value.substr(pos1)));
+            osm2ttl::ttl::IRI("osm", "wikidata"),
+            osm2ttl::ttl::IRI("wd", value.substr(pos1)));
         } else {
           writeTriple(s,
-            osm2nt::nt::IRI("osm", "wikidata"),
-            osm2nt::nt::IRI("wd", value));
+            osm2ttl::ttl::IRI("osm", "wikidata"),
+            osm2ttl::ttl::IRI("wd", value));
         }
       }
       if (Writer::endsWith(tag.key(), "wikipedia") &&
@@ -413,12 +413,12 @@ void osm2nt::nt::Writer::writeOsmTagList(const S& s,
           std::string lang = v.substr(0, pos);
           std::string entry = v.substr(pos);
           writeTriple(s,
-            osm2nt::nt::IRI("osm", "wikipedia"),
-            osm2nt::nt::IRI("https://"+lang+".wikipedia.org/wiki/", entry));
+            osm2ttl::ttl::IRI("osm", "wikipedia"),
+            osm2ttl::ttl::IRI("https://"+lang+".wikipedia.org/wiki/", entry));
         } else {
           writeTriple(s,
-            osm2nt::nt::IRI("osm", "wikipedia"),
-            osm2nt::nt::IRI("https://www.wikipedia.org/wiki/", v));
+            osm2ttl::ttl::IRI("osm", "wikipedia"),
+            osm2ttl::ttl::IRI("https://www.wikipedia.org/wiki/", v));
         }
       }
     }
@@ -426,75 +426,75 @@ void osm2nt::nt::Writer::writeOsmTagList(const S& s,
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
+void osm2ttl::ttl::Writer::writeOsmWay(const osmium::Way& way) {
   if (_config.ignoreUnnamed && way.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::IRI s{"osmw", way};
+  osm2ttl::ttl::IRI s{"osmw", way};
 
   writeOsmTagList(s, way.tags());
   writeOsmWayNodeList(s, way.nodes());
 
   writeTriple(s,
-    osm2nt::nt::IRI("osmw", "is_closed"),
-    osm2nt::nt::Literal(way.is_closed()?"yes":"no"));
+    osm2ttl::ttl::IRI("osmw", "is_closed"),
+    osm2ttl::ttl::Literal(way.is_closed()?"yes":"no"));
 
   if (way.nodes().size() > 3 && way.is_closed()) {
     if (_config.simplifyWKT) {
       writeTriple(s,
-        osm2nt::nt::IRI("osmw", "WKT"),
-        osm2nt::nt::Literal(_simplifyingWktFactory.create_polygon(way)));
+        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::Literal(_simplifyingWktFactory.create_polygon(way)));
     } else {
       writeTriple(s,
-        osm2nt::nt::IRI("osmw", "WKT"),
-        osm2nt::nt::Literal(_wktFactory.create_polygon(way)));
+        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::Literal(_wktFactory.create_polygon(way)));
     }
   } else if (way.nodes().size() > 1) {
     if (_config.simplifyWKT) {
       writeTriple(s,
-        osm2nt::nt::IRI("osmw", "WKT"),
-        osm2nt::nt::Literal(_simplifyingWktFactory.create_linestring(
+        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::Literal(_simplifyingWktFactory.create_linestring(
           way, osmium::geom::use_nodes::all)));
     } else {
       writeTriple(s,
-        osm2nt::nt::IRI("osmw", "WKT"),
-        osm2nt::nt::Literal(_wktFactory.create_linestring(
+        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::Literal(_wktFactory.create_linestring(
           way, osmium::geom::use_nodes::all)));
     }
   } else {
     if (_config.simplifyWKT) {
       writeTriple(s,
-        osm2nt::nt::IRI("osmw", "WKT"),
-        osm2nt::nt::Literal(
+        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::Literal(
           _simplifyingWktFactory.create_point(way.nodes()[0])));
     } else {
       writeTriple(s,
-        osm2nt::nt::IRI("osmw", "WKT"),
-        osm2nt::nt::Literal(_wktFactory.create_point(way.nodes()[0])));
+        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::Literal(_wktFactory.create_point(way.nodes()[0])));
     }
   }
 
-  writeOsmBox(s, osm2nt::nt::IRI("osmw", "bbox"), way.envelope());
+  writeOsmBox(s, osm2ttl::ttl::IRI("osmw", "bbox"), way.envelope());
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2nt::nt::Writer::writeOsmWayNodeList(const S& s,
+void osm2ttl::ttl::Writer::writeOsmWayNodeList(const S& s,
                                              const osmium::WayNodeList& nodes) {
-  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
-                || std::is_same<S, osm2nt::nt::IRI>::value);
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
   uint32_t i = 0;
   for (const osmium::NodeRef& nodeRef : nodes) {
-    osm2nt::nt::BlankNode b;
-    writeTriple(s, osm2nt::nt::IRI("osmw", "node"), b);
+    osm2ttl::ttl::BlankNode b;
+    writeTriple(s, osm2ttl::ttl::IRI("osmw", "node"), b);
 
     writeTriple(b,
-      osm2nt::nt::IRI("osmw", "node"),
-      osm2nt::nt::IRI("osmn", nodeRef));
+      osm2ttl::ttl::IRI("osmw", "node"),
+      osm2ttl::ttl::IRI("osmn", nodeRef));
 
     writeTriple(b,
-      osm2nt::nt::IRI("osmw", "pos"),
-      osm2nt::nt::Literal(std::to_string(++i),
-        osm2nt::nt::IRI("w3s", "integer")));
+      osm2ttl::ttl::IRI("osmw", "pos"),
+      osm2ttl::ttl::Literal(std::to_string(++i),
+        osm2ttl::ttl::IRI("w3s", "integer")));
   }
 }

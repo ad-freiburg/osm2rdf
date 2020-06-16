@@ -1,25 +1,25 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2nt/config/Config.h"
+#include "osm2ttl/config/Config.h"
 
 #include <string>
 #include <iostream>
 
 #include "popl.hpp"
 
-#include "osm2nt/nt/OutputFormat.h"
+#include "osm2ttl/ttl/OutputFormat.h"
 
 // ____________________________________________________________________________
-void osm2nt::config::Config::load(const std::string& filename) {
+void osm2ttl::config::Config::load(const std::string& filename) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::config::Config::save(const std::string& filename) {
+void osm2ttl::config::Config::save(const std::string& filename) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::config::Config::fromArgs(int argc, char** argv) {
+void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   popl::OptionParser op("Allowed options");
 
   auto helpOp = op.add<popl::Switch>("h", "help", "Lorem ipsum");
@@ -31,7 +31,7 @@ void osm2nt::config::Config::fromArgs(int argc, char** argv) {
        popl::Attribute::advanced>(
     "", "output-format", "Output format, valid values: nt, ttl", "ttl");
   auto cacheOp = op.add<popl::Value<std::string>>(
-    "t", "cache", "Path to cache file", "/tmp/osm2nt-cache");
+    "t", "cache", "Path to cache file", "/tmp/osm2ttl-cache");
   auto ignoreUnnamedOp = op.add<popl::Switch>(
     "u", "ignore-unnamed", "Only add named entities to the result.");
   auto addWikiLinksOp = op.add<popl::Switch>(
@@ -64,9 +64,9 @@ void osm2nt::config::Config::fromArgs(int argc, char** argv) {
     output = outputOp->value();
     if (outputFormatOp->is_set()) {
       if (outputFormatOp->value() == "ttl") {
-        outputFormat = osm2nt::nt::OutputFormat::TTL;
+        outputFormat = osm2ttl::ttl::OutputFormat::TTL;
       } else if (outputFormatOp->value() == "nt") {
-        outputFormat = osm2nt::nt::OutputFormat::NT;
+        outputFormat = osm2ttl::ttl::OutputFormat::NT;
       } else {
         std::cerr << "Unknown output format selected: "
           << outputFormatOp->value() << "\n"

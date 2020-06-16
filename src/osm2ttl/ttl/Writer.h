@@ -1,8 +1,8 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2NT_NT_WRITER_H_
-#define OSM2NT_NT_WRITER_H_
+#ifndef OSM2TTL_TTL_WRITER_H_
+#define OSM2TTL_TTL_WRITER_H_
 
 #include <fstream>
 #include <ostream>
@@ -17,29 +17,29 @@
 #include "osmium/osm/tag.hpp"
 #include "osmium/osm/way.hpp"
 
-#include "osm2nt/config/Config.h"
+#include "osm2ttl/config/Config.h"
 
-#include "osm2nt/nt/BlankNode.h"
-#include "osm2nt/nt/IRI.h"
-#include "osm2nt/nt/Literal.h"
+#include "osm2ttl/ttl/BlankNode.h"
+#include "osm2ttl/ttl/IRI.h"
+#include "osm2ttl/ttl/Literal.h"
 
-#include "osm2nt/osm/SimplifyingWKTFactory.h"
+#include "osm2ttl/osm/SimplifyingWKTFactory.h"
 
-namespace osm2nt {
-namespace nt {
+namespace osm2ttl {
+namespace ttl {
 
 class Writer {
  public:
-  explicit Writer(const osm2nt::config::Config& config);
+  explicit Writer(const osm2ttl::config::Config& config);
   void writeHeader() const;
 
   template<typename S, typename O>
-  void writeTriple(const S& s, const osm2nt::nt::IRI& p, const O& o);
+  void writeTriple(const S& s, const osm2ttl::ttl::IRI& p, const O& o);
 
   // OSM
   void writeOsmArea(const osmium::Area& area);
   template<typename S>
-  void writeOsmBox(const S& s, const osm2nt::nt::IRI& p,
+  void writeOsmBox(const S& s, const osm2ttl::ttl::IRI& p,
                    const osmium::Box& box);
   template<typename S>
   void writeOsmLocation(const S& s,
@@ -67,23 +67,23 @@ class Writer {
   static std::string urlencode(std::string_view s);
 
   // Element
-  void write(const osm2nt::nt::BlankNode& b);
-  void write(const osm2nt::nt::IRI& i);
-  void write(const osm2nt::nt::LangTag& l);
-  void write(const osm2nt::nt::Literal& l);
+  void write(const osm2ttl::ttl::BlankNode& b);
+  void write(const osm2ttl::ttl::IRI& i);
+  void write(const osm2ttl::ttl::LangTag& l);
+  void write(const osm2ttl::ttl::Literal& l);
 
   // Config
-  osm2nt::config::Config _config;
+  osm2ttl::config::Config _config;
   std::unordered_map<std::string, std::string> _prefixes;
   // Output
   std::ostream* _out;
   std::ofstream _outFile;
   // Factories
   osmium::geom::WKTFactory<> _wktFactory;
-  osm2nt::osm::SimplifyingWKTFactory<> _simplifyingWktFactory;
+  osm2ttl::osm::SimplifyingWKTFactory<> _simplifyingWktFactory;
 };
 
-}  // namespace nt
-}  // namespace osm2nt
+}  // namespace ttl
+}  // namespace osm2ttl
 
-#endif  // OSM2NT_NT_WRITER_H_
+#endif  // OSM2TTL_TTL_WRITER_H_

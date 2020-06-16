@@ -1,8 +1,8 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2NT_OSM_DUMPHANDLER_H_
-#define OSM2NT_OSM_DUMPHANDLER_H_
+#ifndef OSM2TTL_OSM_DUMPHANDLER_H_
+#define OSM2TTL_OSM_DUMPHANDLER_H_
 
 #include <ostream>
 
@@ -12,24 +12,24 @@
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/way.hpp"
 
-#include "osm2nt/config/Config.h"
-#include "osm2nt/nt/Writer.h"
+#include "osm2ttl/config/Config.h"
+#include "osm2ttl/ttl/Writer.h"
 
-namespace osm2nt {
+namespace osm2ttl {
 namespace osm {
 
 class DumpHandler : public osmium::handler::Handler {
  public:
-  explicit DumpHandler(osm2nt::nt::Writer* writer);
+  explicit DumpHandler(osm2ttl::ttl::Writer* writer);
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
  protected:
-  osm2nt::nt::Writer* _w;
+  osm2ttl::ttl::Writer* _w;
 };
 
 }  // namespace osm
-}  // namespace osm2nt
+}  // namespace osm2ttl
 
-#endif  // OSM2NT_OSM_DUMPHANDLER_H_
+#endif  // OSM2TTL_OSM_DUMPHANDLER_H_

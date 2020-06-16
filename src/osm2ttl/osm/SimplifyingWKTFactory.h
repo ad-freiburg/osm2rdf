@@ -1,8 +1,8 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2NT_OSM_SIMPLIFYINGWKTFACTORY_H_
-#define OSM2NT_OSM_SIMPLIFYINGWKTFACTORY_H_
+#ifndef OSM2TTL_OSM_SIMPLIFYINGWKTFACTORY_H_
+#define OSM2TTL_OSM_SIMPLIFYINGWKTFACTORY_H_
 
 #include <string>
 #include <vector>
@@ -10,9 +10,9 @@
 #include "osmium/geom/coordinates.hpp"
 #include "osmium/geom/factory.hpp"
 
-#include "osm2nt/osm/MergeMode.h"
+#include "osm2ttl/osm/MergeMode.h"
 
-namespace osm2nt {
+namespace osm2ttl {
 namespace osm {
 
 class SimplifyingWKTFactoryImpl {
@@ -59,14 +59,14 @@ class SimplifyingWKTFactoryImpl {
   std::string buffer;
   int precision = 7;
   size_t maxCoordinates = 10;
-  MergeMode mergeMode = MergeMode::MERGE;
+  osm2ttl::osm::MergeMode mergeMode = osm2ttl::osm::MergeMode::MERGE;
 };
 
 template <typename TProjection = osmium::geom::IdentityProjection>
 using SimplifyingWKTFactory = osmium::geom::GeometryFactory<
-  osm2nt::osm::SimplifyingWKTFactoryImpl, TProjection>;
+  osm2ttl::osm::SimplifyingWKTFactoryImpl, TProjection>;
 
 }  // namespace osm
-}  // namespace osm2nt
+}  // namespace osm2ttl
 
-#endif  // OSM2NT_OSM_SIMPLIFYINGWKTFACTORY_H_
+#endif  // OSM2TTL_OSM_SIMPLIFYINGWKTFACTORY_H_

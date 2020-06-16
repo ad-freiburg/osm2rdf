@@ -1,8 +1,8 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2NT_OSM_ELEMENT_H_
-#define OSM2NT_OSM_ELEMENT_H_
+#ifndef OSM2TTL_OSM_ELEMENT_H_
+#define OSM2TTL_OSM_ELEMENT_H_
 
 #include <string>
 
@@ -10,7 +10,7 @@
 #include "osmium/osm/entity_bits.hpp"
 #include "osmium/osm/types.hpp"
 
-namespace osm2nt {
+namespace osm2ttl {
 namespace osm {
 
 struct Element {
@@ -27,6 +27,6 @@ struct Element {
 };
 
 }  // namespace osm
-}  // namespace osm2nt
+}  // namespace osm2ttl
 
-#endif  // OSM2NT_OSM_ELEMENT_H_
+#endif  // OSM2TTL_OSM_ELEMENT_H_

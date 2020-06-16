@@ -1,19 +1,19 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2nt/nt/BlankNode.h"
+#include "osm2ttl/ttl/BlankNode.h"
 
 #include <cstdint>
 
 // ____________________________________________________________________________
-std::uint64_t osm2nt::nt::BlankNode::_idCounter;
+uint64_t osm2ttl::ttl::BlankNode::_idCounter;
 
 // ____________________________________________________________________________
-osm2nt::nt::BlankNode::BlankNode() {
+osm2ttl::ttl::BlankNode::BlankNode() {
   _id = _idCounter++;
 }
 
 // ____________________________________________________________________________
-std::uint64_t osm2nt::nt::BlankNode::getId() const {
+uint64_t osm2ttl::ttl::BlankNode::getId() const {
   return _id;
 }

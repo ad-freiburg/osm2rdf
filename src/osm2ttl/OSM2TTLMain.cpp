@@ -14,21 +14,21 @@
 #include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/util/memory.hpp"
 
-#include "osm2nt/_config.h"
-#include "osm2nt/config/Config.h"
-#include "osm2nt/nt/Writer.h"
-#include "osm2nt/osm/DumpHandler.h"
+#include "osm2ttl/_config.h"
+#include "osm2ttl/config/Config.h"
+#include "osm2ttl/ttl/Writer.h"
+#include "osm2ttl/osm/DumpHandler.h"
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
-  osm2nt::config::Config config;
+  osm2ttl::config::Config config;
   config.fromArgs(argc, argv);
 
   try {
     // Input file reference
     osmium::io::File input_file{config.input};
-    osm2nt::nt::Writer* writer = new osm2nt::nt::Writer(config);
-    osm2nt::osm::DumpHandler dump_handler{writer};
+    osm2ttl::ttl::Writer* writer = new osm2ttl::ttl::Writer(config);
+    osm2ttl::osm::DumpHandler dump_handler{writer};
     writer->writeHeader();
 
     // Do not create empty areas

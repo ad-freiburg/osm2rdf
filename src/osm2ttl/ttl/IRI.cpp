@@ -1,7 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2nt/nt/IRI.h"
+#include "osm2ttl/ttl/IRI.h"
 
 #include <sstream>
 #include <string>
@@ -11,7 +11,7 @@
 #include "osmium/osm/relation.hpp"
 
 // ____________________________________________________________________________
-osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n) {
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n) {
   _prefix = prefix;
   std::stringstream tmp;
   tmp << n.positive_ref();
@@ -19,7 +19,7 @@ osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n) {
 }
 
 // ____________________________________________________________________________
-osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o) {
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o) {
   _prefix = prefix;
   std::stringstream tmp;
   tmp << o.positive_id();
@@ -27,7 +27,7 @@ osm2nt::nt::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o) {
 }
 
 // ____________________________________________________________________________
-osm2nt::nt::IRI::IRI(const std::string& prefix,
+osm2ttl::ttl::IRI::IRI(const std::string& prefix,
                      const osmium::RelationMember& m) {
   _prefix = prefix;
   std::stringstream tmp;
@@ -36,17 +36,17 @@ osm2nt::nt::IRI::IRI(const std::string& prefix,
 }
 
 // ____________________________________________________________________________
-osm2nt::nt::IRI::IRI(const std::string& prefix, const std::string& s) {
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s) {
   _prefix = prefix;
   _value = s;
 }
 
 // ____________________________________________________________________________
-std::string osm2nt::nt::IRI::prefix() const {
+std::string osm2ttl::ttl::IRI::prefix() const {
   return _prefix;
 }
 
 // ____________________________________________________________________________
-std::string osm2nt::nt::IRI::value() const {
+std::string osm2ttl::ttl::IRI::value() const {
   return _value;
 }

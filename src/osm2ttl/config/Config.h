@@ -1,14 +1,14 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2NT_CONFIG_CONFIG_H_
-#define OSM2NT_CONFIG_CONFIG_H_
+#ifndef OSM2TTL_CONFIG_CONFIG_H_
+#define OSM2TTL_CONFIG_CONFIG_H_
 
 #include <string>
 
-#include "osm2nt/nt/OutputFormat.h"
+#include "osm2ttl/ttl/OutputFormat.h"
 
-namespace osm2nt {
+namespace osm2ttl {
 namespace config {
 
 struct Config {
@@ -16,7 +16,7 @@ struct Config {
   bool addWikiLinks = false;
   bool ignoreUnnamed = false;
   std::string output;
-  osm2nt::nt::OutputFormat outputFormat = osm2nt::nt::OutputFormat::TTL;
+  osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::TTL;
   std::string input;
   std::string cache;
 
@@ -25,7 +25,7 @@ struct Config {
   void fromArgs(int argc, char** argv);
 };
 }  // namespace config
-}  // namespace osm2nt
+}  // namespace osm2ttl
 
-#endif  // OSM2NT_CONFIG_CONFIG_H_
+#endif  // OSM2TTL_CONFIG_CONFIG_H_
 

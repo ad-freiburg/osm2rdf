@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.6)
 
-project (osm2nt CXX)
+project (osm2ttl CXX)
 
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -249,10 +249,10 @@ add_custom_target(
 
 # handles install target
 install(
-	FILES osm2nt.cfg DESTINATION etc/${PROJECT_NAME} COMPONENT config PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+	FILES osm2ttl.cfg DESTINATION etc/${PROJECT_NAME} COMPONENT config PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
 )
 
 install(
-	FILES build/osm2nt DESTINATION bin
+	FILES build/osm2ttl DESTINATION bin
 	PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE COMPONENT binaries
 )
