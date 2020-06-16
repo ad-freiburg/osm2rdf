@@ -20,13 +20,18 @@ Prepare input and output folders and download some data and convert the data to 
 $ mkdir input
 $ mkdir output
 $ wget -O ./input/freiburg-regbez-latest.osm.pbf https://download.geofabrik.de/europe/germany/baden-wuerttemberg/freiburg-regbez-latest.osm.pbf
-$ ./build/osm2ttl ./input/freiburg-regbez-latest.osm.pbf -o ./output/freiburg-regbez-latest.osm.ttl
+$ ./build/osm2ttl ./input/freiburg-regbez-latest.osm.pbf -o ./output/freiburg-regbez-latest.osm.ttl -u -w
 ```
 
 Alternativly use the provided `Dockerfile` to compile and run `osm2ttl`:
 ```
 $ docker build -t osm2ttl .
-$ docker run --rm -it osm2ttl -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -- /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl
+$ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -u -w
+
+$ wget -O ./input/baden-wuerttemberg-latest.osm.pbf https://download.geofabrik.de/europe/germany/baden-wuerttemberg-latest.osm.pbf
+$ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl -u -w
+$ wget -O ./input/germany-latest.osm.pbf https://download.geofabrik.de/europe/germany-latest.osm.pbf
+$ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl -u -w
 ```
 
 More `.pbf` files can be found on the [Geofrabik Download Server](https://download.geofabrik.de/index.html)
