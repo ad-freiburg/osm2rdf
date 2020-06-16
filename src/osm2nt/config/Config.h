@@ -20,7 +20,7 @@ struct Config {
   bool addWikiLinks = false;
   bool ignoreUnnamed = false;
   std::string output;
-  osm2nt::nt::OutputFormat outputFormat;
+  osm2nt::nt::OutputFormat outputFormat = osm2nt::nt::OutputFormat::TTL;
   std::string input;
   std::string cache;
 };

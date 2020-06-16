@@ -34,51 +34,36 @@ class Writer {
 
   // OSM
   void writeOsmArea(const osmium::Area& area);
-  void writeOsmBox(const osm2nt::nt::BlankNode& s, const osm2nt::nt::IRI& p,
+  template<typename S>
+  void writeOsmBox(const S& s, const osm2nt::nt::IRI& p,
                    const osmium::Box& box);
-  void writeOsmBox(const osm2nt::nt::IRI& s, const osm2nt::nt::IRI& p,
-                   const osmium::Box& box);
-  void writeOsmLocation(const osm2nt::nt::BlankNode& s,
-                        const osmium::Location& l);
-  void writeOsmLocation(const osm2nt::nt::IRI& s,
+  template<typename S>
+  void writeOsmLocation(const S& s,
                         const osmium::Location& l);
   void writeOsmNode(const osmium::Node& node);
   void writeOsmRelation(const osmium::Relation& relation);
-  void writeOsmRelationMembers(const osm2nt::nt::BlankNode& s,
+  template<typename S>
+  void writeOsmRelationMembers(const S& s,
                                const osmium::RelationMemberList& members);
-  void writeOsmRelationMembers(const osm2nt::nt::IRI& s,
-                               const osmium::RelationMemberList& members);
-  void writeOsmTag(const osm2nt::nt::BlankNode& s, const osmium::Tag& tag);
-  void writeOsmTag(const osm2nt::nt::IRI& s, const osmium::Tag& tag);
-  void writeOsmTagList(const osm2nt::nt::BlankNode& s,
-                       const osmium::TagList& tags);
-  void writeOsmTagList(const osm2nt::nt::IRI& s,
+  template<typename S>
+  void writeOsmTag(const S& s, const osmium::Tag& tag);
+  template<typename S>
+  void writeOsmTagList(const S& s,
                        const osmium::TagList& tags);
   void writeOsmWay(const osmium::Way& way);
-  void writeOsmWayNodeList(const osm2nt::nt::BlankNode& s,
-                           const osmium::WayNodeList& nodes);
-  void writeOsmWayNodeList(const osm2nt::nt::IRI& s,
+  template<typename S>
+  void writeOsmWayNodeList(const S& s,
                            const osmium::WayNodeList& nodes);
 
  protected:
-  // Triple
-  void writeTriple(const osm2nt::nt::BlankNode& s, const osm2nt::nt::IRI& p,
-                   const osm2nt::nt::IRI& o);
-  void writeTriple(const osm2nt::nt::BlankNode& s, const osm2nt::nt::IRI& p,
-                   const osm2nt::nt::BlankNode& o);
-  void writeTriple(const osm2nt::nt::BlankNode& s, const osm2nt::nt::IRI& p,
-                   const osm2nt::nt::Literal& o);
-  void writeTriple(const osm2nt::nt::IRI& s, const osm2nt::nt::IRI& p,
-                   const osm2nt::nt::IRI& o);
-  void writeTriple(const osm2nt::nt::IRI& s, const osm2nt::nt::IRI& p,
-                   const osm2nt::nt::BlankNode& o);
-  void writeTriple(const osm2nt::nt::IRI& s, const osm2nt::nt::IRI& p,
-                   const osm2nt::nt::Literal& o);
+  template<typename S, typename P, typename O>
+  void writeTriple(const S& s, const P& p, const O& o);
+
   // Element
-  void writeBlankNode(const osm2nt::nt::BlankNode& b);
-  void writeIRI(const osm2nt::nt::IRI& i);
-  void writeLangTag(const osm2nt::nt::LangTag& l);
-  void writeLiteral(const osm2nt::nt::Literal& l);
+  void write(const osm2nt::nt::BlankNode& b);
+  void write(const osm2nt::nt::IRI& i);
+  void write(const osm2nt::nt::LangTag& l);
+  void write(const osm2nt::nt::Literal& l);
 
   static bool tagKeyEndsWith(const osmium::Tag& tag, const std::string& needle);
   static std::string urlencode(const std::string& s);

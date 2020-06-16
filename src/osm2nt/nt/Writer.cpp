@@ -107,98 +107,42 @@ void osm2nt::nt::Writer::writeHeader() {
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::BlankNode& s,
-                                     const osm2nt::nt::IRI& p,
-                                     const osm2nt::nt::IRI& o) {
-  writeBlankNode(s);
+template<typename S, typename P, typename O>
+void osm2nt::nt::Writer::writeTriple(const S& s, const P& p, const O& o) {
+  write(s);
   *_out << " ";
-  writeIRI(p);
+  write(p);
   *_out << " ";
-  writeIRI(o);
+  write(o);
   *_out << " .\n";
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::BlankNode& s,
-                                     const osm2nt::nt::IRI& p,
-                                     const osm2nt::nt::BlankNode& o) {
-  writeBlankNode(s);
-  *_out << " ";
-  writeIRI(p);
-  *_out << " ";
-  writeBlankNode(o);
-  *_out << " .\n";
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::BlankNode& s,
-                                     const osm2nt::nt::IRI& p,
-                                     const osm2nt::nt::Literal& o) {
-  writeBlankNode(s);
-  *_out << " ";
-  writeIRI(p);
-  *_out << " ";
-  writeLiteral(o);
-  *_out << " .\n";
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::IRI& s,
-                                     const osm2nt::nt::IRI& p,
-                                     const osm2nt::nt::IRI& o) {
-  writeIRI(s);
-  *_out << " ";
-  writeIRI(p);
-  *_out << " ";
-  writeIRI(o);
-  *_out << " .\n";
-}
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::IRI& s,
-                                     const osm2nt::nt::IRI& p,
-                                     const osm2nt::nt::BlankNode& o) {
-  writeIRI(s);
-  *_out << " ";
-  writeIRI(p);
-  *_out << " ";
-  writeBlankNode(o);
-  *_out << " .\n";
-}
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeTriple(const osm2nt::nt::IRI& s,
-                                     const osm2nt::nt::IRI& p,
-                                     const osm2nt::nt::Literal& o) {
-  writeIRI(s);
-  *_out << " ";
-  writeIRI(p);
-  *_out << " ";
-  writeLiteral(o);
-  *_out << " .\n";
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeBlankNode(const osm2nt::nt::BlankNode& b) {
+void osm2nt::nt::Writer::write(const osm2nt::nt::BlankNode& b) {
   *_out << "_:" << b.getId();
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeIRI(const osm2nt::nt::IRI& i) {
+void osm2nt::nt::Writer::write(const osm2nt::nt::IRI& i) {
   switch (_config.outputFormat) {
   case osm2nt::nt::OutputFormat::NT:
     *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
     break;
   case osm2nt::nt::OutputFormat::TTL:
+    *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
     break;
+  default:
+    throw;
   }
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeLangTag(const osm2nt::nt::LangTag& l) {
+void osm2nt::nt::Writer::write(const osm2nt::nt::LangTag& l) {
   *_out << l.value();
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeLiteral(const osm2nt::nt::Literal& l) {
+void osm2nt::nt::Writer::write(const osm2nt::nt::Literal& l) {
   *_out << "\"";
   // Escape value
   std::string value = l.value();
@@ -223,11 +167,11 @@ void osm2nt::nt::Writer::writeLiteral(const osm2nt::nt::Literal& l) {
   *_out << "\"";
   if (auto iri = l.iri()) {
     *_out << "^^";
-    writeIRI(*iri);
+    write(*iri);
   }
   if (auto langTag = l.langTag()) {
     *_out << "@";
-    writeLangTag(*langTag);
+    write(*langTag);
   }
 }
 
@@ -285,42 +229,16 @@ void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmBox(const osm2nt::nt::BlankNode& s,
+template<typename S>
+void osm2nt::nt::Writer::writeOsmBox(const S& s,
                                      const osm2nt::nt::IRI& p,
                                      const osmium::Box& box) {
   writeTriple(s, p, osm2nt::nt::Literal(box));
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmBox(const osm2nt::nt::IRI& s,
-                                     const osm2nt::nt::IRI& p,
-                                     const osmium::Box& box) {
-  writeTriple(s, p, osm2nt::nt::Literal(box));
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmLocation(const osm2nt::nt::BlankNode& s,
-                                          const osmium::Location& location) {
-  std::stringstream loc;
-  location.as_string_without_check(std::ostream_iterator<char>(loc));
-
-  writeTriple(s,
-    osm2nt::nt::IRI("https://www.openstreetmap.org/Location/", "direct"),
-    osm2nt::nt::Literal(loc.str()));
-
-  if (_config.simplifyWKT) {
-    writeTriple(s,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/Location/", "WKT"),
-      osm2nt::nt::Literal(_simplifyingWktFactory.create_point(location)));
-  } else {
-    writeTriple(s,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/Location/", "WKT"),
-      osm2nt::nt::Literal(_wktFactory.create_point(location)));
-  }
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmLocation(const osm2nt::nt::IRI& s,
+template<typename S>
+void osm2nt::nt::Writer::writeOsmLocation(const S& s,
                                           const osmium::Location& location) {
   std::stringstream loc;
   location.as_string_without_check(std::ostream_iterator<char>(loc));
@@ -363,8 +281,9 @@ void osm2nt::nt::Writer::writeOsmRelation(const osmium::Relation& relation) {
 }
 
 // ____________________________________________________________________________
+template<typename S>
 void osm2nt::nt::Writer::writeOsmRelationMembers(
-    const osm2nt::nt::BlankNode& s,
+    const S& s,
     const osmium::RelationMemberList& members) {
 
   std::uint32_t i = 0;
@@ -389,32 +308,8 @@ void osm2nt::nt::Writer::writeOsmRelationMembers(
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmRelationMembers(
-    const osm2nt::nt::IRI& s,
-    const osmium::RelationMemberList& members) {
-  std::uint32_t i = 0;
-  for (const osmium::RelationMember& member : members) {
-    osm2nt::nt::BlankNode b;
-    writeTriple(s,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/relation/", "membership"),
-      b);
-
-    writeTriple(b,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/relation/", "member"),
-      osm2nt::nt::IRI("https://www.openstreetmap.org/"
-        + std::string(osmium::item_type_to_name(member.type()))  + "/",
-        member));
-
-    writeTriple(b,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/way/", "pos"),
-      osm2nt::nt::Literal(std::to_string(++i),
-                          osm2nt::nt::IRI("http://www.w3.org/2001/XMLSchema#",
-                                          "integer")));
-  }
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmTag(const osm2nt::nt::BlankNode& s,
+template<typename S>
+void osm2nt::nt::Writer::writeOsmTag(const S& s,
                                      const osmium::Tag& tag) {
   // No spaces allowed in tag keys (see 002.problem.nt)
   std::string key = std::string(tag.key());
@@ -434,57 +329,8 @@ void osm2nt::nt::Writer::writeOsmTag(const osm2nt::nt::BlankNode& s,
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmTag(const osm2nt::nt::IRI& s,
-                                     const osmium::Tag& tag) {
-  // No spaces allowed in tag keys (see 002.problem.nt)
-  std::string key = std::string(tag.key());
-  std::stringstream tmp;
-  for (size_t pos = 0; pos < key.size(); ++pos) {
-    switch (key[pos]) {
-      case ' ':
-        tmp << "_";
-        break;
-      default:
-        tmp << key[pos];
-    }
-  }
-  writeTriple(s,
-    osm2nt::nt::IRI("https://www.openstreetmap.org/wiki/key:", tmp.str()),
-    osm2nt::nt::Literal(tag.value()));
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmTagList(const osm2nt::nt::BlankNode& s,
-                                         const osmium::TagList& tags) {
-  for (const osmium::Tag& tag : tags) {
-    writeOsmTag(s, tag);
-    if (_config.addWikiLinks) {
-      if (Writer::tagKeyEndsWith(tag, "wikidata")) {
-        writeTriple(s,
-          osm2nt::nt::IRI("https://www.openstreetmap.org/", "wikidata"),
-          osm2nt::nt::IRI("https://www.wikidata.org/wiki/", tag.value()));
-      }
-      if (Writer::tagKeyEndsWith(tag, "wikipedia")) {
-        std::string v = tag.value();
-        auto pos = v.find(':');
-        if (pos != std::string::npos) {
-          std::string lang = v.substr(0, pos);
-          std::string entry = v.substr(pos);
-          writeTriple(s,
-            osm2nt::nt::IRI("https://www.openstreetmap.org/", "wikipedia"),
-            osm2nt::nt::IRI("https://"+lang+".wikipedia.org/wiki/", entry));
-        } else {
-          writeTriple(s,
-            osm2nt::nt::IRI("https://www.openstreetmap.org/", "wikipedia"),
-            osm2nt::nt::IRI("https://www.wikipedia.org/wiki/", v));
-        }
-      }
-    }
-  }
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmTagList(const osm2nt::nt::IRI& s,
+template<typename S>
+void osm2nt::nt::Writer::writeOsmTagList(const S& s,
                                          const osmium::TagList& tags) {
   for (const osmium::Tag& tag : tags) {
     writeOsmTag(s, tag);
@@ -568,28 +414,8 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
 }
 
 // ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmWayNodeList(const osm2nt::nt::BlankNode& s,
-                                             const osmium::WayNodeList& nodes) {
-  uint32_t i = 0;
-  for (const osmium::NodeRef& nodeRef : nodes) {
-    osm2nt::nt::BlankNode b;
-    writeTriple(s,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/way/", "node"),
-      b);
-
-    writeTriple(b,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/way/", "node"),
-      osm2nt::nt::IRI("https://www.openstreetmap.org/node/", nodeRef));
-
-    writeTriple(b,
-      osm2nt::nt::IRI("https://www.openstreetmap.org/way/", "node/pos"),
-      osm2nt::nt::Literal(std::to_string(++i),
-        osm2nt::nt::IRI("http://www.w3.org/2001/XMLSchema#", "integer")));
-  }
-}
-
-// ____________________________________________________________________________
-void osm2nt::nt::Writer::writeOsmWayNodeList(const osm2nt::nt::IRI& s,
+template<typename S>
+void osm2nt::nt::Writer::writeOsmWayNodeList(const S& s,
                                              const osmium::WayNodeList& nodes) {
   uint32_t i = 0;
   for (const osmium::NodeRef& nodeRef : nodes) {
