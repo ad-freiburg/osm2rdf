@@ -27,7 +27,8 @@ void osm2nt::config::Config::fromArgs(int argc, char** argv) {
     "c", "config", "Config file");
   auto outputOp = op.add<popl::Value<std::string>>(
     "o", "output", "Output file", "");
-  auto outputFormatOp = op.add<popl::Value<std::string>>(
+  auto outputFormatOp = op.add<popl::Value<std::string>,
+       popl::Attribute::advanced>(
     "", "output-format", "Output format, valid values: nt, ttl", "ttl");
   auto cacheOp = op.add<popl::Value<std::string>>(
     "t", "cache", "Path to cache file", "/tmp/osm2nt-cache");
@@ -61,6 +62,18 @@ void osm2nt::config::Config::fromArgs(int argc, char** argv) {
     }
     // Set values
     output = outputOp->value();
+    if (outputFormatOp->is_set()) {
+      if (outputFormatOp->value() == "ttl") {
+        outputFormat = osm2nt::nt::OutputFormat::TTL;
+      } else if (outputFormatOp->value() == "nt") {
+        outputFormat = osm2nt::nt::OutputFormat::NT;
+      } else {
+        std::cerr << "Unknown output format selected: "
+          << outputFormatOp->value() << "\n"
+          << op.help(popl::Attribute::advanced) << "\n";
+        exit(1);
+      }
+    }
     if (cacheOp->is_set() || cache.empty()) {
       cache = cacheOp->value();
     }
