@@ -61,9 +61,9 @@ class Writer {
 
  protected:
   // Helper
-  static bool endsWith(const std::string& s, const std::string& n);
-  static bool startsWith(const std::string& s, const std::string& n);
-  static std::string urlencode(const std::string& s);
+  static bool endsWith(std::string_view s, std::string_view n);
+  static bool startsWith(std::string_view s, std::string_view n);
+  static std::string urlencode(std::string_view s);
 
   // Element
   void write(const osm2nt::nt::BlankNode& b);

@@ -47,7 +47,8 @@ osm2nt::nt::Writer::Writer(const osm2nt::config::Config& config) {
 }
 
 // ____________________________________________________________________________
-bool osm2nt::nt::Writer::endsWith(const std::string& s, const std::string& n) {
+bool osm2nt::nt::Writer::endsWith(std::string_view s,
+                                  std::string_view n) {
   if (n.empty()) {
     return true;
   }
@@ -58,8 +59,8 @@ bool osm2nt::nt::Writer::endsWith(const std::string& s, const std::string& n) {
 }
 
 // ____________________________________________________________________________
-bool osm2nt::nt::Writer::startsWith(const std::string& s,
-                                    const std::string& n) {
+bool osm2nt::nt::Writer::startsWith(std::string_view s,
+                                    std::string_view n) {
   if (n.empty()) {
     return true;
   }
@@ -70,7 +71,7 @@ bool osm2nt::nt::Writer::startsWith(const std::string& s,
 }
 
 // ____________________________________________________________________________
-std::string osm2nt::nt::Writer::urlencode(const std::string& s) {
+std::string osm2nt::nt::Writer::urlencode(std::string_view s) {
   std::stringstream tmp;
   for (size_t pos = 0; pos < s.size(); ++pos) {
     switch (s[pos]) {
@@ -145,11 +146,21 @@ void osm2nt::nt::Writer::write(const osm2nt::nt::BlankNode& b) {
 void osm2nt::nt::Writer::write(const osm2nt::nt::IRI& i) {
   switch (_config.outputFormat) {
   case osm2nt::nt::OutputFormat::NT:
-    *_out << "<" << _prefixes[i.prefix()] << urlencode(i.value()) << ">";
-    break;
+    // Lookup prefix, if not defined print as long IRI
+    if (_prefixes.find(i.prefix()) != _prefixes.end()) {
+      *_out << i.prefix() << ":" << i.value();
+      return;
+    }
+    *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
+    return;
   case osm2nt::nt::OutputFormat::TTL:
-    *_out << i.prefix() << ":" << i.value();
-    break;
+    // Lookup prefix, if not defined print as long IRI
+    if (_prefixes.find(i.prefix()) != _prefixes.end()) {
+      *_out << i.prefix() << ":" << i.value();
+      return;
+    }
+    *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
+    return;
   default:
     throw;
   }
@@ -210,7 +221,6 @@ void osm2nt::nt::Writer::writeOsmArea(const osmium::Area& area) {
       osm2nt::nt::IRI("osma", "WKT"),
       osm2nt::nt::Literal(_wktFactory.create_multipolygon(area)));
   }
-
 
   writeTriple(s,
     osm2nt::nt::IRI("osma", "from_way"),
