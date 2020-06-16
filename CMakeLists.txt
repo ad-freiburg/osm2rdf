@@ -233,14 +233,6 @@ else()
 	set(VERSION_GIT_FULL "${VERSION_GIT}-${VERSION_GIT_IS_DIRTY}")
 endif()
 
-# Download submodules if needed
-
-#if(NOT OSMIUM_FOUND AND NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/libosmium/.git)
-#    execute_process(
-#		COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/libosmium
-#    )
-#endif()
-
 add_subdirectory(src)
 
 # tests

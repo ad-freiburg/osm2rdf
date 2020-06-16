@@ -42,7 +42,6 @@ osm2nt::nt::Writer::Writer(const osm2nt::config::Config& config) {
   _prefixes["osml"] = "https://www.openstreetmap.org/location/";
   _prefixes["w3s"] = "http://www.w3.org/2001/XMLSchema#";
   _prefixes["wd"] = "http://www.wikidata.org/entity/";
-  _prefixes.insert(_config.prefixes.begin(), _config.prefixes.end());
 }
 
 // ____________________________________________________________________________
