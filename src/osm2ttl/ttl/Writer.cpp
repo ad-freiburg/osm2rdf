@@ -146,7 +146,7 @@ std::string osm2ttl::ttl::Writer::urlescape(std::string_view s) {
         tmp << "\\~";
         break;
       case '.':
-        tmp << "\\.'";
+        tmp << "\\.";
         break;
       case '-':
         tmp << "\\-";
@@ -198,6 +198,11 @@ std::string osm2ttl::ttl::Writer::urlescape(std::string_view s) {
         break;
       case '%':
         tmp << "\\%";
+        break;
+      // This case is not defined in the turtle grammar but occures in osm
+      // data and needs handling.
+      case '|':
+        tmp << "\\;";
         break;
       default:
         tmp << s[pos];
