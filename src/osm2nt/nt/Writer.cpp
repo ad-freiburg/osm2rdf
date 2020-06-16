@@ -38,9 +38,11 @@ osm2nt::nt::Writer::Writer(const osm2nt::config::Config& config) {
   _prefixes["osma"] = "https://www.openstreetmap.org/area/";
   _prefixes["osmr"] = "https://www.openstreetmap.org/relation/";
   _prefixes["osmw"] = "https://www.openstreetmap.org/way/";
+  _prefixes["osmwk"] = "https://www.openstreetmap.org/wiki/";
   _prefixes["osmn"] = "https://www.openstreetmap.org/node/";
   _prefixes["osml"] = "https://www.openstreetmap.org/location/";
   _prefixes["w3s"] = "http://www.w3.org/2001/XMLSchema#";
+  _prefixes["wd"] = "http://www.wikidata.org/entity/";
   _prefixes.insert(_config.prefixes.begin(), _config.prefixes.end());
 }
 
@@ -275,7 +277,7 @@ void osm2nt::nt::Writer::writeOsmNode(const osmium::Node& node) {
   if (_config.ignoreUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
-  osm2nt::nt::IRI s{"omsn", node};
+  osm2nt::nt::IRI s{"osmn", node};
 
   writeOsmLocation(s, node.location());
   writeOsmTagList(s, node.tags());
@@ -335,7 +337,7 @@ void osm2nt::nt::Writer::writeOsmTag(const S& s,
     }
   }
   writeTriple(s,
-    osm2nt::nt::IRI("osm", "wiki/key:"+tmp.str()),
+    osm2nt::nt::IRI("osmwk", "key:"+tmp.str()),
     osm2nt::nt::Literal(tag.value()));
 }
 
@@ -349,7 +351,7 @@ void osm2nt::nt::Writer::writeOsmTagList(const S& s,
       if (Writer::endsWith(tag.key(), "wikidata")) {
         writeTriple(s,
           osm2nt::nt::IRI("osm", "wikidata"),
-          osm2nt::nt::IRI("https://www.wikidata.org/wiki/", tag.value()));
+          osm2nt::nt::IRI("wd", tag.value()));
       }
       if (Writer::endsWith(tag.key(), "wikipedia")) {
         std::string v = tag.value();
