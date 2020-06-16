@@ -34,14 +34,22 @@ osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
     _outFile.open(config.output);
     _out = &_outFile;
   }
+  // well-known prefixes
+  _prefixes["geo"] = "http://www.opengis.net/ont/geosparql#";
+  _prefixes["wd"] = "http://www.wikidata.org/entity/";
+  _prefixes["xsd"] = "http://www.w3.org/2001/XMLSchema#";
+  // osm prefixes
+  // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
+  // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
+  _prefixes["osmnode"] = "https://www.openstreetmap.org/node/";
+  _prefixes["osmrel"] = "https://www.openstreetmap.org/relation/";
+  _prefixes["osmt"] = "https://www.openstreetmap.org/wiki/Key:";
+  _prefixes["osmway"] = "https://www.openstreetmap.org/way/";
+  _prefixes["osmm"] = "https://www.openstreetmap.org/meta/";
+  // own prefixes
   _prefixes["osm"] = "https://www.openstreetmap.org/";
   _prefixes["osma"] = "https://www.openstreetmap.org/area/";
-  _prefixes["osmr"] = "https://www.openstreetmap.org/relation/";
-  _prefixes["osmw"] = "https://www.openstreetmap.org/way/";
-  _prefixes["osmn"] = "https://www.openstreetmap.org/node/";
   _prefixes["osml"] = "https://www.openstreetmap.org/location/";
-  _prefixes["w3s"] = "http://www.w3.org/2001/XMLSchema#";
-  _prefixes["wd"] = "http://www.wikidata.org/entity/";
 }
 
 // ____________________________________________________________________________
@@ -126,6 +134,79 @@ std::string osm2ttl::ttl::Writer::urlencode(std::string_view s) {
 }
 
 // ____________________________________________________________________________
+std::string osm2ttl::ttl::Writer::urlescape(std::string_view s) {
+  std::stringstream tmp;
+  for (size_t pos = 0; pos < s.size(); ++pos) {
+    // PN_LOCAL_ESC
+    switch (s[pos]) {
+      case '_':
+        tmp << "\\_";
+        break;
+      case '~':
+        tmp << "\\~";
+        break;
+      case '.':
+        tmp << "\\.'";
+        break;
+      case '-':
+        tmp << "\\-";
+        break;
+      case '!':
+        tmp << "\\!";
+        break;
+      case '$':
+        tmp << "\\$";
+        break;
+      case '&':
+        tmp << "\\&";
+        break;
+      case '\'':
+        tmp << "\\\'";
+        break;
+      case '(':
+        tmp << "\\(";
+        break;
+      case ')':
+        tmp << "\\)";
+        break;
+      case '*':
+        tmp << "\\*";
+        break;
+      case '+':
+        tmp << "\\+";
+        break;
+      case ',':
+        tmp << "\\,";
+        break;
+      case ';':
+        tmp << "\\;";
+        break;
+      case '=':
+        tmp << "\\=";
+        break;
+      case '/':
+        tmp << "\\/";
+        break;
+      case '?':
+        tmp << "\\?";
+        break;
+      case '#':
+        tmp << "\\#";
+        break;
+      case '@':
+        tmp << "\\@";
+        break;
+      case '%':
+        tmp << "\\%";
+        break;
+      default:
+        tmp << s[pos];
+    }
+  }
+  return tmp.str();
+}
+
+// ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeHeader() const {
   if (_config.outputFormat != osm2ttl::ttl::OutputFormat::TTL) {
     return;
@@ -171,7 +252,7 @@ void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::IRI& i) {
   case osm2ttl::ttl::OutputFormat::TTL:
     // Lookup prefix, if not defined print as long IRI
     if (_prefixes.find(i.prefix()) != _prefixes.end()) {
-      *_out << i.prefix() << ":" << i.value();
+      *_out << i.prefix() << ":" << urlescape(i.value());
       return;
     }
     *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
@@ -229,12 +310,14 @@ void osm2ttl::ttl::Writer::writeOsmArea(const osmium::Area& area) {
 
   if (_config.simplifyWKT) {
     writeTriple(s,
-      osm2ttl::ttl::IRI("osma", "WKT"),
-      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_multipolygon(area)));
+      osm2ttl::ttl::IRI("geo", "hasGeometry"),
+      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_multipolygon(area),
+        osm2ttl::ttl::IRI("geo", "wktLiteral")));
   } else {
     writeTriple(s,
-      osm2ttl::ttl::IRI("osma", "WKT"),
-      osm2ttl::ttl::Literal(_wktFactory.create_multipolygon(area)));
+      osm2ttl::ttl::IRI("geo", "hasGeometry"),
+      osm2ttl::ttl::Literal(_wktFactory.create_multipolygon(area),
+        osm2ttl::ttl::IRI("geo", "wktLiteral")));
   }
 
   writeTriple(s,
@@ -247,16 +330,18 @@ void osm2ttl::ttl::Writer::writeOsmArea(const osmium::Area& area) {
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "orig"),
-    osm2ttl::ttl::IRI(area.from_way()?"osmw":"osmr",
+    osm2ttl::ttl::IRI(area.from_way()?"osmway":"osmrel",
       std::to_string(area.orig_id())));
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "num_outer_rings"),
-    osm2ttl::ttl::Literal(std::to_string(area.num_rings().first)));
+    osm2ttl::ttl::Literal(std::to_string(area.num_rings().first),
+      osm2ttl::ttl::IRI("xsd", "integer")));
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "num_inner_rings"),
-    osm2ttl::ttl::Literal(std::to_string(area.num_rings().second)));
+    osm2ttl::ttl::Literal(std::to_string(area.num_rings().second),
+      osm2ttl::ttl::IRI("xsd", "integer")));
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "is_multipolygon"),
@@ -292,12 +377,14 @@ void osm2ttl::ttl::Writer::writeOsmLocation(const S& s,
 
   if (_config.simplifyWKT) {
     writeTriple(s,
-      osm2ttl::ttl::IRI("osml", "WKT"),
-      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_point(location)));
+      osm2ttl::ttl::IRI("geo", "hasGeometry"),
+      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_point(location),
+        osm2ttl::ttl::IRI("geo", "wktLiteral")));
   } else {
     writeTriple(s,
-      osm2ttl::ttl::IRI("osml", "WKT"),
-      osm2ttl::ttl::Literal(_wktFactory.create_point(location)));
+      osm2ttl::ttl::IRI("geo", "hasGeometry"),
+      osm2ttl::ttl::Literal(_wktFactory.create_point(location),
+        osm2ttl::ttl::IRI("geo", "wktLiteral")));
   }
 }
 
@@ -306,7 +393,7 @@ void osm2ttl::ttl::Writer::writeOsmNode(const osmium::Node& node) {
   if (_config.ignoreUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
-  osm2ttl::ttl::IRI s{"osmn", node};
+  osm2ttl::ttl::IRI s{"osmnode", node};
 
   writeOsmLocation(s, node.location());
   writeOsmTagList(s, node.tags());
@@ -317,7 +404,7 @@ void osm2ttl::ttl::Writer::writeOsmRelation(const osmium::Relation& relation) {
   if (_config.ignoreUnnamed && relation.tags()["name"] == nullptr) {
     return;
   }
-  osm2ttl::ttl::IRI s{"osmr", relation};
+  osm2ttl::ttl::IRI s{"osmrel", relation};
 
   writeOsmTagList(s, relation.tags());
   writeOsmRelationMembers(s, relation.members());
@@ -335,19 +422,19 @@ void osm2ttl::ttl::Writer::writeOsmRelationMembers(
   for (const osmium::RelationMember& member : members) {
     osm2ttl::ttl::BlankNode b;
     writeTriple(s,
-      osm2ttl::ttl::IRI("osmr", "membership"),
+      osm2ttl::ttl::IRI("osmrel", "membership"),
       b);
 
     writeTriple(b,
-      osm2ttl::ttl::IRI("osmr", "member"),
+      osm2ttl::ttl::IRI("osmrel", "member"),
       osm2ttl::ttl::IRI("osm"
         + std::string(osmium::item_type_to_name(member.type()))  + "/",
         member));
 
     writeTriple(b,
-      osm2ttl::ttl::IRI("osmr", "pos"),
+      osm2ttl::ttl::IRI("osmm", "pos"),
       osm2ttl::ttl::Literal(std::to_string(++i),
-                          osm2ttl::ttl::IRI("w3s", "integer")));
+                          osm2ttl::ttl::IRI("xsd", "integer")));
   }
 }
 
@@ -370,7 +457,7 @@ void osm2ttl::ttl::Writer::writeOsmTag(const S& s,
     }
   }
   writeTriple(s,
-    osm2ttl::ttl::IRI("https://www.openstreetmap.org/wiki/", "key:"+tmp.str()),
+    osm2ttl::ttl::IRI("osmt", tmp.str()),
     osm2ttl::ttl::Literal(tag.value()));
 }
 
@@ -430,51 +517,57 @@ void osm2ttl::ttl::Writer::writeOsmWay(const osmium::Way& way) {
   if (_config.ignoreUnnamed && way.tags()["name"] == nullptr) {
     return;
   }
-  osm2ttl::ttl::IRI s{"osmw", way};
+  osm2ttl::ttl::IRI s{"osmway", way};
 
   writeOsmTagList(s, way.tags());
   writeOsmWayNodeList(s, way.nodes());
 
   writeTriple(s,
-    osm2ttl::ttl::IRI("osmw", "is_closed"),
+    osm2ttl::ttl::IRI("osmway", "is_closed"),
     osm2ttl::ttl::Literal(way.is_closed()?"yes":"no"));
 
   if (way.nodes().size() > 3 && way.is_closed()) {
     if (_config.simplifyWKT) {
       writeTriple(s,
-        osm2ttl::ttl::IRI("osmw", "WKT"),
-        osm2ttl::ttl::Literal(_simplifyingWktFactory.create_polygon(way)));
+        osm2ttl::ttl::IRI("geo", "hasGeometry"),
+        osm2ttl::ttl::Literal(_simplifyingWktFactory.create_polygon(way),
+          osm2ttl::ttl::IRI("geo", "wktLiteral")));
     } else {
       writeTriple(s,
-        osm2ttl::ttl::IRI("osmw", "WKT"),
-        osm2ttl::ttl::Literal(_wktFactory.create_polygon(way)));
+        osm2ttl::ttl::IRI("geo", "hasGeometry"),
+        osm2ttl::ttl::Literal(_wktFactory.create_polygon(way),
+          osm2ttl::ttl::IRI("geo", "wktLiteral")));
     }
   } else if (way.nodes().size() > 1) {
     if (_config.simplifyWKT) {
       writeTriple(s,
-        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::IRI("geo", "hasGeometry"),
         osm2ttl::ttl::Literal(_simplifyingWktFactory.create_linestring(
-          way, osmium::geom::use_nodes::all)));
+          way, osmium::geom::use_nodes::all),
+          osm2ttl::ttl::IRI("geo", "wktLiteral")));
     } else {
       writeTriple(s,
-        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::IRI("geo", "hasGeometry"),
         osm2ttl::ttl::Literal(_wktFactory.create_linestring(
-          way, osmium::geom::use_nodes::all)));
+          way, osmium::geom::use_nodes::all),
+          osm2ttl::ttl::IRI("geo", "wktLiteral")));
     }
   } else {
     if (_config.simplifyWKT) {
       writeTriple(s,
-        osm2ttl::ttl::IRI("osmw", "WKT"),
+        osm2ttl::ttl::IRI("geo", "hasGeometry"),
         osm2ttl::ttl::Literal(
-          _simplifyingWktFactory.create_point(way.nodes()[0])));
+          _simplifyingWktFactory.create_point(way.nodes()[0]),
+          osm2ttl::ttl::IRI("geo", "wktLiteral")));
     } else {
       writeTriple(s,
-        osm2ttl::ttl::IRI("osmw", "WKT"),
-        osm2ttl::ttl::Literal(_wktFactory.create_point(way.nodes()[0])));
+        osm2ttl::ttl::IRI("geo", "hasGeometry"),
+        osm2ttl::ttl::Literal(_wktFactory.create_point(way.nodes()[0]),
+          osm2ttl::ttl::IRI("geo", "wktLiteral")));
     }
   }
 
-  writeOsmBox(s, osm2ttl::ttl::IRI("osmw", "bbox"), way.envelope());
+  writeOsmBox(s, osm2ttl::ttl::IRI("osmway", "bbox"), way.envelope());
 }
 
 // ____________________________________________________________________________
@@ -486,15 +579,15 @@ void osm2ttl::ttl::Writer::writeOsmWayNodeList(const S& s,
   uint32_t i = 0;
   for (const osmium::NodeRef& nodeRef : nodes) {
     osm2ttl::ttl::BlankNode b;
-    writeTriple(s, osm2ttl::ttl::IRI("osmw", "node"), b);
+    writeTriple(s, osm2ttl::ttl::IRI("osmway", "node"), b);
 
     writeTriple(b,
-      osm2ttl::ttl::IRI("osmw", "node"),
-      osm2ttl::ttl::IRI("osmn", nodeRef));
+      osm2ttl::ttl::IRI("osmway", "node"),
+      osm2ttl::ttl::IRI("osmnode", nodeRef));
 
     writeTriple(b,
-      osm2ttl::ttl::IRI("osmw", "pos"),
+      osm2ttl::ttl::IRI("osmm", "pos"),
       osm2ttl::ttl::Literal(std::to_string(++i),
-        osm2ttl::ttl::IRI("w3s", "integer")));
+        osm2ttl::ttl::IRI("xsd", "integer")));
   }
 }

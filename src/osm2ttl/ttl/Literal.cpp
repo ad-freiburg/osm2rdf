@@ -17,7 +17,6 @@ osm2ttl::ttl::Literal::Literal(const std::string& s) {
   _langTag = std::nullopt;
 }
 
-
 // ____________________________________________________________________________
 osm2ttl::ttl::Literal::Literal(const osmium::Box& b)
   : osm2ttl::ttl::Literal::Literal("POLYGON(("
@@ -28,7 +27,9 @@ osm2ttl::ttl::Literal::Literal(const osmium::Box& b)
       +std::to_string(b.top_right().lon_without_check())+" "
       +std::to_string(b.bottom_left().lat_without_check())+","
       +std::to_string(b.bottom_left().lon_without_check())+" "
-      +std::to_string(b.bottom_left().lat_without_check())+"))") {}
+      +std::to_string(b.bottom_left().lat_without_check())+"))") {
+    _iri = osm2ttl::ttl::IRI("geo", "wktLiteral");
+  }
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Literal::Literal(const std::string &s, const osm2ttl::ttl::IRI& i)
