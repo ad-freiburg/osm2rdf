@@ -61,6 +61,7 @@ class Writer {
 
  protected:
   // Helper
+  static bool contains(std::string_view s, std::string_view n);
   static bool endsWith(std::string_view s, std::string_view n);
   static bool startsWith(std::string_view s, std::string_view n);
   static std::string urlencode(std::string_view s);

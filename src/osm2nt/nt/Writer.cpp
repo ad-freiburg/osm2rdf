@@ -38,12 +38,23 @@ osm2nt::nt::Writer::Writer(const osm2nt::config::Config& config) {
   _prefixes["osma"] = "https://www.openstreetmap.org/area/";
   _prefixes["osmr"] = "https://www.openstreetmap.org/relation/";
   _prefixes["osmw"] = "https://www.openstreetmap.org/way/";
-  _prefixes["osmwk"] = "https://www.openstreetmap.org/wiki/";
   _prefixes["osmn"] = "https://www.openstreetmap.org/node/";
   _prefixes["osml"] = "https://www.openstreetmap.org/location/";
   _prefixes["w3s"] = "http://www.w3.org/2001/XMLSchema#";
   _prefixes["wd"] = "http://www.wikidata.org/entity/";
   _prefixes.insert(_config.prefixes.begin(), _config.prefixes.end());
+}
+
+// ____________________________________________________________________________
+bool osm2nt::nt::Writer::contains(std::string_view s,
+                                  std::string_view n) {
+  if (n.empty()) {
+    return true;
+  }
+  if (s.size() < n.size()) {
+    return false;
+  }
+  return (s.find(n) != std::string::npos);
 }
 
 // ____________________________________________________________________________
@@ -129,6 +140,11 @@ void osm2nt::nt::Writer::writeHeader() const {
 template<typename S, typename O>
 void osm2nt::nt::Writer::writeTriple(const S& s, const osm2nt::nt::IRI& p,
                                      const O& o) {
+  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
+                || std::is_same<S, osm2nt::nt::IRI>::value);
+  static_assert(std::is_same<O, osm2nt::nt::BlankNode>::value
+                || std::is_same<O, osm2nt::nt::IRI>::value
+                ||std::is_same<O, osm2nt::nt::Literal>::value);
   write(s);
   *_out << " ";
   write(p);
@@ -148,7 +164,7 @@ void osm2nt::nt::Writer::write(const osm2nt::nt::IRI& i) {
   case osm2nt::nt::OutputFormat::NT:
     // Lookup prefix, if not defined print as long IRI
     if (_prefixes.find(i.prefix()) != _prefixes.end()) {
-      *_out << i.prefix() << ":" << i.value();
+      *_out << "<" << _prefixes[i.prefix()] << urlencode(i.value()) << ">";
       return;
     }
     *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
@@ -257,6 +273,8 @@ template<typename S>
 void osm2nt::nt::Writer::writeOsmBox(const S& s,
                                      const osm2nt::nt::IRI& p,
                                      const osmium::Box& box) {
+  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
+                || std::is_same<S, osm2nt::nt::IRI>::value);
   writeTriple(s, p, osm2nt::nt::Literal(box));
 }
 
@@ -264,6 +282,8 @@ void osm2nt::nt::Writer::writeOsmBox(const S& s,
 template<typename S>
 void osm2nt::nt::Writer::writeOsmLocation(const S& s,
                                           const osmium::Location& location) {
+  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
+                || std::is_same<S, osm2nt::nt::IRI>::value);
   std::stringstream loc;
   location.as_string_without_check(std::ostream_iterator<char>(loc));
 
@@ -309,6 +329,8 @@ template<typename S>
 void osm2nt::nt::Writer::writeOsmRelationMembers(
     const S& s,
     const osmium::RelationMemberList& members) {
+  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
+                || std::is_same<S, osm2nt::nt::IRI>::value);
 
   std::uint32_t i = 0;
   for (const osmium::RelationMember& member : members) {
@@ -324,7 +346,7 @@ void osm2nt::nt::Writer::writeOsmRelationMembers(
         member));
 
     writeTriple(b,
-      osm2nt::nt::IRI("osmw", "pos"),
+      osm2nt::nt::IRI("osmr", "pos"),
       osm2nt::nt::Literal(std::to_string(++i),
                           osm2nt::nt::IRI("w3s", "integer")));
   }
@@ -334,6 +356,8 @@ void osm2nt::nt::Writer::writeOsmRelationMembers(
 template<typename S>
 void osm2nt::nt::Writer::writeOsmTag(const S& s,
                                      const osmium::Tag& tag) {
+  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
+                || std::is_same<S, osm2nt::nt::IRI>::value);
   // No spaces allowed in tag keys (see 002.problem.nt)
   std::string key = std::string(tag.key());
   std::stringstream tmp;
@@ -347,7 +371,7 @@ void osm2nt::nt::Writer::writeOsmTag(const S& s,
     }
   }
   writeTriple(s,
-    osm2nt::nt::IRI("osmwk", "key:"+tmp.str()),
+    osm2nt::nt::IRI("https://www.openstreetmap.org/wiki/", "key:"+tmp.str()),
     osm2nt::nt::Literal(tag.value()));
 }
 
@@ -355,15 +379,35 @@ void osm2nt::nt::Writer::writeOsmTag(const S& s,
 template<typename S>
 void osm2nt::nt::Writer::writeOsmTagList(const S& s,
                                          const osmium::TagList& tags) {
+  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
+                || std::is_same<S, osm2nt::nt::IRI>::value);
   for (const osmium::Tag& tag : tags) {
     writeOsmTag(s, tag);
     if (_config.addWikiLinks) {
-      if (Writer::endsWith(tag.key(), "wikidata")) {
-        writeTriple(s,
-          osm2nt::nt::IRI("osm", "wikidata"),
-          osm2nt::nt::IRI("wd", tag.value()));
+      if (Writer::endsWith(tag.key(), "wikidata") &&
+          !Writer::contains(tag.key(), "fixme")) {
+        std::string value{tag.value()};
+        size_t pos1 = 0;
+        size_t pos2 = value.find(";");
+        if (pos2 != std::string::npos) {
+          while (pos2 != std::string::npos) {
+            writeTriple(s,
+              osm2nt::nt::IRI("osm", "wikidata"),
+              osm2nt::nt::IRI("wd", value.substr(pos1, pos2-pos1)));
+            pos1 = pos2 + 1;
+            pos2 = value.find(";", pos1);
+          }
+          writeTriple(s,
+            osm2nt::nt::IRI("osm", "wikidata"),
+            osm2nt::nt::IRI("wd", value.substr(pos1)));
+        } else {
+          writeTriple(s,
+            osm2nt::nt::IRI("osm", "wikidata"),
+            osm2nt::nt::IRI("wd", value));
+        }
       }
-      if (Writer::endsWith(tag.key(), "wikipedia")) {
+      if (Writer::endsWith(tag.key(), "wikipedia") &&
+          !Writer::contains(tag.key(), "fixme")) {
         std::string v = tag.value();
         auto pos = v.find(':');
         if (pos != std::string::npos) {
@@ -438,6 +482,8 @@ void osm2nt::nt::Writer::writeOsmWay(const osmium::Way& way) {
 template<typename S>
 void osm2nt::nt::Writer::writeOsmWayNodeList(const S& s,
                                              const osmium::WayNodeList& nodes) {
+  static_assert(std::is_same<S, osm2nt::nt::BlankNode>::value
+                || std::is_same<S, osm2nt::nt::IRI>::value);
   uint32_t i = 0;
   for (const osmium::NodeRef& nodeRef : nodes) {
     osm2nt::nt::BlankNode b;
@@ -448,7 +494,7 @@ void osm2nt::nt::Writer::writeOsmWayNodeList(const S& s,
       osm2nt::nt::IRI("osmn", nodeRef));
 
     writeTriple(b,
-      osm2nt::nt::IRI("osmw", "node/pos"),
+      osm2nt::nt::IRI("osmw", "pos"),
       osm2nt::nt::Literal(std::to_string(++i),
         osm2nt::nt::IRI("w3s", "integer")));
   }
