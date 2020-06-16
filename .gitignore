@@ -4,3 +4,5 @@ CMakeCache.txt
 *.o
 *.pyc
 /build/
+/input/
+/output/
