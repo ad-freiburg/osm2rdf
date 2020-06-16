@@ -5,6 +5,7 @@
 #define OSM2NT_CONFIG_CONFIG_H_
 
 #include <string>
+#include <unordered_map>
 
 #include "osm2nt/nt/OutputFormat.h"
 
@@ -23,6 +24,7 @@ struct Config {
   osm2nt::nt::OutputFormat outputFormat = osm2nt::nt::OutputFormat::TTL;
   std::string input;
   std::string cache;
+  std::unordered_map<std::string, std::string> prefixes;
 };
 }  // namespace config
 }  // namespace osm2nt

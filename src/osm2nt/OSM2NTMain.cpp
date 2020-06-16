@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
     osmium::io::File input_file{config.input};
     osm2nt::nt::Writer* writer = new osm2nt::nt::Writer(config);
     osm2nt::osm::DumpHandler dump_handler{writer};
+    writer->writeHeader();
 
     // Do not create empty areas
     osmium::area::Assembler::config_type assembler_config;

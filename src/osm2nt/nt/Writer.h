@@ -7,6 +7,7 @@
 #include <fstream>
 #include <ostream>
 #include <string>
+#include <unordered_map>
 
 #include "osmium/geom/wkt.hpp"
 #include "osmium/osm/area.hpp"
@@ -30,7 +31,10 @@ namespace nt {
 class Writer {
  public:
   explicit Writer(const osm2nt::config::Config& config);
-  void writeHeader();
+  void writeHeader() const;
+
+  template<typename S, typename O>
+  void writeTriple(const S& s, const osm2nt::nt::IRI& p, const O& o);
 
   // OSM
   void writeOsmArea(const osmium::Area& area);
@@ -56,8 +60,10 @@ class Writer {
                            const osmium::WayNodeList& nodes);
 
  protected:
-  template<typename S, typename P, typename O>
-  void writeTriple(const S& s, const P& p, const O& o);
+  // Helper
+  static bool endsWith(const std::string& s, const std::string& n);
+  static bool startsWith(const std::string& s, const std::string& n);
+  static std::string urlencode(const std::string& s);
 
   // Element
   void write(const osm2nt::nt::BlankNode& b);
@@ -65,12 +71,13 @@ class Writer {
   void write(const osm2nt::nt::LangTag& l);
   void write(const osm2nt::nt::Literal& l);
 
-  static bool tagKeyEndsWith(const osmium::Tag& tag, const std::string& needle);
-  static std::string urlencode(const std::string& s);
-
+  // Config
   osm2nt::config::Config _config;
+  std::unordered_map<std::string, std::string> _prefixes;
+  // Output
   std::ostream* _out;
   std::ofstream _outFile;
+  // Factories
   osmium::geom::WKTFactory<> _wktFactory;
   osm2nt::osm::SimplifyingWKTFactory<> _simplifyingWktFactory;
 };
