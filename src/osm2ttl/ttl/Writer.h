@@ -31,6 +31,10 @@ namespace ttl {
 class Writer {
  public:
   explicit Writer(const osm2ttl::config::Config& config);
+  ~Writer();
+  bool open();
+  void close();
+
   void writeHeader() const;
 
   template<typename S, typename O>
@@ -43,7 +47,7 @@ class Writer {
                    const osmium::Box& box);
   template<typename S>
   void writeOsmLocation(const S& s,
-                        const osmium::Location& l);
+                        const osmium::Location& location);
   void writeOsmNode(const osmium::Node& node);
   void writeOsmRelation(const osmium::Relation& relation);
   template<typename S>

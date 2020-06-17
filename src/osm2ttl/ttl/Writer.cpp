@@ -30,10 +30,6 @@
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
   _config = config;
   _out = &std::cout;
-  if (!_config.output.empty()) {
-    _outFile.open(config.output);
-    _out = &_outFile;
-  }
   // well-known prefixes
   _prefixes["geo"] = "http://www.opengis.net/ont/geosparql#";
   _prefixes["wd"] = "http://www.wikidata.org/entity/";
@@ -50,6 +46,28 @@ osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
   _prefixes["osm"] = "https://www.openstreetmap.org/";
   _prefixes["osma"] = "https://www.openstreetmap.org/area/";
   _prefixes["osml"] = "https://www.openstreetmap.org/location/";
+}
+
+// ____________________________________________________________________________
+osm2ttl::ttl::Writer::~Writer() {
+  close();
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::ttl::Writer::open() {
+  if (!_config.output.empty()) {
+    _outFile.open(_config.output);
+    _out = &_outFile;
+    return _outFile.is_open();
+  }
+  return true;
+}
+
+// ____________________________________________________________________________
+void osm2ttl::ttl::Writer::close() {
+  if (_outFile.is_open()) {
+    _outFile.close();
+  }
 }
 
 // ____________________________________________________________________________
@@ -199,10 +217,14 @@ std::string osm2ttl::ttl::Writer::urlescape(std::string_view s) {
       case '%':
         tmp << "\\%";
         break;
-      // This case is not defined in the turtle grammar but occures in osm
-      // data and needs handling.
+      case '[':
+        tmp << "%5B";
+        break;
+      case ']':
+        tmp << "%5D";
+        break;
       case '|':
-        tmp << "\\;";
+        tmp << "%7C";
         break;
       default:
         tmp << s[pos];
@@ -370,7 +392,7 @@ void osm2ttl::ttl::Writer::writeOsmBox(const S& s,
 // ____________________________________________________________________________
 template<typename S>
 void osm2ttl::ttl::Writer::writeOsmLocation(const S& s,
-                                          const osmium::Location& location) {
+                                            const osmium::Location& location) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   std::stringstream loc;
