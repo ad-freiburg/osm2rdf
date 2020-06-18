@@ -341,7 +341,11 @@ std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s) {
           s[pos] == '\"' || s[pos] == '|' ||
           s[pos] == '^' || s[pos] == '`' ||
           s[pos] == '\\') {
-        tmp << UCHAR(s[pos]);
+        // TODO(lehmanna): CHeck what to do... %-encoding not explicitly allowed
+        // in grammer... but in IRI
+        // RFC: https://tools.ietf.org/html/rfc3987#section-2.2
+        tmp << encodePERCENT(s.substr(pos, 1));
+        // tmp << UCHAR(s[pos]);
         continue;
       }
     }
@@ -365,7 +369,7 @@ std::string osm2ttl::ttl::OutputFormat::encodePERCENT(const std::string& s) {
     if (!echo) {
       continue;
     }
-    tmp << "% "<< std::hex << ((v & 0xF0) >> 4) << std::hex << (v & 0x0F);
+    tmp << "%"<< std::hex << ((v & 0xF0) >> 4) << std::hex << (v & 0x0F);
   }
   return tmp.str();
 }
