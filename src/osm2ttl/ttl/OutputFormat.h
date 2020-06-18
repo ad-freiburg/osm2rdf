@@ -39,7 +39,14 @@ class OutputFormat {
   static std::string STRING_LITERAL_QUOTE(const std::string& s);
   static std::string STRING_LITERAL_SINGLE_QUOTE(const std::string& s);
   static std::string ECHAR(char c);
-  static std::string iriEncode(std::string_view s);
+  static uint8_t utf8Length(char c);
+  static uint8_t utf8Length(const std::string& s);
+  static uint32_t utf8Codepoint(const std::string& s);
+  static std::string UCHAR(char c);
+  static std::string UCHAR(const std::string& s);
+  static std::string encodeIRIREF(const std::string& s);
+  static std::string encodePN_LOCAL(const std::string& s);
+  static std::string encodePERCENT(const std::string& s);
   void initPrefixes();
   std::unordered_map<std::string, std::string> _prefixes;
   Value _value;

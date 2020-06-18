@@ -3,6 +3,7 @@
 
 #include "osm2ttl/ttl/OutputFormat.h"
 
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -153,7 +154,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
 // ____________________________________________________________________________
 std::string osm2ttl::ttl::OutputFormat::IRIREF(const std::string& p,
                                                const std::string& v) {
-  return "<" + iriEncode(p) + iriEncode(v) + ">";
+  return "<" + encodeIRIREF(p) + encodeIRIREF(v) + ">";
 }
 
 // ____________________________________________________________________________
@@ -163,7 +164,7 @@ std::string osm2ttl::ttl::OutputFormat::PrefixedName(const std::string& p,
   if (!p.empty()) {
     tmp << p << ":";
   }
-  tmp << v;
+  tmp << encodePN_LOCAL(v);
   return tmp.str();
 }
 
@@ -256,52 +257,177 @@ std::string osm2ttl::ttl::OutputFormat::ECHAR(char c) {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::OutputFormat::iriEncode(std::string_view s) {
-  // NT:  [8]    IRIREF
-  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
-  // TTL: [18]   IRIREF
-  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  // TODO(lehmanna): make this compliant to defs.
+uint8_t osm2ttl::ttl::OutputFormat::utf8Length(char c) {
+  if ((c & 0xF8) == 0xF0) { return 4; }
+  if ((c & 0xF0) == 0xE0) { return 3; }
+  if ((c & 0xE0) == 0xC0) { return 2; }
+  if ((c & 0x80) == 0x00) { return 1; }
+  return 0;
+}
+
+// ____________________________________________________________________________
+uint8_t osm2ttl::ttl::OutputFormat::utf8Length(const std::string& s) {
+  return utf8Length(s[0]);
+}
+
+// ____________________________________________________________________________
+uint32_t osm2ttl::ttl::OutputFormat::utf8Codepoint(const std::string& s) {
+  switch (utf8Length(s)) {
+    case 4:
+      return (s[3] & 0x07) << 18 | (s[2] & 0x0F) << 12 \
+        | (s[1] & 0x1F) << 6 | (s[0] & 0x3F);
+    case 3:
+      return (s[2] & 0x0F) << 12 | (s[1] & 0x1F) << 6 | (s[0] & 0x3F);
+    case 2:
+      return (s[1] & 0x1F) << 6 | (s[0] & 0x3F);
+    case 1:
+      return s[0];
+    default:
+      throw;
+  }
+}
+
+// ____________________________________________________________________________
+std::string osm2ttl::ttl::OutputFormat::UCHAR(char c) {
+  // NT:  [10]  UCHAR
+  //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
+  // TTL: [26]  UCHAR
+  //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
+  std::stringstream tmp;
+  tmp << "\\u" << std::setfill('0') << std::setw(4) << std::right << std::hex
+    << c;
+  return tmp.str();
+}
+
+// ____________________________________________________________________________
+std::string osm2ttl::ttl::OutputFormat::UCHAR(const std::string& s) {
+  // NT:  [10]  UCHAR
+  //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
+  // TTL: [26]  UCHAR
+  //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
+  std::stringstream tmp;
+  uint32_t c = utf8Codepoint(s);
+  if (c <= 0xFFFF) {
+    tmp << "\\u" << std::setfill('0') << std::setw(4);
+  } else {
+    tmp << "\\U" << std::setfill('0') << std::setw(8);
+  }
+  tmp << std::right << std::hex << c;
+  return tmp.str();
+}
+
+// ____________________________________________________________________________
+std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s) {
   std::stringstream tmp;
   for (size_t pos = 0; pos < s.size(); ++pos) {
-    switch (s[pos]) {
-      case ' ':
-        tmp << "%20";
-        break;
-      case '\"':
-        tmp << "%22";
-        break;
-      case '\'':
-        tmp << "%24";
-        break;
-      case '%':
-        tmp << "%25";
-        break;
-      case '&':
-        tmp << "%26";
-        break;
-      case '(':
-        tmp << "%28";
-        break;
-      case ')':
-        tmp << "%29";
-        break;
-      case ',':
-        tmp << "%2C";
-        break;
-      case '<':
-        tmp << "%3C";
-        break;
-      case '>':
-        tmp << "%3E";
-        break;
-      case '|':
-        tmp << "%7C";
-        break;
-      default:
-        tmp << s[pos];
+    // Force non-allowed chars to UCHAR
+    if ((s[pos] >= 0 && s[pos] <= ' ') ||
+        s[pos] == '<' || s[pos] == '>' ||
+        s[pos] == '{' || s[pos] == '}' ||
+        s[pos] == '\"' || s[pos] == '|' ||
+        s[pos] == '^' || s[pos] == '`' ||
+        s[pos] == '\\') {
+      tmp << UCHAR(s[pos]);
+      continue;
     }
+    tmp << s[pos];
   }
   return tmp.str();
 }
 
+// ____________________________________________________________________________
+std::string osm2ttl::ttl::OutputFormat::encodePERCENT(const std::string& s) {
+  // TTL: [170s] PERCENT
+  //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
+  std::stringstream tmp;
+  uint32_t c = utf8Codepoint(s);
+  uint32_t mask = 0xFF;
+  bool echo = false;
+  for (size_t shift = 16; shift > 0; shift -= 2) {
+    uint8_t v = c & (mask << shift);
+    echo |= v > 0;
+    if (!echo) {
+      continue;
+    }
+    tmp << "%" << std::setfill('0') << std::setw(2) << std::right
+      << std::hex << v;
+  }
+  return tmp.str();
+}
+
+// ____________________________________________________________________________
+std::string osm2ttl::ttl::OutputFormat::encodePN_LOCAL(const std::string& s) {
+  // TTL: [168s] PN_LOCAL
+  //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
+  std::stringstream tmp;
+  for (size_t pos = 0; pos < s.size(); ++pos) {
+    // PN_LOCAL      ::= (PN_CHARS_U | ':' | [0-9] | PLX)
+    //                   ((PN_CHARS | '.' | ':' | PLX)*
+    //                   (PN_CHARS | ':' | PLX))?
+    //
+    // PN_CHARS_U    ::= PN_CHARS_BASE | '_'
+    //
+    // PN_CHARS      ::= PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x036F] |
+    //                   [#x203F-#x2040]
+    //
+    // PN_CHARS_BASE ::= [A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] |
+    //                   [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] |
+    //                   [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] |
+    //                   [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] |
+    //                   [#x10000-#xEFFFF]
+    //
+    // PLX           ::= PERCENT | PN_LOCAL_ESC
+    //
+    // PERCENT       ::= '%' HEX HEX
+    //
+    // HEX           ::= [0-9] | [A-F] | [a-f]
+    //
+    // PN_LOCAL_ESC  ::= '\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | "'" |
+    //                        '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' |
+    //                        '?' | '#' | '@' | '%')
+
+    // _, :, A-Z, a-z, and 0-9 always allowed:
+    if (s[pos] == ':' || s[pos] == '_' ||
+        (s[pos] >= 'A' && s[pos] <= 'Z') ||
+        (s[pos] >= 'a' && s[pos] <= 'z') ||
+        (s[pos] >= '0' && s[pos] <= '9')) {
+      tmp << s[pos];
+      continue;
+    }
+    // First and last char is never .
+    if (pos > 0 && pos < s.size() - 1 && s[pos] == '.') {
+      tmp << s[pos];
+      continue;
+    }
+    // Handle PN_LOCAL_ESC
+    if (s[pos] == '_' || s[pos] == '~' || s[pos] == '.' || s[pos] == '-' ||
+        s[pos] == '!' || s[pos] == '$' || s[pos] == '&' || s[pos] == '\'' ||
+        s[pos] == '(' || s[pos] == ')' || s[pos] == '*' || s[pos] == '+' ||
+        s[pos] == ',' || s[pos] == ';' || s[pos] == '=' || s[pos] == '/' ||
+        s[pos] == '?' || s[pos] == '#' || s[pos] == '@' || s[pos] == '%') {
+      tmp << '\\' << s[pos];
+      continue;
+    }
+    uint8_t length = utf8Length(s[pos]);
+    std::string sub = s.substr(pos, length);
+    uint32_t c = utf8Codepoint(sub);
+    // Handle allowed Codepoints for CHARS_U
+    if ((c >= 0xC0 && c <= 0xD6) || (c >= 0xD8 && c <= 0xF6) ||
+        (c >= 0xF8 && c <= 0x2FF) || (c >= 0x370 && c <= 0x37D) ||
+        (c >= 0x37F && c <= 0x1FFF) || (c >= 0x200C && c <= 0x200D) ||
+        (c >= 0x2070 && c <= 0x218F) || (c >= 0x2C00 && c <= 0x2FEF) ||
+        (c >= 0x3001 && c <= 0xD7FF) || (c >= 0xF900 && c <= 0xFDCF) ||
+        (c >= 0xFDF0 && c <= 0xFFFD) || (c >= 0x10000 && c <= 0xEFFFF)) {
+      tmp << sub;
+    } else if (pos > 0 && (c == 0xB7 || (c >= 0x300 && c <= 0x36F) ||
+                           (c >= 0x203F && c <= 0x2040))) {
+      tmp << sub;
+    } else {
+      // Escape all other symbols
+      tmp << encodePERCENT(sub);
+    }
+    // Shift new pos according to utf8-bytecount
+    pos += length-1;
+  }
+  return tmp.str();
+}
