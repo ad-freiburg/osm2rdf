@@ -7,7 +7,6 @@
 #include <fstream>
 #include <ostream>
 #include <string>
-#include <unordered_map>
 
 #include "osmium/geom/wkt.hpp"
 #include "osmium/osm/area.hpp"
@@ -81,7 +80,6 @@ class Writer {
 
   // Config
   osm2ttl::config::Config _config;
-  std::unordered_map<std::string, std::string> _prefixes;
   // Output
   std::ostream* _out;
   std::ofstream _outFile;

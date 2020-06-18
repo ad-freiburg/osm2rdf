@@ -30,22 +30,6 @@
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
   _config = config;
   _out = &std::cout;
-  // well-known prefixes
-  _prefixes["geo"] = "http://www.opengis.net/ont/geosparql#";
-  _prefixes["wd"] = "http://www.wikidata.org/entity/";
-  _prefixes["xsd"] = "http://www.w3.org/2001/XMLSchema#";
-  // osm prefixes
-  // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
-  // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
-  _prefixes["osmnode"] = "https://www.openstreetmap.org/node/";
-  _prefixes["osmrel"] = "https://www.openstreetmap.org/relation/";
-  _prefixes["osmt"] = "https://www.openstreetmap.org/wiki/Key:";
-  _prefixes["osmway"] = "https://www.openstreetmap.org/way/";
-  _prefixes["osmm"] = "https://www.openstreetmap.org/meta/";
-  // own prefixes
-  _prefixes["osm"] = "https://www.openstreetmap.org/";
-  _prefixes["osma"] = "https://www.openstreetmap.org/area/";
-  _prefixes["osml"] = "https://www.openstreetmap.org/location/";
 }
 
 // ____________________________________________________________________________
@@ -235,12 +219,27 @@ std::string osm2ttl::ttl::Writer::urlescape(std::string_view s) {
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeHeader() const {
-  if (_config.outputFormat != osm2ttl::ttl::OutputFormat::TTL) {
-    return;
-  }
-  for (const auto& p : _prefixes) {
-      *_out << "@prefix " << p.first << ": <" << p.second << "> .\n";
-  }
+  *_out << _config.outputFormat.header();
+}
+
+// ____________________________________________________________________________
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::BlankNode& b) {
+  *_out << _config.outputFormat.format(b);
+}
+
+// ____________________________________________________________________________
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::IRI& i) {
+  *_out << _config.outputFormat.format(i);
+}
+
+// ____________________________________________________________________________
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::LangTag& l) {
+  *_out << _config.outputFormat.format(l);
+}
+
+// ____________________________________________________________________________
+void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::Literal& l) {
+  *_out << _config.outputFormat.format(l);
 }
 
 // ____________________________________________________________________________
@@ -258,74 +257,6 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
   *_out << " ";
   write(o);
   *_out << " .\n";
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::BlankNode& b) {
-  *_out << "_:" << b.getId();
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::IRI& i) {
-  switch (_config.outputFormat) {
-  case osm2ttl::ttl::OutputFormat::NT:
-    // Lookup prefix, if not defined print as long IRI
-    if (_prefixes.find(i.prefix()) != _prefixes.end()) {
-      *_out << "<" << _prefixes[i.prefix()] << urlencode(i.value()) << ">";
-      return;
-    }
-    *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
-    return;
-  case osm2ttl::ttl::OutputFormat::TTL:
-    // Lookup prefix, if not defined print as long IRI
-    if (_prefixes.find(i.prefix()) != _prefixes.end()) {
-      *_out << i.prefix() << ":" << urlescape(i.value());
-      return;
-    }
-    *_out << "<" << i.prefix() << urlencode(i.value()) << ">";
-    return;
-  default:
-    throw;
-  }
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::LangTag& l) {
-  *_out << l.value();
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::Literal& l) {
-  *_out << "\"";
-  // Escape value
-  std::string value = l.value();
-  for (size_t pos = 0; pos < value.size(); ++pos) {
-    switch (value[pos]) {
-      case '\\':
-        *_out << "\\\\";
-        break;
-      case '\n':
-        *_out << "\\n";
-        break;
-      case '"':
-        *_out << "\\\"";
-        break;
-      case '\r':
-        *_out << "\\r";
-        break;
-      default:
-        *_out << value[pos];
-    }
-  }
-  *_out << "\"";
-  if (auto iri = l.iri()) {
-    *_out << "^^";
-    write(*iri);
-  }
-  if (auto langTag = l.langTag()) {
-    *_out << "@";
-    write(*langTag);
-  }
 }
 
 // ____________________________________________________________________________
@@ -525,7 +456,7 @@ void osm2ttl::ttl::Writer::writeOsmTagList(const S& s,
         auto pos = v.find(':');
         if (pos != std::string::npos) {
           std::string lang = v.substr(0, pos);
-          std::string entry = v.substr(pos);
+          std::string entry = v.substr(pos + 1);
           writeTriple(s,
             osm2ttl::ttl::IRI("osm", "wikipedia"),
             osm2ttl::ttl::IRI("https://"+lang+".wikipedia.org/wiki/", entry));
