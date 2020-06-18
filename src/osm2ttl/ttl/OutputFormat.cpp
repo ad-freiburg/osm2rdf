@@ -262,7 +262,7 @@ uint8_t osm2ttl::ttl::OutputFormat::utf8Length(char c) {
   if ((c & 0xF0) == 0xE0) { return 3; }
   if ((c & 0xE0) == 0xC0) { return 2; }
   if ((c & 0x80) == 0x00) { return 1; }
-  return 0;
+  throw;
 }
 
 // ____________________________________________________________________________
@@ -274,14 +274,23 @@ uint8_t osm2ttl::ttl::OutputFormat::utf8Length(const std::string& s) {
 uint32_t osm2ttl::ttl::OutputFormat::utf8Codepoint(const std::string& s) {
   switch (utf8Length(s)) {
     case 4:
-      return (s[3] & 0x07) << 18 | (s[2] & 0x0F) << 12 \
-        | (s[1] & 0x1F) << 6 | (s[0] & 0x3F);
+      // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+      //      111   111111   111111   111111 = 7 3F 3F 3F
+      return (((s[0] & 0x07) << 18) | ((s[1] & 0x3F) << 12)
+        | ((s[2] & 0x3F) << 6) | (s[3] & 0x3F));
+      break;
     case 3:
-      return (s[2] & 0x0F) << 12 | (s[1] & 0x1F) << 6 | (s[0] & 0x3F);
+      // 1110xxxx 10xxxxxx 10xxxxxx
+      //     1111   111111   111111 = F 3F 3F
+      return (((s[0] & 0x0F) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F));
     case 2:
-      return (s[1] & 0x1F) << 6 | (s[0] & 0x3F);
+      // 110xxxxx 10xxxxxx
+      //    11111   111111 = 1F 3F
+      return (((s[0] & 0x1F) << 6) | (s[1] & 0x3F));
     case 1:
-      return s[0];
+      // 0xxxxxxx
+      //  1111111 = 7F
+      return (s[0] & 0x7F);
     default:
       throw;
   }
@@ -294,8 +303,7 @@ std::string osm2ttl::ttl::OutputFormat::UCHAR(char c) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
   std::stringstream tmp;
-  tmp << "\\u" << std::setfill('0') << std::setw(4) << std::right << std::hex
-    << c;
+  tmp << "\\u00" << std::hex  << ((c & 0xF0) >> 4) << std::hex << (c & 0x0F);
   return tmp.str();
 }
 
@@ -318,19 +326,27 @@ std::string osm2ttl::ttl::OutputFormat::UCHAR(const std::string& s) {
 
 // ____________________________________________________________________________
 std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s) {
+  // NT:  [8]   IRIREF
+  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
+  // TTL: [18]  IRIREF
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
   std::stringstream tmp;
   for (size_t pos = 0; pos < s.size(); ++pos) {
+    uint8_t length = utf8Length(s[pos]);
     // Force non-allowed chars to UCHAR
-    if ((s[pos] >= 0 && s[pos] <= ' ') ||
-        s[pos] == '<' || s[pos] == '>' ||
-        s[pos] == '{' || s[pos] == '}' ||
-        s[pos] == '\"' || s[pos] == '|' ||
-        s[pos] == '^' || s[pos] == '`' ||
-        s[pos] == '\\') {
-      tmp << UCHAR(s[pos]);
-      continue;
+    if (length == 1) {
+      if ((s[pos] >= 0 && s[pos] <= ' ') ||
+          s[pos] == '<' || s[pos] == '>' ||
+          s[pos] == '{' || s[pos] == '}' ||
+          s[pos] == '\"' || s[pos] == '|' ||
+          s[pos] == '^' || s[pos] == '`' ||
+          s[pos] == '\\') {
+        tmp << UCHAR(s[pos]);
+        continue;
+      }
     }
-    tmp << s[pos];
+    tmp << s.substr(pos, length);
+    pos += length-1;
   }
   return tmp.str();
 }
@@ -343,14 +359,13 @@ std::string osm2ttl::ttl::OutputFormat::encodePERCENT(const std::string& s) {
   uint32_t c = utf8Codepoint(s);
   uint32_t mask = 0xFF;
   bool echo = false;
-  for (size_t shift = 16; shift > 0; shift -= 2) {
-    uint8_t v = c & (mask << shift);
-    echo |= v > 0;
+  for (int shift = 3; shift >= 0; --shift) {
+    uint8_t v = (c & (mask << (shift * 8)) >> shift);
+    echo |= (v > 0);
     if (!echo) {
       continue;
     }
-    tmp << "%" << std::setfill('0') << std::setw(2) << std::right
-      << std::hex << v;
+    tmp << "% "<< std::hex << ((v & 0xF0) >> 4) << std::hex << (v & 0x0F);
   }
   return tmp.str();
 }
