@@ -141,6 +141,8 @@ std::string osm2ttl::ttl::OutputFormat::format(
     }
     return IRIREF(i.prefix(), i.value());
   case osm2ttl::ttl::OutputFormat::TTL:
+    [[fallthrough]];
+  case osm2ttl::ttl::OutputFormat::QLEVER:
     // If known prefix -> PrefixedName
     if (_prefixes.find(i.prefix()) != _prefixes.end()) {
       return PrefixedName(i.prefix(), i.value());
@@ -153,13 +155,14 @@ std::string osm2ttl::ttl::OutputFormat::format(
 
 // ____________________________________________________________________________
 std::string osm2ttl::ttl::OutputFormat::IRIREF(const std::string& p,
-                                               const std::string& v) {
+                                               const std::string& v) const {
   return "<" + encodeIRIREF(p) + encodeIRIREF(v) + ">";
 }
 
 // ____________________________________________________________________________
 std::string osm2ttl::ttl::OutputFormat::PrefixedName(const std::string& p,
-                                                     const std::string& v) {
+                                                     const std::string& v)
+  const {
   std::stringstream tmp;
   if (!p.empty()) {
     tmp << p << ":";
@@ -170,7 +173,7 @@ std::string osm2ttl::ttl::OutputFormat::PrefixedName(const std::string& p,
 
 // ____________________________________________________________________________
 std::string osm2ttl::ttl::OutputFormat::STRING_LITERAL_QUOTE(
-  const std::string& s) {
+  const std::string& s) const {
   // NT:  [9]   STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/n-triples/#grammar-production-STRING_LITERAL_QUOTE
   // TTL: [22]  STRING_LITERAL_QUOTE
@@ -201,7 +204,7 @@ std::string osm2ttl::ttl::OutputFormat::STRING_LITERAL_QUOTE(
 
 // ____________________________________________________________________________
 std::string osm2ttl::ttl::OutputFormat::STRING_LITERAL_SINGLE_QUOTE(
-  const std::string& s) {
+  const std::string& s) const {
   // TTL: [23]  STRING_LITERAL_SINGLE_QUOTE
   //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_SINGLE_QUOTE
   std::stringstream tmp;
@@ -229,7 +232,7 @@ std::string osm2ttl::ttl::OutputFormat::STRING_LITERAL_SINGLE_QUOTE(
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::OutputFormat::ECHAR(char c) {
+std::string osm2ttl::ttl::OutputFormat::ECHAR(char c) const {
   // NT:  [153s] ECHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-ECHAR
   // TTL: [159s] ECHAR
@@ -257,7 +260,7 @@ std::string osm2ttl::ttl::OutputFormat::ECHAR(char c) {
 }
 
 // ____________________________________________________________________________
-uint8_t osm2ttl::ttl::OutputFormat::utf8Length(char c) {
+uint8_t osm2ttl::ttl::OutputFormat::utf8Length(char c) const {
   if ((c & 0xF8) == 0xF0) { return 4; }
   if ((c & 0xF0) == 0xE0) { return 3; }
   if ((c & 0xE0) == 0xC0) { return 2; }
@@ -266,12 +269,13 @@ uint8_t osm2ttl::ttl::OutputFormat::utf8Length(char c) {
 }
 
 // ____________________________________________________________________________
-uint8_t osm2ttl::ttl::OutputFormat::utf8Length(const std::string& s) {
+uint8_t osm2ttl::ttl::OutputFormat::utf8Length(const std::string& s) const {
   return utf8Length(s[0]);
 }
 
 // ____________________________________________________________________________
-uint32_t osm2ttl::ttl::OutputFormat::utf8Codepoint(const std::string& s) {
+uint32_t osm2ttl::ttl::OutputFormat::utf8Codepoint(const std::string& s)
+  const {
   switch (utf8Length(s)) {
     case 4:
       // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
@@ -297,7 +301,8 @@ uint32_t osm2ttl::ttl::OutputFormat::utf8Codepoint(const std::string& s) {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::OutputFormat::UCHAR(char c) {
+std::string osm2ttl::ttl::OutputFormat::UCHAR(char c)
+  const {
   // NT:  [10]  UCHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
   // TTL: [26]  UCHAR
@@ -308,7 +313,8 @@ std::string osm2ttl::ttl::OutputFormat::UCHAR(char c) {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::OutputFormat::UCHAR(const std::string& s) {
+std::string osm2ttl::ttl::OutputFormat::UCHAR(const std::string& s)
+  const {
   // NT:  [10]  UCHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
   // TTL: [26]  UCHAR
@@ -325,7 +331,8 @@ std::string osm2ttl::ttl::OutputFormat::UCHAR(const std::string& s) {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s) {
+std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s)
+  const {
   // NT:  [8]   IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
   // TTL: [18]  IRIREF
@@ -344,8 +351,11 @@ std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s) {
         // TODO(lehmanna): CHeck what to do... %-encoding not explicitly allowed
         // in grammer... but in IRI
         // RFC: https://tools.ietf.org/html/rfc3987#section-2.2
-        tmp << encodePERCENT(s.substr(pos, 1));
-        // tmp << UCHAR(s[pos]);
+        if (_value == osm2ttl::ttl::OutputFormat::QLEVER) {
+          tmp << encodePERCENT(s.substr(pos, 1));
+        } else {
+          tmp << UCHAR(s[pos]);
+        }
         continue;
       }
     }
@@ -356,7 +366,8 @@ std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s) {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::OutputFormat::encodePERCENT(const std::string& s) {
+std::string osm2ttl::ttl::OutputFormat::encodePERCENT(const std::string& s)
+  const {
   // TTL: [170s] PERCENT
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
   std::stringstream tmp;
@@ -375,7 +386,8 @@ std::string osm2ttl::ttl::OutputFormat::encodePERCENT(const std::string& s) {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::OutputFormat::encodePN_LOCAL(const std::string& s) {
+std::string osm2ttl::ttl::OutputFormat::encodePN_LOCAL(const std::string& s)
+  const {
   // TTL: [168s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
   std::stringstream tmp;

@@ -19,7 +19,8 @@ class OutputFormat {
  public:
   enum Value : uint8_t {
     TTL,
-    NT
+    NT,
+    QLEVER
   };
 
   OutputFormat();
@@ -34,19 +35,19 @@ class OutputFormat {
   std::string format(const osm2ttl::ttl::Literal& l) const;
 
  private:
-  static std::string IRIREF(const std::string& p, const std::string& v);
-  static std::string PrefixedName(const std::string& p, const std::string& v);
-  static std::string STRING_LITERAL_QUOTE(const std::string& s);
-  static std::string STRING_LITERAL_SINGLE_QUOTE(const std::string& s);
-  static std::string ECHAR(char c);
-  static uint8_t utf8Length(char c);
-  static uint8_t utf8Length(const std::string& s);
-  static uint32_t utf8Codepoint(const std::string& s);
-  static std::string UCHAR(char c);
-  static std::string UCHAR(const std::string& s);
-  static std::string encodeIRIREF(const std::string& s);
-  static std::string encodePN_LOCAL(const std::string& s);
-  static std::string encodePERCENT(const std::string& s);
+  std::string IRIREF(const std::string& p, const std::string& v) const;
+  std::string PrefixedName(const std::string& p, const std::string& v) const;
+  std::string STRING_LITERAL_QUOTE(const std::string& s) const;
+  std::string STRING_LITERAL_SINGLE_QUOTE(const std::string& s) const;
+  std::string ECHAR(char c) const;
+  uint8_t utf8Length(char c) const;
+  uint8_t utf8Length(const std::string& s) const;
+  uint32_t utf8Codepoint(const std::string& s) const;
+  std::string UCHAR(char c) const;
+  std::string UCHAR(const std::string& s) const;
+  std::string encodeIRIREF(const std::string& s) const;
+  std::string encodePN_LOCAL(const std::string& s) const;
+  std::string encodePERCENT(const std::string& s) const;
   void initPrefixes();
   std::unordered_map<std::string, std::string> _prefixes;
   Value _value;

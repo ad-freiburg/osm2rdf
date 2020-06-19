@@ -29,7 +29,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "o", "output", "Output file", "");
   auto outputFormatOp = op.add<popl::Value<std::string>,
        popl::Attribute::advanced>(
-    "", "output-format", "Output format, valid values: nt, ttl", "ttl");
+    "", "output-format", "Output format, valid values: nt, ttl, qlever", "ttl");
   auto cacheOp = op.add<popl::Value<std::string>>(
     "t", "cache", "Path to cache file", "/tmp/osm2ttl-cache");
   auto ignoreUnnamedOp = op.add<popl::Switch>(
@@ -67,6 +67,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
         outputFormat = osm2ttl::ttl::OutputFormat::TTL;
       } else if (outputFormatOp->value() == "nt") {
         outputFormat = osm2ttl::ttl::OutputFormat::NT;
+      } else if (outputFormatOp->value() == "qlever") {
+        outputFormat = osm2ttl::ttl::OutputFormat::QLEVER;
       } else {
         std::cerr << "Unknown output format selected: "
           << outputFormatOp->value() << "\n"
