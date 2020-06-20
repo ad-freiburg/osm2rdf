@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 
 #include "osmium/geom/factory.hpp"
 #include "osmium/osm/area.hpp"
@@ -31,6 +32,14 @@ osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
   _config = config;
   _out = &std::cout;
   _factory = osm2ttl::osm::WKTFactory::create(_config);
+  _basicDataTagKeys.emplace("name");
+  _basicDataTagKeys.emplace("type");
+  _basicDataTagKeys.emplace("wikidata");
+  _basicDataTagKeys.emplace("wikipedia");
+  // TODO(lehmanna): Load these from config and only keep the once above always
+  // active.
+  _basicDataTagKeys.emplace("boundary");
+  _basicDataTagKeys.emplace("building");
 }
 
 // ____________________________________________________________________________
@@ -363,6 +372,10 @@ void osm2ttl::ttl::Writer::writeOsmRelationMembers(
     const osmium::RelationMemberList& members) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  // If only basic data is requested, skip this.
+  if (_config.basicDataOnly) {
+    return;
+  }
 
   std::uint32_t i = 0;
   for (const osmium::RelationMember& member : members) {
@@ -414,6 +427,10 @@ void osm2ttl::ttl::Writer::writeOsmTagList(const S& s,
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   for (const osmium::Tag& tag : tags) {
+    // If only basic data is requested, skip this.
+    if (_config.basicDataOnly && (_basicDataTagKeys.count(tag.key()) == 0)) {
+      continue;
+    }
     writeOsmTag(s, tag);
     if (_config.addWikiLinks) {
       if (Writer::endsWith(tag.key(), "wikidata") &&
@@ -500,6 +517,11 @@ void osm2ttl::ttl::Writer::writeOsmWayNodeList(const S& s,
                                              const osmium::WayNodeList& nodes) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  // If only basic data is requested, skip this.
+  if (_config.basicDataOnly) {
+    return;
+  }
+
   uint32_t i = 0;
   for (const osmium::NodeRef& nodeRef : nodes) {
     osm2ttl::ttl::BlankNode b;

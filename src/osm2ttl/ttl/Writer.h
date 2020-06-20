@@ -7,6 +7,7 @@
 #include <fstream>
 #include <ostream>
 #include <string>
+#include <unordered_set>
 
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/location.hpp"
@@ -79,10 +80,13 @@ class Writer {
 
   // Config
   osm2ttl::config::Config _config;
+
   // Output
   std::ostream* _out;
   std::ofstream _outFile;
 
+  // Helper
+  std::unordered_set<std::string> _basicDataTagKeys;
   osm2ttl::osm::WKTFactory* _factory;
 };
 

@@ -136,7 +136,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
   switch (_value) {
   case osm2ttl::ttl::OutputFormat::NT:
     // Expand prefix
-    if (_prefixes.find(i.prefix()) != _prefixes.end()) {
+    if (_prefixes.count(i.prefix()) > 0) {
       return IRIREF(_prefixes.at(i.prefix()), i.value());
     }
     return IRIREF(i.prefix(), i.value());
@@ -144,7 +144,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
     [[fallthrough]];
   case osm2ttl::ttl::OutputFormat::QLEVER:
     // If known prefix -> PrefixedName
-    if (_prefixes.find(i.prefix()) != _prefixes.end()) {
+    if (_prefixes.count(i.prefix()) > 0) {
       return PrefixedName(i.prefix(), i.value());
     }
     return IRIREF(i.prefix(), i.value());

@@ -41,6 +41,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto storeConfigOp = op.add<popl::Value<std::string>,
        popl::Attribute::advanced>(
     "", "store-config", "Path to store calculated config.");
+  auto basicDataOnlyOp = op.add<popl::Switch>("b", "basic-data-only",
+    "Only print basic data");
 
   try {
     op.parse(argc, argv);
@@ -87,6 +89,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
     if (simplifyWKTOp->is_set()) {
       simplifyWKT = true;
+    }
+    if (basicDataOnlyOp->is_set()) {
+      basicDataOnly = true;
     }
 
     // Handle input

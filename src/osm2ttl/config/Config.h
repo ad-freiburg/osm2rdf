@@ -15,6 +15,7 @@ struct Config {
   bool simplifyWKT = false;
   bool addWikiLinks = false;
   bool ignoreUnnamed = false;
+  bool basicDataOnly = false;
   std::string output;
   osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::TTL;
   std::string input;
