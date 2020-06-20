@@ -8,7 +8,6 @@
 #include <ostream>
 #include <string>
 
-#include "osmium/geom/wkt.hpp"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/location.hpp"
 #include "osmium/osm/node.hpp"
@@ -18,11 +17,11 @@
 
 #include "osm2ttl/config/Config.h"
 
+#include "osm2ttl/osm/WKTFactory.h"
+
 #include "osm2ttl/ttl/BlankNode.h"
 #include "osm2ttl/ttl/IRI.h"
 #include "osm2ttl/ttl/Literal.h"
-
-#include "osm2ttl/osm/SimplifyingWKTFactory.h"
 
 namespace osm2ttl {
 namespace ttl {
@@ -83,9 +82,8 @@ class Writer {
   // Output
   std::ostream* _out;
   std::ofstream _outFile;
-  // Factories
-  osmium::geom::WKTFactory<> _wktFactory;
-  osm2ttl::osm::SimplifyingWKTFactory<> _simplifyingWktFactory;
+
+  osm2ttl::osm::WKTFactory* _factory;
 };
 
 }  // namespace ttl

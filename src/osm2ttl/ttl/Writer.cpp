@@ -20,21 +20,23 @@
 
 #include "osm2ttl/config/Config.h"
 
+#include "osm2ttl/osm/WKTFactory.h"
+
 #include "osm2ttl/ttl/BlankNode.h"
 #include "osm2ttl/ttl/IRI.h"
 #include "osm2ttl/ttl/Literal.h"
-
-#include "osm2ttl/osm/SimplifyingWKTFactory.h"
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
   _config = config;
   _out = &std::cout;
+  _factory = osm2ttl::osm::WKTFactory::create(_config);
 }
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::~Writer() {
   close();
+  delete _factory;
 }
 
 // ____________________________________________________________________________
@@ -266,17 +268,10 @@ void osm2ttl::ttl::Writer::writeOsmArea(const osmium::Area& area) {
   }
   osm2ttl::ttl::IRI s{"osma", area};
 
-  if (_config.simplifyWKT) {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_multipolygon(area),
-        osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  } else {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(_wktFactory.create_multipolygon(area),
-        osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  }
+  writeTriple(s,
+    osm2ttl::ttl::IRI("geo", "hasGeometry"),
+    osm2ttl::ttl::Literal(_factory->create_multipolygon(area),
+      osm2ttl::ttl::IRI("geo", "wktLiteral")));
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "from_way"),
@@ -333,17 +328,10 @@ void osm2ttl::ttl::Writer::writeOsmLocation(const S& s,
     osm2ttl::ttl::IRI("osml", "direct"),
     osm2ttl::ttl::Literal(loc.str()));
 
-  if (_config.simplifyWKT) {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(_simplifyingWktFactory.create_point(location),
-        osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  } else {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(_wktFactory.create_point(location),
-        osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  }
+  writeTriple(s,
+    osm2ttl::ttl::IRI("geo", "hasGeometry"),
+    osm2ttl::ttl::Literal(_factory->create_point(location),
+      osm2ttl::ttl::IRI("geo", "wktLiteral")));
 }
 
 // ____________________________________________________________________________
@@ -485,44 +473,22 @@ void osm2ttl::ttl::Writer::writeOsmWay(const osmium::Way& way) {
     osm2ttl::ttl::Literal(way.is_closed()?"yes":"no"));
 
   if (way.nodes().size() > 3 && way.is_closed()) {
-    if (_config.simplifyWKT) {
-      writeTriple(s,
-        osm2ttl::ttl::IRI("geo", "hasGeometry"),
-        osm2ttl::ttl::Literal(_simplifyingWktFactory.create_polygon(way),
-          osm2ttl::ttl::IRI("geo", "wktLiteral")));
-    } else {
-      writeTriple(s,
-        osm2ttl::ttl::IRI("geo", "hasGeometry"),
-        osm2ttl::ttl::Literal(_wktFactory.create_polygon(way),
-          osm2ttl::ttl::IRI("geo", "wktLiteral")));
-    }
+    writeTriple(s,
+      osm2ttl::ttl::IRI("geo", "hasGeometry"),
+      osm2ttl::ttl::Literal(_factory->create_polygon(way),
+        osm2ttl::ttl::IRI("geo", "wktLiteral")));
   } else if (way.nodes().size() > 1) {
-    if (_config.simplifyWKT) {
-      writeTriple(s,
-        osm2ttl::ttl::IRI("geo", "hasGeometry"),
-        osm2ttl::ttl::Literal(_simplifyingWktFactory.create_linestring(
-          way, osmium::geom::use_nodes::all),
-          osm2ttl::ttl::IRI("geo", "wktLiteral")));
-    } else {
-      writeTriple(s,
-        osm2ttl::ttl::IRI("geo", "hasGeometry"),
-        osm2ttl::ttl::Literal(_wktFactory.create_linestring(
-          way, osmium::geom::use_nodes::all),
-          osm2ttl::ttl::IRI("geo", "wktLiteral")));
-    }
+    writeTriple(s,
+      osm2ttl::ttl::IRI("geo", "hasGeometry"),
+      osm2ttl::ttl::Literal(_factory->create_linestring(
+        way, osmium::geom::use_nodes::all),
+        osm2ttl::ttl::IRI("geo", "wktLiteral")));
   } else {
-    if (_config.simplifyWKT) {
-      writeTriple(s,
-        osm2ttl::ttl::IRI("geo", "hasGeometry"),
-        osm2ttl::ttl::Literal(
-          _simplifyingWktFactory.create_point(way.nodes()[0]),
-          osm2ttl::ttl::IRI("geo", "wktLiteral")));
-    } else {
-      writeTriple(s,
-        osm2ttl::ttl::IRI("geo", "hasGeometry"),
-        osm2ttl::ttl::Literal(_wktFactory.create_point(way.nodes()[0]),
-          osm2ttl::ttl::IRI("geo", "wktLiteral")));
-    }
+    writeTriple(s,
+      osm2ttl::ttl::IRI("geo", "hasGeometry"),
+      osm2ttl::ttl::Literal(
+        _factory->create_point(way.nodes()[0]),
+        osm2ttl::ttl::IRI("geo", "wktLiteral")));
   }
 
   writeOsmBox(s, osm2ttl::ttl::IRI("osmway", "bbox"), way.envelope());

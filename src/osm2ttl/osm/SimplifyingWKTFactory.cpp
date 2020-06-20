@@ -8,6 +8,8 @@
 #include <iostream>
 #include <utility>
 
+#include "osmium/geom/coordinates.hpp"
+
 // ____________________________________________________________________________
 osm2ttl::osm::SimplifyingWKTFactoryImpl::SimplifyingWKTFactoryImpl(
   int /*unused*/, int precision) {

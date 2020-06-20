@@ -14,6 +14,7 @@
 #include "osmium/osm/way.hpp"
 
 #include "osm2ttl/config/Config.h"
+
 #include "osm2ttl/ttl/Writer.h"
 
 // ____________________________________________________________________________
