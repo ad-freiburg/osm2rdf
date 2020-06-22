@@ -21,7 +21,7 @@ double osm2ttl::osm::SimplifyingWKTFactoryImpl::getDistance(
   const osmium::geom::Coordinates& x, const osmium::geom::Coordinates& y) {
   const double a = x.x - y.x;
   const double b = x.y - y.y;
-  return std::abs(std::sqrt(a*a + b*b));
+  return std::sqrt(a*a + b*b);
 }
 
 // ____________________________________________________________________________
