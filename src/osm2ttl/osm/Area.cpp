@@ -10,6 +10,7 @@
 #include "osmium/handler/node_locations_for_ways.hpp"
 #include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/osm/area.hpp"
+#include "osmium/osm/location.hpp"
 
 #include "osm2ttl/osm/Ring.h"
 
@@ -71,8 +72,14 @@ double osm2ttl::osm::Area::vagueArea() const {
 // ____________________________________________________________________________
 bool osm2ttl::osm::Area::vagueIntersects(const osm2ttl::osm::Area& other)
   const {
-  return _box.contains(other._box.bottom_left())
-      || _box.contains(other._box.top_right());
+  return _box.contains(osmium::Location(other._box.bottom_left().x(),
+                                        other._box.bottom_left().y()))
+      || _box.contains(osmium::Location(other._box.bottom_left().x(),
+                                        other._box.top_right().y()))
+      || _box.contains(osmium::Location(other._box.top_right().x(),
+                                        other._box.top_right().y()))
+      || _box.contains(osmium::Location(other._box.top_right().x(),
+                                        other._box.bottom_left().y()));
 }
 
 // ____________________________________________________________________________
