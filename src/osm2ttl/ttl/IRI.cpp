@@ -3,6 +3,7 @@
 
 #include "osm2ttl/ttl/IRI.h"
 
+#include <cctype>
 #include <sstream>
 #include <string>
 
@@ -39,6 +40,14 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix,
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s) {
   _prefix = prefix;
   _value = s;
+  // Trim strings
+  _value.erase(_value.begin(),
+               std::find_if(_value.begin(), _value.end(), [](char c) {
+                 return std::isspace(c) != 0;
+  }));
+  _value.erase(std::find_if(_value.rbegin(), _value.rend(), [](char c) {
+    return std::isspace(c) != 0;
+  }).base(), _value.end());
 }
 
 // ____________________________________________________________________________
