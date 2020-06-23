@@ -10,6 +10,8 @@
 #include "osmium/osm/object.hpp"
 #include "osmium/osm/relation.hpp"
 
+#include "osm2ttl/osm/Area.h"
+
 namespace osm2ttl {
 namespace ttl {
 
@@ -19,6 +21,7 @@ struct IRI {
   IRI(const std::string& prefix, const osmium::NodeRef& n);
   IRI(const std::string& prefix, const osmium::OSMObject& o);
   IRI(const std::string& prefix, const osmium::RelationMember& m);
+  IRI(const std::string& prefix, const osm2ttl::osm::Area& a);
   std::string prefix() const;
   std::string value() const;
  protected:

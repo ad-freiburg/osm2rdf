@@ -39,6 +39,15 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix,
 }
 
 // ____________________________________________________________________________
+osm2ttl::ttl::IRI::IRI(const std::string& prefix,
+                     const osm2ttl::osm::Area& a) {
+  _prefix = prefix;
+  std::stringstream tmp;
+  tmp << a.id();
+  _value = tmp.str();
+}
+
+// ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s) {
   _prefix = prefix;
   auto begin = std::find_if(s.begin(), s.end(), [](int c) {

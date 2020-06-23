@@ -10,6 +10,7 @@
 #include "osmium/handler/node_locations_for_ways.hpp"
 #include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/osm/area.hpp"
+#include "osmium/osm/box.hpp"
 #include "osmium/osm/location.hpp"
 
 #include "osm2ttl/osm/Ring.h"
@@ -17,7 +18,7 @@
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area(const osmium::Area& area) {
   _id = area.positive_id();
-  _box = area.envelope();
+  _objId = area.orig_id();
 
   for (const auto& ring : area.outer_rings()) {
     _rings.emplace_back();
@@ -35,94 +36,89 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) {
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Area::id() const {
+uint64_t osm2ttl::osm::Area::id() const noexcept {
   return _id;
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Area::objId() const {
+uint64_t osm2ttl::osm::Area::objId() const noexcept {
   return _objId;
 }
 
 // ____________________________________________________________________________
-osmium::Box osm2ttl::osm::Area::bbox() const {
-  return _box;
+osmium::Box osm2ttl::osm::Area::bbox() const noexcept {
+  return _rings[0].bbox();
 }
 
 // ____________________________________________________________________________
-char osm2ttl::osm::Area::tagAdministrationLevel() const {
+osmium::Location osm2ttl::osm::Area::centroid() const noexcept {
+  return _rings[0].centroid();
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Area::fromWay() const noexcept {
+  // https://github.com/osmcode/libosmium/blob/master/include/osmium/osm/area.hpp#L145-L153
+  return (_id & 0x1U) == 0;
+}
+
+// ____________________________________________________________________________
+char osm2ttl::osm::Area::tagAdministrationLevel() const noexcept {
   return _tagAdministrationLevel;
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::osm::OuterRing> osm2ttl::osm::Area::rings() const {
+std::vector<osm2ttl::osm::OuterRing> osm2ttl::osm::Area::rings() const
+  noexcept {
   return _rings;
 }
 
 // ____________________________________________________________________________
-double osm2ttl::osm::Area::vagueArea() const {
-  std::cout << _box.top_right().x() << "-" << _box.bottom_left().x()
-    << "=" << _box.top_right().x() - _box.bottom_left().x() << "\n";
-  std::cout << _box.top_right().y() << "-" << _box.bottom_left().y()
-    << "=" << _box.top_right().y() - _box.bottom_left().y() << "\n";
-  return (_box.top_right().x() - _box.bottom_left().x()) *
-         (_box.top_right().y() - _box.bottom_left().y());
+double osm2ttl::osm::Area::vagueArea() const noexcept {
+  const osmium::Location tr = bbox().top_right();
+  const osmium::Location bl = bbox().bottom_left();
+  return std::abs((tr.x() - bl.x()) * (tr.y() - bl.y()));
 }
 
 // ____________________________________________________________________________
 bool osm2ttl::osm::Area::vagueIntersects(const osm2ttl::osm::Area& other)
-  const {
-  return _box.contains(osmium::Location(other._box.bottom_left().x(),
-                                        other._box.bottom_left().y()))
-      || _box.contains(osmium::Location(other._box.bottom_left().x(),
-                                        other._box.top_right().y()))
-      || _box.contains(osmium::Location(other._box.top_right().x(),
-                                        other._box.top_right().y()))
-      || _box.contains(osmium::Location(other._box.top_right().x(),
-                                        other._box.bottom_left().y()));
+  const noexcept {
+  return bbox().contains(osmium::Location(other.bbox().bottom_left().x(),
+                                        other.bbox().bottom_left().y()))
+      || bbox().contains(osmium::Location(other.bbox().bottom_left().x(),
+                                        other.bbox().top_right().y()))
+      || bbox().contains(osmium::Location(other.bbox().top_right().x(),
+                                        other.bbox().top_right().y()))
+      || bbox().contains(osmium::Location(other.bbox().top_right().x(),
+                                        other.bbox().bottom_left().y()));
 }
 
 // ____________________________________________________________________________
 bool osm2ttl::osm::Area::vagueContains(const osm2ttl::osm::Area& other)
-  const {
-  return _box.contains(other._box.bottom_left())
-      && _box.contains(other._box.top_right());
+  const noexcept {
+  return bbox().contains(other.bbox().bottom_left())
+      && bbox().contains(other.bbox().top_right());
 }
 
 // ____________________________________________________________________________
-double osm2ttl::osm::Area::area() const {
+double osm2ttl::osm::Area::area() const noexcept {
   double res = 0.0;
   for (const auto& outer : _rings) {
-    res += osm2ttl::osm::Area::area(outer);
+    res += outer.area();
     for (const auto& inner : outer.inner) {
-      res -= osm2ttl::osm::Area::area(inner);
+      res -= inner.area();
     }
   }
   return res;
 }
 
 // ____________________________________________________________________________
-double osm2ttl::osm::Area::area(const osm2ttl::osm::Ring& ring) const {
-  double res = 0.0;
-  for (size_t i = 0; i < ring.vertices.size() - 1; ++i) {
-    const osmium::Location& l1 = ring.vertices[i];
-    const osmium::Location& l2 = ring.vertices[i + 1];
-    std::cout << "  " << l1.x() << " " << l1.y() << "\n";
-    std::cout << "  " << l2.x() << " " << l2.y() << "\n";
-    res += 0.5 * (l1.x() * l2.y()) - (l1.y() * l2.x());
-    std::cout << "|" << l1 << " " << l2 << " :: " << res << "\n";
-  }
-  return res;
-}
-
-
-// ____________________________________________________________________________
 bool osm2ttl::osm::Area::intersects(const osm2ttl::osm::Area& other)
-  const {
+  const noexcept {
   return false;
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::Area::contains(const osm2ttl::osm::Area& other) const {
+bool osm2ttl::osm::Area::contains(const osm2ttl::osm::Area& other) const
+  noexcept {
   return false;
 }

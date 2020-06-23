@@ -6,10 +6,17 @@
 
 #include <vector>
 
+#include "osmium/osm/box.hpp"
+#include "osmium/osm/location.hpp"
+
 namespace osm2ttl {
 namespace osm {
 
 struct Ring {
+  double area() const noexcept;
+  osmium::Box bbox() const noexcept;
+  osmium::Location centroid() const noexcept;
+
   std::vector<osmium::Location> vertices;
 };
 

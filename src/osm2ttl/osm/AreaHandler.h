@@ -4,7 +4,9 @@
 #ifndef OSM2TTL_OSM_AREAHANDLER_H_
 #define OSM2TTL_OSM_AREAHANDLER_H_
 
-#include <unordered_set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "osmium/handler.hpp"
 #include "osmium/handler/node_locations_for_ways.hpp"
@@ -28,13 +30,19 @@ class AreaHandler : public osmium::handler::Handler {
 
   // Store area
   void area(const osmium::Area& area);
+  osm2ttl::osm::Area lookup(uint64_t id) const;
   void sort();
  protected:
+  // helper
+  std::vector<std::pair<size_t, size_t>> stacksForArea(
+    const osm2ttl::osm::Area& area);
   // Global config
   osm2ttl::config::Config _config;
   // Triple writer
   osm2ttl::ttl::Writer* _writer;
-  std::unordered_set<osm2ttl::osm::Area> _areas;
+  // Areas
+  std::unordered_map<uint64_t, osm2ttl::osm::Area> _areas;
+  // Stacks
 };
 
 }  // namespace osm

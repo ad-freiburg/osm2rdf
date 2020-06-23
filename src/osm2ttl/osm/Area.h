@@ -18,30 +18,29 @@ namespace osm {
 
 struct Area {
   explicit Area(const osmium::Area& area);
-  uint64_t id() const;
-  uint64_t objId() const;
-  osmium::Box bbox() const;
-  char tagAdministrationLevel() const;
+  uint64_t id() const noexcept;
+  uint64_t objId() const noexcept;
+  osmium::Box bbox() const noexcept;
+  osmium::Location centroid() const noexcept;
+  char tagAdministrationLevel() const noexcept;
+  bool fromWay() const noexcept;
 
-  std::vector<osm2ttl::osm::OuterRing> rings() const;
+  std::vector<osm2ttl::osm::OuterRing> rings() const noexcept;
 
-  double area() const;
-  bool contains(const Area& other) const;
-  bool intersects(const Area& other) const;
+  double area() const noexcept;
+  bool contains(const Area& other) const noexcept;
+  bool intersects(const Area& other) const noexcept;
   // Vague functions
-  double vagueArea() const;
-  bool vagueContains(const Area& other) const;
-  bool vagueIntersects(const Area& other) const;
+  double vagueArea() const noexcept;
+  bool vagueContains(const Area& other) const noexcept;
+  bool vagueIntersects(const Area& other) const noexcept;
 
   bool operator==(const osm2ttl::osm::Area& other) const {
     return _id == other._id;
   }
 
  protected:
-  double area(const osm2ttl::osm::Ring& ring) const;
-
   uint64_t _id;
-  osmium::Box _box;
   osmium::unsigned_object_id_type _objId;
   char _tagAdministrationLevel;
   std::vector<OuterRing> _rings;

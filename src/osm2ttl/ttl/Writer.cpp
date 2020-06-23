@@ -20,6 +20,7 @@
 
 #include "osm2ttl/config/Config.h"
 
+#include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/WKTFactory.h"
 
 #include "osm2ttl/ttl/BlankNode.h"
@@ -262,7 +263,7 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmArea(const osmium::Area& area) {
+void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
   osm2ttl::ttl::IRI s{"osma", area};
 
   writeTriple(s,
@@ -297,14 +298,19 @@ void osm2ttl::ttl::Writer::writeOsmArea(const osmium::Area& area) {
     osm2ttl::ttl::IRI("osma", "is_multipolygon"),
     osm2ttl::ttl::Literal(area.is_multipolygon()?"yes":"no"));
 
-  writeOsmBox(s, osm2ttl::ttl::IRI("osma", "bbox"), area.envelope());
+  writeOsmiumBox(s, osm2ttl::ttl::IRI("osma", "bbox"), area.envelope());
 
-  writeOsmTagList(s, area.tags());
+  writeOsmiumTagList(s, area.tags());
+}
+
+// ____________________________________________________________________________
+void osm2ttl::ttl::Writer::writeOSM2TTLArea(const osm2ttl::osm::Area& area) {
+  osm2ttl::ttl::IRI s{"osma", area};
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2ttl::ttl::Writer::writeOsmBox(const S& s,
+void osm2ttl::ttl::Writer::writeOsmiumBox(const S& s,
                                      const osm2ttl::ttl::IRI& p,
                                      const osmium::Box& box) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
@@ -314,7 +320,7 @@ void osm2ttl::ttl::Writer::writeOsmBox(const S& s,
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2ttl::ttl::Writer::writeOsmLocation(const S& s,
+void osm2ttl::ttl::Writer::writeOsmiumLocation(const S& s,
                                             const osmium::Location& location) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
@@ -332,24 +338,25 @@ void osm2ttl::ttl::Writer::writeOsmLocation(const S& s,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmNode(const osmium::Node& node) {
+void osm2ttl::ttl::Writer::writeOsmiumNode(const osmium::Node& node) {
   osm2ttl::ttl::IRI s{"osmnode", node};
 
-  writeOsmLocation(s, node.location());
-  writeOsmTagList(s, node.tags());
+  writeOsmiumLocation(s, node.location());
+  writeOsmiumTagList(s, node.tags());
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmRelation(const osmium::Relation& relation) {
+void osm2ttl::ttl::Writer::writeOsmiumRelation(
+  const osmium::Relation& relation) {
   osm2ttl::ttl::IRI s{"osmrel", relation};
 
-  writeOsmTagList(s, relation.tags());
-  writeOsmRelationMembers(s, relation.members());
+  writeOsmiumTagList(s, relation.tags());
+  writeOsmiumRelationMembers(s, relation.members());
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2ttl::ttl::Writer::writeOsmRelationMembers(
+void osm2ttl::ttl::Writer::writeOsmiumRelationMembers(
     const S& s,
     const osmium::RelationMemberList& members) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
@@ -381,7 +388,7 @@ void osm2ttl::ttl::Writer::writeOsmRelationMembers(
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2ttl::ttl::Writer::writeOsmTag(const S& s,
+void osm2ttl::ttl::Writer::writeOsmiumTag(const S& s,
                                      const osmium::Tag& tag) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
@@ -404,12 +411,12 @@ void osm2ttl::ttl::Writer::writeOsmTag(const S& s,
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2ttl::ttl::Writer::writeOsmTagList(const S& s,
+void osm2ttl::ttl::Writer::writeOsmiumTagList(const S& s,
                                          const osmium::TagList& tags) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   for (const osmium::Tag& tag : tags) {
-    writeOsmTag(s, tag);
+    writeOsmiumTag(s, tag);
     if (_config.addWikiLinks) {
       if (Writer::endsWith(tag.key(), "wikidata") &&
           !Writer::contains(tag.key(), "fixme")) {
@@ -419,17 +426,17 @@ void osm2ttl::ttl::Writer::writeOsmTagList(const S& s,
         if (pos2 != std::string::npos) {
           while (pos2 != std::string::npos) {
             writeTriple(s,
-              osm2ttl::ttl::IRI("osm", "wikidata"),
+              osm2ttl::ttl::IRI("osm", tag.key()),
               osm2ttl::ttl::IRI("wd", value.substr(pos1, pos2-pos1)));
             pos1 = pos2 + 1;
             pos2 = value.find(";", pos1);
           }
           writeTriple(s,
-            osm2ttl::ttl::IRI("osm", "wikidata"),
+            osm2ttl::ttl::IRI("osm", tag.key()),
             osm2ttl::ttl::IRI("wd", value.substr(pos1)));
         } else {
           writeTriple(s,
-            osm2ttl::ttl::IRI("osm", "wikidata"),
+            osm2ttl::ttl::IRI("osm", tag.key()),
             osm2ttl::ttl::IRI("wd", value));
         }
       }
@@ -454,11 +461,11 @@ void osm2ttl::ttl::Writer::writeOsmTagList(const S& s,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmWay(const osmium::Way& way) {
+void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
   osm2ttl::ttl::IRI s{"osmway", way};
 
-  writeOsmTagList(s, way.tags());
-  writeOsmWayNodeList(s, way.nodes());
+  writeOsmiumTagList(s, way.tags());
+  writeOsmiumWayNodeList(s, way.nodes());
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osmway", "is_closed"),
@@ -483,12 +490,12 @@ void osm2ttl::ttl::Writer::writeOsmWay(const osmium::Way& way) {
         osm2ttl::ttl::IRI("geo", "wktLiteral")));
   }
 
-  writeOsmBox(s, osm2ttl::ttl::IRI("osmway", "bbox"), way.envelope());
+  writeOsmiumBox(s, osm2ttl::ttl::IRI("osmway", "bbox"), way.envelope());
 }
 
 // ____________________________________________________________________________
 template<typename S>
-void osm2ttl::ttl::Writer::writeOsmWayNodeList(const S& s,
+void osm2ttl::ttl::Writer::writeOsmiumWayNodeList(const S& s,
                                              const osmium::WayNodeList& nodes) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);

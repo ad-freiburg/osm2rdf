@@ -28,8 +28,8 @@ osm2ttl::ttl::Literal::Literal(const osmium::Box& b)
       +std::to_string(b.bottom_left().lat_without_check())+","
       +std::to_string(b.bottom_left().lon_without_check())+" "
       +std::to_string(b.bottom_left().lat_without_check())+"))") {
-    _iri = osm2ttl::ttl::IRI("geo", "wktLiteral");
-  }
+  _iri = osm2ttl::ttl::IRI("geo", "wktLiteral");
+}
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Literal::Literal(const std::string &s, const osm2ttl::ttl::IRI& i)

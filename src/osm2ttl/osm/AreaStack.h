@@ -7,18 +7,21 @@
 #include <vector>
 
 #include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/AreaHandler.h"
 
 namespace osm2ttl {
 namespace osm {
 
 class AreaStack {
  public:
+  explicit AreaStack(osm2ttl::osm::AreaHandler* areaHandler);
   void add(const osm2ttl::osm::Area& area);
+  void add(uint64_t area);
+  osm2ttl::osm::Area lookup(uint64_t areaId);
   void sort();
  protected:
-  std::vector<osm2ttl::osm::Area> elements;
-  static bool _sort(const osm2ttl::osm::Area& i,
-                    const osm2ttl::osm::Area& j);
+  std::vector<uint64_t> elements;
+  osm2ttl::osm::AreaHandler* _areaHandler;
 };
 
 }  // namespace osm
