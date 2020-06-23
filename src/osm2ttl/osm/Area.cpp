@@ -19,6 +19,10 @@
 osm2ttl::osm::Area::Area(const osmium::Area& area) {
   _id = area.positive_id();
   _objId = area.orig_id();
+  if (area.tags()["boundary"] != nullptr
+      && area.tags()["admin_level"] != nullptr) {
+    _tagAdministrationLevel = atoi(area.tags()["admin_level"]);
+  }
 
   for (const auto& ring : area.outer_rings()) {
     _rings.emplace_back();

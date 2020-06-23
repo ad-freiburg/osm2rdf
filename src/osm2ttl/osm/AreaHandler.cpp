@@ -3,6 +3,7 @@
 
 #include "osm2ttl/osm/AreaHandler.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -20,25 +21,27 @@ osm2ttl::osm::AreaHandler::AreaHandler(const osm2ttl::config::Config& config,
 
 // ____________________________________________________________________________
 void osm2ttl::osm::AreaHandler::area(const osmium::Area& area) {
+  if (_config.ignoreUnnamed && area.tags()["name"] != nullptr) {
+    return;
+  }
   osm2ttl::osm::Area a(area);
   _areas.emplace(a.id(), a);
-  for (const auto& p : stacksForArea(a)) {
+  if (a.tagAdministrationLevel() != 0) {
+    _stacks.push_back(a.id());
   }
 }
 
 // ____________________________________________________________________________
-std::vector<std::pair<size_t, size_t>>
-osm2ttl::osm::AreaHandler::stacksForArea(const osm2ttl::osm::Area& area) {
-  std::vector<std::pair<size_t, size_t>> result;
-
-  return result;
-}
-
-// ____________________________________________________________________________
-osm2ttl::osm::Area osm2ttl::osm::AreaHandler::lookup(uint64_t id) const {
-  return _areas.at(id);
-}
-
-// ____________________________________________________________________________
 void osm2ttl::osm::AreaHandler::sort() {
+  std::vector<uint64_t>& stack = _stacks;
+  std::sort(stack.begin(), stack.end(),
+    [this](uint64_t& i, uint64_t& j) -> bool {
+    const osm2ttl::osm::Area a = _areas.at(i);
+    const osm2ttl::osm::Area b = _areas.at(j);
+    if (a.tagAdministrationLevel() >= 0 && b.tagAdministrationLevel() >= 0) {
+      return a.tagAdministrationLevel() > b.tagAdministrationLevel();
+    }
+    // No other comparison found, move smaller to the left
+    return a.vagueArea() < b.vagueArea();
+  });
 }
