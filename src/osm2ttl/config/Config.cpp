@@ -43,6 +43,12 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "store-config", "Path to store calculated config.");
   auto basicDataOnlyOp = op.add<popl::Switch>("b", "basic-data-only",
     "Only print basic data");
+  auto skipFirstPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "skip-first-pass", "");
+  auto skipSecondPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "skip-second-pass", "");
+  auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "skip-area-prep", "");
 
   try {
     op.parse(argc, argv);
@@ -62,7 +68,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     if (configOp->is_set()) {
       load(configOp->value());
     }
-    // Set values
+    // Output
     output = outputOp->value();
     if (outputFormatOp->is_set()) {
       if (outputFormatOp->value() == "ttl") {
@@ -81,6 +87,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     if (cacheOp->is_set() || cache.empty()) {
       cache = cacheOp->value();
     }
+
+    // Data selection
     if (ignoreUnnamedOp->is_set()) {
       ignoreUnnamed = true;
     }
@@ -92,6 +100,17 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
     if (basicDataOnlyOp->is_set()) {
       basicDataOnly = true;
+    }
+
+    // Skip passes
+    if (skipFirstPassOp->is_set()) {
+      skipFirstPass = true;
+    }
+    if (skipSecondPassOp->is_set()) {
+      skipSecondPass = true;
+    }
+    if (skipAreaPrepOp->is_set()) {
+      skipAreaPrep = true;
     }
 
     // Handle input

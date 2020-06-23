@@ -4,8 +4,10 @@
 #include "osm2ttl/ttl/IRI.h"
 
 #include <cctype>
+#include <iterator>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 #include "osmium/osm/node_ref.hpp"
 #include "osmium/osm/object.hpp"
@@ -39,15 +41,17 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix,
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s) {
   _prefix = prefix;
-  _value = s;
+  auto begin = std::find_if(s.begin(), s.end(), [](int c) {
+    return std::isspace(c) == 0;
+  });
+  auto end = std::find_if(s.rbegin(), s.rend(), [](int c) {
+    return std::isspace(c) == 0;
+  });
+  _value = s.substr(begin - s.begin(), std::distance(begin, end.base()));
   // Trim strings
-  _value.erase(_value.begin(),
-               std::find_if(_value.begin(), _value.end(), [](char c) {
-                 return std::isspace(c) != 0;
-  }));
-  _value.erase(std::find_if(_value.rbegin(), _value.rend(), [](char c) {
-    return std::isspace(c) != 0;
-  }).base(), _value.end());
+  if (s != _value) {
+    std::cout << "s:" << s << " -> "<< _value << "\n";
+  }
 }
 
 // ____________________________________________________________________________

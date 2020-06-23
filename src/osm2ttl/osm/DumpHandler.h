@@ -13,6 +13,7 @@
 #include "osmium/osm/way.hpp"
 
 #include "osm2ttl/config/Config.h"
+#include "osm2ttl/osm/AreaHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 
 namespace osm2ttl {
@@ -20,13 +21,17 @@ namespace osm {
 
 class DumpHandler : public osmium::handler::Handler {
  public:
-  explicit DumpHandler(osm2ttl::ttl::Writer* writer);
+  DumpHandler(const osm2ttl::config::Config& config,
+              osm2ttl::ttl::Writer* writer,
+              osm2ttl::osm::AreaHandler* areaHandler);
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
  protected:
-  osm2ttl::ttl::Writer* _w;
+  const osm2ttl::config::Config _config;
+  osm2ttl::ttl::Writer* _writer;
+  osm2ttl::osm::AreaHandler* _areaHandler;
 };
 
 }  // namespace osm

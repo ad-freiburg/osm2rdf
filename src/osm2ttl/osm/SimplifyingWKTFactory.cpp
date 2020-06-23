@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 #include <utility>
 
 #include "osmium/geom/coordinates.hpp"
@@ -146,7 +145,6 @@ void osm2ttl::osm::SimplifyingWKTFactoryImpl::simplifyByDistance(
 
 // ____________________________________________________________________________
 void osm2ttl::osm::SimplifyingWKTFactoryImpl::simplify(const bool closed) {
-  size_t oldCount = coordinates.size();
   double minX = coordinates[0].x;
   double minY = coordinates[0].y;
   double maxX = coordinates[0].x;
@@ -174,12 +172,6 @@ void osm2ttl::osm::SimplifyingWKTFactoryImpl::simplify(const bool closed) {
     if (distanceDiff >= bboxSmallest) {
       break;
     }
-  }
-  if (coordinates.size() < oldCount) {
-    std::cout << "Simplified " << oldCount << " to " << coordinates.size()
-      << " nodes" << std::endl;
-    std::cout << "AngleDiff " << angleDiff << " DistanceDiff " << distanceDiff
-      << std::endl;
   }
 }
 

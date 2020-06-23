@@ -16,6 +16,9 @@ struct Config {
   bool addWikiLinks = false;
   bool ignoreUnnamed = false;
   bool basicDataOnly = false;
+  bool skipFirstPass = false;
+  bool skipSecondPass = false;
+  bool skipAreaPrep = false;
   std::string output;
   osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::TTL;
   std::string input;

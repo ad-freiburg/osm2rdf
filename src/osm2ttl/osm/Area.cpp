@@ -15,24 +15,20 @@
 #include "osm2ttl/osm/Ring.h"
 
 // ____________________________________________________________________________
-osm2ttl::osm::Area::Area(uint64_t id, const osmium::Area& area,
-  osmium::handler::NodeLocationsForWays<
-    osmium::index::map::SparseFileArray<
-      osmium::unsigned_object_id_type, osmium::Location>>* nodeLocations) :
-    _nodeLocations(nodeLocations) {
-  _id = id;
+osm2ttl::osm::Area::Area(const osmium::Area& area) {
+  _id = area.positive_id();
   _box = area.envelope();
 
   for (const auto& ring : area.outer_rings()) {
     _rings.emplace_back();
     for (const auto& noderef : ring) {
-      _rings.back().nodes.push_back(noderef.positive_ref());
+      _rings.back().vertices.push_back(noderef.location());
     }
 
     for (const auto& iring : area.inner_rings(ring)) {
       _rings.back().inner.emplace_back();
       for (const auto& noderef : iring) {
-      _rings.back().inner.back().nodes.push_back(noderef.positive_ref());
+      _rings.back().inner.back().vertices.push_back(noderef.location());
       }
     }
   }
@@ -59,12 +55,16 @@ char osm2ttl::osm::Area::tagAdministrationLevel() const {
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::osm::OuterRing> osm2ttl::osm::Area::rings() {
+std::vector<osm2ttl::osm::OuterRing> osm2ttl::osm::Area::rings() const {
   return _rings;
 }
 
 // ____________________________________________________________________________
 double osm2ttl::osm::Area::vagueArea() const {
+  std::cout << _box.top_right().x() << "-" << _box.bottom_left().x()
+    << "=" << _box.top_right().x() - _box.bottom_left().x() << "\n";
+  std::cout << _box.top_right().y() << "-" << _box.bottom_left().y()
+    << "=" << _box.top_right().y() - _box.bottom_left().y() << "\n";
   return (_box.top_right().x() - _box.bottom_left().x()) *
          (_box.top_right().y() - _box.bottom_left().y());
 }
@@ -92,7 +92,6 @@ bool osm2ttl::osm::Area::vagueContains(const osm2ttl::osm::Area& other)
 // ____________________________________________________________________________
 double osm2ttl::osm::Area::area() const {
   double res = 0.0;
-
   for (const auto& outer : _rings) {
     res += osm2ttl::osm::Area::area(outer);
     for (const auto& inner : outer.inner) {
@@ -105,11 +104,12 @@ double osm2ttl::osm::Area::area() const {
 // ____________________________________________________________________________
 double osm2ttl::osm::Area::area(const osm2ttl::osm::Ring& ring) const {
   double res = 0.0;
-  for (size_t i = 0; i < ring.nodes.size(); ++i) {
-    size_t j = (i + 1) % ring.nodes.size();
-    osmium::Location l1 = _nodeLocations->get_node_location(ring.nodes[i]);
-    osmium::Location l2 = _nodeLocations->get_node_location(ring.nodes[j]);
-    res += 0.5 * std::abs((l1.x() * l2.y()) - (l1.y() * l2.x()));
+  for (size_t i = 0; i < ring.vertices.size() - 1; ++i) {
+    const osmium::Location& l1 = ring.vertices[i];
+    const osmium::Location& l2 = ring.vertices[i + 1];
+    std::cout << "  " << l1.x() << " " << l1.y() << "\n";
+    std::cout << "  " << l2.x() << " " << l2.y() << "\n";
+    res += 0.5 * (l1.x() * l2.y()) - (l1.y() * l2.x());
     std::cout << "|" << l1 << " " << l2 << " :: " << res << "\n";
   }
   return res;

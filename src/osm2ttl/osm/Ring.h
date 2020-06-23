@@ -10,7 +10,7 @@ namespace osm2ttl {
 namespace osm {
 
 struct Ring {
-  std::vector<uint64_t> nodes;
+  std::vector<osmium::Location> vertices;
 };
 
 struct OuterRing : public Ring {

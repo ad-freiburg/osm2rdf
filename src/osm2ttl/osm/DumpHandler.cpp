@@ -18,26 +18,39 @@
 #include "osm2ttl/ttl/Writer.h"
 
 // ____________________________________________________________________________
-osm2ttl::osm::DumpHandler::DumpHandler(osm2ttl::ttl::Writer* writer) {
-  _w = writer;
+osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
+  osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler) :
+  _config(config), _writer(writer), _areaHandler(areaHandler) {
 }
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
-  _w->writeOsmArea(area);
+  if (_config.ignoreUnnamed && area.tags()["name"] == nullptr) {
+    return;
+  }
+  _writer->writeOsmArea(area);
 }
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
-  _w->writeOsmNode(node);
+  if (_config.ignoreUnnamed && node.tags()["name"] == nullptr) {
+    return;
+  }
+  _writer->writeOsmNode(node);
 }
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
-  _w->writeOsmRelation(relation);
+  if (_config.ignoreUnnamed && relation.tags()["name"] == nullptr) {
+    return;
+  }
+  _writer->writeOsmRelation(relation);
 }
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
-  _w->writeOsmWay(way);
+  if (_config.ignoreUnnamed && way.tags()["name"] == nullptr) {
+    return;
+  }
+  _writer->writeOsmWay(way);
 }

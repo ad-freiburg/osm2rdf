@@ -263,9 +263,6 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeOsmArea(const osmium::Area& area) {
-  if (_config.ignoreUnnamed && area.tags()["name"] == nullptr) {
-    return;
-  }
   osm2ttl::ttl::IRI s{"osma", area};
 
   writeTriple(s,
@@ -336,9 +333,6 @@ void osm2ttl::ttl::Writer::writeOsmLocation(const S& s,
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeOsmNode(const osmium::Node& node) {
-  if (_config.ignoreUnnamed && node.tags()["name"] == nullptr) {
-    return;
-  }
   osm2ttl::ttl::IRI s{"osmnode", node};
 
   writeOsmLocation(s, node.location());
@@ -347,9 +341,6 @@ void osm2ttl::ttl::Writer::writeOsmNode(const osmium::Node& node) {
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeOsmRelation(const osmium::Relation& relation) {
-  if (_config.ignoreUnnamed && relation.tags()["name"] == nullptr) {
-    return;
-  }
   osm2ttl::ttl::IRI s{"osmrel", relation};
 
   writeOsmTagList(s, relation.tags());
@@ -464,9 +455,6 @@ void osm2ttl::ttl::Writer::writeOsmTagList(const S& s,
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeOsmWay(const osmium::Way& way) {
-  if (_config.ignoreUnnamed && way.tags()["name"] == nullptr) {
-    return;
-  }
   osm2ttl::ttl::IRI s{"osmway", way};
 
   writeOsmTagList(s, way.tags());
