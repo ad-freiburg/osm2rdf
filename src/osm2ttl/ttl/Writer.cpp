@@ -146,8 +146,7 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "from_way"),
-    osm2ttl::ttl::Literal(area.from_way()?"true":"false",
-      osm2ttl::ttl::IRI("xsd", "boolean")));
+    osm2ttl::ttl::Literal(area.from_way()?"true":"false"));
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "orig_id"),
@@ -171,8 +170,7 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "is_multipolygon"),
-    osm2ttl::ttl::Literal(area.is_multipolygon()?"true":"false",
-      osm2ttl::ttl::IRI("xsd", "boolean")));
+    osm2ttl::ttl::Literal(area.is_multipolygon()?"true":"false"));
 
   writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), area.envelope());
 

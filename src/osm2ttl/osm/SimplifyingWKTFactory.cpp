@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <algorithm>
-#include <iostream>
 #include <utility>
 
 #include "osmium/geom/coordinates.hpp"
@@ -165,22 +164,18 @@ void osm2ttl::osm::SimplifyingWKTFactoryImpl::simplify(const bool closed) {
   double distanceDiff = bboxSmallest / bboxScaleFactor;
   const double halfCircle = 180.0;
   double angleDiff = 2;
-  std::cout << _coordinates.size() << " -> " << maxCoords << " " << std::endl;
   while (_coordinates.size() > maxCoords) {
     simplifyByDistance(closed, distanceDiff);
     simplifyByAngle(closed, angleDiff);
     angleDiff += 0.5;
     distanceDiff *= 2;
     if (angleDiff >= halfCircle) {
-      std::cout << "abort angle " << std::endl;
       break;
     }
     if (distanceDiff >= bboxSmallest) {
-      std::cout << "abort distance " << std::endl;
       break;
     }
   }
-  std::cout << "exit with " << _coordinates.size() << std::endl;
 }
 
 // ____________________________________________________________________________
