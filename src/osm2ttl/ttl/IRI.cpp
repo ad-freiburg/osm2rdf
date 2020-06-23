@@ -14,16 +14,16 @@
 #include "osmium/osm/relation.hpp"
 
 // ____________________________________________________________________________
-osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n) {
-  _prefix = prefix;
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n)
+  : _prefix(prefix) {
   std::stringstream tmp;
   tmp << n.positive_ref();
   _value = tmp.str();
 }
 
 // ____________________________________________________________________________
-osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o) {
-  _prefix = prefix;
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o)
+  : _prefix(prefix) {
   std::stringstream tmp;
   tmp << o.positive_id();
   _value = tmp.str();
@@ -31,25 +31,24 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o) {
 
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix,
-                     const osmium::RelationMember& m) {
-  _prefix = prefix;
+                       const osmium::RelationMember& m)
+  : _prefix(prefix) {
   std::stringstream tmp;
   tmp << m.positive_ref();
   _value = tmp.str();
 }
 
 // ____________________________________________________________________________
-osm2ttl::ttl::IRI::IRI(const std::string& prefix,
-                     const osm2ttl::osm::Area& a) {
-  _prefix = prefix;
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Area& a)
+  : _prefix(prefix) {
   std::stringstream tmp;
   tmp << a.id();
   _value = tmp.str();
 }
 
 // ____________________________________________________________________________
-osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s) {
-  _prefix = prefix;
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s)
+  : _prefix(prefix) {
   auto begin = std::find_if(s.begin(), s.end(), [](int c) {
     return std::isspace(c) == 0;
   });
@@ -64,11 +63,11 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s) {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::IRI::prefix() const {
+std::string osm2ttl::ttl::IRI::prefix() const noexcept {
   return _prefix;
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::IRI::value() const {
+std::string osm2ttl::ttl::IRI::value() const noexcept {
   return _value;
 }

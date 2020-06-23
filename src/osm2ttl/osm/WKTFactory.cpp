@@ -16,11 +16,12 @@
 // ____________________________________________________________________________
 osm2ttl::osm::WKTFactory* osm2ttl::osm::WKTFactory::create(
   const osm2ttl::config::Config& config) {
-  if (config.simplifyWKT) {
+  if (config.simplifyWKT > 0) {
     return new osm2ttl::osm::WKTSimplifying();
   }
   return new osm2ttl::osm::WKTOsmium();
 }
+
 // ____________________________________________________________________________
 template<class T>
 std::string osm2ttl::osm::WKTFactoryImpl<T>::create_point(

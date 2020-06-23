@@ -18,9 +18,9 @@ namespace ttl {
 class OutputFormat {
  public:
   enum Value : uint8_t {
+    QLEVER,
     TTL,
-    NT,
-    QLEVER
+    NT
   };
 
   OutputFormat();

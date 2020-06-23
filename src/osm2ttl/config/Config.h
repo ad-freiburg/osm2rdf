@@ -5,6 +5,7 @@
 #define OSM2TTL_CONFIG_CONFIG_H_
 
 #include <string>
+#include <unordered_map>
 
 #include "osm2ttl/ttl/OutputFormat.h"
 
@@ -12,21 +13,31 @@ namespace osm2ttl {
 namespace config {
 
 struct Config {
-  bool simplifyWKT = false;
-  bool addWikiLinks = false;
-  bool ignoreUnnamed = false;
-  bool basicDataOnly = false;
-  bool skipFirstPass = false;
+  size_t simplifyWKT = 0;
+  bool addUnnamed = false;
+  bool expandedData = false;
+  bool skipWikiLinks = false;
+  bool skipFirstPass = true;
   bool skipSecondPass = false;
   bool skipAreaPrep = false;
   std::string output;
-  osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::TTL;
+  osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::QLEVER;
   std::string input;
   std::string cache;
+
+  std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;
 
   void load(const std::string& filename);
   void save(const std::string& filename);
   void fromArgs(int argc, char** argv);
+
+  static Config& getInstance() {
+    static Config instance;
+    return instance;
+  }
+
+ private:
+  Config() {}
 };
 }  // namespace config
 }  // namespace osm2ttl

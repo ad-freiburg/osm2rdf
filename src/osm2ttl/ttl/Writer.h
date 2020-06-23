@@ -69,10 +69,6 @@ class Writer {
   static bool contains(std::string_view s, std::string_view n);
   static bool endsWith(std::string_view s, std::string_view n);
   static bool startsWith(std::string_view s, std::string_view n);
-  static std::string urlencode(std::string_view s);
-  // Used for PN_LOCAL_ESC
-  // https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL_ESC
-  static std::string urlescape(std::string_view s);
 
   // Element
   void write(const osm2ttl::ttl::BlankNode& b);

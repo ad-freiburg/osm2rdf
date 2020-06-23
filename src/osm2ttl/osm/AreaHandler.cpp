@@ -21,7 +21,7 @@ osm2ttl::osm::AreaHandler::AreaHandler(const osm2ttl::config::Config& config,
 
 // ____________________________________________________________________________
 void osm2ttl::osm::AreaHandler::area(const osmium::Area& area) {
-  if (_config.ignoreUnnamed && area.tags()["name"] != nullptr) {
+  if (!_config.addUnnamed && area.tags()["name"] != nullptr) {
     return;
   }
   osm2ttl::osm::Area a(area);

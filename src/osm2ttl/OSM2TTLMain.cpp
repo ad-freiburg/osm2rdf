@@ -21,7 +21,7 @@
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
-  osm2ttl::config::Config config;
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   config.fromArgs(argc, argv);
 
   try {

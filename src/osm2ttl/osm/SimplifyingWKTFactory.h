@@ -55,11 +55,11 @@ class SimplifyingWKTFactoryImpl {
   void simplifyByAngle(const bool closed, const double angleDiff);
   void simplifyByDistance(const bool closed, const double distanceDiff);
   void merge(const size_t index1, const size_t index2);
-  std::vector<osmium::geom::Coordinates> coordinates;
-  std::string buffer;
-  int precision = 7;
-  size_t maxCoordinates = 10;
-  osm2ttl::osm::MergeMode mergeMode = osm2ttl::osm::MergeMode::MERGE;
+  std::vector<osmium::geom::Coordinates> _coordinates;
+  std::string _buffer;
+  int _precision = 7;
+  size_t _maxCoordinates = 10;
+  osm2ttl::osm::MergeMode _mergeMode = osm2ttl::osm::MergeMode::MERGE;
 };
 
 template <typename TProjection = osmium::geom::IdentityProjection>

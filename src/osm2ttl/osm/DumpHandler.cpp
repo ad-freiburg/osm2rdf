@@ -25,7 +25,7 @@ osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
-  if (_config.ignoreUnnamed && area.tags()["name"] == nullptr) {
+  if (!_config.addUnnamed && area.tags()["name"] == nullptr) {
     return;
   }
   _writer->writeOsmiumArea(area);
@@ -34,7 +34,7 @@ void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
-  if (_config.ignoreUnnamed && node.tags()["name"] == nullptr) {
+  if (!_config.addUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
   _writer->writeOsmiumNode(node);
@@ -42,7 +42,7 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
-  if (_config.ignoreUnnamed && relation.tags()["name"] == nullptr) {
+  if (!_config.addUnnamed && relation.tags()["name"] == nullptr) {
     return;
   }
   _writer->writeOsmiumRelation(relation);
@@ -50,7 +50,7 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
-  if (_config.ignoreUnnamed && way.tags()["name"] == nullptr) {
+  if (!_config.addUnnamed && way.tags()["name"] == nullptr) {
     return;
   }
   _writer->writeOsmiumWay(way);

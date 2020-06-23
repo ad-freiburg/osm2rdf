@@ -32,23 +32,23 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "output-format", "Output format, valid values: nt, ttl, qlever", "ttl");
   auto cacheOp = op.add<popl::Value<std::string>>(
     "t", "cache", "Path to cache file", "/tmp/osm2ttl-cache");
-  auto ignoreUnnamedOp = op.add<popl::Switch>(
-    "u", "ignore-unnamed", "Only add named entities to the result.");
-  auto addWikiLinksOp = op.add<popl::Switch>(
-    "w", "add-wiki-links", "Add links to wikipedia and wikidata.");
-  auto simplifyWKTOp = op.add<popl::Switch>(
+  auto addUnnamedOp = op.add<popl::Switch>(
+    "u", "add-unnamed", "Add unnamed entities to the result.");
+  auto skipWikiLinksOp = op.add<popl::Switch>(
+    "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
+  auto simplifyWKTOp = op.add<popl::Value<size_t>>(
     "s", "simplify-wkt", "Simplify WKT-Geometry");
   auto storeConfigOp = op.add<popl::Value<std::string>,
        popl::Attribute::advanced>(
     "", "store-config", "Path to store calculated config.");
-  auto basicDataOnlyOp = op.add<popl::Switch>("b", "basic-data-only",
-    "Only print basic data");
+  auto expandedDataOp = op.add<popl::Switch>("x", "expanded-data",
+    "Add expanded data");
   auto skipFirstPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-first-pass", "");
-  auto skipSecondPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-second-pass", "");
+    "", "skip-first-pass", "Skip area collection for contains-relation");
   auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-area-prep", "");
+    "", "skip-area-prep", "Skip area sorting");
+  auto skipSecondPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "skip-second-pass", "Skip dump");
 
   try {
     op.parse(argc, argv);
@@ -89,17 +89,17 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     // Data selection
-    if (ignoreUnnamedOp->is_set()) {
-      ignoreUnnamed = true;
+    if (addUnnamedOp->is_set()) {
+      addUnnamed = true;
     }
-    if (addWikiLinksOp->is_set()) {
-      addWikiLinks = true;
+    if (skipWikiLinksOp->is_set()) {
+      skipWikiLinks = true;
+    }
+    if (expandedDataOp->is_set()) {
+      expandedData = true;
     }
     if (simplifyWKTOp->is_set()) {
-      simplifyWKT = true;
-    }
-    if (basicDataOnlyOp->is_set()) {
-      basicDataOnly = true;
+      simplifyWKT = simplifyWKTOp->value();
     }
 
     // Skip passes
@@ -112,6 +112,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     if (skipAreaPrepOp->is_set()) {
       skipAreaPrep = true;
     }
+
+    // Add tag-key -> xsd overrides
+    tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");
 
     // Handle input
     if (op.non_option_args().size() != 1) {

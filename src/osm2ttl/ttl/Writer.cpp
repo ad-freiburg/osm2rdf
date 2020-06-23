@@ -28,8 +28,8 @@
 #include "osm2ttl/ttl/Literal.h"
 
 // ____________________________________________________________________________
-osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config) {
-  _config = config;
+osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
+  : _config(config) {
   _out = &std::cout;
   _factory = osm2ttl::osm::WKTFactory::create(_config);
 }
@@ -94,133 +94,6 @@ bool osm2ttl::ttl::Writer::startsWith(std::string_view s,
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::ttl::Writer::urlencode(std::string_view s) {
-  std::stringstream tmp;
-  for (size_t pos = 0; pos < s.size(); ++pos) {
-    switch (s[pos]) {
-      case ' ':
-        tmp << "%20";
-        break;
-      case '\"':
-        tmp << "%22";
-        break;
-      case '\'':
-        tmp << "%24";
-        break;
-      case '%':
-        tmp << "%25";
-        break;
-      case '&':
-        tmp << "%26";
-        break;
-      case '(':
-        tmp << "%28";
-        break;
-      case ')':
-        tmp << "%29";
-        break;
-      case ',':
-        tmp << "%2C";
-        break;
-      case '<':
-        tmp << "%3C";
-        break;
-      case '>':
-        tmp << "%3E";
-        break;
-      case '|':
-        tmp << "%7C";
-        break;
-      default:
-        tmp << s[pos];
-    }
-  }
-  return tmp.str();
-}
-
-// ____________________________________________________________________________
-std::string osm2ttl::ttl::Writer::urlescape(std::string_view s) {
-  std::stringstream tmp;
-  for (size_t pos = 0; pos < s.size(); ++pos) {
-    // PN_LOCAL_ESC
-    switch (s[pos]) {
-      case '_':
-        tmp << "\\_";
-        break;
-      case '~':
-        tmp << "\\~";
-        break;
-      case '.':
-        tmp << "\\.";
-        break;
-      case '-':
-        tmp << "\\-";
-        break;
-      case '!':
-        tmp << "\\!";
-        break;
-      case '$':
-        tmp << "\\$";
-        break;
-      case '&':
-        tmp << "\\&";
-        break;
-      case '\'':
-        tmp << "\\\'";
-        break;
-      case '(':
-        tmp << "\\(";
-        break;
-      case ')':
-        tmp << "\\)";
-        break;
-      case '*':
-        tmp << "\\*";
-        break;
-      case '+':
-        tmp << "\\+";
-        break;
-      case ',':
-        tmp << "\\,";
-        break;
-      case ';':
-        tmp << "\\;";
-        break;
-      case '=':
-        tmp << "\\=";
-        break;
-      case '/':
-        tmp << "\\/";
-        break;
-      case '?':
-        tmp << "\\?";
-        break;
-      case '#':
-        tmp << "\\#";
-        break;
-      case '@':
-        tmp << "\\@";
-        break;
-      case '%':
-        tmp << "\\%";
-        break;
-      case '[':
-        tmp << "%5B";
-        break;
-      case ']':
-        tmp << "%5D";
-        break;
-      case '|':
-        tmp << "%7C";
-        break;
-      default:
-        tmp << s[pos];
-    }
-  }
-  return tmp.str();
-}
-
-// ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeHeader() const {
   *_out << _config.outputFormat.header();
 }
@@ -273,11 +146,13 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "from_way"),
-    osm2ttl::ttl::Literal(area.from_way()?"yes":"no"));
+    osm2ttl::ttl::Literal(area.from_way()?"true":"false",
+      osm2ttl::ttl::IRI("xsd", "boolean")));
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "orig_id"),
-    osm2ttl::ttl::Literal(std::to_string(area.orig_id())));
+    osm2ttl::ttl::Literal(std::to_string(area.orig_id()),
+      osm2ttl::ttl::IRI("xsd", "integer")));
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "orig"),
@@ -296,9 +171,10 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
 
   writeTriple(s,
     osm2ttl::ttl::IRI("osma", "is_multipolygon"),
-    osm2ttl::ttl::Literal(area.is_multipolygon()?"yes":"no"));
+    osm2ttl::ttl::Literal(area.is_multipolygon()?"true":"false",
+      osm2ttl::ttl::IRI("xsd", "boolean")));
 
-  writeOsmiumBox(s, osm2ttl::ttl::IRI("osma", "bbox"), area.envelope());
+  writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), area.envelope());
 
   writeOsmiumTagList(s, area.tags());
 }
@@ -362,7 +238,7 @@ void osm2ttl::ttl::Writer::writeOsmiumRelationMembers(
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   // If only basic data is requested, skip this.
-  if (_config.basicDataOnly) {
+  if (!_config.expandedData) {
     return;
   }
 
@@ -404,9 +280,16 @@ void osm2ttl::ttl::Writer::writeOsmiumTag(const S& s,
         tmp << key[pos];
     }
   }
-  writeTriple(s,
-    osm2ttl::ttl::IRI("osmt", tmp.str()),
-    osm2ttl::ttl::Literal(tag.value()));
+  if (_config.tagKeyType.find(tag.key()) != _config.tagKeyType.end()) {
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmt", tmp.str()),
+      osm2ttl::ttl::Literal(tag.value(),
+        _config.tagKeyType.at(tag.key())));
+  } else {
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmt", tmp.str()),
+      osm2ttl::ttl::Literal(tag.value()));
+  }
 }
 
 // ____________________________________________________________________________
@@ -417,28 +300,22 @@ void osm2ttl::ttl::Writer::writeOsmiumTagList(const S& s,
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   for (const osmium::Tag& tag : tags) {
     writeOsmiumTag(s, tag);
-    if (_config.addWikiLinks) {
-      if (Writer::endsWith(tag.key(), "wikidata") &&
-          !Writer::contains(tag.key(), "fixme")) {
+    if (!_config.skipWikiLinks) {
+      if (std::string(tag.key()) == "wikidata") {
         std::string value{tag.value()};
-        size_t pos1 = 0;
-        size_t pos2 = value.find(";");
-        if (pos2 != std::string::npos) {
-          while (pos2 != std::string::npos) {
-            writeTriple(s,
-              osm2ttl::ttl::IRI("osm", tag.key()),
-              osm2ttl::ttl::IRI("wd", value.substr(pos1, pos2-pos1)));
-            pos1 = pos2 + 1;
-            pos2 = value.find(";", pos1);
-          }
-          writeTriple(s,
-            osm2ttl::ttl::IRI("osm", tag.key()),
-            osm2ttl::ttl::IRI("wd", value.substr(pos1)));
-        } else {
-          writeTriple(s,
-            osm2ttl::ttl::IRI("osm", tag.key()),
-            osm2ttl::ttl::IRI("wd", value));
+        // Only take first wikidata entry if ; is found
+        auto end = value.find(';');
+        if (end != std::string::npos) {
+          value = value.erase(end);
         }
+        // Remove all but Q and digits to ensuder Qdddddd format
+        value.erase(remove_if(value.begin(), value.end(), [](char c) {
+          return (!isdigit(c) && c != 'Q');
+        }), value.end());
+
+        writeTriple(s,
+          osm2ttl::ttl::IRI("osm", tag.key()),
+          osm2ttl::ttl::IRI("wd", value));
       }
       if (Writer::endsWith(tag.key(), "wikipedia") &&
           !Writer::contains(tag.key(), "fixme")) {
@@ -490,7 +367,7 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
         osm2ttl::ttl::IRI("geo", "wktLiteral")));
   }
 
-  writeOsmiumBox(s, osm2ttl::ttl::IRI("osmway", "bbox"), way.envelope());
+  writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), way.envelope());
 }
 
 // ____________________________________________________________________________
@@ -500,7 +377,7 @@ void osm2ttl::ttl::Writer::writeOsmiumWayNodeList(const S& s,
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   // If only basic data is requested, skip this.
-  if (_config.basicDataOnly) {
+  if (!_config.expandedData) {
     return;
   }
 

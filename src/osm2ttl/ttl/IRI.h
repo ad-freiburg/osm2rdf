@@ -17,13 +17,14 @@ namespace ttl {
 
 struct IRI {
  public:
+  IRI() = default;
   IRI(const std::string& prefix, const std::string& s);
   IRI(const std::string& prefix, const osmium::NodeRef& n);
   IRI(const std::string& prefix, const osmium::OSMObject& o);
   IRI(const std::string& prefix, const osmium::RelationMember& m);
   IRI(const std::string& prefix, const osm2ttl::osm::Area& a);
-  std::string prefix() const;
-  std::string value() const;
+  std::string prefix() const noexcept;
+  std::string value() const noexcept;
  protected:
   std::string _prefix;
   std::string _value;
