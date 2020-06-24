@@ -262,7 +262,6 @@ void osm2ttl::osm::SimplifyingWKTFactoryImpl::multipolygon_inner_ring_finish() {
     _buffer += ',';
   }
   _buffer.back() = ')';
-  _buffer += ',';
 }
 
 // ____________________________________________________________________________
