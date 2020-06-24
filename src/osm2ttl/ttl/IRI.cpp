@@ -55,11 +55,8 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix, const std::string& s)
   auto end = std::find_if(s.rbegin(), s.rend(), [](int c) {
     return std::isspace(c) == 0;
   });
-  _value = s.substr(begin - s.begin(), std::distance(begin, end.base()));
   // Trim strings
-  if (s != _value) {
-    std::cout << "s:" << s << " -> "<< _value << "\n";
-  }
+  _value = s.substr(begin - s.begin(), std::distance(begin, end.base()));
 }
 
 // ____________________________________________________________________________
