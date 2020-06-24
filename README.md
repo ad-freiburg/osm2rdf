@@ -32,6 +32,10 @@ $ wget -O ./input/baden-wuerttemberg-latest.osm.pbf https://download.geofabrik.d
 $ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl
 $ wget -O ./input/germany-latest.osm.pbf https://download.geofabrik.de/europe/germany-latest.osm.pbf
 $ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl
+$ wget -O ./input/europe-latest.osm.pbf https://download.geofabrik.de/europe-latest.osm.pbf
+$ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl
+$ wget -O ./input/planet-latest.osm.pbf https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+$ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/planet-latest.osm.pbf -o /output/planet-latest.osm.ttl
 ```
 
 More `.pbf` files can be found on the [Geofrabik Download Server](https://download.geofabrik.de/index.html)
