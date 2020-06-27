@@ -13,19 +13,36 @@ namespace osm2ttl {
 namespace config {
 
 struct Config {
-  size_t simplifyWKT = 0;
-  bool addUnnamed = false;
-  bool expandedData = false;
-  bool skipWikiLinks = false;
+  // Select what to do
   bool skipFirstPass = true;
   bool skipSecondPass = false;
   bool skipAreaPrep = false;
+
+  // Select types to dump
+  bool noNodeDump = false;
+  bool noRelationDump = false;
+  bool noWayDump = false;
+  bool noAreaDump = false;
+
+  // Select amount to dump
+  bool addUnnamed = false;
+  bool expandedData = false;
+  bool skipWikiLinks = false;
+  size_t simplifyWKT = 0;
+
+  // tag.key() -> IRI
+  std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;
+
+  // Output, empty for stdout
   std::string output;
+  // Output format
   osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::QLEVER;
-  std::string input;
+
+  // osmium location cache
   std::string cache;
 
-  std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;
+  // Input file
+  std::string input;
 
   void load(const std::string& filename);
   void save(const std::string& filename);

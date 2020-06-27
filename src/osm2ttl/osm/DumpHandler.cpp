@@ -25,6 +25,9 @@ osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
+  if (_config.noAreaDump) {
+    return;
+  }
   if (!_config.addUnnamed && area.tags()["name"] == nullptr) {
     return;
   }
@@ -34,6 +37,9 @@ void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
+  if (_config.noNodeDump) {
+    return;
+  }
   if (!_config.addUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
@@ -42,6 +48,9 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
+  if (_config.noRelationDump) {
+    return;
+  }
   if (!_config.addUnnamed && relation.tags()["name"] == nullptr) {
     return;
   }
@@ -50,6 +59,9 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
+  if (_config.noWayDump) {
+    return;
+  }
   if (!_config.addUnnamed && way.tags()["name"] == nullptr) {
     return;
   }

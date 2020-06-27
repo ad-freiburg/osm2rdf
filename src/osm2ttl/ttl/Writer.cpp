@@ -202,10 +202,6 @@ void osm2ttl::ttl::Writer::writeOsmiumLocation(const S& s,
   location.as_string_without_check(std::ostream_iterator<char>(loc));
 
   writeTriple(s,
-    osm2ttl::ttl::IRI("osml", "direct"),
-    osm2ttl::ttl::Literal(loc.str()));
-
-  writeTriple(s,
     osm2ttl::ttl::IRI("geo", "hasGeometry"),
     osm2ttl::ttl::Literal(_factory->create_point(location),
       osm2ttl::ttl::IRI("geo", "wktLiteral")));
@@ -247,10 +243,14 @@ void osm2ttl::ttl::Writer::writeOsmiumRelationMembers(
       osm2ttl::ttl::IRI("osmrel", "membership"),
       b);
 
+    std::string role{member.role()};
+    if (role.empty()) {
+      role = "member";
+    }
     writeTriple(b,
-      osm2ttl::ttl::IRI("osmrel", "member"),
+      osm2ttl::ttl::IRI("osmrel", role),
       osm2ttl::ttl::IRI("osm"
-        + std::string(osmium::item_type_to_name(member.type()))  + "/",
+        + std::string(osmium::item_type_to_name(member.type())),
         member));
 
     writeTriple(b,

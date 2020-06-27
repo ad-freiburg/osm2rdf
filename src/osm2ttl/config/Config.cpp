@@ -29,7 +29,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "o", "output", "Output file", "");
   auto outputFormatOp = op.add<popl::Value<std::string>,
        popl::Attribute::advanced>(
-    "", "output-format", "Output format, valid values: nt, ttl, qlever", "ttl");
+    "", "output-format", "Output format, valid values: nt, ttl, qlever",
+    "qlever");
   auto cacheOp = op.add<popl::Value<std::string>>(
     "t", "cache", "Path to cache file", "/tmp/osm2ttl-cache");
   auto addUnnamedOp = op.add<popl::Switch>(
@@ -49,6 +50,14 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "skip-area-prep", "Skip area sorting");
   auto skipSecondPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "skip-second-pass", "Skip dump");
+  auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-node-dump", "Skip nodes while dumping data");
+  auto noRelationDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-relation-dump", "Skip relations while dumping data");
+  auto noWayDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-way-dump", "Skip ways while dumping data");
+  auto noAreaDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-area-dump", "Skip areas while dumping data");
 
   try {
     op.parse(argc, argv);
@@ -68,6 +77,49 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     if (configOp->is_set()) {
       load(configOp->value());
     }
+
+    // Skip passes
+    if (skipFirstPassOp->is_set()) {
+      skipFirstPass = true;
+    }
+    if (skipSecondPassOp->is_set()) {
+      skipSecondPass = true;
+    }
+    if (skipAreaPrepOp->is_set()) {
+      skipAreaPrep = true;
+    }
+
+    // Select types to dump
+    if (noNodeDumpOp->is_set()) {
+      noNodeDump = true;
+    }
+    if (noRelationDumpOp->is_set()) {
+      noRelationDump = true;
+    }
+    if (noWayDumpOp->is_set()) {
+      noWayDump = true;
+    }
+    if (noAreaDumpOp->is_set()) {
+      noAreaDump = true;
+    }
+
+    // Select amount to dump
+    if (addUnnamedOp->is_set()) {
+      addUnnamed = true;
+    }
+    if (skipWikiLinksOp->is_set()) {
+      skipWikiLinks = true;
+    }
+    if (expandedDataOp->is_set()) {
+      expandedData = true;
+    }
+    if (simplifyWKTOp->is_set()) {
+      simplifyWKT = simplifyWKTOp->value();
+    }
+
+    // Add tag-key -> xsd overrides
+    tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");
+
     // Output
     output = outputOp->value();
     if (outputFormatOp->is_set()) {
@@ -84,37 +136,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
         exit(1);
       }
     }
+
+    // osmium location cache
     if (cacheOp->is_set() || cache.empty()) {
       cache = cacheOp->value();
     }
-
-    // Data selection
-    if (addUnnamedOp->is_set()) {
-      addUnnamed = true;
-    }
-    if (skipWikiLinksOp->is_set()) {
-      skipWikiLinks = true;
-    }
-    if (expandedDataOp->is_set()) {
-      expandedData = true;
-    }
-    if (simplifyWKTOp->is_set()) {
-      simplifyWKT = simplifyWKTOp->value();
-    }
-
-    // Skip passes
-    if (skipFirstPassOp->is_set()) {
-      skipFirstPass = true;
-    }
-    if (skipSecondPassOp->is_set()) {
-      skipSecondPass = true;
-    }
-    if (skipAreaPrepOp->is_set()) {
-      skipAreaPrep = true;
-    }
-
-    // Add tag-key -> xsd overrides
-    tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");
 
     // Handle input
     if (op.non_option_args().size() != 1) {
