@@ -149,15 +149,15 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
       osm2ttl::ttl::IRI("geo", "wktLiteral")));
 
   writeTriple(s,
-    osm2ttl::ttl::IRI("osma", "from_way"),
-    osm2ttl::ttl::Literal(area.from_way()?"true":"false"));
-
-  writeTriple(s,
     osm2ttl::ttl::IRI("osma", "orig"),
     osm2ttl::ttl::IRI(area.from_way()?"osmway":"osmrel",
       std::to_string(area.orig_id())));
 
   if (_config.metaData) {
+  writeTriple(s,
+    osm2ttl::ttl::IRI("osma", "from_way"),
+    osm2ttl::ttl::Literal(area.from_way()?"true":"false"));
+
     writeTriple(s,
       osm2ttl::ttl::IRI("osma", "orig_id"),
       osm2ttl::ttl::Literal(std::to_string(area.orig_id()),
@@ -362,10 +362,6 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
   writeOsmiumTagList(s, way.tags());
   writeOsmiumWayNodeList(s, way.nodes());
 
-  writeTriple(s,
-    osm2ttl::ttl::IRI("osmway", "is_closed"),
-    osm2ttl::ttl::Literal(way.is_closed()?"yes":"no"));
-
   if (way.nodes().size() > 3 && way.is_closed()) {
     writeTriple(s,
       osm2ttl::ttl::IRI("geo", "hasGeometry"),
@@ -383,6 +379,12 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
       osm2ttl::ttl::Literal(
         _factory->create_point(way.nodes()[0]),
         osm2ttl::ttl::IRI("geo", "wktLiteral")));
+  }
+
+  if (_config.metaData) {
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmway", "is_closed"),
+      osm2ttl::ttl::Literal(way.is_closed()?"yes":"no"));
   }
 
   if (_config.addBBox) {
