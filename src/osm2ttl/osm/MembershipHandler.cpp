@@ -17,12 +17,12 @@
 // ____________________________________________________________________________
 osm2ttl::osm::MembershipHandler::MembershipHandler(
   const osm2ttl::config::Config& config) : _config(config),
-  _node2relationFile(config.cache + "osmium-node2relation.index"),
-  _node2wayFile(config.cache + "osmium-node2way.index"),
-  _relation2areaFile(config.cache + "osmium-relation2area.index"),
-  _relation2relationFile(config.cache + "osmium-relation2relation.index"),
-  _way2areaFile(config.cache + "osmium-way2area.index"),
-  _way2relationFile(config.cache + "osmium-way2relation.index") {
+  _node2relationFile(config.cache + "osmium-node2relation.cache"),
+  _node2wayFile(config.cache + "osmium-node2way.cache"),
+  _relation2areaFile(config.cache + "osmium-relation2area.cache"),
+  _relation2relationFile(config.cache + "osmium-relation2relation.cache"),
+  _way2areaFile(config.cache + "osmium-way2area.cache"),
+  _way2relationFile(config.cache + "osmium-way2relation.cache") {
   _node2relationFile.open();
   _node2wayFile.open();
   _relation2areaFile.open();
