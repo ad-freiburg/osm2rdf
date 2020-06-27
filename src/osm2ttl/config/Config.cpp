@@ -3,8 +3,9 @@
 
 #include "osm2ttl/config/Config.h"
 
-#include <string>
+#include <filesystem>
 #include <iostream>
+#include <string>
 
 #include "popl.hpp"
 
@@ -154,12 +155,26 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       cache = cacheOp->value();
     }
 
+    // Check cache location
+    if (!std::filesystem::is_directory(cache)) {
+      std::cerr << "Cache location not a directory: "
+        << cache << "\n"
+        << op.help() << "\n";
+      exit(1);
+    }
+
     // Handle input
     if (op.non_option_args().size() != 1) {
       std::cerr << op << "\n";
       exit(1);
     }
     input = op.non_option_args()[0];
+    if (!std::filesystem::exists(input)) {
+      std::cerr << "Input does not exist: "
+        << input << "\n"
+        << op.help() << "\n";
+      exit(1);
+    }
   } catch (const popl::invalid_option& e) {
     std::cerr << "Invalid Option Exception: " << e.what() << "\n";
     std::cerr << "error:  ";
