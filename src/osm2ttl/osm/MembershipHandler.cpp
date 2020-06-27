@@ -16,20 +16,17 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::MembershipHandler::MembershipHandler(
-  const osm2ttl::config::Config& config) : _config(config),
-  _node2relationFile(config.cache + "osmium-node2relation.cache"),
-  _node2wayFile(config.cache + "osmium-node2way.cache"),
-  _relation2areaFile(config.cache + "osmium-relation2area.cache"),
-  _relation2relationFile(config.cache + "osmium-relation2relation.cache"),
-  _way2areaFile(config.cache + "osmium-way2area.cache"),
-  _way2relationFile(config.cache + "osmium-way2relation.cache") {
-  _node2relationFile.open();
-  _node2wayFile.open();
-  _relation2areaFile.open();
-  _relation2relationFile.open();
-  _way2areaFile.open();
-  _way2relationFile.open();
-
+  const osm2ttl::config::Config& config,
+  const std::filesystem::path& n2r, const std::filesystem::path& n2w,
+  const std::filesystem::path& r2a, const std::filesystem::path& r2r,
+  const std::filesystem::path& w2a, const std::filesystem::path& w2r)
+  : _config(config),
+  _node2relationFile(n2r),
+  _node2wayFile(n2w),
+  _relation2areaFile(r2a),
+  _relation2relationFile(r2r),
+  _way2areaFile(w2a),
+  _way2relationFile(w2r) {
   _node2wayIndex =
   osmium::index::multimap::SparseFileArray<
     osmium::unsigned_object_id_type, osmium::unsigned_object_id_type>(

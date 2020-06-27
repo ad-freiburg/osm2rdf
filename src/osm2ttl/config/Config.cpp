@@ -152,7 +152,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     // osmium location cache
     if (cacheOp->is_set() || cache.empty()) {
-      cache = cacheOp->value();
+      cache = std::filesystem::absolute(cacheOp->value()).string()+"/";
     }
 
     // Check cache location

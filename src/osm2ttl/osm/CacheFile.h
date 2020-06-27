@@ -4,20 +4,21 @@
 #ifndef OSM2TTL_OSM_CACHEFILE_H_
 #define OSM2TTL_OSM_CACHEFILE_H_
 
-#include <string>
+#include <filesystem>
 
 namespace osm2ttl {
 namespace osm {
 
 class CacheFile {
  public:
-  explicit CacheFile(const std::string& filename);
-  bool open();
-  bool close();
-  void remove();
+  explicit CacheFile(const std::filesystem::path& path);
+  ~CacheFile();
+  void reopen();
+  void close();
+  bool remove();
   int fileDescriptor() const;
  protected:
-  std::string _filename;
+  std::filesystem::path _path;
   int _fileDescriptor = -1;
 };
 

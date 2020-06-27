@@ -1,6 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
+#include <filesystem>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -37,10 +38,29 @@ int main(int argc, char** argv) {
     }
     writer.writeHeader();
 
-    osm2ttl::osm::AreaHandler area_handler{config, &writer};
-    osm2ttl::osm::MembershipHandler membershipHandler{config};
+    std::filesystem::path areaCache{config.cache};
+    areaCache /= "osm2ttl-area.cache";
+    std::filesystem::path node2relationCache{config.cache};
+    node2relationCache /= "osmium-n2r.cache";
+    std::filesystem::path node2wayCache{config.cache};
+    node2wayCache /= "osmium-n2w.cache";
+    std::filesystem::path relation2areaCache{config.cache};
+    relation2areaCache /= "osmium-r2a.cache";
+    std::filesystem::path relation2relationCache{config.cache};
+    relation2relationCache /= "osmium-r2r.cache";
+    std::filesystem::path way2areaCache{config.cache};
+    way2areaCache /= "osmium-w2a.cache";
+    std::filesystem::path way2relationCache{config.cache};
+    way2relationCache /= "osmium-w2r.cache";
+    std::filesystem::path node2locationCache{config.cache};
+    node2locationCache /= "osmium-n2l.cache";
+    osm2ttl::osm::AreaHandler area_handler{config, &writer, areaCache};
+    osm2ttl::osm::MembershipHandler membershipHandler{config,
+      node2relationCache, node2wayCache, relation2areaCache,
+      relation2relationCache, way2areaCache, way2relationCache};
     osm2ttl::osm::DumpHandler dump_handler{config, &writer, &area_handler,
       &membershipHandler};
+    osm2ttl::osm::CacheFile node2locationCacheFile{node2locationCache};
 
 
     {
@@ -64,16 +84,9 @@ int main(int argc, char** argv) {
 
       // store area data
       {
-        osm2ttl::osm::CacheFile
-          locationCacheFile{config.cache + "osmium-location"};
-        if (!locationCacheFile.open()) {
-          std::cerr << "Can not open location cache file '" << config.cache
-            << "': " << std::strerror(errno) << "\n";
-          std::exit(1);
-        }
         osmium::index::map::SparseFileArray<
           osmium::unsigned_object_id_type, osmium::Location>
-          index{locationCacheFile.fileDescriptor()};
+          index{node2locationCacheFile.fileDescriptor()};
         osmium::handler::NodeLocationsForWays<
           osmium::index::map::SparseFileArray<
           osmium::unsigned_object_id_type, osmium::Location>>
@@ -90,9 +103,6 @@ int main(int argc, char** argv) {
         }), membershipHandler);
         reader.close();
         std::cerr << "... done" << std::endl;
-
-        locationCacheFile.close();
-        locationCacheFile.remove();
       }
 
       std::cerr << "Memory:\n";
@@ -129,16 +139,10 @@ int main(int argc, char** argv) {
 
       // store data
       {
-        osm2ttl::osm::CacheFile
-          locationCacheFile{config.cache + "osmium-location"};
-        if (!locationCacheFile.open()) {
-          std::cerr << "Can not open location cache file '" << config.cache
-            << "': " << std::strerror(errno) << "\n";
-          std::exit(1);
-        }
+        node2locationCacheFile.reopen();
         osmium::index::map::SparseFileArray<
           osmium::unsigned_object_id_type, osmium::Location>
-          index{locationCacheFile.fileDescriptor()};
+          index{node2locationCacheFile.fileDescriptor()};
         osmium::handler::NodeLocationsForWays<
           osmium::index::map::SparseFileArray<
           osmium::unsigned_object_id_type, osmium::Location>>
@@ -155,9 +159,6 @@ int main(int argc, char** argv) {
         }), dump_handler);
         reader.close();
         std::cerr << "... done" << std::endl;
-
-        locationCacheFile.close();
-        locationCacheFile.remove();
       }
 
       std::cerr << "Memory:\n";

@@ -4,6 +4,8 @@
 #ifndef OSM2TTL_OSM_MEMBERSHIPHANDLER_H_
 #define OSM2TTL_OSM_MEMBERSHIPHANDLER_H_
 
+#include <filesystem>
+
 #include "osmium/index/multimap/sparse_file_array.hpp"
 #include "osmium/handler.hpp"
 #include "osmium/handler/object_relations.hpp"
@@ -21,7 +23,10 @@ namespace osm {
 // Partially based on osmium::handler::ObjectRelations
 class MembershipHandler : public osmium::handler::Handler {
  public:
-  explicit MembershipHandler(const osm2ttl::config::Config& config);
+  explicit MembershipHandler(const osm2ttl::config::Config& config,
+    const std::filesystem::path& n2r, const std::filesystem::path& n2w,
+    const std::filesystem::path& r2a, const std::filesystem::path& r2r,
+    const std::filesystem::path& w2a, const std::filesystem::path& w2r);
   ~MembershipHandler();
 
   void sort();

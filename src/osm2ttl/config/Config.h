@@ -4,6 +4,8 @@
 #ifndef OSM2TTL_CONFIG_CONFIG_H_
 #define OSM2TTL_CONFIG_CONFIG_H_
 
+#include <filesystem>
+
 #include <string>
 #include <unordered_map>
 
@@ -36,15 +38,15 @@ struct Config {
   std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;
 
   // Output, empty for stdout
-  std::string output;
+  std::filesystem::path output;
   // Output format
   osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::QLEVER;
 
   // osmium location cache
-  std::string cache;
+  std::filesystem::path cache;
 
   // Input file
-  std::string input;
+  std::filesystem::path input;
 
   void load(const std::string& filename);
   void save(const std::string& filename);
