@@ -37,6 +37,8 @@ void osm2ttl::ttl::OutputFormat::initPrefixes() {
   _prefixes["geo"] = "http://www.opengis.net/ont/geosparql#";
   _prefixes["wd"] = "http://www.wikidata.org/entity/";
   _prefixes["xsd"] = "http://www.w3.org/2001/XMLSchema#";
+  _prefixes["rdf"] = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+  _prefixes["rdfs"] = "http://www.w3.org/2000/01/rdf-schema#";
   // osm prefixes
   // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
   // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39

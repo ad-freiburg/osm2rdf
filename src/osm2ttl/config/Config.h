@@ -25,8 +25,12 @@ struct Config {
   bool noAreaDump = false;
 
   // Select amount to dump
+  bool addAreaSources = false;
+  bool addBBox = false;
+  bool addMemberNodes = false;
   bool addUnnamed = false;
   bool expandedData = false;
+  bool metaData = false;
   bool skipWikiLinks = false;
   size_t simplifyWKT = 0;
 

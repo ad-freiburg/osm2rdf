@@ -140,6 +140,10 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
   osm2ttl::ttl::IRI s{"osma", area};
 
   writeTriple(s,
+    osm2ttl::ttl::IRI("rdf", "type"),
+    osm2ttl::ttl::IRI("osm", "area"));
+
+  writeTriple(s,
     osm2ttl::ttl::IRI("geo", "hasGeometry"),
     osm2ttl::ttl::Literal(_factory->create_multipolygon(area),
       osm2ttl::ttl::IRI("geo", "wktLiteral")));
@@ -149,30 +153,34 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
     osm2ttl::ttl::Literal(area.from_way()?"true":"false"));
 
   writeTriple(s,
-    osm2ttl::ttl::IRI("osma", "orig_id"),
-    osm2ttl::ttl::Literal(std::to_string(area.orig_id()),
-      osm2ttl::ttl::IRI("xsd", "integer")));
-
-  writeTriple(s,
     osm2ttl::ttl::IRI("osma", "orig"),
     osm2ttl::ttl::IRI(area.from_way()?"osmway":"osmrel",
       std::to_string(area.orig_id())));
 
-  writeTriple(s,
-    osm2ttl::ttl::IRI("osma", "num_outer_rings"),
-    osm2ttl::ttl::Literal(std::to_string(area.num_rings().first),
-      osm2ttl::ttl::IRI("xsd", "integer")));
+  if (_config.metaData) {
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osma", "orig_id"),
+      osm2ttl::ttl::Literal(std::to_string(area.orig_id()),
+        osm2ttl::ttl::IRI("xsd", "integer")));
 
-  writeTriple(s,
-    osm2ttl::ttl::IRI("osma", "num_inner_rings"),
-    osm2ttl::ttl::Literal(std::to_string(area.num_rings().second),
-      osm2ttl::ttl::IRI("xsd", "integer")));
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osma", "num_outer_rings"),
+      osm2ttl::ttl::Literal(std::to_string(area.num_rings().first),
+        osm2ttl::ttl::IRI("xsd", "integer")));
 
-  writeTriple(s,
-    osm2ttl::ttl::IRI("osma", "is_multipolygon"),
-    osm2ttl::ttl::Literal(area.is_multipolygon()?"true":"false"));
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osma", "num_inner_rings"),
+      osm2ttl::ttl::Literal(std::to_string(area.num_rings().second),
+        osm2ttl::ttl::IRI("xsd", "integer")));
 
-  writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), area.envelope());
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osma", "is_multipolygon"),
+      osm2ttl::ttl::Literal(area.is_multipolygon()?"true":"false"));
+  }
+
+  if (_config.addBBox) {
+    writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), area.envelope());
+  }
 
   writeOsmiumTagList(s, area.tags());
 }
@@ -211,6 +219,10 @@ void osm2ttl::ttl::Writer::writeOsmiumLocation(const S& s,
 void osm2ttl::ttl::Writer::writeOsmiumNode(const osmium::Node& node) {
   osm2ttl::ttl::IRI s{"osmnode", node};
 
+  writeTriple(s,
+    osm2ttl::ttl::IRI("rdf", "type"),
+    osm2ttl::ttl::IRI("osm", "node"));
+
   writeOsmiumLocation(s, node.location());
   writeOsmiumTagList(s, node.tags());
 }
@@ -219,6 +231,10 @@ void osm2ttl::ttl::Writer::writeOsmiumNode(const osmium::Node& node) {
 void osm2ttl::ttl::Writer::writeOsmiumRelation(
   const osmium::Relation& relation) {
   osm2ttl::ttl::IRI s{"osmrel", relation};
+
+  writeTriple(s,
+    osm2ttl::ttl::IRI("rdf", "type"),
+    osm2ttl::ttl::IRI("osm", "relation"));
 
   writeOsmiumTagList(s, relation.tags());
   writeOsmiumRelationMembers(s, relation.members());
@@ -339,6 +355,10 @@ void osm2ttl::ttl::Writer::writeOsmiumTagList(const S& s,
 void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
   osm2ttl::ttl::IRI s{"osmway", way};
 
+  writeTriple(s,
+    osm2ttl::ttl::IRI("rdf", "type"),
+    osm2ttl::ttl::IRI("osm", "way"));
+
   writeOsmiumTagList(s, way.tags());
   writeOsmiumWayNodeList(s, way.nodes());
 
@@ -365,7 +385,9 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
         osm2ttl::ttl::IRI("geo", "wktLiteral")));
   }
 
-  writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), way.envelope());
+  if (_config.addBBox) {
+    writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), way.envelope());
+  }
 }
 
 // ____________________________________________________________________________

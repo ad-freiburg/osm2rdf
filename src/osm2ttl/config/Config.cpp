@@ -25,14 +25,30 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto helpOp = op.add<popl::Switch>("h", "help", "Lorem ipsum");
   auto configOp = op.add<popl::Value<std::string>>(
     "c", "config", "Config file");
-  auto outputOp = op.add<popl::Value<std::string>>(
-    "o", "output", "Output file", "");
-  auto outputFormatOp = op.add<popl::Value<std::string>,
-       popl::Attribute::advanced>(
-    "", "output-format", "Output format, valid values: nt, ttl, qlever",
-    "qlever");
-  auto cacheOp = op.add<popl::Value<std::string>>(
-    "t", "cache", "Path to cache file", "/tmp/osm2ttl-cache");
+
+  auto skipFirstPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "skip-first-pass", "Skip area collection for contains-relation");
+  auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "skip-area-prep", "Skip area sorting");
+  auto skipSecondPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "skip-second-pass", "Skip dump");
+
+  auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-node-dump", "Skip nodes while dumping data");
+  auto noRelationDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-relation-dump", "Skip relations while dumping data");
+  auto noWayDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-way-dump", "Skip ways while dumping data");
+  auto noAreaDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
+    "no-area-dump", "Skip areas while dumping data");
+
+  auto addAreaSourcesOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "add-area-sources", "Add area sources (ways and relations).");
+  auto addBBoxOp = op.add<popl::Switch>(
+    "", "add-bbox", "Add BoundingBoxes to entries.");
+  auto addMemberNodesOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "add-member-nodes", "Add nodes triples for members of ways and" \
+    "relations. This does not add information to the ways or relations.");
   auto addUnnamedOp = op.add<popl::Switch>(
     "u", "add-unnamed", "Add unnamed entities to the result.");
   auto skipWikiLinksOp = op.add<popl::Switch>(
@@ -44,20 +60,17 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "store-config", "Path to store calculated config.");
   auto expandedDataOp = op.add<popl::Switch>("x", "expanded-data",
     "Add expanded data");
-  auto skipFirstPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-first-pass", "Skip area collection for contains-relation");
-  auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-area-prep", "Skip area sorting");
-  auto skipSecondPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-second-pass", "Skip dump");
-  auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-node-dump", "Skip nodes while dumping data");
-  auto noRelationDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-relation-dump", "Skip relations while dumping data");
-  auto noWayDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-way-dump", "Skip ways while dumping data");
-  auto noAreaDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-area-dump", "Skip areas while dumping data");
+  auto metaDataOp = op.add<popl::Switch>("m", "meta-data",
+    "Add meta-data");
+
+  auto outputOp = op.add<popl::Value<std::string>>(
+    "o", "output", "Output file", "");
+  auto outputFormatOp = op.add<popl::Value<std::string>,
+       popl::Attribute::advanced>(
+    "", "output-format", "Output format, valid values: nt, ttl, qlever",
+    "qlever");
+  auto cacheOp = op.add<popl::Value<std::string>>(
+    "t", "cache", "Path to cache file", "/tmp/osm2ttl-cache");
 
   try {
     op.parse(argc, argv);
@@ -104,6 +117,15 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     // Select amount to dump
+    if (addAreaSourcesOp->is_set()) {
+      addAreaSources = true;
+    }
+    if (addBBoxOp->is_set()) {
+      addBBox = true;
+    }
+    if (addMemberNodesOp->is_set()) {
+      addMemberNodes = true;
+    }
     if (addUnnamedOp->is_set()) {
       addUnnamed = true;
     }
