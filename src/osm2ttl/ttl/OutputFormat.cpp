@@ -89,14 +89,14 @@ std::string osm2ttl::ttl::OutputFormat::format(
   size_t partCount = 0;
   for (size_t pos = 0; pos < s.length(); pos++) {
     if (pos == 0 && s[0] == '-') {
-      throw;
+      throw std::domain_error("Invalid LangTag " + l.value());
     }
     if ((s[pos] >= 'a' && s[pos] <= 'z') ||
         (s[pos] >= 'A' && s[pos] <= 'Z') ||
         (s[pos] >= '0' && s[pos] <= '9' && partCount > 0)) {
       tmp << s[pos];
     } else {
-      throw;
+      throw std::domain_error("Invalid LangTag " + l.value());
     }
   }
   return tmp.str();
@@ -151,7 +151,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
     }
     return IRIREF(i.prefix(), i.value());
   default:
-    throw;
+    throw std::domain_error("Invalid OutputFormat " + std::to_string(_value));
   }
 }
 
@@ -267,7 +267,7 @@ uint8_t osm2ttl::ttl::OutputFormat::utf8Length(char c) const {
   if ((c & 0xF0) == 0xE0) { return 3; }
   if ((c & 0xE0) == 0xC0) { return 2; }
   if ((c & 0x80) == 0x00) { return 1; }
-  throw;
+  throw std::domain_error("Invalid UTF-8 Sequence start " + std::to_string(c));
 }
 
 // ____________________________________________________________________________
@@ -298,7 +298,7 @@ uint32_t osm2ttl::ttl::OutputFormat::utf8Codepoint(const std::string& s)
       //  1111111 = 7F
       return (s[0] & 0x7F);
     default:
-      throw;
+      throw std::domain_error("Invalid UTF-8 Sequence: " + s);
   }
 }
 
