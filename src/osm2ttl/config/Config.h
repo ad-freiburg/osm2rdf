@@ -14,8 +14,6 @@ namespace config {
 
 struct Config {
   // Select what to do
-  bool skipFirstPass = true;
-  bool skipSecondPass = false;
   bool skipAreaPrep = false;
 
   // Select types to dump

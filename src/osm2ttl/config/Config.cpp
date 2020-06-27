@@ -26,12 +26,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto configOp = op.add<popl::Value<std::string>>(
     "c", "config", "Config file");
 
-  auto skipFirstPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-first-pass", "Skip area collection for contains-relation");
   auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "skip-area-prep", "Skip area sorting");
-  auto skipSecondPassOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-second-pass", "Skip dump");
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
     "no-node-dump", "Skip nodes while dumping data");
@@ -70,7 +66,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "output-format", "Output format, valid values: nt, ttl, qlever",
     "qlever");
   auto cacheOp = op.add<popl::Value<std::string>>(
-    "t", "cache", "Path to cache file", "/tmp/osm2ttl-cache");
+    "t", "cache", "Path to cache directory", "/tmp/");
 
   try {
     op.parse(argc, argv);
@@ -92,12 +88,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     // Skip passes
-    if (skipFirstPassOp->is_set()) {
-      skipFirstPass = true;
-    }
-    if (skipSecondPassOp->is_set()) {
-      skipSecondPass = true;
-    }
     if (skipAreaPrepOp->is_set()) {
       skipAreaPrep = true;
     }

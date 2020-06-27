@@ -19,8 +19,10 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
-  osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler) :
-  _config(config), _writer(writer), _areaHandler(areaHandler) {
+  osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler,
+  osm2ttl::osm::MembershipHandler* membershipHandler) :
+  _config(config), _writer(writer), _areaHandler(areaHandler),
+  _membershipHandler(membershipHandler) {
 }
 
 // ____________________________________________________________________________
@@ -40,6 +42,11 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
   if (_config.noNodeDump) {
     return;
   }
+  if (!_config.addMemberNodes &&
+      (_membershipHandler->isNodeMemberOfAnyRelation(node) ||
+       _membershipHandler->isNodeMemberOfAnyWay(node))) {
+    return;
+  }
   if (!_config.addUnnamed && node.tags()["name"] == nullptr) {
     return;
   }
@@ -51,6 +58,10 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
   if (_config.noRelationDump) {
     return;
   }
+  if (!_config.addAreaSources &&
+      _membershipHandler->isRelationMemberOfAnyArea(relation)) {
+    return;
+  }
   if (!_config.addUnnamed && relation.tags()["name"] == nullptr) {
     return;
   }
@@ -60,6 +71,10 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
 // ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
   if (_config.noWayDump) {
+    return;
+  }
+  if (!_config.addAreaSources &&
+      _membershipHandler->isWayMemberOfAnyArea(way)) {
     return;
   }
   if (!_config.addUnnamed && way.tags()["name"] == nullptr) {

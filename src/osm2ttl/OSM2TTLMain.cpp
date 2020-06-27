@@ -17,7 +17,9 @@
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/osm/AreaHandler.h"
+#include "osm2ttl/osm/CacheFile.h"
 #include "osm2ttl/osm/DumpHandler.h"
+#include "osm2ttl/osm/MembershipHandler.h"
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -36,10 +38,12 @@ int main(int argc, char** argv) {
     writer.writeHeader();
 
     osm2ttl::osm::AreaHandler area_handler{config, &writer};
-    osm2ttl::osm::DumpHandler dump_handler{config, &writer, &area_handler};
+    osm2ttl::osm::MembershipHandler membershipHandler{config};
+    osm2ttl::osm::DumpHandler dump_handler{config, &writer, &area_handler,
+      &membershipHandler};
 
 
-    if (!config.skipFirstPass) {
+    {
       // Do not create empty areas
       osmium::area::Assembler::config_type assembler_config;
       assembler_config.create_empty_areas = false;
@@ -60,15 +64,16 @@ int main(int argc, char** argv) {
 
       // store area data
       {
-        const int fd = ::open(config.cache.c_str(), O_RDWR | O_CREAT | O_TRUNC,
-              0666);
-        if (fd == -1) {
+        osm2ttl::osm::CacheFile
+          locationCacheFile{config.cache + "osmium-location"};
+        if (!locationCacheFile.open()) {
           std::cerr << "Can not open location cache file '" << config.cache
             << "': " << std::strerror(errno) << "\n";
           std::exit(1);
         }
         osmium::index::map::SparseFileArray<
-          osmium::unsigned_object_id_type, osmium::Location> index{fd};
+          osmium::unsigned_object_id_type, osmium::Location>
+          index{locationCacheFile.fileDescriptor()};
         osmium::handler::NodeLocationsForWays<
           osmium::index::map::SparseFileArray<
           osmium::unsigned_object_id_type, osmium::Location>>
@@ -79,30 +84,31 @@ int main(int argc, char** argv) {
         osmium::io::ReaderWithProgressBar reader{true, input_file,
           osmium::osm_entity_bits::object};
         osmium::apply(reader, location_handler,
-          mp_manager.handler([&area_handler](
+          mp_manager.handler([&area_handler, &membershipHandler](
               osmium::memory::Buffer&& buffer) {
-            osmium::apply(buffer, area_handler);
-        }));
+            osmium::apply(buffer, area_handler, membershipHandler);
+        }), membershipHandler);
         reader.close();
         std::cerr << "... done" << std::endl;
 
-        ::close(fd);
-        std::remove(config.cache.c_str());
+        locationCacheFile.close();
+        locationCacheFile.remove();
       }
 
       std::cerr << "Memory:\n";
       osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
-
-      if (!config.skipAreaPrep) {
-        std::cerr << "Prepare area data for lookup" << std::endl;
-        // All areas are loaded, prepare them for lookup
-        area_handler.sort();
-        std::cerr << "... done" << std::endl;
-      }
     }
 
+      std::cerr << "Prepare area data for lookup" << std::endl;
+      area_handler.sort();
+      std::cerr << "... done" << std::endl;
+
+      std::cerr << "Prepare membership data for lookup" << std::endl;
+      membershipHandler.sort();
+      std::cerr << "... done" << std::endl;
+
     // Data from first pass required
-    if (!config.skipSecondPass) {
+    {
       // Do not create empty areas
       osmium::area::Assembler::config_type assembler_config;
       assembler_config.create_empty_areas = false;
@@ -123,15 +129,16 @@ int main(int argc, char** argv) {
 
       // store data
       {
-        const int fd = ::open(config.cache.c_str(), O_RDWR | O_CREAT | O_TRUNC,
-              0666);
-        if (fd == -1) {
+        osm2ttl::osm::CacheFile
+          locationCacheFile{config.cache + "osmium-location"};
+        if (!locationCacheFile.open()) {
           std::cerr << "Can not open location cache file '" << config.cache
             << "': " << std::strerror(errno) << "\n";
           std::exit(1);
         }
         osmium::index::map::SparseFileArray<
-          osmium::unsigned_object_id_type, osmium::Location> index{fd};
+          osmium::unsigned_object_id_type, osmium::Location>
+          index{locationCacheFile.fileDescriptor()};
         osmium::handler::NodeLocationsForWays<
           osmium::index::map::SparseFileArray<
           osmium::unsigned_object_id_type, osmium::Location>>
@@ -149,8 +156,8 @@ int main(int argc, char** argv) {
         reader.close();
         std::cerr << "... done" << std::endl;
 
-        ::close(fd);
-        std::remove(config.cache.c_str());
+        locationCacheFile.close();
+        locationCacheFile.remove();
       }
 
       std::cerr << "Memory:\n";
