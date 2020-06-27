@@ -18,6 +18,7 @@
 
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/CacheFile.h"
 #include "osm2ttl/ttl/Writer.h"
 
 namespace osm2ttl {
@@ -27,6 +28,7 @@ class AreaHandler : public osmium::handler::Handler {
  public:
   AreaHandler(const osm2ttl::config::Config& config,
               osm2ttl::ttl::Writer* writer);
+  ~AreaHandler();
 
   // Store area
   void area(const osmium::Area& area);
@@ -37,9 +39,12 @@ class AreaHandler : public osmium::handler::Handler {
   // Triple writer
   osm2ttl::ttl::Writer* _writer;
   // Areas
-  std::unordered_map<uint64_t, osm2ttl::osm::Area> _areas;
+  osm2ttl::osm::CacheFile _areasFile;
+  osmium::index::map::SparseFileArray<
+    osmium::unsigned_object_id_type, osm2ttl::osm::Area>
+    _areas;
   // Stacks
-  std::vector<uint64_t> _stacks;
+  std::vector<osmium::unsigned_object_id_type> _stacks;
 };
 
 }  // namespace osm

@@ -17,6 +17,7 @@ namespace osm2ttl {
 namespace osm {
 
 struct Area {
+  Area();
   explicit Area(const osmium::Area& area);
   uint64_t id() const noexcept;
   uint64_t objId() const noexcept;
@@ -35,9 +36,8 @@ struct Area {
   bool vagueContains(const Area& other) const noexcept;
   bool vagueIntersects(const Area& other) const noexcept;
 
-  bool operator==(const osm2ttl::osm::Area& other) const {
-    return _id == other._id;
-  }
+  bool operator==(const osm2ttl::osm::Area& other) const;
+  bool operator<(const osm2ttl::osm::Area& other) const;
 
  protected:
   uint64_t _id;

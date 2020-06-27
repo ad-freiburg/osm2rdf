@@ -79,18 +79,24 @@ osm2ttl::osm::MembershipHandler::~MembershipHandler() {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::MembershipHandler::sort() {
-  std::cerr << "n2r " << _node2relationIndex.size() << " elements" << "\n";
-  std::cerr << "n2w " << _node2relationIndex.size() << " elements" << "\n";
-  std::cerr << "r2a " << _relation2areaIndex.size() << " elements" << "\n";
-  std::cerr << "r2r " << _relation2relationIndex.size() << " elements" << "\n";
-  std::cerr << "w2a " << _way2areaIndex.size() << " elements" << "\n";
-  std::cerr << "w2r " << _way2relationIndex.size() << " elements" << "\n";
+  std::cerr << " n2r " << _node2relationIndex.size() << " elements ... ";
   _node2relationIndex.sort();
+  std::cerr << "done\n" << " n2w " << _node2relationIndex.size()
+    << " elements ... ";
   _node2wayIndex.sort();
+  std::cerr << "done\n" << " r2a " << _relation2areaIndex.size()
+    << " elements ... ";
   _relation2areaIndex.sort();
+  std::cerr << "done\n" << " r2r " << _relation2relationIndex.size()
+    << " elements ... ";
   _relation2relationIndex.sort();
+  std::cerr << "done\n" << " w2a " << _way2areaIndex.size()
+    << " elements ... ";
   _way2areaIndex.sort();
+  std::cerr << "done\n" << " w2r " << _way2relationIndex.size()
+    << " elements ... ";
   _way2relationIndex.sort();
+  std::cerr << "done" << std::endl;
 }
 
 // ____________________________________________________________________________

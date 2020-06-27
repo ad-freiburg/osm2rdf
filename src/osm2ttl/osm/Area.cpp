@@ -4,6 +4,7 @@
 #include "osm2ttl/osm/Area.h"
 
 #include <iostream>
+#include <limits>
 #include <vector>
 #include <utility>
 
@@ -15,6 +16,11 @@
 
 #include "osm2ttl/osm/Ring.h"
 
+// ____________________________________________________________________________
+osm2ttl::osm::Area::Area() {
+  _id = std::numeric_limits<uint64_t>::max();
+  _objId = std::numeric_limits<uint64_t>::max();
+}
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area(const osmium::Area& area) {
   _id = area.positive_id();
@@ -125,4 +131,23 @@ bool osm2ttl::osm::Area::intersects(const osm2ttl::osm::Area& other)
 bool osm2ttl::osm::Area::contains(const osm2ttl::osm::Area& other) const
   noexcept {
   return false;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Area::operator==(const osm2ttl::osm::Area& other) const {
+  return _id == other._id;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Area::operator<(const osm2ttl::osm::Area& other) const {
+  // If administration level is different, higher first
+  if (_tagAdministrationLevel != other._tagAdministrationLevel) {
+    return _tagAdministrationLevel > other._tagAdministrationLevel;
+  }
+  // Sort by area, smaller first
+  if (vagueArea() != other.vagueArea()) {
+    return vagueArea() < other.vagueArea();
+  }
+  // No better metric -> sort by id, smaller first
+  return _id < other._id;
 }
