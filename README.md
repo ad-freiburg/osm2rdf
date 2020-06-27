@@ -3,7 +3,7 @@ Convert OpenStreetMap (OSM) data to Turtle (TTL)
 
 ## Getting started
 
-On Ubuntu 18.04 the following packages are required to build osm2ttl:
+On Ubuntu 20.04 the following packages are required to build osm2ttl:
 ```
 clang clang-tidy g++ libboost-dev libexpat1-dev cmake libbz2-dev zlib1g-dev
 ```
