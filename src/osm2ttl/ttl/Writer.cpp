@@ -142,7 +142,7 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
 
   writeTriple(s,
     osm2ttl::ttl::IRI("rdf", "type"),
-    osm2ttl::ttl::IRI("osm", "area"));
+    osm2ttl::ttl::IRI("osm", area.from_way()?"way":"relation");
 
   writeTriple(s,
     osm2ttl::ttl::IRI("geo", "hasGeometry"),
@@ -183,7 +183,8 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeOSM2TTLArea(const osm2ttl::osm::Area& area) {
-  osm2ttl::ttl::IRI s{"osma", area};
+  osm2ttl::ttl::IRI s{area.from_way()?"osmway":"osmrel",
+      std::to_string(area.orig_id())};
 }
 
 // ____________________________________________________________________________
