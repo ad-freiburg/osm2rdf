@@ -137,7 +137,8 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
-  osm2ttl::ttl::IRI s{"osma", area};
+  osm2ttl::ttl::IRI s{area.from_way()?"osmway":"osmrel",
+      std::to_string(area.orig_id())};
 
   writeTriple(s,
     osm2ttl::ttl::IRI("rdf", "type"),
@@ -147,11 +148,6 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
     osm2ttl::ttl::IRI("geo", "hasGeometry"),
     osm2ttl::ttl::Literal(_factory->create_multipolygon(area),
       osm2ttl::ttl::IRI("geo", "wktLiteral")));
-
-  writeTriple(s,
-    osm2ttl::ttl::IRI("osma", "orig"),
-    osm2ttl::ttl::IRI(area.from_way()?"osmway":"osmrel",
-      std::to_string(area.orig_id())));
 
   if (_config.metaData) {
   writeTriple(s,
