@@ -23,8 +23,8 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::AreaHandler::AreaHandler(const osm2ttl::config::Config& config,
-  osm2ttl::ttl::Writer* writer, std::filesystem::path path) : _config(config),
-  _writer(writer), _areasFile(path) {
+  osm2ttl::ttl::Writer* writer) : _config(config),
+  _writer(writer), _areasFile(config.getTempPath("osm2ttl", "areas.cache")) {
   _areas =
   osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type, osm2ttl::osm::Area>(

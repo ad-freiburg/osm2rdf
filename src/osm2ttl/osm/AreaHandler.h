@@ -27,7 +27,7 @@ namespace osm {
 class AreaHandler : public osmium::handler::Handler {
  public:
   AreaHandler(const osm2ttl::config::Config& config,
-              osm2ttl::ttl::Writer* writer, std::filesystem::path path);
+              osm2ttl::ttl::Writer* writer);
   ~AreaHandler();
 
   // Store area

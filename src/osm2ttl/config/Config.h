@@ -51,6 +51,8 @@ struct Config {
   void load(const std::string& filename);
   void save(const std::string& filename);
   void fromArgs(int argc, char** argv);
+  std::filesystem::path getTempPath(const std::string& p,
+                                    const std::string& s) const;
 
   static Config& getInstance() {
     static Config instance;

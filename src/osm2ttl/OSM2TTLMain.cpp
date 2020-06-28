@@ -38,29 +38,12 @@ int main(int argc, char** argv) {
     }
     writer.writeHeader();
 
-    std::filesystem::path areaCache{config.cache};
-    areaCache /= "osm2ttl-area.cache";
-    std::filesystem::path node2relationCache{config.cache};
-    node2relationCache /= "osmium-n2r.cache";
-    std::filesystem::path node2wayCache{config.cache};
-    node2wayCache /= "osmium-n2w.cache";
-    std::filesystem::path relation2areaCache{config.cache};
-    relation2areaCache /= "osmium-r2a.cache";
-    std::filesystem::path relation2relationCache{config.cache};
-    relation2relationCache /= "osmium-r2r.cache";
-    std::filesystem::path way2areaCache{config.cache};
-    way2areaCache /= "osmium-w2a.cache";
-    std::filesystem::path way2relationCache{config.cache};
-    way2relationCache /= "osmium-w2r.cache";
-    std::filesystem::path node2locationCache{config.cache};
-    node2locationCache /= "osmium-n2l.cache";
-    osm2ttl::osm::AreaHandler area_handler{config, &writer, areaCache};
-    osm2ttl::osm::MembershipHandler membershipHandler{config,
-      node2relationCache, node2wayCache, relation2areaCache,
-      relation2relationCache, way2areaCache, way2relationCache};
+    osm2ttl::osm::AreaHandler area_handler{config, &writer};
+    osm2ttl::osm::MembershipHandler membershipHandler{config};
     osm2ttl::osm::DumpHandler dump_handler{config, &writer, &area_handler,
       &membershipHandler};
-    osm2ttl::osm::CacheFile node2locationCacheFile{node2locationCache};
+    osm2ttl::osm::CacheFile node2locationCacheFile{config.getTempPath("osmium",
+      "n2l.cache")};
 
 
     {

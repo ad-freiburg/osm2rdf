@@ -202,3 +202,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     exit(1);
   }
 }
+
+// ____________________________________________________________________________
+std::filesystem::path osm2ttl::config::Config::getTempPath(
+  const std::string& p, const std::string& s) const {
+  std::filesystem::path path{cache};
+  path /= p+"-"+s;
+  return std::filesystem::absolute(path);
+}
