@@ -22,7 +22,7 @@ osm2ttl::osm::MembershipHandler::MembershipHandler(
   _relation2areaFile(config.getTempPath("osmium", "r2a.cache")),
   _relation2relationFile(config.getTempPath("osmium", "r2r.cache")),
   _way2areaFile(config.getTempPath("osmium", "w2a.cache")),
-  _way2relationFile(config.getTempPath("osmium", "w2r")) {
+  _way2relationFile(config.getTempPath("osmium", "w2r.cache")) {
   _node2wayIndex =
   osmium::index::multimap::SparseFileArray<
     osmium::unsigned_object_id_type, osmium::unsigned_object_id_type>(
