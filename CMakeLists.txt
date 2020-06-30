@@ -197,12 +197,20 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+find_program(
+	CLANG_TIDY_EXE
+	NAMES "clang-tidy"
+	DOC "Path to clang-tidy executable"
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0")
 set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS} -Og -g -DLOGLEVEL=3 -DOSM2NT_DBG=1")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -Os")
 set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -O3")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -g -DLOGLEVEL=3")
-set(CMAKE_CXX_CLANG_TIDY           "clang-tidy;-checks=-*,readability-*")
+if(CLANG_TIDY_EXE)
+	set(CMAKE_CXX_CLANG_TIDY       "clang-tidy;-checks=-*,readability-*")
+endif()
 
 # export compile commands to tools like clang
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
