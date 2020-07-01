@@ -30,7 +30,7 @@ void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
   if (_config.noAreaDump) {
     return;
   }
-  if (!_config.addUnnamed && area.tags()["name"] == nullptr) {
+  if (area.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
   _writer->writeOsmiumArea(area);
@@ -42,12 +42,15 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
   if (_config.noNodeDump) {
     return;
   }
-  if (!_config.addMemberNodes &&
-      (_membershipHandler->isNodeMemberOfAnyRelation(node) ||
-       _membershipHandler->isNodeMemberOfAnyWay(node))) {
+  if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  if (!_config.addUnnamed && node.tags()["name"] == nullptr) {
+  if (!_config.addMemberNodes &&
+      (_membershipHandler->isRelationMember(node) ||
+       _membershipHandler->isWayMember(node))) {
+    return;
+  }
+  if (!isInteresting(node)) {
     return;
   }
   _writer->writeOsmiumNode(node);
@@ -59,10 +62,10 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
     return;
   }
   if (!_config.addAreaSources &&
-      _membershipHandler->isRelationMemberOfAnyArea(relation)) {
+      _membershipHandler->isArea(relation)) {
     return;
   }
-  if (!_config.addUnnamed && relation.tags()["name"] == nullptr) {
+  if (relation.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
   _writer->writeOsmiumRelation(relation);
@@ -74,11 +77,37 @@ void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
     return;
   }
   if (!_config.addAreaSources &&
-      _membershipHandler->isWayMemberOfAnyArea(way)) {
+      _membershipHandler->isArea(way)) {
     return;
   }
-  if (!_config.addUnnamed && way.tags()["name"] == nullptr) {
+  if (way.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
   _writer->writeOsmiumWay(way);
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::DumpHandler::isInteresting(const osmium::Node& node) {
+  if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
+    return false;
+  }
+  bool pos = false;
+  bool neg = false;
+  for (const auto& tag : node.tags()) {
+    auto it = _config.tagInterest.find(tag.key());
+    if (it != _config.tagInterest.end()) {
+      // Compare each entry
+      std::string value{tag.value()};
+      for (const auto& pair : it->second) {
+        if (pair.first.empty() || pair.first == value) {
+          if (pair.second) {
+            pos = true;
+          } else {
+            neg = true;
+          }
+        }
+      }
+    }
+  }
+  return (pos || !neg);
 }

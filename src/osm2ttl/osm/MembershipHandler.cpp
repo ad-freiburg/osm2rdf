@@ -33,10 +33,10 @@ osm2ttl::osm::MembershipHandler::MembershipHandler(
     osmium::unsigned_object_id_type, osmium::unsigned_object_id_type>(
       _node2relationFile.fileDescriptor());
 
-  _way2relationIndex =
+  _relation2areaIndex =
   osmium::index::multimap::SparseFileArray<
     osmium::unsigned_object_id_type, osmium::unsigned_object_id_type>(
-      _way2relationFile.fileDescriptor());
+      _relation2areaFile.fileDescriptor());
 
   _relation2relationIndex =
   osmium::index::multimap::SparseFileArray<
@@ -48,10 +48,10 @@ osm2ttl::osm::MembershipHandler::MembershipHandler(
     osmium::unsigned_object_id_type, osmium::unsigned_object_id_type>(
       _way2areaFile.fileDescriptor());
 
-  _relation2areaIndex =
+  _way2relationIndex =
   osmium::index::multimap::SparseFileArray<
     osmium::unsigned_object_id_type, osmium::unsigned_object_id_type>(
-      _relation2areaFile.fileDescriptor());
+      _way2relationFile.fileDescriptor());
 }
 
 // ____________________________________________________________________________
@@ -93,44 +93,44 @@ void osm2ttl::osm::MembershipHandler::sort() {
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::MembershipHandler::isNodeMemberOfAnyWay(
-  const osmium::Node& node) {
-  auto pos = _node2wayIndex.get_all(node.id());
-  return pos.first != pos.second;
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::MembershipHandler::isNodeMemberOfAnyRelation(
-  const osmium::Node& node) {
-  auto pos = _node2relationIndex.get_all(node.id());
-  return pos.first != pos.second;
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::MembershipHandler::isRelationMemberOfAnyRelation(
-  const osmium::Relation& relation) {
-  auto pos = _relation2relationIndex.get_all(relation.id());
-  return pos.first != pos.second;
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::MembershipHandler::isRelationMemberOfAnyArea(
+bool osm2ttl::osm::MembershipHandler::isArea(
   const osmium::Relation& relation) {
   auto pos = _relation2areaIndex.get_all(relation.id());
   return pos.first != pos.second;
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::MembershipHandler::isWayMemberOfAnyRelation(
+bool osm2ttl::osm::MembershipHandler::isArea(
+  const osmium::Way& way) {
+  auto pos = _way2areaIndex.get_all(way.id());
+  return pos.first != pos.second;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::MembershipHandler::isRelationMember(
+  const osmium::Node& node) {
+  auto pos = _node2relationIndex.get_all(node.id());
+  return pos.first != pos.second;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::MembershipHandler::isRelationMember(
+  const osmium::Relation& relation) {
+  auto pos = _relation2relationIndex.get_all(relation.id());
+  return pos.first != pos.second;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::MembershipHandler::isRelationMember(
   const osmium::Way& way) {
   auto pos = _way2relationIndex.get_all(way.id());
   return pos.first != pos.second;
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::MembershipHandler::isWayMemberOfAnyArea(
-  const osmium::Way& way) {
-  auto pos = _way2areaIndex.get_all(way.id());
+bool osm2ttl::osm::MembershipHandler::isWayMember(
+  const osmium::Node& node) {
+  auto pos = _node2wayIndex.get_all(node.id());
   return pos.first != pos.second;
 }
 

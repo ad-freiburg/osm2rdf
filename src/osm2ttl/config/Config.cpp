@@ -47,7 +47,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "add-member-nodes", "Add nodes triples for members of ways and" \
     "relations. This does not add information to the ways or relations.");
   auto addUnnamedOp = op.add<popl::Switch>(
-    "u", "add-unnamed", "Add unnamed entities to the result.");
+    "u", "add-unnamed", "DEPRECATED! Add unnamed entities to the result.");
   auto skipWikiLinksOp = op.add<popl::Switch>(
     "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
   auto simplifyWKTOp = op.add<popl::Value<size_t>>(
@@ -118,7 +118,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       addMemberNodes = true;
     }
     if (addUnnamedOp->is_set()) {
-      addUnnamed = true;
+      std::cerr << "Deprecation Warning: -u --add-unnamed!" << std::endl;
     }
     if (skipWikiLinksOp->is_set()) {
       skipWikiLinks = true;
@@ -130,8 +130,15 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       simplifyWKT = simplifyWKTOp->value();
     }
 
-    // Add tag-key -> xsd overrides
+    // Add tag.key() -> xsd overrides
     tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");
+
+    // Add tag.key() -> interest
+    tagKeyInterest["name"].emplace_back("", true);
+    tagKeyInterest["ele"].emplace_back("", false);
+    tagKeyInterest["highway"].emplace_back("milestone", false);
+    tagKeyInterest["traffic_sign"].emplace_back("destination", false);
+    tagKeyInterest["traffic_sign:forward"].emplace_back("", false);
 
     // Output
     output = outputOp->value();

@@ -8,6 +8,8 @@
 
 #include <string>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "osm2ttl/ttl/OutputFormat.h"
 
@@ -28,7 +30,6 @@ struct Config {
   bool addAreaSources = false;
   bool addBBox = false;
   bool addMemberNodes = false;
-  bool addUnnamed = false;
   bool expandedData = false;
   bool metaData = false;
   bool skipWikiLinks = false;
@@ -36,6 +37,10 @@ struct Config {
 
   // tag.key() -> IRI
   std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;
+
+  // tag.key() -> interest
+  std::unordered_map<std::string, std::vector<std::pair<std::string, bool>>>
+    tagInterest;
 
   // Output, empty for stdout
   std::filesystem::path output;

@@ -30,7 +30,9 @@ class DumpHandler : public osmium::handler::Handler {
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
+  const osmium::memory::item_size_type EMPTY_TAG_SIZE = 8;
  protected:
+  bool isInteresting(const osmium::Node& node);
   const osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer* _writer;
   osm2ttl::osm::AreaHandler* _areaHandler;

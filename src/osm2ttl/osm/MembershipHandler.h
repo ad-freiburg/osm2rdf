@@ -28,12 +28,12 @@ class MembershipHandler : public osmium::handler::Handler {
 
   void sort();
 
-  bool isNodeMemberOfAnyRelation(const osmium::Node& node);
-  bool isNodeMemberOfAnyWay(const osmium::Node& node);
-  bool isRelationMemberOfAnyArea(const osmium::Relation& relation);
-  bool isRelationMemberOfAnyRelation(const osmium::Relation& relation);
-  bool isWayMemberOfAnyArea(const osmium::Way& way);
-  bool isWayMemberOfAnyRelation(const osmium::Way& way);
+  bool isArea(const osmium::Relation& relation);
+  bool isArea(const osmium::Way& way);
+  bool isRelationMember(const osmium::Node& node);
+  bool isRelationMember(const osmium::Relation& relation);
+  bool isRelationMember(const osmium::Way& way);
+  bool isWayMember(const osmium::Node& node);
 
   // Handler interface
   void area(const osmium::Area& area);

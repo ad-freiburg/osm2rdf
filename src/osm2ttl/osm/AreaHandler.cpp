@@ -39,9 +39,6 @@ osm2ttl::osm::AreaHandler::~AreaHandler() {
 
 // ____________________________________________________________________________
 void osm2ttl::osm::AreaHandler::area(const osmium::Area& area) {
-  if (!_config.addUnnamed && area.tags()["name"] != nullptr) {
-    return;
-  }
   // Only keep administrative areas... turn this into groups of attributes
   if (area.tags()["boundary"] == nullptr
       || std::string(area.tags()["boundary"]) != "administrative") {
