@@ -3,7 +3,6 @@
 
 #include "osm2ttl/osm/DumpHandler.h"
 
-#include <iostream>
 #include <ostream>
 #include <string>
 
@@ -45,14 +44,6 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
   if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  if (!_config.addMemberNodes &&
-      (_membershipHandler->isRelationMember(node) ||
-       _membershipHandler->isWayMember(node))) {
-    return;
-  }
-  if (!isInteresting(node)) {
-    return;
-  }
   _writer->writeOsmiumNode(node);
 }
 
@@ -84,30 +75,4 @@ void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
     return;
   }
   _writer->writeOsmiumWay(way);
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::DumpHandler::isInteresting(const osmium::Node& node) {
-  if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
-    return false;
-  }
-  bool pos = false;
-  bool neg = false;
-  for (const auto& tag : node.tags()) {
-    auto it = _config.tagInterest.find(tag.key());
-    if (it != _config.tagInterest.end()) {
-      // Compare each entry
-      std::string value{tag.value()};
-      for (const auto& pair : it->second) {
-        if (pair.first.empty() || pair.first == value) {
-          if (pair.second) {
-            pos = true;
-          } else {
-            neg = true;
-          }
-        }
-      }
-    }
-  }
-  return (pos || !neg);
 }

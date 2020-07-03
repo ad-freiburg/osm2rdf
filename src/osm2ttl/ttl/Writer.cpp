@@ -245,21 +245,28 @@ void osm2ttl::ttl::Writer::writeOsmiumRelationMembers(
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   // If only basic data is requested, skip this.
-  if (!_config.expandedData) {
-    return;
-  }
 
   std::uint32_t i = 0;
   for (const osmium::RelationMember& member : members) {
+    std::string role{member.role()};
+    if (!role.empty() && role != "outer" && role != "inner") {
+      writeTriple(s,
+        osm2ttl::ttl::IRI("osmrel", role),
+        osm2ttl::ttl::IRI("osm"
+          + std::string(osmium::item_type_to_name(member.type())),
+          member));
+    }
+    if (!_config.expandedData) {
+      continue;
+    }
+    if (role.empty()) {
+      role = "member";
+    }
     osm2ttl::ttl::BlankNode b;
     writeTriple(s,
       osm2ttl::ttl::IRI("osmrel", "membership"),
       b);
 
-    std::string role{member.role()};
-    if (role.empty()) {
-      role = "member";
-    }
     writeTriple(b,
       osm2ttl::ttl::IRI("osmrel", role),
       osm2ttl::ttl::IRI("osm"
