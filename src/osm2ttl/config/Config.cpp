@@ -133,13 +133,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     // Add tag.key() -> xsd overrides
     tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");
 
-    // Add tag.key() -> interest
-    tagInterest["name"].emplace_back("", true);
-    tagInterest["ele"].emplace_back("", false);
-    tagInterest["highway"].emplace_back("milestone", false);
-    tagInterest["traffic_sign"].emplace_back("destination", false);
-    tagInterest["traffic_sign:forward"].emplace_back("", false);
-
     // Output
     output = outputOp->value();
     if (outputFormatOp->is_set()) {
