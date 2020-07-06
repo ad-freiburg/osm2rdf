@@ -52,11 +52,10 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
   if (_config.noRelationDump) {
     return;
   }
-  if (!_config.addAreaSources &&
-      _membershipHandler->isArea(relation)) {
+  if (relation.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  if (relation.tags().byte_size() == EMPTY_TAG_SIZE) {
+  if (!_config.addAreaSources && _membershipHandler->isArea(relation)) {
     return;
   }
   _writer->writeOsmiumRelation(relation);
@@ -67,11 +66,10 @@ void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
   if (_config.noWayDump) {
     return;
   }
-  if (!_config.addAreaSources &&
-      _membershipHandler->isArea(way)) {
+  if (way.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  if (way.tags().byte_size() == EMPTY_TAG_SIZE) {
+  if (!_config.addAreaSources && _membershipHandler->isArea(way)) {
     return;
   }
   _writer->writeOsmiumWay(way);
