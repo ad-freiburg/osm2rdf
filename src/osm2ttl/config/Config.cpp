@@ -29,6 +29,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
   auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "skip-area-prep", "Skip area sorting");
+  auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+    "", "use-ram-for-locations", "Store locations in RAM");
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
     "no-node-dump", "Skip nodes while dumping data");
@@ -91,6 +93,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     if (skipAreaPrepOp->is_set()) {
       skipAreaPrep = true;
+    }
+    if (useRamForLocationsOp->is_set()) {
+      useRamForLocations = true;
     }
 
     // Select types to dump

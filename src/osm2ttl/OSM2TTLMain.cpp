@@ -8,8 +8,6 @@
 
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
-#include "osmium/handler/node_locations_for_ways.hpp"
-#include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/io/any_input.hpp"
 #include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/util/memory.hpp"
@@ -20,6 +18,7 @@
 #include "osm2ttl/osm/AreaHandler.h"
 #include "osm2ttl/osm/CacheFile.h"
 #include "osm2ttl/osm/DumpHandler.h"
+#include "osm2ttl/osm/LocationHandler.h"
 #include "osm2ttl/osm/MembershipHandler.h"
 
 // ____________________________________________________________________________
@@ -38,13 +37,12 @@ int main(int argc, char** argv) {
     }
     writer.writeHeader();
 
-    osm2ttl::osm::AreaHandler area_handler{config, &writer};
+    osm2ttl::osm::AreaHandler areaHandler{config, &writer};
     osm2ttl::osm::MembershipHandler membershipHandler{config};
-    osm2ttl::osm::DumpHandler dump_handler{config, &writer, &area_handler,
+    osm2ttl::osm::DumpHandler dumpHandler{config, &writer, &areaHandler,
       &membershipHandler};
-    osm2ttl::osm::CacheFile node2locationCacheFile{config.getTempPath("osmium",
-      "n2l.cache")};
-
+    osm2ttl::osm::LocationHandler* locationHandler =
+      osm2ttl::osm::LocationHandler::create(config);
 
     {
       // Do not create empty areas
@@ -67,24 +65,16 @@ int main(int argc, char** argv) {
 
       // store area data
       {
-        osmium::index::map::SparseFileArray<
-          osmium::unsigned_object_id_type, osmium::Location>
-          index{node2locationCacheFile.fileDescriptor()};
-        osmium::handler::NodeLocationsForWays<
-          osmium::index::map::SparseFileArray<
-          osmium::unsigned_object_id_type, osmium::Location>>
-          location_handler{index};
-        location_handler.ignore_errors();
-
         std::cerr << "OSM Pass 1b ... (store locations and areas)" << std::endl;
         osmium::io::ReaderWithProgressBar reader{true, input_file,
           osmium::osm_entity_bits::object};
-        osmium::apply(reader, location_handler,
-          mp_manager.handler([&area_handler, &membershipHandler](
+        osmium::apply(reader, *locationHandler,
+          mp_manager.handler([&areaHandler, &membershipHandler](
               osmium::memory::Buffer&& buffer) {
-            osmium::apply(buffer, area_handler, membershipHandler);
+            osmium::apply(buffer, areaHandler, membershipHandler);
         }), membershipHandler);
         reader.close();
+        locationHandler->firstPassDone();
         std::cerr << "... done" << std::endl;
       }
 
@@ -93,7 +83,7 @@ int main(int argc, char** argv) {
     }
 
       std::cerr << "Prepare area data for lookup" << std::endl;
-      area_handler.sort();
+      areaHandler.sort();
       std::cerr << "... done" << std::endl;
 
       std::cerr << "Prepare membership data for lookup" << std::endl;
@@ -122,24 +112,14 @@ int main(int argc, char** argv) {
 
       // store data
       {
-        node2locationCacheFile.reopen();
-        osmium::index::map::SparseFileArray<
-          osmium::unsigned_object_id_type, osmium::Location>
-          index{node2locationCacheFile.fileDescriptor()};
-        osmium::handler::NodeLocationsForWays<
-          osmium::index::map::SparseFileArray<
-          osmium::unsigned_object_id_type, osmium::Location>>
-          location_handler{index};
-        location_handler.ignore_errors();
-
         std::cerr << "OSM Pass 2b ... (dump)" << std::endl;
         osmium::io::ReaderWithProgressBar reader{true, input_file,
           osmium::osm_entity_bits::object};
-        osmium::apply(reader, location_handler,
-          mp_manager.handler([&dump_handler](
+        osmium::apply(reader, *locationHandler,
+          mp_manager.handler([&dumpHandler](
               osmium::memory::Buffer&& buffer) {
-            osmium::apply(buffer, dump_handler);
-        }), dump_handler);
+            osmium::apply(buffer, dumpHandler);
+        }), dumpHandler);
         reader.close();
         std::cerr << "... done" << std::endl;
       }
@@ -153,6 +133,7 @@ int main(int argc, char** argv) {
 
     // All work done, close output
     writer.close();
+    delete locationHandler;
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
     std::cerr << e.what() << std::endl;
