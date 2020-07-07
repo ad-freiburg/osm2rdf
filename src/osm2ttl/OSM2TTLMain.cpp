@@ -19,7 +19,6 @@
 #include "osm2ttl/osm/CacheFile.h"
 #include "osm2ttl/osm/DumpHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
-#include "osm2ttl/osm/MembershipHandler.h"
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
@@ -38,9 +37,7 @@ int main(int argc, char** argv) {
     writer.writeHeader();
 
     osm2ttl::osm::AreaHandler areaHandler{config, &writer};
-    osm2ttl::osm::MembershipHandler membershipHandler{config};
-    osm2ttl::osm::DumpHandler dumpHandler{config, &writer, &areaHandler,
-      &membershipHandler};
+    osm2ttl::osm::DumpHandler dumpHandler{config, &writer, &areaHandler};
     osm2ttl::osm::LocationHandler* locationHandler =
       osm2ttl::osm::LocationHandler::create(config);
 
@@ -69,10 +66,10 @@ int main(int argc, char** argv) {
         osmium::io::ReaderWithProgressBar reader{true, input_file,
           osmium::osm_entity_bits::object};
         osmium::apply(reader, *locationHandler,
-          mp_manager.handler([&areaHandler, &membershipHandler](
+          mp_manager.handler([&areaHandler](
               osmium::memory::Buffer&& buffer) {
-            osmium::apply(buffer, areaHandler, membershipHandler);
-        }), membershipHandler);
+            osmium::apply(buffer, areaHandler);
+        }));
         reader.close();
         locationHandler->firstPassDone();
         std::cerr << "... done" << std::endl;
@@ -84,10 +81,6 @@ int main(int argc, char** argv) {
 
       std::cerr << "Prepare area data for lookup" << std::endl;
       areaHandler.sort();
-      std::cerr << "... done" << std::endl;
-
-      std::cerr << "Prepare membership data for lookup" << std::endl;
-      membershipHandler.sort();
       std::cerr << "... done" << std::endl;
 
     // Data from first pass required

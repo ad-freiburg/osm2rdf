@@ -18,10 +18,8 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
-  osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler,
-  osm2ttl::osm::MembershipHandler* membershipHandler) :
-  _config(config), _writer(writer), _areaHandler(areaHandler),
-  _membershipHandler(membershipHandler) {
+  osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler) :
+  _config(config), _writer(writer), _areaHandler(areaHandler) {
 }
 
 // ____________________________________________________________________________

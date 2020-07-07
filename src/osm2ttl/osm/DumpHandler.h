@@ -14,7 +14,6 @@
 
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/AreaHandler.h"
-#include "osm2ttl/osm/MembershipHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 
 namespace osm2ttl {
@@ -24,8 +23,7 @@ class DumpHandler : public osmium::handler::Handler {
  public:
   DumpHandler(const osm2ttl::config::Config& config,
               osm2ttl::ttl::Writer* writer,
-              osm2ttl::osm::AreaHandler* areaHandler,
-              osm2ttl::osm::MembershipHandler* membershipHandler);
+              osm2ttl::osm::AreaHandler* areaHandler);
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
@@ -35,7 +33,6 @@ class DumpHandler : public osmium::handler::Handler {
   const osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer* _writer;
   osm2ttl::osm::AreaHandler* _areaHandler;
-  osm2ttl::osm::MembershipHandler* _membershipHandler;
 };
 
 }  // namespace osm
