@@ -59,7 +59,7 @@ void osm2ttl::ttl::Writer::close() {
 
 // ____________________________________________________________________________
 bool osm2ttl::ttl::Writer::contains(std::string_view s,
-                                  std::string_view n) {
+                                    std::string_view n) {
   if (n.empty()) {
     return true;
   }
@@ -71,7 +71,7 @@ bool osm2ttl::ttl::Writer::contains(std::string_view s,
 
 // ____________________________________________________________________________
 bool osm2ttl::ttl::Writer::endsWith(std::string_view s,
-                                  std::string_view n) {
+                                    std::string_view n) {
   if (n.empty()) {
     return true;
   }
@@ -83,7 +83,7 @@ bool osm2ttl::ttl::Writer::endsWith(std::string_view s,
 
 // ____________________________________________________________________________
 bool osm2ttl::ttl::Writer::startsWith(std::string_view s,
-                                    std::string_view n) {
+                                      std::string_view n) {
   if (n.empty()) {
     return true;
   }
@@ -253,8 +253,9 @@ void osm2ttl::ttl::Writer::writeOsmiumRelationMembers(
       writeTriple(s,
         osm2ttl::ttl::IRI("osmrel", role),
         osm2ttl::ttl::IRI("osm"
-          + std::string(osmium::item_type_to_name(
-            member.type()) == "relation" ? "rel" : "way"), member));
+          + std::string((osmium::item_type_to_name(
+            member.type()) == std::string("relation")) ? "rel" : "way"),
+          member));
     }
     if (!_config.expandedData) {
       continue;

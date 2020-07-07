@@ -52,50 +52,7 @@ int main(int argc, char** argv) {
       {
         osmium::io::Reader reader{input_file};
         osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
-        std::cerr << "OSM Pass 1a ... (Relations for areas)" << std::endl;
-        osmium::relations::read_relations(progress, input_file, mp_manager);
-        std::cerr << "... done" << std::endl;
-      }
-
-      std::cerr << "Memory:\n";
-      osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
-
-      // store area data
-      {
-        std::cerr << "OSM Pass 1b ... (store locations and areas)" << std::endl;
-        osmium::io::ReaderWithProgressBar reader{true, input_file,
-          osmium::osm_entity_bits::object};
-        osmium::apply(reader, *locationHandler,
-          mp_manager.handler([&areaHandler](
-              osmium::memory::Buffer&& buffer) {
-            osmium::apply(buffer, areaHandler);
-        }));
-        reader.close();
-        locationHandler->firstPassDone();
-        std::cerr << "... done" << std::endl;
-      }
-
-      std::cerr << "Memory:\n";
-      osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
-    }
-
-      std::cerr << "Prepare area data for lookup" << std::endl;
-      areaHandler.sort();
-      std::cerr << "... done" << std::endl;
-
-    // Data from first pass required
-    {
-      // Do not create empty areas
-      osmium::area::Assembler::config_type assembler_config;
-      assembler_config.create_empty_areas = false;
-      osmium::area::MultipolygonManager<osmium::area::Assembler>
-      mp_manager{assembler_config};
-
-      // read relations for areas
-      {
-        osmium::io::Reader reader{input_file};
-        osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
-        std::cerr << "OSM Pass 2a ... (Relations for areas)" << std::endl;
+        std::cerr << "OSM Pass 1 ... (Relations for areas)" << std::endl;
         osmium::relations::read_relations(progress, input_file, mp_manager);
         std::cerr << "... done" << std::endl;
       }
@@ -105,17 +62,21 @@ int main(int argc, char** argv) {
 
       // store data
       {
-        std::cerr << "OSM Pass 2b ... (dump)" << std::endl;
+        std::cerr << "OSM Pass 2 ... (dump)" << std::endl;
         osmium::io::ReaderWithProgressBar reader{true, input_file,
           osmium::osm_entity_bits::object};
         osmium::apply(reader, *locationHandler,
-          mp_manager.handler([&dumpHandler](
+          mp_manager.handler([&dumpHandler, &areaHandler](
               osmium::memory::Buffer&& buffer) {
-            osmium::apply(buffer, dumpHandler);
+            osmium::apply(buffer, dumpHandler, areaHandler);
         }), dumpHandler);
         reader.close();
         std::cerr << "... done" << std::endl;
       }
+
+      std::cerr << "Prepare area data for lookup" << std::endl;
+      areaHandler.sort();
+      std::cerr << "... done" << std::endl;
 
       std::cerr << "Memory:\n";
       osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
