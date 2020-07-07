@@ -253,8 +253,8 @@ void osm2ttl::ttl::Writer::writeOsmiumRelationMembers(
       writeTriple(s,
         osm2ttl::ttl::IRI("osmrel", role),
         osm2ttl::ttl::IRI("osm"
-          + std::string(osmium::item_type_to_name(member.type())),
-          member));
+          + std::string(osmium::item_type_to_name(
+            member.type()) == "relation" ? "rel" : "way"), member));
     }
     if (!_config.expandedData) {
       continue;
