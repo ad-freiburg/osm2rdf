@@ -140,10 +140,7 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
   osm2ttl::ttl::IRI s{area.from_way()?"osmway":"osmrel",
       std::to_string(area.orig_id())};
 
-  writeTriple(s,
-    osm2ttl::ttl::IRI("rdf", "type"),
-    osm2ttl::ttl::IRI("osm", area.from_way()?"way":"relation"));
-
+  // Do not add tags or type as this extends a relation or way
   writeTriple(s,
     osm2ttl::ttl::IRI("geo", "hasGeometry"),
     osm2ttl::ttl::Literal(_factory->create_multipolygon(area),
@@ -177,8 +174,6 @@ void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
   if (_config.addBBox) {
     writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), area.envelope());
   }
-
-  writeOsmiumTagList(s, area.tags());
 }
 
 // ____________________________________________________________________________
