@@ -44,9 +44,9 @@ void osm2ttl::osm::SimplifyingWKTFactoryImpl::merge(const size_t index1,
   case MergeMode::MERGE:
     const double x = (_coordinates[index1].x + _coordinates[index2].x) / 2;
     const double y = (_coordinates[index1].y + _coordinates[index2].y) / 2;
+    _coordinates[index1].x = x;
+    _coordinates[index1].y = y;
     _coordinates.erase(_coordinates.begin() + index2);
-    _coordinates.erase(_coordinates.begin() + index1);
-    _coordinates.emplace(_coordinates.begin() + index1, x, y);
     break;
   }
 }
