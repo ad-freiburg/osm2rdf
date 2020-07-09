@@ -362,16 +362,26 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
   writeOsmiumTagList(s, way.tags());
   writeOsmiumWayNodeList(s, way.nodes());
 
-  if (way.nodes().size() > 3 && way.is_closed()) {
+  // Count unique points, this only checks direct duplicates.
+  size_t numUniquePoints = 0;
+  osmium::Location last;
+  for (auto const *it = way.nodes().cbegin(); it != way.nodes().cend(); ++it) {
+    if (last != it->location()) {
+      last = it->location();
+      numUniquePoints++;
+    }
+  }
+
+  // Select geometry object in relation to the number of unique points.
+  if (numUniquePoints > 3 && way.is_closed()) {
     writeTriple(s,
       osm2ttl::ttl::IRI("geo", "hasGeometry"),
       osm2ttl::ttl::Literal(_factory->create_polygon(way),
         osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  } else if (way.nodes().size() > 1) {
+  } else if (numUniquePoints > 1) {
     writeTriple(s,
       osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(_factory->create_linestring(
-        way, osmium::geom::use_nodes::all),
+      osm2ttl::ttl::Literal(_factory->create_linestring(way),
         osm2ttl::ttl::IRI("geo", "wktLiteral")));
   } else {
     writeTriple(s,
@@ -385,6 +395,12 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
     writeTriple(s,
       osm2ttl::ttl::IRI("osmway", "is_closed"),
       osm2ttl::ttl::Literal(way.is_closed()?"yes":"no"));
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmway", "nodeCount"),
+      osm2ttl::ttl::Literal(std::to_string(way.nodes().size())));
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmway", "uniqueNodeCount"),
+      osm2ttl::ttl::Literal(std::to_string(numUniquePoints)));
   }
 
   if (_config.addBBox) {
