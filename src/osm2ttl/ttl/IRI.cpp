@@ -5,7 +5,6 @@
 
 #include <cctype>
 #include <iterator>
-#include <sstream>
 #include <string>
 #include <iostream>
 
@@ -15,35 +14,23 @@
 
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n)
-  : _prefix(prefix) {
-  std::stringstream tmp;
-  tmp << n.positive_ref();
-  _value = tmp.str();
+  : _prefix(prefix),  _value(std::to_string(n.positive_ref())) {
 }
 
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o)
-  : _prefix(prefix) {
-  std::stringstream tmp;
-  tmp << o.positive_id();
-  _value = tmp.str();
+  : _prefix(prefix),  _value(std::to_string(o.positive_id())) {
 }
 
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix,
                        const osmium::RelationMember& m)
-  : _prefix(prefix) {
-  std::stringstream tmp;
-  tmp << m.positive_ref();
-  _value = tmp.str();
+  : _prefix(prefix),  _value(std::to_string(m.positive_ref())) {
 }
 
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Area& a)
-  : _prefix(prefix) {
-  std::stringstream tmp;
-  tmp << a.id();
-  _value = tmp.str();
+  : _prefix(prefix),  _value(std::to_string(a.id())) {
 }
 
 // ____________________________________________________________________________

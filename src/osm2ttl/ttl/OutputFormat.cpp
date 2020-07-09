@@ -58,7 +58,7 @@ std::string osm2ttl::ttl::OutputFormat::header() const {
   if (_value == osm2ttl::ttl::OutputFormat::NT) {
     return "";
   }
-  std::stringstream tmp;
+  std::ostringstream tmp;
   for (const auto& p : _prefixes) {
     tmp << "@prefix " << p.first << ": <" << p.second << "> .\n";
   }
@@ -71,7 +71,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
   // NT:  [141s] BLANK_NODE_LABEL
   // TTL: [141s] BLANK_NODE_LABEL
   //      [162s] ANON (not used here)
-  std::stringstream tmp;
+  std::ostringstream tmp;
   tmp << "_:" << b.getId();
   return tmp.str();
 }
@@ -83,7 +83,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
   //      https://www.w3.org/TR/n-triples/#grammar-production-LANGTAG
   // TTL: [144s] LANGTAG
   //      https://www.w3.org/TR/turtle/#grammar-production-LANGTAG
-  std::stringstream tmp;
+  std::ostringstream tmp;
   tmp << "@";
   std::string_view s = l.value();
   size_t partCount = 0;
@@ -113,7 +113,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
   //      Currently only:
   //      [128s] RDFLiteral
   //      https://www.w3.org/TR/turtle/#grammar-production-RDFLiteral
-  std::stringstream tmp;
+  std::ostringstream tmp;
   tmp << osm2ttl::ttl::OutputFormat::STRING_LITERAL_QUOTE(l.value());
   if (auto iri = l.iri()) {
     tmp << "^^" << format(*iri);
@@ -165,12 +165,7 @@ std::string osm2ttl::ttl::OutputFormat::IRIREF(const std::string& p,
 std::string osm2ttl::ttl::OutputFormat::PrefixedName(const std::string& p,
                                                      const std::string& v)
   const {
-  std::stringstream tmp;
-  if (!p.empty()) {
-    tmp << p << ":";
-  }
-  tmp << encodePN_LOCAL(v);
-  return tmp.str();
+  return p + ":" + encodePN_LOCAL(v);
 }
 
 // ____________________________________________________________________________
@@ -180,7 +175,7 @@ std::string osm2ttl::ttl::OutputFormat::STRING_LITERAL_QUOTE(
   //      https://www.w3.org/TR/n-triples/#grammar-production-STRING_LITERAL_QUOTE
   // TTL: [22]  STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
-  std::stringstream tmp;
+  std::ostringstream tmp;
   tmp << "\"";
   for (size_t pos = 0; pos < s.size(); ++pos) {
     switch (s[pos]) {
@@ -209,7 +204,7 @@ std::string osm2ttl::ttl::OutputFormat::STRING_LITERAL_SINGLE_QUOTE(
   const std::string& s) const {
   // TTL: [23]  STRING_LITERAL_SINGLE_QUOTE
   //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_SINGLE_QUOTE
-  std::stringstream tmp;
+  std::ostringstream tmp;
   tmp << "\"";
   for (size_t pos = 0; pos < s.size(); ++pos) {
     switch (s[pos]) {
@@ -309,8 +304,8 @@ std::string osm2ttl::ttl::OutputFormat::UCHAR(char c)
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  std::stringstream tmp;
-  tmp << "\\u00" << std::hex  << ((c & 0xF0) >> 4) << std::hex << (c & 0x0F);
+  std::ostringstream tmp;
+  tmp << "\\u00" << std::hex << ((c & 0xF0) >> 4) << std::hex << (c & 0x0F);
   return tmp.str();
 }
 
@@ -321,7 +316,7 @@ std::string osm2ttl::ttl::OutputFormat::UCHAR(const std::string& s)
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  std::stringstream tmp;
+  std::ostringstream tmp;
   uint32_t c = utf8Codepoint(s);
   if (c <= 0xFFFF) {
     tmp << "\\u" << std::setfill('0') << std::setw(4);
@@ -339,7 +334,7 @@ std::string osm2ttl::ttl::OutputFormat::encodeIRIREF(const std::string& s)
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
   // TTL: [18]  IRIREF
   //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  std::stringstream tmp;
+  std::ostringstream tmp;
   for (size_t pos = 0; pos < s.size(); ++pos) {
     uint8_t length = utf8Length(s[pos]);
     // Force non-allowed chars to UCHAR
@@ -372,7 +367,7 @@ std::string osm2ttl::ttl::OutputFormat::encodePERCENT(const std::string& s)
   const {
   // TTL: [170s] PERCENT
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
-  std::stringstream tmp;
+  std::ostringstream tmp;
   uint32_t c = utf8Codepoint(s);
   uint32_t mask = 0xFF;
   bool echo = false;
@@ -392,7 +387,7 @@ std::string osm2ttl::ttl::OutputFormat::encodePN_LOCAL(const std::string& s)
   const {
   // TTL: [168s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
-  std::stringstream tmp;
+  std::ostringstream tmp;
   for (size_t pos = 0; pos < s.size(); ++pos) {
     // PN_LOCAL      ::= (PN_CHARS_U | ':' | [0-9] | PLX)
     //                   ((PN_CHARS | '.' | ':' | PLX)*

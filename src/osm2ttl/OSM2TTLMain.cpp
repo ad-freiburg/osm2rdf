@@ -60,6 +60,10 @@ int main(int argc, char** argv) {
       std::cerr << "Memory:\n";
       osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
 
+      std::cerr << "Prepare area data for lookup" << std::endl;
+      areaHandler.sort();
+      std::cerr << "... done" << std::endl;
+
       // store data
       {
         std::cerr << "OSM Pass 2 ... (dump)" << std::endl;
@@ -73,10 +77,6 @@ int main(int argc, char** argv) {
         reader.close();
         std::cerr << "... done" << std::endl;
       }
-
-      std::cerr << "Prepare area data for lookup" << std::endl;
-      areaHandler.sort();
-      std::cerr << "... done" << std::endl;
 
       std::cerr << "Memory:\n";
       osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());

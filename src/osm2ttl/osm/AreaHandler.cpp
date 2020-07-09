@@ -46,11 +46,9 @@ void osm2ttl::osm::AreaHandler::area(const osmium::Area& area) {
   }
   osm2ttl::osm::Area a(area);
   _areas.set(a.id(), a);
-  /*
-  if (a.tagAdministrationLevel() != 0) {
+  if (a.tagAdministrationLevel() == 2) {
     _stacks.push_back(a.id());
   }
-  */
 }
 
 // ____________________________________________________________________________

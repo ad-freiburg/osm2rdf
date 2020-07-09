@@ -198,7 +198,7 @@ void osm2ttl::ttl::Writer::writeOsmiumLocation(const S& s,
                                             const osmium::Location& location) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  std::stringstream loc;
+  std::ostringstream loc;
   location.as_string_without_check(std::ostream_iterator<char>(loc));
 
   writeTriple(s,
@@ -284,24 +284,25 @@ void osm2ttl::ttl::Writer::writeOsmiumTag(const S& s,
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   // No spaces allowed in tag keys (see 002.problem.nt)
   std::string key = std::string(tag.key());
-  std::stringstream tmp;
+  std::string tmp;
+  tmp.reserve(key.size());
   for (size_t pos = 0; pos < key.size(); ++pos) {
     switch (key[pos]) {
       case ' ':
-        tmp << "_";
+        tmp += "_";
         break;
       default:
-        tmp << key[pos];
+        tmp += key[pos];
     }
   }
   if (_config.tagKeyType.find(tag.key()) != _config.tagKeyType.end()) {
     writeTriple(s,
-      osm2ttl::ttl::IRI("osmt", tmp.str()),
+      osm2ttl::ttl::IRI("osmt", tmp),
       osm2ttl::ttl::Literal(tag.value(),
         _config.tagKeyType.at(tag.key())));
   } else {
     writeTriple(s,
-      osm2ttl::ttl::IRI("osmt", tmp.str()),
+      osm2ttl::ttl::IRI("osmt", tmp),
       osm2ttl::ttl::Literal(tag.value()));
   }
 }
