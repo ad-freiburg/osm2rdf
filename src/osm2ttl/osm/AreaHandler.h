@@ -18,8 +18,8 @@
 
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/Area.h"
-#include "osm2ttl/osm/CacheFile.h"
 #include "osm2ttl/ttl/Writer.h"
+#include "osm2ttl/util/CacheFile.h"
 
 namespace osm2ttl {
 namespace osm {
@@ -39,7 +39,7 @@ class AreaHandler : public osmium::handler::Handler {
   // Triple writer
   osm2ttl::ttl::Writer* _writer;
   // Areas
-  osm2ttl::osm::CacheFile _areasFile;
+  osm2ttl::util::CacheFile _areasFile;
   osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type, osm2ttl::osm::Area>
     _areas;

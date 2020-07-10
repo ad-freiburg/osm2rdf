@@ -1,7 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2ttl/osm/CacheFile.h"
+#include "osm2ttl/util/CacheFile.h"
 
 
 #include <fcntl.h>
@@ -10,19 +10,19 @@
 #include <string>
 
 // ____________________________________________________________________________
-osm2ttl::osm::CacheFile::CacheFile(const std::filesystem::path& path) :
+osm2ttl::util::CacheFile::CacheFile(const std::filesystem::path& path) :
   _path(std::filesystem::absolute(path)) {
   reopen();
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::CacheFile::~CacheFile() {
+osm2ttl::util::CacheFile::~CacheFile() {
   close();
   remove();
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::CacheFile::reopen() {
+void osm2ttl::util::CacheFile::reopen() {
   const int RWRWRW = 0666;
   _fileDescriptor = ::open(_path.c_str(), O_RDWR | O_CREAT | O_TRUNC, RWRWRW);
   if (_fileDescriptor == -1) {
@@ -34,7 +34,7 @@ void osm2ttl::osm::CacheFile::reopen() {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::CacheFile::close() {
+void osm2ttl::util::CacheFile::close() {
   if (_fileDescriptor >= 0) {
     ::close(_fileDescriptor);
     _fileDescriptor = -1;
@@ -42,11 +42,11 @@ void osm2ttl::osm::CacheFile::close() {
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::CacheFile::remove() {
+bool osm2ttl::util::CacheFile::remove() {
   return std::filesystem::remove(_path);
 }
 
 // ____________________________________________________________________________
-int osm2ttl::osm::CacheFile::fileDescriptor() const {
+int osm2ttl::util::CacheFile::fileDescriptor() const {
   return _fileDescriptor;
 }

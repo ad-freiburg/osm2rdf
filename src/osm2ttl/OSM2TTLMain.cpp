@@ -16,7 +16,6 @@
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/osm/AreaHandler.h"
-#include "osm2ttl/osm/CacheFile.h"
 #include "osm2ttl/osm/DumpHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
 

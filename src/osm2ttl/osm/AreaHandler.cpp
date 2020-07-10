@@ -18,8 +18,8 @@
 
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/Area.h"
-#include "osm2ttl/osm/CacheFile.h"
 #include "osm2ttl/ttl/Writer.h"
+#include "osm2ttl/util/CacheFile.h"
 
 // ____________________________________________________________________________
 osm2ttl::osm::AreaHandler::AreaHandler(const osm2ttl::config::Config& config,

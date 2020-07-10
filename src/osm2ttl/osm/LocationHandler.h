@@ -14,7 +14,7 @@
 #include "osmium/osm/way.hpp"
 
 #include "osm2ttl/config/Config.h"
-#include "osm2ttl/osm/CacheFile.h"
+#include "osm2ttl/util/CacheFile.h"
 
 namespace osm2ttl {
 namespace osm {
@@ -51,7 +51,7 @@ osmium::unsigned_object_id_type, osmium::Location>>: public LocationHandler {
   void node(const osmium::Node& node);
   void way(osmium::Way& way);  // NOLINT
  protected:
-  osm2ttl::osm::CacheFile _cacheFile;
+  osm2ttl::util::CacheFile _cacheFile;
   osmium::index::map::SparseFileArray<osmium::unsigned_object_id_type,
                                       osmium::Location> _index;
   osmium::handler::NodeLocationsForWays<
