@@ -113,15 +113,14 @@ std::string osm2ttl::ttl::OutputFormat::format(
   //      Currently only:
   //      [128s] RDFLiteral
   //      https://www.w3.org/TR/turtle/#grammar-production-RDFLiteral
-  std::ostringstream tmp;
-  tmp << osm2ttl::ttl::OutputFormat::STRING_LITERAL_QUOTE(l.value());
+  std::string s = osm2ttl::ttl::OutputFormat::STRING_LITERAL_QUOTE(l.value());
   if (auto iri = l.iri()) {
-    tmp << "^^" << format(*iri);
+    return s += "^^" + format(*iri);
   }
   if (auto langTag = l.langTag()) {
-    tmp << osm2ttl::ttl::OutputFormat::format(*langTag);
+    return s += osm2ttl::ttl::OutputFormat::format(*langTag);
   }
-  return tmp.str();
+  return s;
 }
 
 // ____________________________________________________________________________
@@ -135,18 +134,19 @@ std::string osm2ttl::ttl::OutputFormat::format(
   //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
   //      [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  auto prefix = _prefixes.find(i.prefix());
   switch (_value) {
   case osm2ttl::ttl::OutputFormat::NT:
     // Expand prefix
-    if (_prefixes.count(i.prefix()) > 0) {
-      return IRIREF(_prefixes.at(i.prefix()), i.value());
+    if (prefix != _prefixes.end()) {
+      return IRIREF(prefix->second, i.value());
     }
     return IRIREF(i.prefix(), i.value());
   case osm2ttl::ttl::OutputFormat::TTL:
     [[fallthrough]];
   case osm2ttl::ttl::OutputFormat::QLEVER:
     // If known prefix -> PrefixedName
-    if (_prefixes.count(i.prefix()) > 0) {
+    if (prefix != _prefixes.end()) {
       return PrefixedName(i.prefix(), i.value());
     }
     return IRIREF(i.prefix(), i.value());
