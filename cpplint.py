@@ -5879,11 +5879,11 @@ def FlagCxx11Features(filename, clean_lines, linenum, error):
   # MODIFICATION(Hannah 03-11-2016): allow "chrono".
   # MODIFICATION(Claudius 15-10-2017): allow "regex".
   if include and include.group(1) in ('cfenv',
-                                      'condition_variable',
+                                      #'condition_variable',
                                       'fenv.h',
                                       'future',
-                                      'mutex',
-                                      'thread',
+                                      #'mutex',
+                                      #'thread',
                                       # 'chrono',
                                       'ratio',
                                       # 'regex',

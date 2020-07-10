@@ -29,7 +29,7 @@
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
-  : _config(config) {
+  : _config(config), _queue(_config.writerThreads) {
   _out = &std::cout;
   _factory = osm2ttl::osm::WKTFactory::create(_config);
 }
@@ -94,28 +94,9 @@ bool osm2ttl::ttl::Writer::startsWith(std::string_view s,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeHeader() const {
+void osm2ttl::ttl::Writer::writeHeader() {
+  const std::lock_guard<std::mutex> lock(_outMutex);
   *_out << _config.outputFormat.header();
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::BlankNode& b) {
-  *_out << _config.outputFormat.format(b);
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::IRI& i) {
-  *_out << _config.outputFormat.format(i);
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::LangTag& l) {
-  *_out << _config.outputFormat.format(l);
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::write(const osm2ttl::ttl::Literal& l) {
-  *_out << _config.outputFormat.format(l);
 }
 
 // ____________________________________________________________________________
@@ -127,12 +108,15 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
   static_assert(std::is_same<O, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<O, osm2ttl::ttl::IRI>::value
                 || std::is_same<O, osm2ttl::ttl::Literal>::value);
-  write(s);
-  *_out << " ";
-  write(p);
-  *_out << " ";
-  write(o);
-  *_out << " .\n";
+  _queue.dispatch([this, s, p, o]{
+    const std::lock_guard<std::mutex> lock(_outMutex);
+    *_out << _config.outputFormat.format(s);
+    *_out << " ";
+    *_out << _config.outputFormat.format(p);
+    *_out << " ";
+    *_out << _config.outputFormat.format(o);
+    *_out << " .\n";
+  });
 }
 
 // ____________________________________________________________________________

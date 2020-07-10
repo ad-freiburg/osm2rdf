@@ -7,6 +7,7 @@
 #include <fstream>
 #include <ostream>
 #include <string>
+#include <mutex>
 
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/location.hpp"
@@ -24,6 +25,8 @@
 #include "osm2ttl/ttl/IRI.h"
 #include "osm2ttl/ttl/Literal.h"
 
+#include "osm2ttl/util/DispatchQueue.h"
+
 namespace osm2ttl {
 namespace ttl {
 
@@ -34,7 +37,7 @@ class Writer {
   bool open();
   void close();
 
-  void writeHeader() const;
+  void writeHeader();
 
   template<typename S, typename O>
   void writeTriple(const S& s, const osm2ttl::ttl::IRI& p, const O& o);
@@ -70,18 +73,14 @@ class Writer {
   static bool endsWith(std::string_view s, std::string_view n);
   static bool startsWith(std::string_view s, std::string_view n);
 
-  // Element
-  void write(const osm2ttl::ttl::BlankNode& b);
-  void write(const osm2ttl::ttl::IRI& i);
-  void write(const osm2ttl::ttl::LangTag& l);
-  void write(const osm2ttl::ttl::Literal& l);
-
   // Config
   osm2ttl::config::Config _config;
+  osm2ttl::util::DispatchQueue _queue;
 
   // Output
   std::ostream* _out;
   std::ofstream _outFile;
+  std::mutex _outMutex;
 
   // Helper
   osm2ttl::osm::WKTFactory* _factory;
