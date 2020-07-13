@@ -22,7 +22,13 @@
 
 #include "osm2ttl/config/Config.h"
 
+#include "osm2ttl/geometry/Location.h"
+
 #include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/Box.h"
+#include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Tag.h"
+#include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/WKTFactory.h"
 
 #include "osm2ttl/ttl/BlankNode.h"
@@ -162,30 +168,21 @@ void osm2ttl::ttl::Writer::writeBox(const S& s,
 }
 
 // ____________________________________________________________________________
-template<typename S>
-void osm2ttl::ttl::Writer::writeOsmiumLocation(const S& s,
-                                            const osmium::Location& location) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  std::ostringstream loc;
-  location.as_string_without_check(std::ostream_iterator<char>(loc));
-
-  writeTriple(s,
-    osm2ttl::ttl::IRI("geo", "hasGeometry"),
-    osm2ttl::ttl::Literal(_factory->create_point(location),
-      osm2ttl::ttl::IRI("geo", "wktLiteral")));
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmiumNode(const osmium::Node& node) {
+void osm2ttl::ttl::Writer::writeNode(const osm2ttl::osm::Node& node) {
   osm2ttl::ttl::IRI s{"osmnode", node};
 
   writeTriple(s,
     osm2ttl::ttl::IRI("rdf", "type"),
     osm2ttl::ttl::IRI("osm", "node"));
 
-  writeOsmiumLocation(s, node.location());
-  writeOsmiumTagList(s, node.tags());
+  std::ostringstream tmp;
+  tmp << boost::geometry::wkt(node.geom());
+  writeTriple(s,
+    osm2ttl::ttl::IRI("geo", "hasGeometry"),
+    osm2ttl::ttl::Literal(std::move(tmp.str()),
+                          osm2ttl::ttl::IRI("geo", "wktLiteral")));
+
+  writeTagList(s, node.tags());
 }
 
 // ____________________________________________________________________________
@@ -278,6 +275,25 @@ void osm2ttl::ttl::Writer::writeOsmiumTag(const S& s,
 
 // ____________________________________________________________________________
 template<typename S>
+void osm2ttl::ttl::Writer::writeTag(const S& s, const osm2ttl::osm::Tag& tag) {
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  const std::string &key = tag.first;
+  const std::string &value = tag.second;
+  auto tagType = _config.tagKeyType.find(key);
+  if (tagType != _config.tagKeyType.end()) {
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmt", key),
+      osm2ttl::ttl::Literal(value, tagType->second));
+  } else {
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmt", key),
+      osm2ttl::ttl::Literal(value));
+  }
+}
+
+// ____________________________________________________________________________
+template<typename S>
 void osm2ttl::ttl::Writer::writeOsmiumTagList(const S& s,
                                          const osmium::TagList& tags) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
@@ -315,6 +331,50 @@ void osm2ttl::ttl::Writer::writeOsmiumTagList(const S& s,
           writeTriple(s,
             osm2ttl::ttl::IRI("osm", "wikipedia"),
             osm2ttl::ttl::IRI("https://www.wikipedia.org/wiki/", v));
+        }
+      }
+    }
+  }
+}
+
+// ____________________________________________________________________________
+template<typename S>
+void osm2ttl::ttl::Writer::writeTagList(const S& s,
+                                        const osm2ttl::osm::TagList& tags) {
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  for (const osm2ttl::osm::Tag& tag : tags) {
+    writeTag(s, tag);
+    const std::string &key = tag.first;
+    std::string value = tag.second;
+    if (!_config.skipWikiLinks) {
+      if (key == "wikidata") {
+        // Only take first wikidata entry if ; is found
+        auto end = value.find(';');
+        if (end != std::string::npos) {
+          value = value.erase(end);
+        }
+        // Remove all but Q and digits to ensuder Qdddddd format
+        value.erase(remove_if(value.begin(), value.end(), [](char c) {
+          return (!isdigit(c) && c != 'Q');
+        }), value.end());
+
+        writeTriple(s,
+          osm2ttl::ttl::IRI("osm", key),
+          osm2ttl::ttl::IRI("wd", value));
+      }
+      if (key == "wikipedia") {
+        auto pos = value.find(':');
+        if (pos != std::string::npos) {
+          std::string lang = value.substr(0, pos);
+          std::string entry = value.substr(pos + 1);
+          writeTriple(s,
+            osm2ttl::ttl::IRI("osm", "wikipedia"),
+            osm2ttl::ttl::IRI("https://"+lang+".wikipedia.org/wiki/", entry));
+        } else {
+          writeTriple(s,
+            osm2ttl::ttl::IRI("osm", "wikipedia"),
+            osm2ttl::ttl::IRI("https://www.wikipedia.org/wiki/", value));
         }
       }
     }

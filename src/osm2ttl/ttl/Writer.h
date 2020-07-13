@@ -18,7 +18,13 @@
 
 #include "osm2ttl/config/Config.h"
 
+#include "osm2ttl/geometry/Location.h"
+
 #include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/Box.h"
+#include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Tag.h"
+#include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/WKTFactory.h"
 
 #include "osm2ttl/ttl/BlankNode.h"
@@ -46,10 +52,6 @@ class Writer {
   template<typename S>
   void writeOsmiumBox(const S& s, const osm2ttl::ttl::IRI& p,
                    const osmium::Box& box);
-  template<typename S>
-  void writeOsmiumLocation(const S& s,
-                        const osmium::Location& location);
-  void writeOsmiumNode(const osmium::Node& node);
   void writeOsmiumRelation(const osmium::Relation& relation);
   template<typename S>
   void writeOsmiumRelationMembers(const S& s,
@@ -68,6 +70,11 @@ class Writer {
   template<typename S>
   void writeBox(const S& s, const osm2ttl::ttl::IRI& p,
                 const osm2ttl::osm::Box& box);
+  void writeNode(const osm2ttl::osm::Node& node);
+  template<typename S>
+  void writeTag(const S& s, const osm2ttl::osm::Tag& tag);
+  template<typename S>
+  void writeTagList(const S& s, const osm2ttl::osm::TagList& tags);
 
  protected:
   // Helper

@@ -16,6 +16,9 @@
 
 #include "osm2ttl/ttl/Writer.h"
 
+#include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/Node.h"
+
 // ____________________________________________________________________________
 osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
   osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler) :
@@ -41,7 +44,7 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
   if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  _writer->writeOsmiumNode(node);
+  _writer->writeNode(osm2ttl::osm::Node(node));
 }
 
 // ____________________________________________________________________________

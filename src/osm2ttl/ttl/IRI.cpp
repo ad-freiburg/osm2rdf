@@ -12,6 +12,9 @@
 #include "osmium/osm/object.hpp"
 #include "osmium/osm/relation.hpp"
 
+#include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/Node.h"
+
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n)
   : _prefix(prefix),  _value(std::to_string(n.positive_ref())) {
@@ -31,6 +34,11 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix,
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Area& a)
   : _prefix(prefix),  _value(std::to_string(a.id())) {
+}
+
+// ____________________________________________________________________________
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Node& n)
+  : _prefix(prefix),  _value(std::to_string(n.id())) {
 }
 
 // ____________________________________________________________________________
