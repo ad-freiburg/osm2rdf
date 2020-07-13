@@ -20,6 +20,7 @@ class DispatchQueue {
   ~DispatchQueue();
   void dispatch(const std::function<void(void)>& op);
   void dispatch(std::function<void(void)>&& op);
+  void quit();
 
   DispatchQueue(const DispatchQueue& rhs) = delete;
   DispatchQueue& operator=(const DispatchQueue& rhs) = delete;
@@ -32,6 +33,7 @@ class DispatchQueue {
   std::queue<std::function<void(void)>> _queue;
   std::condition_variable _conditionVariable;
   bool _quit = false;
+  bool _die = false;
 };
 
 }  // namespace util

@@ -52,6 +52,7 @@ bool osm2ttl::ttl::Writer::open() {
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::close() {
+  _queue.quit();
   if (_outFile.is_open()) {
     _outFile.close();
   }
@@ -279,11 +280,11 @@ void osm2ttl::ttl::Writer::writeOsmiumTag(const S& s,
         tmp += key[pos];
     }
   }
-  if (_config.tagKeyType.find(tag.key()) != _config.tagKeyType.end()) {
+  auto tagType = _config.tagKeyType.find(tag.key());
+  if (tagType != _config.tagKeyType.end()) {
     writeTriple(s,
       osm2ttl::ttl::IRI("osmt", tmp),
-      osm2ttl::ttl::Literal(tag.value(),
-        _config.tagKeyType.at(tag.key())));
+      osm2ttl::ttl::Literal(tag.value(), tagType->second));
   } else {
     writeTriple(s,
       osm2ttl::ttl::IRI("osmt", tmp),

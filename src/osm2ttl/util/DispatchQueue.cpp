@@ -8,6 +8,8 @@
 // ____________________________________________________________________________
 osm2ttl::util::DispatchQueue::DispatchQueue(size_t threadCount)
   : _threads(threadCount) {
+  _quit = false;
+  _die = false;
   for (size_t i = 0; i < _threads.size(); ++i) {
     _threads[i] = std::thread(&osm2ttl::util::DispatchQueue::handler, this);
   }
@@ -15,13 +17,20 @@ osm2ttl::util::DispatchQueue::DispatchQueue(size_t threadCount)
 
 // ____________________________________________________________________________
 osm2ttl::util::DispatchQueue::~DispatchQueue() {
-  // Signal end
+  std::unique_lock<std::mutex> lock(_lock);
+  _die = true;
+  lock.unlock();
+  _conditionVariable.notify_all();
+  quit();
+}
+
+// ____________________________________________________________________________
+void osm2ttl::util::DispatchQueue::quit() {
   std::unique_lock<std::mutex> lock(_lock);
   _quit = true;
   lock.unlock();
   _conditionVariable.notify_all();
 
-  // Wait for finish
   for (size_t i = 0; i < _threads.size(); ++i) {
     if (_threads[i].joinable()) {
       _threads[i].join();
@@ -51,14 +60,14 @@ void osm2ttl::util::DispatchQueue::handler(void) {
   std::unique_lock<std::mutex> lock(_lock);
   do {
     _conditionVariable.wait(lock, [this]{
-      return (!_queue.empty() || _quit);
+      return (!_queue.empty() || _quit || _die);
     });
-    if (!_quit && !_queue.empty()) {
+    if (!_die && !_queue.empty()) {
       auto op = std::move(_queue.front());
       _queue.pop();
       lock.unlock();
       op();
       lock.lock();
     }
-  } while (!_quit);
+  } while (!_die && (!_quit || !_queue.empty()));
 }
