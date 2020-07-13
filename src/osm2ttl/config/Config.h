@@ -27,7 +27,7 @@ struct Config {
 
   // Select amount to dump
   bool addAreaSources = false;
-  bool addBBox = false;
+  bool addEnvelope = false;
   bool addMemberNodes = false;
   bool expandedData = false;
   bool metaData = false;

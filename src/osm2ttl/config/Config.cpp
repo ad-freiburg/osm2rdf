@@ -45,8 +45,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
   auto addAreaSourcesOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "add-area-sources", "Add area sources (ways and relations).");
-  auto addBBoxOp = op.add<popl::Switch>(
-    "", "add-bbox", "Add BoundingBoxes to entries.");
+  auto addEnvelopeOp = op.add<popl::Switch>(
+    "", "add-envelope", "Add envelope to entries.");
   auto addMemberNodesOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "add-member-nodes", "Add nodes triples for members of ways and" \
     "relations. This does not add information to the ways or relations.");
@@ -120,8 +120,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     if (addAreaSourcesOp->is_set()) {
       addAreaSources = true;
     }
-    if (addBBoxOp->is_set()) {
-      addBBox = true;
+    if (addEnvelopeOp->is_set()) {
+      addEnvelope = true;
     }
     if (addMemberNodesOp->is_set()) {
       addMemberNodes = true;

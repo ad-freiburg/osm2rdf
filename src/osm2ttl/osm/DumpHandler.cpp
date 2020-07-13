@@ -30,8 +30,7 @@ void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
   if (area.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  _writer->writeOsmiumArea(area);
-  _writer->writeOSM2TTLArea(osm2ttl::osm::Area(area));
+  _writer->writeArea(osm2ttl::osm::Area(area));
 }
 
 // ____________________________________________________________________________

@@ -43,7 +43,6 @@ class Writer {
   void writeTriple(const S& s, const osm2ttl::ttl::IRI& p, const O& o);
 
   // Osmium
-  void writeOsmiumArea(const osmium::Area& area);
   template<typename S>
   void writeOsmiumBox(const S& s, const osm2ttl::ttl::IRI& p,
                    const osmium::Box& box);
@@ -65,7 +64,10 @@ class Writer {
   void writeOsmiumWayNodeList(const S& s,
                            const osmium::WayNodeList& nodes);
   // OSM2TTL
-  void writeOSM2TTLArea(const osm2ttl::osm::Area& area);
+  void writeArea(const osm2ttl::osm::Area& area);
+  template<typename S>
+  void writeBox(const S& s, const osm2ttl::ttl::IRI& p,
+                const osm2ttl::osm::Box& box);
 
  protected:
   // Helper

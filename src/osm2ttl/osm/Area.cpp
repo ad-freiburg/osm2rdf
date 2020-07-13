@@ -8,13 +8,16 @@
 #include <vector>
 #include <utility>
 
+#include "boost/geometry.hpp"
 #include "osmium/handler/node_locations_for_ways.hpp"
 #include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/osm/area.hpp"
-#include "osmium/osm/box.hpp"
-#include "osmium/osm/location.hpp"
 
-#include "osm2ttl/osm/Ring.h"
+#include "osm2ttl/geometry/Area.h"
+#include "osm2ttl/geometry/Box.h"
+#include "osm2ttl/geometry/Location.h"
+
+#include "osm2ttl/osm/Box.h"
 
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area() {
@@ -30,18 +33,28 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) {
     _tagAdministrationLevel = atoi(area.tags()["admin_level"]);
   }
 
-  for (const auto& ring : area.outer_rings()) {
-    _rings.emplace_back();
-    for (const auto& noderef : ring) {
-      _rings.back().vertices.push_back(noderef.location());
+  auto outerRings = area.outer_rings();
+  _geom.resize(outerRings.size());
+  size_t oCount = 0;
+  for (const auto& oring : outerRings) {
+    for (const auto& noderef : oring) {
+      osm2ttl::geometry::Location p(noderef.location().lon(),
+                                    noderef.location().lat());
+      boost::geometry::append(_geom[oCount].outer(), p);
     }
 
-    for (const auto& iring : area.inner_rings(ring)) {
-      _rings.back().inner.emplace_back();
+    auto innerRings = area.inner_rings(oring);
+    _geom[oCount].inners().resize(innerRings.size());
+    size_t iCount = 0;
+    for (const auto& iring : innerRings) {
       for (const auto& noderef : iring) {
-      _rings.back().inner.back().vertices.push_back(noderef.location());
+        osm2ttl::geometry::Location p(noderef.location().lon(),
+                                      noderef.location().lat());
+        boost::geometry::append(_geom[oCount].inners()[iCount], p);
       }
+      iCount++;
     }
+    oCount++;
   }
 }
 
@@ -56,13 +69,15 @@ uint64_t osm2ttl::osm::Area::objId() const noexcept {
 }
 
 // ____________________________________________________________________________
-osmium::Box osm2ttl::osm::Area::bbox() const noexcept {
-  return _rings[0].bbox();
+osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const {
+  return _geom;
 }
 
 // ____________________________________________________________________________
-osmium::Location osm2ttl::osm::Area::centroid() const noexcept {
-  return _rings[0].centroid();
+osm2ttl::osm::Box osm2ttl::osm::Area::envelope() const noexcept {
+  osm2ttl::geometry::Box box;
+  boost::geometry::envelope(geom(), box);
+  return osm2ttl::osm::Box(box);
 }
 
 // ____________________________________________________________________________
@@ -77,63 +92,6 @@ char osm2ttl::osm::Area::tagAdministrationLevel() const noexcept {
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::osm::OuterRing> osm2ttl::osm::Area::rings() const
-  noexcept {
-  return _rings;
-}
-
-// ____________________________________________________________________________
-double osm2ttl::osm::Area::vagueArea() const noexcept {
-  const osmium::Location tr = bbox().top_right();
-  const osmium::Location bl = bbox().bottom_left();
-  return std::abs((tr.x() - bl.x()) * (tr.y() - bl.y()));
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::Area::vagueIntersects(const osm2ttl::osm::Area& other)
-  const noexcept {
-  return bbox().contains(osmium::Location(other.bbox().bottom_left().x(),
-                                        other.bbox().bottom_left().y()))
-      || bbox().contains(osmium::Location(other.bbox().bottom_left().x(),
-                                        other.bbox().top_right().y()))
-      || bbox().contains(osmium::Location(other.bbox().top_right().x(),
-                                        other.bbox().top_right().y()))
-      || bbox().contains(osmium::Location(other.bbox().top_right().x(),
-                                        other.bbox().bottom_left().y()));
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::Area::vagueContains(const osm2ttl::osm::Area& other)
-  const noexcept {
-  return bbox().contains(other.bbox().bottom_left())
-      && bbox().contains(other.bbox().top_right());
-}
-
-// ____________________________________________________________________________
-double osm2ttl::osm::Area::area() const noexcept {
-  double res = 0.0;
-  for (const auto& outer : _rings) {
-    res += outer.area();
-    for (const auto& inner : outer.inner) {
-      res -= inner.area();
-    }
-  }
-  return res;
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::Area::intersects(const osm2ttl::osm::Area& other)
-  const noexcept {
-  return false;
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::osm::Area::contains(const osm2ttl::osm::Area& other) const
-  noexcept {
-  return false;
-}
-
-// ____________________________________________________________________________
 bool osm2ttl::osm::Area::operator==(const osm2ttl::osm::Area& other) const {
   return _id == other._id;
 }
@@ -145,8 +103,10 @@ bool osm2ttl::osm::Area::operator<(const osm2ttl::osm::Area& other) const {
     return _tagAdministrationLevel > other._tagAdministrationLevel;
   }
   // Sort by area, smaller first
-  if (vagueArea() != other.vagueArea()) {
-    return vagueArea() < other.vagueArea();
+  auto ownArea = boost::geometry::area(envelope().geom());
+  auto otherArea = boost::geometry::area(other.envelope().geom());
+  if (ownArea != otherArea) {
+    return ownArea < otherArea;
   }
   // No better metric -> sort by id, smaller first
   return _id < other._id;

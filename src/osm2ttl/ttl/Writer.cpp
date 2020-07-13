@@ -7,7 +7,9 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <utility>
 
+#include "boost/geometry.hpp"
 #include "osmium/geom/factory.hpp"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/item_type.hpp"
@@ -121,50 +123,20 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmiumArea(const osmium::Area& area) {
-  osm2ttl::ttl::IRI s{area.from_way()?"osmway":"osmrel",
-      std::to_string(area.orig_id())};
-
-  // Do not add tags or type as this extends a relation or way
-  writeTriple(s,
-    osm2ttl::ttl::IRI("geo", "hasGeometry"),
-    osm2ttl::ttl::Literal(_factory->create_multipolygon(area),
-      osm2ttl::ttl::IRI("geo", "wktLiteral")));
-
-  if (_config.metaData) {
-  writeTriple(s,
-    osm2ttl::ttl::IRI("osma", "from_way"),
-    osm2ttl::ttl::Literal(area.from_way()?"true":"false"));
-
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osma", "orig_id"),
-      osm2ttl::ttl::Literal(std::to_string(area.orig_id()),
-        osm2ttl::ttl::IRI("xsd", "integer")));
-
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osma", "num_outer_rings"),
-      osm2ttl::ttl::Literal(std::to_string(area.num_rings().first),
-        osm2ttl::ttl::IRI("xsd", "integer")));
-
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osma", "num_inner_rings"),
-      osm2ttl::ttl::Literal(std::to_string(area.num_rings().second),
-        osm2ttl::ttl::IRI("xsd", "integer")));
-
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osma", "is_multipolygon"),
-      osm2ttl::ttl::Literal(area.is_multipolygon()?"true":"false"));
-  }
-
-  if (_config.addBBox) {
-    writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), area.envelope());
-  }
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOSM2TTLArea(const osm2ttl::osm::Area& area) {
+void osm2ttl::ttl::Writer::writeArea(const osm2ttl::osm::Area& area) {
   osm2ttl::ttl::IRI s{area.fromWay()?"osmway":"osmrel",
       std::to_string(area.objId())};
+
+  std::ostringstream tmp;
+  tmp << boost::geometry::wkt(area.geom());
+  writeTriple(s,
+    osm2ttl::ttl::IRI("geo", "hasGeometry"),
+    osm2ttl::ttl::Literal(std::move(tmp.str()),
+                          osm2ttl::ttl::IRI("geo", "wktLiteral")));
+
+  if (_config.addEnvelope) {
+    writeBox(s, osm2ttl::ttl::IRI("osm", "envelope"), area.envelope());
+  }
 }
 
 // ____________________________________________________________________________
@@ -175,6 +147,18 @@ void osm2ttl::ttl::Writer::writeOsmiumBox(const S& s,
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
   writeTriple(s, p, osm2ttl::ttl::Literal(box));
+}
+
+// ____________________________________________________________________________
+template<typename S>
+void osm2ttl::ttl::Writer::writeBox(const S& s,
+                                    const osm2ttl::ttl::IRI& p,
+                                    const osm2ttl::osm::Box& box) {
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  std::ostringstream tmp;
+  tmp << boost::geometry::wkt(box.geom());
+  writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
 }
 
 // ____________________________________________________________________________
@@ -389,8 +373,8 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
       osm2ttl::ttl::Literal(std::to_string(numUniquePoints)));
   }
 
-  if (_config.addBBox) {
-    writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "bbox"), way.envelope());
+  if (_config.addEnvelope) {
+    writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "envelope"), way.envelope());
   }
 }
 
