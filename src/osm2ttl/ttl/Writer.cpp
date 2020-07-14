@@ -31,7 +31,6 @@
 #include "osm2ttl/osm/Node.h"
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
-#include "osm2ttl/osm/WKTFactory.h"
 
 #include "osm2ttl/ttl/BlankNode.h"
 #include "osm2ttl/ttl/IRI.h"
@@ -41,13 +40,11 @@
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
   : _config(config), _queue(_config.writerThreads) {
   _out = &std::cout;
-  _factory = osm2ttl::osm::WKTFactory::create(_config);
 }
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::~Writer() {
   close();
-  delete _factory;
 }
 
 // ____________________________________________________________________________
@@ -313,25 +310,6 @@ void osm2ttl::ttl::Writer::writeWay(const osm2ttl::osm::Way& way) {
   osm2ttl::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
   writeBoostGeometry(s, osm2ttl::ttl::IRI("geo", "hasGeometry"), locations);
-  // Select geometry object in relation to the number of unique points.
-  /*
-  if (numUniquePoints > 3 && way.is_closed()) {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(_factory->create_polygon(way),
-        osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  } else if (numUniquePoints > 1) {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(_factory->create_linestring(way),
-        osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  } else {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("geo", "hasGeometry"),
-      osm2ttl::ttl::Literal(
-        _factory->create_point(way.nodes()[0]),
-        osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  }*/
 
   if (_config.metaData) {
     writeTriple(s,

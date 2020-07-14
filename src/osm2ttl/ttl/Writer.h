@@ -26,7 +26,6 @@
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/Way.h"
-#include "osm2ttl/osm/WKTFactory.h"
 
 #include "osm2ttl/ttl/BlankNode.h"
 #include "osm2ttl/ttl/IRI.h"
@@ -79,9 +78,6 @@ class Writer {
   std::ostream* _out;
   std::ofstream _outFile;
   std::mutex _outMutex;
-
-  // Helper
-  osm2ttl::osm::WKTFactory* _factory;
 };
 
 }  // namespace ttl
