@@ -14,6 +14,7 @@
 
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Way.h"
 
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n)
@@ -39,6 +40,11 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Area& a)
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Node& n)
   : _prefix(prefix),  _value(std::to_string(n.id())) {
+}
+
+// ____________________________________________________________________________
+osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Way& w)
+  : _prefix(prefix),  _value(std::to_string(w.id())) {
 }
 
 // ____________________________________________________________________________

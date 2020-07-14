@@ -14,7 +14,6 @@
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/tag.hpp"
-#include "osmium/osm/way.hpp"
 
 #include "osm2ttl/config/Config.h"
 
@@ -25,6 +24,7 @@
 #include "osm2ttl/osm/Node.h"
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
+#include "osm2ttl/osm/Way.h"
 #include "osm2ttl/osm/WKTFactory.h"
 
 #include "osm2ttl/ttl/BlankNode.h"
@@ -49,9 +49,6 @@ class Writer {
   void writeTriple(const S& s, const osm2ttl::ttl::IRI& p, const O& o);
 
   // Osmium
-  template<typename S>
-  void writeOsmiumBox(const S& s, const osm2ttl::ttl::IRI& p,
-                   const osmium::Box& box);
   void writeOsmiumRelation(const osmium::Relation& relation);
   template<typename S>
   void writeOsmiumRelationMembers(const S& s,
@@ -61,10 +58,6 @@ class Writer {
   template<typename S>
   void writeOsmiumTagList(const S& s,
                        const osmium::TagList& tags);
-  void writeOsmiumWay(const osmium::Way& way);
-  template<typename S>
-  void writeOsmiumWayNodeList(const S& s,
-                           const osmium::WayNodeList& nodes);
   // OSM2TTL
   void writeArea(const osm2ttl::osm::Area& area);
   template<typename S, typename G>
@@ -78,6 +71,7 @@ class Writer {
   void writeTag(const S& s, const osm2ttl::osm::Tag& tag);
   template<typename S>
   void writeTagList(const S& s, const osm2ttl::osm::TagList& tags);
+  void writeWay(const osm2ttl::osm::Way& way);
 
  protected:
   // Helper

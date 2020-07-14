@@ -3,10 +3,12 @@
 
 #include "osm2ttl/ttl/Writer.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
 #include <utility>
 
 #include "boost/geometry.hpp"
@@ -138,16 +140,6 @@ void osm2ttl::ttl::Writer::writeArea(const osm2ttl::osm::Area& area) {
   if (_config.addEnvelope) {
     writeBox(s, osm2ttl::ttl::IRI("osm", "envelope"), area.envelope());
   }
-}
-
-// ____________________________________________________________________________
-template<typename S>
-void osm2ttl::ttl::Writer::writeOsmiumBox(const S& s,
-                                     const osm2ttl::ttl::IRI& p,
-                                     const osmium::Box& box) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  writeTriple(s, p, osm2ttl::ttl::Literal(box));
 }
 
 // ____________________________________________________________________________
@@ -400,27 +392,37 @@ void osm2ttl::ttl::Writer::writeTagList(const S& s,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
+void osm2ttl::ttl::Writer::writeWay(const osm2ttl::osm::Way& way) {
   osm2ttl::ttl::IRI s{"osmway", way};
 
   writeTriple(s,
     osm2ttl::ttl::IRI("rdf", "type"),
     osm2ttl::ttl::IRI("osm", "way"));
 
-  writeOsmiumTagList(s, way.tags());
-  writeOsmiumWayNodeList(s, way.nodes());
+  writeTagList(s, way.tags());
 
-  // Count unique points, this only checks direct duplicates.
-  size_t numUniquePoints = 0;
-  osmium::Location last;
-  for (auto const *it = way.nodes().cbegin(); it != way.nodes().cend(); ++it) {
-    if (last != it->location()) {
-      last = it->location();
-      numUniquePoints++;
+  if (_config.expandedData) {
+    size_t i = 0;
+    for (const auto& node : way.nodes()) {
+      osm2ttl::ttl::BlankNode b;
+      writeTriple(s, osm2ttl::ttl::IRI("osmway", "node"), b);
+
+      writeTriple(b,
+        osm2ttl::ttl::IRI("osmway", "node"),
+        osm2ttl::ttl::IRI("osmnode", node.id()));
+
+      writeTriple(b,
+        osm2ttl::ttl::IRI("osmm", "pos"),
+        osm2ttl::ttl::Literal(std::to_string(++i),
+          osm2ttl::ttl::IRI("xsd", "integer")));
     }
   }
 
+  osm2ttl::geometry::Linestring locations{way.geom()};
+  size_t numUniquePoints = locations.size();
+  writeBoostGeometry(s, osm2ttl::ttl::IRI("geo", "hasGeometry"), locations);
   // Select geometry object in relation to the number of unique points.
+  /*
   if (numUniquePoints > 3 && way.is_closed()) {
     writeTriple(s,
       osm2ttl::ttl::IRI("geo", "hasGeometry"),
@@ -437,12 +439,12 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
       osm2ttl::ttl::Literal(
         _factory->create_point(way.nodes()[0]),
         osm2ttl::ttl::IRI("geo", "wktLiteral")));
-  }
+  }*/
 
   if (_config.metaData) {
     writeTriple(s,
       osm2ttl::ttl::IRI("osmway", "is_closed"),
-      osm2ttl::ttl::Literal(way.is_closed()?"yes":"no"));
+      osm2ttl::ttl::Literal(way.closed()?"yes":"no"));
     writeTriple(s,
       osm2ttl::ttl::IRI("osmway", "nodeCount"),
       osm2ttl::ttl::Literal(std::to_string(way.nodes().size())));
@@ -452,33 +454,6 @@ void osm2ttl::ttl::Writer::writeOsmiumWay(const osmium::Way& way) {
   }
 
   if (_config.addEnvelope) {
-    writeOsmiumBox(s, osm2ttl::ttl::IRI("osm", "envelope"), way.envelope());
-  }
-}
-
-// ____________________________________________________________________________
-template<typename S>
-void osm2ttl::ttl::Writer::writeOsmiumWayNodeList(const S& s,
-                                             const osmium::WayNodeList& nodes) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  // If only basic data is requested, skip this.
-  if (!_config.expandedData) {
-    return;
-  }
-
-  uint32_t i = 0;
-  for (const osmium::NodeRef& nodeRef : nodes) {
-    osm2ttl::ttl::BlankNode b;
-    writeTriple(s, osm2ttl::ttl::IRI("osmway", "node"), b);
-
-    writeTriple(b,
-      osm2ttl::ttl::IRI("osmway", "node"),
-      osm2ttl::ttl::IRI("osmnode", nodeRef));
-
-    writeTriple(b,
-      osm2ttl::ttl::IRI("osmm", "pos"),
-      osm2ttl::ttl::Literal(std::to_string(++i),
-        osm2ttl::ttl::IRI("xsd", "integer")));
+    writeBox(s, osm2ttl::ttl::IRI("osm", "envelope"), way.envelope());
   }
 }

@@ -73,5 +73,8 @@ void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
   if (way.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  _writer->writeOsmiumWay(way);
+  osm2ttl::osm::Way w{way};
+  _queue.dispatch([this, w]{
+    _writer->writeWay(w);
+  });
 }

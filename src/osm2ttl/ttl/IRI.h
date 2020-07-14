@@ -12,6 +12,7 @@
 
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Way.h"
 
 namespace osm2ttl {
 namespace ttl {
@@ -25,6 +26,7 @@ struct IRI {
   IRI(const std::string& prefix, const osmium::RelationMember& m);
   IRI(const std::string& prefix, const osm2ttl::osm::Area& a);
   IRI(const std::string& prefix, const osm2ttl::osm::Node& n);
+  IRI(const std::string& prefix, const osm2ttl::osm::Way& w);
   std::string prefix() const noexcept;
   std::string value() const noexcept;
  protected:
