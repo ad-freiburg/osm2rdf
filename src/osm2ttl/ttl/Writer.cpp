@@ -119,12 +119,15 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
                 || std::is_same<O, osm2ttl::ttl::IRI>::value
                 || std::is_same<O, osm2ttl::ttl::Literal>::value);
   _outQueue.dispatch([this, s, p, o]{
+    std::string subject = _config.outputFormat.format(s);
+    std::string predicate = _config.outputFormat.format(p);
+    std::string object = _config.outputFormat.format(o);
     const std::lock_guard<std::mutex> lock(_outMutex);
-    *_out << _config.outputFormat.format(s);
+    *_out << subject;
     *_out << " ";
-    *_out << _config.outputFormat.format(p);
+    *_out << predicate;
     *_out << " ";
-    *_out << _config.outputFormat.format(o);
+    *_out << object;
     *_out << " .\n";
   });
 }
