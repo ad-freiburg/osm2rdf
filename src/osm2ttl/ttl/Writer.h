@@ -72,7 +72,10 @@ class Writer {
 
   // Config
   const osm2ttl::config::Config _config;
-  osm2ttl::util::DispatchQueue _queue;
+
+  // Queues
+  osm2ttl::util::DispatchQueue _outQueue;
+  osm2ttl::util::DispatchQueue _convertQueue;
 
   // Output
   std::ostream* _out;

@@ -38,7 +38,8 @@
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
-  : _config(config), _queue(_config.writerThreads) {
+  : _config(config), _outQueue(_config.writerThreads),
+  _convertQueue(_config.writerThreads) {
   _out = &std::cout;
 }
 
@@ -59,7 +60,8 @@ bool osm2ttl::ttl::Writer::open() {
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::close() {
-  _queue.quit();
+  _convertQueue.quit();
+  _outQueue.quit();
   if (_outFile.is_open()) {
     _outFile.close();
   }
@@ -116,7 +118,7 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
   static_assert(std::is_same<O, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<O, osm2ttl::ttl::IRI>::value
                 || std::is_same<O, osm2ttl::ttl::Literal>::value);
-  _queue.dispatch([this, s, p, o]{
+  _outQueue.dispatch([this, s, p, o]{
     const std::lock_guard<std::mutex> lock(_outMutex);
     *_out << _config.outputFormat.format(s);
     *_out << " ";
@@ -146,7 +148,7 @@ void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
                                               const G& g) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  _queue.dispatch([this, s, p, g]{
+  _convertQueue.dispatch([this, s, p, g]{
     G geom{g};
     if (_config.simplifyWKT != 0 && boost::geometry::num_points(g) > 4) {
       osm2ttl::geometry::Box box;
@@ -175,7 +177,7 @@ void osm2ttl::ttl::Writer::writeBox(const S& s,
                                     const osm2ttl::osm::Box& box) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  _queue.dispatch([this, s, p, box]{
+  _convertQueue.dispatch([this, s, p, box]{
     // Box can not be simplified -> output directly.
     std::ostringstream tmp;
     tmp << boost::geometry::wkt(box.geom());
