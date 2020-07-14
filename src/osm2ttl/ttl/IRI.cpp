@@ -8,29 +8,11 @@
 #include <string>
 #include <iostream>
 
-#include "osmium/osm/node_ref.hpp"
-#include "osmium/osm/object.hpp"
-#include "osmium/osm/relation.hpp"
-
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Relation.h"
+#include "osm2ttl/osm/RelationMember.h"
 #include "osm2ttl/osm/Way.h"
-
-// ____________________________________________________________________________
-osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::NodeRef& n)
-  : _prefix(prefix),  _value(std::to_string(n.positive_ref())) {
-}
-
-// ____________________________________________________________________________
-osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osmium::OSMObject& o)
-  : _prefix(prefix),  _value(std::to_string(o.positive_id())) {
-}
-
-// ____________________________________________________________________________
-osm2ttl::ttl::IRI::IRI(const std::string& prefix,
-                       const osmium::RelationMember& m)
-  : _prefix(prefix),  _value(std::to_string(m.positive_ref())) {
-}
 
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Area& a)
@@ -40,6 +22,18 @@ osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Area& a)
 // ____________________________________________________________________________
 osm2ttl::ttl::IRI::IRI(const std::string& prefix, const osm2ttl::osm::Node& n)
   : _prefix(prefix),  _value(std::to_string(n.id())) {
+}
+
+// ____________________________________________________________________________
+osm2ttl::ttl::IRI::IRI(const std::string& prefix,
+                       const osm2ttl::osm::Relation& r)
+  : _prefix(prefix),  _value(std::to_string(r.id())) {
+}
+
+// ____________________________________________________________________________
+osm2ttl::ttl::IRI::IRI(const std::string& prefix,
+                       const osm2ttl::osm::RelationMember& m)
+  : _prefix(prefix),  _value(std::to_string(m.id())) {
 }
 
 // ____________________________________________________________________________

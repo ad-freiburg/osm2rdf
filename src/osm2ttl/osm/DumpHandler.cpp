@@ -18,6 +18,8 @@
 
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Relation.h"
+#include "osm2ttl/osm/Way.h"
 
 // ____________________________________________________________________________
 osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
@@ -62,7 +64,10 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
   if (relation.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  _writer->writeOsmiumRelation(relation);
+  osm2ttl::osm::Relation r{relation};
+  _queue.dispatch([this, r]{
+    _writer->writeRelation(r);
+  });
 }
 
 // ____________________________________________________________________________

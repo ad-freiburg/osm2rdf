@@ -22,6 +22,7 @@
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/Box.h"
 #include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Relation.h"
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/Way.h"
@@ -48,16 +49,6 @@ class Writer {
   template<typename S, typename O>
   void writeTriple(const S& s, const osm2ttl::ttl::IRI& p, const O& o);
 
-  // Osmium
-  void writeOsmiumRelation(const osmium::Relation& relation);
-  template<typename S>
-  void writeOsmiumRelationMembers(const S& s,
-                               const osmium::RelationMemberList& members);
-  template<typename S>
-  void writeOsmiumTag(const S& s, const osmium::Tag& tag);
-  template<typename S>
-  void writeOsmiumTagList(const S& s,
-                       const osmium::TagList& tags);
   // OSM2TTL
   void writeArea(const osm2ttl::osm::Area& area);
   template<typename S, typename G>
@@ -67,6 +58,7 @@ class Writer {
   void writeBox(const S& s, const osm2ttl::ttl::IRI& p,
                 const osm2ttl::osm::Box& box);
   void writeNode(const osm2ttl::osm::Node& node);
+  void writeRelation(const osm2ttl::osm::Relation& relation);
   template<typename S>
   void writeTag(const S& s, const osm2ttl::osm::Tag& tag);
   template<typename S>

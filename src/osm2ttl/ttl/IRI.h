@@ -6,12 +6,10 @@
 
 #include <string>
 
-#include "osmium/osm/node_ref.hpp"
-#include "osmium/osm/object.hpp"
-#include "osmium/osm/relation.hpp"
-
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/Node.h"
+#include "osm2ttl/osm/Relation.h"
+#include "osm2ttl/osm/RelationMember.h"
 #include "osm2ttl/osm/Way.h"
 
 namespace osm2ttl {
@@ -21,11 +19,10 @@ struct IRI {
  public:
   IRI() = default;
   IRI(const std::string& prefix, const std::string& s);
-  IRI(const std::string& prefix, const osmium::NodeRef& n);
-  IRI(const std::string& prefix, const osmium::OSMObject& o);
-  IRI(const std::string& prefix, const osmium::RelationMember& m);
   IRI(const std::string& prefix, const osm2ttl::osm::Area& a);
   IRI(const std::string& prefix, const osm2ttl::osm::Node& n);
+  IRI(const std::string& prefix, const osm2ttl::osm::Relation& r);
+  IRI(const std::string& prefix, const osm2ttl::osm::RelationMember& m);
   IRI(const std::string& prefix, const osm2ttl::osm::Way& w);
   std::string prefix() const noexcept;
   std::string value() const noexcept;

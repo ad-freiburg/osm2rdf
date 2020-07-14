@@ -196,90 +196,27 @@ void osm2ttl::ttl::Writer::writeNode(const osm2ttl::osm::Node& node) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeOsmiumRelation(
-  const osmium::Relation& relation) {
+void osm2ttl::ttl::Writer::writeRelation(
+  const osm2ttl::osm::Relation& relation) {
   osm2ttl::ttl::IRI s{"osmrel", relation};
 
   writeTriple(s,
     osm2ttl::ttl::IRI("rdf", "type"),
     osm2ttl::ttl::IRI("osm", "relation"));
 
-  writeOsmiumTagList(s, relation.tags());
-  writeOsmiumRelationMembers(s, relation.members());
-}
+  writeTagList(s, relation.tags());
 
-// ____________________________________________________________________________
-template<typename S>
-void osm2ttl::ttl::Writer::writeOsmiumRelationMembers(
-    const S& s,
-    const osmium::RelationMemberList& members) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  // If only basic data is requested, skip this.
-
-  std::uint32_t i = 0;
-  for (const osmium::RelationMember& member : members) {
-    std::string role{member.role()};
-    if (!role.empty() && role != "outer" && role != "inner") {
+  for (const auto& member : relation.members()) {
+    const std::string& role = member.role();
+    if (role != "outer" && role != "inner") {
+      std::string type = "osm";
+      if (member.type() == "node") { type = "osmnode"; }
+      if (member.type() == "relation") { type = "osmrel"; }
+      if (member.type() == "way") { type = "osmway"; }
       writeTriple(s,
         osm2ttl::ttl::IRI("osmrel", role),
-        osm2ttl::ttl::IRI("osm"
-          + std::string((osmium::item_type_to_name(
-            member.type()) == std::string("relation")) ? "rel" : "way"),
-          member));
+        osm2ttl::ttl::IRI(type, member));
     }
-    if (!_config.expandedData) {
-      continue;
-    }
-    if (role.empty()) {
-      role = "member";
-    }
-    osm2ttl::ttl::BlankNode b;
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osmrel", "membership"),
-      b);
-
-    writeTriple(b,
-      osm2ttl::ttl::IRI("osmrel", role),
-      osm2ttl::ttl::IRI("osm"
-        + std::string(osmium::item_type_to_name(member.type())),
-        member));
-
-    writeTriple(b,
-      osm2ttl::ttl::IRI("osmm", "pos"),
-      osm2ttl::ttl::Literal(std::to_string(++i),
-                          osm2ttl::ttl::IRI("xsd", "integer")));
-  }
-}
-
-// ____________________________________________________________________________
-template<typename S>
-void osm2ttl::ttl::Writer::writeOsmiumTag(const S& s,
-                                     const osmium::Tag& tag) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  // No spaces allowed in tag keys (see 002.problem.nt)
-  std::string key = std::string(tag.key());
-  std::string tmp;
-  tmp.reserve(key.size());
-  for (size_t pos = 0; pos < key.size(); ++pos) {
-    switch (key[pos]) {
-      case ' ':
-        tmp += "_";
-        break;
-      default:
-        tmp += key[pos];
-    }
-  }
-  auto tagType = _config.tagKeyType.find(tag.key());
-  if (tagType != _config.tagKeyType.end()) {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osmt", tmp),
-      osm2ttl::ttl::Literal(tag.value(), tagType->second));
-  } else {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osmt", tmp),
-      osm2ttl::ttl::Literal(tag.value()));
   }
 }
 
@@ -299,51 +236,6 @@ void osm2ttl::ttl::Writer::writeTag(const S& s, const osm2ttl::osm::Tag& tag) {
     writeTriple(s,
       osm2ttl::ttl::IRI("osmt", key),
       osm2ttl::ttl::Literal(value));
-  }
-}
-
-// ____________________________________________________________________________
-template<typename S>
-void osm2ttl::ttl::Writer::writeOsmiumTagList(const S& s,
-                                         const osmium::TagList& tags) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  for (const osmium::Tag& tag : tags) {
-    writeOsmiumTag(s, tag);
-    if (!_config.skipWikiLinks) {
-      if (std::string(tag.key()) == "wikidata") {
-        std::string value{tag.value()};
-        // Only take first wikidata entry if ; is found
-        auto end = value.find(';');
-        if (end != std::string::npos) {
-          value = value.erase(end);
-        }
-        // Remove all but Q and digits to ensuder Qdddddd format
-        value.erase(remove_if(value.begin(), value.end(), [](char c) {
-          return (!isdigit(c) && c != 'Q');
-        }), value.end());
-
-        writeTriple(s,
-          osm2ttl::ttl::IRI("osm", tag.key()),
-          osm2ttl::ttl::IRI("wd", value));
-      }
-      if (Writer::endsWith(tag.key(), "wikipedia") &&
-          !Writer::contains(tag.key(), "fixme")) {
-        std::string v = tag.value();
-        auto pos = v.find(':');
-        if (pos != std::string::npos) {
-          std::string lang = v.substr(0, pos);
-          std::string entry = v.substr(pos + 1);
-          writeTriple(s,
-            osm2ttl::ttl::IRI("osm", "wikipedia"),
-            osm2ttl::ttl::IRI("https://"+lang+".wikipedia.org/wiki/", entry));
-        } else {
-          writeTriple(s,
-            osm2ttl::ttl::IRI("osm", "wikipedia"),
-            osm2ttl::ttl::IRI("https://www.wikipedia.org/wiki/", v));
-        }
-      }
-    }
   }
 }
 
@@ -409,7 +301,7 @@ void osm2ttl::ttl::Writer::writeWay(const osm2ttl::osm::Way& way) {
 
       writeTriple(b,
         osm2ttl::ttl::IRI("osmway", "node"),
-        osm2ttl::ttl::IRI("osmnode", node.id()));
+        osm2ttl::ttl::IRI("osmnode", node));
 
       writeTriple(b,
         osm2ttl::ttl::IRI("osmm", "pos"),
