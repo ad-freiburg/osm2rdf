@@ -4,6 +4,7 @@
 #include "osm2ttl/osm/Node.h"
 
 #include "osmium/osm/node.hpp"
+#include "osmium/osm/node_ref.hpp"
 
 #include "osm2ttl/osm/TagList.h"
 
@@ -13,6 +14,13 @@ osm2ttl::osm::Node::Node(const osmium::Node& node) {
   _geom = osm2ttl::geometry::Location(node.location().lon(),
                                       node.location().lat());
   _tags = osm2ttl::osm::convertTagList(node.tags());
+}
+
+// ____________________________________________________________________________
+osm2ttl::osm::Node::Node(const osmium::NodeRef& nodeRef) {
+  _id = nodeRef.positive_ref();
+  _geom = osm2ttl::geometry::Location(nodeRef.location().lon(),
+                                      nodeRef.location().lat());
 }
 
 // ____________________________________________________________________________

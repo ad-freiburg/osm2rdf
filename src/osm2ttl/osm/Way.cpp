@@ -18,6 +18,9 @@
 osm2ttl::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
   _tags = osm2ttl::osm::convertTagList(way.tags());
+  for (const auto& noderef : way.nodes()) {
+    _nodes.emplace_back(noderef);
+  }
 }
 
 // ____________________________________________________________________________
@@ -39,9 +42,8 @@ std::vector<osm2ttl::osm::Node> osm2ttl::osm::Way::nodes() const noexcept {
 osm2ttl::geometry::Linestring osm2ttl::osm::Way::geom() const
 noexcept {
   osm2ttl::geometry::Linestring locations;
-  locations.resize(_nodes.size());
   for (const auto& node : _nodes) {
-    locations.emplace_back(node.geom());
+    boost::geometry::append(locations, node.geom());
   }
   boost::geometry::unique(locations);
   return locations;

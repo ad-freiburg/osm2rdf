@@ -160,7 +160,7 @@ void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
                - boost::geometry::get<boost::geometry::min_corner, 1>(box))
         / 20.0);
       // If empty geometry -> use original
-      if (boost::geometry::is_empty(geom)) {
+      if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
         geom = g;
       }
     }
