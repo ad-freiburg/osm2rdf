@@ -34,7 +34,8 @@ struct Config {
   bool skipWikiLinks = false;
   size_t simplifyWKT = 0;
 
-  size_t writerThreads = 4;
+  size_t writerThreads = 6;
+  size_t dumpThreads = 4;
 
   // tag.key() -> IRI
   std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;

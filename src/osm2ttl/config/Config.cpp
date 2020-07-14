@@ -32,7 +32,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "use-ram-for-locations", "Store locations in RAM");
   auto writerThreadsOp = op.add<popl::Value<size_t>, popl::Attribute::advanced>(
-    "", "writer-threads", "Number of threads per writer object", 4);
+    "", "writer-threads", "Number of threads per writer object", writerThreads);
+  auto dumpThreadsOp = op.add<popl::Value<size_t>, popl::Attribute::advanced>(
+    "", "dump-threads", "Number of threads per writer object", dumpThreads);
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
     "no-node-dump", "Skip nodes while dumping data");
@@ -101,6 +103,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     writerThreads = writerThreadsOp->value();
+    dumpThreads = dumpThreadsOp->value();
 
     // Select types to dump
     if (noNodeDumpOp->is_set()) {

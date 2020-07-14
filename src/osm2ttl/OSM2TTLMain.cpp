@@ -56,9 +56,6 @@ int main(int argc, char** argv) {
         std::cerr << "... done" << std::endl;
       }
 
-      std::cerr << "Memory:\n";
-      osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
-
       std::cerr << "Prepare area data for lookup" << std::endl;
       areaHandler.sort();
       std::cerr << "... done" << std::endl;
@@ -74,19 +71,17 @@ int main(int argc, char** argv) {
             osmium::apply(buffer, dumpHandler, areaHandler);
         }), dumpHandler);
         reader.close();
-        std::cerr << "... done" << std::endl;
+        std::cerr << "... done reading ..." << std::endl;
       }
-
-      std::cerr << "Memory:\n";
-      osmium::relations::print_used_memory(std::cerr, mp_manager.used_memory());
     }
-
-    osmium::MemoryUsage memory;
-    std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;
 
     // All work done, close output
     writer.close();
+    std::cerr << "... done writing" << std::endl;
     delete locationHandler;
+
+    osmium::MemoryUsage memory;
+    std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
     std::cerr << e.what() << std::endl;

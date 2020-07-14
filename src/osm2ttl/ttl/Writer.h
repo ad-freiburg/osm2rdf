@@ -67,6 +67,9 @@ class Writer {
                            const osmium::WayNodeList& nodes);
   // OSM2TTL
   void writeArea(const osm2ttl::osm::Area& area);
+  template<typename S, typename G>
+  void writeBoostGeometry(const S& s, const osm2ttl::ttl::IRI& p,
+                          const G& g);
   template<typename S>
   void writeBox(const S& s, const osm2ttl::ttl::IRI& p,
                 const osm2ttl::osm::Box& box);
@@ -83,7 +86,7 @@ class Writer {
   static bool startsWith(std::string_view s, std::string_view n);
 
   // Config
-  osm2ttl::config::Config _config;
+  const osm2ttl::config::Config _config;
   osm2ttl::util::DispatchQueue _queue;
 
   // Output

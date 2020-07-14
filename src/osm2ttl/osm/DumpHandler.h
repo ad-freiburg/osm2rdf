@@ -31,6 +31,7 @@ class DumpHandler : public osmium::handler::Handler {
   const osmium::memory::item_size_type EMPTY_TAG_SIZE = 8;
  protected:
   const osm2ttl::config::Config _config;
+  osm2ttl::util::DispatchQueue _queue;
   osm2ttl::ttl::Writer* _writer;
   osm2ttl::osm::AreaHandler* _areaHandler;
 };

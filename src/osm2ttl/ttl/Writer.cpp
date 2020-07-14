@@ -133,12 +133,7 @@ void osm2ttl::ttl::Writer::writeArea(const osm2ttl::osm::Area& area) {
   osm2ttl::ttl::IRI s{area.fromWay()?"osmway":"osmrel",
       std::to_string(area.objId())};
 
-  std::ostringstream tmp;
-  tmp << boost::geometry::wkt(area.geom());
-  writeTriple(s,
-    osm2ttl::ttl::IRI("geo", "hasGeometry"),
-    osm2ttl::ttl::Literal(std::move(tmp.str()),
-                          osm2ttl::ttl::IRI("geo", "wktLiteral")));
+  writeBoostGeometry(s, osm2ttl::ttl::IRI("geo", "hasGeometry"), area.geom());
 
   if (_config.addEnvelope) {
     writeBox(s, osm2ttl::ttl::IRI("osm", "envelope"), area.envelope());
@@ -156,15 +151,43 @@ void osm2ttl::ttl::Writer::writeOsmiumBox(const S& s,
 }
 
 // ____________________________________________________________________________
+template<typename S, typename G>
+void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
+                                              const osm2ttl::ttl::IRI& p,
+                                              const G& g) {
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  _queue.dispatch([this, s, p, g]{
+    G geom{g};
+    if (_config.simplifyWKT != 0 && boost::geometry::num_points(g) > 4) {
+      osm2ttl::geometry::Box box;
+      boost::geometry::envelope(geom, box);
+      boost::geometry::simplify(g, geom,
+        std::min(boost::geometry::get<boost::geometry::max_corner, 0>(box)
+               - boost::geometry::get<boost::geometry::min_corner, 0>(box),
+                 boost::geometry::get<boost::geometry::max_corner, 1>(box)
+               - boost::geometry::get<boost::geometry::min_corner, 1>(box))
+        / 20.0);
+    }
+    std::ostringstream tmp;
+    tmp << boost::geometry::wkt(geom);
+    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
+  });
+}
+
+// ____________________________________________________________________________
 template<typename S>
 void osm2ttl::ttl::Writer::writeBox(const S& s,
                                     const osm2ttl::ttl::IRI& p,
                                     const osm2ttl::osm::Box& box) {
   static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  std::ostringstream tmp;
-  tmp << boost::geometry::wkt(box.geom());
-  writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
+  _queue.dispatch([this, s, p, box]{
+    // Box can not be simplified -> output directly.
+    std::ostringstream tmp;
+    tmp << boost::geometry::wkt(box.geom());
+    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
+  });
 }
 
 // ____________________________________________________________________________
@@ -175,12 +198,7 @@ void osm2ttl::ttl::Writer::writeNode(const osm2ttl::osm::Node& node) {
     osm2ttl::ttl::IRI("rdf", "type"),
     osm2ttl::ttl::IRI("osm", "node"));
 
-  std::ostringstream tmp;
-  tmp << boost::geometry::wkt(node.geom());
-  writeTriple(s,
-    osm2ttl::ttl::IRI("geo", "hasGeometry"),
-    osm2ttl::ttl::Literal(std::move(tmp.str()),
-                          osm2ttl::ttl::IRI("geo", "wktLiteral")));
+  writeBoostGeometry(s, osm2ttl::ttl::IRI("geo", "hasGeometry"), node.geom());
 
   writeTagList(s, node.tags());
 }

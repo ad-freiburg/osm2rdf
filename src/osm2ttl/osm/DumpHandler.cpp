@@ -22,7 +22,8 @@
 // ____________________________________________________________________________
 osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
   osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler) :
-  _config(config), _writer(writer), _areaHandler(areaHandler) {
+  _config(config), _queue(_config.writerThreads), _writer(writer),
+  _areaHandler(areaHandler) {
 }
 
 // ____________________________________________________________________________
@@ -33,7 +34,10 @@ void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
   if (area.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  _writer->writeArea(osm2ttl::osm::Area(area));
+  osm2ttl::osm::Area a{area};
+  _queue.dispatch([this, a]{
+    _writer->writeArea(a);
+  });
 }
 
 // ____________________________________________________________________________
@@ -44,7 +48,10 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
   if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  _writer->writeNode(osm2ttl::osm::Node(node));
+  osm2ttl::osm::Node n{node};
+  _queue.dispatch([this, n]{
+    _writer->writeNode(n);
+  });
 }
 
 // ____________________________________________________________________________
