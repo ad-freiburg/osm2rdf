@@ -18,16 +18,16 @@ osm2ttl::osm::RelationMember::RelationMember(
   }
   switch (relationMember.type()) {
     case osmium::item_type::node:
-      _type = "node";
+      _type = osm2ttl::osm::RelationMemberType::NODE;
       break;
     case osmium::item_type::relation:
-      _type = "relation";
+      _type = osm2ttl::osm::RelationMemberType::RELATION;
       break;
     case osmium::item_type::way:
-      _type = "way";
+      _type = osm2ttl::osm::RelationMemberType::WAY;
       break;
     default:
-      _type = "unknown";
+      _type = osm2ttl::osm::RelationMemberType::UNKNOWN;
   }
 }
 
@@ -42,6 +42,7 @@ std::string osm2ttl::osm::RelationMember::role() const noexcept {
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::osm::RelationMember::type() const noexcept {
+osm2ttl::osm::RelationMemberType osm2ttl::osm::RelationMember::type() const
+noexcept {
   return _type;
 }

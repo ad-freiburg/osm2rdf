@@ -11,16 +11,20 @@
 namespace osm2ttl {
 namespace osm {
 
+enum class RelationMemberType : uint8_t {
+  UNKNOWN, NODE, RELATION, WAY
+};
+
 class RelationMember {
  public:
   explicit RelationMember(const osmium::RelationMember& relationMember);
   uint64_t id() const noexcept;
   std::string role() const noexcept;
-  std::string type() const noexcept;
+  osm2ttl::osm::RelationMemberType type() const noexcept;
  protected:
   uint64_t _id;
   std::string _role;
-  std::string _type;
+  osm2ttl::osm::RelationMemberType _type;
 };
 
 }  // namespace osm

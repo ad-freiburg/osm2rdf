@@ -38,8 +38,8 @@
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
-  : _config(config), _outQueue(_config.writerThreads),
-  _convertQueue(_config.writerThreads) {
+  : _config(config), _outQueue(_config.numThreadsWrite),
+  _convertQueue(_config.numThreadsConvertGeom) {
   _out = &std::cout;
 }
 
@@ -216,9 +216,13 @@ void osm2ttl::ttl::Writer::writeRelation(
     const std::string& role = member.role();
     if (role != "outer" && role != "inner") {
       std::string type = "osm";
-      if (member.type() == "node") { type = "osmnode"; }
-      if (member.type() == "relation") { type = "osmrel"; }
-      if (member.type() == "way") { type = "osmway"; }
+      if (member.type() == osm2ttl::osm::RelationMemberType::NODE) {
+        type = "osmnode";
+      } else if (member.type() == osm2ttl::osm::RelationMemberType::RELATION) {
+        type = "osmrel";
+      } else if (member.type() == osm2ttl::osm::RelationMemberType::WAY) {
+        type = "osmway";
+      }
       writeTriple(s,
         osm2ttl::ttl::IRI("osmrel", role),
         osm2ttl::ttl::IRI(type, member));

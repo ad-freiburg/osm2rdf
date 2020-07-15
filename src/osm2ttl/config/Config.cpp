@@ -31,10 +31,18 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "skip-area-prep", "Skip area sorting");
   auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "use-ram-for-locations", "Store locations in RAM");
-  auto writerThreadsOp = op.add<popl::Value<size_t>, popl::Attribute::advanced>(
-    "", "writer-threads", "Number of threads per writer object", writerThreads);
-  auto dumpThreadsOp = op.add<popl::Value<size_t>, popl::Attribute::advanced>(
-    "", "dump-threads", "Number of threads per writer object", dumpThreads);
+  auto numThreadsWriteOp = op.add<popl::Value<size_t>,
+       popl::Attribute::advanced>("", "num-threads-write",
+                                  "Number of threads to write output",
+                                  numThreadsWrite);
+  auto numThreadsReadOp = op.add<popl::Value<size_t>,
+       popl::Attribute::advanced>("", "num-threads-read",
+                                  "Number of threads to read libosmium data",
+                                  numThreadsRead);
+  auto numThreadsConvertGeomOp = op.add<popl::Value<size_t>,
+       popl::Attribute::advanced>("", "num-threads-convert-geom",
+                                  "Number of threads to convert geometries",
+                                  numThreadsConvertGeom);
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
     "no-node-dump", "Skip nodes while dumping data");
@@ -102,8 +110,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       useRamForLocations = true;
     }
 
-    writerThreads = writerThreadsOp->value();
-    dumpThreads = dumpThreadsOp->value();
+    // Threads
+    numThreadsConvertGeom = numThreadsConvertGeomOp->value();
+    numThreadsRead = numThreadsReadOp->value();
+    numThreadsWrite = numThreadsWriteOp->value();
 
     // Select types to dump
     if (noNodeDumpOp->is_set()) {

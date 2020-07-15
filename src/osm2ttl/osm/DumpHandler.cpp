@@ -24,7 +24,7 @@
 // ____________________________________________________________________________
 osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
   osm2ttl::ttl::Writer* writer, osm2ttl::osm::AreaHandler* areaHandler) :
-  _config(config), _queue(_config.writerThreads), _writer(writer),
+  _config(config), _queue(_config.numThreadsRead), _writer(writer),
   _areaHandler(areaHandler) {
 }
 
