@@ -29,7 +29,7 @@ class LocationHandler : public osmium::handler::Handler {
   // Helper creating the correct instance.
   static LocationHandler* create(const osm2ttl::config::Config& config);
  protected:
-  bool _firstPassDone;
+  bool _firstPassDone = false;
 };
 
 template<typename T>

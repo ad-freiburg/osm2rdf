@@ -38,8 +38,8 @@
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
-  : _config(config), _outQueue(_config.numThreadsWrite),
-  _convertQueue(_config.numThreadsConvertGeom) {
+  : _config(config), _outQueue(_config.numThreadsWrite, "Writer::out"),
+  _convertQueue(_config.numThreadsConvertGeom, "Writer::convert") {
   _out = &std::cout;
 }
 
