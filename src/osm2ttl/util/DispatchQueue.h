@@ -44,6 +44,7 @@ class DispatchQueue {
   std::condition_variable _conditionVariableOut;
   std::string _queueName;
   size_t _maxSize = std::numeric_limits<size_t>::max();
+  uint8_t _insertCount = 0;
   bool _quit = false;
   bool _die = false;
 };

@@ -36,17 +36,29 @@ void osm2ttl::util::DispatchQueue::limit(size_t maxSize) {
 
 // ____________________________________________________________________________
 void osm2ttl::util::DispatchQueue::checkFreeRam() {
+  if (_insertCount++ != 0) {
+    return;
+  }
   const size_t kilo = 1024;
   const size_t mega = kilo * kilo;
   const size_t giga = kilo * mega;
   const size_t dangerRam = 2 * giga;
-  const size_t enoughRam = 3 * giga;
+  const size_t lowRam = 3 * giga;
+  const size_t enoughRam = 4 * giga;
   size_t freeRam = sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
-  if (_maxSize == std::numeric_limits<size_t>::max() && freeRam < dangerRam) {
+  if (_maxSize == std::numeric_limits<size_t>::max() && freeRam < lowRam) {
+    // Low ram, ... try to keep current usage.
     limit();
   }
-  if (_maxSize != std::numeric_limits<size_t>::max() && freeRam > enoughRam) {
-    unlimit();
+  if (_maxSize != std::numeric_limits<size_t>::max()) {
+    if (freeRam > enoughRam) {
+      // We have enough ram again, use it before somebody else does.
+      unlimit();
+    } else if (freeRam < dangerRam) {
+      // Dangerously low ram, try to half our queues to reduce memory usage
+      // after workers have taken items.
+      limit(_maxSize / 2);
+    }
   }
 }
 
