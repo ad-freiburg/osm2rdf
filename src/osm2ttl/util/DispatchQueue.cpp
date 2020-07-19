@@ -32,7 +32,9 @@ void osm2ttl::util::DispatchQueue::limit() {
 // ____________________________________________________________________________
 void osm2ttl::util::DispatchQueue::limit(size_t maxSize) {
   // Allow atleast one entry in the queue -> single threaded.
+  std::cerr << "(" << _queueName << ") update limit: " << _maxSize;
   _maxSize = std::max(size_t(1), maxSize);
+  std::cerr << " -> " << _maxSize << std::endl;
 }
 
 // ____________________________________________________________________________
