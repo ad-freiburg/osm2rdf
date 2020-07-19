@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <iostream>
 #include <string>
 #include <utility>
 
@@ -25,13 +26,13 @@ osm2ttl::util::DispatchQueue::DispatchQueue(size_t threadCount,
 
 // ____________________________________________________________________________
 void osm2ttl::util::DispatchQueue::limit() {
-  // Allow atleast one entry in the queue -> single threaded.
-  limit(std::max(size_t(1), _queue.size()));
+  limit(std::max(_threads.size(), _queue.size()));
 }
 
 // ____________________________________________________________________________
 void osm2ttl::util::DispatchQueue::limit(size_t maxSize) {
-  _maxSize = maxSize;
+  // Allow atleast one entry in the queue -> single threaded.
+  _maxSize = std::max(size_t(1), maxSize);
 }
 
 // ____________________________________________________________________________
@@ -64,7 +65,7 @@ void osm2ttl::util::DispatchQueue::checkFreeRam() {
 
 // ____________________________________________________________________________
 void osm2ttl::util::DispatchQueue::unlimit() {
-  _maxSize = std::numeric_limits<size_t>::max();
+  limit(std::numeric_limits<size_t>::max());
   // Increased storage capacity -> inform all inserting calls.
   _conditionVariableIn.notify_all();
 }
