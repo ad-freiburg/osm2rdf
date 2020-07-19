@@ -11,6 +11,8 @@
 #include <string>
 #include <utility>
 
+#include "osm2ttl/util/Ram.h"
+
 // ____________________________________________________________________________
 osm2ttl::util::DispatchQueue::DispatchQueue(size_t threadCount,
                                             const std::string& name)
@@ -33,7 +35,7 @@ void osm2ttl::util::DispatchQueue::limit() {
 void osm2ttl::util::DispatchQueue::limit(size_t maxSize) {
   // Allow atleast one entry in the queue -> single threaded.
   std::cerr << "(" << _queueName << ") update limit: " << _maxSize;
-  _maxSize = std::max(size_t(1), maxSize);
+  _maxSize = std::max(_threads.size(), maxSize);
   std::cerr << " -> " << _maxSize << std::endl;
 }
 
@@ -42,13 +44,14 @@ void osm2ttl::util::DispatchQueue::checkFreeRam() {
   if (_insertCount++ != 0) {
     return;
   }
-  const size_t kilo = 1024;
-  const size_t mega = kilo * kilo;
-  const size_t giga = kilo * mega;
-  const size_t dangerRam = 2 * giga;
-  const size_t lowRam = 3 * giga;
-  const size_t enoughRam = 4 * giga;
-  size_t freeRam = sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
+  const int64_t dangerRam = 2 * osm2ttl::util::ram::GIGA;
+  const int64_t lowRam = 3 * osm2ttl::util::ram::GIGA;
+  const int64_t enoughRam = 4 * osm2ttl::util::ram::GIGA;
+  int64_t freeRam = osm2ttl::util::ram::available();
+  if (freeRam < 0) {
+    // Invalid read -> don't change anything.
+    return;
+  }
   if (_maxSize == std::numeric_limits<size_t>::max() && freeRam < lowRam) {
     // Low ram, ... try to keep current usage.
     limit();

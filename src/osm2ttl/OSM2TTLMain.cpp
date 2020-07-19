@@ -17,11 +17,17 @@
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/osm/DumpHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
+#include "osm2ttl/util/Ram.h"
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   config.fromArgs(argc, argv);
+
+  std::cerr << "Free ram: "
+    << osm2ttl::util::ram::available()/(osm2ttl::util::ram::GIGA*1.0) << "G/"
+    << osm2ttl::util::ram::physPages()/(osm2ttl::util::ram::GIGA*1.0) << "G"
+    << std::endl;
 
   try {
     // Setup
