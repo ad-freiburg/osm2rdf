@@ -11,9 +11,9 @@ namespace osm2ttl {
 namespace util {
 namespace ram {
 
-const int64_t KILO = 1024;
-const int64_t MEGA = KILO * KILO;
-const int64_t GIGA = KILO * MEGA;
+constexpr int64_t KILO = 1024;
+constexpr int64_t MEGA = KILO * KILO;
+constexpr int64_t GIGA = KILO * MEGA;
 
 int64_t available();
 int64_t physPages();

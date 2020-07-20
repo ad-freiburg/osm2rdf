@@ -74,10 +74,7 @@ void osm2ttl::util::DispatchQueue::unlimit() {
 
 // ____________________________________________________________________________
 osm2ttl::util::DispatchQueue::~DispatchQueue() {
-  std::unique_lock<std::mutex> lock(_lockOut);
   _die = true;
-  lock.unlock();
-  _conditionVariableOut.notify_all();
   quit();
 }
 
@@ -136,8 +133,8 @@ void osm2ttl::util::DispatchQueue::handler(void) {
       _queue.pop();
       lockOut.unlock();
       op();
+      _conditionVariableIn.notify_all();
       lockOut.lock();
-      _conditionVariableIn.notify_one();
     }
   } while (!_die && (!_quit || !_queue.empty()));
 }
