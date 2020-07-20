@@ -32,7 +32,10 @@ struct Config {
   bool expandedData = false;
   bool metaData = false;
   bool skipWikiLinks = false;
+
+  // Output modifiers
   size_t simplifyWKT = 0;
+  bool gzip = false;
 
   // Threads
   size_t numThreadsConvertGeom = 6;

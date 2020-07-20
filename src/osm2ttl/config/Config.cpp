@@ -82,6 +82,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "qlever");
   auto cacheOp = op.add<popl::Value<std::string>>(
     "t", "cache", "Path to cache directory", "/tmp/");
+  auto gzipOp = op.add<popl::Switch>("z", "gzip", "Compress output");
 
   try {
     op.parse(argc, argv);
@@ -103,12 +104,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     // Skip passes
-    if (skipAreaPrepOp->is_set()) {
-      skipAreaPrep = true;
-    }
-    if (useRamForLocationsOp->is_set()) {
-      useRamForLocations = true;
-    }
+    skipAreaPrep = skipAreaPrepOp->is_set();
+    useRamForLocations = useRamForLocationsOp->is_set();
 
     // Threads
     numThreadsConvertGeom = numThreadsConvertGeomOp->value();
@@ -116,38 +113,20 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     numThreadsWrite = numThreadsWriteOp->value();
 
     // Select types to dump
-    if (noNodeDumpOp->is_set()) {
-      noNodeDump = true;
-    }
-    if (noRelationDumpOp->is_set()) {
-      noRelationDump = true;
-    }
-    if (noWayDumpOp->is_set()) {
-      noWayDump = true;
-    }
-    if (noAreaDumpOp->is_set()) {
-      noAreaDump = true;
-    }
+    noNodeDump = noNodeDumpOp->is_set();
+    noRelationDump = noRelationDumpOp->is_set();
+    noWayDump = noWayDumpOp->is_set();
+    noAreaDump = noAreaDumpOp->is_set();
 
     // Select amount to dump
-    if (addAreaSourcesOp->is_set()) {
-      addAreaSources = true;
-    }
-    if (addEnvelopeOp->is_set()) {
-      addEnvelope = true;
-    }
-    if (addMemberNodesOp->is_set()) {
-      addMemberNodes = true;
-    }
+    addAreaSources = addAreaSourcesOp->is_set();
+    addEnvelope = addEnvelopeOp->is_set();
+    addMemberNodes = addMemberNodesOp->is_set();
     if (addUnnamedOp->is_set()) {
       std::cerr << "Deprecation Warning: -u --add-unnamed!" << std::endl;
     }
-    if (skipWikiLinksOp->is_set()) {
-      skipWikiLinks = true;
-    }
-    if (expandedDataOp->is_set()) {
-      expandedData = true;
-    }
+    skipWikiLinks = skipWikiLinksOp->is_set();
+    expandedData = expandedDataOp->is_set();
     if (simplifyWKTOp->is_set()) {
       simplifyWKT = simplifyWKTOp->value();
     }
@@ -171,6 +150,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
         exit(1);
       }
     }
+    gzip = gzipOp->is_set();
 
     // osmium location cache
     if (cacheOp->is_set() || cache.empty()) {
