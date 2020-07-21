@@ -49,27 +49,22 @@ class Writer {
   void writeTriple(const S& s, const osm2ttl::ttl::IRI& p, const O& o);
 
   // OSM2TTL
-  void writeArea(const osm2ttl::osm::Area& area);
+  void write(const osm2ttl::osm::Area& area);
+  void write(const osm2ttl::osm::Node& node);
+  void write(const osm2ttl::osm::Relation& relation);
+  void write(const osm2ttl::osm::Way& way);
   template<typename S, typename G>
   void writeBoostGeometry(const S& s, const osm2ttl::ttl::IRI& p,
                           const G& g);
   template<typename S>
   void writeBox(const S& s, const osm2ttl::ttl::IRI& p,
                 const osm2ttl::osm::Box& box);
-  void writeNode(const osm2ttl::osm::Node& node);
-  void writeRelation(const osm2ttl::osm::Relation& relation);
   template<typename S>
   void writeTag(const S& s, const osm2ttl::osm::Tag& tag);
   template<typename S>
   void writeTagList(const S& s, const osm2ttl::osm::TagList& tags);
-  void writeWay(const osm2ttl::osm::Way& way);
 
  protected:
-  // Helper
-  static bool contains(std::string_view s, std::string_view n);
-  static bool endsWith(std::string_view s, std::string_view n);
-  static bool startsWith(std::string_view s, std::string_view n);
-
   // Config
   const osm2ttl::config::Config _config;
 

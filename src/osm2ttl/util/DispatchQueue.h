@@ -18,16 +18,20 @@ namespace util {
 
 class DispatchQueue {
  public:
-  DispatchQueue(size_t threadCount, const std::string& name);
+  DispatchQueue(size_t threadCount, size_t queueFactor,
+                const std::string& name);
   ~DispatchQueue();
-  void dispatch(const std::function<void(void)>& op);
-  void dispatch(std::function<void(void)>&& op);
-  void quit();
+  void dispatch(const std::function<void(void)>& op) noexcept;
+  void dispatch(std::function<void(void)>&& op) noexcept;
+  void quit() noexcept;
 
-  void limit();
-  void limit(size_t maxSize);
-  void unlimit();
-  void checkFreeRam();
+  void limit() noexcept;
+  void limit(size_t maxSize) noexcept;
+  void unlimit() noexcept;
+  void checkFreeRam() noexcept;
+
+  size_t size() noexcept;
+  bool empty() noexcept;
 
   DispatchQueue(const DispatchQueue& rhs) = delete;
   DispatchQueue& operator=(const DispatchQueue& rhs) = delete;
@@ -35,15 +39,15 @@ class DispatchQueue {
   DispatchQueue& operator=(DispatchQueue&& rhs) = delete;
 
  protected:
-  void handler(void);
-  std::mutex _lockIn;
-  std::mutex _lockOut;
+  void handler(void) noexcept;
   std::vector<std::thread> _threads;
   std::queue<std::function<void(void)>> _queue;
-  std::condition_variable _conditionVariableIn;
-  std::condition_variable _conditionVariableOut;
-  std::string _queueName;
+  std::mutex _mutex;
+  std::condition_variable _cvHasData;
+  std::condition_variable _cvHasSpace;
+  std::string _name;
   size_t _maxSize = std::numeric_limits<size_t>::max();
+  size_t _factor;
   uint8_t _insertCount = 0;
   bool _quit = false;
   bool _die = false;

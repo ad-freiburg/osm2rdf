@@ -35,13 +35,25 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
        popl::Attribute::advanced>("", "num-threads-write",
                                   "Number of threads to write output",
                                   numThreadsWrite);
+  auto queueFactorWriteOp = op.add<popl::Value<size_t>,
+       popl::Attribute::advanced>("", "queue-factor-write",
+                                  "Factor for write queue",
+                                  queueFactorWrite);
   auto numThreadsReadOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "num-threads-read",
                                   "Number of threads to read libosmium data",
                                   numThreadsRead);
+  auto queueFactorReadOp = op.add<popl::Value<size_t>,
+       popl::Attribute::advanced>("", "queue-factor-read",
+                                  "Factor for read queue",
+                                  numThreadsRead);
   auto numThreadsConvertGeomOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "num-threads-convert-geom",
                                   "Number of threads to convert geometries",
+                                  numThreadsConvertGeom);
+  auto queueFactorConvertGeomOp = op.add<popl::Value<size_t>,
+       popl::Attribute::advanced>("", "queue-factor-convert-geom",
+                                  "Factor for convert geometries queue",
                                   numThreadsConvertGeom);
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
@@ -64,8 +76,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "u", "add-unnamed", "DEPRECATED! Add unnamed entities to the result.");
   auto skipWikiLinksOp = op.add<popl::Switch>(
     "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
-  auto simplifyWKTOp = op.add<popl::Value<size_t>>(
-    "s", "simplify-wkt", "Simplify WKT-Geometry");
   auto storeConfigOp = op.add<popl::Value<std::string>,
        popl::Attribute::advanced>(
     "", "store-config", "Path to store calculated config.");
@@ -73,6 +83,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "Add expanded data");
   auto metaDataOp = op.add<popl::Switch>("m", "meta-data",
     "Add meta-data");
+
+  auto wktSimplifyOp = op.add<popl::Switch>(
+    "s", "wkt-simplify", "Simplify WKT-Geometry");
 
   auto outputOp = op.add<popl::Value<std::string>>(
     "o", "output", "Output file", "");
@@ -109,8 +122,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     // Threads
     numThreadsConvertGeom = numThreadsConvertGeomOp->value();
+    queueFactorConvertGeom = queueFactorConvertGeomOp->value();
     numThreadsRead = numThreadsReadOp->value();
+    queueFactorRead = queueFactorReadOp->value();
     numThreadsWrite = numThreadsWriteOp->value();
+    queueFactorWrite = queueFactorWriteOp->value();
 
     // Select types to dump
     noNodeDump = noNodeDumpOp->is_set();
@@ -127,9 +143,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
     skipWikiLinks = skipWikiLinksOp->is_set();
     expandedData = expandedDataOp->is_set();
-    if (simplifyWKTOp->is_set()) {
-      simplifyWKT = simplifyWKTOp->value();
-    }
+    wktSimplify = wktSimplifyOp->is_set();
 
     // Add tag.key() -> xsd overrides
     tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");

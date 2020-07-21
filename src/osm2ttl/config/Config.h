@@ -34,20 +34,24 @@ struct Config {
   bool skipWikiLinks = false;
 
   // Output modifiers
-  size_t simplifyWKT = 0;
+  bool wktSimplify = false;
+  uint8_t wktDeviation = 5;
+  uint8_t wktPrecision = 12;
   bool gzip = false;
 
   // Threads
-  size_t numThreadsConvertGeom = 6;
-  size_t numThreadsRead = 6;
-  size_t numThreadsWrite = 6;
+  size_t numThreadsConvertGeom = 0;
+  size_t queueFactorConvertGeom = 2;
+  size_t numThreadsRead = 0;
+  size_t queueFactorRead = 2;
+  size_t numThreadsWrite = 0;
+  size_t queueFactorWrite = 2;
 
   // tag.key() -> IRI
   std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;
 
   // Output, empty for stdout
   std::filesystem::path output;
-  // Output format
   osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::QLEVER;
 
   // osmium location cache

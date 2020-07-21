@@ -24,7 +24,8 @@
 // ____________________________________________________________________________
 osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
   osm2ttl::ttl::Writer* writer) : _config(config),
-  _queue(_config.numThreadsRead, "DumpHandler"), _writer(writer) {
+  _queue(_config.numThreadsRead, _config.queueFactorRead, "DumpHandler"),
+  _writer(writer) {
 }
 
 // ____________________________________________________________________________
@@ -37,6 +38,18 @@ void osm2ttl::osm::DumpHandler::finish() {
 }
 
 // ____________________________________________________________________________
+template<typename T>
+void osm2ttl::osm::DumpHandler::write(const T& o) {
+  if (_config.numThreadsRead > 0) {
+    _queue.dispatch([this, o]{
+      _writer->write(o);
+    });
+  } else {
+    _writer->write(o);
+  }
+}
+
+// ____________________________________________________________________________
 void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
   if (_config.noAreaDump) {
     return;
@@ -44,10 +57,7 @@ void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
   if (area.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  osm2ttl::osm::Area a{area};
-  _queue.dispatch([this, a]{
-    _writer->writeArea(a);
-  });
+  write(osm2ttl::osm::Area(area));
 }
 
 // ____________________________________________________________________________
@@ -58,10 +68,7 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
   if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  osm2ttl::osm::Node n{node};
-  _queue.dispatch([this, n]{
-    _writer->writeNode(n);
-  });
+  write(osm2ttl::osm::Node(node));
 }
 
 // ____________________________________________________________________________
@@ -72,10 +79,7 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
   if (relation.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  osm2ttl::osm::Relation r{relation};
-  _queue.dispatch([this, r]{
-    _writer->writeRelation(r);
-  });
+  write(osm2ttl::osm::Relation(relation));
 }
 
 // ____________________________________________________________________________
@@ -86,8 +90,5 @@ void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
   if (way.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  osm2ttl::osm::Way w{way};
-  _queue.dispatch([this, w]{
-    _writer->writeWay(w);
-  });
+  write(osm2ttl::osm::Way(way));
 }

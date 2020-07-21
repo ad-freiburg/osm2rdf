@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -38,8 +39,10 @@
 
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
-  : _config(config), _outQueue(_config.numThreadsWrite, "Writer::out"),
-  _convertQueue(_config.numThreadsConvertGeom, "Writer::convert") {
+  : _config(config),
+  _outQueue(_config.numThreadsWrite, _config.queueFactorWrite, "Writer::out"),
+  _convertQueue(_config.numThreadsConvertGeom, _config.queueFactorConvertGeom,
+                "Writer::geom") {
   _out = &std::cout;
 }
 
@@ -68,42 +71,6 @@ void osm2ttl::ttl::Writer::close() {
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::ttl::Writer::contains(std::string_view s,
-                                    std::string_view n) {
-  if (n.empty()) {
-    return true;
-  }
-  if (s.size() < n.size()) {
-    return false;
-  }
-  return (s.find(n) != std::string::npos);
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::ttl::Writer::endsWith(std::string_view s,
-                                    std::string_view n) {
-  if (n.empty()) {
-    return true;
-  }
-  if (s.size() < n.size()) {
-    return false;
-  }
-  return (s.find(n, s.size() - n.size()) != std::string::npos);
-}
-
-// ____________________________________________________________________________
-bool osm2ttl::ttl::Writer::startsWith(std::string_view s,
-                                      std::string_view n) {
-  if (n.empty()) {
-    return true;
-  }
-  if (s.size() < n.size()) {
-    return false;
-  }
-  return (s.rfind(n, 0) != std::string::npos);
-}
-
-// ____________________________________________________________________________
 void osm2ttl::ttl::Writer::writeHeader() {
   const std::lock_guard<std::mutex> lock(_outMutex);
   *_out << _config.outputFormat.header();
@@ -118,22 +85,22 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
   static_assert(std::is_same<O, osm2ttl::ttl::BlankNode>::value
                 || std::is_same<O, osm2ttl::ttl::IRI>::value
                 || std::is_same<O, osm2ttl::ttl::Literal>::value);
-  _outQueue.dispatch([this, s, p, o]{
-    std::string subject = _config.outputFormat.format(s);
-    std::string predicate = _config.outputFormat.format(p);
-    std::string object = _config.outputFormat.format(o);
+  auto f = [this, s, p, o]{
+    std::string line = _config.outputFormat.format(s) + " " \
+      + _config.outputFormat.format(p) + " " \
+      + _config.outputFormat.format(o) + " .\n";
     const std::lock_guard<std::mutex> lock(_outMutex);
-    *_out << subject;
-    *_out << " ";
-    *_out << predicate;
-    *_out << " ";
-    *_out << object;
-    *_out << " .\n";
-  });
+    *_out << std::move(line);
+  };
+  if (_config.numThreadsWrite > 0) {
+    _outQueue.dispatch(f);
+  } else {
+    f();
+  }
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeArea(const osm2ttl::osm::Area& area) {
+void osm2ttl::ttl::Writer::write(const osm2ttl::osm::Area& area) {
   osm2ttl::ttl::IRI s{area.fromWay()?"osmway":"osmrel",
       std::to_string(area.objId())};
 
@@ -145,51 +112,7 @@ void osm2ttl::ttl::Writer::writeArea(const osm2ttl::osm::Area& area) {
 }
 
 // ____________________________________________________________________________
-template<typename S, typename G>
-void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
-                                              const osm2ttl::ttl::IRI& p,
-                                              const G& g) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  _convertQueue.dispatch([this, s, p, g]{
-    G geom{g};
-    if (_config.simplifyWKT != 0 && boost::geometry::num_points(g) > 4) {
-      osm2ttl::geometry::Box box;
-      boost::geometry::envelope(geom, box);
-      boost::geometry::simplify(g, geom,
-        std::min(boost::geometry::get<boost::geometry::max_corner, 0>(box)
-               - boost::geometry::get<boost::geometry::min_corner, 0>(box),
-                 boost::geometry::get<boost::geometry::max_corner, 1>(box)
-               - boost::geometry::get<boost::geometry::min_corner, 1>(box))
-        / 20.0);
-      // If empty geometry -> use original
-      if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
-        geom = g;
-      }
-    }
-    std::ostringstream tmp;
-    tmp << boost::geometry::wkt(geom);
-    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
-  });
-}
-
-// ____________________________________________________________________________
-template<typename S>
-void osm2ttl::ttl::Writer::writeBox(const S& s,
-                                    const osm2ttl::ttl::IRI& p,
-                                    const osm2ttl::osm::Box& box) {
-  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
-                || std::is_same<S, osm2ttl::ttl::IRI>::value);
-  _convertQueue.dispatch([this, s, p, box]{
-    // Box can not be simplified -> output directly.
-    std::ostringstream tmp;
-    tmp << boost::geometry::wkt(box.geom());
-    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
-  });
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeNode(const osm2ttl::osm::Node& node) {
+void osm2ttl::ttl::Writer::write(const osm2ttl::osm::Node& node) {
   osm2ttl::ttl::IRI s{"osmnode", node};
 
   writeTriple(s,
@@ -202,8 +125,7 @@ void osm2ttl::ttl::Writer::writeNode(const osm2ttl::osm::Node& node) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeRelation(
-  const osm2ttl::osm::Relation& relation) {
+void osm2ttl::ttl::Writer::write(const osm2ttl::osm::Relation& relation) {
   osm2ttl::ttl::IRI s{"osmrel", relation};
 
   writeTriple(s,
@@ -227,6 +149,110 @@ void osm2ttl::ttl::Writer::writeRelation(
         osm2ttl::ttl::IRI("osmrel", role),
         osm2ttl::ttl::IRI(type, member));
     }
+  }
+}
+
+// ____________________________________________________________________________
+void osm2ttl::ttl::Writer::write(const osm2ttl::osm::Way& way) {
+  osm2ttl::ttl::IRI s{"osmway", way};
+
+  writeTriple(s,
+    osm2ttl::ttl::IRI("rdf", "type"),
+    osm2ttl::ttl::IRI("osm", "way"));
+
+  writeTagList(s, way.tags());
+
+  if (_config.expandedData) {
+    size_t i = 0;
+    for (const auto& node : way.nodes()) {
+      osm2ttl::ttl::BlankNode b;
+      writeTriple(s, osm2ttl::ttl::IRI("osmway", "node"), b);
+
+      writeTriple(b,
+        osm2ttl::ttl::IRI("osmway", "node"),
+        osm2ttl::ttl::IRI("osmnode", node));
+
+      writeTriple(b,
+        osm2ttl::ttl::IRI("osmm", "pos"),
+        osm2ttl::ttl::Literal(std::to_string(++i),
+          osm2ttl::ttl::IRI("xsd", "integer")));
+    }
+  }
+
+  osm2ttl::geometry::Linestring locations{way.geom()};
+  size_t numUniquePoints = locations.size();
+  writeBoostGeometry(s, osm2ttl::ttl::IRI("geo", "hasGeometry"), locations);
+
+  if (_config.metaData) {
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmway", "is_closed"),
+      osm2ttl::ttl::Literal(way.closed()?"yes":"no"));
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmway", "nodeCount"),
+      osm2ttl::ttl::Literal(std::to_string(way.nodes().size())));
+    writeTriple(s,
+      osm2ttl::ttl::IRI("osmway", "uniqueNodeCount"),
+      osm2ttl::ttl::Literal(std::to_string(numUniquePoints)));
+  }
+
+  if (_config.addEnvelope) {
+    writeBox(s, osm2ttl::ttl::IRI("osm", "envelope"), way.envelope());
+  }
+}
+
+// ____________________________________________________________________________
+template<typename S, typename G>
+void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
+                                              const osm2ttl::ttl::IRI& p,
+                                              const G& g) {
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  auto f = [this, s, p, g]{
+    const double onePercent = 0.01;
+    G geom{g};
+    if (_config.wktSimplify && boost::geometry::num_points(g) > 4) {
+      osm2ttl::geometry::Box box;
+      boost::geometry::envelope(geom, box);
+      boost::geometry::simplify(g, geom,
+        std::min(boost::geometry::get<boost::geometry::max_corner, 0>(box)
+               - boost::geometry::get<boost::geometry::min_corner, 0>(box),
+                 boost::geometry::get<boost::geometry::max_corner, 1>(box)
+               - boost::geometry::get<boost::geometry::min_corner, 1>(box))
+        / (onePercent * _config.wktDeviation));
+      // If empty geometry -> use original
+      if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
+        geom = g;
+      }
+    }
+    std::ostringstream tmp;
+    tmp << std::setprecision(_config.wktPrecision)
+      << boost::geometry::wkt(geom);
+    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
+  };
+  if (_config.numThreadsConvertGeom > 0) {
+    _outQueue.dispatch(f);
+  } else {
+    f();
+  }
+}
+
+// ____________________________________________________________________________
+template<typename S>
+void osm2ttl::ttl::Writer::writeBox(const S& s,
+                                    const osm2ttl::ttl::IRI& p,
+                                    const osm2ttl::osm::Box& box) {
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  auto f = [this, s, p, box]{
+    // Box can not be simplified -> output directly.
+    std::ostringstream tmp;
+    tmp << boost::geometry::wkt(box.geom());
+    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
+  };
+  if (_config.numThreadsConvertGeom > 0) {
+    _outQueue.dispatch(f);
+  } else {
+    f();
   }
 }
 
@@ -290,53 +316,5 @@ void osm2ttl::ttl::Writer::writeTagList(const S& s,
         }
       }
     }
-  }
-}
-
-// ____________________________________________________________________________
-void osm2ttl::ttl::Writer::writeWay(const osm2ttl::osm::Way& way) {
-  osm2ttl::ttl::IRI s{"osmway", way};
-
-  writeTriple(s,
-    osm2ttl::ttl::IRI("rdf", "type"),
-    osm2ttl::ttl::IRI("osm", "way"));
-
-  writeTagList(s, way.tags());
-
-  if (_config.expandedData) {
-    size_t i = 0;
-    for (const auto& node : way.nodes()) {
-      osm2ttl::ttl::BlankNode b;
-      writeTriple(s, osm2ttl::ttl::IRI("osmway", "node"), b);
-
-      writeTriple(b,
-        osm2ttl::ttl::IRI("osmway", "node"),
-        osm2ttl::ttl::IRI("osmnode", node));
-
-      writeTriple(b,
-        osm2ttl::ttl::IRI("osmm", "pos"),
-        osm2ttl::ttl::Literal(std::to_string(++i),
-          osm2ttl::ttl::IRI("xsd", "integer")));
-    }
-  }
-
-  osm2ttl::geometry::Linestring locations{way.geom()};
-  size_t numUniquePoints = locations.size();
-  writeBoostGeometry(s, osm2ttl::ttl::IRI("geo", "hasGeometry"), locations);
-
-  if (_config.metaData) {
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osmway", "is_closed"),
-      osm2ttl::ttl::Literal(way.closed()?"yes":"no"));
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osmway", "nodeCount"),
-      osm2ttl::ttl::Literal(std::to_string(way.nodes().size())));
-    writeTriple(s,
-      osm2ttl::ttl::IRI("osmway", "uniqueNodeCount"),
-      osm2ttl::ttl::Literal(std::to_string(numUniquePoints)));
-  }
-
-  if (_config.addEnvelope) {
-    writeBox(s, osm2ttl::ttl::IRI("osm", "envelope"), way.envelope());
   }
 }
