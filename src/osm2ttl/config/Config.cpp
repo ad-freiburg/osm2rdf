@@ -72,8 +72,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto addMemberNodesOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "add-member-nodes", "Add nodes triples for members of ways and" \
     "relations. This does not add information to the ways or relations.");
-  auto addUnnamedOp = op.add<popl::Switch>(
-    "u", "add-unnamed", "DEPRECATED! Add unnamed entities to the result.");
   auto skipWikiLinksOp = op.add<popl::Switch>(
     "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
   auto storeConfigOp = op.add<popl::Value<std::string>,
@@ -138,9 +136,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addAreaSources = addAreaSourcesOp->is_set();
     addEnvelope = addEnvelopeOp->is_set();
     addMemberNodes = addMemberNodesOp->is_set();
-    if (addUnnamedOp->is_set()) {
-      std::cerr << "Deprecation Warning: -u --add-unnamed!" << std::endl;
-    }
     skipWikiLinks = skipWikiLinksOp->is_set();
     expandedData = expandedDataOp->is_set();
     wktSimplify = wktSimplifyOp->is_set();
