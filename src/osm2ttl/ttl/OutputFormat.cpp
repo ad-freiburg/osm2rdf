@@ -86,14 +86,17 @@ std::string osm2ttl::ttl::OutputFormat::format(
   std::ostringstream tmp;
   tmp << "@";
   std::string_view s = l.value();
-  size_t partCount = 0;
+  bool allowDigits = false;
   for (size_t pos = 0; pos < s.length(); pos++) {
     if (pos == 0 && s[0] == '-') {
       throw std::domain_error("Invalid LangTag " + l.value());
     }
     if ((s[pos] >= 'a' && s[pos] <= 'z') ||
         (s[pos] >= 'A' && s[pos] <= 'Z') ||
-        (s[pos] >= '0' && s[pos] <= '9' && partCount > 0)) {
+        (s[pos] >= '0' && s[pos] <= '9' && allowDigits)) {
+      tmp << s[pos];
+    } if (s[pos] == '-') {
+      allowDigits = true;
       tmp << s[pos];
     } else {
       throw std::domain_error("Invalid LangTag " + l.value());
