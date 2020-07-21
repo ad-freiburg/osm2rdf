@@ -230,7 +230,7 @@ void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
     writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
   };
   if (_config.numThreadsConvertGeom > 0) {
-    _outQueue.dispatch(f);
+    _convertQueue.dispatch(f);
   } else {
     f();
   }
@@ -250,7 +250,7 @@ void osm2ttl::ttl::Writer::writeBox(const S& s,
     writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
   };
   if (_config.numThreadsConvertGeom > 0) {
-    _outQueue.dispatch(f);
+    _convertQueue.dispatch(f);
   } else {
     f();
   }

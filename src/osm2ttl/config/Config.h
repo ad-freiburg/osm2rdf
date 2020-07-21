@@ -40,11 +40,11 @@ struct Config {
   bool gzip = false;
 
   // Threads
-  size_t numThreadsConvertGeom = 0;
+  size_t numThreadsConvertGeom = 4;
   size_t queueFactorConvertGeom = 2;
-  size_t numThreadsRead = 0;
+  size_t numThreadsRead = 2;
   size_t queueFactorRead = 2;
-  size_t numThreadsWrite = 0;
+  size_t numThreadsWrite = 4;
   size_t queueFactorWrite = 2;
 
   // tag.key() -> IRI

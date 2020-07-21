@@ -46,7 +46,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto queueFactorReadOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "queue-factor-read",
                                   "Factor for read queue",
-                                  numThreadsRead);
+                                  queueFactorRead);
   auto numThreadsConvertGeomOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "num-threads-convert-geom",
                                   "Number of threads to convert geometries",
@@ -54,7 +54,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto queueFactorConvertGeomOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "queue-factor-convert-geom",
                                   "Factor for convert geometries queue",
-                                  numThreadsConvertGeom);
+                                  queueFactorConvertGeom);
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
     "no-node-dump", "Skip nodes while dumping data");
