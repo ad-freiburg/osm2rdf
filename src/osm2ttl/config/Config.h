@@ -34,18 +34,18 @@ struct Config {
   bool skipWikiLinks = false;
 
   // Output modifiers
-  bool wktSimplify = false;
+  uint16_t wktSimplify = 100;
   uint8_t wktDeviation = 5;
   uint8_t wktPrecision = 12;
   bool gzip = false;
 
   // Threads
-  size_t numThreadsConvertGeom = 4;
-  size_t queueFactorConvertGeom = 2;
+  size_t numThreadsConvertGeometry = 4;
+  size_t queueFactorConvertGeometry = 2;
+  size_t numThreadsConvertString = 4;
+  size_t queueFactorConvertString = 2;
   size_t numThreadsRead = 2;
   size_t queueFactorRead = 2;
-  size_t numThreadsWrite = 4;
-  size_t queueFactorWrite = 2;
 
   // tag.key() -> IRI
   std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;

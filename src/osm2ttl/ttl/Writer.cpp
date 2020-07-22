@@ -40,9 +40,10 @@
 // ____________________________________________________________________________
 osm2ttl::ttl::Writer::Writer(const osm2ttl::config::Config& config)
   : _config(config),
-  _outQueue(_config.numThreadsWrite, _config.queueFactorWrite, "Writer::out"),
-  _convertQueue(_config.numThreadsConvertGeom, _config.queueFactorConvertGeom,
-                "Writer::geom") {
+  _convertStringQueue(_config.numThreadsConvertString,
+    _config.queueFactorConvertString, "Writer::convertString"),
+  _convertGeometryQueue(_config.numThreadsConvertGeometry,
+    _config.queueFactorConvertGeometry, "Writer::convertGeometry") {
   _out = &std::cout;
 }
 
@@ -63,8 +64,8 @@ bool osm2ttl::ttl::Writer::open() {
 
 // ____________________________________________________________________________
 void osm2ttl::ttl::Writer::close() {
-  _convertQueue.quit();
-  _outQueue.quit();
+  _convertGeometryQueue.quit();
+  _convertStringQueue.quit();
   if (_outFile.is_open()) {
     _outFile.close();
   }
@@ -92,8 +93,8 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
     const std::lock_guard<std::mutex> lock(_outMutex);
     *_out << std::move(line);
   };
-  if (_config.numThreadsWrite > 0) {
-    _outQueue.dispatch(f);
+  if (_config.numThreadsConvertString > 0) {
+    _convertStringQueue.dispatch(f);
   } else {
     f();
   }
@@ -210,7 +211,8 @@ void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
   auto f = [this, s, p, g]{
     const double onePercent = 0.01;
     G geom{g};
-    if (_config.wktSimplify && boost::geometry::num_points(g) > 4) {
+    if (_config.wktSimplify > 0 &&
+        boost::geometry::num_points(g) > _config.wktSimplify) {
       osm2ttl::geometry::Box box;
       boost::geometry::envelope(geom, box);
       boost::geometry::simplify(g, geom,
@@ -229,8 +231,8 @@ void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
       << boost::geometry::wkt(geom);
     writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
   };
-  if (_config.numThreadsConvertGeom > 0) {
-    _convertQueue.dispatch(f);
+  if (_config.numThreadsConvertGeometry > 0) {
+    _convertGeometryQueue.dispatch(f);
   } else {
     f();
   }
@@ -249,8 +251,8 @@ void osm2ttl::ttl::Writer::writeBox(const S& s,
     tmp << boost::geometry::wkt(box.geom());
     writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
   };
-  if (_config.numThreadsConvertGeom > 0) {
-    _convertQueue.dispatch(f);
+  if (_config.numThreadsConvertGeometry > 0) {
+    _convertGeometryQueue.dispatch(f);
   } else {
     f();
   }

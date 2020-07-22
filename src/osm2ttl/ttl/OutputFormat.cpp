@@ -95,7 +95,7 @@ std::string osm2ttl::ttl::OutputFormat::format(
         (s[pos] >= 'A' && s[pos] <= 'Z') ||
         (s[pos] >= '0' && s[pos] <= '9' && allowDigits)) {
       tmp << s[pos];
-    } if (s[pos] == '-') {
+    } else if (s[pos] == '-') {
       allowDigits = true;
       tmp << s[pos];
     } else {

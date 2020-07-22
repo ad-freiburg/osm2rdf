@@ -31,14 +31,14 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "skip-area-prep", "Skip area sorting");
   auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "use-ram-for-locations", "Store locations in RAM");
-  auto numThreadsWriteOp = op.add<popl::Value<size_t>,
+  auto numThreadsConvertStringOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "num-threads-write",
                                   "Number of threads to write output",
-                                  numThreadsWrite);
-  auto queueFactorWriteOp = op.add<popl::Value<size_t>,
+                                  numThreadsConvertString);
+  auto queueFactorConvertStringOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "queue-factor-write",
                                   "Factor for write queue",
-                                  queueFactorWrite);
+                                  queueFactorConvertString);
   auto numThreadsReadOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "num-threads-read",
                                   "Number of threads to read libosmium data",
@@ -47,14 +47,14 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
        popl::Attribute::advanced>("", "queue-factor-read",
                                   "Factor for read queue",
                                   queueFactorRead);
-  auto numThreadsConvertGeomOp = op.add<popl::Value<size_t>,
+  auto numThreadsConvertGeometryOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "num-threads-convert-geom",
                                   "Number of threads to convert geometries",
-                                  numThreadsConvertGeom);
-  auto queueFactorConvertGeomOp = op.add<popl::Value<size_t>,
+                                  numThreadsConvertGeometry);
+  auto queueFactorConvertGeometryOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "queue-factor-convert-geom",
                                   "Factor for convert geometries queue",
-                                  queueFactorConvertGeom);
+                                  queueFactorConvertGeometry);
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
     "no-node-dump", "Skip nodes while dumping data");
@@ -82,8 +82,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto metaDataOp = op.add<popl::Switch>("m", "meta-data",
     "Add meta-data");
 
-  auto wktSimplifyOp = op.add<popl::Switch>(
-    "s", "wkt-simplify", "Simplify WKT-Geometry");
+  auto wktSimplifyOp = op.add<popl::Value<uint16_t>>("s", "wkt-simplify",
+    "Simplify WKT-Geometries over this number of nodes, 0 to disable",
+    wktSimplify);
 
   auto outputOp = op.add<popl::Value<std::string>>(
     "o", "output", "Output file", "");
@@ -119,12 +120,12 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     useRamForLocations = useRamForLocationsOp->is_set();
 
     // Threads
-    numThreadsConvertGeom = numThreadsConvertGeomOp->value();
-    queueFactorConvertGeom = queueFactorConvertGeomOp->value();
+    numThreadsConvertGeometry = numThreadsConvertGeometryOp->value();
+    queueFactorConvertGeometry = queueFactorConvertGeometryOp->value();
     numThreadsRead = numThreadsReadOp->value();
     queueFactorRead = queueFactorReadOp->value();
-    numThreadsWrite = numThreadsWriteOp->value();
-    queueFactorWrite = queueFactorWriteOp->value();
+    numThreadsConvertString = numThreadsConvertStringOp->value();
+    queueFactorConvertString = queueFactorConvertStringOp->value();
 
     // Select types to dump
     noNodeDump = noNodeDumpOp->is_set();
@@ -138,7 +139,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addMemberNodes = addMemberNodesOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     expandedData = expandedDataOp->is_set();
-    wktSimplify = wktSimplifyOp->is_set();
+    wktSimplify = wktSimplifyOp->value();
 
     // Add tag.key() -> xsd overrides
     tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");
