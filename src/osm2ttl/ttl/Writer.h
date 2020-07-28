@@ -47,6 +47,9 @@ class Writer {
 
   template<typename S, typename O>
   void writeTriple(const S& s, const osm2ttl::ttl::IRI& p, const O& o);
+  template<typename S>
+  void writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
+                   const std::string& o);
 
   // OSM2TTL
   void write(const osm2ttl::osm::Area& area);

@@ -101,6 +101,26 @@ void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
 }
 
 // ____________________________________________________________________________
+template<typename S>
+void osm2ttl::ttl::Writer::writeTriple(const S& s, const osm2ttl::ttl::IRI& p,
+                                       const std::string& o) {
+  static_assert(std::is_same<S, osm2ttl::ttl::BlankNode>::value
+                || std::is_same<S, osm2ttl::ttl::IRI>::value);
+  auto f = [this, s, p, o]{
+    std::string line = _config.outputFormat.format(s) + " " \
+      + _config.outputFormat.format(p) + " " \
+      + o + " .\n";
+    const std::lock_guard<std::mutex> lock(_outMutex);
+    *_out << std::move(line);
+  };
+  if (_config.numThreadsConvertString > 0) {
+    _convertStringQueue.dispatch(f);
+  } else {
+    f();
+  }
+}
+
+// ____________________________________________________________________________
 void osm2ttl::ttl::Writer::write(const osm2ttl::osm::Area& area) {
   osm2ttl::ttl::IRI s{area.fromWay()?"osmway":"osmrel",
       std::to_string(area.objId())};
@@ -229,7 +249,7 @@ void osm2ttl::ttl::Writer::writeBoostGeometry(const S&s,
     std::ostringstream tmp;
     tmp << std::setprecision(_config.wktPrecision)
       << boost::geometry::wkt(geom);
-    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
+    writeTriple(s, p, "\""+tmp.str()+"\"^^geo:wktLiteral");
   };
   if (_config.numThreadsConvertGeometry > 0) {
     _convertGeometryQueue.dispatch(f);
@@ -249,7 +269,7 @@ void osm2ttl::ttl::Writer::writeBox(const S& s,
     // Box can not be simplified -> output directly.
     std::ostringstream tmp;
     tmp << boost::geometry::wkt(box.geom());
-    writeTriple(s, p, osm2ttl::ttl::Literal(tmp.str()));
+    writeTriple(s, p, "\""+tmp.str()+"\"^^geo:wktLiteral");
   };
   if (_config.numThreadsConvertGeometry > 0) {
     _convertGeometryQueue.dispatch(f);
