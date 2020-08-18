@@ -57,7 +57,7 @@
 # Look for the header file.
 find_path(OSMIUM_INCLUDE_DIR osmium/version.hpp
     PATH_SUFFIXES include
-    PATHS ${CMAKE_SOURCE_DIR}/src/vendor/libosmium
+    PATHS ${CMAKE_SOURCE_DIR}/vendor/osmcode/libosmium
 )
 
 # Check libosmium version number

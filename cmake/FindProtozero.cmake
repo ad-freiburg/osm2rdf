@@ -39,7 +39,7 @@
 # find include path
 find_path(PROTOZERO_INCLUDE_DIR protozero/version.hpp
     PATH_SUFFIXES include
-    PATHS ${CMAKE_SOURCE_DIR}/src/vendor/protozero
+    PATHS ${CMAKE_SOURCE_DIR}/vendor/mapbox/protozero
 )
 
 # Check version number

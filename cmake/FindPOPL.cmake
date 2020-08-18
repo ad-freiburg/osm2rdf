@@ -39,7 +39,7 @@
 # find include path
 find_path(POPL_INCLUDE_DIR popl.hpp
     PATH_SUFFIXES include
-    PATHS ${CMAKE_SOURCE_DIR}/src/vendor/popl
+    PATHS ${CMAKE_SOURCE_DIR}/vendor/baidaix/popl
 )
 
 set(POPL_INCLUDE_DIRS "${POPL_INCLUDE_DIR}")

@@ -1,206 +1,82 @@
-cmake_minimum_required (VERSION 3.6)
+cmake_minimum_required(VERSION 3.16...3.18)
 
-project (osm2ttl CXX)
+project(
+  osm2ttl
+  VERSION 0.5
+  DESCRIPTION "Convert osm to ttl"
+  LANGUAGES CXX)
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
-if (CMAKE_BUILD_TYPE)
-	string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-endif()
-if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-	set(CPPLINT "${CMAKE_SOURCE_DIR}/cpplint.py")
-	include(cmake/cpplint.cmake)
-endif()
+# Only do these if this is the main project, and not if it is included through add_subdirectory
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
-set(CPPLINT_PROJECT_ROOT "src")
+  # Optionally set things like CMAKE_CXX_STANDARD, CMAKE_POSITION_INDEPENDENT_CODE here
 
-enable_testing()
+  # Let's ensure -std=c++xx instead of -std=g++xx
+  set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/build")
+  # Let's nicely support folders in IDEs
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-
-# Detect dependencies, download submodules if needed
-find_package(Osmium)
-if (NOT OSMIUM_FOUND)
-	message(WARNING "No global libosmium found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/libosmium/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/libosmium)
-		find_package(Osmium)
-		if (NOT OSMIUM_FOUND)
-			message(FATAL_ERROR "libosmium not found")
-		endif()
-	endif()
-endif()
-
-find_package(Protozero)
-if (NOT PROTOZERO_FOUND)
-	message(WARNING "No global protozero found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/protozero/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/protozero)
-		find_package(Protozero)
-		if (NOT PROTOZERO_FOUND)
-			message(FATAL_ERROR "protozero not found")
-		endif()
-	endif()
+  # Testing only available if this is the main app
+  # Note this needs to be done in the main CMakeLists
+  # since it calls enable_testing, which must be in the
+  # main CMakeLists.
+  option(PACKAGE_TESTS "Build the tests" ON)
+  if(PACKAGE_TESTS)
+    enable_testing()
+    include(GoogleTest)
+    add_subdirectory(tests)
+  endif()
+  option(PACKAGE_BENCHMARKS "Build the benchmarks" ON)
+  if(PACKAGE_BENCHMARKS)
+    enable_testing()
+    add_subdirectory(benchmarks)
+  endif()
 endif()
 
-find_package(POPL)
-if (NOT POPL_FOUND)
-	message(WARNING "No global popl found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/popl/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/popl)
-		find_package(POPL)
-		if (NOT POPL_FOUND)
-			message(FATAL_ERROR "popl not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostVariant)
-if (NOT BOOSTVARIANT_FOUND)
-	message(WARNING "No global boost::variant found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/variant/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/variant)
-		find_package(BoostVariant)
-		if (NOT BOOSTVARIANT_FOUND)
-			message(FATAL_ERROR "boost::variant not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostTypeIndex)
-if (NOT BOOSTTYPEINDEX_FOUND)
-	message(WARNING "No global boost::type_index found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_index/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_index)
-		find_package(BoostTypeIndex)
-		if (NOT BOOSTTYPEINDEX_FOUND)
-			message(FATAL_ERROR "boost::type_index not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostConfig)
-if (NOT BOOSTCONFIG_FOUND)
-	message(WARNING "No global boost::config found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/config/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/config)
-		find_package(BoostConfig)
-		if (NOT BOOSTCONFIG_FOUND)
-			message(FATAL_ERROR "boost::config not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostContainerHash)
-if (NOT BOOSTCONTAINERHASH_FOUND)
-	message(WARNING "No global boost::container_hash found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/container_hash/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/container_hash)
-		find_package(BoostContainerHash)
-		if (NOT BOOSTCONTAINERHASH_FOUND)
-			message(FATAL_ERROR "boost::container_hash not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostStaticAssert)
-if (NOT BOOSTSTATICASSERT_FOUND)
-	message(WARNING "No global boost::static_assert found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/static_assert/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/static_assert)
-		find_package(BoostStaticAssert)
-		if (NOT BOOSTSTATICASSERT_FOUND)
-			message(FATAL_ERROR "boost::static_assert not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostThrowException)
-if (NOT BOOSTTHROWEXCEPTION_FOUND)
-	message(WARNING "No global boost::throw_exception found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/throw_exception/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/throw_exception)
-		find_package(BoostThrowException)
-		if (NOT BOOSTTHROWEXCEPTION_FOUND)
-			message(FATAL_ERROR "boost::throw_exception not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostAssert)
-if (NOT BOOSTASSERT_FOUND)
-	message(WARNING "No global boost::assert found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/assert/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/assert)
-		find_package(BoostAssert)
-		if (NOT BOOSTASSERT_FOUND)
-			message(FATAL_ERROR "boost::assert not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostCore)
-if (NOT BOOSTCORE_FOUND)
-	message(WARNING "No global boost::core found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/core/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/core)
-		find_package(BoostCore)
-		if (NOT BOOSTCORE_FOUND)
-			message(FATAL_ERROR "boost::core not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostTypeTraits)
-if (NOT BOOSTTYPETRAITS_FOUND)
-	message(WARNING "No global boost::type_traits found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_traits/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/type_traits)
-		find_package(BoostTypeTraits)
-		if (NOT BOOSTTYPETRAITS_FOUND)
-			message(FATAL_ERROR "boost::type_traits not found")
-		endif()
-	endif()
-endif()
-
-find_package(BoostMPL)
-if (NOT BOOSTMPL_FOUND)
-	message(WARNING "No global boost::mpl found, using local copy")
-	if(NOT EXISTS ${CMAKE_SOURCE_DIR}/src/vendor/boost/mpl/.git)
-		execute_process(COMMAND git submodule update --init --recursive ${CMAKE_SOURCE_DIR}/src/vendor/boost/mpl)
-		find_package(BoostMPL)
-		if (NOT BOOSTMPL_FOUND)
-			message(FATAL_ERROR "boost::mpl not found")
-		endif()
-	endif()
-endif()
-
+find_package(Boost REQUIRED)
 find_package(EXPAT REQUIRED)
-if (NOT EXPAT_FOUND)
-	message(FATAL_ERROR "No global expat found")
-endif()
-
 find_package(BZip2 REQUIRED)
-if (NOT BZIP2_FOUND)
-	message(FATAL_ERROR "No global bzip2 found")
+find_package(ZLIB REQUIRED)
+
+find_package(Git QUIET)
+if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
+  # Update submodules as needed
+  option(GIT_SUBMODULE "Check submodules during build" ON)
+  if(GIT_SUBMODULE)
+    message(STATUS "Submodule update")
+    execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            RESULT_VARIABLE GIT_SUBMOD_RESULT)
+    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+      message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+    endif()
+  endif()
 endif()
 
-find_package(ZLIB REQUIRED)
-if (NOT ZLIB_FOUND)
-	message(FATAL_ERROR "No global zlib found")
+if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/google/googletest/CMakeLists.txt")
+  message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif()
+
+find_package(POPL REQUIRED)
+include_directories(SYSTEM ${POPL_INCLUDE_DIR})
+find_package(Protozero REQUIRED)
+include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIR})
+find_package(Osmium REQUIRED COMPONENTS pbf xml sparsehash)
+include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 find_program(
-	CLANG_TIDY_EXE
-	NAMES "clang-tidy"
-	DOC "Path to clang-tidy executable"
+        CLANG_TIDY_EXE
+        NAMES "clang-tidy"
+        DOC "Path to clang-tidy executable"
 )
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0")
@@ -210,58 +86,11 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -Os")
 set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -O3")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -g -DLOGLEVEL=3")
 if(CLANG_TIDY_EXE)
-	set(CMAKE_CXX_CLANG_TIDY       "clang-tidy;-checks=-*,readability-*")
+  set(CMAKE_CXX_CLANG_TIDY       "clang-tidy;-checks=-*,readability-*")
 endif()
 
-# export compile commands to tools like clang
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Compiler-specific C++11 activation.
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-	execute_process(
-		COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE GCC_VERSION)
-	if ((GCC_VERSION VERSION_GREATER 4.8 OR GCC_VERSION VERSION_EQUAL 4.8))
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-	else ()
-		message(FATAL_ERROR "${PROJECT_NAME} requires g++ 4.8 or greater!")
-	endif ()
-elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-	#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -std=c++11")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else ()
-	message(FATAL_ERROR "Your C++ compiler does not support C++11.")
-endif ()
-
-# http://brianmilco.blogspot.de/2012/11/cmake-automatically-use-git-tags-as.html
-include(GetGitRevisionDescription)
-git_get_tag(VERSION_GIT)
-get_git_is_dirty(VERSION_GIT_IS_DIRTY)
-if ("${VERSION_GIT_IS_DIRTY}" STREQUAL "")
-	set(VERSION_GIT_FULL "${VERSION_GIT}")
-else()
-	set(VERSION_GIT_FULL "${VERSION_GIT}-${VERSION_GIT_IS_DIRTY}")
-endif()
-
+# The compiled library code is here
 add_subdirectory(src)
 
-# tests
-
-add_test("utilTest" utilTest)
-
-# custom eval target
-
-add_custom_target(
-	eval
-	COMMAND make
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}//eval
-)
-
-# handles install target
-install(
-	FILES osm2ttl.cfg DESTINATION etc/${PROJECT_NAME} COMPONENT config PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-)
-
-install(
-	FILES build/osm2ttl DESTINATION bin
-	PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE COMPONENT binaries
-)
+# The executable code is here
+add_subdirectory(apps)

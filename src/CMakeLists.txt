@@ -1,28 +1,29 @@
-set(OSM2TTL_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+# Note that headers are optional, and do not affect add_library, but they will not
+# show up in IDEs unless they are listed in add_library.
 
-if (COMMAND cpplint_add_subdirectory)
-	cpplint_add_subdirectory(osm2ttl)
-endif()
+# Optionally glob, but only for CMake 3.12 or later:
+file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/osm2ttl/*.h")
+file(GLOB_RECURSE CPP_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
 
-include_directories(
-	${OSM2TTL_INCLUDE_DIR}
-)
+# Make an automatic library - will be static or dynamic based on user setting
+add_library(osm2ttl_library ${CPP_LIST} ${HEADER_LIST})
 
-include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
-include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIRS})
-include_directories(SYSTEM ${POPL_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTVARIANT_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTTYPEINDEX_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTCONFIG_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTCONTAINERHASH_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTSTATICASSERT_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTTHROWEXCEPTION_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTASSERT_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTCORE_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTTYPETRAITS_INCLUDE_DIRS})
-include_directories(SYSTEM ${BOOSTMPL_INCLUDE_DIRS})
-include_directories(SYSTEM ${EXPAT_INCLUDE_DIRS})
-include_directories(SYSTEM ${BZIP2_INCLUDE_DIR})
-include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS})
+# We need this directory, and users of our library will need it too
+target_include_directories(osm2ttl_library PUBLIC ../include)
 
-add_subdirectory(osm2ttl)
+# This depends on (header only) boost
+target_link_libraries(osm2ttl_library PRIVATE
+  Boost::boost
+  Threads::Threads
+  ${EXPAT_LIBRARIES}
+  ${BZIP2_LIBRARIES}
+  ${ZLIB_LIBRARIES})
+
+# All users of this library will need at least C++17
+target_compile_features(osm2ttl_library PUBLIC cxx_std_17)
+
+# IDEs should put the headers in a nice place
+source_group(
+        TREE "${PROJECT_SOURCE_DIR}/include"
+        PREFIX "Header Files"
+        FILES ${HEADER_LIST})

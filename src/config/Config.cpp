@@ -7,9 +7,8 @@
 #include <iostream>
 #include <string>
 
-#include "popl.hpp"
-
 #include "osm2ttl/ttl/OutputFormat.h"
+#include "popl.hpp"
 
 // ____________________________________________________________________________
 void osm2ttl::config::Config::load(const std::string& filename) {

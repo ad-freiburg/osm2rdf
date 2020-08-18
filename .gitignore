@@ -1,10 +1,2 @@
-Makefile
-CMakeCache.txt
-*.a
-*.o
-*.pyc
-perf.data*
-valgrind-out.txt
-/build/
-/input/
-/output/
+.idea
+*build*

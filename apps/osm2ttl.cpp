@@ -1,23 +1,21 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include <filesystem>
 #include <cstdlib>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
+#include "osm2ttl/config/Config.h"
+#include "osm2ttl/osm/DumpHandler.h"
+#include "osm2ttl/osm/LocationHandler.h"
+#include "osm2ttl/ttl/Writer.h"
+#include "osm2ttl/util/Ram.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
 #include "osmium/io/any_input.hpp"
 #include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/util/memory.hpp"
-
-#include "osm2ttl/_config.h"
-#include "osm2ttl/config/Config.h"
-#include "osm2ttl/ttl/Writer.h"
-#include "osm2ttl/osm/DumpHandler.h"
-#include "osm2ttl/osm/LocationHandler.h"
-#include "osm2ttl/util/Ram.h"
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
