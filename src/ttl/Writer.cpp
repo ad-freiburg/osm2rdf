@@ -140,8 +140,7 @@ void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
                                        const std::string& p,
                                        const std::string& o) {
   auto f = [this, s, p, o]{
-    std::string line = s + " " + p + " " + o + " .\n";
-    *_out << std::move(line);
+    *_out << s + " " + p + " " + o + " .\n";
   };
   if (_config.numThreadsConvertString > 0) {
     _convertStringQueue.dispatch(f);
@@ -327,7 +326,7 @@ void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s, const osm2ttl::osm:
 template<typename T>
 void osm2ttl::ttl::Writer<T>::writeTagList(const std::string& s,
                                         const osm2ttl::osm::TagList& tags) {
-  for (const osm2ttl::osm::Tag& tag : tags) {
+  for (const auto& tag : tags) {
     writeTag(s, tag);
     const std::string &key = tag.first;
     std::string value = tag.second;
@@ -439,22 +438,16 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(
   std::string tmp;
   tmp.reserve(s.size() * 2);
   tmp += "\"";
-  for (size_t pos = 0; pos < s.size(); ++pos) {
-    switch (s[pos]) {
+  for (const auto c : s) {
+    switch (c) {
       case '\"':  // #x22
-        tmp += ECHAR(s[pos]);
-        break;
       case '\\':  // #x5C
-        tmp += ECHAR(s[pos]);
-        break;
       case '\n':  // #x0A
-        tmp += ECHAR(s[pos]);
-        break;
       case '\r':  // #x0D
-        tmp += ECHAR(s[pos]);
+        tmp += ECHAR(c);
         break;
       default:
-        tmp += s[pos];
+        tmp += c;
     }
   }
   tmp += "\"";

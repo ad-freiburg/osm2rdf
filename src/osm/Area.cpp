@@ -37,6 +37,7 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) {
   _geom.resize(outerRings.size());
   size_t oCount = 0;
   for (const auto& oring : outerRings) {
+    _geom[oCount].outer().reserve(oring.size());
     for (const auto& noderef : oring) {
       osm2ttl::geometry::Location p(noderef.location().lon(),
                                     noderef.location().lat());
@@ -47,6 +48,7 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) {
     _geom[oCount].inners().resize(innerRings.size());
     size_t iCount = 0;
     for (const auto& iring : innerRings) {
+      _geom[oCount].inners()[iCount].reserve(iring.size());
       for (const auto& noderef : iring) {
         osm2ttl::geometry::Location p(noderef.location().lon(),
                                       noderef.location().lat());

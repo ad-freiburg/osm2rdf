@@ -17,6 +17,10 @@ test: build
 benchmark: build
 	cmake --build build --target benchmarks
 
+perf: build
+	cmake --build build --target osm2ttl
+	for FILE in $(shell ls -Sr input); do echo $${FILE}; time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever" --use-ram-for-locations; perf report; done
+
 docker:
 	mkdir input || true
 	mkdir output || true

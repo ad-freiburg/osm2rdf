@@ -19,7 +19,7 @@ osm2ttl::osm::TagList osm2ttl::osm::convertTagList(
           break;
       }
     }
-    result[tag.key()] = tag.value();
+    result[key] = tag.value();
   }
   return result;
 }

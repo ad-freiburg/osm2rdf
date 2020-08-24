@@ -18,6 +18,7 @@
 osm2ttl::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
   _tags = osm2ttl::osm::convertTagList(way.tags());
+  _nodes.reserve(way.nodes().size());
   for (const auto& noderef : way.nodes()) {
     _nodes.emplace_back(noderef);
   }
