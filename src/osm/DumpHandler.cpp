@@ -22,24 +22,28 @@
 #include "osm2ttl/osm/Way.h"
 
 // ____________________________________________________________________________
-osm2ttl::osm::DumpHandler::DumpHandler(const osm2ttl::config::Config& config,
-  osm2ttl::ttl::Writer* writer) : _config(config),
+template<typename W>
+osm2ttl::osm::DumpHandler<W>::DumpHandler(const osm2ttl::config::Config& config,
+  osm2ttl::ttl::Writer<W>* writer) : _config(config),
   _queue(_config.numThreadsRead, _config.queueFactorRead, "DumpHandler"),
   _writer(writer) {
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::DumpHandler::~DumpHandler() {
+template<typename W>
+osm2ttl::osm::DumpHandler<W>::~DumpHandler() {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::DumpHandler::finish() {
+template<typename W>
+void osm2ttl::osm::DumpHandler<W>::finish() {
   _queue.quit();
 }
 
 // ____________________________________________________________________________
+template<typename W>
 template<typename T>
-void osm2ttl::osm::DumpHandler::write(const T& o) {
+void osm2ttl::osm::DumpHandler<W>::write(const T& o) {
   if (_config.numThreadsRead > 0) {
     _queue.dispatch([this, o]{
       _writer->write(o);
@@ -50,7 +54,8 @@ void osm2ttl::osm::DumpHandler::write(const T& o) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
+template<typename W>
+void osm2ttl::osm::DumpHandler<W>::area(const osmium::Area& area) {
   if (_config.noAreaDump) {
     return;
   }
@@ -61,7 +66,8 @@ void osm2ttl::osm::DumpHandler::area(const osmium::Area& area) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
+template<typename W>
+void osm2ttl::osm::DumpHandler<W>::node(const osmium::Node& node) {
   if (_config.noNodeDump) {
     return;
   }
@@ -72,7 +78,8 @@ void osm2ttl::osm::DumpHandler::node(const osmium::Node& node) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
+template<typename W>
+void osm2ttl::osm::DumpHandler<W>::relation(const osmium::Relation& relation) {
   if (_config.noRelationDump) {
     return;
   }
@@ -83,7 +90,8 @@ void osm2ttl::osm::DumpHandler::relation(const osmium::Relation& relation) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::DumpHandler::way(const osmium::Way& way) {
+template<typename W>
+void osm2ttl::osm::DumpHandler<W>::way(const osmium::Way& way) {
   if (_config.noWayDump) {
     return;
   }

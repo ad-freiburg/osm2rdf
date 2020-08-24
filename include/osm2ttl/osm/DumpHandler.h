@@ -18,10 +18,11 @@
 namespace osm2ttl {
 namespace osm {
 
+template<typename W>
 class DumpHandler : public osmium::handler::Handler {
  public:
   DumpHandler(const osm2ttl::config::Config& config,
-              osm2ttl::ttl::Writer* writer);
+              osm2ttl::ttl::Writer<W>* writer);
   ~DumpHandler();
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
@@ -35,7 +36,7 @@ class DumpHandler : public osmium::handler::Handler {
   void write(const T& o);
   const osm2ttl::config::Config _config;
   osm2ttl::util::DispatchQueue _queue;
-  osm2ttl::ttl::Writer* _writer;
+  osm2ttl::ttl::Writer<W>* _writer;
 };
 
 }  // namespace osm

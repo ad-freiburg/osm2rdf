@@ -26,8 +26,7 @@ namespace osm {
 
 class AreaHandler : public osmium::handler::Handler {
  public:
-  AreaHandler(const osm2ttl::config::Config& config,
-              osm2ttl::ttl::Writer* writer);
+  explicit AreaHandler(const osm2ttl::config::Config& config);
   ~AreaHandler();
 
   // Store area
@@ -36,8 +35,6 @@ class AreaHandler : public osmium::handler::Handler {
  protected:
   // Global config
   osm2ttl::config::Config _config;
-  // Triple writer
-  osm2ttl::ttl::Writer* _writer;
   // Areas
   osm2ttl::util::CacheFile _areasFile;
   osmium::index::map::SparseFileArray<

@@ -5,11 +5,10 @@
 #define OSM2TTL_CONFIG_CONFIG_H_
 
 #include <filesystem>
-
 #include <string>
 #include <unordered_map>
 
-#include "osm2ttl/ttl/OutputFormat.h"
+#include "osm2ttl/ttl/Format.h"
 
 namespace osm2ttl {
 namespace config {
@@ -47,12 +46,9 @@ struct Config {
   size_t numThreadsRead = 2;
   size_t queueFactorRead = 2;
 
-  // tag.key() -> IRI
-  std::unordered_map<std::string, osm2ttl::ttl::IRI> tagKeyType;
-
   // Output, empty for stdout
   std::filesystem::path output;
-  osm2ttl::ttl::OutputFormat outputFormat = osm2ttl::ttl::OutputFormat::QLEVER;
+  std::string outputFormat;
 
   // osmium location cache
   std::filesystem::path cache;

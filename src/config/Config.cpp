@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string>
 
-#include "osm2ttl/ttl/OutputFormat.h"
+#include "osm2ttl/ttl/Format.h"
 #include "popl.hpp"
 
 // ____________________________________________________________________________
@@ -140,25 +140,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     expandedData = expandedDataOp->is_set();
     wktSimplify = wktSimplifyOp->value();
 
-    // Add tag.key() -> xsd overrides
-    tagKeyType["admin_level"] = osm2ttl::ttl::IRI("xsd", "integer");
-
     // Output
     output = outputOp->value();
-    if (outputFormatOp->is_set()) {
-      if (outputFormatOp->value() == "ttl") {
-        outputFormat = osm2ttl::ttl::OutputFormat::TTL;
-      } else if (outputFormatOp->value() == "nt") {
-        outputFormat = osm2ttl::ttl::OutputFormat::NT;
-      } else if (outputFormatOp->value() == "qlever") {
-        outputFormat = osm2ttl::ttl::OutputFormat::QLEVER;
-      } else {
-        std::cerr << "Unknown output format selected: "
-          << outputFormatOp->value() << "\n"
-          << op.help(popl::Attribute::advanced) << "\n";
-        exit(1);
-      }
-    }
+    outputFormat = outputFormatOp->value();
     gzip = gzipOp->is_set();
 
     // osmium location cache
