@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include <sstream>
 
 #include "osm2ttl/ttl/BlankNode.h"
 #include "osm2ttl/ttl/IRI.h"

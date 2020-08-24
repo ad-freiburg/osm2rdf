@@ -7,7 +7,8 @@ set_target_properties(benchmark_main PROPERTIES FOLDER vendor)
 macro(package_add_benchmark BENCHMARKNAME)
     # create an executable in which the benchmarks will be stored
     add_executable(${BENCHMARKNAME} ${ARGN})
-    target_link_libraries(${BENCHMARKNAME} benchmark::benchmark_main)
+    target_link_libraries(${BENCHMARKNAME} PRIVATE benchmark::benchmark_main)
+    target_link_libraries(${BENCHMARKNAME} PRIVATE osm2ttl_library)
     set_target_properties(${BENCHMARKNAME} PROPERTIES FOLDER benchmarks)
 endmacro()
 
