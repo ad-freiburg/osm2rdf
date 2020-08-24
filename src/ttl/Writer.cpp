@@ -4,24 +4,14 @@
 #include "osm2ttl/ttl/Writer.h"
 
 #include <algorithm>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <utility>
 
 #include "boost/geometry.hpp"
-#include "osmium/geom/factory.hpp"
-#include "osmium/osm/area.hpp"
 #include "osmium/osm/item_type.hpp"
-#include "osmium/osm/location.hpp"
-#include "osmium/osm/node.hpp"
-#include "osmium/osm/node_ref.hpp"
-#include "osmium/osm/relation.hpp"
-#include "osmium/osm/tag.hpp"
-#include "osmium/osm/way.hpp"
 
 #include "osm2ttl/config/Config.h"
 
@@ -33,6 +23,7 @@
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
 
+static const int k0xB7 = 0xB7;
 // ____________________________________________________________________________
 template<typename T>
 osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
@@ -150,7 +141,6 @@ void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
                                        const std::string& o) {
   auto f = [this, s, p, o]{
     std::string line = s + " " + p + " " + o + " .\n";
-    const std::lock_guard<std::mutex> lock(_outMutex);
     *_out << std::move(line);
   };
   if (_config.numThreadsConvertString > 0) {
@@ -503,10 +493,10 @@ std::string osm2ttl::ttl::Writer<T>::ECHAR(char c) {
 // ____________________________________________________________________________
 template<typename T>
 uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
-  if ((c & 0xF8) == 0xF0) { return 4; }
-  if ((c & 0xF0) == 0xE0) { return 3; }
-  if ((c & 0xE0) == 0xC0) { return 2; }
-  if ((c & 0x80) == 0x00) { return 1; }
+  if ((c & k0xF8) == k0xF0) { return k4Byte; }
+  if ((c & k0xF0) == k0xE0) { return k3Byte; }
+  if ((c & k0xE0) == k0xC0) { return k2Byte; }
+  if ((c & k0x80) == 0) { return k1Byte; }
   throw std::domain_error("Invalid UTF-8 Sequence start " + std::to_string(c));
 }
 
@@ -521,24 +511,24 @@ template<typename T>
 uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(const std::string& s)
 {
   switch (utf8Length(s)) {
-    case 4:
+    case k4Byte:
       // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
       //      111   111111   111111   111111 = 7 3F 3F 3F
-      return (((s[0] & 0x07) << 18) | ((s[1] & 0x3F) << 12)
-          | ((s[2] & 0x3F) << 6) | (s[3] & 0x3F));
+      return (((s[0] & k0x07) << 18) | ((s[1] & k0x3F) << 12)
+          | ((s[2] & k0x3F) << 6) | (s[3] & k0x3F));
       break;
-    case 3:
+    case k3Byte:
       // 1110xxxx 10xxxxxx 10xxxxxx
       //     1111   111111   111111 = F 3F 3F
-      return (((s[0] & 0x0F) << 12) | ((s[1] & 0x3F) << 6) | (s[2] & 0x3F));
-    case 2:
+      return (((s[0] & k0x0F) << 12) | ((s[1] & k0x3F) << 6) | (s[2] & k0x3F));
+    case k2Byte:
       // 110xxxxx 10xxxxxx
       //    11111   111111 = 1F 3F
-      return (((s[0] & 0x1F) << 6) | (s[1] & 0x3F));
-    case 1:
+      return (((s[0] & k0x1F) << 6) | (s[1] & k0x3F));
+    case k1Byte:
       // 0xxxxxxx
       //  1111111 = 7F
-      return (s[0] & 0x7F);
+      return (s[0] & k0x7F);
     default:
       throw std::domain_error("Invalid UTF-8 Sequence: " + s);
   }
@@ -553,7 +543,7 @@ std::string osm2ttl::ttl::Writer<T>::UCHAR(char c)
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
   std::ostringstream tmp;
-  tmp << "\\u00" << std::hex << ((c & 0xF0) >> 4) << std::hex << (c & 0x0F);
+  tmp << "\\u00" << std::hex << ((c & k0xF0) >> 4) << std::hex << (c & k0x0F);
   return tmp.str();
 }
 
@@ -570,16 +560,13 @@ std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(const std::string& s)
   for (size_t pos = 0; pos < s.size(); ++pos) {
     uint8_t length = utf8Length(s[pos]);
     // Force non-allowed chars to UCHAR
-    if (length == 1) {
+    if (length == k1Byte) {
       if ((s[pos] >= 0 && s[pos] <= ' ') ||
           s[pos] == '<' || s[pos] == '>' ||
           s[pos] == '{' || s[pos] == '}' ||
           s[pos] == '\"' || s[pos] == '|' ||
           s[pos] == '^' || s[pos] == '`' ||
           s[pos] == '\\') {
-        // TODO(lehmanna): CHeck what to do... %-encoding not explicitly allowed
-        // in grammer... but in IRI
-        // RFC: https://tools.ietf.org/html/rfc3987#section-2.2
         tmp += UCHAR(s[pos]);
         continue;
       }
@@ -603,16 +590,13 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(con
   for (size_t pos = 0; pos < s.size(); ++pos) {
     uint8_t length = utf8Length(s[pos]);
     // Force non-allowed chars to UCHAR
-    if (length == 1) {
+    if (length == k1Byte) {
       if ((s[pos] >= 0 && s[pos] <= ' ') ||
           s[pos] == '<' || s[pos] == '>' ||
           s[pos] == '{' || s[pos] == '}' ||
           s[pos] == '\"' || s[pos] == '|' ||
           s[pos] == '^' || s[pos] == '`' ||
           s[pos] == '\\') {
-        // TODO(lehmanna): CHeck what to do... %-encoding not explicitly allowed
-        // in grammer... but in IRI
-        // RFC: https://tools.ietf.org/html/rfc3987#section-2.2
         tmp += encodePERCENT(s.substr(pos, 1));
         continue;
       }
@@ -639,7 +623,7 @@ std::string osm2ttl::ttl::Writer<T>::encodePERCENT(const std::string& s)
     if (!echo) {
       continue;
     }
-    tmp << "%"<< std::hex << ((v & 0xF0) >> 4) << std::hex << (v & 0x0F);
+    tmp << "%"<< std::hex << ((v & k0xF0) >> 4) << std::hex << (v & k0x0F);
   }
   return tmp.str();
 }
@@ -704,15 +688,15 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(const std::string& s)
     std::string sub = s.substr(pos, length);
     uint32_t c = utf8Codepoint(sub);
     // Handle allowed Codepoints for CHARS_U
-    if ((c >= 0xC0 && c <= 0xD6) || (c >= 0xD8 && c <= 0xF6) ||
-        (c >= 0xF8 && c <= 0x2FF) || (c >= 0x370 && c <= 0x37D) ||
-        (c >= 0x37F && c <= 0x1FFF) || (c >= 0x200C && c <= 0x200D) ||
-        (c >= 0x2070 && c <= 0x218F) || (c >= 0x2C00 && c <= 0x2FEF) ||
-        (c >= 0x3001 && c <= 0xD7FF) || (c >= 0xF900 && c <= 0xFDCF) ||
-        (c >= 0xFDF0 && c <= 0xFFFD) || (c >= 0x10000 && c <= 0xEFFFF)) {
+    if ((c >= k0xC0 && c <= k0xD6) || (c >= k0xD8 && c <= k0xF6) ||
+        (c >= k0xF8 && c <= k0x2FF) || (c >= k0x370 && c <= k0x37D) ||
+        (c >= k0x37F && c <= k0x1FFF) || (c >= k0x200C && c <= k0x200D) ||
+        (c >= k0x2070 && c <= k0x218F) || (c >= k0x2C00 && c <= k0x2FEF) ||
+        (c >= k0x3001 && c <= k0xD7FF) || (c >= k0xF900 && c <= k0xFDCF) ||
+        (c >= k0xFDF0 && c <= k0xFFFD) || (c >= k0x10000 && c <= k0xEFFFF)) {
       tmp += sub;
-    } else if (pos > 0 && (c == 0xB7 || (c >= 0x300 && c <= 0x36F) ||
-        (c >= 0x203F && c <= 0x2040))) {
+    } else if (pos > 0 && (c == k0xB7|| (c >= k0x300 && c <= k0x36F) ||
+        (c >= k0x203F && c <= k0x2040))) {
       tmp += sub;
     } else {
       // Escape all other symbols
@@ -723,3 +707,9 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(const std::string& s)
   }
   return tmp;
 }
+
+// ____________________________________________________________________________
+template< typename T> uint64_t osm2ttl::ttl::Writer<T>::_blankNodeCounter;
+template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>;
+template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL>;
+template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>;

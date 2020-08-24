@@ -4,21 +4,55 @@
 #ifndef OSM2TTL_TTL_WRITER_H_
 #define OSM2TTL_TTL_WRITER_H_
 
+static const int k1Byte = 1;
+static const int k2Byte = 2;
+static const int k3Byte = 3;
+static const int k4Byte = 4;
+
+static const int k0x07 = 0x07;
+static const int k0x0F = 0x0F;
+static const int k0x1F = 0x1F;
+static const int k0x3F = 0x3F;
+static const int k0x7F = 0x7F;
+static const int k0x80 = 0x80;
+static const int k0xC0 = 0xC0;
+static const int k0xD6 = 0xD6;
+static const int k0xD8 = 0xD8;
+static const int k0xE0 = 0xE0;
+static const int k0xF0 = 0xF0;
+static const int k0xF6 = 0xF6;
+static const int k0xF8 = 0xF8;
+static const int k0x2FF = 0x2FF;
+static const int k0x370 = 0x370;
+static const int k0x37D = 0x37D;
+static const int k0x203F = 0x203F;
+static const int k0x2040 = 0x2040;
+static const int k0x36F = 0x36F;
+static const int k0x300 = 0x300;
+static const int k0x37F = 0x37F;
+static const int k0x1FFF = 0x1FFF;
+static const int k0x200C = 0x200C;
+static const int k0x200D = 0x200D;
+static const int k0x2070 = 0x2070;
+static const int k0x218F = 0x218F;
+static const int k0x2C00 = 0x2C00;
+static const int k0x2FEF = 0x2FEF;
+static const int k0x3001 = 0x3001;
+static const int k0xD7FF = 0xD7FF;
+static const int k0xF900 = 0xF900;
+static const int k0xFDCF = 0xFDCF;
+static const int k0xFDF0 = 0xFDF0;
+static const int k0xFFFD = 0xFFFD;
+static const int k0x10000 = 0x10000;
+static const int k0xEFFFF = 0xEFFFF;
+
 #include <fstream>
+#include <mutex>
 #include <ostream>
 #include <string>
-#include <mutex>
-
-#include "osmium/osm/area.hpp"
-#include "osmium/osm/location.hpp"
-#include "osmium/osm/node.hpp"
-#include "osmium/osm/relation.hpp"
-#include "osmium/osm/tag.hpp"
 
 #include "osm2ttl/config/Config.h"
-
 #include "osm2ttl/geometry/Location.h"
-
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/osm/Box.h"
 #include "osm2ttl/osm/Node.h"
@@ -26,8 +60,12 @@
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/Way.h"
-
 #include "osm2ttl/util/DispatchQueue.h"
+#include "osmium/osm/area.hpp"
+#include "osmium/osm/location.hpp"
+#include "osmium/osm/node.hpp"
+#include "osmium/osm/relation.hpp"
+#include "osmium/osm/tag.hpp"
 
 namespace osm2ttl {
 namespace ttl {
@@ -114,11 +152,6 @@ class Writer {
   std::ofstream _outFile;
   std::mutex _outMutex;
 };
-
-template< typename T> uint64_t osm2ttl::ttl::Writer<T>::_blankNodeCounter;
-template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>;
-template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL>;
-template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>;
 }  // namespace ttl
 }  // namespace osm2ttl
 

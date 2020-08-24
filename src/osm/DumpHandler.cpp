@@ -100,3 +100,8 @@ void osm2ttl::osm::DumpHandler<W>::way(const osmium::Way& way) {
   }
   write(osm2ttl::osm::Way(way));
 }
+
+// ____________________________________________________________________________
+template class osm2ttl::osm::DumpHandler<osm2ttl::ttl::format::NT>;
+template class osm2ttl::osm::DumpHandler<osm2ttl::ttl::format::TTL>;
+template class osm2ttl::osm::DumpHandler<osm2ttl::ttl::format::QLEVER>;
