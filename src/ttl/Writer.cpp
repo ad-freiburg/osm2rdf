@@ -28,10 +28,8 @@ static const int k0xB7 = 0xB7;
 template<typename T>
 osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
   : _config(config),
-  _convertStringQueue(_config.numThreadsConvertString,
-    _config.queueFactorConvertString, "Writer::convertString"),
   _convertGeometryQueue(_config.numThreadsConvertGeometry,
-    _config.queueFactorConvertGeometry, "Writer::convertGeometry") {
+    _config.queueFactorConvertGeometry, "convertGeometry") {
   _out = &std::cout;
 }
 
@@ -56,7 +54,6 @@ bool osm2ttl::ttl::Writer<T>::open() {
 template<typename T>
 void osm2ttl::ttl::Writer<T>::close() {
   _convertGeometryQueue.quit();
-  _convertStringQueue.quit();
   if (_outFile.is_open()) {
     _outFile.close();
   }
@@ -139,14 +136,7 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
                                        const std::string& p,
                                        const std::string& o) {
-  auto f = [this, s, p, o]{
-    *_out << s + " " + p + " " + o + " .\n";
-  };
-  if (_config.numThreadsConvertString > 0) {
-    _convertStringQueue.dispatch(f);
-  } else {
-    f();
-  }
+  *_out << s + " " + p + " " + o + " .\n";
 }
 
 // ____________________________________________________________________________
@@ -441,10 +431,16 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(
   for (const auto c : s) {
     switch (c) {
       case '\"':  // #x22
+        tmp += "\\\"";
+        break;
       case '\\':  // #x5C
+        tmp +=  "\\\\";
+        break;
       case '\n':  // #x0A
+        tmp += "\\n";
+        break;
       case '\r':  // #x0D
-        tmp += ECHAR(c);
+        tmp += "\\r";
         break;
       default:
         tmp += c;
@@ -452,35 +448,6 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(
   }
   tmp += "\"";
   return tmp;
-}
-
-// ____________________________________________________________________________
-template<typename T>
-std::string osm2ttl::ttl::Writer<T>::ECHAR(char c) {
-  // NT:  [153s] ECHAR
-  //      https://www.w3.org/TR/n-triples/#grammar-production-ECHAR
-  // TTL: [159s] ECHAR
-  //      https://www.w3.org/TR/turtle/#grammar-production-ECHAR
-  switch (c) {
-    case '\t':
-      return "\\t";
-    case '\b':
-      return "\\b";
-    case '\n':
-      return "\\n";
-    case '\r':
-      return "\\r";
-    case '\f':
-      return "\\f";
-    case '\"':
-      return "\\\"";
-    case '\'':
-      return "\\'";
-    case '\\':
-      return "\\\\";
-    default:
-      return std::string(1, c);
-  }
 }
 
 // ____________________________________________________________________________

@@ -39,11 +39,9 @@ struct Config {
   bool gzip = false;
 
   // Threads
-  size_t numThreadsConvertGeometry = 4;
+  size_t numThreadsConvertGeometry = 0;
   size_t queueFactorConvertGeometry = 2;
-  size_t numThreadsConvertString = 4;
-  size_t queueFactorConvertString = 2;
-  size_t numThreadsRead = 2;
+  size_t numThreadsRead = 0;
   size_t queueFactorRead = 2;
 
   // Output, empty for stdout

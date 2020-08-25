@@ -108,7 +108,6 @@ class Writer {
   static std::string STRING_LITERAL_QUOTE(const std::string& s);
   static std::string IRIREF(const std::string& p, const std::string& v);
   static std::string PrefixedName(const std::string& p, const std::string& v);
-  static std::string ECHAR(char c);
   static uint8_t utf8Length(char c);
   static uint8_t utf8Length(const std::string& s);
   static uint32_t utf8Codepoint(const std::string& s);
@@ -122,7 +121,6 @@ class Writer {
   const osm2ttl::config::Config _config;
 
   // Queues
-  osm2ttl::util::DispatchQueue _convertStringQueue;
   osm2ttl::util::DispatchQueue _convertGeometryQueue;
 
   // Prefix

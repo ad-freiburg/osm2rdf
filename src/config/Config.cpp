@@ -30,14 +30,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "skip-area-prep", "Skip area sorting");
   auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "use-ram-for-locations", "Store locations in RAM");
-  auto numThreadsConvertStringOp = op.add<popl::Value<size_t>,
-       popl::Attribute::advanced>("", "num-threads-write",
-                                  "Number of threads to write output",
-                                  numThreadsConvertString);
-  auto queueFactorConvertStringOp = op.add<popl::Value<size_t>,
-       popl::Attribute::advanced>("", "queue-factor-write",
-                                  "Factor for write queue",
-                                  queueFactorConvertString);
   auto numThreadsReadOp = op.add<popl::Value<size_t>,
        popl::Attribute::advanced>("", "num-threads-read",
                                   "Number of threads to read libosmium data",
@@ -123,8 +115,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     queueFactorConvertGeometry = queueFactorConvertGeometryOp->value();
     numThreadsRead = numThreadsReadOp->value();
     queueFactorRead = queueFactorReadOp->value();
-    numThreadsConvertString = numThreadsConvertStringOp->value();
-    queueFactorConvertString = queueFactorConvertStringOp->value();
 
     // Select types to dump
     noNodeDump = noNodeDumpOp->is_set();
