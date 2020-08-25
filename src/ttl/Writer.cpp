@@ -31,6 +31,25 @@ osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
   _convertGeometryQueue(_config.numThreadsConvertGeometry,
     _config.queueFactorConvertGeometry, "convertGeometry") {
   _out = &std::cout;
+
+  // Generate constants
+  _kGeoHasGeometry = generateIRI("geo", "hasGeometry");
+  _kGeoWktLiteral = generateIRI("geo", "wktLiteral");
+  _kRdfType = generateIRI("rdf", "type");
+  _kOsmEnvelope = generateIRI("osm", "envelope");
+  _kOsmNode = generateIRI("osm", "node");
+  _kOsmRelation = generateIRI("osm", "relation");
+  _kOsmWay = generateIRI("osm", "way");
+  _kOsmWikipedia = generateIRI("osm", "wikipedia");
+  _kOsmmPos = generateIRI("osmm", "pos");
+  _kOsmwayIsClosed = generateIRI("osmway", "is_closed");
+  _kOsmwayNode = generateIRI("osmway", "node");
+  _kOsmwayNodeCount = generateIRI("osmway", "nodeCount");
+  _kOsmwayUniqueNodeCount = generateIRI("osmway", "uniqueNodeCount");
+  _kXsdInteger = generateIRI("xsd", "integer");
+
+  _kLiteralNo = generateLiteral("no", "");
+  _kLiteralYes = generateLiteral("yes", "");
 }
 
 // ____________________________________________________________________________
@@ -144,10 +163,10 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Area& area) {
   std::string s = generateIRI(area.fromWay()?"osmway":"osmrel", area.objId());
 
-  writeBoostGeometry(s, generateIRI("geo", "hasGeometry"), area.geom());
+  writeBoostGeometry(s, _kGeoHasGeometry, area.geom());
 
   if (_config.addEnvelope) {
-    writeBox(s, generateIRI("osm", "envelope"), area.envelope());
+    writeBox(s, _kOsmEnvelope, area.envelope());
   }
 }
 
@@ -156,11 +175,9 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Node& node) {
   std::string s = generateIRI("osmnode", node.id());
 
-  writeTriple(s,
-              generateIRI("rdf", "type"),
-              generateIRI("osm", "node"));
+  writeTriple(s, _kRdfType, _kOsmNode);
 
-  writeBoostGeometry(s, generateIRI("geo", "hasGeometry"), node.geom());
+  writeBoostGeometry(s, _kGeoHasGeometry, node.geom());
 
   writeTagList(s, node.tags());
 }
@@ -170,9 +187,7 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Relation& relation) {
   std::string s = generateIRI("osmrel", relation.id());
 
-  writeTriple(s,
-              generateIRI("rdf", "type"),
-              generateIRI("osm", "relation"));
+  writeTriple(s, _kRdfType, _kOsmRelation);
 
   writeTagList(s, relation.tags());
 
@@ -199,9 +214,7 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Way& way) {
   std::string s = generateIRI("osmway", way.id());
 
-  writeTriple(s,
-              generateIRI("rdf", "type"),
-              generateIRI("osm", "way"));
+  writeTriple(s, _kRdfType, _kOsmWay);
 
   writeTagList(s, way.tags());
 
@@ -209,36 +222,30 @@ void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Way& way) {
     size_t i = 0;
     for (const auto& node : way.nodes()) {
       std::string blankNode = generateBlankNode();
-      writeTriple(s, generateIRI("osmway", "node"), blankNode);
+      writeTriple(s, _kOsmwayNode, blankNode);
 
-      writeTriple(blankNode,
-                  generateIRI("osmway", "node"),
+      writeTriple(blankNode, _kOsmwayNode,
                   generateIRI("osmnode", node.id()));
 
-      writeTriple(blankNode,
-                  generateIRI("osmm", "pos"),
-                  generateLiteral(std::to_string(++i), "^^"+generateIRI("xsd", "integer")));
+      writeTriple(blankNode, _kOsmmPos,
+                 generateLiteral(std::to_string(++i), "^^"+_kXsdInteger));
     }
   }
 
   osm2ttl::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
-  writeBoostGeometry(s, generateIRI("geo", "hasGeometry"), locations);
+  writeBoostGeometry(s, _kGeoHasGeometry, locations);
 
   if (_config.metaData) {
-    writeTriple(s,
-                generateIRI("osmway", "is_closed"),
-                generateLiteral(way.closed()?"yes":"no", ""));
-    writeTriple(s,
-                generateIRI("osmway", "nodeCount"),
+    writeTriple(s, _kOsmwayIsClosed, way.closed()?_kLiteralYes:_kLiteralNo);
+    writeTriple(s, _kOsmwayNodeCount,
                 generateLiteral(std::to_string(way.nodes().size()), ""));
-    writeTriple(s,
-                generateIRI("osmway", "uniqueNodeCount"),
+    writeTriple(s, _kOsmwayUniqueNodeCount,
                 generateLiteral(std::to_string(numUniquePoints), ""));
   }
 
   if (_config.addEnvelope) {
-    writeBox(s, generateIRI("osm", "envelope"), way.envelope());
+    writeBox(s, _kOsmEnvelope, way.envelope());
   }
 }
 
@@ -269,7 +276,7 @@ void osm2ttl::ttl::Writer<T>::writeBoostGeometry(const std::string& s,
     std::ostringstream tmp;
     tmp << std::setprecision(_config.wktPrecision)
       << boost::geometry::wkt(geom);
-    writeTriple(s, p, "\""+tmp.str()+"\"^^"+generateIRI("geo","wktLiteral"));
+    writeTriple(s, p, "\""+tmp.str()+"\"^^"+_kGeoWktLiteral);
   };
   if (_config.numThreadsConvertGeometry > 0) {
     _convertGeometryQueue.dispatch(f);
@@ -287,7 +294,7 @@ void osm2ttl::ttl::Writer<T>::writeBox(const std::string& s,
     // Box can not be simplified -> output directly.
     std::ostringstream tmp;
     tmp << boost::geometry::wkt(box.geom());
-    writeTriple(s, p, "\""+tmp.str()+"\"^^"+generateIRI("geo","wktLiteral"));
+    writeTriple(s, p, "\""+tmp.str()+"\"^^"+_kGeoWktLiteral);
   };
   if (_config.numThreadsConvertGeometry > 0) {
     _convertGeometryQueue.dispatch(f);
@@ -304,7 +311,7 @@ void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s, const osm2ttl::osm:
   if (key == "admin_level") {
     writeTriple(s,
                 generateIRI("osmt", key),
-                generateLiteral(value, generateIRI("xsd", "integer")));
+                generateLiteral(value, _kXsdInteger));
   } else {
     writeTriple(s,
                 generateIRI("osmt", key),
@@ -341,12 +348,10 @@ void osm2ttl::ttl::Writer<T>::writeTagList(const std::string& s,
         if (pos != std::string::npos) {
           std::string lang = value.substr(0, pos);
           std::string entry = value.substr(pos + 1);
-          writeTriple(s,
-                      generateIRI("osm", "wikipedia"),
+          writeTriple(s, _kOsmWikipedia,
                       generateIRI("https://"+lang+".wikipedia.org/wiki/", entry));
         } else {
-          writeTriple(s,
-                      generateIRI("osm", "wikipedia"),
+          writeTriple(s, _kOsmWikipedia,
                       generateIRI("https://www.wikipedia.org/wiki/", value));
         }
       }

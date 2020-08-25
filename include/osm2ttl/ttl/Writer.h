@@ -116,6 +116,24 @@ class Writer {
   static std::string encodePN_LOCAL(const std::string& s);
   static std::string encodePERCENT(const std::string& s);
 
+  std::string _kGeoHasGeometry;
+  std::string _kGeoWktLiteral;
+  std::string _kOsmEnvelope;
+  std::string _kOsmNode;
+  std::string _kOsmRelation;
+  std::string _kOsmWay;
+  std::string _kOsmWikipedia;
+  std::string _kOsmmPos;
+  std::string _kOsmwayIsClosed;
+  std::string _kOsmwayNode;
+  std::string _kOsmwayNodeCount;
+  std::string _kOsmwayUniqueNodeCount;
+  std::string _kRdfType;
+  std::string _kXsdInteger;
+
+  std::string _kLiteralNo;
+  std::string _kLiteralYes;
+
   // Config
   static uint64_t _blankNodeCounter;
   const osm2ttl::config::Config _config;
