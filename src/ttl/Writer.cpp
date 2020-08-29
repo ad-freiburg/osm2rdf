@@ -82,8 +82,8 @@ void osm2ttl::ttl::Writer<T>::close() {
 template<typename T>
 void osm2ttl::ttl::Writer<T>::writeHeader() {
   const std::lock_guard<std::mutex> lock(_outMutex);
-  for (const auto& p : _prefixes) {
-    *_out << "@prefix " << p.first << ": <" << p.second << "> .\n";
+  for (const auto&[prefix, iriref] : _prefixes) {
+    *_out << "@prefix " << prefix << ": <" << iriref << "> .\n";
   }
 }
 
@@ -458,10 +458,10 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(
 // ____________________________________________________________________________
 template<typename T>
 uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
-  if ((c & k0xF8) == k0xF0) { return k4Byte; }
-  if ((c & k0xF0) == k0xE0) { return k3Byte; }
-  if ((c & k0xE0) == k0xC0) { return k2Byte; }
   if ((c & k0x80) == 0) { return k1Byte; }
+  if ((c & k0xE0) == k0xC0) { return k2Byte; }
+  if ((c & k0xF0) == k0xE0) { return k3Byte; }
+  if ((c & k0xF8) == k0xF0) { return k4Byte; }
   throw std::domain_error("Invalid UTF-8 Sequence start " + std::to_string(c));
 }
 
@@ -523,19 +523,18 @@ std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(const std::string& s)
   std::string tmp;
   tmp.reserve(s.size() * 2);
   for (size_t pos = 0; pos < s.size(); ++pos) {
-    uint8_t length = utf8Length(s[pos]);
     // Force non-allowed chars to UCHAR
-    if (length == k1Byte) {
-      if ((s[pos] >= 0 && s[pos] <= ' ') ||
-          s[pos] == '<' || s[pos] == '>' ||
-          s[pos] == '{' || s[pos] == '}' ||
-          s[pos] == '\"' || s[pos] == '|' ||
-          s[pos] == '^' || s[pos] == '`' ||
-          s[pos] == '\\') {
-        tmp += UCHAR(s[pos]);
-        continue;
-      }
+    auto c = s[pos];
+    if ((s[pos] >= 0 && c <= ' ') ||
+        c == '<' || c == '>' ||
+        c == '{' || c == '}' ||
+        c == '\"' || c == '|' ||
+        c == '^' || c == '`' ||
+        c == '\\') {
+      tmp += UCHAR(s[pos]);
+      continue;
     }
+    uint8_t length = utf8Length(s[pos]);
     tmp += s.substr(pos, length);
     pos += length-1;
   }
@@ -627,29 +626,28 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(const std::string& s)
     //                        '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' |
     //                        '?' | '#' | '@' | '%')
 
+    auto currentChar = s[pos];
     // _, :, A-Z, a-z, and 0-9 always allowed:
-    if (s[pos] == ':' || s[pos] == '_' ||
-        (s[pos] >= 'A' && s[pos] <= 'Z') ||
-        (s[pos] >= 'a' && s[pos] <= 'z') ||
-        (s[pos] >= '0' && s[pos] <= '9')) {
-      tmp += s[pos];
+    if (currentChar == ':' || currentChar == '_' ||
+        (currentChar >= 'A' && currentChar <= 'Z') ||
+        (currentChar >= 'a' && currentChar <= 'z') ||
+        (currentChar >= '0' && currentChar <= '9')) {
+      tmp += currentChar;
       continue;
     }
     // First and last char is never .
-    if (pos > 0 && pos < s.size() - 1 && s[pos] == '.') {
-      tmp += s[pos];
+    if (currentChar == '.' && pos > 0 && pos < s.size() - 1) {
+      tmp += currentChar;
       continue;
     }
     // Handle PN_LOCAL_ESC
-    if (s[pos] == '_' || s[pos] == '~' || s[pos] == '.' || s[pos] == '-' ||
-        s[pos] == '!' || s[pos] == '$' || s[pos] == '&' || s[pos] == '\'' ||
-        s[pos] == '(' || s[pos] == ')' || s[pos] == '*' || s[pos] == '+' ||
-        s[pos] == ',' || s[pos] == ';' || s[pos] == '=' || s[pos] == '/' ||
-        s[pos] == '?' || s[pos] == '#' || s[pos] == '@' || s[pos] == '%') {
-      tmp += '\\' + s[pos];
+    if (currentChar == '!' || (currentChar >= '#' && currentChar <= '@') ||
+        currentChar == ';' || currentChar == '=' || currentChar == '?' ||
+        currentChar == '_' || currentChar == '~') {
+      tmp += '\\' + currentChar;
       continue;
     }
-    uint8_t length = utf8Length(s[pos]);
+    uint8_t length = utf8Length(currentChar);
     std::string sub = s.substr(pos, length);
     uint32_t c = utf8Codepoint(sub);
     // Handle allowed Codepoints for CHARS_U

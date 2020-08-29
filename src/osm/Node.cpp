@@ -11,16 +11,16 @@
 // ____________________________________________________________________________
 osm2ttl::osm::Node::Node(const osmium::Node& node) {
   _id = node.positive_id();
-  _geom = osm2ttl::geometry::Location(node.location().lon(),
-                                      node.location().lat());
+  auto loc = node.location();
+  _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
   _tags = osm2ttl::osm::convertTagList(node.tags());
 }
 
 // ____________________________________________________________________________
 osm2ttl::osm::Node::Node(const osmium::NodeRef& nodeRef) {
   _id = nodeRef.positive_ref();
-  _geom = osm2ttl::geometry::Location(nodeRef.location().lon(),
-                                      nodeRef.location().lat());
+  auto loc = nodeRef.location();
+  _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
 }
 
 // ____________________________________________________________________________

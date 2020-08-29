@@ -103,6 +103,8 @@ class Writer {
   void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
 
+  static std::string encodePN_LOCAL(const std::string& s);
+  static uint32_t utf8Codepoint(const std::string& s);
  protected:
   static std::string formatIRI(const std::string& p, const std::string& v);
   static std::string STRING_LITERAL_QUOTE(const std::string& s);
@@ -110,10 +112,8 @@ class Writer {
   static std::string PrefixedName(const std::string& p, const std::string& v);
   static uint8_t utf8Length(char c);
   static uint8_t utf8Length(const std::string& s);
-  static uint32_t utf8Codepoint(const std::string& s);
   static std::string UCHAR(char c);
   static std::string encodeIRIREF(const std::string& s);
-  static std::string encodePN_LOCAL(const std::string& s);
   static std::string encodePERCENT(const std::string& s);
 
   std::string _kGeoHasGeometry;
