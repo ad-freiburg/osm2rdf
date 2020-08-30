@@ -38,10 +38,10 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) {
   size_t oCount = 0;
   for (const auto& oring : outerRings) {
     _geom[oCount].outer().reserve(oring.size());
-    for (const auto& noderef : oring) {
-      osm2ttl::geometry::Location p(noderef.location().lon(),
-                                    noderef.location().lat());
-      boost::geometry::append(_geom[oCount].outer(), p);
+    for (const auto& nodeRef : oring) {
+      auto l = nodeRef.location();
+      boost::geometry::append(_geom,
+                              osm2ttl::geometry::Location(l.lon(), l.lat()), -1, oCount);
     }
 
     auto innerRings = area.inner_rings(oring);
@@ -49,10 +49,10 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) {
     size_t iCount = 0;
     for (const auto& iring : innerRings) {
       _geom[oCount].inners()[iCount].reserve(iring.size());
-      for (const auto& noderef : iring) {
-        osm2ttl::geometry::Location p(noderef.location().lon(),
-                                      noderef.location().lat());
-        boost::geometry::append(_geom[oCount].inners()[iCount], p);
+      for (const auto& nodeRef : iring) {
+        auto l = nodeRef.location();
+        boost::geometry::append(_geom,
+                                osm2ttl::geometry::Location(l.lon(), l.lat()), iCount, oCount);
       }
       iCount++;
     }
