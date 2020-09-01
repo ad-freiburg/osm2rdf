@@ -14,6 +14,7 @@
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
 #include "osmium/io/reader_with_progress_bar.hpp"
+#include "osmium/io/any_input.hpp"
 #include "osmium/util/memory.hpp"
 
 template<typename T>
