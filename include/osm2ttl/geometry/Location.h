@@ -4,12 +4,11 @@
 #ifndef OSM2TTL_GEOMETRY_LOCATION_H_
 #define OSM2TTL_GEOMETRY_LOCATION_H_
 
-#include "boost/geometry/geometries/geometries.hpp"
+#include <boost/geometry/geometries/point_xy.hpp>
 
 namespace osm2ttl {
 namespace geometry {
-  typedef boost::geometry::model::point<
-    double, 2, boost::geometry::cs::cartesian> Location;
+  typedef boost::geometry::model::d2::point_xy<double> Location;
 }  // namespace geometry
 }  // namespace osm2ttl
 

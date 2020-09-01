@@ -13,7 +13,6 @@
 #include "osm2ttl/util/Ram.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
-#include "osmium/io/any_input.hpp"
 #include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/util/memory.hpp"
 
@@ -54,11 +53,17 @@ void run(osm2ttl::config::Config& config) {
       std::cerr << "OSM Pass 2 ... (dump)" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
                                                osmium::osm_entity_bits::object};
-      osmium::apply(reader, *locationHandler,
-                    mp_manager.handler([&dumpHandler](
-                        osmium::memory::Buffer&& buffer) {
-                      osmium::apply(buffer, dumpHandler);
-                    }), dumpHandler);
+      while(true) {
+        osmium::memory::Buffer buf = reader.read();
+        if (!buf) {
+          break;
+        }
+        osmium::apply(buf, *locationHandler,
+                      mp_manager.handler([&dumpHandler](
+                          osmium::memory::Buffer&& buffer) {
+                        osmium::apply(buffer, dumpHandler);
+                      }), dumpHandler);
+      }
       reader.close();
       std::cerr << "... done reading (libosmium) ..." << std::endl;
       dumpHandler.finish();

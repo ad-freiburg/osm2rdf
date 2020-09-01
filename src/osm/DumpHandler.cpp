@@ -3,13 +3,9 @@
 
 #include "osm2ttl/osm/DumpHandler.h"
 
-#include <ostream>
-#include <string>
-
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/relation.hpp"
-#include "osmium/osm/tag.hpp"
 #include "osmium/osm/way.hpp"
 
 #include "osm2ttl/config/Config.h"

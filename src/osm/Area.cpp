@@ -6,11 +6,8 @@
 #include <iostream>
 #include <limits>
 #include <vector>
-#include <utility>
 
 #include "boost/geometry.hpp"
-#include "osmium/handler/node_locations_for_ways.hpp"
-#include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/osm/area.hpp"
 
 #include "osm2ttl/geometry/Area.h"
