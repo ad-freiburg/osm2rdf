@@ -101,14 +101,14 @@ std::string osm2ttl::ttl::Writer<T>::generateBlankNode() {
 // ____________________________________________________________________________
 template<typename T>
 std::string osm2ttl::ttl::Writer<T>::generateIRI(
-    const std::string& p, uint64_t v) {
+    std::string_view p, uint64_t v) {
   return generateIRI(p, std::to_string(v));
 }
 
 // ____________________________________________________________________________
 template<typename T>
 std::string osm2ttl::ttl::Writer<T>::generateIRI(
-    const std::string& p, const std::string& v) {
+    std::string_view p, std::string_view v) {
   auto begin = std::find_if(v.begin(), v.end(), [](int c) {
     return std::isspace(c) == 0;
   });
@@ -121,24 +121,28 @@ std::string osm2ttl::ttl::Writer<T>::generateIRI(
 
 // ____________________________________________________________________________
 template<typename T>
-std::string osm2ttl::ttl::Writer<T>::generateLangTag(const std::string& s) {
-  std::string tmp = "@";
-  tmp.reserve(s.size() + 1);
+std::string osm2ttl::ttl::Writer<T>::generateLangTag(std::string_view s) {
   bool allowDigits = false;
+  bool ok = true;
   for (size_t pos = 0; pos < s.length(); pos++) {
     if (pos == 0 && s[0] == '-') {
-      throw std::domain_error("Invalid LangTag " + s);
+      ok = false;
+      break;
     }
     if ((s[pos] >= 'a' && s[pos] <= 'z') ||
         (s[pos] >= 'A' && s[pos] <= 'Z') ||
         (s[pos] >= '0' && s[pos] <= '9' && allowDigits)) {
-      tmp += s[pos];
     } else if (s[pos] == '-') {
       allowDigits = true;
-      tmp += s[pos];
     } else {
-      throw std::domain_error("Invalid LangTag " + s);
+      ok = false;
+      break;
     }
+  }
+  std::string tmp = "@";
+  tmp.reserve(s.size() + 1);
+  if (ok) {
+    tmp += s;
   }
   return tmp;
 }
@@ -146,15 +150,15 @@ std::string osm2ttl::ttl::Writer<T>::generateLangTag(const std::string& s) {
 // ____________________________________________________________________________
 template<typename T>
 std::string osm2ttl::ttl::Writer<T>::generateLiteral(
-    const std::string& v, const std::string& s) {
-  return STRING_LITERAL_QUOTE(v) + s;
+    std::string_view v, std::string_view s) {
+  return STRING_LITERAL_QUOTE(v) + std::string(s);
 }
 
 // ____________________________________________________________________________
 template<typename T>
 void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
-                                       const std::string& p,
-                                       const std::string& o) {
+                                          const std::string&p,
+                                          const std::string& o) {
   *_out << s + " " + p + " " + o + " .\n";
 }
 
@@ -362,10 +366,10 @@ void osm2ttl::ttl::Writer<T>::writeTagList(const std::string& s,
 // ____________________________________________________________________________
 template<>
 std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>::formatIRI(
-    const std::string& p, const std::string& v) {
+    std::string_view p, std::string_view v) {
   // NT:  [8]    IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
-  auto prefix = _prefixes.find(p);
+  auto prefix = _prefixes.find(std::string{p});
   if (prefix != _prefixes.end()) {
     return IRIREF(prefix->second, v);
   }
@@ -374,14 +378,14 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>::formatIRI(
 // ____________________________________________________________________________
 template<>
 std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL>::formatIRI(
-    const std::string& p, const std::string& v) {
+    std::string_view p, std::string_view v) {
   // TTL: [135s] iri
   //      https://www.w3.org/TR/turtle/#grammar-production-iri
   //      [18]   IRIREF (same as NT)
   //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
   //      [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-  auto prefix = _prefixes.find(p);
+  auto prefix = _prefixes.find(std::string{p});
   // If known prefix -> PrefixedName
   if (prefix != _prefixes.end()) {
     return PrefixedName(p, v);
@@ -392,14 +396,14 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL>::formatIRI(
 // ____________________________________________________________________________
 template<>
 std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::formatIRI(
-      const std::string& p, const std::string& v) {
+    std::string_view p, std::string_view v) {
     // TTL: [135s] iri
     //      https://www.w3.org/TR/turtle/#grammar-production-iri
     //      [18]   IRIREF (same as NT)
     //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
     //      [136s] PrefixedName
     //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-    auto prefix = _prefixes.find(p);
+    auto prefix = _prefixes.find(std::string{p});
     // If known prefix -> PrefixedName
     if (prefix != _prefixes.end()) {
       return PrefixedName(p, v);
@@ -409,23 +413,23 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::formatIRI(
 
 // ____________________________________________________________________________
 template<typename T>
-std::string osm2ttl::ttl::Writer<T>::IRIREF(const std::string& p,
-                                               const std::string& v) {
+std::string osm2ttl::ttl::Writer<T>::IRIREF(std::string_view p,
+                                            std::string_view v) {
   return "<" + encodeIRIREF(p) + encodeIRIREF(v) + ">";
 }
 
 // ____________________________________________________________________________
 template<typename T>
-std::string osm2ttl::ttl::Writer<T>::PrefixedName(const std::string& p,
-                                                     const std::string& v)
+std::string osm2ttl::ttl::Writer<T>::PrefixedName(std::string_view p,
+                                                  std::string_view v)
 {
-  return p + ":" + encodePN_LOCAL(v);
+  return std::string(p) + ":" + encodePN_LOCAL(v);
 }
 
 // ____________________________________________________________________________
 template<typename T>
 std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(
-    const std::string& s) {
+    std::string_view s) {
   // NT:  [9]   STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/n-triples/#grammar-production-STRING_LITERAL_QUOTE
   // TTL: [22]  STRING_LITERAL_QUOTE
@@ -467,13 +471,13 @@ uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
 
 // ____________________________________________________________________________
 template<typename T>
-uint8_t osm2ttl::ttl::Writer<T>::utf8Length(const std::string& s) {
+uint8_t osm2ttl::ttl::Writer<T>::utf8Length(std::string_view s) {
   return utf8Length(s[0]);
 }
 
 // ____________________________________________________________________________
 template<typename T>
-uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(const std::string& s)
+uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s)
 {
   switch (utf8Length(s)) {
     case k4Byte:
@@ -495,7 +499,7 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(const std::string& s)
       //  1111111 = 7F
       return (s[0] & k0x7F);
     default:
-      throw std::domain_error("Invalid UTF-8 Sequence: " + s);
+      throw std::domain_error("Invalid UTF-8 Sequence: " + std::string{s});
   }
 }
 
@@ -514,7 +518,7 @@ std::string osm2ttl::ttl::Writer<T>::UCHAR(char c)
 
 // ____________________________________________________________________________
 template<typename T>
-std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(const std::string& s)
+std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(std::string_view s)
 {
   // NT:  [8]   IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
@@ -543,7 +547,7 @@ std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(const std::string& s)
 
 // ____________________________________________________________________________
 template<>
-std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(const std::string& s)
+std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(std::string_view s)
 {
   // NT:  [8]   IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
@@ -573,7 +577,7 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(con
 
 // ____________________________________________________________________________
 template<typename T>
-std::string osm2ttl::ttl::Writer<T>::encodePERCENT(const std::string& s)
+std::string osm2ttl::ttl::Writer<T>::encodePERCENT(std::string_view s)
 {
   // TTL: [170s] PERCENT
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
@@ -594,7 +598,7 @@ std::string osm2ttl::ttl::Writer<T>::encodePERCENT(const std::string& s)
 
 // ____________________________________________________________________________
 template<typename T>
-std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(const std::string& s)
+std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s)
 {
   // TTL: [168s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
@@ -648,7 +652,7 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(const std::string& s)
       continue;
     }
     uint8_t length = utf8Length(currentChar);
-    std::string sub = s.substr(pos, length);
+    std::string_view sub = s.substr(pos, length);
     uint32_t c = utf8Codepoint(sub);
     // Handle allowed Codepoints for CHARS_U
     if ((c >= k0xC0 && c <= k0xD6) || (c >= k0xD8 && c <= k0xF6) ||

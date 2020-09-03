@@ -80,14 +80,13 @@ class Writer {
 
   void writeHeader();
 
-  void writeTriple(const std::string& s, const std::string& p,
-                   const std::string& o);
+  void writeTriple(const std::string& s, const std::string& p, const std::string& o);
 
   static std::string generateBlankNode();
-  static std::string generateIRI(const std::string& p, uint64_t v);
-  static std::string generateIRI(const std::string& p, const std::string& v);
-  static std::string generateLangTag(const std::string& s);
-  static std::string generateLiteral(const std::string& v, const std::string& s);
+  static std::string generateIRI(std::string_view p, uint64_t v);
+  static std::string generateIRI(std::string_view p, std::string_view v);
+  static std::string generateLangTag(std::string_view s);
+  static std::string generateLiteral(std::string_view v, std::string_view s);
 
   // OSM2TTL
   void write(const osm2ttl::osm::Area& area);
@@ -103,18 +102,18 @@ class Writer {
   void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
 
-  static std::string encodePN_LOCAL(const std::string& s);
-  static uint32_t utf8Codepoint(const std::string& s);
+  static std::string encodePN_LOCAL(std::string_view s);
+  static uint32_t utf8Codepoint(std::string_view s);
  protected:
-  static std::string formatIRI(const std::string& p, const std::string& v);
-  static std::string STRING_LITERAL_QUOTE(const std::string& s);
-  static std::string IRIREF(const std::string& p, const std::string& v);
-  static std::string PrefixedName(const std::string& p, const std::string& v);
+  static std::string formatIRI(std::string_view p, std::string_view v);
+  static std::string STRING_LITERAL_QUOTE(std::string_view s);
+  static std::string IRIREF(std::string_view p, std::string_view v);
+  static std::string PrefixedName(std::string_view p, std::string_view v);
   static uint8_t utf8Length(char c);
-  static uint8_t utf8Length(const std::string& s);
+  static uint8_t utf8Length(std::string_view s);
   static std::string UCHAR(char c);
-  static std::string encodeIRIREF(const std::string& s);
-  static std::string encodePERCENT(const std::string& s);
+  static std::string encodeIRIREF(std::string_view s);
+  static std::string encodePERCENT(std::string_view s);
 
   std::string _kGeoHasGeometry;
   std::string _kGeoWktLiteral;
