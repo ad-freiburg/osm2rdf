@@ -21,7 +21,10 @@ osm2ttl::osm::Way::Way(const osmium::Way& way) {
   _nodes.reserve(way.nodes().size());
   for (const auto& nodeRef : way.nodes()) {
     _nodes.emplace_back(nodeRef);
+    auto loc = nodeRef.location();
+    boost::geometry::append(_geom, osm2ttl::geometry::Location(loc.lon(), loc.lat()));
   }
+  boost::geometry::envelope(_geom, _envelope);
 }
 
 // ____________________________________________________________________________
@@ -42,19 +45,14 @@ std::vector<osm2ttl::osm::Node> osm2ttl::osm::Way::nodes() const noexcept {
 // ____________________________________________________________________________
 osm2ttl::geometry::Linestring osm2ttl::osm::Way::geom() const
 noexcept {
-  osm2ttl::geometry::Linestring locations;
-  for (const auto& node : _nodes) {
-    boost::geometry::append(locations, node.geom());
-  }
+  osm2ttl::geometry::Linestring locations{_geom};
   boost::geometry::unique(locations);
   return locations;
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::Box osm2ttl::osm::Way::envelope() const noexcept {
-  osm2ttl::geometry::Box box;
-  boost::geometry::envelope(geom(), box);
-  return osm2ttl::osm::Box(box);
+osm2ttl::geometry::Box osm2ttl::osm::Way::envelope() const noexcept {
+  return _envelope;
 }
 
 // ____________________________________________________________________________

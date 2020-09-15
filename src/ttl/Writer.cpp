@@ -188,6 +188,19 @@ void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Node& node) {
 
 // ____________________________________________________________________________
 template<typename T>
+void osm2ttl::ttl::Writer<T>::write(const osmium::Node& node) {
+  std::string s = generateIRI("osmnode", node.positive_id());
+
+  writeTriple(s, _kRdfType, _kOsmNode);
+
+  auto loc = node.location();
+  writeBoostGeometry(s, _kGeoHasGeometry, osm2ttl::geometry::Location{loc.lon(), loc.lat()});
+
+  writeTagList(s, node.tags());
+}
+
+// ____________________________________________________________________________
+template<typename T>
 void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Relation& relation) {
   std::string s = generateIRI("osmrel", relation.id());
 
@@ -209,6 +222,39 @@ void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Relation& relation) {
       writeTriple(s,
                   generateIRI("osmrel", role),
                   generateIRI(type, member.id()));
+    }
+  }
+}
+
+// ____________________________________________________________________________
+template<typename T>
+void osm2ttl::ttl::Writer<T>::write(const osmium::Relation& relation) {
+  std::string s = generateIRI("osmrel", relation.positive_id());
+
+  writeTriple(s, _kRdfType, _kOsmRelation);
+
+  writeTagList(s, relation.tags());
+
+  for (const auto& member : relation.members()) {
+    const std::string& role = member.role();
+    if (role != "outer" && role != "inner") {
+      std::string type = "osm";
+      switch (member.type()) {
+        case osmium::item_type::node:
+          type = "osmnode";
+          break;
+        case osmium::item_type::relation:
+          type = "osmrel";
+          break;
+        case osmium::item_type::way:
+          type = "osmway";
+          break;
+        default:
+          break;
+      }
+      writeTriple(s,
+                  generateIRI("osmrel", role.empty()?"member":role),
+                  generateIRI(type, member.positive_ref()));
     }
   }
 }
@@ -294,10 +340,18 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::writeBox(const std::string& s,
                                        const std::string& p,
                                        const osm2ttl::osm::Box& box) {
+  writeBox(s, p, box.geom());
+}
+
+// ____________________________________________________________________________
+template<typename T>
+void osm2ttl::ttl::Writer<T>::writeBox(const std::string& s,
+                                       const std::string& p,
+                                       const osm2ttl::geometry::Box& box) {
   auto f = [this, s, p, box]{
     // Box can not be simplified -> output directly.
     std::ostringstream tmp;
-    tmp << boost::geometry::wkt(box.geom());
+    tmp << boost::geometry::wkt(box);
     writeTriple(s, p, "\""+tmp.str()+"\"^^"+_kGeoWktLiteral);
   };
   if (_config.numThreadsConvertGeometry > 0) {
@@ -312,6 +366,22 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s, const osm2ttl::osm::Tag& tag) {
   const std::string &key = tag.first;
   const std::string &value = tag.second;
+  if (key == "admin_level") {
+    writeTriple(s,
+                generateIRI("osmt", key),
+                generateLiteral(value, _kXsdInteger));
+  } else {
+    writeTriple(s,
+                generateIRI("osmt", key),
+                generateLiteral(value, ""));
+  }
+}
+
+// ____________________________________________________________________________
+template<typename T>
+void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s, const osmium::Tag& tag) {
+  std::string_view key{tag.key()};
+  std::string_view value{tag.value()};
   if (key == "admin_level") {
     writeTriple(s,
                 generateIRI("osmt", key),
@@ -352,6 +422,47 @@ void osm2ttl::ttl::Writer<T>::writeTagList(const std::string& s,
         if (pos != std::string::npos) {
           std::string lang = value.substr(0, pos);
           std::string entry = value.substr(pos + 1);
+          writeTriple(s, _kOsmWikipedia,
+                      generateIRI("https://"+lang+".wikipedia.org/wiki/", entry));
+        } else {
+          writeTriple(s, _kOsmWikipedia,
+                      generateIRI("https://www.wikipedia.org/wiki/", value));
+        }
+      }
+    }
+  }
+}
+
+// ____________________________________________________________________________
+template<typename T>
+void osm2ttl::ttl::Writer<T>::writeTagList(const std::string& s,
+                                           const osmium::TagList& tags) {
+  for (const auto& tag : tags) {
+    writeTag(s, tag);
+    std::string_view key{tag.key()};
+    if (!_config.skipWikiLinks) {
+      if (key == "wikidata") {
+        // Only take first wikidata entry if ; is found
+        std::string value{tag.value()};
+        auto end = value.find(';');
+        if (end != std::string::npos) {
+          value = value.erase(end);
+        }
+        // Remove all but Q and digits to ensure Qdddddd format
+        value.erase(remove_if(value.begin(), value.end(), [](char c) {
+          return (c != 'Q' && isdigit(c) == 0);
+        }), value.end());
+
+        writeTriple(s,
+                    generateIRI("osm", key),
+                    generateIRI("wd", value));
+      }
+      if (key == "wikipedia") {
+        std::string_view value{tag.value()};
+        auto pos = value.find(':');
+        if (pos != std::string::npos) {
+          std::string lang{value.substr(0, pos)};
+          std::string_view entry = value.substr(pos + 1);
           writeTriple(s, _kOsmWikipedia,
                       generateIRI("https://"+lang+".wikipedia.org/wiki/", entry));
         } else {
@@ -485,7 +596,6 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s)
       //      111   111111   111111   111111 = 7 3F 3F 3F
       return (((s[0] & k0x07) << 18) | ((s[1] & k0x3F) << 12)
           | ((s[2] & k0x3F) << 6) | (s[3] & k0x3F));
-      break;
     case k3Byte:
       // 1110xxxx 10xxxxxx 10xxxxxx
       //     1111   111111   111111 = F 3F 3F
@@ -644,10 +754,14 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s)
       tmp += currentChar;
       continue;
     }
+    // First char is nevvr -
+    if (currentChar == '-' && pos > 0) {
+      tmp += currentChar;
+      continue;
+    }
     // Handle PN_LOCAL_ESC
     if (currentChar == '!' || (currentChar >= '#' && currentChar <= '@') ||
-        currentChar == ';' || currentChar == '=' || currentChar == '?' ||
-        currentChar == '_' || currentChar == '~') {
+        currentChar == ';' || currentChar == '=' || currentChar == '?' || currentChar == '~') {
       tmp += '\\' + currentChar;
       continue;
     }
@@ -662,7 +776,7 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s)
         (c >= k0x3001 && c <= k0xD7FF) || (c >= k0xF900 && c <= k0xFDCF) ||
         (c >= k0xFDF0 && c <= k0xFFFD) || (c >= k0x10000 && c <= k0xEFFFF)) {
       tmp += sub;
-    } else if (pos > 0 && (c == k0xB7|| (c >= k0x300 && c <= k0x36F) ||
+    } else if (pos > 0 && (c == k0xB7 || (c >= k0x300 && c <= k0x36F) ||
         (c >= k0x203F && c <= k0x2040))) {
       tmp += sub;
     } else {

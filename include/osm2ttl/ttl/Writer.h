@@ -91,16 +91,22 @@ class Writer {
   // OSM2TTL
   void write(const osm2ttl::osm::Area& area);
   void write(const osm2ttl::osm::Node& node);
+  void write(const osmium::Node& node);
   void write(const osm2ttl::osm::Relation& relation);
+  void write(const osmium::Relation& relation);
   void write(const osm2ttl::osm::Way& way);
   template<typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
                           const G& g);
 
   void writeBox(const std::string& s, const std::string& p,
+                const osm2ttl::geometry::Box& box);
+  void writeBox(const std::string& s, const std::string& p,
                 const osm2ttl::osm::Box& box);
   void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
+  void writeTag(const std::string& s, const osmium::Tag& tag);
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
+  void writeTagList(const std::string& s, const osmium::TagList& tags);
 
   static std::string encodePN_LOCAL(std::string_view s);
   static uint32_t utf8Codepoint(std::string_view s);
@@ -147,7 +153,8 @@ class Writer {
       {"wd", "http://www.wikidata.org/entity/"},
       {"xsd", "http://www.w3.org/2001/XMLSchema#"},
       {"rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
-      {"rdfs", "\"http://www.w3.org/2000/01/rdf-schema#"},
+      {"rdfs", "http://www.w3.org/2000/01/rdf-schema#"},
+      {"ogc", "http://www.opengis.net/rdf#"},
 // osm prefixes
 // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
 // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39

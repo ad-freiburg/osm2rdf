@@ -23,7 +23,7 @@ struct Area {
   explicit Area(const osmium::Area& area);
   uint64_t id() const noexcept;
   uint64_t objId() const noexcept;
-  osm2ttl::osm::Box envelope() const noexcept;
+  osm2ttl::geometry::Box envelope() const noexcept;
   char tagAdministrationLevel() const noexcept;
   bool fromWay() const noexcept;
 
@@ -37,6 +37,7 @@ struct Area {
   osmium::unsigned_object_id_type _objId;
   char _tagAdministrationLevel;
   osm2ttl::geometry::Area _geom;
+  osm2ttl::geometry::Box _envelope;
 };
 
 }  // namespace osm

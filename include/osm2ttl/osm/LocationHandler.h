@@ -25,11 +25,8 @@ class LocationHandler : public osmium::handler::Handler {
   virtual ~LocationHandler() {}
   virtual void node(const osmium::Node& node) = 0;
   virtual void way(osmium::Way& way) = 0;  // NOLINT
-  void firstPassDone();
   // Helper creating the correct instance.
   static LocationHandler* create(const osm2ttl::config::Config& config);
- protected:
-  bool _firstPassDone = false;
 };
 
 template<typename T>

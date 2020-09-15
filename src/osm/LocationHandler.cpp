@@ -3,11 +3,12 @@
 
 #include "osm2ttl/osm/LocationHandler.h"
 
-#include "osmium/handler/node_locations_for_ways.hpp"
-#include "osmium/index/map/sparse_file_array.hpp"
-#include "osmium/index/map/flex_mem.hpp"
+#include <iostream>
 
 #include "osm2ttl/config/Config.h"
+#include "osmium/handler/node_locations_for_ways.hpp"
+#include "osmium/index/map/flex_mem.hpp"
+#include "osmium/index/map/sparse_file_array.hpp"
 
 // ____________________________________________________________________________
 osm2ttl::osm::LocationHandler* osm2ttl::osm::LocationHandler::create(
@@ -19,16 +20,8 @@ osm2ttl::osm::LocationHandler* osm2ttl::osm::LocationHandler::create(
 }
 
 // ____________________________________________________________________________
-void osm2ttl::osm::LocationHandler::firstPassDone() {
-  _firstPassDone = true;
-}
-
-// ____________________________________________________________________________
 template<typename T>
 void osm2ttl::osm::LocationHandlerImpl<T>::node(const osmium::Node& node) {
-  if (_firstPassDone) {
-    return;
-  }
   _handler.node(node);
 }
 
@@ -58,9 +51,6 @@ osm2ttl::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
 void osm2ttl::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
   osmium::unsigned_object_id_type, osmium::Location>>::node(
   const osmium::Node& node) {
-  if (_firstPassDone) {
-    return;
-  }
   _handler.node(node);
 }
 

@@ -1,6 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
+
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -8,13 +9,14 @@
 
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/DumpHandler.h"
+#include "osm2ttl/osm/AreaHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/Ram.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
-#include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/io/any_input.hpp"
+#include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/util/memory.hpp"
 
 template<typename T>
@@ -30,8 +32,7 @@ void run(osm2ttl::config::Config& config) {
   writer.writeHeader();
 
   osm2ttl::osm::DumpHandler dumpHandler{config, &writer};
-  osm2ttl::osm::LocationHandler* locationHandler =
-      osm2ttl::osm::LocationHandler::create(config);
+  osm2ttl::osm::AreaHandler areaHandler{config, &writer};
 
   {
     // Do not create empty areas
@@ -54,29 +55,52 @@ void run(osm2ttl::config::Config& config) {
       std::cerr << "OSM Pass 2 ... (dump)" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
                                                osmium::osm_entity_bits::object};
+      osm2ttl::osm::LocationHandler* locationHandler =
+          osm2ttl::osm::LocationHandler::create(config);
       while(true) {
         osmium::memory::Buffer buf = reader.read();
         if (!buf) {
           break;
         }
         osmium::apply(buf, *locationHandler,
-                      mp_manager.handler([&dumpHandler](
+                      mp_manager.handler([&dumpHandler, &areaHandler](
                           osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, dumpHandler);
-                      }), dumpHandler);
+                        osmium::apply(buffer, dumpHandler, areaHandler);
+                      }), dumpHandler, areaHandler);
       }
       reader.close();
+      delete locationHandler;
       std::cerr << "... done reading (libosmium) ..." << std::endl;
       dumpHandler.finish();
-      std::cerr << "... done converting (libosmium -> osm2ttl) ..."
+      std::cerr << "... done converting (libosmium -> osm2ttl)"
                 << std::endl;
+    }
+
+    {
+      std::cerr << "Preparing areas for lookup ..." << std::endl;
+      areaHandler.sort();
+      std::cerr << "... done" << std::endl;
+      std::cerr << "OSM Pass 3 ... (contains relation)" << std::endl;
+      osm2ttl::osm::LocationHandler* locationHandler =
+          osm2ttl::osm::LocationHandler::create(config);
+      osmium::io::ReaderWithProgressBar reader{true, input_file,
+                                               osmium::osm_entity_bits::object};
+      while (true) {
+        osmium::memory::Buffer buf = reader.read();
+        if (!buf) {
+          break;
+        }
+        osmium::apply(buf, *locationHandler, areaHandler);
+      }
+      reader.close();
+      delete locationHandler;
     }
   }
 
   // All work done, close output
+  std::cerr << "Still writing output ..." << std::endl;
   writer.close();
   std::cerr << "... done writing (osm2ttl)" << std::endl;
-  delete locationHandler;
 
   osmium::MemoryUsage memory;
   std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;

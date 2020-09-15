@@ -40,13 +40,14 @@ void osm2ttl::osm::DumpHandler<W>::finish() {
 template<typename W>
 template<typename T>
 void osm2ttl::osm::DumpHandler<W>::write(const T& o) {
-  if (_config.numThreadsRead > 0) {
+  /*if (_config.numThreadsRead > 0) {
     _queue.dispatch([this, o]{
       _writer->write(o);
     });
   } else {
     _writer->write(o);
-  }
+  }*/
+  _writer->write(o);
 }
 
 // ____________________________________________________________________________
@@ -70,7 +71,8 @@ void osm2ttl::osm::DumpHandler<W>::node(const osmium::Node& node) {
   if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  write(osm2ttl::osm::Node(node));
+  write(node);
+  //write(osm2ttl::osm::Node(node));
 }
 
 // ____________________________________________________________________________
@@ -82,7 +84,8 @@ void osm2ttl::osm::DumpHandler<W>::relation(const osmium::Relation& relation) {
   if (relation.tags().byte_size() == EMPTY_TAG_SIZE) {
     return;
   }
-  write(osm2ttl::osm::Relation(relation));
+  write(relation);
+  //write(osm2ttl::osm::Relation(relation));
 }
 
 // ____________________________________________________________________________

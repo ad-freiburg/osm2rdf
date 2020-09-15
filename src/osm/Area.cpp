@@ -14,20 +14,19 @@
 #include "osm2ttl/geometry/Box.h"
 #include "osm2ttl/geometry/Location.h"
 
-#include "osm2ttl/osm/Box.h"
-
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area() {
   _id = std::numeric_limits<uint64_t>::max();
   _objId = std::numeric_limits<uint64_t>::max();
+  _tagAdministrationLevel = 0;
 }
 // ____________________________________________________________________________
-osm2ttl::osm::Area::Area(const osmium::Area& area) {
+osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
   _objId = area.orig_id();
   if (area.tags()["boundary"] != nullptr
       && area.tags()["admin_level"] != nullptr) {
-    _tagAdministrationLevel = atoi(area.tags()["admin_level"]);
+    _tagAdministrationLevel = strtol(area.tags()["admin_level"], nullptr, 10);
   }
 
   auto outerRings = area.outer_rings();
@@ -55,6 +54,7 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) {
     }
     oCount++;
   }
+  boost::geometry::envelope(_geom, _envelope);
 }
 
 // ____________________________________________________________________________
@@ -73,10 +73,8 @@ osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const {
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::Box osm2ttl::osm::Area::envelope() const noexcept {
-  osm2ttl::geometry::Box box;
-  boost::geometry::envelope(geom(), box);
-  return osm2ttl::osm::Box(box);
+osm2ttl::geometry::Box osm2ttl::osm::Area::envelope() const noexcept {
+  return _envelope;
 }
 
 // ____________________________________________________________________________
@@ -102,8 +100,8 @@ bool osm2ttl::osm::Area::operator<(const osm2ttl::osm::Area& other) const {
     return _tagAdministrationLevel > other._tagAdministrationLevel;
   }
   // Sort by area, smaller first
-  auto ownArea = boost::geometry::area(envelope().geom());
-  auto otherArea = boost::geometry::area(other.envelope().geom());
+  auto ownArea = boost::geometry::area(envelope());
+  auto otherArea = boost::geometry::area(other.envelope());
   if (ownArea != otherArea) {
     return ownArea < otherArea;
   }
