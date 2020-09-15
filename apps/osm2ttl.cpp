@@ -9,7 +9,7 @@
 
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/DumpHandler.h"
-#include "osm2ttl/osm/AreaHandler.h"
+#include "osm2ttl/osm/GeometryHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/Ram.h"
@@ -32,7 +32,7 @@ void run(osm2ttl::config::Config& config) {
   writer.writeHeader();
 
   osm2ttl::osm::DumpHandler dumpHandler{config, &writer};
-  osm2ttl::osm::AreaHandler areaHandler{config, &writer};
+  osm2ttl::osm::GeometryHandler areaHandler{config, &writer};
 
   {
     // Do not create empty areas
@@ -78,7 +78,7 @@ void run(osm2ttl::config::Config& config) {
 
     {
       std::cerr << "Preparing areas for lookup ..." << std::endl;
-      areaHandler.sort();
+      areaHandler.prepareLookup();
       std::cerr << "... done" << std::endl;
       std::cerr << "OSM Pass 3 ... (contains relation)" << std::endl;
       osm2ttl::osm::LocationHandler* locationHandler =
@@ -90,7 +90,11 @@ void run(osm2ttl::config::Config& config) {
         if (!buf) {
           break;
         }
-        osmium::apply(buf, *locationHandler, areaHandler);
+        osmium::apply(buf, *locationHandler,
+                      mp_manager.handler([&areaHandler](
+                          osmium::memory::Buffer&& buffer) {
+                        osmium::apply(buffer, areaHandler);
+                      }), areaHandler);
       }
       reader.close();
       delete locationHandler;

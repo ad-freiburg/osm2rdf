@@ -1,8 +1,8 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2TTL_OSM_AREAHANDLER_H_
-#define OSM2TTL_OSM_AREAHANDLER_H_
+#ifndef OSM2TTL_OSM_GEOMETRYHANDLER_H_
+#define OSM2TTL_OSM_GEOMETRYHANDLER_H_
 
 #include <unordered_map>
 #include <utility>
@@ -21,26 +21,26 @@
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/CacheFile.h"
 
+#include "boost/geometry/index/rtree.hpp"
+
 namespace osm2ttl {
 namespace osm {
 
+typedef std::pair<osm2ttl::geometry::Box, uint64_t> SpatialValue;
+
 template<typename W>
-class AreaHandler : public osmium::handler::Handler {
+class GeometryHandler : public osmium::handler::Handler {
  public:
-  AreaHandler(const osm2ttl::config::Config& config,
+  GeometryHandler(const osm2ttl::config::Config& config,
                        osm2ttl::ttl::Writer<W>* writer);
-  ~AreaHandler();
+  ~GeometryHandler();
 
   // Store area
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
-  void sort();
-  constexpr uint16_t stackIndex(uint8_t x, uint8_t y) const;
-  osm2ttl::geometry::Polygon regionForIndex(uint8_t x, uint8_t y) const;
-  std::pair<uint8_t, uint8_t> reducedCoordinates(double x, double y) const;
-  std::pair<uint8_t, uint8_t> reducedCoordinates(const osm2ttl::geometry::Location& location) const;
+  void prepareLookup();
  protected:
   bool _sorted = false;
   // Global config
@@ -52,7 +52,9 @@ class AreaHandler : public osmium::handler::Handler {
     osmium::unsigned_object_id_type, osm2ttl::osm::Area>
     _areas;
   // Stacks
-  std::vector<std::vector<std::pair<bool, osm2ttl::osm::Area*>>> _stacks;
+  boost::geometry::index::rtree<
+      SpatialValue,
+      boost::geometry::index::quadratic<16>> _spatialIndex;
   std::unordered_multimap<uint64_t, uint64_t> _locationRelationMap;
   std::unordered_multimap<uint64_t, uint64_t> _wayRelationMap;
   std::unordered_multimap<uint64_t, uint64_t> _wayLocationMap;
@@ -63,4 +65,4 @@ class AreaHandler : public osmium::handler::Handler {
 }  // namespace osm
 }  // namespace osm2ttl
 
-#endif  // OSM2TTL_OSM_AREAHANDLER_H_
+#endif  // OSM2TTL_OSM_GEOMETRYHANDLER_H_
