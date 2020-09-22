@@ -26,12 +26,7 @@
 namespace osm2ttl {
 namespace osm {
 
-typedef std::pair<osm2ttl::geometry::Box, uint64_t> SpatialBoxValue;
-typedef std::pair<osm2ttl::geometry::Location , uint64_t> SpatialPointValue;
 typedef std::pair<osm2ttl::geometry::Box, std::pair<uint64_t, uint8_t>> SpatialValue;
-typedef boost::geometry::index::rtree<SpatialBoxValue, boost::geometry::index::quadratic<16>> SpatialAreaIndex;
-typedef boost::geometry::index::rtree<SpatialPointValue, boost::geometry::index::quadratic<16>> SpatialNodeIndex;
-typedef boost::geometry::index::rtree<SpatialBoxValue, boost::geometry::index::quadratic<16>> SpatialWayIndex;
 typedef boost::geometry::index::rtree<SpatialValue, boost::geometry::index::quadratic<16>> SpatialIndex;
 
 template<typename W>
@@ -63,10 +58,9 @@ class GeometryHandler : public osmium::handler::Handler {
   osmium::index::map::SparseFileArray<
       osmium::unsigned_object_id_type, osm2ttl::osm::Way>
       _ways;
-  // Spatial Indices
-  SpatialAreaIndex _spatialAreaIndex;
-  SpatialNodeIndex _spatialNodeIndex;
-  SpatialWayIndex _spatialWayIndex;
+  // Spatial Index
+  std::vector<uint64_t> _containingAreas;
+  std::vector<SpatialValue> _spatialStorage;
   SpatialIndex _spatialIndex;
   double _xFactor = 1.5;
   double _yFactor = 0.75;

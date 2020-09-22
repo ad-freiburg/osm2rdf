@@ -79,7 +79,7 @@ void run(osm2ttl::config::Config& config) {
     {
       std::cerr << "Preparing areas for lookup ..." << std::endl;
       areaHandler.prepareLookup();
-      std::cerr << "calculating contains ..." << std::endl;
+      std::cerr << "... calculating contains ..." << std::endl;
       areaHandler.lookup();
       std::cerr << "... done" << std::endl;
     }
