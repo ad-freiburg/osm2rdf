@@ -15,6 +15,11 @@
 #include "osm2ttl/osm/TagList.h"
 
 // ____________________________________________________________________________
+osm2ttl::osm::Way::Way() {
+  _id = std::numeric_limits<uint64_t>::max();
+}
+
+// ____________________________________________________________________________
 osm2ttl::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
   _tags = osm2ttl::osm::convertTagList(way.tags());
@@ -24,6 +29,7 @@ osm2ttl::osm::Way::Way(const osmium::Way& way) {
     auto loc = nodeRef.location();
     boost::geometry::append(_geom, osm2ttl::geometry::Location(loc.lon(), loc.lat()));
   }
+  boost::geometry::unique(_geom);
   boost::geometry::envelope(_geom, _envelope);
 }
 
@@ -45,9 +51,7 @@ std::vector<osm2ttl::osm::Node> osm2ttl::osm::Way::nodes() const noexcept {
 // ____________________________________________________________________________
 osm2ttl::geometry::Linestring osm2ttl::osm::Way::geom() const
 noexcept {
-  osm2ttl::geometry::Linestring locations{_geom};
-  boost::geometry::unique(locations);
-  return locations;
+  return _geom;
 }
 
 // ____________________________________________________________________________
@@ -58,4 +62,14 @@ osm2ttl::geometry::Box osm2ttl::osm::Way::envelope() const noexcept {
 // ____________________________________________________________________________
 bool osm2ttl::osm::Way::closed() const noexcept {
   return boost::geometry::equals(_nodes.front().geom(), _nodes.back().geom());
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Way::operator==(const osm2ttl::osm::Way& other) const {
+  return _id == other._id;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Way::operator<(const osm2ttl::osm::Way& other) const {
+  return _id < other._id;
 }

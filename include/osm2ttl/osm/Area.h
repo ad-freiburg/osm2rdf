@@ -23,14 +23,14 @@ struct Area {
   explicit Area(const osmium::Area& area);
   uint64_t id() const noexcept;
   uint64_t objId() const noexcept;
+
+  osm2ttl::geometry::Area geom() const noexcept;
   osm2ttl::geometry::Box envelope() const noexcept;
   char tagAdministrationLevel() const noexcept;
   bool fromWay() const noexcept;
 
   bool operator==(const osm2ttl::osm::Area& other) const;
   bool operator<(const osm2ttl::osm::Area& other) const;
-
-  osm2ttl::geometry::Area geom() const;
 
  protected:
   uint64_t _id;

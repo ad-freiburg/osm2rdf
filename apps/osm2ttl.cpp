@@ -79,25 +79,9 @@ void run(osm2ttl::config::Config& config) {
     {
       std::cerr << "Preparing areas for lookup ..." << std::endl;
       areaHandler.prepareLookup();
+      std::cerr << "calculating contains ..." << std::endl;
+      areaHandler.lookup();
       std::cerr << "... done" << std::endl;
-      std::cerr << "OSM Pass 3 ... (contains relation)" << std::endl;
-      osm2ttl::osm::LocationHandler* locationHandler =
-          osm2ttl::osm::LocationHandler::create(config);
-      osmium::io::ReaderWithProgressBar reader{true, input_file,
-                                               osmium::osm_entity_bits::object};
-      while (true) {
-        osmium::memory::Buffer buf = reader.read();
-        if (!buf) {
-          break;
-        }
-        osmium::apply(buf, *locationHandler,
-                      mp_manager.handler([&areaHandler](
-                          osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, areaHandler);
-                      }), areaHandler);
-      }
-      reader.close();
-      delete locationHandler;
     }
   }
 

@@ -20,6 +20,7 @@ namespace osm {
 
 class Way {
  public:
+  Way();
   explicit Way(const osmium::Way& way);
   uint64_t id() const noexcept;
   bool closed() const noexcept;
@@ -27,6 +28,9 @@ class Way {
   osm2ttl::geometry::Linestring geom() const noexcept;
   std::vector<osm2ttl::osm::Node> nodes() const noexcept;
   osm2ttl::osm::TagList tags() const noexcept;
+
+  bool operator==(const osm2ttl::osm::Way& other) const;
+  bool operator<(const osm2ttl::osm::Way& other) const;
  protected:
   uint64_t _id;
   std::vector<osm2ttl::osm::Node> _nodes;

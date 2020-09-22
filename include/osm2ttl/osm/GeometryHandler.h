@@ -26,7 +26,13 @@
 namespace osm2ttl {
 namespace osm {
 
-typedef std::pair<osm2ttl::geometry::Box, uint64_t> SpatialValue;
+typedef std::pair<osm2ttl::geometry::Box, uint64_t> SpatialBoxValue;
+typedef std::pair<osm2ttl::geometry::Location , uint64_t> SpatialPointValue;
+typedef std::pair<osm2ttl::geometry::Box, std::pair<uint64_t, uint8_t>> SpatialValue;
+typedef boost::geometry::index::rtree<SpatialBoxValue, boost::geometry::index::quadratic<16>> SpatialAreaIndex;
+typedef boost::geometry::index::rtree<SpatialPointValue, boost::geometry::index::quadratic<16>> SpatialNodeIndex;
+typedef boost::geometry::index::rtree<SpatialBoxValue, boost::geometry::index::quadratic<16>> SpatialWayIndex;
+typedef boost::geometry::index::rtree<SpatialValue, boost::geometry::index::quadratic<16>> SpatialIndex;
 
 template<typename W>
 class GeometryHandler : public osmium::handler::Handler {
@@ -35,11 +41,12 @@ class GeometryHandler : public osmium::handler::Handler {
                        osm2ttl::ttl::Writer<W>* writer);
   ~GeometryHandler();
 
-  // Store area
+  // Store data
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
-  void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
+  // Calculate data
+  void lookup();
   void prepareLookup();
  protected:
   bool _sorted = false;
@@ -51,13 +58,16 @@ class GeometryHandler : public osmium::handler::Handler {
   osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type, osm2ttl::osm::Area>
     _areas;
-  // Stacks
-  boost::geometry::index::rtree<
-      SpatialValue,
-      boost::geometry::index::quadratic<16>> _spatialIndex;
-  std::unordered_multimap<uint64_t, uint64_t> _locationRelationMap;
-  std::unordered_multimap<uint64_t, uint64_t> _wayRelationMap;
-  std::unordered_multimap<uint64_t, uint64_t> _wayLocationMap;
+  // Ways
+  osm2ttl::util::CacheFile _waysFile;
+  osmium::index::map::SparseFileArray<
+      osmium::unsigned_object_id_type, osm2ttl::osm::Way>
+      _ways;
+  // Spatial Indices
+  SpatialAreaIndex _spatialAreaIndex;
+  SpatialNodeIndex _spatialNodeIndex;
+  SpatialWayIndex _spatialWayIndex;
+  SpatialIndex _spatialIndex;
   double _xFactor = 1.5;
   double _yFactor = 0.75;
 };

@@ -20,6 +20,7 @@ osm2ttl::osm::Area::Area() {
   _objId = std::numeric_limits<uint64_t>::max();
   _tagAdministrationLevel = 0;
 }
+
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
@@ -68,7 +69,7 @@ uint64_t osm2ttl::osm::Area::objId() const noexcept {
 }
 
 // ____________________________________________________________________________
-osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const {
+osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const noexcept {
   return _geom;
 }
 

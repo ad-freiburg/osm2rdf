@@ -7,6 +7,7 @@
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
 
+#include "osm2ttl/geometry/Box.h"
 #include "osm2ttl/geometry/Location.h"
 
 #include "osm2ttl/osm/TagList.h"
@@ -19,11 +20,13 @@ class Node {
   explicit Node(const osmium::Node& node);
   explicit Node(const osmium::NodeRef& nodeRef);
   uint64_t id() const noexcept;
+  osm2ttl::geometry::Box envelope() const noexcept;
   osm2ttl::geometry::Location geom() const noexcept;
   osm2ttl::osm::TagList tags() const noexcept;
  protected:
   uint64_t _id;
   osm2ttl::geometry::Location _geom;
+  osm2ttl::geometry::Box _envelope;
   osm2ttl::osm::TagList _tags;
 };
 
