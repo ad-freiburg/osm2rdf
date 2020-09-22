@@ -27,7 +27,10 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   _objId = area.orig_id();
   if (area.tags()["boundary"] != nullptr
       && area.tags()["admin_level"] != nullptr) {
-    _tagAdministrationLevel = strtol(area.tags()["admin_level"], nullptr, 10);
+    _tagAdministrationLevel = strtol(area.tags()["admin_level"], nullptr, Base10Base);
+  }
+  if (area.tags()["name"] != nullptr) {
+    _hasName = true;
   }
 
   auto outerRings = area.outer_rings();
@@ -76,6 +79,11 @@ osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const noexcept {
 // ____________________________________________________________________________
 osm2ttl::geometry::Box osm2ttl::osm::Area::envelope() const noexcept {
   return _envelope;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Area::hasName() const noexcept {
+  return _hasName;
 }
 
 // ____________________________________________________________________________

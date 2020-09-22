@@ -594,16 +594,19 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s)
     case k4Byte:
       // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
       //      111   111111   111111   111111 = 7 3F 3F 3F
-      return (((s[0] & k0x07) << 18) | ((s[1] & k0x3F) << 12)
-          | ((s[2] & k0x3F) << 6) | (s[3] & k0x3F));
+      return (((s[0] & k0x07) << UTF8_CODEPOINT_OFFSET_BYTE4)
+              | ((s[1] & k0x3F) << UTF8_CODEPOINT_OFFSET_BYTE3)
+          | ((s[2] & k0x3F) << UTF8_CODEPOINT_OFFSET_BYTE2) | (s[3] & k0x3F));
     case k3Byte:
       // 1110xxxx 10xxxxxx 10xxxxxx
       //     1111   111111   111111 = F 3F 3F
-      return (((s[0] & k0x0F) << 12) | ((s[1] & k0x3F) << 6) | (s[2] & k0x3F));
+      return (((s[0] & k0x0F) << UTF8_CODEPOINT_OFFSET_BYTE3)
+              | ((s[1] & k0x3F) << UTF8_CODEPOINT_OFFSET_BYTE2)
+              | (s[2] & k0x3F));
     case k2Byte:
       // 110xxxxx 10xxxxxx
       //    11111   111111 = 1F 3F
-      return (((s[0] & k0x1F) << 6) | (s[1] & k0x3F));
+      return (((s[0] & k0x1F) << UTF8_CODEPOINT_OFFSET_BYTE2) | (s[1] & k0x3F));
     case k1Byte:
       // 0xxxxxxx
       //  1111111 = 7F

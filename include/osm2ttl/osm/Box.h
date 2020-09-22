@@ -12,7 +12,7 @@ namespace osm {
 class Box {
  public:
   explicit Box(const osm2ttl::geometry::Box& box);
-  osm2ttl::geometry::Box geom() const;
+  [[nodiscard]] osm2ttl::geometry::Box geom() const;
 
  protected:
   osm2ttl::geometry::Box _geom;

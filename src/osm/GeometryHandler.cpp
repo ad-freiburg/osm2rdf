@@ -48,6 +48,9 @@ osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() {
 template<typename W>
 void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
   osm2ttl::osm::Area a = osm2ttl::osm::Area(area);
+  if (!a.hasName()) {
+    return;
+  }
   _areas.set(a.id(), a);
   if (!a.fromWay()) {
     _spatialStorage.emplace_back(a.envelope(), std::make_pair(a.id(), 2));
@@ -88,7 +91,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareLookup() {
     std::cerr << " Sorting " << _ways.size() << " ways ... " << std::flush;
     _ways.sort();
     std::cerr << "done" << std::endl;
-    std::cerr << " Packing combined tree with  " << _spatialStorage.size() << " entries ... " << std::flush;
+    std::cerr << " Packing combined tree with " << _spatialStorage.size() << " entries ... " << std::flush;
     _spatialIndex = SpatialIndex(_spatialStorage.begin(), _spatialStorage.end());
     _spatialStorage.clear();
     std::cerr << "done" << std::endl;

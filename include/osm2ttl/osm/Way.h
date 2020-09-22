@@ -22,12 +22,12 @@ class Way {
  public:
   Way();
   explicit Way(const osmium::Way& way);
-  uint64_t id() const noexcept;
-  bool closed() const noexcept;
-  osm2ttl::geometry::Box envelope() const noexcept;
-  osm2ttl::geometry::Linestring geom() const noexcept;
-  std::vector<osm2ttl::osm::Node> nodes() const noexcept;
-  osm2ttl::osm::TagList tags() const noexcept;
+  [[nodiscard]] uint64_t id() const noexcept;
+  [[nodiscard]] bool closed() const noexcept;
+  [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
+  [[nodiscard]] osm2ttl::geometry::Linestring geom() const noexcept;
+  [[nodiscard]] std::vector<osm2ttl::osm::Node> nodes() const noexcept;
+  [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
 
   bool operator==(const osm2ttl::osm::Way& other) const;
   bool operator<(const osm2ttl::osm::Way& other) const;

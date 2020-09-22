@@ -18,9 +18,9 @@ enum class RelationMemberType : uint8_t {
 class RelationMember {
  public:
   explicit RelationMember(const osmium::RelationMember& relationMember);
-  uint64_t id() const noexcept;
-  std::string role() const noexcept;
-  osm2ttl::osm::RelationMemberType type() const noexcept;
+  [[nodiscard]] uint64_t id() const noexcept;
+  [[nodiscard]] std::string role() const noexcept;
+  [[nodiscard]] osm2ttl::osm::RelationMemberType type() const noexcept;
  protected:
   uint64_t _id;
   std::string _role;

@@ -19,10 +19,10 @@ class Node {
  public:
   explicit Node(const osmium::Node& node);
   explicit Node(const osmium::NodeRef& nodeRef);
-  uint64_t id() const noexcept;
-  osm2ttl::geometry::Box envelope() const noexcept;
-  osm2ttl::geometry::Location geom() const noexcept;
-  osm2ttl::osm::TagList tags() const noexcept;
+  [[nodiscard]] uint64_t id() const noexcept;
+  [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
+  [[nodiscard]] osm2ttl::geometry::Location geom() const noexcept;
+  [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
  protected:
   uint64_t _id;
   osm2ttl::geometry::Location _geom;
