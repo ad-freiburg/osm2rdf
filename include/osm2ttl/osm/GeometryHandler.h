@@ -6,7 +6,10 @@
 
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
+
+#include "boost/geometry/index/rtree.hpp"
 
 #include "osmium/handler.hpp"
 #include "osmium/handler/node_locations_for_ways.hpp"
@@ -17,16 +20,18 @@
 #include "osmium/osm/way.hpp"
 
 #include "osm2ttl/config/Config.h"
+#include "osm2ttl/geometry/Linestring.h"
+#include "osm2ttl/geometry/Location.h"
+#include "osm2ttl/geometry/Area.h"
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/CacheFile.h"
 
-#include "boost/geometry/index/rtree.hpp"
 
 namespace osm2ttl {
 namespace osm {
 
-typedef std::pair<osm2ttl::geometry::Box, std::pair<uint64_t, uint8_t>> SpatialValue;
+typedef std::pair<osm2ttl::geometry::Box, std::pair<uint64_t, std::variant<osm2ttl::geometry::Location, osm2ttl::geometry::Linestring, osm2ttl::geometry::Area>>> SpatialValue;
 typedef boost::geometry::index::rtree<SpatialValue, boost::geometry::index::quadratic<16>> SpatialIndex;
 
 template<typename W>
@@ -48,18 +53,8 @@ class GeometryHandler : public osmium::handler::Handler {
   // Global config
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
-  // Areas
-  osm2ttl::util::CacheFile _areasFile;
-  osmium::index::map::SparseFileArray<
-    osmium::unsigned_object_id_type, osm2ttl::osm::Area>
-    _areas;
-  // Ways
-  osm2ttl::util::CacheFile _waysFile;
-  osmium::index::map::SparseFileArray<
-      osmium::unsigned_object_id_type, osm2ttl::osm::Way>
-      _ways;
   // Spatial Index
-  std::vector<uint64_t> _containingAreas;
+  std::vector<osm2ttl::osm::Area> _containingAreas;
   std::vector<SpatialValue> _spatialStorage;
   SpatialIndex _spatialIndex;
   double _xFactor = 1.5;

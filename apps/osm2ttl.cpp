@@ -32,7 +32,7 @@ void run(osm2ttl::config::Config& config) {
   writer.writeHeader();
 
   osm2ttl::osm::DumpHandler dumpHandler{config, &writer};
-  osm2ttl::osm::GeometryHandler areaHandler{config, &writer};
+  osm2ttl::osm::GeometryHandler geometryHandler{config, &writer};
 
   {
     // Do not create empty areas
@@ -63,10 +63,10 @@ void run(osm2ttl::config::Config& config) {
           break;
         }
         osmium::apply(buf, *locationHandler,
-                      mp_manager.handler([&dumpHandler, &areaHandler](
+                      mp_manager.handler([&dumpHandler, &geometryHandler](
                           osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, dumpHandler, areaHandler);
-                      }), dumpHandler, areaHandler);
+                        osmium::apply(buffer, dumpHandler, geometryHandler);
+                      }), dumpHandler, geometryHandler);
       }
       reader.close();
       delete locationHandler;
@@ -78,9 +78,9 @@ void run(osm2ttl::config::Config& config) {
 
     {
       std::cerr << "Preparing data for contains relation ..." << std::endl;
-      areaHandler.prepareLookup();
+      geometryHandler.prepareLookup();
       std::cerr << "... calculating contains relation ..." << std::endl;
-      areaHandler.lookup();
+      geometryHandler.lookup();
       std::cerr << "... done" << std::endl;
     }
   }

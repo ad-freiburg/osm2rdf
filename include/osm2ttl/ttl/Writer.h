@@ -49,6 +49,9 @@ static const int k0xEFFFF = 0xEFFFF;
 static const int UTF8_CODEPOINT_OFFSET_BYTE4 = 18;
 static const int UTF8_CODEPOINT_OFFSET_BYTE3 = 12;
 static const int UTF8_CODEPOINT_OFFSET_BYTE2 = 6;
+static const int BIT_IN_BYTE = 8;
+static const int BITS_OF_BYTE = 0xFF;
+static const int BIT_IN_NIBBLE = 4;
 #include <fstream>
 #include <mutex>
 #include <ostream>

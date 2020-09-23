@@ -159,7 +159,10 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string&p,
                                           const std::string& o) {
-  *_out << s + " " + p + " " + o + " .\n";
+  #pragma omp critical
+  {
+    *_out << s + " " + p + " " + o + " .\n";
+  }
 }
 
 // ____________________________________________________________________________
@@ -696,15 +699,15 @@ std::string osm2ttl::ttl::Writer<T>::encodePERCENT(std::string_view s)
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
   std::ostringstream tmp;
   uint32_t c = utf8Codepoint(s);
-  uint32_t mask = 0xFF;
+  uint32_t mask = BITS_OF_BYTE;
   bool echo = false;
   for (int shift = 3; shift >= 0; --shift) {
-    uint8_t v = (c & (mask << (shift * 8)) >> shift);
+    uint8_t v = (c & (mask << (shift * BIT_IN_BYTE)) >> shift);
     echo |= (v > 0);
     if (!echo) {
       continue;
     }
-    tmp << "%"<< std::hex << ((v & k0xF0) >> 4) << std::hex << (v & k0x0F);
+    tmp << "%"<< std::hex << ((v & k0xF0) >> BIT_IN_NIBBLE) << std::hex << (v & k0x0F);
   }
   return tmp.str();
 }

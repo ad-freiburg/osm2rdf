@@ -19,6 +19,11 @@ target_link_libraries(osm2ttl_library PRIVATE
   ${BZIP2_LIBRARIES}
   ${ZLIB_LIBRARIES})
 
+# Link OpenMP if found
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(osm2ttl_library PUBLIC OpenMP::OpenMP_CXX)
+endif()
+
 # All users of this library will need at least C++17
 target_compile_features(osm2ttl_library PUBLIC cxx_std_17)
 
