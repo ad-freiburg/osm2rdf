@@ -27,9 +27,7 @@ static const int k0xB7 = 0xB7;
 // ____________________________________________________________________________
 template<typename T>
 osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
-  : _config(config),
-  _convertGeometryQueue(_config.numThreadsConvertGeometry,
-    _config.queueFactorConvertGeometry, "convertGeometry") {
+  : _config(config) {
   _out = &std::cout;
 
   // Generate constants
@@ -72,7 +70,6 @@ bool osm2ttl::ttl::Writer<T>::open() {
 // ____________________________________________________________________________
 template<typename T>
 void osm2ttl::ttl::Writer<T>::close() {
-  _convertGeometryQueue.quit();
   if (_outFile.is_open()) {
     _outFile.close();
   }
@@ -308,34 +305,27 @@ template<typename G>
 void osm2ttl::ttl::Writer<T>::writeBoostGeometry(const std::string& s,
                                                  const std::string& p,
                                                  const G& g) {
-  auto f = [this, s, p, g]{
-    const double onePercent = 0.01;
-    G geom{g};
-    if (_config.wktSimplify > 0 &&
-        boost::geometry::num_points(g) > _config.wktSimplify) {
-      osm2ttl::geometry::Box box;
-      boost::geometry::envelope(geom, box);
-      boost::geometry::simplify(g, geom,
-        std::min(boost::geometry::get<boost::geometry::max_corner, 0>(box)
-               - boost::geometry::get<boost::geometry::min_corner, 0>(box),
-                 boost::geometry::get<boost::geometry::max_corner, 1>(box)
-               - boost::geometry::get<boost::geometry::min_corner, 1>(box))
-        / (onePercent * _config.wktDeviation));
-      // If empty geometry -> use original
-      if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
-        geom = g;
-      }
+  const double onePercent = 0.01;
+  G geom{g};
+  if (_config.wktSimplify > 0 &&
+      boost::geometry::num_points(g) > _config.wktSimplify) {
+    osm2ttl::geometry::Box box;
+    boost::geometry::envelope(geom, box);
+    boost::geometry::simplify(g, geom,
+      std::min(boost::geometry::get<boost::geometry::max_corner, 0>(box)
+             - boost::geometry::get<boost::geometry::min_corner, 0>(box),
+               boost::geometry::get<boost::geometry::max_corner, 1>(box)
+             - boost::geometry::get<boost::geometry::min_corner, 1>(box))
+      / (onePercent * _config.wktDeviation));
+    // If empty geometry -> use original
+    if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
+      geom = g;
     }
-    std::ostringstream tmp;
-    tmp << std::setprecision(_config.wktPrecision)
-      << boost::geometry::wkt(geom);
-    writeTriple(s, p, "\""+tmp.str()+"\"^^"+_kGeoWktLiteral);
-  };
-  if (_config.numThreadsConvertGeometry > 0) {
-    _convertGeometryQueue.dispatch(f);
-  } else {
-    f();
   }
+  std::ostringstream tmp;
+  tmp << std::setprecision(_config.wktPrecision)
+    << boost::geometry::wkt(geom);
+  writeTriple(s, p, "\""+tmp.str()+"\"^^"+_kGeoWktLiteral);
 }
 
 // ____________________________________________________________________________
@@ -351,17 +341,10 @@ template<typename T>
 void osm2ttl::ttl::Writer<T>::writeBox(const std::string& s,
                                        const std::string& p,
                                        const osm2ttl::geometry::Box& box) {
-  auto f = [this, s, p, box]{
-    // Box can not be simplified -> output directly.
-    std::ostringstream tmp;
-    tmp << boost::geometry::wkt(box);
-    writeTriple(s, p, "\""+tmp.str()+"\"^^"+_kGeoWktLiteral);
-  };
-  if (_config.numThreadsConvertGeometry > 0) {
-    _convertGeometryQueue.dispatch(f);
-  } else {
-    f();
-  }
+  // Box can not be simplified -> output directly.
+  std::ostringstream tmp;
+  tmp << boost::geometry::wkt(box);
+  writeTriple(s, p, "\""+tmp.str()+"\"^^"+_kGeoWktLiteral);
 }
 
 // ____________________________________________________________________________

@@ -70,10 +70,7 @@ void run(osm2ttl::config::Config& config) {
       }
       reader.close();
       delete locationHandler;
-      std::cerr << "... done reading (libosmium) ..." << std::endl;
-      dumpHandler.finish();
-      std::cerr << "... done converting (libosmium -> osm2ttl)"
-                << std::endl;
+      std::cerr << "... done reading (libosmium) and converting (libosmium -> osm2ttl)" << std::endl;
     }
 
     {
@@ -86,9 +83,7 @@ void run(osm2ttl::config::Config& config) {
   }
 
   // All work done, close output
-  std::cerr << "Still writing output ..." << std::endl;
   writer.close();
-  std::cerr << "... done writing (osm2ttl)" << std::endl;
 
   osmium::MemoryUsage memory;
   std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;

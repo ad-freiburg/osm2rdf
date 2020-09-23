@@ -95,7 +95,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 
   #pragma omp parallel
   {
-    #pragma omp single nowait
+    #pragma omp single
     {
       for (size_t i = 0; i < _containingAreas.size(); ++i) {
         osm2ttl::osm::Area& area = _containingAreas[i];

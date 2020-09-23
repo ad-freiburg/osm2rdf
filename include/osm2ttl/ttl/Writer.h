@@ -149,9 +149,6 @@ class Writer {
   static uint64_t _blankNodeCounter;
   const osm2ttl::config::Config _config;
 
-  // Queues
-  osm2ttl::util::DispatchQueue _convertGeometryQueue;
-
   // Prefix
   const static inline std::unordered_map<std::string, std::string> _prefixes{
 // well-known prefixes

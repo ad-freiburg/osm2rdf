@@ -30,22 +30,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "", "skip-area-prep", "Skip area sorting");
   auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
     "", "use-ram-for-locations", "Store locations in RAM");
-  auto numThreadsReadOp = op.add<popl::Value<size_t>,
-       popl::Attribute::advanced>("", "num-threads-read",
-                                  "Number of threads to read libosmium data",
-                                  numThreadsRead);
-  auto queueFactorReadOp = op.add<popl::Value<size_t>,
-       popl::Attribute::advanced>("", "queue-factor-read",
-                                  "Factor for read queue",
-                                  queueFactorRead);
-  auto numThreadsConvertGeometryOp = op.add<popl::Value<size_t>,
-       popl::Attribute::advanced>("", "num-threads-convert-geom",
-                                  "Number of threads to convert geometries",
-                                  numThreadsConvertGeometry);
-  auto queueFactorConvertGeometryOp = op.add<popl::Value<size_t>,
-       popl::Attribute::advanced>("", "queue-factor-convert-geom",
-                                  "Factor for convert geometries queue",
-                                  queueFactorConvertGeometry);
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
     "no-node-dump", "Skip nodes while dumping data");
@@ -85,7 +69,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     "qlever");
   auto cacheOp = op.add<popl::Value<std::string>>(
     "t", "cache", "Path to cache directory", "/tmp/");
-  auto gzipOp = op.add<popl::Switch>("z", "gzip", "Compress output");
 
   try {
     op.parse(argc, argv);
@@ -110,12 +93,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     skipAreaPrep = skipAreaPrepOp->is_set();
     useRamForLocations = useRamForLocationsOp->is_set();
 
-    // Threads
-    numThreadsConvertGeometry = numThreadsConvertGeometryOp->value();
-    queueFactorConvertGeometry = queueFactorConvertGeometryOp->value();
-    numThreadsRead = numThreadsReadOp->value();
-    queueFactorRead = queueFactorReadOp->value();
-
     // Select types to dump
     noNodeDump = noNodeDumpOp->is_set();
     noRelationDump = noRelationDumpOp->is_set();
@@ -133,7 +110,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     // Output
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
-    gzip = gzipOp->is_set();
 
     // osmium location cache
     if (cacheOp->is_set() || cache.empty()) {

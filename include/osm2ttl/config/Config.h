@@ -36,13 +36,6 @@ struct Config {
   uint16_t wktSimplify = 100;
   uint8_t wktDeviation = 5;
   uint8_t wktPrecision = 12;
-  bool gzip = false;
-
-  // Threads
-  size_t numThreadsConvertGeometry = 0;
-  size_t queueFactorConvertGeometry = 2;
-  size_t numThreadsRead = 0;
-  size_t queueFactorRead = 2;
 
   // Output, empty for stdout
   std::filesystem::path output;
