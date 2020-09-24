@@ -7,6 +7,7 @@
 
 #include "boost/geometry.hpp"
 #include "osm2ttl/geometry/Location.h"
+#include "osm2ttl/geometry/Way.h"
 #include "osm2ttl/osm/Box.h"
 #include "osm2ttl/osm/Node.h"
 #include "osm2ttl/osm/TagList.h"

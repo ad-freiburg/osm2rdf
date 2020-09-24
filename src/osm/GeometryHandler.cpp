@@ -3,17 +3,17 @@
 
 #include "osm2ttl/osm/GeometryHandler.h"
 
-#include <osm2ttl/ttl/Constants.h>
-
 #include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
 
+#include "boost/geometry.hpp"
 #include "boost/geometry/index/rtree.hpp"
 #include "boost/thread.hpp"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/Area.h"
+#include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/util/progress_bar.hpp"
@@ -99,7 +99,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
   size_t entryCount = 0;
   progressBar.update(entryCount);
 
-#pragma omp parallel shared(entryCount, progressBar) default(none)
+#pragma omp parallel shared(                                            \
+    entryCount, progressBar, osm2ttl::ttl::constants::IRI_OGC_CONTAINS, \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,                       \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                   \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY) default(none)
   {
 #pragma omp single
     {
@@ -113,8 +117,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                    boost::geometry::index::covered_by(area.envelope()));
                it != _spatialIndex.qend(); it++) {
             auto entry = it->second;
-#pragma omp task private( \
-    entry, area, s) default(shared)  // NOLINT(openmp-use-default-none)
+#pragma omp task firstprivate(area, entry, s)                \
+    shared(osm2ttl::ttl::constants::IRI_OGC_CONTAINS,        \
+           osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,     \
+           osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, \
+           osm2ttl::ttl::constants::NAMESPACE__OSM_WAY) default(none)
             {
               auto& entryId = entry.first;
               auto& geometry = entry.second;

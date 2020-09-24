@@ -7,7 +7,6 @@
 #include <unistd.h>
 
 #include <filesystem>
-#include <string>
 
 // ____________________________________________________________________________
 osm2ttl::util::CacheFile::CacheFile(const std::filesystem::path& path)
