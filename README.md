@@ -5,9 +5,10 @@ Convert OpenStreetMap (OSM) data to Turtle (TTL)
 
 On Ubuntu 20.04 the following packages are required to build osm2ttl:
 ```
-clang clang-tidy g++ libboost-dev libexpat1-dev cmake libbz2-dev zlib1g-dev
+clang clang-tidy g++ libboost-dev libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
 ```
 `clang` is optional, but without it `clang-tidy` has [unrelated error messages](https://stackoverflow.com/a/52728225).
+`libomp-dev` is optional, but enables multithreading for the calculation of the contains relation
 
 Clone and build `osm2ttl`:
 ```
