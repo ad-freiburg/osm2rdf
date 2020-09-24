@@ -3,16 +3,15 @@
 
 #include "osm2ttl/osm/GeometryHandler.h"
 
+#include <osm2ttl/ttl/Constants.h>
+
 #include <iostream>
 #include <memory>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "boost/thread.hpp"
-#include "boost/geometry.hpp"
 #include "boost/geometry/index/rtree.hpp"
-
+#include "boost/thread.hpp"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/ttl/Writer.h"
@@ -20,27 +19,25 @@
 #include "osmium/util/progress_bar.hpp"
 
 // ____________________________________________________________________________
-template<typename W>
-osm2ttl::osm::GeometryHandler<W>::GeometryHandler(const osm2ttl::config::Config& config,
-                                       osm2ttl::ttl::Writer<W>* writer)
-    : _config(config),
-      _writer(writer) {
-}
+template <typename W>
+osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
+    const osm2ttl::config::Config& config, osm2ttl::ttl::Writer<W>* writer)
+    : _config(config), _writer(writer) {}
 
 // ____________________________________________________________________________
-template<typename W>
-osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() {
-}
+template <typename W>
+osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() {}
 
 // ____________________________________________________________________________
-template<typename W>
+template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
   osm2ttl::osm::Area a = osm2ttl::osm::Area(area);
   if (!a.hasName()) {
     return;
   }
   if (!a.fromWay()) {
-    _spatialStorage.emplace_back(a.envelope(), std::make_pair(a.objId(), a.geom()));
+    _spatialStorage.emplace_back(a.envelope(),
+                                 std::make_pair(a.objId(), a.geom()));
   }
   if (a.tagAdministrationLevel() > 0) {
     _containingAreas.push_back(a);
@@ -48,7 +45,7 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
 }
 
 // ____________________________________________________________________________
-template<typename W>
+template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
   osm2ttl::osm::Node n = osm2ttl::osm::Node(node);
   if (n.tags().count("name") < 1) {
@@ -58,7 +55,7 @@ void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
 }
 
 // ____________________________________________________________________________
-template<typename W>
+template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::way(const osmium::Way& way) {
   osm2ttl::osm::Way w = osm2ttl::osm::Way(way);
   if (w.tags().count("name") < 1 || w.tags().count("building") < 1) {
@@ -68,14 +65,17 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osmium::Way& way) {
 }
 
 // ____________________________________________________________________________
-template<typename W>
+template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::prepareLookup() {
   {
-    std::cerr << " Packing combined tree with " << _spatialStorage.size() << " entries ... " << std::flush;
-    _spatialIndex = SpatialIndex(_spatialStorage.begin(), _spatialStorage.end());
+    std::cerr << " Packing combined tree with " << _spatialStorage.size()
+              << " entries ... " << std::flush;
+    _spatialIndex =
+        SpatialIndex(_spatialStorage.begin(), _spatialStorage.end());
     _spatialStorage.clear();
     std::cerr << "done" << std::endl;
-    std::cerr << " Sort " << _containingAreas.size() << " containing areas ... " << std::flush;
+    std::cerr << " Sort " << _containingAreas.size() << " containing areas ... "
+              << std::flush;
     std::sort(_containingAreas.rbegin(), _containingAreas.rend());
     std::cerr << "done" << std::endl;
   }
@@ -83,50 +83,71 @@ void osm2ttl::osm::GeometryHandler<W>::prepareLookup() {
 }
 
 // ____________________________________________________________________________
-template<typename W>
+template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::lookup() {
   if (!_sorted) {
     throw std::runtime_error("GeometryHandler was not prepared for lookup!");
   }
-  std::cerr << " Contains relations for " << _containingAreas.size() << " areas and their members ..." << std::endl;
+  std::cerr << " Contains relations for " << _containingAreas.size()
+            << " areas and their members ..." << std::endl;
   osmium::ProgressBar progressBar{_containingAreas.size(), true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
 
-  #pragma omp parallel
+#pragma omp parallel
   {
-    #pragma omp single
+#pragma omp single
     {
       for (size_t i = 0; i < _containingAreas.size(); ++i) {
         osm2ttl::osm::Area& area = _containingAreas[i];
         if (area.tagAdministrationLevel() > 0) {
-          std::string s = _writer->generateIRI(area.fromWay()?"osmway":"osmrel", area.objId());
-          for (auto it = _spatialIndex.qbegin(boost::geometry::index::covered_by(area.envelope())); it != _spatialIndex.qend(); it++) {
+          std::string s = _writer->generateIRI(
+              area.fromWay() ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                             : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+              area.objId());
+          for (auto it = _spatialIndex.qbegin(
+                   boost::geometry::index::covered_by(area.envelope()));
+               it != _spatialIndex.qend(); it++) {
             auto entry = it->second;
-            #pragma omp task
+#pragma omp task
             {
               auto entryId = entry.first;
               auto geometry = entry.second;
-              switch(geometry.index()) {
+              switch (geometry.index()) {
                 // Handle node
                 case 0:
-                  if (boost::geometry::covered_by(std::get<0>(geometry), area.geom())) {
-                    _writer->writeTriple(s, "ogc:contains", _writer->generateIRI("osmnode", entryId));
+                  if (boost::geometry::covered_by(std::get<0>(geometry),
+                                                  area.geom())) {
+                    _writer->writeTriple(
+                        s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
+                        _writer->generateIRI(
+                            osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+                            entryId));
                   }
                   break;
                   // Handle way
                 case 1:
                   if (entryId != area.objId()) {
-                    if (boost::geometry::covered_by(std::get<1>(geometry), area.geom())) {
-                      _writer->writeTriple(s, "ogc:contains", _writer->generateIRI("osmway", entryId));
+                    if (boost::geometry::covered_by(std::get<1>(geometry),
+                                                    area.geom())) {
+                      _writer->writeTriple(
+                          s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
+                          _writer->generateIRI(
+                              osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,
+                              entryId));
                     }
                   }
                   break;
                   // Handle area
                 case 2:
                   if (entryId != area.objId()) {
-                    if (boost::geometry::covered_by(std::get<2>(geometry), area.geom())) {
-                      _writer->writeTriple(s, "ogc:contains", _writer->generateIRI("osmrel", entryId));
+                    if (boost::geometry::covered_by(std::get<2>(geometry),
+                                                    area.geom())) {
+                      _writer->writeTriple(
+                          s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
+                          _writer->generateIRI(
+                              osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+                              entryId));
                     }
                   }
                   break;

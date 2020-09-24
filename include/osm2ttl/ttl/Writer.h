@@ -52,11 +52,13 @@ static const int UTF8_CODEPOINT_OFFSET_BYTE2 = 6;
 static const int BIT_IN_BYTE = 8;
 static const int BITS_OF_BYTE = 0xFF;
 static const int BIT_IN_NIBBLE = 4;
+
 #include <fstream>
 #include <mutex>
 #include <ostream>
 #include <string>
 
+#include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/osm/Area.h"
@@ -127,24 +129,6 @@ class Writer {
   static std::string encodeIRIREF(std::string_view s);
   static std::string encodePERCENT(std::string_view s);
 
-  std::string _kGeoHasGeometry;
-  std::string _kGeoWktLiteral;
-  std::string _kOsmEnvelope;
-  std::string _kOsmNode;
-  std::string _kOsmRelation;
-  std::string _kOsmWay;
-  std::string _kOsmWikipedia;
-  std::string _kOsmmPos;
-  std::string _kOsmwayIsClosed;
-  std::string _kOsmwayNode;
-  std::string _kOsmwayNodeCount;
-  std::string _kOsmwayUniqueNodeCount;
-  std::string _kRdfType;
-  std::string _kXsdInteger;
-
-  std::string _kLiteralNo;
-  std::string _kLiteralYes;
-
   // Config
   static uint64_t _blankNodeCounter;
   const osm2ttl::config::Config _config;
@@ -152,24 +136,20 @@ class Writer {
   // Prefix
   const static inline std::unordered_map<std::string, std::string> _prefixes{
 // well-known prefixes
-      {"geo", "http://www.opengis.net/ont/geosparql#"},
-      {"wd", "http://www.wikidata.org/entity/"},
-      {"xsd", "http://www.w3.org/2001/XMLSchema#"},
-      {"rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
-      {"rdfs", "http://www.w3.org/2000/01/rdf-schema#"},
-      {"ogc", "http://www.opengis.net/rdf#"},
+      {osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "http://www.opengis.net/ont/geosparql#"},
+      {osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "http://www.wikidata.org/entity/"},
+      {osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "http://www.w3.org/2001/XMLSchema#"},
+      {osm2ttl::ttl::constants::NAMESPACE__RDF, "http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
+      {osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "http://www.opengis.net/rdf#"},
 // osm prefixes
+      {osm2ttl::ttl::constants::NAMESPACE__OSM, "https://www.openstreetmap.org/"},
 // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
 // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
-      {"osmnode", "https://www.openstreetmap.org/node/"},
-      {"osmrel", "https://www.openstreetmap.org/relation/"},
-      {"osmt", "https://www.openstreetmap.org/wiki/Key:"},
-      {"osmway", "https://www.openstreetmap.org/way/"},
-      {"osmm", "https://www.openstreetmap.org/meta/"},
-// own prefixes
-      {"osm", "https://www.openstreetmap.org/"},
-      {"osma", "https://www.openstreetmap.org/area/"},
-      {"osml", "https://www.openstreetmap.org/location/"}
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, "https://www.openstreetmap.org/node/"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, "https://www.openstreetmap.org/relation/"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, "https://www.openstreetmap.org/wiki/Key:"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "https://www.openstreetmap.org/way/"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_META, "https://www.openstreetmap.org/meta/"}
   };
 
   // Output

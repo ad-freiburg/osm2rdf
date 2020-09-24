@@ -6,20 +6,15 @@
 #include "osm2ttl/ttl/Format.h"
 #include "osm2ttl/ttl/Writer.h"
 
-static void BM_StringCreation(benchmark::State& state) {
+static void UINT64T_TO_STRING(benchmark::State& state) {
+  uint64_t x = state.range(0);
   for (auto _ : state) {
-    std::string empty_string;
+    std::string dummy = std::to_string(x);
   }
+  state.SetComplexityN(state.range(0));
 }
-BENCHMARK(BM_StringCreation);
-
-static void BM_StringCopy(benchmark::State& state) {
-  std::string x = "hello";
-  for (auto _ : state) {
-    std::string copy(x);
-  }
-}
-BENCHMARK(BM_StringCopy);
+BENCHMARK(UINT64T_TO_STRING)
+->RangeMultiplier(2)->Range(1<<0, 1<<30)->Complexity();
 
 static void OSM2TT_TTL_OUTPUTFORMAT_BLANKNODE_NT(benchmark::State& state) {
   for (auto _ : state) {
