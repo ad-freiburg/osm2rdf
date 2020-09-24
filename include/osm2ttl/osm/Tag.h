@@ -16,5 +16,3 @@ typedef std::pair<std::string, std::string> Tag;
 }  // namespace osm2ttl
 
 #endif  // OSM2TTL_OSM_TAG_H_
-
-

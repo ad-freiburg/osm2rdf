@@ -20,4 +20,3 @@ osm2ttl::osm::TagList convertTagList(const osmium::TagList& tagList);
 }  // namespace osm2ttl
 
 #endif  // OSM2TTL_OSM_TAGLIST_H_
-

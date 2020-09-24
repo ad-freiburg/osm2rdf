@@ -11,64 +11,63 @@
 #include "popl.hpp"
 
 // ____________________________________________________________________________
-void osm2ttl::config::Config::load(const std::string& filename) {
-}
+void osm2ttl::config::Config::load(const std::string& filename) {}
 
 // ____________________________________________________________________________
-void osm2ttl::config::Config::save(const std::string& filename) {
-}
+void osm2ttl::config::Config::save(const std::string& filename) {}
 
 // ____________________________________________________________________________
 void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   popl::OptionParser op("Allowed options");
 
   auto helpOp = op.add<popl::Switch>("h", "help", "Lorem ipsum");
-  auto configOp = op.add<popl::Value<std::string>>(
-    "c", "config", "Config file");
+  auto configOp =
+      op.add<popl::Value<std::string>>("c", "config", "Config file");
 
   auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "skip-area-prep", "Skip area sorting");
+      "", "skip-area-prep", "Skip area sorting");
   auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "use-ram-for-locations", "Store locations in RAM");
+      "", "use-ram-for-locations", "Store locations in RAM");
 
-  auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-node-dump", "Skip nodes while dumping data");
-  auto noRelationDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-relation-dump", "Skip relations while dumping data");
-  auto noWayDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-way-dump", "Skip ways while dumping data");
-  auto noAreaDumpOp = op.add<popl::Switch, popl::Attribute::advanced>("",
-    "no-area-dump", "Skip areas while dumping data");
+  auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-node-dump", "Skip nodes while dumping data");
+  auto noRelationDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-relation-dump", "Skip relations while dumping data");
+  auto noWayDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-way-dump", "Skip ways while dumping data");
+  auto noAreaDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-area-dump", "Skip areas while dumping data");
 
   auto addAreaSourcesOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "add-area-sources", "Add area sources (ways and relations).");
-  auto addEnvelopeOp = op.add<popl::Switch>(
-    "", "add-envelope", "Add envelope to entries.");
+      "", "add-area-sources", "Add area sources (ways and relations).");
+  auto addEnvelopeOp =
+      op.add<popl::Switch>("", "add-envelope", "Add envelope to entries.");
   auto addMemberNodesOp = op.add<popl::Switch, popl::Attribute::advanced>(
-    "", "add-member-nodes", "Add nodes triples for members of ways and" \
-    "relations. This does not add information to the ways or relations.");
+      "", "add-member-nodes",
+      "Add nodes triples for members of ways and"
+      "relations. This does not add information to the ways or relations.");
   auto skipWikiLinksOp = op.add<popl::Switch>(
-    "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
-  auto storeConfigOp = op.add<popl::Value<std::string>,
-       popl::Attribute::advanced>(
-    "", "store-config", "Path to store calculated config.");
-  auto expandedDataOp = op.add<popl::Switch>("x", "expanded-data",
-    "Add expanded data");
-  auto metaDataOp = op.add<popl::Switch>("m", "meta-data",
-    "Add meta-data");
+      "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
+  auto storeConfigOp =
+      op.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          "", "store-config", "Path to store calculated config.");
+  auto expandedDataOp =
+      op.add<popl::Switch>("x", "expanded-data", "Add expanded data");
+  auto metaDataOp = op.add<popl::Switch>("m", "meta-data", "Add meta-data");
 
-  auto wktSimplifyOp = op.add<popl::Value<uint16_t>>("s", "wkt-simplify",
-    "Simplify WKT-Geometries over this number of nodes, 0 to disable",
-    wktSimplify);
+  auto wktSimplifyOp = op.add<popl::Value<uint16_t>>(
+      "s", "wkt-simplify",
+      "Simplify WKT-Geometries over this number of nodes, 0 to disable",
+      wktSimplify);
 
-  auto outputOp = op.add<popl::Value<std::string>>(
-    "o", "output", "Output file", "");
-  auto outputFormatOp = op.add<popl::Value<std::string>,
-       popl::Attribute::advanced>(
-    "", "output-format", "Output format, valid values: nt, ttl, qlever",
-    "qlever");
+  auto outputOp =
+      op.add<popl::Value<std::string>>("o", "output", "Output file", "");
+  auto outputFormatOp =
+      op.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          "", "output-format", "Output format, valid values: nt, ttl, qlever",
+          "qlever");
   auto cacheOp = op.add<popl::Value<std::string>>(
-    "t", "cache", "Path to cache directory", "/tmp/");
+      "t", "cache", "Path to cache directory", "/tmp/");
 
   try {
     op.parse(argc, argv);
@@ -113,14 +112,13 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     // osmium location cache
     if (cacheOp->is_set() || cache.empty()) {
-      cache = std::filesystem::absolute(cacheOp->value()).string()+"/";
+      cache = std::filesystem::absolute(cacheOp->value()).string() + "/";
     }
 
     // Check cache location
     if (!std::filesystem::is_directory(cache)) {
-      std::cerr << "Cache location not a directory: "
-        << cache << "\n"
-        << op.help() << "\n";
+      std::cerr << "Cache location not a directory: " << cache << "\n"
+                << op.help() << "\n";
       exit(1);
     }
 
@@ -131,9 +129,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
     input = op.non_option_args()[0];
     if (!std::filesystem::exists(input)) {
-      std::cerr << "Input does not exist: "
-        << input << "\n"
-        << op.help() << "\n";
+      std::cerr << "Input does not exist: " << input << "\n"
+                << op.help() << "\n";
       exit(1);
     }
   } catch (const popl::invalid_option& e) {
@@ -150,8 +147,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     if (e.error() == popl::invalid_option::Error::missing_option) {
-      std::string option_name(e.option()->name(popl::OptionName::short_name,
-                                               true));
+      std::string option_name(
+          e.option()->name(popl::OptionName::short_name, true));
       if (option_name.empty()) {
         option_name = e.option()->name(popl::OptionName::long_name, true);
       }
@@ -166,8 +163,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
 // ____________________________________________________________________________
 std::filesystem::path osm2ttl::config::Config::getTempPath(
-  const std::string& p, const std::string& s) const {
+    const std::string& p, const std::string& s) const {
   std::filesystem::path path{cache};
-  path /= p+"-"+s;
+  path /= p + "-" + s;
   return std::filesystem::absolute(path);
 }

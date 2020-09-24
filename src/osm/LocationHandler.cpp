@@ -12,7 +12,7 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::LocationHandler* osm2ttl::osm::LocationHandler::create(
-  const osm2ttl::config::Config& config) {
+    const osm2ttl::config::Config& config) {
   if (config.useRamForLocations) {
     return new osm2ttl::osm::LocationHandlerRAM(config);
   }
@@ -20,43 +20,45 @@ osm2ttl::osm::LocationHandler* osm2ttl::osm::LocationHandler::create(
 }
 
 // ____________________________________________________________________________
-template<typename T>
+template <typename T>
 void osm2ttl::osm::LocationHandlerImpl<T>::node(const osmium::Node& node) {
   _handler.node(node);
 }
 
 // ____________________________________________________________________________
-template<typename T>
+template <typename T>
 void osm2ttl::osm::LocationHandlerImpl<T>::way(osmium::Way& way) {  // NOLINT
   _handler.way(way);
 }
 
 // ____________________________________________________________________________
-template<typename T>
+template <typename T>
 osm2ttl::osm::LocationHandlerImpl<T>::LocationHandlerImpl(
-  const osm2ttl::config::Config& /*unused*/) : _handler(_index) {
+    const osm2ttl::config::Config& /*unused*/)
+    : _handler(_index) {
   _handler.ignore_errors();
 }
 
 // ____________________________________________________________________________
 osm2ttl::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
-  osmium::unsigned_object_id_type, osmium::Location>>::LocationHandlerImpl(
-  const osm2ttl::config::Config& config) :
-  _cacheFile(config.getTempPath("osmium", "n2l.cache")),
-  _index(_cacheFile.fileDescriptor()), _handler(_index) {
+    osmium::unsigned_object_id_type, osmium::Location>>::
+    LocationHandlerImpl(const osm2ttl::config::Config& config)
+    : _cacheFile(config.getTempPath("osmium", "n2l.cache")),
+      _index(_cacheFile.fileDescriptor()),
+      _handler(_index) {
   _handler.ignore_errors();
 }
 
 // ____________________________________________________________________________
 void osm2ttl::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
-  osmium::unsigned_object_id_type, osmium::Location>>::node(
-  const osmium::Node& node) {
+    osmium::unsigned_object_id_type,
+    osmium::Location>>::node(const osmium::Node& node) {
   _handler.node(node);
 }
 
 // ____________________________________________________________________________
 void osm2ttl::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
-  osmium::unsigned_object_id_type, osmium::Location>>::way(
-  osmium::Way& way) {  // NOLINT
+    osmium::unsigned_object_id_type,
+    osmium::Location>>::way(osmium::Way& way) {  // NOLINT
   _handler.way(way);
 }

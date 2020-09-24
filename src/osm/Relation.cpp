@@ -5,10 +5,9 @@
 
 #include <vector>
 
-#include "osmium/osm/relation.hpp"
-
 #include "osm2ttl/osm/RelationMember.h"
 #include "osm2ttl/osm/TagList.h"
+#include "osmium/osm/relation.hpp"
 
 // ____________________________________________________________________________
 osm2ttl::osm::Relation::Relation(const osmium::Relation& relation) {
@@ -21,9 +20,7 @@ osm2ttl::osm::Relation::Relation(const osmium::Relation& relation) {
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Relation::id() const noexcept {
-  return _id;
-}
+uint64_t osm2ttl::osm::Relation::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
 osm2ttl::osm::TagList osm2ttl::osm::Relation::tags() const noexcept {
@@ -32,6 +29,6 @@ osm2ttl::osm::TagList osm2ttl::osm::Relation::tags() const noexcept {
 
 // ____________________________________________________________________________
 std::vector<osm2ttl::osm::RelationMember> osm2ttl::osm::Relation::members()
-  const noexcept {
+    const noexcept {
   return _members;
 }

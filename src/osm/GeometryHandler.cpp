@@ -26,11 +26,10 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
 
 // ____________________________________________________________________________
 template <typename W>
-osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() {}
-
-// ____________________________________________________________________________
-template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
+  if (_config.noAreaDump) {
+    return;
+  }
   osm2ttl::osm::Area a = osm2ttl::osm::Area(area);
   if (!a.hasName()) {
     return;
@@ -47,6 +46,9 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
+  if (_config.noNodeDump) {
+    return;
+  }
   osm2ttl::osm::Node n = osm2ttl::osm::Node(node);
   if (n.tags().count("name") < 1) {
     return;
@@ -57,6 +59,9 @@ void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::way(const osmium::Way& way) {
+  if (_config.noWayDump) {
+    return;
+  }
   osm2ttl::osm::Way w = osm2ttl::osm::Way(way);
   if (w.tags().count("name") < 1 || w.tags().count("building") < 1) {
     return;
@@ -94,12 +99,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
   size_t entryCount = 0;
   progressBar.update(entryCount);
 
-#pragma omp parallel
+#pragma omp parallel shared(entryCount, progressBar) default(none)
   {
 #pragma omp single
     {
-      for (size_t i = 0; i < _containingAreas.size(); ++i) {
-        osm2ttl::osm::Area& area = _containingAreas[i];
+      for (auto& area : _containingAreas) {
         if (area.tagAdministrationLevel() > 0) {
           std::string s = _writer->generateIRI(
               area.fromWay() ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
@@ -109,10 +113,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                    boost::geometry::index::covered_by(area.envelope()));
                it != _spatialIndex.qend(); it++) {
             auto entry = it->second;
-#pragma omp task
+#pragma omp task private( \
+    entry, area, s) default(shared)  // NOLINT(openmp-use-default-none)
             {
-              auto entryId = entry.first;
-              auto geometry = entry.second;
+              auto& entryId = entry.first;
+              auto& geometry = entry.second;
               switch (geometry.index()) {
                 // Handle node
                 case 0:

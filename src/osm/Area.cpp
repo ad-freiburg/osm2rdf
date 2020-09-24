@@ -8,11 +8,10 @@
 #include <vector>
 
 #include "boost/geometry.hpp"
-#include "osmium/osm/area.hpp"
-
 #include "osm2ttl/geometry/Area.h"
 #include "osm2ttl/geometry/Box.h"
 #include "osm2ttl/geometry/Location.h"
+#include "osmium/osm/area.hpp"
 
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area() {
@@ -25,9 +24,10 @@ osm2ttl::osm::Area::Area() {
 osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
   _objId = area.orig_id();
-  if (area.tags()["boundary"] != nullptr
-      && area.tags()["admin_level"] != nullptr) {
-    _tagAdministrationLevel = strtol(area.tags()["admin_level"], nullptr, Base10Base);
+  if (area.tags()["boundary"] != nullptr &&
+      area.tags()["admin_level"] != nullptr) {
+    _tagAdministrationLevel =
+        strtol(area.tags()["admin_level"], nullptr, Base10Base);
   }
   if (area.tags()["name"] != nullptr) {
     _hasName = true;
@@ -40,8 +40,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
     _geom[oCount].outer().reserve(oring.size());
     for (const auto& nodeRef : oring) {
       auto l = nodeRef.location();
-      boost::geometry::append(_geom,
-                              osm2ttl::geometry::Location(l.lon(), l.lat()), -1, oCount);
+      boost::geometry::append(
+          _geom, osm2ttl::geometry::Location(l.lon(), l.lat()), -1, oCount);
     }
 
     auto innerRings = area.inner_rings(oring);
@@ -52,7 +52,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
       for (const auto& nodeRef : iring) {
         auto l = nodeRef.location();
         boost::geometry::append(_geom,
-                                osm2ttl::geometry::Location(l.lon(), l.lat()), iCount, oCount);
+                                osm2ttl::geometry::Location(l.lon(), l.lat()),
+                                iCount, oCount);
       }
       iCount++;
     }
@@ -62,14 +63,10 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Area::id() const noexcept {
-  return _id;
-}
+uint64_t osm2ttl::osm::Area::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Area::objId() const noexcept {
-  return _objId;
-}
+uint64_t osm2ttl::osm::Area::objId() const noexcept { return _objId; }
 
 // ____________________________________________________________________________
 osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const noexcept {
@@ -82,9 +79,7 @@ osm2ttl::geometry::Box osm2ttl::osm::Area::envelope() const noexcept {
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::Area::hasName() const noexcept {
-  return _hasName;
-}
+bool osm2ttl::osm::Area::hasName() const noexcept { return _hasName; }
 
 // ____________________________________________________________________________
 bool osm2ttl::osm::Area::fromWay() const noexcept {

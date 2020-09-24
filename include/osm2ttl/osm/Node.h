@@ -4,13 +4,11 @@
 #ifndef OSM2TTL_OSM_NODE_H_
 #define OSM2TTL_OSM_NODE_H_
 
-#include "osmium/osm/node.hpp"
-#include "osmium/osm/node_ref.hpp"
-
 #include "osm2ttl/geometry/Box.h"
 #include "osm2ttl/geometry/Location.h"
-
 #include "osm2ttl/osm/TagList.h"
+#include "osmium/osm/node.hpp"
+#include "osmium/osm/node_ref.hpp"
 
 namespace osm2ttl {
 namespace osm {
@@ -23,6 +21,7 @@ class Node {
   [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Location geom() const noexcept;
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
+
  protected:
   uint64_t _id;
   osm2ttl::geometry::Location _geom;

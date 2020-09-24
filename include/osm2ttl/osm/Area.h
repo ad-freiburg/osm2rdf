@@ -48,7 +48,7 @@ struct Area {
 // Make area hashable for stl-container
 namespace std {
 
-template<>
+template <>
 struct hash<osm2ttl::osm::Area> {
   std::size_t operator()(const osm2ttl::osm::Area& area) const noexcept {
     return area.id();

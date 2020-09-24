@@ -1,7 +1,6 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -19,7 +18,7 @@
 #include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/util/memory.hpp"
 
-template<typename T>
+template <typename T>
 void run(osm2ttl::config::Config& config) {
   // Setup
   // Input file reference
@@ -38,8 +37,8 @@ void run(osm2ttl::config::Config& config) {
     // Do not create empty areas
     osmium::area::Assembler::config_type assembler_config;
     assembler_config.create_empty_areas = false;
-    osmium::area::MultipolygonManager<osmium::area::Assembler>
-        mp_manager{assembler_config};
+    osmium::area::MultipolygonManager<osmium::area::Assembler> mp_manager{
+        assembler_config};
 
     // read relations for areas
     {
@@ -57,20 +56,23 @@ void run(osm2ttl::config::Config& config) {
                                                osmium::osm_entity_bits::object};
       osm2ttl::osm::LocationHandler* locationHandler =
           osm2ttl::osm::LocationHandler::create(config);
-      while(true) {
+      while (true) {
         osmium::memory::Buffer buf = reader.read();
         if (!buf) {
           break;
         }
         osmium::apply(buf, *locationHandler,
                       mp_manager.handler([&dumpHandler, &geometryHandler](
-                          osmium::memory::Buffer&& buffer) {
+                                             osmium::memory::Buffer&& buffer) {
                         osmium::apply(buffer, dumpHandler, geometryHandler);
-                      }), dumpHandler, geometryHandler);
+                      }),
+                      dumpHandler, geometryHandler);
       }
       reader.close();
       delete locationHandler;
-      std::cerr << "... done reading (libosmium) and converting (libosmium -> osm2ttl)" << std::endl;
+      std::cerr << "... done reading (libosmium) and converting (libosmium -> "
+                   "osm2ttl)"
+                << std::endl;
     }
 
     {
@@ -95,9 +97,12 @@ int main(int argc, char** argv) {
   config.fromArgs(argc, argv);
 
   std::cerr << "Free ram: "
-    << osm2ttl::util::ram::available()/(osm2ttl::util::ram::GIGA*1.0) << "G/"
-    << osm2ttl::util::ram::physPages()/(osm2ttl::util::ram::GIGA*1.0) << "G"
-    << std::endl;
+            << osm2ttl::util::ram::available() /
+                   (osm2ttl::util::ram::GIGA * 1.0)
+            << "G/"
+            << osm2ttl::util::ram::physPages() /
+                   (osm2ttl::util::ram::GIGA * 1.0)
+            << "G" << std::endl;
 
   try {
     if (config.outputFormat == "qlever") {
@@ -107,7 +112,8 @@ int main(int argc, char** argv) {
     } else if (config.outputFormat == "ttl") {
       run<osm2ttl::ttl::format::TTL>(config);
     } else {
-      std::cerr << "Unknown output format: " << config.outputFormat << std::endl;
+      std::cerr << "Unknown output format: " << config.outputFormat
+                << std::endl;
       std::exit(1);
     }
   } catch (const std::exception& e) {

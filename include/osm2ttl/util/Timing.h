@@ -6,22 +6,20 @@
 
 #include <algorithm>
 #include <chrono>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace osm2ttl {
 namespace util {
 
 class Timing {
  public:
-  void start() {
-    _start = std::chrono::steady_clock::now();
-  }
+  void start() { _start = std::chrono::steady_clock::now(); }
   void end() {
     auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double, std::milli> dur
-      = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
-        end - _start);
+    std::chrono::duration<double, std::milli> dur =
+        std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(
+            end - _start);
     _min = std::min<std::chrono::duration<double, std::milli>>(_min, dur);
     _max = std::max<std::chrono::duration<double, std::milli>>(_max, dur);
     _count++;

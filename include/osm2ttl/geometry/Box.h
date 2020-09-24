@@ -10,7 +10,7 @@
 
 namespace osm2ttl {
 namespace geometry {
-  typedef boost::geometry::model::box<osm2ttl::geometry::Location> Box;
+typedef boost::geometry::model::box<osm2ttl::geometry::Location> Box;
 }  // namespace geometry
 }  // namespace osm2ttl
 

@@ -65,4 +65,3 @@ struct Config {
 }  // namespace osm2ttl
 
 #endif  // OSM2TTL_CONFIG_CONFIG_H_
-

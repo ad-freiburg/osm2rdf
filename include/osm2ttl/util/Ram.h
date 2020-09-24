@@ -5,6 +5,7 @@
 #define OSM2TTL_UTIL_RAM_H_
 
 #include <unistd.h>
+
 #include <cstdint>
 
 namespace osm2ttl {

@@ -6,10 +6,9 @@
 
 #include <vector>
 
-#include "osmium/osm/relation.hpp"
-
 #include "osm2ttl/osm/RelationMember.h"
 #include "osm2ttl/osm/TagList.h"
+#include "osmium/osm/relation.hpp"
 
 namespace osm2ttl {
 namespace osm {
@@ -18,8 +17,10 @@ class Relation {
  public:
   explicit Relation(const osmium::Relation& relation);
   [[nodiscard]] uint64_t id() const noexcept;
-  [[nodiscard]] std::vector<osm2ttl::osm::RelationMember> members() const noexcept;
+  [[nodiscard]] std::vector<osm2ttl::osm::RelationMember> members()
+      const noexcept;
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
+
  protected:
   uint64_t _id;
   std::vector<osm2ttl::osm::RelationMember> _members;
@@ -30,5 +31,3 @@ class Relation {
 }  // namespace osm2ttl
 
 #endif  // OSM2TTL_OSM_RELATION_H_
-
-

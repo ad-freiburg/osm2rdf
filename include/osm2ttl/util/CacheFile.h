@@ -17,6 +17,7 @@ class CacheFile {
   void close();
   bool remove();
   int fileDescriptor() const;
+
  protected:
   std::filesystem::path _path;
   int _fileDescriptor = -1;

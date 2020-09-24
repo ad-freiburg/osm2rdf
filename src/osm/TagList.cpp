@@ -7,7 +7,7 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::TagList osm2ttl::osm::convertTagList(
-  const osmium::TagList& tagList) {
+    const osmium::TagList& tagList) {
   osm2ttl::osm::TagList result;
 
   for (const auto& tag : tagList) {

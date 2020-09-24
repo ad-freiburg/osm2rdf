@@ -3,15 +3,15 @@
 
 #include "osm2ttl/util/CacheFile.h"
 
-
 #include <fcntl.h>
-#include <filesystem>
 #include <unistd.h>
+
+#include <filesystem>
 #include <string>
 
 // ____________________________________________________________________________
-osm2ttl::util::CacheFile::CacheFile(const std::filesystem::path& path) :
-  _path(std::filesystem::absolute(path)) {
+osm2ttl::util::CacheFile::CacheFile(const std::filesystem::path& path)
+    : _path(std::filesystem::absolute(path)) {
   reopen();
 }
 
@@ -27,9 +27,8 @@ void osm2ttl::util::CacheFile::reopen() {
   _fileDescriptor = ::open(_path.c_str(), O_RDWR | O_CREAT | O_TRUNC, RWRWRW);
   if (_fileDescriptor == -1) {
     throw std::filesystem::filesystem_error(
-      "Can't open CacheFile",
-      std::filesystem::absolute(_path.c_str()),
-      std::make_error_code(std::errc::permission_denied));
+        "Can't open CacheFile", std::filesystem::absolute(_path.c_str()),
+        std::make_error_code(std::errc::permission_denied));
   }
 }
 
@@ -47,6 +46,4 @@ bool osm2ttl::util::CacheFile::remove() {
 }
 
 // ____________________________________________________________________________
-int osm2ttl::util::CacheFile::fileDescriptor() const {
-  return _fileDescriptor;
-}
+int osm2ttl::util::CacheFile::fileDescriptor() const { return _fileDescriptor; }

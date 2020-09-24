@@ -68,7 +68,6 @@ static const int BIT_IN_NIBBLE = 4;
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/Way.h"
-#include "osm2ttl/util/DispatchQueue.h"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/location.hpp"
 #include "osmium/osm/node.hpp"

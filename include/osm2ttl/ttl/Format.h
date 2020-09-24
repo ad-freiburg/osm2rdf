@@ -10,9 +10,9 @@
 namespace osm2ttl {
 namespace ttl {
 namespace format {
-  struct QLEVER {};
-  struct TTL {};
-  struct NT {};
+struct QLEVER {};
+struct TTL {};
+struct NT {};
 }  // namespace format
 }  // namespace ttl
 }  // namespace osm2ttl

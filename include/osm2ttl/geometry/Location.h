@@ -8,7 +8,7 @@
 
 namespace osm2ttl {
 namespace geometry {
-  typedef boost::geometry::model::d2::point_xy<double> Location;
+typedef boost::geometry::model::d2::point_xy<double> Location;
 }  // namespace geometry
 }  // namespace osm2ttl
 

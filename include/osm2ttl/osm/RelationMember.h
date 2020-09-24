@@ -11,9 +11,7 @@
 namespace osm2ttl {
 namespace osm {
 
-enum class RelationMemberType : uint8_t {
-  UNKNOWN, NODE, RELATION, WAY
-};
+enum class RelationMemberType : uint8_t { UNKNOWN, NODE, RELATION, WAY };
 
 class RelationMember {
  public:
@@ -21,6 +19,7 @@ class RelationMember {
   [[nodiscard]] uint64_t id() const noexcept;
   [[nodiscard]] std::string role() const noexcept;
   [[nodiscard]] osm2ttl::osm::RelationMemberType type() const noexcept;
+
  protected:
   uint64_t _id;
   std::string _role;
@@ -31,4 +30,3 @@ class RelationMember {
 }  // namespace osm2ttl
 
 #endif  // OSM2TTL_OSM_RELATIONMEMBER_H_
-

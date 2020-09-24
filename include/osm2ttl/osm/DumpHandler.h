@@ -6,19 +6,18 @@
 
 #include <ostream>
 
+#include "osm2ttl/config/Config.h"
+#include "osm2ttl/ttl/Writer.h"
 #include "osmium/handler.hpp"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/way.hpp"
 
-#include "osm2ttl/config/Config.h"
-#include "osm2ttl/ttl/Writer.h"
-
 namespace osm2ttl {
 namespace osm {
 
-template<typename W>
+template <typename W>
 class DumpHandler : public osmium::handler::Handler {
  public:
   DumpHandler(const osm2ttl::config::Config& config,
@@ -30,7 +29,7 @@ class DumpHandler : public osmium::handler::Handler {
   const osmium::memory::item_size_type EMPTY_TAG_SIZE = 8;
 
  protected:
-  template<typename T>
+  template <typename T>
   void write(const T& o);
   const osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;

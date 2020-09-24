@@ -10,7 +10,7 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::RelationMember::RelationMember(
-  const osmium::RelationMember& relationMember) {
+    const osmium::RelationMember& relationMember) {
   _id = relationMember.positive_ref();
   _role = std::string(relationMember.role());
   if (_role.empty()) {
@@ -32,9 +32,7 @@ osm2ttl::osm::RelationMember::RelationMember(
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::RelationMember::id() const noexcept {
-  return _id;
-}
+uint64_t osm2ttl::osm::RelationMember::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
 std::string osm2ttl::osm::RelationMember::role() const noexcept {
@@ -42,7 +40,7 @@ std::string osm2ttl::osm::RelationMember::role() const noexcept {
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::RelationMemberType osm2ttl::osm::RelationMember::type() const
-noexcept {
+osm2ttl::osm::RelationMemberType osm2ttl::osm::RelationMember::type()
+    const noexcept {
   return _type;
 }
