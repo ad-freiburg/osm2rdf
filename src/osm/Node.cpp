@@ -3,10 +3,8 @@
 
 #include "osm2ttl/osm/Node.h"
 
-#include <osm2ttl/geometry/Box.h>
-
-#include <boost/geometry/algorithms/envelope.hpp>
-
+#include "boost/geometry/algorithms/envelope.hpp"
+#include "osm2ttl/geometry/Box.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"

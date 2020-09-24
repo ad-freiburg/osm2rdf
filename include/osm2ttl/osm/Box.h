@@ -15,7 +15,7 @@ class Box {
   [[nodiscard]] osm2ttl::geometry::Box geom() const;
 
  protected:
-  osm2ttl::geometry::Box _geom;
+  osm2ttl::geometry::Box _geom{};
 };
 
 }  // namespace osm
