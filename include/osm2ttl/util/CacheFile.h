@@ -16,7 +16,7 @@ class CacheFile {
   void reopen();
   void close();
   bool remove();
-  int fileDescriptor() const;
+  [[nodiscard]] int fileDescriptor() const;
 
  protected:
   std::filesystem::path _path;

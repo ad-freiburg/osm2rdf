@@ -108,64 +108,62 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 #pragma omp single
     {
       for (auto& area : _containingAreas) {
-        if (area.tagAdministrationLevel() > 0) {
-          auto areaGeom = area.geom();
-          auto areaId = area.objId();
-          std::string s = _writer->generateIRI(
-              area.fromWay() ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                             : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaId);
-          for (auto it = _spatialIndex.qbegin(
-                   boost::geometry::index::covered_by(area.envelope()));
-               it != _spatialIndex.qend(); it++) {
-            auto entry = it->second;
+        auto areaGeom = area.geom();
+        auto areaId = area.objId();
+        std::string s = _writer->generateIRI(
+            area.fromWay() ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                           : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+            areaId);
+        for (auto it = _spatialIndex.qbegin(
+                 boost::geometry::index::covered_by(area.envelope()));
+             it != _spatialIndex.qend(); it++) {
+          auto entry = it->second;
 #pragma omp task firstprivate(areaGeom, areaId, entry, s)    \
     shared(osm2ttl::ttl::constants::IRI_OGC_CONTAINS,        \
            osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,     \
            osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, \
            osm2ttl::ttl::constants::NAMESPACE__OSM_WAY) default(none)
-            {
-              auto& entryId = entry.first;
-              auto& geometry = entry.second;
-              switch (geometry.index()) {
-                // Handle node
-                case 0:
-                  if (boost::geometry::covered_by(std::get<0>(geometry),
+          {
+            auto& entryId = entry.first;
+            auto& geometry = entry.second;
+            switch (geometry.index()) {
+              // Handle node
+              case 0:
+                if (boost::geometry::covered_by(std::get<0>(geometry),
+                                                areaGeom)) {
+                  _writer->writeTriple(
+                      s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
+                      _writer->generateIRI(
+                          osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+                          entryId));
+                }
+                break;
+                // Handle way
+              case 1:
+                if (entryId != areaId) {
+                  if (boost::geometry::covered_by(std::get<1>(geometry),
                                                   areaGeom)) {
                     _writer->writeTriple(
                         s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
                         _writer->generateIRI(
-                            osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+                            osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,
                             entryId));
                   }
-                  break;
-                  // Handle way
-                case 1:
-                  if (entryId != areaId) {
-                    if (boost::geometry::covered_by(std::get<1>(geometry),
-                                                    areaGeom)) {
-                      _writer->writeTriple(
-                          s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
-                          _writer->generateIRI(
-                              osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,
-                              entryId));
-                    }
+                }
+                break;
+                // Handle area
+              case 2:
+                if (entryId != areaId) {
+                  if (boost::geometry::covered_by(std::get<2>(geometry),
+                                                  areaGeom)) {
+                    _writer->writeTriple(
+                        s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
+                        _writer->generateIRI(
+                            osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+                            entryId));
                   }
-                  break;
-                  // Handle area
-                case 2:
-                  if (entryId != areaId) {
-                    if (boost::geometry::covered_by(std::get<2>(geometry),
-                                                    areaGeom)) {
-                      _writer->writeTriple(
-                          s, osm2ttl::ttl::constants::IRI_OGC_CONTAINS,
-                          _writer->generateIRI(
-                              osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-                              entryId));
-                    }
-                  }
-                  break;
-              }
+                }
+                break;
             }
           }
         }

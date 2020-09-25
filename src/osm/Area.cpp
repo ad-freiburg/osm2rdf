@@ -3,9 +3,7 @@
 
 #include "osm2ttl/osm/Area.h"
 
-#include <iostream>
 #include <limits>
-#include <vector>
 
 #include "boost/geometry.hpp"
 #include "osm2ttl/geometry/Area.h"
@@ -23,11 +21,11 @@ osm2ttl::osm::Area::Area() {
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
-  _objId = area.orig_id();
+  _objId = static_cast<unsigned long>(area.orig_id());
   if (area.tags()["boundary"] != nullptr &&
       area.tags()["admin_level"] != nullptr) {
-    _tagAdministrationLevel =
-        strtol(area.tags()["admin_level"], nullptr, Base10Base);
+    _tagAdministrationLevel = static_cast<char>(
+        strtol(area.tags()["admin_level"], nullptr, Base10Base));
   }
   if (area.tags()["name"] != nullptr) {
     _hasName = true;
@@ -35,7 +33,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
 
   auto outerRings = area.outer_rings();
   _geom.resize(outerRings.size());
-  size_t oCount = 0;
+  // int and not size_t as boost uses int internal
+  int oCount = 0;
   for (const auto& oring : outerRings) {
     _geom[oCount].outer().reserve(oring.size());
     for (const auto& nodeRef : oring) {
@@ -46,7 +45,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
 
     auto innerRings = area.inner_rings(oring);
     _geom[oCount].inners().resize(innerRings.size());
-    size_t iCount = 0;
+    // int and not size_t as boost uses int internal
+    int iCount = 0;
     for (const auto& iring : innerRings) {
       _geom[oCount].inners()[iCount].reserve(iring.size());
       for (const auto& nodeRef : iring) {
