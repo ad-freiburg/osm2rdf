@@ -34,7 +34,7 @@ struct Config {
   bool skipWikiLinks = false;
 
   // Output modifiers
-  uint16_t wktSimplify = 100;
+  uint16_t wktSimplify = 250;
   uint8_t wktDeviation = 5;
   uint8_t wktPrecision = 12;
 

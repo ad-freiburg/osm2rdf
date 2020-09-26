@@ -26,22 +26,22 @@ const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 // Generated constants (depending on output format)
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
-inline std::string IRI_OGC_CONTAINS;
+inline std::string IRI__OGC_CONTAINS;
 inline std::string IRI__OSM_META__POS;
-inline std::string IRI_OSMWAY_ISCLOSED;
-inline std::string IRI_OSMWAY_NODE;
-inline std::string IRI_OSMWAY_NODECOUNT;
-inline std::string IRI_OSMWAY_UNIQUENODECOUNT;
-inline std::string IRI_OSM_ENVELOPE;
-inline std::string IRI_OSM_NODE;
-inline std::string IRI_OSM_RELATION;
-inline std::string IRI_OSM_WAY;
-inline std::string IRI_OSM_WIKIPEDIA;
-inline std::string IRI_RDF_TYPE;
-inline std::string IRI_XSD_INTEGER;
+inline std::string IRI__OSMWAY_ISCLOSED;
+inline std::string IRI__OSMWAY_NODE;
+inline std::string IRI__OSMWAY_NODECOUNT;
+inline std::string IRI__OSMWAY_UNIQUENODECOUNT;
+inline std::string IRI__OSM_ENVELOPE;
+inline std::string IRI__OSM_NODE;
+inline std::string IRI__OSM_RELATION;
+inline std::string IRI__OSM_WAY;
+inline std::string IRI__OSM_WIKIPEDIA;
+inline std::string IRI__RDF_TYPE;
+inline std::string IRI__XSD_INTEGER;
 
-inline std::string LITERAL_NO;
-inline std::string LITERAL_YES;
+inline std::string LITERAL__NO;
+inline std::string LITERAL__YES;
 
 }  // namespace constants
 }  // namespace ttl
