@@ -24,8 +24,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto configOp =
       op.add<popl::Value<std::string>>("c", "config", "Config file");
 
-  auto skipAreaPrepOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "skip-area-prep", "Skip area sorting");
+  auto noDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-dump", "Do not dump normal data");
+  auto noContainsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-contains", "Do not calculate contains relation");
   auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "use-ram-for-locations", "Store locations in RAM");
 
@@ -89,7 +91,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     // Skip passes
-    skipAreaPrep = skipAreaPrepOp->is_set();
+    noDump = noDumpOp->is_set();
+    noContains = noContainsOp->is_set();
     useRamForLocations = useRamForLocationsOp->is_set();
 
     // Select types to dump

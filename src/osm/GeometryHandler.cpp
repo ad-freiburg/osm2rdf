@@ -27,6 +27,9 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
+  if (_config.noContains) {
+    return;
+  }
   if (_config.noAreaDump) {
     return;
   }
@@ -38,7 +41,7 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
     _spatialStorage.emplace_back(a.envelope(),
                                  std::make_pair(a.objId(), a.geom()));
   }
-  if (a.tagAdministrationLevel() > 0) {
+  if (a.tagAdministrationLevel() > 0 && a.tagAdministrationLevel() < 4) {
     _containingAreas.push_back(a);
   }
 }
@@ -46,6 +49,9 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
+  if (_config.noContains) {
+    return;
+  }
   if (_config.noNodeDump) {
     return;
   }
@@ -59,6 +65,9 @@ void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::way(const osmium::Way& way) {
+  if (_config.noContains) {
+    return;
+  }
   if (_config.noWayDump) {
     return;
   }
@@ -72,6 +81,9 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osmium::Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::prepareLookup() {
+  if (_config.noContains) {
+    return;
+  }
   {
     std::cerr << " Packing combined tree with " << _spatialStorage.size()
               << " entries ... " << std::flush;
@@ -90,6 +102,9 @@ void osm2ttl::osm::GeometryHandler<W>::prepareLookup() {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::lookup() {
+  if (_config.noContains) {
+    return;
+  }
   if (!_sorted) {
     throw std::runtime_error("GeometryHandler was not prepared for lookup!");
   }

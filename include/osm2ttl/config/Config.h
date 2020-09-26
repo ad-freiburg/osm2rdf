@@ -15,7 +15,8 @@ namespace config {
 
 struct Config {
   // Select what to do
-  bool skipAreaPrep = false;
+  bool noDump = false;
+  bool noContains = false;
   bool useRamForLocations = false;
 
   // Select types to dump

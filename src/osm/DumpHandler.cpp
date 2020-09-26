@@ -34,6 +34,9 @@ void osm2ttl::osm::DumpHandler<W>::write(const T& o) {
 // ____________________________________________________________________________
 template<typename W>
 void osm2ttl::osm::DumpHandler<W>::area(const osmium::Area& area) {
+  if (_config.noDump) {
+    return;
+  }
   if (_config.noAreaDump) {
     return;
   }
@@ -46,6 +49,9 @@ void osm2ttl::osm::DumpHandler<W>::area(const osmium::Area& area) {
 // ____________________________________________________________________________
 template<typename W>
 void osm2ttl::osm::DumpHandler<W>::node(const osmium::Node& node) {
+  if (_config.noDump) {
+    return;
+  }
   if (_config.noNodeDump) {
     return;
   }
@@ -58,6 +64,9 @@ void osm2ttl::osm::DumpHandler<W>::node(const osmium::Node& node) {
 // ____________________________________________________________________________
 template<typename W>
 void osm2ttl::osm::DumpHandler<W>::relation(const osmium::Relation& relation) {
+  if (_config.noDump) {
+    return;
+  }
   if (_config.noRelationDump) {
     return;
   }
@@ -70,6 +79,9 @@ void osm2ttl::osm::DumpHandler<W>::relation(const osmium::Relation& relation) {
 // ____________________________________________________________________________
 template<typename W>
 void osm2ttl::osm::DumpHandler<W>::way(const osmium::Way& way) {
+  if (_config.noDump) {
+    return;
+  }
   if (_config.noWayDump) {
     return;
   }

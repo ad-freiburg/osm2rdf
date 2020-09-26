@@ -392,9 +392,10 @@ void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s,
   const std::string& key = tag.first;
   const std::string& value = tag.second;
   if (key == "admin_level") {
-    writeTriple(
-        s, generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
-        generateLiteral(value, osm2ttl::ttl::constants::IRI_XSD_INTEGER));
+    writeTriple(s,
+                generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
+                generateLiteral(
+                    value, "^^" + osm2ttl::ttl::constants::IRI_XSD_INTEGER));
   } else {
     writeTriple(s,
                 generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
@@ -409,9 +410,10 @@ void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s,
   std::string_view key{tag.key()};
   std::string_view value{tag.value()};
   if (key == "admin_level") {
-    writeTriple(
-        s, generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
-        generateLiteral(value, osm2ttl::ttl::constants::IRI_XSD_INTEGER));
+    writeTriple(s,
+                generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
+                generateLiteral(
+                    value, "^^" + osm2ttl::ttl::constants::IRI_XSD_INTEGER));
   } else {
     writeTriple(s,
                 generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
