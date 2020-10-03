@@ -35,6 +35,8 @@ osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
   osm2ttl::ttl::constants::IRI__OGC_CONTAINS =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contains");
+  osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY =
+      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contained_by");
   osm2ttl::ttl::constants::IRI__OSM_META__POS =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META, "pos");
   osm2ttl::ttl::constants::IRI__OSMWAY_ISCLOSED =

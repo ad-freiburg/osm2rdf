@@ -60,6 +60,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
     oCount++;
   }
   boost::geometry::envelope(_geom, _envelope);
+  _geomArea = boost::geometry::area(_geom);
+  _envelopeArea = boost::geometry::area(_envelope);
 }
 
 // ____________________________________________________________________________
@@ -76,6 +78,16 @@ osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const noexcept {
 // ____________________________________________________________________________
 osm2ttl::geometry::Box osm2ttl::osm::Area::envelope() const noexcept {
   return _envelope;
+}
+
+// ____________________________________________________________________________
+double osm2ttl::osm::Area::geomArea() const noexcept {
+  return _geomArea;
+}
+
+// ____________________________________________________________________________
+double osm2ttl::osm::Area::envelopeArea() const noexcept {
+  return _envelopeArea;
 }
 
 // ____________________________________________________________________________
