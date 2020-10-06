@@ -76,9 +76,7 @@ void run(osm2ttl::config::Config& config) {
     }
 
     {
-      std::cerr << "Preparing data for contains relation ..." << std::endl;
-      geometryHandler.prepareLookup();
-      std::cerr << "... calculating contains relation ..." << std::endl;
+      std::cerr << "Calculating contains relation ..." << std::endl;
       geometryHandler.lookup();
       std::cerr << "... done" << std::endl;
     }
