@@ -37,7 +37,8 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
   if (!a.hasName()) {
     return;
   }
-  _containingAreas.emplace_back(a.envelope(), a.objId(), a.geom(), a.fromWay());
+  _spatialStorageArea.emplace_back(a.envelope(), a.objId(), a.geom(),
+                                   a.fromWay());
 }
 
 // ____________________________________________________________________________
@@ -80,18 +81,18 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
   }
   SpatialIndex spatialIndex;
   {
-    std::cerr << " Packing combined tree with " << _containingAreas.size()
+    std::cerr << " Packing combined tree with " << _spatialStorageArea.size()
               << " entries ... " << std::flush;
     spatialIndex =
-        SpatialIndex(_containingAreas.begin(), _containingAreas.end());
+        SpatialIndex(_spatialStorageArea.begin(), _spatialStorageArea.end());
     std::cerr << "done" << std::endl;
   }
 
   if (!_config.noAreaDump) {
-    std::cerr << " Contains relations for " << _containingAreas.size()
+    std::cerr << " Contains relations for " << _spatialStorageArea.size()
               << " areas in " << spatialIndex.size() << " areas ..."
               << std::endl;
-    osmium::ProgressBar progressBar{_containingAreas.size(), true};
+    osmium::ProgressBar progressBar{_spatialStorageArea.size(), true};
     size_t entryCount = 0;
     progressBar.update(entryCount);
 
@@ -105,35 +106,35 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     {
 #pragma omp single
       {
-        for (auto& entry : _containingAreas) {
+        for (auto& entry : _spatialStorageArea) {
           auto entryEnvelope = std::get<0>(entry);
           auto entryId = std::get<1>(entry);
           auto entryGeom = std::get<2>(entry);
           std::string entryIRI = _writer->generateIRI(
               std::get<3>(entry)
-              ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-              : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+                  ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                  : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
               entryId);
           for (auto it = spatialIndex.qbegin(
-              boost::geometry::index::covers(entryEnvelope));
+                   boost::geometry::index::covers(entryEnvelope));
                it != spatialIndex.qend(); it++) {
             auto areaId = std::get<1>(*it);
             auto areaGeom = std::get<2>(*it);
             auto areaFromWay = std::get<3>(*it);
 #pragma omp task firstprivate(areaFromWay, areaGeom, areaId, entryGeom, \
                               entryIRI, entryId)                        \
-    shared(osm2ttl::ttl::constants::IRI__OGC_CONTAINS, std::cerr,      \
-           osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,             \
-           osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,               \
-           osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,           \
+    shared(osm2ttl::ttl::constants::IRI__OGC_CONTAINS, std::cerr,       \
+           osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,              \
+           osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,                \
+           osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,            \
            osm2ttl::ttl::constants::NAMESPACE__OSM_WAY) default(none)
             {
               if (areaId != entryId &&
                   boost::geometry::covered_by(entryGeom, areaGeom)) {
                 std::string areaIRI = _writer->generateIRI(
                     areaFromWay
-                    ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                    : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+                        ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
                     areaId);
                 _writer->writeTriple(areaIRI,
                                      osm2ttl::ttl::constants::IRI__OGC_CONTAINS,

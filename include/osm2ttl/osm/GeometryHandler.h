@@ -61,7 +61,7 @@ class GeometryHandler : public osmium::handler::Handler {
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
   // Spatial Index
-  std::vector<SpatialAreaValue> _containingAreas;
+  std::vector<SpatialAreaValue> _spatialStorageArea;
   std::vector<SpatialNodeValue> _spatialStorageNode;
   std::vector<SpatialWayValue> _spatialStorageWay;
 };
