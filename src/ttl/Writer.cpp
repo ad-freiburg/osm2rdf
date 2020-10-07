@@ -360,7 +360,8 @@ void osm2ttl::ttl::Writer<T>::writeBoostGeometry(const std::string& s,
     }
   }
   std::ostringstream tmp;
-  tmp << std::setprecision(_config.wktPrecision) << boost::geometry::wkt(geom);
+  tmp << std::fixed << std::setprecision(_config.wktPrecision)
+      << boost::geometry::wkt(geom);
   writeTriple(s, p,
               "\"" + tmp.str() + "\"^^" +
                   osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL);
@@ -381,7 +382,8 @@ void osm2ttl::ttl::Writer<T>::writeBox(const std::string& s,
                                        const osm2ttl::geometry::Box& box) {
   // Box can not be simplified -> output directly.
   std::ostringstream tmp;
-  tmp << boost::geometry::wkt(box);
+  tmp << std::fixed << std::setprecision(_config.wktPrecision)
+      << boost::geometry::wkt(box);
   writeTriple(s, p,
               "\"" + tmp.str() + "\"^^" +
                   osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL);

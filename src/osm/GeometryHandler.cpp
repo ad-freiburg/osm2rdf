@@ -50,7 +50,7 @@ void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
     return;
   }
   osm2ttl::osm::Node n = osm2ttl::osm::Node(node);
-  if (n.tags().count("name") < 1) {
+  if (n.tags().empty()) {
     return;
   }
   _spatialStorageNode.emplace_back(n.envelope(), n.id(), n.geom());
@@ -66,7 +66,7 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osmium::Way& way) {
     return;
   }
   osm2ttl::osm::Way w = osm2ttl::osm::Way(way);
-  if (w.tags().count("name") < 1 || w.tags().count("building") < 1) {
+  if (w.tags().empty()) {
     return;
   }
   _spatialStorageWay.emplace_back(w.envelope(), w.id(), w.geom());
@@ -96,7 +96,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     progressBar.update(entryCount);
 
 #pragma omp parallel shared(                          \
-    entryCount, progressBar, spatialIndex,            \
+    entryCount, progressBar, spatialIndex, std::cerr, \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,       \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,   \
     osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,     \
@@ -121,8 +121,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
             auto areaGeom = std::get<2>(*it);
             auto areaFromWay = std::get<3>(*it);
 #pragma omp task firstprivate(areaFromWay, areaGeom, areaId, entryGeom, \
-                              entryIRI, entryId)                                 \
-    shared(osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                 \
+                              entryIRI, entryId)                        \
+    shared(osm2ttl::ttl::constants::IRI__OGC_CONTAINS, std::cerr,      \
            osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,             \
            osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,               \
            osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,           \
@@ -222,7 +222,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     progressBar.update(entryCount);
 
 #pragma omp parallel shared(                          \
-    entryCount, progressBar, spatialIndex,            \
+    entryCount, progressBar, spatialIndex, std::cerr, \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,       \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,   \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, \
@@ -244,7 +244,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
             auto areaFromWay = std::get<3>(*it);
 #pragma omp task firstprivate(areaFromWay, areaGeom, areaId, wayGeom, wayId, \
                               wayIRI)                                        \
-    shared(osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                       \
+    shared(osm2ttl::ttl::constants::IRI__OGC_CONTAINS, std::cerr,            \
            osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                   \
            osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                 \
            osm2ttl::ttl::constants::NAMESPACE__OSM_WAY) default(none)
