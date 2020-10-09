@@ -3,6 +3,7 @@
 
 #include "osm2ttl/osm/GeometryHandler.h"
 
+
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -15,6 +16,7 @@
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/ttl/Writer.h"
+#include "osm2ttl/util/DirectedGraph.h"
 #include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/util/progress_bar.hpp"
 
@@ -38,7 +40,7 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
     return;
   }
   _spatialStorageArea.emplace_back(a.envelope(), a.objId(), a.geom(),
-                                   a.fromWay());
+                                   a.fromWay(), boost::geometry::area(a.geom()));
 }
 
 // ____________________________________________________________________________
@@ -80,12 +82,61 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     return;
   }
   SpatialIndex spatialIndex;
+  osm2ttl::util::DirectedGraph directedAreaGraph;
   {
     std::cerr << " Packing combined tree with " << _spatialStorageArea.size()
               << " entries ... " << std::flush;
     spatialIndex =
         SpatialIndex(_spatialStorageArea.begin(), _spatialStorageArea.end());
     std::cerr << "done" << std::endl;
+  }
+  {
+    std::cerr << " Sorting " << _spatialStorageArea.size()
+              << " areas by explicit size ... " << std::flush;
+    std::vector<SpatialAreaValue> sav(_spatialStorageArea.begin(), _spatialStorageArea.end());
+    // big -> small
+    std::sort(sav.begin(), sav.end(), [](const auto& a, const auto& b){
+      return std::get<4>(a) < std::get<4>(b);
+    });
+    std::cerr << " done" << std::endl;
+    std::cerr << " Generating DAG from " << sav.size()
+              << " sorted areas ... " << std::endl;
+
+    osmium::ProgressBar progressBar{sav.size(), true};
+    size_t entryCount = 0;
+    progressBar.update(entryCount);
+
+    for (auto& entry : sav) {
+      // Set containing all areas we are inside of
+      std::set<uint64_t> skip;
+      std::vector<SpatialAreaValue> queryResult;
+      spatialIndex.query(boost::geometry::index::covers(std::get<0>(entry)), std::back_inserter(queryResult));
+      // small -> big
+      std::sort(queryResult.rbegin(), queryResult.rend(), [](const auto& a, const auto& b){
+        return std::get<4>(a) < std::get<4>(b);
+      });
+
+      for (const auto& area : queryResult) {
+        if (std::get<1>(area) == std::get<1>(entry)) {
+          continue;
+        }
+        if (skip.find(std::get<1>(area)) != skip.end()) {
+          continue;
+        }
+        if (boost::geometry::covered_by(std::get<2>(entry), std::get<2>(area))) {
+          if (!boost::geometry::equals(std::get<2>(entry), std::get<2>(area))) {
+            directedAreaGraph.addEdge(std::get<1>(entry), std::get<1>(area));
+            for (const auto& newSkip : directedAreaGraph.findAbove(std::get<1>(entry))) {
+              skip.insert(newSkip);
+            }
+          }
+        }
+      }
+      progressBar.update(entryCount++);
+    }
+
+    progressBar.done();
+    std::cerr << " ... done" << std::endl;
   }
 
   if (!_config.noAreaDump) {
