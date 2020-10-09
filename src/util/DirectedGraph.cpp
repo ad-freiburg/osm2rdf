@@ -13,17 +13,17 @@ void osm2ttl::util::DirectedGraph::addEdge(uint64_t src, uint64_t dst) {
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(uint64_t src) {
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(uint64_t src) const {
   return findInDirection(src, true);
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findBelow(uint64_t src) {
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findBelow(uint64_t src) const {
   return findInDirection(src, false);
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(uint64_t src, bool up) {
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(uint64_t src, bool up) const {
   std::vector<uint64_t> tmp;
 
   if (_adjacency.count(src) == 0) {
@@ -31,12 +31,12 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(uint64_t src
   }
 
   std::vector<uint64_t> tmp2;
-  for (const auto& pair : _adjacency[src]) {
+  for (const auto& pair : _adjacency.at(src)) {
     if (pair.second == up) {
       tmp2.push_back(pair.first);
     }
   }
-  for (const auto& pair : _adjacency[src]) {
+  for (const auto& pair : _adjacency.at(src)) {
     if (pair.second == up) {
       auto v = findInDirection(pair.first, up);
       tmp2.insert(tmp2.end(), v.begin(), v.end());
