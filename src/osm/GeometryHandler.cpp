@@ -107,7 +107,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t entryCount = 0;
     size_t numberChecks = 0;
     size_t skippedByDAG = 0;
-    size_t skippedByEnvelope = 0;
     progressBar.update(entryCount);
 
     for (auto& entry : sav) {
@@ -134,9 +133,9 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
         const auto& areaFromWay = std::get<3>(area);
-        if (areaId == entryId) {
+        /*if (areaId == entryId) {
           continue;
-        }
+        }*/
         numberChecks++;
 
         if (skip.find(areaId) != skip.end()) {
@@ -144,11 +143,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           continue;
         }
 
-        if (!boost::geometry::intersects(entryEnvelope,
-                                         areaEnvelope)) {
-          skippedByEnvelope++;
-          continue;
-        }
         if (boost::geometry::intersects(entryGeom,
                                         areaGeom)) {
           std::string areaIRI = _writer->generateIRI(
@@ -162,9 +156,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           _writer->writeTriple(
               entryIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
               areaIRI);
-          if (boost::geometry::covered_by(entryEnvelope,
-                                           areaEnvelope)
-              && boost::geometry::covered_by(entryGeom,
+          if (boost::geometry::covered_by(entryGeom,
                                         areaGeom)) {
             _writer->writeTriple(areaIRI,
                                  osm2ttl::ttl::constants::IRI__OGC_CONTAINS,
@@ -186,8 +178,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 
     progressBar.done();
     std::cerr << " ... done with " << numberChecks << " checks, "
-              << skippedByDAG << " skipped by DAG and " << skippedByEnvelope
-              << " skipped by Envelope" << std::endl;
+              << skippedByDAG << " skipped by DAG" << std::endl;
   }
 
   if (!_config.noNodeDump) {
@@ -198,7 +189,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t entryCount = 0;
     size_t numberChecks = 0;
     size_t skippedByDAG = 0;
-    size_t skippedByEnvelope = 0;
     progressBar.update(entryCount);
 
 #pragma omp parallel for
@@ -227,10 +217,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         const auto& areaFromWay = std::get<3>(area);
         numberChecks++;
 
-        if (!boost::geometry::covered_by(nodeEnvelope, areaEnvelope)) {
-          skippedByEnvelope++;
-          continue;
-        }
         if (skip.find(areaId) != skip.end()) {
           skippedByDAG++;
           continue;
@@ -259,8 +245,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
     progressBar.done();
     std::cerr << " ... done with " << numberChecks << " checks, "
-              << skippedByDAG << " skipped by DAG and " << skippedByEnvelope
-              << " skipped by Envelope" << std::endl;
+              << skippedByDAG << " skipped by DAG" << std::endl;
   }
 
   if (!_config.noWayDump) {
@@ -271,7 +256,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t entryCount = 0;
     size_t numberChecks = 0;
     size_t skippedByDAG = 0;
-    size_t skippedByEnvelope = 0;
     progressBar.update(entryCount);
 
 #pragma omp parallel for
@@ -298,15 +282,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
         const auto& areaFromWay = std::get<3>(area);
-        if (areaId == wayId) {
+        if (areaFromWay && areaId == wayId) {
           continue;
         }
         numberChecks++;
 
-        if (!boost::geometry::intersects(wayEnvelope, areaEnvelope)) {
-          skippedByEnvelope++;
-          continue;
-        }
         if (skip.find(areaId) != skip.end()) {
           skippedByDAG++;
           continue;
@@ -322,9 +302,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
           _writer->writeTriple(
               wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, areaIRI);
-          if (boost::geometry::covered_by(wayEnvelope,
-                                          areaEnvelope)
-              && boost::geometry::covered_by(wayGeom,
+          if (boost::geometry::covered_by(wayGeom,
                                              areaGeom)) {
             _writer->writeTriple(areaIRI,
                                  osm2ttl::ttl::constants::IRI__OGC_CONTAINS,
@@ -343,8 +321,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
     progressBar.done();
     std::cerr << " ... done with " << numberChecks << " checks, "
-              << skippedByDAG << " skipped by DAG and " << skippedByEnvelope
-              << " skipped by Envelope" << std::endl;
+              << skippedByDAG << " skipped by DAG" << std::endl;
   }
 }
 
