@@ -38,9 +38,9 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
   if (!a.hasName()) {
     return;
   }
-  _spatialStorageArea.emplace_back(a.envelope(), a.objId(), a.geom(),
-                                   a.fromWay(),
-                                   boost::geometry::area(a.geom()));
+  _spatialStorageArea.emplace_back(a.envelope(), a.id(), a.geom(), a.objId(),
+                                   boost::geometry::area(a.geom()),
+                                   a.fromWay());
 }
 
 // ____________________________________________________________________________
@@ -113,10 +113,12 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
+      const auto& entryObjId = std::get<3>(entry);
+      const auto& entryFromWay = std::get<5>(entry);
       std::string entryIRI = _writer->generateIRI(
-          std::get<3>(entry) ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                             : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-          std::get<1>(entry));
+          entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                       : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+          entryObjId);
       // Set containing all areas we are inside of
       std::set<uint64_t> skip;
       std::vector<SpatialAreaValue> queryResult;
@@ -129,13 +131,13 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                 });
 
       for (const auto& area : queryResult) {
-        const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
-        const auto& areaFromWay = std::get<3>(area);
-        /*if (areaId == entryId) {
+        const auto& areaObjId = std::get<3>(area);
+        const auto& areaFromWay = std::get<5>(area);
+        if (areaId == entryId) {
           continue;
-        }*/
+        }
         numberChecks++;
 
         if (skip.find(areaId) != skip.end()) {
@@ -143,27 +145,22 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           continue;
         }
 
-        if (boost::geometry::intersects(entryGeom,
-                                        areaGeom)) {
+        if (boost::geometry::intersects(entryGeom, areaGeom)) {
           std::string areaIRI = _writer->generateIRI(
-              areaFromWay
-              ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-              : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaId);
-          _writer->writeTriple(areaIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,
-                               entryIRI);
+              areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
           _writer->writeTriple(
-              entryIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-              areaIRI);
-          if (boost::geometry::covered_by(entryGeom,
-                                        areaGeom)) {
-            _writer->writeTriple(areaIRI,
-                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINS,
-                                 entryIRI);
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
+          _writer->writeTriple(entryIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                               areaIRI);
+          if (boost::geometry::covered_by(entryGeom, areaGeom)) {
             _writer->writeTriple(
-                entryIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                areaIRI);
+                areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
+            _writer->writeTriple(entryIRI,
+                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                                 areaIRI);
             if (!boost::geometry::equals(entryGeom, areaGeom)) {
               directedAreaGraph.addEdge(entryId, areaId);
               for (const auto& newSkip : directedAreaGraph.findAbove(entryId)) {
@@ -179,6 +176,13 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     progressBar.done();
     std::cerr << " ... done with " << numberChecks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;
+  }
+  {
+    std::cerr << " Dumping DAG as " << _config.output << ".dot ..." << std::flush;
+    std::filesystem::path p{_config.output};
+    p += ".dot";
+    directedAreaGraph.dump(p);
+    std::cerr << " done" << std::endl;
   }
 
   if (!_config.noNodeDump) {
@@ -211,10 +215,10 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                   return std::get<4>(a) < std::get<4>(b);
                 });
       for (const auto& area : queryResult) {
-        const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
-        const auto& areaFromWay = std::get<3>(area);
+        const auto& areaObjId = std::get<3>(area);
+        const auto& areaFromWay = std::get<5>(area);
         numberChecks++;
 
         if (skip.find(areaId) != skip.end()) {
@@ -226,17 +230,17 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                           : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaId);
+              areaObjId);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, nodeIRI);
           _writer->writeTriple(
               nodeIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, nodeIRI);
-          _writer->writeTriple(
-              nodeIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, areaIRI);
-          for (const auto& newSkip :
-               directedAreaGraph.findAbove(std::get<1>(area))) {
+          _writer->writeTriple(nodeIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                               areaIRI);
+          for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
             skip.insert(newSkip);
           }
         }
@@ -278,11 +282,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                   return std::get<4>(a) < std::get<4>(b);
                 });
       for (const auto& area : queryResult) {
-        const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
-        const auto& areaFromWay = std::get<3>(area);
-        if (areaFromWay && areaId == wayId) {
+        const auto& areaObjId = std::get<3>(area);
+        const auto& areaFromWay = std::get<5>(area);
+        if (areaFromWay && areaObjId == wayId) {
           continue;
         }
         numberChecks++;
@@ -292,27 +296,24 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           continue;
         }
 
-
         if (boost::geometry::intersects(wayGeom, areaGeom)) {
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                           : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaId);
+              areaObjId);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
-          _writer->writeTriple(
-              wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, areaIRI);
-          if (boost::geometry::covered_by(wayGeom,
-                                             areaGeom)) {
-            _writer->writeTriple(areaIRI,
-                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINS,
-                                 wayIRI);
+          _writer->writeTriple(wayIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                               areaIRI);
+          if (boost::geometry::covered_by(wayGeom, areaGeom)) {
             _writer->writeTriple(
-                wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                areaIRI);
+                areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
+            _writer->writeTriple(wayIRI,
+                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                                 areaIRI);
           }
-          for (const auto& newSkip :
-              directedAreaGraph.findAbove(std::get<1>(area))) {
+          for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
             skip.insert(newSkip);
           }
         }

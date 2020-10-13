@@ -4,7 +4,11 @@
 #include "osm2ttl/util/DirectedGraph.h"
 
 #include <stdint.h>
+
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 
 // ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::addEdge(uint64_t src, uint64_t dst) {
@@ -13,17 +17,20 @@ void osm2ttl::util::DirectedGraph::addEdge(uint64_t src, uint64_t dst) {
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(uint64_t src) const {
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
+    uint64_t src) const {
   return findInDirection(src, true);
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findBelow(uint64_t src) const {
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findBelow(
+    uint64_t src) const {
   return findInDirection(src, false);
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(uint64_t src, bool up) const {
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(
+    uint64_t src, bool up) const {
   std::vector<uint64_t> tmp;
 
   if (_adjacency.count(src) == 0) {
@@ -50,4 +57,35 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(uint64_t src
   }
 
   return std::move(std::vector<uint64_t>(tmp.rbegin(), tmp.rend()));
+}
+
+// ____________________________________________________________________________
+void osm2ttl::util::DirectedGraph::dump(std::filesystem::path filename) const {
+  std::ofstream ofs;
+  ofs.open(filename);
+
+  ofs << "digraph osm2ttl {\nrankdir=\"BT\"\n";
+  for (const auto& [id, list] : _adjacency) {
+    uint64_t src = id;
+    std::string shape = "rectangle";
+    if ((src & 1) == 1) {
+      shape = "ellipse";
+      src -= 1;
+    }
+    src /= 2;
+    ofs << src << " [label=\"" << src << "\", shape=" << shape << ", style=solid]\n";
+    for (const auto& [dstId, dir] : list) {
+      uint64_t dst = dstId;
+      if (dir) {
+        if ((dst & 1) == 1) {
+          dst -= 1;
+        }
+        dst /= 2;
+        ofs << src << " -> " << dst << "\n";
+      }
+    }
+  }
+  ofs << "}\n";
+  ofs.flush();
+  ofs.close();
 }

@@ -5,6 +5,7 @@
 #define OSM2TTL_INCLUDE_OSM2TTL_UTIL_DIRECTEDGRAPH_H
 
 #include <stdint.h>
+#include <filesystem>
 #include <unordered_map>
 #include <vector>
 
@@ -16,6 +17,7 @@ class DirectedGraph {
   void addEdge(uint64_t src, uint64_t dst);
   std::vector<uint64_t> findAbove(uint64_t src) const;
   std::vector<uint64_t> findBelow(uint64_t src) const;
+  void dump(std::filesystem::path filename) const;
 
  protected:
   std::vector<uint64_t> findInDirection(uint64_t src, bool up) const;
