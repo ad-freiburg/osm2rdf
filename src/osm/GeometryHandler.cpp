@@ -230,16 +230,12 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 #pragma omp parallel for
     for (size_t i = 0; i < vertices.size(); i++) {
       const auto id = vertices[i];
-      const auto it =
-          std::find_if(_spatialStorageArea.begin(), _spatialStorageArea.end(),
-                       [id](const SpatialAreaValue v) {
-                         return std::get<1>(v) == id;
-                       });
+      const auto it = std::find_if(
+          _spatialStorageArea.begin(), _spatialStorageArea.end(),
+          [id](const SpatialAreaValue v) { return std::get<1>(v) == id; });
       if (it == _spatialStorageArea.end()) {
 #pragma omp critical(error)
-        {
-          std::cerr << "ERROR: Missing AREA for ID: " << id << std::endl;
-        }
+        { std::cerr << "ERROR: Missing AREA for ID: " << id << std::endl; }
         continue;
       }
       const auto& entry = *it;
@@ -247,7 +243,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
       const auto& entryFromWay = std::get<5>(entry);
       std::string entryIRI = _writer->generateIRI(
           entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                           : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+                       : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
           entryObjId);
       for (const auto& dst : tmpDirectedAreaGraph.getEdges(id)) {
         const auto it2 = std::find_if(
@@ -255,10 +251,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
             [dst](const SpatialAreaValue v) { return std::get<1>(v) == dst; });
         if (it2 == _spatialStorageArea.end()) {
 #pragma omp critical(error)
-          {
-            std::cerr << "ERROR: Missing AREA for ID: " << dst
-                      << std::endl;
-          }
+          { std::cerr << "ERROR: Missing AREA for ID: " << dst << std::endl; }
           continue;
         }
         const auto& area = *it2;

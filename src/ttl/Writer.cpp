@@ -173,7 +173,7 @@ template <typename T>
 void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
-#pragma omp critical
+#pragma omp critical(writeTriple)
   { *_out << s + " " + p + " " + o + " .\n"; }
 }
 
