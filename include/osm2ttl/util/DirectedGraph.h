@@ -16,12 +16,15 @@ class DirectedGraph {
  public:
   void addEdge(uint64_t src, uint64_t dst);
   std::vector<uint64_t> findAbove(uint64_t src) const;
-  std::vector<uint64_t> findBelow(uint64_t src) const;
   void dump(std::filesystem::path filename) const;
+  size_t getNumEdges() const;
+  size_t getNumVertices() const;
+  std::vector<uint64_t> getVertices() const;
+  std::vector<uint64_t> getEdges(uint64_t src) const;
 
  protected:
-  std::vector<uint64_t> findInDirection(uint64_t src, bool up) const;
-  std::unordered_map<uint64_t, std::vector<std::pair<uint64_t, bool>>> _adjacency;
+  std::unordered_map<uint64_t, std::vector<uint64_t>> _adjacency;
+  size_t _numEdges = 0;
 };
 
 }  // namespace util

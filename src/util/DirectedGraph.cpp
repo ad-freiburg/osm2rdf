@@ -12,25 +12,19 @@
 
 // ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::addEdge(uint64_t src, uint64_t dst) {
-  _adjacency[src].emplace_back(dst, true);
-  _adjacency[dst].emplace_back(src, false);
+#pragma omp critical(addEdge)
+  {
+    _adjacency[src].push_back(dst);
+    if (_adjacency.count(dst) == 0) {
+      _adjacency[dst].size();
+    }
+    _numEdges++;
+  }
 }
 
 // ____________________________________________________________________________
 std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
     uint64_t src) const {
-  return findInDirection(src, true);
-}
-
-// ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findBelow(
-    uint64_t src) const {
-  return findInDirection(src, false);
-}
-
-// ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(
-    uint64_t src, bool up) const {
   std::vector<uint64_t> tmp;
 
   if (_adjacency.count(src) == 0) {
@@ -38,16 +32,12 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findInDirection(
   }
 
   std::vector<uint64_t> tmp2;
-  for (const auto& pair : _adjacency.at(src)) {
-    if (pair.second == up) {
-      tmp2.push_back(pair.first);
-    }
+  for (const auto& dst : _adjacency.at(src)) {
+    tmp2.push_back(dst);
   }
-  for (const auto& pair : _adjacency.at(src)) {
-    if (pair.second == up) {
-      auto v = findInDirection(pair.first, up);
-      tmp2.insert(tmp2.end(), v.begin(), v.end());
-    }
+  for (const auto& dst : _adjacency.at(src)) {
+    auto v = findAbove(dst);
+    tmp2.insert(tmp2.end(), v.begin(), v.end());
   }
 
   for (uint64_t v : tmp2) {
@@ -73,19 +63,43 @@ void osm2ttl::util::DirectedGraph::dump(std::filesystem::path filename) const {
       src -= 1;
     }
     src /= 2;
-    ofs << src << " [label=\"" << src << "\", shape=" << shape << ", style=solid]\n";
-    for (const auto& [dstId, dir] : list) {
+    ofs << src << " [label=\"" << src << "\", shape=" << shape
+        << ", style=solid]\n";
+    for (const auto& dstId : list) {
       uint64_t dst = dstId;
-      if (dir) {
-        if ((dst & 1) == 1) {
-          dst -= 1;
-        }
-        dst /= 2;
-        ofs << src << " -> " << dst << "\n";
+      if ((dst & 1) == 1) {
+        dst -= 1;
       }
+      dst /= 2;
+      ofs << src << " -> " << dst << "\n";
     }
   }
   ofs << "}\n";
   ofs.flush();
   ofs.close();
+}
+
+// ____________________________________________________________________________
+size_t osm2ttl::util::DirectedGraph::getNumEdges() const {
+  return _numEdges;
+}
+
+// ____________________________________________________________________________
+size_t osm2ttl::util::DirectedGraph::getNumVertices() const {
+  return _adjacency.size();
+}
+
+// ____________________________________________________________________________
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::getVertices() const {
+  std::vector<uint64_t> result;
+  for (const auto& [key, _] : _adjacency) {
+    result.push_back(key);
+  }
+  return result;
+}
+
+// ____________________________________________________________________________
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::getEdges(uint64_t src) const {
+  const auto& tmp = _adjacency.at(src);
+  return std::move(std::vector<uint64_t>(tmp.begin(), tmp.end()));
 }
