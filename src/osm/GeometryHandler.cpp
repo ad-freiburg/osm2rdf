@@ -279,7 +279,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     osmium::ProgressBar progressBar{_spatialStorageNode.size(), true};
     size_t entryCount = 0;
     size_t numberChecks = 0;
-    size_t okIntersects = 0;
     size_t okContains = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
@@ -337,17 +336,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
             skip.insert(newSkip);
           }
-        } else if (boost::geometry::intersects(nodeGeom, areaGeom)) {
-#pragma omp atomic
-          okIntersects++;
-          _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, nodeIRI);
-          _writer->writeTriple(nodeIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                               areaIRI);
-          for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
-            skip.insert(newSkip);
-          }
         }
       }
 #pragma omp critical(progress)
@@ -357,8 +345,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     std::cerr << " ... done with " << numberChecks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;
     std::cerr << (numberChecks - skippedByDAG)
-              << " checks performed, intersects: " << okIntersects
-              << ", contains: " << okContains << std::endl;
+              << " checks performed, contains: " << okContains << std::endl;
   }
 
   if (!_config.noWayDump) {
