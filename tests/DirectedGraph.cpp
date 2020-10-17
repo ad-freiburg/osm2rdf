@@ -25,23 +25,3 @@ TEST(DirectedGraph, findAbove) {
     ASSERT_EQ(0, res[1]);
   }
 }
-
-TEST(DirectedGraph, findBelow) {
-  osm2ttl::util::DirectedGraph g;
-  {
-    auto res = g.findBelow(0);
-    ASSERT_EQ(0, res.size());
-  }
-  {
-    g.addEdge(1, 0);
-    auto res = g.findBelow(0);
-    ASSERT_EQ(1, res.size());
-    ASSERT_EQ(1, res[0]);
-  }
-  {
-    g.addEdge(1, 2);
-    auto res = g.findBelow(0);
-    ASSERT_EQ(1, res.size());
-    ASSERT_EQ(1, res[0]);
-  }
-}

@@ -229,7 +229,57 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     std::vector<uint64_t> vertices = directedAreaGraph.getVertices();
 #pragma omp parallel for
     for (size_t i = 0; i < vertices.size(); i++) {
-      // TODO
+      const auto id = vertices[i];
+      const auto it =
+          std::find_if(_spatialStorageArea.begin(), _spatialStorageArea.end(),
+                       [id](const SpatialAreaValue v) {
+                         return std::get<1>(v) == id;
+                       });
+      if (it == _spatialStorageArea.end()) {
+#pragma omp critical(error)
+        {
+          std::cerr << "ERROR: Missing AREA for ID: " << id << std::endl;
+        }
+        continue;
+      }
+      const auto& entry = *it;
+      const auto& entryObjId = std::get<3>(entry);
+      const auto& entryFromWay = std::get<5>(entry);
+      std::string entryIRI = _writer->generateIRI(
+          entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                           : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+          entryObjId);
+      for (const auto& dst : tmpDirectedAreaGraph.getEdges(id)) {
+        const auto it2 = std::find_if(
+            _spatialStorageArea.begin(), _spatialStorageArea.end(),
+            [dst](const SpatialAreaValue v) { return std::get<1>(v) == dst; });
+        if (it2 == _spatialStorageArea.end()) {
+#pragma omp critical(error)
+          {
+            std::cerr << "ERROR: Missing AREA for ID: " << dst
+                      << std::endl;
+          }
+          continue;
+        }
+        const auto& area = *it2;
+        const auto& areaObjId = std::get<3>(area);
+        const auto& areaFromWay = std::get<5>(area);
+
+        std::string areaIRI = _writer->generateIRI(
+            areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+            areaObjId);
+
+        _writer->writeTriple(
+            areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
+        _writer->writeTriple(
+            entryIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
+        _writer->writeTriple(
+            areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
+        _writer->writeTriple(entryIRI,
+                             osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                             areaIRI);
+      }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
     }
