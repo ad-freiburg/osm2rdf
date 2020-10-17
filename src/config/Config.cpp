@@ -62,6 +62,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       "Simplify WKT-Geometries over this number of nodes, 0 to disable",
       wktSimplify);
 
+  auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "write-dot-files", "Writes .dot files for DAGs");
+
   auto outputOp =
       op.add<popl::Value<std::string>>("o", "output", "Output file", "");
   auto outputFormatOp =
@@ -108,6 +111,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     skipWikiLinks = skipWikiLinksOp->is_set();
     expandedData = expandedDataOp->is_set();
     wktSimplify = wktSimplifyOp->value();
+
+    // Dot
+    writeDotFiles = writeDotFilesOp->is_set();
 
     // Output
     output = outputOp->value();

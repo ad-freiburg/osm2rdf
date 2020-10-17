@@ -162,7 +162,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               << " checks performed, intersects: " << okIntersects
               << ", contains: " << okContains << std::endl;
   }
-  {
+  if (_config.writeDotFiles) {
     std::cerr << " Dumping tmpDAG as " << _config.output << ".tmp.dot ..."
               << std::flush;
     std::filesystem::path p{_config.output};
@@ -207,7 +207,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               << directedAreaGraph.getNumEdges() << " edges and "
               << directedAreaGraph.getNumVertices() << " vertices" << std::endl;
   }
-  {
+  if (_config.writeDotFiles) {
     std::cerr << " Dumping DAG as " << _config.output << ".dot ..."
               << std::flush;
     std::filesystem::path p{_config.output};
@@ -217,6 +217,13 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
   }
   {
     std::cerr << std::endl;
+    std::cerr << " Preparing area data for dump ..." << std::flush;
+    std::unordered_map<uint64_t, std::pair<uint64_t, bool>> areaData;
+    for (const auto& area : _spatialStorageArea) {
+      areaData[std::get<1>(area)] =
+          std::make_pair(std::get<3>(area), std::get<5>(area));
+    }
+    std::cerr << " done" << std::endl;
     std::cerr << " Dumping relations from DAG with "
               << directedAreaGraph.getNumEdges() << " edges and "
               << directedAreaGraph.getNumVertices() << " vertices ... "
@@ -230,34 +237,17 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 #pragma omp parallel for
     for (size_t i = 0; i < vertices.size(); i++) {
       const auto id = vertices[i];
-      const auto it = std::find_if(
-          _spatialStorageArea.begin(), _spatialStorageArea.end(),
-          [id](const SpatialAreaValue v) { return std::get<1>(v) == id; });
-      if (it == _spatialStorageArea.end()) {
-#pragma omp critical(error)
-        { std::cerr << "ERROR: Missing AREA for ID: " << id << std::endl; }
-        continue;
-      }
-      const auto& entry = *it;
-      const auto& entryObjId = std::get<3>(entry);
-      const auto& entryFromWay = std::get<5>(entry);
+      const auto& entry = areaData.at(id);
+      const auto& entryObjId = entry.first;
+      const auto& entryFromWay = entry.second;
       std::string entryIRI = _writer->generateIRI(
           entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
           entryObjId);
       for (const auto& dst : tmpDirectedAreaGraph.getEdges(id)) {
-        const auto it2 = std::find_if(
-            _spatialStorageArea.begin(), _spatialStorageArea.end(),
-            [dst](const SpatialAreaValue v) { return std::get<1>(v) == dst; });
-        if (it2 == _spatialStorageArea.end()) {
-#pragma omp critical(error)
-          { std::cerr << "ERROR: Missing AREA for ID: " << dst << std::endl; }
-          continue;
-        }
-        const auto& area = *it2;
-        const auto& areaObjId = std::get<3>(area);
-        const auto& areaFromWay = std::get<5>(area);
-
+        const auto& area = areaData.at(dst);
+        const auto& areaObjId = area.first;
+        const auto& areaFromWay = area.second;
         std::string areaIRI = _writer->generateIRI(
             areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                         : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,

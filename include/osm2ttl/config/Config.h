@@ -33,6 +33,9 @@ struct Config {
   bool metaData = false;
   bool skipWikiLinks = false;
 
+  // Dot
+  bool writeDotFiles = false;
+
   // Output modifiers
   uint16_t wktSimplify = 250;
   uint8_t wktDeviation = 5;
