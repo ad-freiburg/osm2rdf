@@ -91,6 +91,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     std::cerr << "done" << std::endl;
   }
   {
+    std::cerr << std::endl;
     std::cerr << " Sorting " << _spatialStorageArea.size()
               << " areas by explicit size ... " << std::flush;
     std::vector<SpatialAreaValue> sav(_spatialStorageArea.begin(),
@@ -100,12 +101,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
       return std::get<4>(a) < std::get<4>(b);
     });
     std::cerr << " done" << std::endl;
+    std::cerr << std::endl;
     std::cerr << " Generating DAG from " << sav.size() << " sorted areas ... "
               << std::endl;
 
     osmium::ProgressBar progressBar{sav.size(), true};
     size_t entryCount = 0;
     size_t numberChecks = 0;
+    size_t okIntersects = 0;
+    size_t okContains = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
 
@@ -138,44 +142,56 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         if (areaId == entryId) {
           continue;
         }
+#pragma omp atomic
         numberChecks++;
 
         if (skip.find(areaId) != skip.end()) {
+#pragma omp atomic
           skippedByDAG++;
           continue;
         }
 
-        if (boost::geometry::intersects(entryGeom, areaGeom)) {
-          std::string areaIRI = _writer->generateIRI(
-              areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                          : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaObjId);
+        std::string areaIRI = _writer->generateIRI(
+            areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+            areaObjId);
+        if (boost::geometry::covered_by(entryGeom, areaGeom)) {
+#pragma omp atomic
+          okContains++;
+          _writer->writeTriple(
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
+          _writer->writeTriple(entryIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                               areaIRI);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
           _writer->writeTriple(entryIRI,
                                osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                                areaIRI);
-          if (boost::geometry::covered_by(entryGeom, areaGeom)) {
-            _writer->writeTriple(
-                areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
-            _writer->writeTriple(entryIRI,
-                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                                 areaIRI);
-            if (!boost::geometry::equals(entryGeom, areaGeom)) {
-              directedAreaGraph.addEdge(entryId, areaId);
-              for (const auto& newSkip : directedAreaGraph.findAbove(entryId)) {
-                skip.insert(newSkip);
-              }
+          if (!boost::geometry::equals(entryGeom, areaGeom)) {
+            directedAreaGraph.addEdge(entryId, areaId);
+            for (const auto& newSkip : directedAreaGraph.findAbove(entryId)) {
+              skip.insert(newSkip);
             }
           }
+        } else if (boost::geometry::intersects(entryGeom, areaGeom)) {
+#pragma omp atomic
+          okIntersects++;
+          _writer->writeTriple(
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
+          _writer->writeTriple(entryIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                               areaIRI);
         }
       }
+#pragma omp critical
       progressBar.update(entryCount++);
     }
 
     progressBar.done();
     std::cerr << " ... done with " << numberChecks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;
+    std::cerr << (numberChecks - skippedByDAG) << " checks performed, intersects: " << okIntersects << ", contains: " << okContains << std::endl;
   }
   {
     std::cerr << " Dumping DAG as " << _config.output << ".dot ..." << std::flush;
@@ -186,12 +202,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
   }
 
   if (!_config.noNodeDump) {
+    std::cerr << std::endl;
     std::cerr << " Contains relations for " << _spatialStorageNode.size()
               << " nodes in " << spatialIndex.size() << " areas ..."
               << std::endl;
     osmium::ProgressBar progressBar{_spatialStorageNode.size(), true};
     size_t entryCount = 0;
     size_t numberChecks = 0;
+    size_t okIntersects = 0;
+    size_t okContains = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
 
@@ -219,22 +238,37 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         const auto& areaGeom = std::get<2>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
+#pragma omp atomic
         numberChecks++;
 
         if (skip.find(areaId) != skip.end()) {
+#pragma omp atomic
           skippedByDAG++;
           continue;
         }
-
+        std::string areaIRI = _writer->generateIRI(
+            areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+            areaObjId);
         if (boost::geometry::covered_by(nodeGeom, areaGeom)) {
-          std::string areaIRI = _writer->generateIRI(
-              areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                          : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaObjId);
+#pragma omp atomic
+          okContains++;
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, nodeIRI);
+          _writer->writeTriple(nodeIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                               areaIRI);
           _writer->writeTriple(
-              nodeIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, nodeIRI);
+          _writer->writeTriple(nodeIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                               areaIRI);
+          for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
+            skip.insert(newSkip);
+          }
+        } else if (boost::geometry::intersects(nodeGeom, areaGeom)) {
+#pragma omp atomic
+          okIntersects++;
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, nodeIRI);
           _writer->writeTriple(nodeIRI,
@@ -245,20 +279,25 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           }
         }
       }
+#pragma omp critical
       progressBar.update(entryCount++);
     }
     progressBar.done();
     std::cerr << " ... done with " << numberChecks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;
+    std::cerr << (numberChecks - skippedByDAG) << " checks performed, intersects: " << okIntersects << ", contains: " << okContains << std::endl;
   }
 
   if (!_config.noWayDump) {
+    std::cerr << std::endl;
     std::cerr << " Contains relations for " << _spatialStorageWay.size()
               << " ways in " << spatialIndex.size() << " areas ..."
               << std::endl;
     osmium::ProgressBar progressBar{_spatialStorageWay.size(), true};
     size_t entryCount = 0;
     size_t numberChecks = 0;
+    size_t okIntersects = 0;
+    size_t okContains = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
 
@@ -289,40 +328,55 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         if (areaFromWay && areaObjId == wayId) {
           continue;
         }
+#pragma omp atomic
         numberChecks++;
 
         if (skip.find(areaId) != skip.end()) {
+#pragma omp atomic
           skippedByDAG++;
           continue;
         }
 
-        if (boost::geometry::intersects(wayGeom, areaGeom)) {
-          std::string areaIRI = _writer->generateIRI(
-              areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                          : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaObjId);
+        std::string areaIRI = _writer->generateIRI(
+            areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+            areaObjId);
+        if (boost::geometry::covered_by(wayGeom, areaGeom)) {
+#pragma omp atomic
+          okContains++;
+          _writer->writeTriple(
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
+          _writer->writeTriple(wayIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                               areaIRI);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
           _writer->writeTriple(wayIRI,
                                osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                                areaIRI);
-          if (boost::geometry::covered_by(wayGeom, areaGeom)) {
-            _writer->writeTriple(
-                areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
-            _writer->writeTriple(wayIRI,
-                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                                 areaIRI);
+          for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
+            skip.insert(newSkip);
           }
+        } else if (boost::geometry::intersects(wayGeom, areaGeom)) {
+#pragma omp atomic
+          okIntersects++;
+          _writer->writeTriple(
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
+          _writer->writeTriple(wayIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                               areaIRI);
           for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
             skip.insert(newSkip);
           }
         }
       }
+#pragma omp critical
       progressBar.update(entryCount++);
     }
     progressBar.done();
     std::cerr << " ... done with " << numberChecks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;
+    std::cerr << (numberChecks - skippedByDAG) << " checks performed, intersects: " << okIntersects << ", contains: " << okContains << std::endl;
   }
 }
 
