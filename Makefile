@@ -19,19 +19,22 @@ benchmark: build
 
 perf: build
 	cmake --build build --target osm2ttl
-	for FILE in $(shell ls -Sr input); do echo $${FILE}; time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever" --use-ram-for-locations; perf report; dot -Tpng -o "/tmp/$${FILE}.png" "/tmp/$${FILE}.qlever.dot"; done
+	for FILE in $(shell ls -Sr input); do echo $${FILE}; time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever" --use-ram-for-locations; perf report; done
 
-docker:
+docker-fr:
 	mkdir input || true
 	mkdir output || true
-	wget -O ./input/freiburg-regbez-latest.osm.pbf https://download.geofabrik.de/europe/germany/baden-wuerttemberg/freiburg-regbez-latest.osm.pbf
 	wharfer build -t osm2ttl .
 	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl --use-ram-for-locations
 
 docker-bw:
+	mkdir input || true
+	mkdir output || true
 	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl --use-ram-for-locations
+	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl --use-ram-for-locations
 
 docker-de:
+	mkdir input || true
+	mkdir output || true
 	wharfer build -t osm2ttl .
 	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl --use-ram-for-locations
