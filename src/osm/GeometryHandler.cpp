@@ -403,22 +403,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
             areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                         : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
             areaObjId);
-        if (boost::geometry::covered_by(wayGeom, areaGeom)) {
-#pragma omp atomic
-          okContains++;
-          _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
-          _writer->writeTriple(
-              wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
-          _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
-          _writer->writeTriple(wayIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                               areaIRI);
-          for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
-            skip.insert(newSkip);
-          }
-        } else if (boost::geometry::intersects(wayGeom, areaGeom)) {
+        if (boost::geometry::intersects(wayGeom, areaGeom)) {
 #pragma omp atomic
           okIntersects++;
           _writer->writeTriple(
@@ -426,6 +411,14 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           _writer->writeTriple(wayIRI,
                                osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                                areaIRI);
+          if (boost::geometry::covered_by(wayGeom, areaGeom)) {
+#pragma omp atomic
+            okContains++;
+            _writer->writeTriple(
+                areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
+            _writer->writeTriple(
+                wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
+          }
           for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
             skip.insert(newSkip);
           }
