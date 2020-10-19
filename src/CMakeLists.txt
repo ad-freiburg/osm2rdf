@@ -2,8 +2,8 @@
 # show up in IDEs unless they are listed in add_library.
 
 # Optionally glob, but only for CMake 3.12 or later:
-file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/include/osm2ttl/*.h")
-file(GLOB_RECURSE CPP_LIST CONFIGURE_DEPENDS "${PROJECT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE HEADER_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/../include/osm2ttl/*.h")
+file(GLOB_RECURSE CPP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 
 # Make an automatic library - will be static or dynamic based on user setting
 add_library(osm2ttl_library ${CPP_LIST} ${HEADER_LIST})
