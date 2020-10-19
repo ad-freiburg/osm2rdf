@@ -49,8 +49,8 @@ void run(osm2ttl::config::Config& config) {
       std::cerr << osm2ttl::util::currentTimeFormatted()
                 << "OSM Pass 1 ... (Relations for areas)" << std::endl;
       osmium::relations::read_relations(progress, input_file, mp_manager);
-      std::cerr << osm2ttl::util::currentTimeFormatted()
-                << "... done" << std::endl;
+      std::cerr << osm2ttl::util::currentTimeFormatted() << "... done"
+                << std::endl;
     }
 
     // store data
@@ -85,8 +85,8 @@ void run(osm2ttl::config::Config& config) {
       std::cerr << osm2ttl::util::currentTimeFormatted()
                 << " Calculating contains relation ..." << std::endl;
       geometryHandler.lookup();
-      std::cerr << osm2ttl::util::currentTimeFormatted()
-                << "... done" << std::endl;
+      std::cerr << osm2ttl::util::currentTimeFormatted() << "... done"
+                << std::endl;
     }
   }
 
@@ -99,12 +99,14 @@ void run(osm2ttl::config::Config& config) {
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
-  std::cerr << "osm2ttl :: " << osm2ttl::version::GIT_INFO << std::endl;
+  std::cerr << osm2ttl::util::currentTimeFormatted()
+            << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: BEGIN"
+            << std::endl;
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   config.fromArgs(argc, argv);
+  std::cerr << config.getInfo(osm2ttl::util::formattedTimeSpacer) << std::endl;
 
-  std::cerr << osm2ttl::util::currentTimeFormatted()
-            << "Free ram: "
+  std::cerr << osm2ttl::util::currentTimeFormatted() << "Free ram: "
             << osm2ttl::util::ram::available() /
                    (osm2ttl::util::ram::GIGA * 1.0)
             << "G/"
@@ -120,13 +122,22 @@ int main(int argc, char** argv) {
     } else if (config.outputFormat == "ttl") {
       run<osm2ttl::ttl::format::TTL>(config);
     } else {
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: ERROR"
+                << std::endl;
       std::cerr << "Unknown output format: " << config.outputFormat
                 << std::endl;
       std::exit(1);
     }
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: ERROR"
+              << std::endl;
     std::cerr << e.what() << std::endl;
     std::exit(1);
   }
+  std::cerr << osm2ttl::util::currentTimeFormatted()
+            << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: FINISHED"
+            << std::endl;
 }

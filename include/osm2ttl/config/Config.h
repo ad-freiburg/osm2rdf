@@ -17,7 +17,7 @@ struct Config {
   // Select what to do
   bool noDump = false;
   bool noContains = false;
-  bool useRamForLocations = false;
+  bool storeLocationsOnDisk = false;
 
   // Select types to dump
   bool noNodeDump = false;
@@ -54,6 +54,7 @@ struct Config {
   void load(const std::string& filename);
   void save(const std::string& filename);
   void fromArgs(int argc, char** argv);
+  std::string getInfo(std::string_view prefix) const;
   std::filesystem::path getTempPath(const std::string& p,
                                     const std::string& s) const;
 

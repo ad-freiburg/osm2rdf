@@ -13,7 +13,7 @@
 // ____________________________________________________________________________
 osm2ttl::osm::LocationHandler* osm2ttl::osm::LocationHandler::create(
     const osm2ttl::config::Config& config) {
-  if (config.useRamForLocations) {
+  if (!config.storeLocationsOnDisk) {
     return new osm2ttl::osm::LocationHandlerRAM(config);
   }
   return new osm2ttl::osm::LocationHandlerFS(config);

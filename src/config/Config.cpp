@@ -17,6 +17,19 @@ void osm2ttl::config::Config::load(const std::string& filename) {}
 void osm2ttl::config::Config::save(const std::string& filename) {}
 
 // ____________________________________________________________________________
+std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
+  std::ostringstream oss;
+  oss << prefix << "--- Config ---";
+  oss << "\n" << prefix << "Input:         " << input;
+  oss << "\n" << prefix << "Output:        " << output;
+  oss << "\n" << prefix << "Output format: " << outputFormat;
+  if (storeLocationsOnDisk) {
+    oss << "\n" << prefix << "Storing locations osmium locations on disk!";
+  }
+  return oss.str();
+}
+
+// ____________________________________________________________________________
 void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   popl::OptionParser op("Allowed options");
 
@@ -28,8 +41,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       "", "no-dump", "Do not dump normal data");
   auto noContainsOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "no-contains", "Do not calculate contains relation");
-  auto useRamForLocationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "use-ram-for-locations", "Store locations in RAM");
+  auto storeLocationsOnDiskOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "store-locations-on-disk", "Store locations in RAM");
 
   auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "no-node-dump", "Skip nodes while dumping data");
@@ -96,7 +109,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     noDump = noDumpOp->is_set();
     noContains = noContainsOp->is_set();
-    useRamForLocations = useRamForLocationsOp->is_set();
+    storeLocationsOnDisk = storeLocationsOnDiskOp->is_set();
 
     // Select types to dump
     noNodeDump = noNodeDumpOp->is_set();
