@@ -16,6 +16,7 @@
 #include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/DirectedGraph.h"
+#include "osm2ttl/util/Time.h"
 #include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/util/progress_bar.hpp"
 
@@ -85,15 +86,18 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
   osm2ttl::util::DirectedGraph directedAreaGraph;
   osm2ttl::util::DirectedGraph tmpDirectedAreaGraph;
   {
-    std::cerr << " Packing combined tree with " << _spatialStorageArea.size()
-              << " entries ... " << std::flush;
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " Packing combined tree with " << _spatialStorageArea.size()
+              << " entries ... " << std::endl;
     spatialIndex =
         SpatialIndex(_spatialStorageArea.begin(), _spatialStorageArea.end());
-    std::cerr << "done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
+              << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << " Generating partial DAG from " << _spatialStorageArea.size()
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " Generating partial DAG from " << _spatialStorageArea.size()
               << " areas ... " << std::endl;
 
     osmium::ProgressBar progressBar{_spatialStorageArea.size(), true};
@@ -156,25 +160,28 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
 
     progressBar.done();
-    std::cerr << " ... done with " << numberChecks << " checks, "
-              << skippedByDAG << " skipped by DAG" << std::endl;
-    std::cerr << (numberChecks - skippedByDAG)
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
+              << numberChecks << " checks, " << skippedByDAG
+              << " skipped by DAG" << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << (numberChecks - skippedByDAG)
               << " checks performed, intersects: " << okIntersects
               << ", contains: " << okContains << std::endl;
   }
   if (_config.writeDotFiles) {
-    std::cerr << " Dumping tmpDAG as " << _config.output << ".tmp.dot ..."
-              << std::flush;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " Dumping tmpDAG as "
+              << _config.output << ".tmp.dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".tmp.dot";
     tmpDirectedAreaGraph.dump(p);
-    std::cerr << " done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " done" << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << " Reducing DAG with " << tmpDirectedAreaGraph.getNumEdges()
-              << " edges and " << tmpDirectedAreaGraph.getNumVertices()
-              << " vertices ... " << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " Reducing DAG with "
+              << tmpDirectedAreaGraph.getNumEdges() << " edges and "
+              << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
+              << std::endl;
 
     osmium::ProgressBar progressBar{tmpDirectedAreaGraph.getNumVertices(),
                                     true};
@@ -203,28 +210,31 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
 
     progressBar.done();
-    std::cerr << " ... done, resulting in DAG with "
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " ... done, resulting in DAG with "
               << directedAreaGraph.getNumEdges() << " edges and "
               << directedAreaGraph.getNumVertices() << " vertices" << std::endl;
   }
   if (_config.writeDotFiles) {
-    std::cerr << " Dumping DAG as " << _config.output << ".dot ..."
-              << std::flush;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " Dumping DAG as "
+              << _config.output << ".dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".dot";
     directedAreaGraph.dump(p);
-    std::cerr << " done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " done" << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << " Preparing area data for dump ..." << std::flush;
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " Preparing area data for dump ..." << std::flush;
     std::unordered_map<uint64_t, std::pair<uint64_t, bool>> areaData;
     for (const auto& area : _spatialStorageArea) {
       areaData[std::get<1>(area)] =
           std::make_pair(std::get<3>(area), std::get<5>(area));
     }
     std::cerr << " done" << std::endl;
-    std::cerr << " Dumping relations from DAG with "
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " Dumping relations from DAG with "
               << directedAreaGraph.getNumEdges() << " edges and "
               << directedAreaGraph.getNumVertices() << " vertices ... "
               << std::endl;
@@ -268,12 +278,14 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
 
     progressBar.done();
-    std::cerr << " ... done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
+              << std::endl;
   }
 
   if (!_config.noNodeDump) {
     std::cerr << std::endl;
-    std::cerr << " Contains relations for " << _spatialStorageNode.size()
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " Contains relations for " << _spatialStorageNode.size()
               << " nodes in " << spatialIndex.size() << " areas ..."
               << std::endl;
     osmium::ProgressBar progressBar{_spatialStorageNode.size(), true};
@@ -342,15 +354,18 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
       progressBar.update(entryCount++);
     }
     progressBar.done();
-    std::cerr << " ... done with " << numberChecks << " checks, "
-              << skippedByDAG << " skipped by DAG" << std::endl;
-    std::cerr << (numberChecks - skippedByDAG)
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
+              << numberChecks << " checks, " << skippedByDAG
+              << " skipped by DAG" << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << (numberChecks - skippedByDAG)
               << " checks performed, contains: " << okContains << std::endl;
   }
 
   if (!_config.noWayDump) {
     std::cerr << std::endl;
-    std::cerr << " Contains relations for " << _spatialStorageWay.size()
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " Contains relations for " << _spatialStorageWay.size()
               << " ways in " << spatialIndex.size() << " areas ..."
               << std::endl;
     osmium::ProgressBar progressBar{_spatialStorageWay.size(), true};
@@ -416,8 +431,9 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
             okContains++;
             _writer->writeTriple(
                 areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
-            _writer->writeTriple(
-                wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
+            _writer->writeTriple(wayIRI,
+                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                                 areaIRI);
           }
           for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
             skip.insert(newSkip);
@@ -428,9 +444,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
       progressBar.update(entryCount++);
     }
     progressBar.done();
-    std::cerr << " ... done with " << numberChecks << " checks, "
-              << skippedByDAG << " skipped by DAG" << std::endl;
-    std::cerr << (numberChecks - skippedByDAG)
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
+              << numberChecks << " checks, " << skippedByDAG
+              << " skipped by DAG" << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << (numberChecks - skippedByDAG)
               << " checks performed, intersects: " << okIntersects
               << ", contains: " << okContains << std::endl;
   }
