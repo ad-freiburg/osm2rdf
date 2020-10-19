@@ -192,6 +192,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 
     // Prepare non-reduced DAG for cleanup
     tmpDirectedAreaGraph.sort();
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " ... adjacency lists sorted ... " << std::endl;
 
     // Reduce each adjacency list
     std::vector<uint64_t> vertices = tmpDirectedAreaGraph.getVertices();

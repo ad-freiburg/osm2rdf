@@ -94,7 +94,8 @@ void run(osm2ttl::config::Config& config) {
   writer.close();
 
   osmium::MemoryUsage memory;
-  std::cerr << "Memory used: " << memory.peak() << " MBytes" << std::endl;
+  std::cerr << osm2ttl::util::formattedTimeSpacer
+            << "Memory used: " << memory.peak() << " MBytes" << std::endl;
 }
 
 // ____________________________________________________________________________
