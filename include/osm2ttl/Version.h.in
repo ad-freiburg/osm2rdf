@@ -1,0 +1,15 @@
+// Copyright 2020, University of Freiburg
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+
+#ifndef OSM2TTL_VERSION_H
+#define OSM2TTL_VERSION_H
+
+namespace osm2ttl {
+namespace version {
+
+const char* GIT_INFO = "@VERSION_GIT_FULL@";
+
+}  // namespace version
+}  // namespace osm2ttl
+
+#endif  // OSM2TTL_VERSION_H

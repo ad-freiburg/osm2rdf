@@ -17,6 +17,7 @@ class DirectedGraph {
   void addEdge(uint64_t src, uint64_t dst);
   std::vector<uint64_t> findAbove(uint64_t src) const;
   void dump(std::filesystem::path filename) const;
+  void sort();
   size_t getNumEdges() const;
   size_t getNumVertices() const;
   std::vector<uint64_t> getVertices() const;

@@ -3,3 +3,4 @@
 input/
 output/
 perf.data*
+/include/osm2ttl/Version.h

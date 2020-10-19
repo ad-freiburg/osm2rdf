@@ -80,6 +80,69 @@ find_program(
         DOC "Path to clang-tidy executable"
 )
 
+# Based on https://github.com/ad-freiburg/pfaedle/blob/master/cmake/GetGitRevisionDescription.cmake
+function(get_git_sha1 _var)
+  if (NOT GIT_FOUND)
+    find_package(Git QUIET)
+  endif ()
+
+  execute_process(
+          COMMAND git rev-parse --short HEAD
+          WORKING_DIRECTORY
+          "${CMAKE_SOURCE_DIR}"
+          RESULT_VARIABLE
+          res
+          OUTPUT_VARIABLE
+          out
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (NOT res EQUAL 0)
+    set(out "${out}-${res}-NOTFOUND")
+  endif ()
+  set(${_var} "${out}" PARENT_SCOPE)
+endfunction()
+function(get_git_is_dirty _var)
+  if (NOT GIT_FOUND)
+    find_package(Git QUIET)
+  endif ()
+
+  execute_process(COMMAND
+          "${GIT_EXECUTABLE}"
+          diff-index --name-only HEAD --
+          WORKING_DIRECTORY
+          "${CMAKE_SOURCE_DIR}"
+          RESULT_VARIABLE
+          res
+          OUTPUT_VARIABLE
+          out
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (NOT res EQUAL 0)
+    set(out "${out}-${res}-NOTFOUND")
+  endif ()
+
+  if (NOT "${out}" STREQUAL "")
+    set(IS_DIRTY "dirty")
+  else ()
+    set(IS_DIRTY "")
+  endif ()
+  set(${_var} "${IS_DIRTY}" PARENT_SCOPE)
+endfunction()
+
+get_git_sha1(VERSION_GIT)
+get_git_is_dirty(VERSION_GIT_IS_DIRTY)
+if ("${VERSION_GIT_IS_DIRTY}" STREQUAL "")
+  set(VERSION_GIT_FULL "${VERSION_GIT}")
+else()
+  set(VERSION_GIT_FULL "${VERSION_GIT}-${VERSION_GIT_IS_DIRTY}")
+endif()
+
+
+configure_file (
+        "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h.in"
+        "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h"
+)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0")
 set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS} -Og -g -DLOGLEVEL=3 -DOSM2NT_DBG=1")
 set(CMAKE_CXX_FLAGS_PERF           "${CMAKE_CXX_FLAGS} -DLOGLEVEL=3 -O3 -DOSM2NT_DBG=1")

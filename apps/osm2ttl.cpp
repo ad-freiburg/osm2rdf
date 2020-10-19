@@ -6,12 +6,14 @@
 #include <iostream>
 #include <string>
 
+#include "osm2ttl/Version.h"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/DumpHandler.h"
 #include "osm2ttl/osm/GeometryHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/Ram.h"
+#include "osm2ttl/util/Time.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
 #include "osmium/io/any_input.hpp"
@@ -44,14 +46,17 @@ void run(osm2ttl::config::Config& config) {
     {
       osmium::io::Reader reader{input_file};
       osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
-      std::cerr << "OSM Pass 1 ... (Relations for areas)" << std::endl;
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "OSM Pass 1 ... (Relations for areas)" << std::endl;
       osmium::relations::read_relations(progress, input_file, mp_manager);
-      std::cerr << "... done" << std::endl;
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "... done" << std::endl;
     }
 
     // store data
     {
-      std::cerr << "OSM Pass 2 ... (dump)" << std::endl;
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "OSM Pass 2 ... (dump)" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
                                                osmium::osm_entity_bits::object};
       osm2ttl::osm::LocationHandler* locationHandler =
@@ -70,15 +75,18 @@ void run(osm2ttl::config::Config& config) {
       }
       reader.close();
       delete locationHandler;
-      std::cerr << "... done reading (libosmium) and converting (libosmium -> "
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "... done reading (libosmium) and converting (libosmium -> "
                    "osm2ttl)"
                 << std::endl;
     }
 
     {
-      std::cerr << "Calculating contains relation ..." << std::endl;
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << " Calculating contains relation ..." << std::endl;
       geometryHandler.lookup();
-      std::cerr << "... done" << std::endl;
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "... done" << std::endl;
     }
   }
 
@@ -91,10 +99,12 @@ void run(osm2ttl::config::Config& config) {
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
+  std::cerr << "osm2ttl :: " << osm2ttl::version::GIT_INFO << std::endl;
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   config.fromArgs(argc, argv);
 
-  std::cerr << "Free ram: "
+  std::cerr << osm2ttl::util::currentTimeFormatted()
+            << "Free ram: "
             << osm2ttl::util::ram::available() /
                    (osm2ttl::util::ram::GIGA * 1.0)
             << "G/"
