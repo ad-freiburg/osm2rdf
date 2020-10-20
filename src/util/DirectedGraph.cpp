@@ -80,7 +80,7 @@ void osm2ttl::util::DirectedGraph::dump(std::filesystem::path filename) const {
 }
 // ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::sort() {
-  std::vector<uint64_t> vertices = getVertices();
+  const auto& vertices = getVertices();
 #pragma omp parallel for
   for (size_t i = 0; i < vertices.size(); i++) {
     std::sort(_adjacency[vertices[i]].begin(), _adjacency[vertices[i]].end());

@@ -196,7 +196,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               << " ... adjacency lists sorted ... " << std::endl;
 
     // Reduce each adjacency list
-    std::vector<uint64_t> vertices = tmpDirectedAreaGraph.getVertices();
+    const auto& vertices = tmpDirectedAreaGraph.getVertices();
 #pragma omp parallel for
     for (size_t i = 0; i < vertices.size(); i++) {
       uint64_t src = vertices[i];
