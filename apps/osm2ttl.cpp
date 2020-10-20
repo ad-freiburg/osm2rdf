@@ -44,6 +44,7 @@ void run(osm2ttl::config::Config& config) {
 
     // read relations for areas
     {
+      std::cerr << std::endl;
       osmium::io::Reader reader{input_file};
       osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
       std::cerr << osm2ttl::util::currentTimeFormatted()
@@ -55,6 +56,7 @@ void run(osm2ttl::config::Config& config) {
 
     // store data
     {
+      std::cerr << std::endl;
       std::cerr << osm2ttl::util::currentTimeFormatted()
                 << "OSM Pass 2 ... (dump)" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
@@ -82,8 +84,9 @@ void run(osm2ttl::config::Config& config) {
     }
 
     {
+      std::cerr << std::endl;
       std::cerr << osm2ttl::util::currentTimeFormatted()
-                << " Calculating contains relation ..." << std::endl;
+                << "Calculating contains relation ..." << std::endl;
       geometryHandler.lookup();
       std::cerr << osm2ttl::util::currentTimeFormatted() << "... done"
                 << std::endl;
@@ -141,4 +144,5 @@ int main(int argc, char** argv) {
   std::cerr << osm2ttl::util::currentTimeFormatted()
             << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: FINISHED"
             << std::endl;
+  std::exit(0);
 }

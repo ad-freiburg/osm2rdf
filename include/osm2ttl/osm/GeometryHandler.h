@@ -36,7 +36,7 @@ typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Area,
 typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Node>
     SpatialNodeValue;
 
-typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Way>
+typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Way, std::vector<uint64_t>>
     SpatialWayValue;
 typedef boost::geometry::index::rtree<SpatialAreaValue,
                                       boost::geometry::index::quadratic<16>>
@@ -62,6 +62,7 @@ class GeometryHandler : public osmium::handler::Handler {
   osm2ttl::ttl::Writer<W>* _writer;
   // Spatial Index
   std::vector<SpatialAreaValue> _spatialStorageArea;
+  std::unordered_map<uint64_t, uint64_t> _areaData;
   std::vector<SpatialNodeValue> _spatialStorageNode;
   std::vector<SpatialWayValue> _spatialStorageWay;
 };
