@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <memory>
+#include <random>
 #include <utility>
 #include <vector>
 
@@ -19,6 +20,9 @@
 #include "osm2ttl/util/Time.h"
 #include "osmium/index/map/sparse_file_array.hpp"
 #include "osmium/util/progress_bar.hpp"
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "modernize-loop-convert"
 
 // ____________________________________________________________________________
 template <typename W>
@@ -100,17 +104,17 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
   // Store for each node all relevant areas
   std::unordered_map<uint64_t, std::vector<uint64_t>> nodeData;
   {
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
+    std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Packing combined tree with " << _spatialStorageArea.size()
               << " entries ... " << std::endl;
     spatialIndex =
         SpatialIndex(_spatialStorageArea.begin(), _spatialStorageArea.end());
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " ... done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
+              << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
+    std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Generating non-reduced DAG from "
               << _spatialStorageArea.size() << " areas ... " << std::endl;
 
@@ -122,8 +126,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
     // Shuffle nodes to improve parallel workloads
-    std::random_shuffle(_spatialStorageArea.begin(), _spatialStorageArea.end());
-#pragma omp parallel for
+    std::shuffle(_spatialStorageArea.begin(), _spatialStorageArea.end(),
+                 std::mt19937(std::random_device()()));
+#pragma omp parallel for shared(spatialIndex, checks, skippedByDAG, contains, \
+                                containsOk, tmpDirectedAreaGraph, entryCount, \
+                                progressBar) default(none)
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
@@ -175,31 +182,29 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " ... done with " << checks << " checks, "
-              << skippedByDAG << " skipped by DAG" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " " << (checks - skippedByDAG)
-              << " checks performed" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " contains: " << contains << " yes: " << containsOk << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
+              << checks << " checks, " << skippedByDAG << " skipped by DAG"
+              << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << (checks - skippedByDAG) << " checks performed" << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " contains: " << contains
+              << " yes: " << containsOk << std::endl;
   }
   if (_config.writeDotFiles) {
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
+    std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Dumping non-reduced DAG as " << _config.output
               << ".non-reduced.dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".non-reduced.dot";
     tmpDirectedAreaGraph.dump(p);
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " done" << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " Reducing DAG with " << tmpDirectedAreaGraph.getNumEdges()
-              << " edges and " << tmpDirectedAreaGraph.getNumVertices()
-              << " vertices ... " << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " Reducing DAG with "
+              << tmpDirectedAreaGraph.getNumEdges() << " edges and "
+              << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
+              << std::endl;
 
     // Prepare non-reduced DAG for cleanup
     tmpDirectedAreaGraph.sort();
@@ -212,19 +217,21 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     progressBar.update(entryCount);
     // Reduce each adjacency list
     const auto& vertices = tmpDirectedAreaGraph.getVertices();
-#pragma omp parallel for
+#pragma omp parallel for shared(vertices, tmpDirectedAreaGraph, \
+                                directedAreaGraph, progressBar, \
+                                entryCount) default(none)
     for (size_t i = 0; i < vertices.size(); i++) {
       uint64_t src = vertices[i];
       std::vector<uint64_t> possibleEdges = tmpDirectedAreaGraph.getEdges(src);
       std::vector<uint64_t> edges;
       for (const auto& dst : tmpDirectedAreaGraph.getEdges(src)) {
-          const auto& dstEdges = tmpDirectedAreaGraph.getEdges(dst);
-          std::set_difference(possibleEdges.begin(), possibleEdges.end(),
-                              dstEdges.begin(), dstEdges.end(),
-                              std::back_inserter(edges));
-          possibleEdges = edges;
-          edges.clear();
-        }
+        const auto& dstEdges = tmpDirectedAreaGraph.getEdges(dst);
+        std::set_difference(possibleEdges.begin(), possibleEdges.end(),
+                            dstEdges.begin(), dstEdges.end(),
+                            std::back_inserter(edges));
+        possibleEdges = edges;
+        edges.clear();
+      }
 #pragma omp critical(addEdge)
       for (const auto& dst : possibleEdges) {
         directedAreaGraph.addEdge(src, dst);
@@ -234,24 +241,22 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
+    std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... done, resulting in DAG with "
               << directedAreaGraph.getNumEdges() << " edges and "
               << directedAreaGraph.getNumVertices() << " vertices" << std::endl;
   }
   if (_config.writeDotFiles) {
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " Dumping DAG as " << _config.output << ".dot ..."
-              << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " Dumping DAG as "
+              << _config.output << ".dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".dot";
     directedAreaGraph.dump(p);
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " done" << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
+    std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Dumping relations from DAG with "
               << directedAreaGraph.getNumEdges() << " edges and "
               << directedAreaGraph.getNumVertices() << " vertices ... "
@@ -261,10 +266,17 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t entryCount = 0;
     progressBar.update(entryCount);
     std::vector<uint64_t> vertices = directedAreaGraph.getVertices();
-#pragma omp parallel for
+#pragma omp parallel for shared(                                         \
+    vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,               \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, directedAreaGraph, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                          \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                      \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                        \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, progressBar,       \
+    entryCount) default(none)
     for (size_t i = 0; i < vertices.size(); i++) {
       const auto id = vertices[i];
-      const auto& entry = _spatialStorageArea[_areaData.at(id)];
+      const auto& entry = _spatialStorageArea[_areaData[id]];
       const auto& entryObjId = std::get<3>(entry);
       const auto& entryFromWay = std::get<5>(entry);
       std::string entryIRI = _writer->generateIRI(
@@ -272,7 +284,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
           entryObjId);
       for (const auto& dst : directedAreaGraph.getEdges(id)) {
-        const auto& area = _spatialStorageArea[_areaData.at(dst)];
+        const auto& area = _spatialStorageArea[_areaData[dst]];
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
         std::string areaIRI = _writer->generateIRI(
@@ -296,12 +308,12 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " ... done" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
+              << std::endl;
   }
   if (!_config.noNodeDump) {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
+    std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Contains relations for " << _spatialStorageNode.size()
               << " nodes in " << spatialIndex.size() << " areas ..."
               << std::endl;
@@ -314,8 +326,17 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
     // Shuffle nodes to improve parallel workloads
-    std::random_shuffle(_spatialStorageNode.begin(), _spatialStorageNode.end());
-#pragma omp parallel for
+    std::shuffle(_spatialStorageNode.begin(), _spatialStorageNode.end(),
+                 std::mt19937(std::random_device()()));
+#pragma omp parallel for shared(                                            \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, spatialIndex, checks,     \
+    skippedByDAG, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,              \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, contains, containsOk, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                             \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                         \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
+    directedAreaGraph, progressBar, entryCount) default(none)
     for (size_t i = 0; i < _spatialStorageNode.size(); i++) {
       const auto& node = _spatialStorageNode[i];
       const auto& nodeEnvelope = std::get<0>(node);
@@ -377,19 +398,18 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " ... done with " << checks << " checks, "
-              << skippedByDAG << " skipped by DAG" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " " << (checks - skippedByDAG)
-              << " checks performed" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " contains: " << contains << " yes: " << containsOk << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
+              << checks << " checks, " << skippedByDAG << " skipped by DAG"
+              << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << (checks - skippedByDAG) << " checks performed" << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " contains: " << contains
+              << " yes: " << containsOk << std::endl;
   }
 
   if (!_config.noWayDump) {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
+    std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Contains relations for " << _spatialStorageWay.size()
               << " ways in " << spatialIndex.size() << " areas ..."
               << std::endl;
@@ -405,8 +425,18 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
     // Shuffle ways to improve parallel workloads
-    std::random_shuffle(_spatialStorageWay.begin(), _spatialStorageWay.end());
-#pragma omp parallel for
+    std::shuffle(_spatialStorageWay.begin(), _spatialStorageWay.end(),
+                 std::mt19937(std::random_device()()));
+#pragma omp parallel for shared(                                            \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData, checks,          \
+    skippedByDAG, intersectsByNodeInfo,                                     \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                       \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, contains, containsOk, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                             \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,      \
+    spatialIndex, intersects, intersectsOk, progressBar,                    \
+    entryCount) default(none)
     for (size_t i = 0; i < _spatialStorageWay.size(); i++) {
       const auto& way = _spatialStorageWay[i];
       const auto& wayEnvelope = std::get<0>(way);
@@ -436,7 +466,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 #pragma omp atomic
             intersectsByNodeInfo++;
             // Load area data for node entry
-            const auto& area = _spatialStorageArea[_areaData.at(areaId)];
+            const auto& area = _spatialStorageArea[_areaData[areaId]];
             const auto& areaGeom = std::get<2>(area);
             const auto& areaObjId = std::get<3>(area);
             const auto& areaFromWay = std::get<5>(area);
@@ -446,9 +476,9 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                 areaObjId);
             _writer->writeTriple(
                 areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
-            _writer->writeTriple(wayIRI,
-                                 osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                                 areaIRI);
+            _writer->writeTriple(
+                wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                areaIRI);
 #pragma omp atomic
             contains++;
             if (boost::geometry::covered_by(wayGeom, areaGeom)) {
@@ -456,9 +486,9 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               containsOk++;
               _writer->writeTriple(
                   areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
-              _writer->writeTriple(wayIRI,
-                                   osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                                   areaIRI);
+              _writer->writeTriple(
+                  wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                  areaIRI);
             }
             for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
               skip.insert(newSkip);
@@ -527,18 +557,19 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() 
-              << " ... done with " << checks << " checks, "
-              << skippedByDAG << " skipped by DAG" << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
+              << checks << " checks, " << skippedByDAG << " skipped by DAG"
+              << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << (checks - skippedByDAG) << " checks performed" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " " << (checks - skippedByDAG)
-              << " checks performed" << std::endl;
+              << " intersect info by nodes: " << intersectsByNodeInfo
+              << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " intersect info by nodes: " << intersectsByNodeInfo << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " intersect: " << intersects << " yes: " << intersectsOk << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " contains: " << contains << " yes: " << containsOk << std::endl;
+              << " intersect: " << intersects << " yes: " << intersectsOk
+              << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " contains: " << contains
+              << " yes: " << containsOk << std::endl;
   }
 }
 
@@ -546,3 +577,5 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 template class osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT>;
 template class osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::TTL>;
 template class osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::QLEVER>;
+
+#pragma clang diagnostic pop
