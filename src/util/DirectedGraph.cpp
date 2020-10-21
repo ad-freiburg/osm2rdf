@@ -12,14 +12,11 @@
 
 // ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::addEdge(uint64_t src, uint64_t dst) {
-#pragma omp critical(addEdge)
-  {
     _adjacency[src].push_back(dst);
     if (_adjacency.count(dst) == 0) {
       _adjacency[dst].size();
     }
     _numEdges++;
-  }
 }
 
 // ____________________________________________________________________________

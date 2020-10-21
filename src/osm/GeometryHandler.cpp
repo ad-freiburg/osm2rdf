@@ -121,10 +121,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t containsOk = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
-
     // Shuffle nodes to improve parallel workloads
     std::random_shuffle(_spatialStorageArea.begin(), _spatialStorageArea.end());
-
 #pragma omp parallel for
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
@@ -163,6 +161,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 #pragma omp atomic
           containsOk++;
           if (!boost::geometry::equals(entryGeom, areaGeom)) {
+#pragma omp critical(addEdge)
             tmpDirectedAreaGraph.addEdge(entryId, areaId);
             for (const auto& newSkip :
                  tmpDirectedAreaGraph.findAbove(entryId)) {
@@ -174,8 +173,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
     }
-
     progressBar.done();
+
     std::cerr << osm2ttl::util::currentTimeFormatted() 
               << " ... done with " << checks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;
@@ -202,16 +201,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               << " edges and " << tmpDirectedAreaGraph.getNumVertices()
               << " vertices ... " << std::endl;
 
-    osmium::ProgressBar progressBar{tmpDirectedAreaGraph.getNumVertices(),
-                                    true};
-    size_t entryCount = 0;
-    progressBar.update(entryCount);
-
     // Prepare non-reduced DAG for cleanup
     tmpDirectedAreaGraph.sort();
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... adjacency lists sorted ... " << std::endl;
 
+    osmium::ProgressBar progressBar{tmpDirectedAreaGraph.getNumVertices(),
+                                    true};
+    size_t entryCount = 0;
+    progressBar.update(entryCount);
     // Reduce each adjacency list
     const auto& vertices = tmpDirectedAreaGraph.getVertices();
 #pragma omp parallel for
@@ -227,14 +225,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           possibleEdges = edges;
           edges.clear();
         }
+#pragma omp critical(addEdge)
       for (const auto& dst : possibleEdges) {
         directedAreaGraph.addEdge(src, dst);
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
     }
-
     progressBar.done();
+
     std::cerr << osm2ttl::util::currentTimeFormatted() 
               << " ... done, resulting in DAG with "
               << directedAreaGraph.getNumEdges() << " edges and "
@@ -261,7 +260,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     osmium::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
     size_t entryCount = 0;
     progressBar.update(entryCount);
-
     std::vector<uint64_t> vertices = directedAreaGraph.getVertices();
 #pragma omp parallel for
     for (size_t i = 0; i < vertices.size(); i++) {
@@ -273,7 +271,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
           entryObjId);
-      for (const auto& dst : tmpDirectedAreaGraph.getEdges(id)) {
+      for (const auto& dst : directedAreaGraph.getEdges(id)) {
         const auto& area = _spatialStorageArea[_areaData.at(dst)];
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
@@ -297,6 +295,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     }
 
     progressBar.done();
+
     std::cerr << osm2ttl::util::currentTimeFormatted() 
               << " ... done" << std::endl;
   }
@@ -306,6 +305,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               << " Contains relations for " << _spatialStorageNode.size()
               << " nodes in " << spatialIndex.size() << " areas ..."
               << std::endl;
+
     osmium::ProgressBar progressBar{_spatialStorageNode.size(), true};
     size_t entryCount = 0;
     size_t checks = 0;
@@ -313,7 +313,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t containsOk = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
-
     // Shuffle nodes to improve parallel workloads
     std::random_shuffle(_spatialStorageNode.begin(), _spatialStorageNode.end());
 #pragma omp parallel for
@@ -377,6 +376,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
       progressBar.update(entryCount++);
     }
     progressBar.done();
+
     std::cerr << osm2ttl::util::currentTimeFormatted() 
               << " ... done with " << checks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;
@@ -393,6 +393,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
               << " Contains relations for " << _spatialStorageWay.size()
               << " ways in " << spatialIndex.size() << " areas ..."
               << std::endl;
+
     osmium::ProgressBar progressBar{_spatialStorageWay.size(), true};
     size_t entryCount = 0;
     size_t checks = 0;
@@ -403,7 +404,6 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     size_t containsOk = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
-
     // Shuffle ways to improve parallel workloads
     std::random_shuffle(_spatialStorageWay.begin(), _spatialStorageWay.end());
 #pragma omp parallel for
@@ -526,6 +526,7 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
       progressBar.update(entryCount++);
     }
     progressBar.done();
+
     std::cerr << osm2ttl::util::currentTimeFormatted() 
               << " ... done with " << checks << " checks, "
               << skippedByDAG << " skipped by DAG" << std::endl;

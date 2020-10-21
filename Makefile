@@ -18,7 +18,7 @@ benchmark: build
 	cmake --build build --target benchmarks
 
 perf: build
-	cmake --build build --target osm2ttl
+	cmake --build build --target osm2ttl --config Debug
 	for FILE in $(shell ls -Sr input); do time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
 
 docker-fr:
