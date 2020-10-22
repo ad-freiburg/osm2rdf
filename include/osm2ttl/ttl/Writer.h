@@ -58,6 +58,7 @@ static const int BIT_IN_NIBBLE = 4;
 #include <ostream>
 #include <string>
 
+#include "boost/iostreams/filtering_stream.hpp"
 #include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Location.h"
@@ -152,7 +153,7 @@ class Writer {
   };
 
   // Output
-  std::ostream* _out;
+  boost::iostreams::filtering_ostream _out;
   std::ofstream _outFile;
   std::mutex _outMutex;
 };

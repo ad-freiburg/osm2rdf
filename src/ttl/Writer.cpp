@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "boost/geometry.hpp"
+#include "boost/iostreams/filter/bzip2.hpp"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/osm/Area.h"
@@ -26,8 +27,6 @@ static const int k0xB7 = 0xB7;
 template <typename T>
 osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
     : _config(config) {
-  _out = &std::cout;
-
   // Generate constants
   osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
@@ -79,17 +78,23 @@ osm2ttl::ttl::Writer<T>::~Writer() {
 // ____________________________________________________________________________
 template <typename T>
 bool osm2ttl::ttl::Writer<T>::open() {
+  if (_config.outputCompress) {
+    _out.push(boost::iostreams::bzip2_compressor{});
+  }
   if (!_config.output.empty()) {
     _outFile.open(_config.output);
-    _out = &_outFile;
+    _out.push(_outFile);
     return _outFile.is_open();
   }
+  _out.push(std::cout);
   return true;
 }
 
 // ____________________________________________________________________________
 template <typename T>
 void osm2ttl::ttl::Writer<T>::close() {
+  _out.flush();
+  _out.pop();
   if (_outFile.is_open()) {
     _outFile.close();
   }
@@ -100,7 +105,7 @@ template <typename T>
 void osm2ttl::ttl::Writer<T>::writeHeader() {
   const std::lock_guard<std::mutex> lock(_outMutex);
   for (const auto& [prefix, iriref] : _prefixes) {
-    *_out << "@prefix " << prefix << ": <" << iriref << "> .\n";
+    _out << "@prefix " << prefix << ": <" << iriref << "> .\n";
   }
 }
 
@@ -174,7 +179,7 @@ void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
 #pragma omp critical(writeTriple)
-  { *_out << s + " " + p + " " + o + " .\n"; }
+  { _out << s + " " + p + " " + o + " .\n"; }
 }
 
 // ____________________________________________________________________________

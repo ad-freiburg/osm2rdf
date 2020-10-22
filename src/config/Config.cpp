@@ -84,6 +84,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
           "", "output-format", "Output format, valid values: nt, ttl, qlever",
           "qlever");
+  auto outputNoCompressOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "output-no-compress",
+      "Do not compress output");
   auto cacheOp = op.add<popl::Value<std::string>>(
       "t", "cache", "Path to cache directory", "/tmp/");
 
@@ -131,6 +134,13 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     // Output
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
+    outputCompress = !outputNoCompressOp->is_set();
+    if (output.empty()) {
+      outputCompress = false;
+    }
+    if (outputCompress && !output.empty() && output.extension() != ".bz2") {
+      output += ".bz2";
+    }
 
     // osmium location cache
     if (cacheOp->is_set() || cache.empty()) {

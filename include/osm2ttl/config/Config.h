@@ -44,6 +44,7 @@ struct Config {
   // Output, empty for stdout
   std::filesystem::path output;
   std::string outputFormat;
+  bool outputCompress = true;
 
   // osmium location cache
   std::filesystem::path cache;
