@@ -23,29 +23,25 @@ void osm2ttl::util::DirectedGraph::addEdge(uint64_t src, uint64_t dst) {
 std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
     uint64_t src) const {
   std::vector<uint64_t> tmp;
-
   const auto& it = _adjacency.find(src);
-
   if (it == _adjacency.end()) {
-    return tmp;
+    return std::vector<uint64_t>();
   }
 
+  tmp.insert(tmp.end(), it->second.begin(), it->second.end());
   std::vector<uint64_t> tmp2;
   for (const auto& dst : it->second) {
     tmp2.push_back(dst);
   }
   for (const auto& dst : it->second) {
     auto v = findAbove(dst);
-    tmp2.insert(tmp2.end(), v.begin(), v.end());
+    tmp.insert(tmp.end(), v.begin(), v.end());
   }
+  std::sort(tmp.begin(), tmp.end());
+  const auto it2 = std::unique(tmp.begin(), tmp.end());
+  tmp.resize(std::distance(tmp.begin(), it2));
 
-  for (uint64_t v : tmp2) {
-    if (std::find(tmp.begin(), tmp.end(), v) == tmp.end()) {
-      tmp.push_back(v);
-    }
-  }
-
-  return std::move(std::vector<uint64_t>(tmp.rbegin(), tmp.rend()));
+  return tmp;
 }
 
 // ____________________________________________________________________________
