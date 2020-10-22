@@ -16,8 +16,10 @@ class DirectedGraph {
  public:
   void addEdge(uint64_t src, uint64_t dst);
   std::vector<uint64_t> findAbove(uint64_t src) const;
+  std::vector<uint64_t> findAboveFast(uint64_t src) const;
   void dump(std::filesystem::path filename) const;
   void sort();
+  void prepareFastAbove();
   size_t getNumEdges() const;
   size_t getNumVertices() const;
   std::vector<uint64_t> getVertices() const;
@@ -25,6 +27,7 @@ class DirectedGraph {
 
  protected:
   std::unordered_map<uint64_t, std::vector<uint64_t>> _adjacency;
+  std::unordered_map<uint64_t, std::vector<uint64_t>> _above;
   size_t _numEdges = 0;
 };
 

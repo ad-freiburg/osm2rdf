@@ -311,6 +311,14 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
+  {
+    std::cerr << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " Preparing fast above lookup in DAG ..." << std::endl;
+    directedAreaGraph.prepareFastAbove();
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
+              << std::endl;
+  }
   if (!_config.noNodeDump) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()

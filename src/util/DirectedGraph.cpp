@@ -24,15 +24,17 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
     uint64_t src) const {
   std::vector<uint64_t> tmp;
 
-  if (_adjacency.count(src) == 0) {
+  const auto& it = _adjacency.find(src);
+
+  if (it == _adjacency.end()) {
     return tmp;
   }
 
   std::vector<uint64_t> tmp2;
-  for (const auto& dst : _adjacency.at(src)) {
+  for (const auto& dst : it->second) {
     tmp2.push_back(dst);
   }
-  for (const auto& dst : _adjacency.at(src)) {
+  for (const auto& dst : it->second) {
     auto v = findAbove(dst);
     tmp2.insert(tmp2.end(), v.begin(), v.end());
   }
@@ -44,6 +46,16 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
   }
 
   return std::move(std::vector<uint64_t>(tmp.rbegin(), tmp.rend()));
+}
+
+// ____________________________________________________________________________
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAboveFast(
+    uint64_t src) const {
+  const auto& it = _above.find(src);
+  if (it == _adjacency.end()) {
+    return std::vector<uint64_t>();
+  }
+  return it->second;
 }
 
 // ____________________________________________________________________________
@@ -75,12 +87,20 @@ void osm2ttl::util::DirectedGraph::dump(std::filesystem::path filename) const {
   ofs.flush();
   ofs.close();
 }
+
 // ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::sort() {
   const auto& vertices = getVertices();
-#pragma omp parallel for
+#pragma omp parallel for shared(vertices) default(none)
   for (size_t i = 0; i < vertices.size(); i++) {
     std::sort(_adjacency[vertices[i]].begin(), _adjacency[vertices[i]].end());
+  }
+}
+// ____________________________________________________________________________
+void osm2ttl::util::DirectedGraph::prepareFastAbove() {
+  const auto& vertices = getVertices();
+  for (size_t i = 0; i < vertices.size(); i++) {
+    _above[vertices[i]] = findAbove(i);
   }
 }
 

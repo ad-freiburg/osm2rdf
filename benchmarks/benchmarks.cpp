@@ -3,8 +3,11 @@
 
 #include <benchmark/benchmark.h>
 
+#include <numeric>
+
 #include "osm2ttl/ttl/Format.h"
 #include "osm2ttl/ttl/Writer.h"
+#include "osm2ttl/util/DirectedGraph.h"
 
 static void UINT64T_TO_STRING(benchmark::State& state) {
   uint64_t x = state.range(0);
@@ -172,6 +175,68 @@ static void OSM2TT_TTL_WRITER_ENCODE_PN_LOCAL_UTF8(benchmark::State& state) {
 }
 BENCHMARK(OSM2TT_TTL_WRITER_ENCODE_PN_LOCAL_UTF8)
 ->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+
+static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_0(benchmark::State& state) {
+  osm2ttl::util::DirectedGraph dg;
+  std::vector<uint64_t> vertices(state.range(0));
+  std::iota(std::begin(vertices), std::end(vertices), 0);
+  for (size_t i = 0; i < vertices.size() - 1; ++i) {
+    dg.addEdge(vertices[i], vertices[i + 1]);
+  }
+  for (auto _ : state) {
+    dg.findAbove(0);
+  }
+  state.SetComplexityN(state.range(0));
+}
+BENCHMARK(OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_0)
+->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
+
+static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_N(benchmark::State& state) {
+  osm2ttl::util::DirectedGraph dg;
+  std::vector<uint64_t> vertices(state.range(0));
+  std::iota(std::begin(vertices), std::end(vertices), 0);
+  for (size_t i = 0; i < vertices.size() - 1; ++i) {
+    dg.addEdge(vertices[i], vertices[i + 1]);
+  }
+  for (auto _ : state) {
+    dg.findAbove(vertices.size());
+  }
+  state.SetComplexityN(state.range(0));
+}
+BENCHMARK(OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_N)
+->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
+
+static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_FAST_0(benchmark::State& state) {
+  osm2ttl::util::DirectedGraph dg;
+  std::vector<uint64_t> vertices(state.range(0));
+  std::iota(std::begin(vertices), std::end(vertices), 0);
+  for (size_t i = 0; i < vertices.size() - 1; ++i) {
+    dg.addEdge(vertices[i], vertices[i + 1]);
+  }
+  dg.prepareFastAbove();
+  for (auto _ : state) {
+    dg.findAboveFast(0);
+  }
+  state.SetComplexityN(state.range(0));
+}
+BENCHMARK(OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_FAST_0)
+->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
+
+static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_FAST_N(benchmark::State& state) {
+  osm2ttl::util::DirectedGraph dg;
+  std::vector<uint64_t> vertices(state.range(0));
+  std::iota(std::begin(vertices), std::end(vertices), 0);
+  for (size_t i = 0; i < vertices.size() - 1; ++i) {
+    dg.addEdge(vertices[i], vertices[i + 1]);
+  }
+  dg.prepareFastAbove();
+  for (auto _ : state) {
+    dg.findAboveFast(vertices.size());
+  }
+  state.SetComplexityN(state.range(0));
+}
+BENCHMARK(OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_FAST_N)
+->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
 
 static void DUMMY(benchmark::State& state) {
   for (auto _ : state) {
