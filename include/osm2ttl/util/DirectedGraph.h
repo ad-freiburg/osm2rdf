@@ -26,6 +26,7 @@ class DirectedGraph {
   std::vector<uint64_t> getEdges(uint64_t src) const;
 
  protected:
+  std::vector<uint64_t> findAboveHelper(uint64_t src) const;
   std::unordered_map<uint64_t, std::vector<uint64_t>> _adjacency;
   std::unordered_map<uint64_t, std::vector<uint64_t>> _above;
   size_t _numEdges = 0;

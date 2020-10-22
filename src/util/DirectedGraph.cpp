@@ -25,22 +25,40 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
   std::vector<uint64_t> tmp;
   const auto& it = _adjacency.find(src);
   if (it == _adjacency.end()) {
-    return std::vector<uint64_t>();
+    return tmp;
   }
 
+  // Copy direct parents.
   tmp.insert(tmp.end(), it->second.begin(), it->second.end());
-  std::vector<uint64_t> tmp2;
+  // Add parents parents.
   for (const auto& dst : it->second) {
-    tmp2.push_back(dst);
-  }
-  for (const auto& dst : it->second) {
-    auto v = findAbove(dst);
+    const auto& v = findAboveHelper(dst);
     tmp.insert(tmp.end(), v.begin(), v.end());
   }
+  // Make unique
   std::sort(tmp.begin(), tmp.end());
   const auto it2 = std::unique(tmp.begin(), tmp.end());
   tmp.resize(std::distance(tmp.begin(), it2));
+  return tmp;
+}
 
+
+// ____________________________________________________________________________
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAboveHelper(
+    uint64_t src) const {
+  std::vector<uint64_t> tmp;
+  const auto& it = _adjacency.find(src);
+  if (it == _adjacency.end()) {
+    return tmp;
+  }
+
+  // Copy direct parents.
+  tmp.insert(tmp.end(), it->second.begin(), it->second.end());
+  // Add parents parents.
+  for (const auto& dst : it->second) {
+    const auto& v = findAbove(dst);
+    tmp.insert(tmp.end(), v.begin(), v.end());
+  }
   return tmp;
 }
 
