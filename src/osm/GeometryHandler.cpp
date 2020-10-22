@@ -49,7 +49,6 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
     _spatialStorageArea.emplace_back(a.envelope(), a.id(), a.geom(), a.objId(),
                                      boost::geometry::area(a.geom()),
                                      a.fromWay());
-    assert(std::get<1>(_spatialStorageArea[_areaData[a.id()]]) == a.id());
   }
 }
 
@@ -128,9 +127,9 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     // Shuffle nodes to improve parallel workloads
     std::shuffle(_spatialStorageArea.begin(), _spatialStorageArea.end(),
                  std::mt19937(std::random_device()()));
-#pragma omp parallel for shared(spatialIndex, checks, skippedByDAG, contains, \
-                                containsOk, tmpDirectedAreaGraph, entryCount, \
-                                progressBar) default(none)
+#pragma omp parallel for shared(spatialIndex, tmpDirectedAreaGraph,          \
+    entryCount, progressBar) reduction(+:checks, skippedByDAG, contains,     \
+    containsOk) default(none)
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
@@ -153,19 +152,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         if (areaId == entryId) {
           continue;
         }
-#pragma omp atomic
         checks++;
 
         if (skip.find(areaId) != skip.end()) {
-#pragma omp atomic
           skippedByDAG++;
           continue;
         }
 
-#pragma omp atomic
         contains++;
         if (boost::geometry::covered_by(entryGeom, areaGeom)) {
-#pragma omp atomic
           containsOk++;
           if (!boost::geometry::equals(entryGeom, areaGeom)) {
 #pragma omp critical(addEdge)
@@ -337,14 +332,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     std::shuffle(_spatialStorageNode.begin(), _spatialStorageNode.end(),
                  std::mt19937(std::random_device()()));
 #pragma omp parallel for shared(                                            \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, spatialIndex, checks,     \
-    skippedByDAG, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,              \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, contains, containsOk, \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, spatialIndex,             \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                            \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                       \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                             \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                         \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
-    directedAreaGraph, progressBar, entryCount) default(none)
+    directedAreaGraph, progressBar, entryCount) reduction(+:checks,         \
+    skippedByDAG, contains, containsOk) default(none)
     for (size_t i = 0; i < _spatialStorageNode.size(); i++) {
       const auto& node = _spatialStorageNode[i];
       const auto& nodeEnvelope = std::get<0>(node);
@@ -368,18 +364,14 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         const auto& areaGeom = std::get<2>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
-#pragma omp atomic
         checks++;
 
         if (skip.find(areaId) != skip.end()) {
-#pragma omp atomic
           skippedByDAG++;
           continue;
         }
-#pragma omp atomic
         contains++;
         if (boost::geometry::covered_by(nodeGeom, areaGeom)) {
-#pragma omp atomic
           containsOk++;
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
@@ -435,16 +427,16 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
     // Shuffle ways to improve parallel workloads
     std::shuffle(_spatialStorageWay.begin(), _spatialStorageWay.end(),
                  std::mt19937(std::random_device()()));
-#pragma omp parallel for shared(                                            \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData, checks,          \
-    skippedByDAG, intersectsByNodeInfo,                                     \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                       \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, contains, containsOk, \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                             \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,      \
-    spatialIndex, intersects, intersectsOk, progressBar,                    \
-    entryCount) default(none)
+#pragma omp parallel for shared(                                             \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData,                   \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                        \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                            \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
+    spatialIndex,  progressBar, entryCount) reduction(+:checks,skippedByDAG, \
+    intersectsByNodeInfo, intersects, intersectsOk, contains, containsOk)    \
+    default(none)
     for (size_t i = 0; i < _spatialStorageWay.size(); i++) {
       const auto& way = _spatialStorageWay[i];
       const auto& wayEnvelope = std::get<0>(way);
@@ -462,16 +454,13 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         auto nodeDataIt = nodeData.find(nodeId);
         if (nodeDataIt != nodeData.end()) {
           for (const auto& areaId : nodeDataIt->second) {
-#pragma omp atomic
             checks++;
 
             if (skip.find(areaId) != skip.end()) {
-#pragma omp atomic
               skippedByDAG++;
               continue;
             }
 
-#pragma omp atomic
             intersectsByNodeInfo++;
             // Load area data for node entry
             const auto& area = _spatialStorageArea[_areaData[areaId]];
@@ -487,10 +476,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
             _writer->writeTriple(
                 wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                 areaIRI);
-#pragma omp atomic
             contains++;
             if (boost::geometry::covered_by(wayGeom, areaGeom)) {
-#pragma omp atomic
               containsOk++;
               _writer->writeTriple(
                   areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
@@ -521,19 +508,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         if (areaFromWay && areaObjId == wayId) {
           continue;
         }
-#pragma omp atomic
         checks++;
 
         if (skip.find(areaId) != skip.end()) {
-#pragma omp atomic
           skippedByDAG++;
           continue;
         }
 
-#pragma omp atomic
         intersects++;
         if (boost::geometry::intersects(wayGeom, areaGeom)) {
-#pragma omp atomic
           intersectsOk++;
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
@@ -544,10 +527,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           _writer->writeTriple(wayIRI,
                                osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                                areaIRI);
-#pragma omp atomic
           contains++;
           if (boost::geometry::covered_by(wayGeom, areaGeom)) {
-#pragma omp atomic
             containsOk++;
             _writer->writeTriple(
                 areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
