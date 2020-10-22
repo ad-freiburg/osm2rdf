@@ -368,15 +368,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           skippedByDAG++;
           continue;
         }
-        std::string areaIRI = _writer->generateIRI(
-            areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-            areaObjId);
 #pragma omp atomic
         contains++;
         if (boost::geometry::covered_by(nodeGeom, areaGeom)) {
 #pragma omp atomic
           containsOk++;
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, nodeIRI);
           _writer->writeTriple(
@@ -522,15 +522,15 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           continue;
         }
 
-        std::string areaIRI = _writer->generateIRI(
-            areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-            areaObjId);
 #pragma omp atomic
         intersects++;
         if (boost::geometry::intersects(wayGeom, areaGeom)) {
 #pragma omp atomic
           intersectsOk++;
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
           _writer->writeTriple(wayIRI,
