@@ -4,21 +4,21 @@ clean:
 	rm -rf *build*
 
 build:
-	cmake -S . -B build
+	cmake -S . -B build -D CMAKE_BUILD_TYPE=RelWithDebInfo
 
 compile: build
-	cmake --build build
+	cmake --build build --config RelWithDebInfo
 
 checkstyle:
 
 test: build
-	cmake --build build --target test
+	cmake --build build --config RelWithDebInfo --target test
 
 benchmark: build
-	cmake --build build --target benchmarks
+	cmake --build build --config RelWithDebInfo --target benchmarks
 
 perf: build
-	cmake --build build --target osm2ttl --config Debug
+	cmake --build build --target osm2ttl --config RelWithDebInfo
 	for FILE in $(shell ls -Sr input); do time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
 
 docker-fr:
