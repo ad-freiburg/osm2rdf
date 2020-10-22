@@ -160,9 +160,11 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         }
 
         contains++;
-        if (boost::geometry::covered_by(entryGeom, areaGeom)) {
+        bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+        if (isCoveredBy) {
           containsOk++;
-          if (!boost::geometry::equals(entryGeom, areaGeom)) {
+          bool isEqual = boost::geometry::equals(entryGeom, areaGeom);
+          if (!isEqual) {
 #pragma omp critical(addEdge)
             tmpDirectedAreaGraph.addEdge(entryId, areaId);
             for (const auto& newSkip :
@@ -371,7 +373,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
           continue;
         }
         contains++;
-        if (boost::geometry::covered_by(nodeGeom, areaGeom)) {
+        bool isCoveredBy = boost::geometry::covered_by(nodeGeom, areaGeom);
+        if (isCoveredBy) {
           containsOk++;
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
@@ -477,7 +480,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                 wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                 areaIRI);
             contains++;
-            if (boost::geometry::covered_by(wayGeom, areaGeom)) {
+            bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
+            if (isCoveredBy) {
               containsOk++;
               _writer->writeTriple(
                   areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
@@ -516,7 +520,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
         }
 
         intersects++;
-        if (boost::geometry::intersects(wayGeom, areaGeom)) {
+        bool doesIntersect = boost::geometry::intersects(wayGeom, areaGeom);
+        if (doesIntersect) {
           intersectsOk++;
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
@@ -528,7 +533,8 @@ void osm2ttl::osm::GeometryHandler<W>::lookup() {
                                osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                                areaIRI);
           contains++;
-          if (boost::geometry::covered_by(wayGeom, areaGeom)) {
+          bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
+          if (isCoveredBy) {
             containsOk++;
             _writer->writeTriple(
                 areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
