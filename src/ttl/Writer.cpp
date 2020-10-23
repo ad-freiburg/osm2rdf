@@ -93,7 +93,6 @@ bool osm2ttl::ttl::Writer<T>::open() {
 // ____________________________________________________________________________
 template <typename T>
 void osm2ttl::ttl::Writer<T>::close() {
-  _out.flush();
   _out.pop();
   if (_outFile.is_open()) {
     _outFile.close();

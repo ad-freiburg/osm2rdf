@@ -16,6 +16,11 @@ test: build
 
 benchmark: build
 	cmake --build build --config RelWithDebInfo --target benchmarks
+	./build/benchmarks/benchmarks
+
+run: build
+	cmake --build build --target osm2ttl --config RelWithDebInfo
+	for FILE in $(shell ls -Sr input); do ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; done
 
 perf: build
 	cmake --build build --target osm2ttl --config RelWithDebInfo
