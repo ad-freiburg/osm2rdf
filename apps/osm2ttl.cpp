@@ -87,7 +87,7 @@ void run(osm2ttl::config::Config& config) {
       std::cerr << std::endl;
       std::cerr << osm2ttl::util::currentTimeFormatted()
                 << "Calculating contains relation ..." << std::endl;
-      geometryHandler.lookup();
+      geometryHandler.calculateRelations();
       std::cerr << osm2ttl::util::currentTimeFormatted() << "... done"
                 << std::endl;
     }
