@@ -102,7 +102,6 @@ void osm2ttl::ttl::Writer<T>::close() {
 // ____________________________________________________________________________
 template <typename T>
 void osm2ttl::ttl::Writer<T>::writeHeader() {
-  const std::lock_guard<std::mutex> lock(_outMutex);
   for (const auto& [prefix, iriref] : _prefixes) {
     _out << "@prefix " << prefix << ": <" << iriref << "> .\n";
   }

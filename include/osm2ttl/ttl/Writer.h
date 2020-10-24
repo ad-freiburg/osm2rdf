@@ -54,7 +54,6 @@ static const int BITS_OF_BYTE = 0xFF;
 static const int BIT_IN_NIBBLE = 4;
 
 #include <fstream>
-#include <mutex>
 #include <ostream>
 #include <string>
 
@@ -155,7 +154,6 @@ class Writer {
   // Output
   boost::iostreams::filtering_ostream _out;
   std::ofstream _outFile;
-  std::mutex _outMutex;
 };
 }  // namespace ttl
 }  // namespace osm2ttl
