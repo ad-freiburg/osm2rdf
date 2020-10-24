@@ -21,7 +21,7 @@ TEST(DirectedGraph, findAbove) {
     g.addEdge(1, 2);
     auto res = g.findAbove(1);
     ASSERT_EQ(2, res.size());
-    ASSERT_EQ(2, res[0]);
-    ASSERT_EQ(0, res[1]);
+    ASSERT_EQ(0, res[0]);
+    ASSERT_EQ(2, res[1]);
   }
 }
