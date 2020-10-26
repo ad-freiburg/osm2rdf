@@ -53,17 +53,18 @@ template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::writeStatisticLine(
     std::string_view function, std::string_view part, std::string_view check, uint64_t outerId,
     std::string_view outerType, uint64_t innerId, std::string_view innerType,
-    std::chrono::nanoseconds durationNS) {
+    std::chrono::nanoseconds durationNS, bool result) {
 #pragma omp critical(writeStatisticLine)
   _statisticsOut << ("{"
       "\"function\": \"" + std::string(function) + "\","
       "\"part\": \"" + std::string(part) + "\","
       "\"check\": \"" + std::string(check) + "\","
-      "\"outer_id\": \"" + std::to_string(outerId) + "\","
+      "\"outer_id\": " + std::to_string(outerId) + ","
       "\"outer_type\": \"" + std::string(outerType) + "\","
-      "\"inner_id\": \"" + std::to_string(innerId) + "\","
+      "\"inner_id\": " + std::to_string(innerId) + ","
       "\"inner_type\": \"" + std::string(innerType) + "\","
-      "\"duration_ns\": \"" + std::to_string(durationNS.count()) + "\""
+      "\"duration_ns\": " + std::to_string(durationNS.count()) + ","
+      "\"result\": " + (result ? "true" : "false") + ""
       "},\n");
 }
 
@@ -200,13 +201,13 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
         auto start = std::chrono::steady_clock::now();
         bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
         auto end = std::chrono::steady_clock::now();
-        writeStatisticLine("calculateRelations", "DAG", "isCoveredBy", areaId, "area", entryId, "area", std::chrono::nanoseconds(end - start));
+        writeStatisticLine(__func__, "DAG", "isCoveredBy", areaId, "area", entryId, "area", std::chrono::nanoseconds(end - start), isCoveredBy);
         if (isCoveredBy) {
           containsOk++;
-          auto start = std::chrono::steady_clock::now();
+          start = std::chrono::steady_clock::now();
           bool isEqual = boost::geometry::equals(entryGeom, areaGeom);
-          auto end = std::chrono::steady_clock::now();
-          writeStatisticLine("calculateRelations", "DAG", "isEqual", areaId, "area", entryId, "area", std::chrono::nanoseconds(end - start));
+          end = std::chrono::steady_clock::now();
+          writeStatisticLine(__func__, "DAG", "isEqual", areaId, "area", entryId, "area", std::chrono::nanoseconds(end - start), isEqual);
           if (!isEqual) {
 #pragma omp critical(addEdge)
             tmpDirectedAreaGraph.addEdge(entryId, areaId);
@@ -419,7 +420,7 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
         auto start = std::chrono::steady_clock::now();
         bool isCoveredBy = boost::geometry::covered_by(nodeGeom, areaGeom);
         auto end = std::chrono::steady_clock::now();
-        writeStatisticLine("calculateRelations", "Node", "isCoveredBy", areaId, "area", nodeId, "node", std::chrono::nanoseconds(end - start));
+        writeStatisticLine(__func__, "Node", "isCoveredBy", areaId, "area", nodeId, "node", std::chrono::nanoseconds(end - start), isCoveredBy);
         if (isCoveredBy) {
           containsOk++;
           std::string areaIRI = _writer->generateIRI(
@@ -529,7 +530,7 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
             auto start = std::chrono::steady_clock::now();
             bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
             auto end = std::chrono::steady_clock::now();
-            writeStatisticLine("calculateRelations", "Way", "isCoveredBy1", areaId, "area", wayId, "way", std::chrono::nanoseconds(end - start));
+            writeStatisticLine(__func__, "Way", "isCoveredBy1", areaId, "area", wayId, "way", std::chrono::nanoseconds(end - start), isCoveredBy);
             if (isCoveredBy) {
               containsOk++;
               _writer->writeTriple(
@@ -572,7 +573,7 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
         auto start = std::chrono::steady_clock::now();
         bool doesIntersect = boost::geometry::intersects(wayGeom, areaGeom);
         auto end = std::chrono::steady_clock::now();
-        writeStatisticLine("calculateRelations", "Way", "doesIntersect", areaId, "area", wayId, "way", std::chrono::nanoseconds(end - start));
+        writeStatisticLine(__func__, "Way", "doesIntersect", areaId, "area", wayId, "way", std::chrono::nanoseconds(end - start), doesIntersect);
         if (doesIntersect) {
           intersectsOk++;
           std::string areaIRI = _writer->generateIRI(
@@ -585,10 +586,10 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
                                osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                                areaIRI);
           contains++;
-          auto start = std::chrono::steady_clock::now();
+          start = std::chrono::steady_clock::now();
           bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
-          auto end = std::chrono::steady_clock::now();
-          writeStatisticLine("calculateRelations", "Way", "isCoveredBy2", areaId, "area", wayId, "way", std::chrono::nanoseconds(end - start));
+          end = std::chrono::steady_clock::now();
+          writeStatisticLine(__func__, "Way", "isCoveredBy2", areaId, "area", wayId, "way", std::chrono::nanoseconds(end - start), isCoveredBy);
           if (isCoveredBy) {
             containsOk++;
             _writer->writeTriple(
