@@ -143,12 +143,11 @@ configure_file (
         "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h"
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0  -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS} -Og -g -DLOGLEVEL=3 -DOSM2NT_DBG=1")
-set(CMAKE_CXX_FLAGS_PERF           "${CMAKE_CXX_FLAGS} -DLOGLEVEL=3 -O3 -DOSM2NT_DBG=1")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -Os")
 set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -O3")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -g -DLOGLEVEL=3")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -DLOGLEVEL=3 -g")
 if(CLANG_TIDY_EXE)
   set(CMAKE_CXX_CLANG_TIDY       "clang-tidy;-checks=-*,readability-*")
 endif()
