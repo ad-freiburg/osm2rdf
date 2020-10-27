@@ -22,11 +22,10 @@ class DumpHandler : public osmium::handler::Handler {
  public:
   DumpHandler(const osm2ttl::config::Config& config,
               osm2ttl::ttl::Writer<W>* writer);
-  void area(const osmium::Area& area);
-  void node(const osmium::Node& node);
-  void relation(const osmium::Relation& relation);
-  void way(const osmium::Way& way);
-  const osmium::memory::item_size_type EMPTY_TAG_SIZE = 8;
+  void area(const osm2ttl::osm::Area& area);
+  void node(const osm2ttl::osm::Node& node);
+  void relation(const osm2ttl::osm::Relation& relation);
+  void way(const osm2ttl::osm::Way& way);
 
  protected:
   template <typename T>

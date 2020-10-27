@@ -51,9 +51,9 @@ class GeometryHandler : public osmium::handler::Handler {
   ~GeometryHandler();
 
   // Store data
-  void area(const osmium::Area& area);
-  void node(const osmium::Node& node);
-  void way(const osmium::Way& way);
+  void area(const osm2ttl::osm::Area& area);
+  void node(const osm2ttl::osm::Node& node);
+  void way(const osm2ttl::osm::Way& way);
   // Calculate data
   void calculateRelations();
 

@@ -33,62 +33,26 @@ void osm2ttl::osm::DumpHandler<W>::write(const T& o) {
 
 // ____________________________________________________________________________
 template<typename W>
-void osm2ttl::osm::DumpHandler<W>::area(const osmium::Area& area) {
-  if (_config.noDump) {
-    return;
-  }
-  if (_config.noAreaDump) {
-    return;
-  }
-  if (area.tags().byte_size() == EMPTY_TAG_SIZE) {
-    return;
-  }
-  write(osm2ttl::osm::Area(area));
+void osm2ttl::osm::DumpHandler<W>::area(const osm2ttl::osm::Area& area) {
+  write(area);
 }
 
 // ____________________________________________________________________________
 template<typename W>
-void osm2ttl::osm::DumpHandler<W>::node(const osmium::Node& node) {
-  if (_config.noDump) {
-    return;
-  }
-  if (_config.noNodeDump) {
-    return;
-  }
-  if (node.tags().byte_size() == EMPTY_TAG_SIZE) {
-    return;
-  }
-  write(osm2ttl::osm::Node(node));
+void osm2ttl::osm::DumpHandler<W>::node(const osm2ttl::osm::Node& node) {
+  write(node);
 }
 
 // ____________________________________________________________________________
 template<typename W>
-void osm2ttl::osm::DumpHandler<W>::relation(const osmium::Relation& relation) {
-  if (_config.noDump) {
-    return;
-  }
-  if (_config.noRelationDump) {
-    return;
-  }
-  if (relation.tags().byte_size() == EMPTY_TAG_SIZE) {
-    return;
-  }
-  write(osm2ttl::osm::Relation(relation));
+void osm2ttl::osm::DumpHandler<W>::relation(const osm2ttl::osm::Relation& relation) {
+  write(relation);
 }
 
 // ____________________________________________________________________________
 template<typename W>
-void osm2ttl::osm::DumpHandler<W>::way(const osmium::Way& way) {
-  if (_config.noDump) {
-    return;
-  }
-  if (_config.noWayDump) {
-    return;
-  }
-  if (way.tags().byte_size() == EMPTY_TAG_SIZE) {
-    return;
-  }
-  write(osm2ttl::osm::Way(way));
+void osm2ttl::osm::DumpHandler<W>::way(const osm2ttl::osm::Way& way) {
+  write(way);
 }
 
 // ____________________________________________________________________________

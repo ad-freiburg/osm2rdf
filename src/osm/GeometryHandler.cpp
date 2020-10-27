@@ -89,69 +89,38 @@ void osm2ttl::osm::GeometryHandler<W>::writeStatisticLine(
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::GeometryHandler<W>::area(const osmium::Area& area) {
-  if (_config.noContains) {
-    return;
-  }
-  if (_config.noAreaDump) {
-    return;
-  }
-  osm2ttl::osm::Area a = osm2ttl::osm::Area(area);
-  if (!a.hasName()) {
-    return;
-  }
+void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 #pragma omp critical(areaDataInsert)
   {
-    _areaData[a.id()] = _spatialStorageArea.size();
-    _spatialStorageArea.emplace_back(a.envelope(), a.id(), a.geom(), a.objId(),
-                                     boost::geometry::area(a.geom()),
-                                     a.fromWay());
+    _areaData[area.id()] = _spatialStorageArea.size();
+    _spatialStorageArea.emplace_back(area.envelope(), area.id(), area.geom(), area.objId(),
+                                     boost::geometry::area(area.geom()),
+                                     area.fromWay());
   }
 }
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::GeometryHandler<W>::node(const osmium::Node& node) {
-  if (_config.noContains) {
-    return;
-  }
-  if (_config.noNodeDump) {
-    return;
-  }
-  osm2ttl::osm::Node n = osm2ttl::osm::Node(node);
-  if (n.tags().empty()) {
-    return;
-  }
-  _spatialStorageNode.emplace_back(n.envelope(), n.id(), n.geom());
+void osm2ttl::osm::GeometryHandler<W>::node(const osm2ttl::osm::Node& node) {
+#pragma omp critical(nodeDataInsert)
+  _spatialStorageNode.emplace_back(node.envelope(), node.id(), node.geom());
 }
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::GeometryHandler<W>::way(const osmium::Way& way) {
-  if (_config.noContains) {
-    return;
-  }
-  if (_config.noWayDump) {
-    return;
-  }
-  osm2ttl::osm::Way w = osm2ttl::osm::Way(way);
-  if (w.tags().empty()) {
-    return;
-  }
+void osm2ttl::osm::GeometryHandler<W>::way(const osm2ttl::osm::Way& way) {
   std::vector<uint64_t> nodeIds;
-  nodeIds.reserve(w.nodes().size());
-  for (const auto& nodeRef : w.nodes()) {
+  nodeIds.reserve(way.nodes().size());
+  for (const auto& nodeRef : way.nodes()) {
     nodeIds.push_back(nodeRef.id());
   }
-  _spatialStorageWay.emplace_back(w.envelope(), w.id(), w.geom(), nodeIds);
+#pragma omp critical(wayDataInsert)
+  _spatialStorageWay.emplace_back(way.envelope(), way.id(), way.geom(), nodeIds);
 }
 
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
-  if (_config.noContains) {
-    return;
-  }
   // Store areas as r-tree
   SpatialIndex spatialIndex;
   // Store dag

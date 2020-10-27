@@ -11,6 +11,7 @@
 #include "osm2ttl/osm/DumpHandler.h"
 #include "osm2ttl/osm/GeometryHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
+#include "osm2ttl/osm/OsmiumHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/Ram.h"
 #include "osm2ttl/util/Time.h"
@@ -32,8 +33,7 @@ void run(osm2ttl::config::Config& config) {
   }
   writer.writeHeader();
 
-  osm2ttl::osm::DumpHandler dumpHandler{config, &writer};
-  osm2ttl::osm::GeometryHandler geometryHandler{config, &writer};
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
 
   {
     // Do not create empty areas
@@ -69,11 +69,11 @@ void run(osm2ttl::config::Config& config) {
           break;
         }
         osmium::apply(buf, *locationHandler,
-                      mp_manager.handler([&dumpHandler, &geometryHandler](
-                                             osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, dumpHandler, geometryHandler);
-                      }),
-                      dumpHandler, geometryHandler);
+                      mp_manager.handler(
+                          [&osmiumHandler](osmium::memory::Buffer&& buffer) {
+                            osmium::apply(buffer, osmiumHandler);
+                          }),
+                      osmiumHandler);
       }
       reader.close();
       delete locationHandler;
@@ -87,7 +87,7 @@ void run(osm2ttl::config::Config& config) {
       std::cerr << std::endl;
       std::cerr << osm2ttl::util::currentTimeFormatted()
                 << "Calculating contains relation ..." << std::endl;
-      geometryHandler.calculateRelations();
+      osmiumHandler.calculateRelations();
       std::cerr << osm2ttl::util::currentTimeFormatted() << "... done"
                 << std::endl;
     }
