@@ -36,6 +36,9 @@ struct Config {
   // Dot
   bool writeDotFiles = false;
 
+  // Statistics
+  bool writeStatistics = false;
+
   // Output modifiers
   uint16_t wktSimplify = 250;
   uint8_t wktDeviation = 5;

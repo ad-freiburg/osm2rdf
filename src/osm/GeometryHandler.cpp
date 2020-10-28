@@ -30,21 +30,25 @@ template <typename W>
 osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
     const osm2ttl::config::Config& config, osm2ttl::ttl::Writer<W>* writer)
     : _config(config), _writer(writer) {
-  std::filesystem::path p{_config.output};
-  p += ".stats.bz2";
-  _statisticsOut.push(boost::iostreams::bzip2_compressor{});
-  _statisticsOutFile.open(p);
-  _statisticsOut.push(_statisticsOutFile);
-  _statisticsOut << "[" << std::endl;
+  if (_config.writeStatistics) {
+    std::filesystem::path p{_config.output};
+    p += ".stats.bz2";
+    _statisticsOut.push(boost::iostreams::bzip2_compressor{});
+    _statisticsOutFile.open(p);
+    _statisticsOut.push(_statisticsOutFile);
+    _statisticsOut << "[" << std::endl;
+  }
 }
 
 // ____________________________________________________________________________
 template <typename W>
 osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() {
-  _statisticsOut << "{}" << std::endl;
-  _statisticsOut << "]" << std::endl;
-  _statisticsOut.pop();
-  _statisticsOutFile.close();
+  if (_config.writeStatistics) {
+    _statisticsOut << "{}" << std::endl;
+    _statisticsOut << "]" << std::endl;
+    _statisticsOut.pop();
+    _statisticsOutFile.close();
+  }
 }
 
 // ____________________________________________________________________________
@@ -54,37 +58,47 @@ void osm2ttl::osm::GeometryHandler<W>::writeStatisticLine(
     uint64_t outerId, std::string_view outerType, uint64_t innerId,
     std::string_view innerType, std::chrono::nanoseconds durationNS,
     bool result) {
+  if (_config.writeStatistics) {
+    writeStatisticLine(
+        "{"
+        "\"function\":\"" +
+        std::string(function) +
+        "\","
+        "\"part\":\"" +
+        std::string(part) +
+        "\","
+        "\"check\":\"" +
+        std::string(check) +
+        "\","
+        "\"outer_id\":" +
+        std::to_string(outerId) +
+        ","
+        "\"outer_type\":\"" +
+        std::string(outerType) +
+        "\","
+        "\"inner_id\":" +
+        std::to_string(innerId) +
+        ","
+        "\"inner_type\":\"" +
+        std::string(innerType) +
+        "\","
+        "\"duration_ns\":" +
+        std::to_string(durationNS.count()) +
+        ","
+        "\"result\":" +
+        (result ? "true" : "false") +
+        ""
+        "},\n");
+  }
+}
+// ____________________________________________________________________________
+template <typename W>
+void osm2ttl::osm::GeometryHandler<W>::writeStatisticLine(
+    std::string_view data) {
+  if (_config.writeStatistics) {
 #pragma omp critical(writeStatisticLine)
-  _statisticsOut
-      << ("{"
-          "\"function\":\"" +
-          std::string(function) +
-          "\","
-          "\"part\":\"" +
-          std::string(part) +
-          "\","
-          "\"check\":\"" +
-          std::string(check) +
-          "\","
-          "\"outer_id\":" +
-          std::to_string(outerId) +
-          ","
-          "\"outer_type\":\"" +
-          std::string(outerType) +
-          "\","
-          "\"inner_id\":" +
-          std::to_string(innerId) +
-          ","
-          "\"inner_type\":\"" +
-          std::string(innerType) +
-          "\","
-          "\"duration_ns\":" +
-          std::to_string(durationNS.count()) +
-          ","
-          "\"result\":" +
-          (result ? "true" : "false") +
-          ""
-          "},\n");
+    _statisticsOut << data;
+  }
 }
 
 // ____________________________________________________________________________
@@ -93,9 +107,9 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     _areaData[area.id()] = _spatialStorageArea.size();
-    _spatialStorageArea.emplace_back(area.envelope(), area.id(), area.geom(), area.objId(),
-                                     boost::geometry::area(area.geom()),
-                                     area.fromWay());
+    _spatialStorageArea.emplace_back(
+        area.envelope(), area.id(), area.geom(), area.objId(),
+        boost::geometry::area(area.geom()), area.fromWay());
   }
 }
 
@@ -115,7 +129,8 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osm2ttl::osm::Way& way) {
     nodeIds.push_back(nodeRef.id());
   }
 #pragma omp critical(wayDataInsert)
-  _spatialStorageWay.emplace_back(way.envelope(), way.id(), way.geom(), nodeIds);
+  _spatialStorageWay.emplace_back(way.envelope(), way.id(), way.geom(),
+                                  nodeIds);
 }
 
 // ____________________________________________________________________________

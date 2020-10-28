@@ -78,6 +78,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "write-dot-files", "Writes .dot files for DAGs");
 
+  auto writeStatisticsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "write-statistics", "Writes statistic files");
+
   auto outputOp =
       op.add<popl::Value<std::string>>("o", "output", "Output file", "");
   auto outputFormatOp =
@@ -130,6 +133,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     // Dot
     writeDotFiles = writeDotFilesOp->is_set();
+
+    writeStatistics = writeStatisticsOp->is_set();
 
     // Output
     output = outputOp->value();

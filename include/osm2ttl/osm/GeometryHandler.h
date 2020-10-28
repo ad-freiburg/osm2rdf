@@ -64,6 +64,7 @@ class GeometryHandler : public osmium::handler::Handler {
                           std::string_view innerType,
                           std::chrono::nanoseconds durationNS,
                           bool result);
+  void writeStatisticLine(std::string_view data);
   // Global config
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
