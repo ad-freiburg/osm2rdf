@@ -8,24 +8,15 @@
 
 #include "osm2ttl/Version.h"
 #include "osm2ttl/config/Config.h"
-#include "osm2ttl/osm/DumpHandler.h"
-#include "osm2ttl/osm/GeometryHandler.h"
-#include "osm2ttl/osm/LocationHandler.h"
 #include "osm2ttl/osm/OsmiumHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/Ram.h"
 #include "osm2ttl/util/Time.h"
-#include "osmium/area/assembler.hpp"
-#include "osmium/area/multipolygon_manager.hpp"
-#include "osmium/io/any_input.hpp"
-#include "osmium/io/reader_with_progress_bar.hpp"
-#include "osmium/util/memory.hpp"
 
 template <typename T>
 void run(osm2ttl::config::Config& config) {
   // Setup
   // Input file reference
-  osmium::io::File input_file{config.input};
   osm2ttl::ttl::Writer<T> writer{config};
   if (!writer.open()) {
     std::cerr << "Error opening outputfile: " << config.output << std::endl;
@@ -34,71 +25,10 @@ void run(osm2ttl::config::Config& config) {
   writer.writeHeader();
 
   osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
-
-  {
-    // Do not create empty areas
-    osmium::area::Assembler::config_type assembler_config;
-    assembler_config.create_empty_areas = false;
-    osmium::area::MultipolygonManager<osmium::area::Assembler> mp_manager{
-        assembler_config};
-
-    // read relations for areas
-    {
-      std::cerr << std::endl;
-      osmium::io::Reader reader{input_file};
-      osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
-      std::cerr << osm2ttl::util::currentTimeFormatted()
-                << "OSM Pass 1 ... (Relations for areas)" << std::endl;
-      osmium::relations::read_relations(progress, input_file, mp_manager);
-      std::cerr << osm2ttl::util::currentTimeFormatted() << "... done"
-                << std::endl;
-    }
-
-    // store data
-    {
-      std::cerr << std::endl;
-      std::cerr << osm2ttl::util::currentTimeFormatted()
-                << "OSM Pass 2 ... (dump)" << std::endl;
-      osmium::io::ReaderWithProgressBar reader{true, input_file,
-                                               osmium::osm_entity_bits::object};
-      osm2ttl::osm::LocationHandler* locationHandler =
-          osm2ttl::osm::LocationHandler::create(config);
-      while (true) {
-        osmium::memory::Buffer buf = reader.read();
-        if (!buf) {
-          break;
-        }
-        osmium::apply(buf, *locationHandler,
-                      mp_manager.handler(
-                          [&osmiumHandler](osmium::memory::Buffer&& buffer) {
-                            osmium::apply(buffer, osmiumHandler);
-                          }),
-                      osmiumHandler);
-      }
-      reader.close();
-      delete locationHandler;
-      std::cerr << osm2ttl::util::currentTimeFormatted()
-                << "... done reading (libosmium) and converting (libosmium -> "
-                   "osm2ttl)"
-                << std::endl;
-    }
-
-    {
-      std::cerr << std::endl;
-      std::cerr << osm2ttl::util::currentTimeFormatted()
-                << "Calculating contains relation ..." << std::endl;
-      osmiumHandler.calculateRelations();
-      std::cerr << osm2ttl::util::currentTimeFormatted() << "... done"
-                << std::endl;
-    }
-  }
+  osmiumHandler.handle();
 
   // All work done, close output
   writer.close();
-
-  osmium::MemoryUsage memory;
-  std::cerr << osm2ttl::util::formattedTimeSpacer
-            << "Memory used: " << memory.peak() << " MBytes" << std::endl;
 }
 
 // ____________________________________________________________________________

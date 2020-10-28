@@ -21,16 +21,28 @@ template <typename W>
 class OsmiumHandler : public osmium::handler::Handler {
  public:
   OsmiumHandler(const osm2ttl::config::Config& config, osm2ttl::ttl::Writer<W>* writer);
+  void handle();
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
-  void calculateRelations();
 
  protected:
   osm2ttl::config::Config _config;
   osm2ttl::osm::DumpHandler<W> _dumpHandler;
   osm2ttl::osm::GeometryHandler<W> _geometryHandler;
+  size_t _areasSeen = 0;
+  size_t _areasDumped = 0;
+  size_t _areaGeometriesHandled = 0;
+  size_t _nodesSeen = 0;
+  size_t _nodesDumped = 0;
+  size_t _nodeGeometriesHandled = 0;
+  size_t _relationsSeen = 0;
+  size_t _relationsDumped = 0;
+  size_t _relationGeometriesHandled = 0;
+  size_t _waysSeen = 0;
+  size_t _waysDumped = 0;
+  size_t _wayGeometriesHandled = 0;
 };
 }
 }
