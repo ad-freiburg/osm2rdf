@@ -32,6 +32,7 @@ struct Config {
   bool expandedData = false;
   bool metaData = false;
   bool skipWikiLinks = false;
+  bool addInverseRelationDirection = false;
 
   // Dot
   bool writeDotFiles = false;

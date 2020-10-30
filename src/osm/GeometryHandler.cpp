@@ -343,12 +343,15 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
         _writer->writeTriple(
             areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
         _writer->writeTriple(
-            entryIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
-        _writer->writeTriple(
             areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
-        _writer->writeTriple(entryIRI,
-                             osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                             areaIRI);
+        if (_config.addInverseRelationDirection) {
+          _writer->writeTriple(entryIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                               areaIRI);
+          _writer->writeTriple(entryIRI,
+                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                               areaIRI);
+        }
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
@@ -439,12 +442,15 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, nodeIRI);
           _writer->writeTriple(
-              nodeIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
-          _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, nodeIRI);
-          _writer->writeTriple(nodeIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                               areaIRI);
+          if (_config.addInverseRelationDirection) {
+            _writer->writeTriple(nodeIRI,
+                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                                 areaIRI);
+            _writer->writeTriple(
+                nodeIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                areaIRI);
+          }
 #pragma omp critical(nodeDataChange)
           nodeData[nodeId].push_back(areaId);
           for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
@@ -534,9 +540,11 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
                 areaObjId);
             _writer->writeTriple(
                 areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
-            _writer->writeTriple(
-                wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                areaIRI);
+            if (_config.addInverseRelationDirection) {
+              _writer->writeTriple(
+                  wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                  areaIRI);
+            }
             contains++;
             auto start = std::chrono::steady_clock::now();
             bool isCoveredByEnvelope =
@@ -559,9 +567,11 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
                 _writer->writeTriple(areaIRI,
                                      osm2ttl::ttl::constants::IRI__OGC_CONTAINS,
                                      wayIRI);
-                _writer->writeTriple(
-                    wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                    areaIRI);
+                if (_config.addInverseRelationDirection) {
+                  _writer->writeTriple(
+                      wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                      areaIRI);
+                }
               }
             }
             for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
@@ -610,9 +620,11 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
               areaObjId);
           _writer->writeTriple(
               areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
-          _writer->writeTriple(wayIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                               areaIRI);
+          if (_config.addInverseRelationDirection) {
+            _writer->writeTriple(
+                wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                areaIRI);
+          }
           contains++;
           start = std::chrono::steady_clock::now();
           bool isCoveredByEnvelope =
@@ -634,9 +646,11 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
               containsOk++;
               _writer->writeTriple(
                   areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
-              _writer->writeTriple(
-                  wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                  areaIRI);
+              if (_config.addInverseRelationDirection) {
+                _writer->writeTriple(
+                    wayIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                    areaIRI);
+              }
             }
           }
           for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {

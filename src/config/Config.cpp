@@ -19,12 +19,52 @@ void osm2ttl::config::Config::save(const std::string& filename) {}
 // ____________________________________________________________________________
 std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   std::ostringstream oss;
-  oss << prefix << "--- Config ---";
+  oss << prefix << "Config";
+  oss << "\n" << prefix << "--- I/O ---";
   oss << "\n" << prefix << "Input:         " << input;
   oss << "\n" << prefix << "Output:        " << output;
   oss << "\n" << prefix << "Output format: " << outputFormat;
+  oss << "\n" << prefix << "--- Dump ---";
+  if (noDump) {
+    oss << "\n" << prefix << "Not dumping facts";
+  } else {
+    if (noAreaDump) {
+      oss << "\n" << prefix << "Ignoring areas in dump";
+    }
+    if (noNodeDump) {
+      oss << "\n" << prefix << "Ignoring nodes in dump";
+    }
+    if (noRelationDump) {
+      oss << "\n" << prefix << "Ignoring relations in dump";
+    }
+    if (noWayDump) {
+      oss << "\n" << prefix << "Ignoring ways in dump";
+    }
+  }
+  oss << "\n" << prefix << "--- Relations ---";
+  if (noRelationDump) {
+    oss << "\n" << prefix << "Not dumping relations";
+  } else {
+    if (noAreaDump) {
+      oss << "\n" << prefix << "Ignoring areas in relations";
+    }
+    if (noNodeDump) {
+      oss << "\n" << prefix << "Ignoring nodes in relations";
+    }
+    if (noWayDump) {
+      oss << "\n" << prefix << "Ignoring ways in relations";
+    }
+    if (addInverseRelationDirection) {
+      oss << "\n" << prefix << "Adding ogc:contained_by and ogc:intersected_by";
+    }
+  }
+  oss << "\n" << prefix << "--- Misc ---";
   if (storeLocationsOnDisk) {
     oss << "\n" << prefix << "Storing locations osmium locations on disk!";
+  }
+  if (writeStatistics) {
+    oss << "\n"
+        << prefix << "Storing statistics about geometry calculations - SLOW!";
   }
   return oss.str();
 }
@@ -74,6 +114,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       "s", "wkt-simplify",
       "Simplify WKT-Geometries over this number of nodes, 0 to disable",
       wktSimplify);
+  auto addInverseRelationDirectionOp =
+      op.add<popl::Switch, popl::Attribute::advanced>(
+          "", "add-inverse-relation-direction",
+          "Adds relations in the opposite direction");
 
   auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "write-dot-files", "Writes .dot files for DAGs");
@@ -88,8 +132,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
           "", "output-format", "Output format, valid values: nt, ttl, qlever",
           "qlever");
   auto outputNoCompressOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "output-no-compress",
-      "Do not compress output");
+      "", "output-no-compress", "Do not compress output");
   auto cacheOp = op.add<popl::Value<std::string>>(
       "t", "cache", "Path to cache directory", "/tmp/");
 
@@ -130,6 +173,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     skipWikiLinks = skipWikiLinksOp->is_set();
     expandedData = expandedDataOp->is_set();
     wktSimplify = wktSimplifyOp->value();
+    addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
 
     // Dot
     writeDotFiles = writeDotFilesOp->is_set();
