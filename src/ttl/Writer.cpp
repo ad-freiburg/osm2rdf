@@ -103,7 +103,7 @@ void osm2ttl::ttl::Writer<T>::close() {
 template <typename T>
 void osm2ttl::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
-    _out << "@prefix " << prefix << ": <" << iriref << "> .\n";
+    writeTriple("@prefix", prefix+":", "<"+iriref+">");
   }
 }
 
