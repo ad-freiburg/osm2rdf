@@ -213,22 +213,6 @@ void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Node& node) {
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2ttl::ttl::Writer<T>::write(const osmium::Node& node) {
-  std::string s = generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
-                              node.positive_id());
-
-  writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
-              osm2ttl::ttl::constants::IRI__OSM_NODE);
-
-  auto loc = node.location();
-  writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                     osm2ttl::geometry::Location{loc.lon(), loc.lat()});
-
-  writeTagList(s, node.tags());
-}
-
-// ____________________________________________________________________________
-template <typename T>
 void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Relation& relation) {
   std::string s = generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
                               relation.id());
@@ -253,42 +237,6 @@ void osm2ttl::ttl::Writer<T>::write(const osm2ttl::osm::Relation& relation) {
           s,
           generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, role),
           generateIRI(type, member.id()));
-    }
-  }
-}
-
-// ____________________________________________________________________________
-template <typename T>
-void osm2ttl::ttl::Writer<T>::write(const osmium::Relation& relation) {
-  std::string s = generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-                              relation.positive_id());
-
-  writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
-              osm2ttl::ttl::constants::IRI__OSM_RELATION);
-
-  writeTagList(s, relation.tags());
-
-  for (const auto& member : relation.members()) {
-    const std::string& role = member.role();
-    if (role != "outer" && role != "inner") {
-      std::string type = osm2ttl::ttl::constants::NAMESPACE__OSM;
-      switch (member.type()) {
-        case osmium::item_type::node:
-          type = osm2ttl::ttl::constants::NAMESPACE__OSM_NODE;
-          break;
-        case osmium::item_type::relation:
-          type = osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION;
-          break;
-        case osmium::item_type::way:
-          type = osm2ttl::ttl::constants::NAMESPACE__OSM_WAY;
-          break;
-        default:
-          break;
-      }
-      writeTriple(s,
-                  generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-                              role.empty() ? "member" : role),
-                  generateIRI(type, member.positive_ref()));
     }
   }
 }
@@ -378,14 +326,6 @@ void osm2ttl::ttl::Writer<T>::writeBoostGeometry(const std::string& s,
 template <typename T>
 void osm2ttl::ttl::Writer<T>::writeBox(const std::string& s,
                                        const std::string& p,
-                                       const osm2ttl::osm::Box& box) {
-  writeBox(s, p, box.geom());
-}
-
-// ____________________________________________________________________________
-template <typename T>
-void osm2ttl::ttl::Writer<T>::writeBox(const std::string& s,
-                                       const std::string& p,
                                        const osm2ttl::geometry::Box& box) {
   // Box can not be simplified -> output directly.
   std::ostringstream tmp;
@@ -402,24 +342,6 @@ void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s,
                                        const osm2ttl::osm::Tag& tag) {
   const std::string& key = tag.first;
   const std::string& value = tag.second;
-  if (key == "admin_level") {
-    writeTriple(s,
-                generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
-                generateLiteral(
-                    value, "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
-  } else {
-    writeTriple(s,
-                generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
-                generateLiteral(value, ""));
-  }
-}
-
-// ____________________________________________________________________________
-template <typename T>
-void osm2ttl::ttl::Writer<T>::writeTag(const std::string& s,
-                                       const osmium::Tag& tag) {
-  std::string_view key{tag.key()};
-  std::string_view value{tag.value()};
   if (key == "admin_level") {
     writeTriple(s,
                 generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
@@ -463,50 +385,6 @@ void osm2ttl::ttl::Writer<T>::writeTagList(const std::string& s,
         if (pos != std::string::npos) {
           std::string lang = value.substr(0, pos);
           std::string entry = value.substr(pos + 1);
-          writeTriple(
-              s, osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA,
-              generateIRI("https://" + lang + ".wikipedia.org/wiki/", entry));
-        } else {
-          writeTriple(s, osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA,
-                      generateIRI("https://www.wikipedia.org/wiki/", value));
-        }
-      }
-    }
-  }
-}
-
-// ____________________________________________________________________________
-template <typename T>
-void osm2ttl::ttl::Writer<T>::writeTagList(const std::string& s,
-                                           const osmium::TagList& tags) {
-  for (const auto& tag : tags) {
-    writeTag(s, tag);
-    std::string_view key{tag.key()};
-    if (!_config.skipWikiLinks) {
-      if (key == "wikidata") {
-        // Only take first wikidata entry if ; is found
-        std::string value{tag.value()};
-        auto end = value.find(';');
-        if (end != std::string::npos) {
-          value = value.erase(end);
-        }
-        // Remove all but Q and digits to ensure Qdddddd format
-        value.erase(
-            remove_if(value.begin(), value.end(),
-                      [](char c) { return (c != 'Q' && isdigit(c) == 0); }),
-            value.end());
-
-        writeTriple(
-            s, generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, key),
-            generateIRI(osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY,
-                        value));
-      }
-      if (key == "wikipedia") {
-        std::string_view value{tag.value()};
-        auto pos = value.find(':');
-        if (pos != std::string::npos) {
-          std::string lang{value.substr(0, pos)};
-          std::string_view entry = value.substr(pos + 1);
           writeTriple(
               s, osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA,
               generateIRI("https://" + lang + ".wikipedia.org/wiki/", entry));

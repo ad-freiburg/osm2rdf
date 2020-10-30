@@ -68,11 +68,6 @@ static const int BIT_IN_NIBBLE = 4;
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/Way.h"
-#include "osmium/osm/area.hpp"
-#include "osmium/osm/location.hpp"
-#include "osmium/osm/node.hpp"
-#include "osmium/osm/relation.hpp"
-#include "osmium/osm/tag.hpp"
 
 namespace osm2ttl {
 namespace ttl {
@@ -98,9 +93,7 @@ class Writer {
   // OSM2TTL
   void write(const osm2ttl::osm::Area& area);
   void write(const osm2ttl::osm::Node& node);
-  void write(const osmium::Node& node);
   void write(const osm2ttl::osm::Relation& relation);
-  void write(const osmium::Relation& relation);
   void write(const osm2ttl::osm::Way& way);
   template<typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
@@ -108,12 +101,8 @@ class Writer {
 
   void writeBox(const std::string& s, const std::string& p,
                 const osm2ttl::geometry::Box& box);
-  void writeBox(const std::string& s, const std::string& p,
-                const osm2ttl::osm::Box& box);
   void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
-  void writeTag(const std::string& s, const osmium::Tag& tag);
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
-  void writeTagList(const std::string& s, const osmium::TagList& tags);
 
   static std::string encodePN_LOCAL(std::string_view s);
   static uint32_t utf8Codepoint(std::string_view s);
