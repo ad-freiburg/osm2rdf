@@ -20,7 +20,7 @@ benchmark: build
 
 run: build
 	cmake --build build --target osm2ttl --config Release
-	for FILE in $(shell ls -Sr input); do ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; done
+	for FILE in $(shell ls -Sr input); do ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever" --write-statistics; done
 
 perf: build
 	cmake --build build --target osm2ttl --config Release

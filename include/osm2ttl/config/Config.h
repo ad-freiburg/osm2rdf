@@ -39,6 +39,7 @@ struct Config {
 
   // Statistics
   bool writeStatistics = false;
+  std::filesystem::path statisticsPath;
 
   // Output modifiers
   uint16_t wktSimplify = 250;

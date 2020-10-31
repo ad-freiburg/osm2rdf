@@ -187,8 +187,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     if (output.empty()) {
       outputCompress = false;
     }
+    statisticsPath = std::filesystem::path(output);
+    statisticsPath += ".stats";
     if (outputCompress && !output.empty() && output.extension() != ".bz2") {
       output += ".bz2";
+      statisticsPath += ".bz2";
     }
 
     // osmium location cache

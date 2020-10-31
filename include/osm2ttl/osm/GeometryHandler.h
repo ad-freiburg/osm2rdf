@@ -18,6 +18,7 @@
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/CacheFile.h"
+#include "osm2ttl/util/Output.h"
 #include "osmium/handler.hpp"
 #include "osmium/handler/node_locations_for_ways.hpp"
 #include "osmium/index/map/sparse_file_array.hpp"
@@ -48,7 +49,6 @@ class GeometryHandler : public osmium::handler::Handler {
  public:
   GeometryHandler(const osm2ttl::config::Config& config,
                   osm2ttl::ttl::Writer<W>* writer);
-  ~GeometryHandler();
 
   // Store data
   void area(const osm2ttl::osm::Area& area);
@@ -58,25 +58,22 @@ class GeometryHandler : public osmium::handler::Handler {
   void calculateRelations();
 
  protected:
-  void writeStatisticLine(std::string_view function, std::string_view part,
+  std::string statisticLine(std::string_view function, std::string_view part,
                           std::string_view check, uint64_t outerId,
                           std::string_view outerType, uint64_t innerId,
                           std::string_view innerType,
                           std::chrono::nanoseconds durationNS,
                           bool result);
-  void writeStatisticLine(std::string_view data);
   // Global config
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
+  // Statistics
+  osm2ttl::util::Output _statistics;
   // Spatial Index
   std::vector<SpatialAreaValue> _spatialStorageArea;
   std::unordered_map<uint64_t, uint64_t> _areaData;
   std::vector<SpatialNodeValue> _spatialStorageNode;
   std::vector<SpatialWayValue> _spatialStorageWay;
-
-  // Output/Stats
-  boost::iostreams::filtering_ostream _statisticsOut;
-  std::ofstream _statisticsOutFile;
 };
 
 }  // namespace osm
