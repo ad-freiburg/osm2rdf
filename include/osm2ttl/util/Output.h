@@ -26,6 +26,7 @@ class Output {
   const osm2ttl::config::Config _config;
   const std::string _prefix;
   size_t _numFilesPerType;
+  bool _open = false;
   // Output
   boost::iostreams::filtering_ostream* _out;
   std::ofstream* _outFile;

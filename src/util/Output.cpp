@@ -38,10 +38,14 @@ void osm2ttl::util::Output::open() {
     _outFile[i].open(_prefix + ".part_" + std::to_string(i));
     _out[i].push(_outFile[i]);
   }
+  _open = true;
 }
 
 // ____________________________________________________________________________
 void osm2ttl::util::Output::close() {
+  if (!_open) {
+    return;
+  }
   for (size_t i = 0; i < _numFilesPerType; ++i) {
     _out[i].pop();
     if (_outFile[i].is_open()) {
@@ -50,6 +54,7 @@ void osm2ttl::util::Output::close() {
   }
   delete[] _outFile;
   delete[] _out;
+  _open = false;
 }
 
 void osm2ttl::util::Output::merge(std::string_view prefix, std::string_view suffix) {
