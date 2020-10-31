@@ -150,7 +150,6 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
-      const auto& entryArea = std::get<4>(entry);
       // Set containing all areas we are inside of
       std::set<uint64_t> skip;
       std::vector<SpatialAreaValue> queryResult;
@@ -165,16 +164,10 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
       for (const auto& area : queryResult) {
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
-        const auto& areaArea = std::get<4>(area);
         if (areaId == entryId) {
           continue;
         }
         checks++;
-
-        if (areaArea < entryArea) {
-          skippedBySize++;
-          continue;
-        }
 
         if (skip.find(areaId) != skip.end()) {
           skippedByDAG++;
