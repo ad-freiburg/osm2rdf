@@ -114,9 +114,6 @@ void osm2ttl::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
     _dumpHandler.area(a);
   }
   if (!_config.noContains) {
-    if (!a.hasName()) {
-      return;
-    }
     _areaGeometriesHandled++;
     _geometryHandler.area(a);
   }

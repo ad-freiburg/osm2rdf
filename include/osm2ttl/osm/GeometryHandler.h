@@ -71,6 +71,7 @@ class GeometryHandler : public osmium::handler::Handler {
   osm2ttl::util::Output _statistics;
   // Spatial Index
   std::vector<SpatialAreaValue> _spatialStorageArea;
+  std::vector<SpatialAreaValue> _spatialStorageUnnamedArea;
   std::unordered_map<uint64_t, uint64_t> _areaData;
   std::vector<SpatialNodeValue> _spatialStorageNode;
   std::vector<SpatialWayValue> _spatialStorageWay;
