@@ -32,7 +32,7 @@ namespace osm2ttl {
 namespace osm {
 
 typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Area,
-                   uint64_t, double, bool>
+                   uint64_t, osm2ttl::osm::Area::AreaType , bool>
     SpatialAreaValue;
 
 typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Node>

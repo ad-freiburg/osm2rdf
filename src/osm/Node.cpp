@@ -12,7 +12,7 @@
 // ____________________________________________________________________________
 osm2ttl::osm::Node::Node(const osmium::Node& node) {
   _id = node.positive_id();
-  auto loc = node.location();
+  const auto& loc = node.location();
   _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
   boost::geometry::envelope(_geom, _envelope);
   _tags = osm2ttl::osm::convertTagList(node.tags());
@@ -21,7 +21,7 @@ osm2ttl::osm::Node::Node(const osmium::Node& node) {
 // ____________________________________________________________________________
 osm2ttl::osm::Node::Node(const osmium::NodeRef& nodeRef) {
   _id = nodeRef.positive_ref();
-  auto loc = nodeRef.location();
+  const auto& loc = nodeRef.location();
   _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
   boost::geometry::envelope(_geom, _envelope);
 }

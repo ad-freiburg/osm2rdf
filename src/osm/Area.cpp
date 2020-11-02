@@ -3,12 +3,13 @@
 
 #include "osm2ttl/osm/Area.h"
 
+#include <iostream>
 #include <limits>
 
 #include "boost/geometry.hpp"
 #include "osm2ttl/geometry/Area.h"
 #include "osm2ttl/geometry/Box.h"
-#include "osm2ttl/geometry/Location.h"
+#include "osm2ttl/osm/Node.h"
 #include "osmium/osm/area.hpp"
 
 // ____________________________________________________________________________
@@ -38,9 +39,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   for (const auto& oring : outerRings) {
     _geom[oCount].outer().reserve(oring.size());
     for (const auto& nodeRef : oring) {
-      auto l = nodeRef.location();
-      boost::geometry::append(
-          _geom, osm2ttl::geometry::Location(l.lon(), l.lat()), -1, oCount);
+      boost::geometry::append(_geom, osm2ttl::osm::Node(nodeRef).geom(), -1,
+                              oCount);
     }
 
     auto innerRings = area.inner_rings(oring);
@@ -50,18 +50,21 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
     for (const auto& iring : innerRings) {
       _geom[oCount].inners()[iCount].reserve(iring.size());
       for (const auto& nodeRef : iring) {
-        auto l = nodeRef.location();
-        boost::geometry::append(_geom,
-                                osm2ttl::geometry::Location(l.lon(), l.lat()),
+        boost::geometry::append(_geom, osm2ttl::osm::Node(nodeRef).geom(),
                                 iCount, oCount);
       }
       iCount++;
     }
     oCount++;
   }
+  // Correct possibly invalid geometry...
+  boost::geometry::correct(_geom);
   boost::geometry::envelope(_geom, _envelope);
+  boost::geometry::correct(_envelope);
   _geomArea = boost::geometry::area(_geom);
   _envelopeArea = boost::geometry::area(_envelope);
+  assert(_geomArea > 0);
+  assert(_envelopeArea > 0);
 }
 
 // ____________________________________________________________________________
@@ -81,12 +84,12 @@ osm2ttl::geometry::Box osm2ttl::osm::Area::envelope() const noexcept {
 }
 
 // ____________________________________________________________________________
-double osm2ttl::osm::Area::geomArea() const noexcept {
+osm2ttl::osm::Area::AreaType osm2ttl::osm::Area::geomArea() const noexcept {
   return _geomArea;
 }
 
 // ____________________________________________________________________________
-double osm2ttl::osm::Area::envelopeArea() const noexcept {
+osm2ttl::osm::Area::AreaType osm2ttl::osm::Area::envelopeArea() const noexcept {
   return _envelopeArea;
 }
 

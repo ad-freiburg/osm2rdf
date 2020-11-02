@@ -19,15 +19,17 @@ namespace osm2ttl {
 namespace osm {
 
 struct Area {
+  typedef double AreaType;
+
   Area();
   explicit Area(const osmium::Area& area);
   [[nodiscard]] uint64_t id() const noexcept;
   [[nodiscard]] uint64_t objId() const noexcept;
 
   [[nodiscard]] osm2ttl::geometry::Area geom() const noexcept;
-  [[nodiscard]] double geomArea() const noexcept;
+  [[nodiscard]] AreaType geomArea() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
-  [[nodiscard]] double envelopeArea() const noexcept;
+  [[nodiscard]] AreaType envelopeArea() const noexcept;
   [[nodiscard]] char tagAdministrationLevel() const noexcept;
   [[nodiscard]] bool fromWay() const noexcept;
   [[nodiscard]] bool hasName() const noexcept;
@@ -40,8 +42,8 @@ struct Area {
   osmium::unsigned_object_id_type _objId;
   char _tagAdministrationLevel;
   bool _hasName;
-  double _geomArea;
-  double _envelopeArea;
+  AreaType _geomArea;
+  AreaType _envelopeArea;
   osm2ttl::geometry::Area _geom;
   osm2ttl::geometry::Box _envelope;
 };

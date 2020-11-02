@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "boost/geometry.hpp"
-#include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/geometry/Way.h"
 #include "osm2ttl/osm/Box.h"
 #include "osm2ttl/osm/Node.h"
@@ -23,9 +22,7 @@ osm2ttl::osm::Way::Way(const osmium::Way& way) {
   _nodes.reserve(way.nodes().size());
   for (const auto& nodeRef : way.nodes()) {
     _nodes.emplace_back(nodeRef);
-    auto loc = nodeRef.location();
-    boost::geometry::append(_geom,
-                            osm2ttl::geometry::Location(loc.lon(), loc.lat()));
+    boost::geometry::append(_geom, osm2ttl::osm::Node(nodeRef).geom());
   }
   boost::geometry::unique(_geom);
   boost::geometry::envelope(_geom, _envelope);

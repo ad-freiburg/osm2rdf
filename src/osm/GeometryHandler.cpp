@@ -80,13 +80,13 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
       _areaData[area.id()] = _spatialStorageArea.size();
       _spatialStorageArea.emplace_back(
           area.envelope(), area.id(), area.geom(), area.objId(),
-          std::abs(boost::geometry::area(area.geom())), area.fromWay());
+          area.geomArea(), area.fromWay());
     }
   } else if (!area.fromWay()) {
     // Areas from ways are handled in GeometryHandler<W>::way
     _spatialStorageUnnamedArea.emplace_back(
         area.envelope(), area.id(), area.geom(), area.objId(),
-        std::abs(boost::geometry::area(area.geom())), area.fromWay());
+        area.geomArea(), area.fromWay());
   }
 }
 
