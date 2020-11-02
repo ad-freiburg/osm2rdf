@@ -18,6 +18,7 @@
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/CacheFile.h"
+#include "osm2ttl/util/DirectedGraph.h"
 #include "osm2ttl/util/Output.h"
 #include "osmium/handler.hpp"
 #include "osmium/handler/node_locations_for_ways.hpp"
@@ -44,6 +45,8 @@ typedef boost::geometry::index::rtree<SpatialAreaValue,
                                       boost::geometry::index::quadratic<16>>
     SpatialIndex;
 
+typedef std::unordered_map<uint64_t, std::vector<uint64_t>> NodeData;
+
 template <typename W>
 class GeometryHandler : public osmium::handler::Handler {
  public:
@@ -58,6 +61,18 @@ class GeometryHandler : public osmium::handler::Handler {
   void calculateRelations();
 
  protected:
+  // Stores named areas in r-tree, used for all other calculations.
+  void prepareRTree();
+  // Generate DAG for areas using prepared r-tree.
+  void prepareDAG();
+  // Calculate relations for each area, this dumps the generated DAG.
+  void dumpNamedAreaRelations();
+  // Calculate relations for each node.
+  NodeData dumpNodeRelations();
+  // Calculate relations for each way.
+  void dumpRelationRelations(const osm2ttl::osm::NodeData& nodeData);
+  // Calculate relations for each area, this dumps the generated DAG.
+  void dumpUnnamedAreaRelations();
   std::string statisticLine(std::string_view function, std::string_view part,
                           std::string_view check, uint64_t outerId,
                           std::string_view outerType, uint64_t innerId,
@@ -69,7 +84,11 @@ class GeometryHandler : public osmium::handler::Handler {
   osm2ttl::ttl::Writer<W>* _writer;
   // Statistics
   osm2ttl::util::Output _statistics;
-  // Spatial Index
+  // Store areas as r-tree
+  SpatialIndex spatialIndex;
+  // Store dag
+  osm2ttl::util::DirectedGraph directedAreaGraph;
+  // Spatial Data
   std::vector<SpatialAreaValue> _spatialStorageArea;
   std::vector<SpatialAreaValue> _spatialStorageUnnamedArea;
   std::unordered_map<uint64_t, uint64_t> _areaData;
