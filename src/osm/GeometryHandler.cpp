@@ -184,7 +184,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
       spatialIndex.query(boost::geometry::index::covers(entryEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
-      std::sort(queryResult.rbegin(), queryResult.rend(),
+      std::sort(queryResult.begin(), queryResult.end(),
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
@@ -432,7 +432,7 @@ osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
       spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
-      std::sort(queryResult.rbegin(), queryResult.rend(),
+      std::sort(queryResult.begin(), queryResult.end(),
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
@@ -460,8 +460,7 @@ osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
           continue;
         }
         containsOk++;
-#pragma omp critical(nodeDataChange)
-        nodeData[nodeId].push_back(areaId);
+        skip.insert(areaId);
         for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
           skip.insert(newSkip);
         }
@@ -481,6 +480,8 @@ osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
                                areaIRI);
         }
       }
+#pragma omp critical(nodeDataChange)
+      std::copy(skip.begin(), skip.end(), std::back_inserter(nodeData[nodeId]));
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
     }
@@ -619,7 +620,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(const osm2ttl::osm:
       spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
-      std::sort(queryResult.rbegin(), queryResult.rend(),
+      std::sort(queryResult.begin(), queryResult.end(),
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
@@ -776,7 +777,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
       spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
-      std::sort(queryResult.rbegin(), queryResult.rend(),
+      std::sort(queryResult.begin(), queryResult.end(),
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
