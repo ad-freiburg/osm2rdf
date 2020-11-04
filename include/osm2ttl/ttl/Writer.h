@@ -90,20 +90,6 @@ class Writer {
   static std::string generateLangTag(std::string_view s);
   static std::string generateLiteral(std::string_view v, std::string_view s);
 
-  // OSM2TTL
-  void write(const osm2ttl::osm::Area& area);
-  void write(const osm2ttl::osm::Node& node);
-  void write(const osm2ttl::osm::Relation& relation);
-  void write(const osm2ttl::osm::Way& way);
-  template<typename G>
-  void writeBoostGeometry(const std::string& s, const std::string& p,
-                          const G& g);
-
-  void writeBox(const std::string& s, const std::string& p,
-                const osm2ttl::geometry::Box& box);
-  void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
-  void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
-
   static std::string encodePN_LOCAL(std::string_view s);
   static uint32_t utf8Codepoint(std::string_view s);
  protected:

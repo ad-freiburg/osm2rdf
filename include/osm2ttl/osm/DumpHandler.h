@@ -27,9 +27,17 @@ class DumpHandler : public osmium::handler::Handler {
   void relation(const osm2ttl::osm::Relation& relation);
   void way(const osm2ttl::osm::Way& way);
 
+
  protected:
-  template <typename T>
-  void write(const T& o);
+  template<typename G>
+  void writeBoostGeometry(const std::string& s, const std::string& p,
+                          const G& g);
+
+  void writeBox(const std::string& s, const std::string& p,
+                const osm2ttl::geometry::Box& box);
+  void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
+  void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
+
   const osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
 };
