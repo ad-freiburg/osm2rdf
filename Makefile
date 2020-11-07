@@ -4,30 +4,30 @@ clean:
 	rm -rf *build*
 
 build:
-	cmake -S . -B build -D CMAKE_BUILD_TYPE=Release
+	cmake -S . -B build
 
 compile: build
-	cmake --build build --config Release
+	cmake --build build
 
 checkstyle:
 
 test: build
-	cmake --build build --config Release --target test
+	cmake --build build --target test
 
 benchmark: build
-	cmake --build build --config Release --target benchmarks
+	cmake --build build --target benchmarks
 	./build/benchmarks/benchmarks
 
 run: build
-	cmake --build build --target osm2ttl --config Release
+	cmake --build build --target osm2ttl
 	for FILE in $(shell ls -Sr input); do ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever" --write-statistics; done
 
 perf: build
-	cmake --build build --target osm2ttl --config Release
+	cmake --build build --target osm2ttl
 	for FILE in $(shell ls -Sr input); do time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
 
 perf-st: build
-	cmake --build build --target osm2ttl --config Release
+	cmake --build build --target osm2ttl
 	for FILE in $(shell ls -Sr input); do export OMP_NUM_THREADS=1 && export OMP_THREAD_LIMIT=1 && time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
 
 docker-fr:
