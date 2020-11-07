@@ -28,10 +28,18 @@ osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contains");
   osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contained_by");
+  osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA =
+      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contains_area");
+  osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY_AREA = generateIRI(
+      osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contained_by_area");
   osm2ttl::ttl::constants::IRI__OGC_INTERSECTS =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersects");
-  osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersected_by");
+  osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY = generateIRI(
+      osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersected_by");
+  osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA = generateIRI(
+      osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersects_area");
+  osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY_AREA = generateIRI(
+      osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersected_by_area");
   osm2ttl::ttl::constants::IRI__OSM_META__POS =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META, "pos");
   osm2ttl::ttl::constants::IRI__OSMWAY_ISCLOSED =
@@ -95,7 +103,7 @@ void osm2ttl::ttl::Writer<T>::close() {
 template <typename T>
 void osm2ttl::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
-    writeTriple("@prefix", prefix+":", "<"+iriref+">");
+    writeTriple("@prefix", prefix + ":", "<" + iriref + ">");
   }
 }
 

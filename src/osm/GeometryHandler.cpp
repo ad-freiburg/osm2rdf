@@ -78,15 +78,15 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 #pragma omp critical(areaDataInsert)
     {
       _areaData[area.id()] = _spatialStorageArea.size();
-      _spatialStorageArea.emplace_back(
-          area.envelope(), area.id(), area.geom(), area.objId(),
-          area.geomArea(), area.fromWay());
+      _spatialStorageArea.emplace_back(area.envelope(), area.id(), area.geom(),
+                                       area.objId(), area.geomArea(),
+                                       area.fromWay());
     }
   } else if (!area.fromWay()) {
     // Areas from ways are handled in GeometryHandler<W>::way
-    _spatialStorageUnnamedArea.emplace_back(
-        area.envelope(), area.id(), area.geom(), area.objId(),
-        area.geomArea(), area.fromWay());
+    _spatialStorageUnnamedArea.emplace_back(area.envelope(), area.id(),
+                                            area.geom(), area.objId(),
+                                            area.geomArea(), area.fromWay());
   }
 }
 
@@ -325,66 +325,69 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
-    std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted()
-              << " Dumping relations from DAG with "
-              << directedAreaGraph.getNumEdges() << " edges and "
-              << directedAreaGraph.getNumVertices() << " vertices ... "
-              << std::endl;
+  std::cerr << std::endl;
+  std::cerr << osm2ttl::util::currentTimeFormatted()
+            << " Dumping relations from DAG with "
+            << directedAreaGraph.getNumEdges() << " edges and "
+            << directedAreaGraph.getNumVertices() << " vertices ... "
+            << std::endl;
 
-    osmium::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
-    size_t entryCount = 0;
-    progressBar.update(entryCount);
-    std::vector<uint64_t> vertices = directedAreaGraph.getVertices();
+  osmium::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
+  size_t entryCount = 0;
+  progressBar.update(entryCount);
+  std::vector<uint64_t> vertices = directedAreaGraph.getVertices();
 #pragma omp parallel for shared(                                         \
     vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,               \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, directedAreaGraph, \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                          \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                      \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA,                     \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY_AREA,                 \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                        \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, progressBar,       \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                    \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA,                   \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY_AREA, progressBar,  \
     entryCount) default(none)
-    for (size_t i = 0; i < vertices.size(); i++) {
-      const auto id = vertices[i];
-      const auto& entry = _spatialStorageArea[_areaData[id]];
-      const auto& entryObjId = std::get<3>(entry);
-      const auto& entryFromWay = std::get<5>(entry);
-      std::string entryIRI = _writer->generateIRI(
-          entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                       : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-          entryObjId);
-      for (const auto& dst : directedAreaGraph.getEdges(id)) {
-        const auto& area = _spatialStorageArea[_areaData[dst]];
-        const auto& areaObjId = std::get<3>(area);
-        const auto& areaFromWay = std::get<5>(area);
-        std::string areaIRI = _writer->generateIRI(
-            areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                        : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-            areaObjId);
+  for (size_t i = 0; i < vertices.size(); i++) {
+    const auto id = vertices[i];
+    const auto& entry = _spatialStorageArea[_areaData[id]];
+    const auto& entryObjId = std::get<3>(entry);
+    const auto& entryFromWay = std::get<5>(entry);
+    std::string entryIRI = _writer->generateIRI(
+        entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                     : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+        entryObjId);
+    for (const auto& dst : directedAreaGraph.getEdges(id)) {
+      const auto& area = _spatialStorageArea[_areaData[dst]];
+      const auto& areaObjId = std::get<3>(area);
+      const auto& areaFromWay = std::get<5>(area);
+      std::string areaIRI = _writer->generateIRI(
+          areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
+                      : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+          areaObjId);
 
+      _writer->writeTriple(
+          areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA, entryIRI);
+      _writer->writeTriple(
+          areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA, entryIRI);
+      if (_config.addInverseRelationDirection) {
         _writer->writeTriple(
-            areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
+            entryIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY_AREA,
+            areaIRI);
         _writer->writeTriple(
-            areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
-        if (_config.addInverseRelationDirection) {
-          _writer->writeTriple(entryIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                               areaIRI);
-          _writer->writeTriple(entryIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                               areaIRI);
-        }
+            entryIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY_AREA,
+            areaIRI);
       }
-#pragma omp critical(progress)
-      progressBar.update(entryCount++);
     }
+#pragma omp critical(progress)
+    progressBar.update(entryCount++);
+  }
 
-    progressBar.done();
+  progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
-              << std::endl;
+  std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
+            << std::endl;
 }
-
 
 // ____________________________________________________________________________
 template <typename W>
@@ -500,7 +503,8 @@ osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(const osm2ttl::osm::NodeData& nodeData) {
+void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
+    const osm2ttl::osm::NodeData& nodeData) {
   if (!_config.noWayDump) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
