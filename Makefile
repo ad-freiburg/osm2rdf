@@ -11,7 +11,7 @@ compile: build
 
 checkstyle:
 
-test: build
+test: compile
 	cmake --build build --target test
 
 benchmark: build
