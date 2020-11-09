@@ -5,6 +5,7 @@
 #define OSM2TTL_INCLUDE_OSM2TTL_UTIL_DIRECTEDGRAPH_H
 
 #include <stdint.h>
+
 #include <filesystem>
 #include <unordered_map>
 #include <vector>
@@ -14,21 +15,36 @@ namespace util {
 
 class DirectedGraph {
  public:
+  // addEdge adds an edge between src and dst vertices. Allows multiple edges
+  // between the same vertices.
   void addEdge(uint64_t src, uint64_t dst);
-  std::vector<uint64_t> findAbove(uint64_t src) const;
-  std::vector<uint64_t> findAboveFast(uint64_t src) const;
+  // findSuccessors returns the ids of all successor vertices of the given
+  // vertex.
+  std::vector<uint64_t> findSuccessors(uint64_t src) const;
+  // findSuccessorsFast returns the same result as findSuccessors but faster,
+  // after data is prepared for faster lookup.
+  std::vector<uint64_t> findSuccessorsFast(uint64_t src) const;
+  // dump stores the complete graph in DOT-Format in a file at the given path.
   void dump(std::filesystem::path filename) const;
+  // sort sorts all adjacency lists.
   void sort();
-  void prepareFastAbove();
+  // prepareFindSuccessorsFast calculates for each vertex the successors and
+  // stores them in a helper map.
+  void prepareFindSuccessorsFast();
+  // getNumEdges returns the number of stored edges. If an edge is defined
+  // multiple times it is counted multiple times too.
   size_t getNumEdges() const;
+  // getNumVertices returns the number of unique vertices in the graph.
   size_t getNumVertices() const;
+  // getVertices returns all unique vertices in the graph.
   std::vector<uint64_t> getVertices() const;
+  // getEdges returns the stored edges for the given vertex.
   std::vector<uint64_t> getEdges(uint64_t src) const;
 
  protected:
-  std::vector<uint64_t> findAboveHelper(uint64_t src) const;
+  std::vector<uint64_t> findSuccessorsHelper(uint64_t src) const;
   std::unordered_map<uint64_t, std::vector<uint64_t>> _adjacency;
-  std::unordered_map<uint64_t, std::vector<uint64_t>> _above;
+  std::unordered_map<uint64_t, std::vector<uint64_t>> _successors;
   size_t _numEdges = 0;
 };
 

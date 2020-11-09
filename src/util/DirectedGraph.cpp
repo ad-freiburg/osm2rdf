@@ -20,7 +20,7 @@ void osm2ttl::util::DirectedGraph::addEdge(uint64_t src, uint64_t dst) {
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findSuccessors(
     uint64_t src) const {
   std::vector<uint64_t> tmp;
   const auto& it = _adjacency.find(src);
@@ -32,7 +32,7 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
   tmp.insert(tmp.end(), it->second.begin(), it->second.end());
   // Add parents parents.
   for (const auto& dst : it->second) {
-    const auto& v = findAboveHelper(dst);
+    const auto& v = findSuccessorsHelper(dst);
     tmp.insert(tmp.end(), v.begin(), v.end());
   }
   // Make unique
@@ -44,7 +44,7 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAbove(
 
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAboveHelper(
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findSuccessorsHelper(
     uint64_t src) const {
   std::vector<uint64_t> tmp;
   const auto& it = _adjacency.find(src);
@@ -56,17 +56,17 @@ std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAboveHelper(
   tmp.insert(tmp.end(), it->second.begin(), it->second.end());
   // Add parents parents.
   for (const auto& dst : it->second) {
-    const auto& v = findAbove(dst);
+    const auto& v = findSuccessors(dst);
     tmp.insert(tmp.end(), v.begin(), v.end());
   }
   return tmp;
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2ttl::util::DirectedGraph::findAboveFast(
+std::vector<uint64_t> osm2ttl::util::DirectedGraph::findSuccessorsFast(
     uint64_t src) const {
-  const auto& it = _above.find(src);
-  if (it == _adjacency.end()) {
+  const auto& it = _successors.find(src);
+  if (it == _successors.end()) {
     return std::vector<uint64_t>();
   }
   return it->second;
@@ -111,10 +111,10 @@ void osm2ttl::util::DirectedGraph::sort() {
   }
 }
 // ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::prepareFastAbove() {
+void osm2ttl::util::DirectedGraph::prepareFindSuccessorsFast() {
   const auto& vertices = getVertices();
   for (size_t i = 0; i < vertices.size(); i++) {
-    _above[vertices[i]] = findAbove(i);
+    _successors[vertices[i]] = findSuccessors(vertices[i]);
   }
 }
 

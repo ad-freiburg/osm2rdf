@@ -228,7 +228,8 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
         }
 #pragma omp critical(addEdge)
         tmpDirectedAreaGraph.addEdge(entryId, areaId);
-        for (const auto& newSkip : tmpDirectedAreaGraph.findAbove(entryId)) {
+        for (const auto& newSkip :
+             tmpDirectedAreaGraph.findSuccessors(entryId)) {
           skip.insert(newSkip);
         }
       }
@@ -316,7 +317,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Preparing fast above lookup in DAG ..." << std::endl;
-    directedAreaGraph.prepareFastAbove();
+    directedAreaGraph.prepareFindSuccessorsFast();
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
@@ -464,7 +465,7 @@ osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
         }
         containsOk++;
         skip.insert(areaId);
-        for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
+        for (const auto& newSkip : directedAreaGraph.findSuccessors(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
@@ -591,7 +592,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
                 "way", std::chrono::nanoseconds(end - start),
                 isCoveredByEnvelope));
           }
-          for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
+          for (const auto& newSkip : directedAreaGraph.findSuccessors(areaId)) {
             skip.insert(newSkip);
           }
           if (!isCoveredByEnvelope) {
@@ -658,7 +659,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
         }
         intersectsOk++;
 
-        for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
+        for (const auto& newSkip : directedAreaGraph.findSuccessors(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
@@ -815,7 +816,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         }
         intersectsOk++;
 
-        for (const auto& newSkip : directedAreaGraph.findAbove(areaId)) {
+        for (const auto& newSkip : directedAreaGraph.findSuccessors(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(

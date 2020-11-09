@@ -8,6 +8,9 @@ file(GLOB_RECURSE CPP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/*.cpp")
 # Make an automatic library - will be static or dynamic based on user setting
 add_library(osm2ttl_library ${CPP_LIST} ${HEADER_LIST})
 
+# Add gtest header for FRIEND_TEST
+include_directories("${PROJECT_SOURCE_DIR}/vendor/google/googletest/googletest/include")
+
 # We need this directory, and users of our library will need it too
 target_include_directories(osm2ttl_library PUBLIC ../include)
 

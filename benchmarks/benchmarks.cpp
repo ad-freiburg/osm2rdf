@@ -184,7 +184,7 @@ static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_0(benchmark::State& state) {
     dg.addEdge(vertices[i], vertices[i + 1]);
   }
   for (auto _ : state) {
-    dg.findAbove(0);
+    dg.findSuccessors(0);
   }
   state.SetComplexityN(state.range(0));
 }
@@ -199,7 +199,7 @@ static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_N(benchmark::State& state) {
     dg.addEdge(vertices[i], vertices[i + 1]);
   }
   for (auto _ : state) {
-    dg.findAbove(vertices.size());
+    dg.findSuccessors(vertices.size());
   }
   state.SetComplexityN(state.range(0));
 }
@@ -213,9 +213,9 @@ static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_FAST_0(benchmark::State& state)
   for (size_t i = 0; i < vertices.size() - 1; ++i) {
     dg.addEdge(vertices[i], vertices[i + 1]);
   }
-  dg.prepareFastAbove();
+  dg.prepareFindSuccessorsFast();
   for (auto _ : state) {
-    dg.findAboveFast(0);
+    dg.findSuccessorsFast(0);
   }
   state.SetComplexityN(state.range(0));
 }
@@ -229,9 +229,9 @@ static void OSM2TT_UTIL_DIRECTEDGRAPH_FIND_ABOVE_FAST_N(benchmark::State& state)
   for (size_t i = 0; i < vertices.size() - 1; ++i) {
     dg.addEdge(vertices[i], vertices[i + 1]);
   }
-  dg.prepareFastAbove();
+  dg.prepareFindSuccessorsFast();
   for (auto _ : state) {
-    dg.findAboveFast(vertices.size());
+    dg.findSuccessorsFast(vertices.size());
   }
   state.SetComplexityN(state.range(0));
 }
