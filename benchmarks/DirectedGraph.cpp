@@ -7,7 +7,7 @@
 
 #include "osm2ttl/util/DirectedGraph.h"
 
-static void DirectedGraph_findSuccessors_0(benchmark::State& state) {
+static void DirectedGraph_findSuccessors_First(benchmark::State& state) {
   osm2ttl::util::DirectedGraph dg;
   std::vector<uint64_t> vertices(state.range(0));
   std::iota(std::begin(vertices), std::end(vertices), 0);
@@ -19,10 +19,10 @@ static void DirectedGraph_findSuccessors_0(benchmark::State& state) {
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(DirectedGraph_findSuccessors_0)
+BENCHMARK(DirectedGraph_findSuccessors_First)
 ->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
 
-static void DirectedGraph_findSuccessors_N(benchmark::State& state) {
+static void DirectedGraph_findSuccessors_Last(benchmark::State& state) {
   osm2ttl::util::DirectedGraph dg;
   std::vector<uint64_t> vertices(state.range(0));
   std::iota(std::begin(vertices), std::end(vertices), 0);
@@ -34,10 +34,10 @@ static void DirectedGraph_findSuccessors_N(benchmark::State& state) {
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(DirectedGraph_findSuccessors_N)
+BENCHMARK(DirectedGraph_findSuccessors_Last)
 ->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
 
-static void DirectedGraph_findSuccessorsFast_0(benchmark::State& state) {
+static void DirectedGraph_findSuccessorsFast_First(benchmark::State& state) {
   osm2ttl::util::DirectedGraph dg;
   std::vector<uint64_t> vertices(state.range(0));
   std::iota(std::begin(vertices), std::end(vertices), 0);
@@ -50,10 +50,10 @@ static void DirectedGraph_findSuccessorsFast_0(benchmark::State& state) {
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(DirectedGraph_findSuccessorsFast_0)
+BENCHMARK(DirectedGraph_findSuccessorsFast_First)
 ->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
 
-static void DirectedGraph_findSuccessorsFast_N(benchmark::State& state) {
+static void DirectedGraph_findSuccessorsFast_Last(benchmark::State& state) {
   osm2ttl::util::DirectedGraph dg;
   std::vector<uint64_t> vertices(state.range(0));
   std::iota(std::begin(vertices), std::end(vertices), 0);
@@ -66,5 +66,5 @@ static void DirectedGraph_findSuccessorsFast_N(benchmark::State& state) {
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(DirectedGraph_findSuccessorsFast_N)
+BENCHMARK(DirectedGraph_findSuccessorsFast_Last)
 ->RangeMultiplier(2)->Range(1<<1, 1<<8)->Complexity();
