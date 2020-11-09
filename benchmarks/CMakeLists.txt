@@ -12,9 +12,12 @@ macro(package_add_benchmark BENCHMARKNAME)
     set_target_properties(${BENCHMARKNAME} PROPERTIES FOLDER benchmarks)
     # register benchmark for global build target
     add_dependencies(build_benchmarks ${BENCHMARKNAME})
+    add_dependencies(run_benchmarks run_${BENCHMARKNAME})
+    add_custom_target(run_${BENCHMARKNAME} COMMAND ${BENCHMARKNAME} DEPENDS ${BENCHMARKNAME} WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/benchmarks)
 endmacro()
 
 add_custom_target(build_benchmarks)
+add_custom_target(run_benchmarks)
 package_add_benchmark(BaselinesBenchmark Baselines.cpp)
 package_add_benchmark(DirectedGraphBenchmark DirectedGraph.cpp)
 package_add_benchmark(WriterBenchmark Writer.cpp)

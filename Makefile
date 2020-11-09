@@ -7,37 +7,23 @@ build:
 	cmake -S . -B build
 
 compile: build
-	cmake --build build
+	cmake --build build --target osm2ttl
 
 checkstyle:
 
 test: build
 	cmake --build build --target test
 
-benchmarks: benchmark-directed-graph benchmark-writer
+benchmark: build
+	cmake --build build --target run_benchmarks
 
-build_benchmarks: build
-	cmake --build build --target build_benchmarks
-
-benchmark-baselines: build_benchmarks
-	./build/benchmarks/BaselinesBenchmark
-
-benchmark-directed-graph: build_benchmarks
-	./build/benchmarks/DirectedGraphBenchmark
-
-benchmark-writer: build_benchmarks
-	./build/benchmarks/WriterBenchmark
-
-run: build
-	cmake --build build --target osm2ttl
+run: compile
 	for FILE in $(shell ls -Sr input); do ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever" --write-statistics; done
 
-perf: build
-	cmake --build build --target osm2ttl
+perf: compile
 	for FILE in $(shell ls -Sr input); do time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
 
-perf-st: build
-	cmake --build build --target osm2ttl
+perf-st: compile
 	for FILE in $(shell ls -Sr input); do export OMP_NUM_THREADS=1 && export OMP_THREAD_LIMIT=1 && time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
 
 docker-fr:
