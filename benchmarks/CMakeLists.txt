@@ -10,6 +10,11 @@ macro(package_add_benchmark BENCHMARKNAME)
     target_link_libraries(${BENCHMARKNAME} PRIVATE benchmark::benchmark_main)
     target_link_libraries(${BENCHMARKNAME} PRIVATE osm2ttl_library)
     set_target_properties(${BENCHMARKNAME} PROPERTIES FOLDER benchmarks)
+    # register benchmark for global build target
+    add_dependencies(build_benchmarks ${BENCHMARKNAME})
 endmacro()
 
+add_custom_target(build_benchmarks)
 package_add_benchmark(benchmarks benchmarks.cpp)
+package_add_benchmark(DirectedGraphBenchmark DirectedGraph.cpp)
+package_add_benchmark(WriterBenchmark Writer.cpp)

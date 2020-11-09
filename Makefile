@@ -11,12 +11,19 @@ compile: build
 
 checkstyle:
 
-test: compile
+test: build
 	cmake --build build --target test
 
-benchmark: build
-	cmake --build build --target benchmarks
-	./build/benchmarks/benchmarks
+benchmarks: benchmark-directed-graph benchmark-writer
+
+build_benchmarks: build
+	cmake --build build --target build_benchmarks
+
+benchmark-directed-graph: build_benchmarks
+	./build/benchmarks/DirectedGraphBenchmark
+
+benchmark-writer: build_benchmarks
+	./build/benchmarks/WriterBenchmark
 
 run: build
 	cmake --build build --target osm2ttl
