@@ -15,6 +15,6 @@ macro(package_add_benchmark BENCHMARKNAME)
 endmacro()
 
 add_custom_target(build_benchmarks)
-package_add_benchmark(benchmarks benchmarks.cpp)
+package_add_benchmark(BaselinesBenchmark Baselines.cpp)
 package_add_benchmark(DirectedGraphBenchmark DirectedGraph.cpp)
 package_add_benchmark(WriterBenchmark Writer.cpp)

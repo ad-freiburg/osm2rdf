@@ -19,6 +19,9 @@ benchmarks: benchmark-directed-graph benchmark-writer
 build_benchmarks: build
 	cmake --build build --target build_benchmarks
 
+benchmark-baselines: build_benchmarks
+	./build/benchmarks/BaselinesBenchmark
+
 benchmark-directed-graph: build_benchmarks
 	./build/benchmarks/DirectedGraphBenchmark
 
