@@ -12,7 +12,7 @@ compile: build
 checkstyle:
 
 test: build
-	cmake --build build --target test
+	cmake --build build --target run_tests
 
 benchmark: build
 	cmake --build build --target run_benchmarks

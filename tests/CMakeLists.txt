@@ -27,7 +27,13 @@ macro(package_add_test TESTNAME)
         WORKING_DIRECTORY ${PROJECT_DIR}
         PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
     )
-    set_target_properties(${TESTNAME} PROPERTIES FOLDER tests)
+    set_target_properties(${TESTNAME} PROPERTIES FOLDER vendor)
+    # register test for global build target
+    add_dependencies(build_tests ${TESTNAME})
+    add_dependencies(run_tests run_${TESTNAME})
+    add_custom_target(run_${TESTNAME} COMMAND ${TESTNAME} DEPENDS ${TESTNAME} WORKING_DIRECTORY "${PROJECT_DIR}")
 endmacro()
 
+add_custom_target(build_tests)
+add_custom_target(run_tests)
 package_add_test(DirectedGraphTest DirectedGraph.cpp)
