@@ -15,15 +15,17 @@ namespace util {
 
 class DirectedGraph {
  public:
+  // Type representing all vertices inside the directed graph.
+  typedef uint64_t VertexID;
   // addEdge adds an edge between src and dst vertices. Allows multiple edges
   // between the same vertices.
-  void addEdge(uint64_t src, uint64_t dst);
+  void addEdge(VertexID src, VertexID dst);
   // findSuccessors returns the ids of all successor vertices of the given
   // vertex.
-  std::vector<uint64_t> findSuccessors(uint64_t src) const;
+  std::vector<VertexID> findSuccessors(VertexID src) const;
   // findSuccessorsFast returns the same result as findSuccessors but faster,
   // after data is prepared for faster lookup.
-  std::vector<uint64_t> findSuccessorsFast(uint64_t src) const;
+  std::vector<VertexID> findSuccessorsFast(VertexID src) const;
   // dump stores the complete graph in DOT-Format in a file at the given path.
   void dump(std::filesystem::path filename) const;
   // sort sorts all adjacency lists.
@@ -37,14 +39,15 @@ class DirectedGraph {
   // getNumVertices returns the number of unique vertices in the graph.
   size_t getNumVertices() const;
   // getVertices returns all unique vertices in the graph.
-  std::vector<uint64_t> getVertices() const;
+  std::vector<osm2ttl::util::DirectedGraph::VertexID> getVertices() const;
   // getEdges returns the stored edges for the given vertex.
-  std::vector<uint64_t> getEdges(uint64_t src) const;
+  std::vector<osm2ttl::util::DirectedGraph::VertexID> getEdges(
+      VertexID src) const;
 
  protected:
-  std::vector<uint64_t> findSuccessorsHelper(uint64_t src) const;
-  std::unordered_map<uint64_t, std::vector<uint64_t>> _adjacency;
-  std::unordered_map<uint64_t, std::vector<uint64_t>> _successors;
+  std::vector<VertexID> findSuccessorsHelper(VertexID src) const;
+  std::unordered_map<VertexID, std::vector<VertexID>> _adjacency;
+  std::unordered_map<VertexID, std::vector<VertexID>> _successors;
   size_t _numEdges = 0;
 };
 
