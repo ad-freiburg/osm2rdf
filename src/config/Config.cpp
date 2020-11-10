@@ -25,6 +25,7 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   oss << "\n" << prefix << "Output:        " << output;
   oss << "\n" << prefix << "Output format: " << outputFormat;
   oss << "\n" << prefix << "--- Dump ---";
+  oss << "\n" << prefix << "Prefix for own IRIs: " << osm2ttlPrefix;
   if (noDump) {
     oss << "\n" << prefix << "Not dumping facts";
   } else {
@@ -110,6 +111,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       op.add<popl::Switch>("x", "expanded-data", "Add expanded data");
   auto metaDataOp = op.add<popl::Switch>("m", "meta-data", "Add meta-data");
 
+  auto osm2ttlPrefixOp =
+      op.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          "", "oms2ttl-prefix", "Prefix for own IRIs", osm2ttlPrefix);
+
   auto wktSimplifyOp = op.add<popl::Value<uint16_t>>(
       "s", "wkt-simplify",
       "Simplify WKT-Geometries over this number of nodes, 0 to disable",
@@ -174,6 +179,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     expandedData = expandedDataOp->is_set();
     wktSimplify = wktSimplifyOp->value();
     addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
+
+    osm2ttlPrefix = osm2ttlPrefixOp->value();
 
     // Dot
     writeDotFiles = writeDotFilesOp->is_set();

@@ -34,6 +34,9 @@ struct Config {
   bool skipWikiLinks = false;
   bool addInverseRelationDirection = false;
 
+  // Default settings for data
+  std::string osm2ttlPrefix = "osmadd";
+
   // Dot
   bool writeDotFiles = false;
 
