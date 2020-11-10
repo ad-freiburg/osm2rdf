@@ -20,22 +20,32 @@ template <typename T>
 osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
     : _config(config) {
   _prefixes = {
-// well-known prefixes
-    {osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "http://www.opengis.net/ont/geosparql#"},
-    {osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "http://www.wikidata.org/entity/"},
-    {osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "http://www.w3.org/2001/XMLSchema#"},
-    {osm2ttl::ttl::constants::NAMESPACE__RDF, "http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
-    {osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "http://www.opengis.net/rdf#"},
-// osm prefixes
-    {osm2ttl::ttl::constants::NAMESPACE__OSM, "https://www.openstreetmap.org/"},
-// https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
-// https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
-    {osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, "https://www.openstreetmap.org/node/"},
-    {osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, "https://www.openstreetmap.org/relation/"},
-    {osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, "https://www.openstreetmap.org/wiki/Key:"},
-    {osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "https://www.openstreetmap.org/way/"},
-    {osm2ttl::ttl::constants::NAMESPACE__OSM_META, "https://www.openstreetmap.org/meta/"}
-  };
+      // well-known prefixes
+      {osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL,
+       "http://www.opengis.net/ont/geosparql#"},
+      {osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY,
+       "http://www.wikidata.org/entity/"},
+      {osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA,
+       "http://www.w3.org/2001/XMLSchema#"},
+      {osm2ttl::ttl::constants::NAMESPACE__RDF,
+       "http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
+      {osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+       "http://www.opengis.net/rdf#"},
+      // osm prefixes
+      {osm2ttl::ttl::constants::NAMESPACE__OSM,
+       "https://www.openstreetmap.org/"},
+      // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
+      // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+       "https://www.openstreetmap.org/node/"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+       "https://www.openstreetmap.org/relation/"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+       "https://www.openstreetmap.org/wiki/Key:"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,
+       "https://www.openstreetmap.org/way/"},
+      {osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+       "https://www.openstreetmap.org/meta/"}};
 
   // Generate constants
   osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
@@ -122,7 +132,8 @@ void osm2ttl::ttl::Writer<T>::close() {
 
 // ____________________________________________________________________________
 template <typename T>
-bool osm2ttl::ttl::Writer<T>::addPrefix(std::string_view p, std::string_view v) {
+bool osm2ttl::ttl::Writer<T>::addPrefix(std::string_view p,
+                                        std::string_view v) {
   std::string key{p};
   auto prefix = _prefixes.find(key);
   if (prefix != _prefixes.end()) {
@@ -440,15 +451,15 @@ std::string osm2ttl::ttl::Writer<T>::encodePERCENT(std::string_view s) {
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
   std::ostringstream tmp;
   uint32_t c = utf8Codepoint(s);
-  uint32_t mask = BITS_OF_BYTE;
+  uint32_t mask = MASK_BITS_OF_ONE_BYTE;
   bool echo = false;
   for (int shift = 3; shift >= 0; --shift) {
-    uint8_t v = (c & (mask << (shift * BIT_IN_BYTE)) >> shift);
+    uint8_t v = (c & (mask << (shift * NUM_BITS_IN_BYTE)) >> shift);
     echo |= (v > 0);
     if (!echo) {
       continue;
     }
-    tmp << "%" << std::hex << ((v & k0xF0) >> BIT_IN_NIBBLE) << std::hex
+    tmp << "%" << std::hex << ((v & k0xF0) >> NUM_BITS_IN_NIBBLE) << std::hex
         << (v & k0x0F);
   }
   return tmp.str();
