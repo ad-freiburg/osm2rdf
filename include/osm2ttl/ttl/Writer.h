@@ -84,11 +84,19 @@ class Writer {
 
   void writeTriple(const std::string& s, const std::string& p, const std::string& o);
 
+  // generateBlankNode creates a new unique identifier for a blank node.
   static std::string generateBlankNode();
+  // generateIRI creates a IRI from given prefix p and ID value v.
   static std::string generateIRI(std::string_view p, uint64_t v);
+  // generateIRI creates a IRI from given prefix p and string value v.
   static std::string generateIRI(std::string_view p, std::string_view v);
+  // generateLangTag creates a LangTag from the given string.
   static std::string generateLangTag(std::string_view s);
+  // generateLangTag creates a Literal from the given string value v.
+  // If suffix s is not empty, it will be appended as is.
   static std::string generateLiteral(std::string_view v, std::string_view s);
+  // resolvePrefix resolves the given prefix. If the prefix is unknown it is returned as provided.
+  static std::string resolvePrefix(std::string_view p);
 
   static std::string encodePN_LOCAL(std::string_view s);
   static uint32_t utf8Codepoint(std::string_view s);

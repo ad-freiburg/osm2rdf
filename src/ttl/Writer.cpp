@@ -93,10 +93,23 @@ bool osm2ttl::ttl::Writer<T>::open() {
 // ____________________________________________________________________________
 template <typename T>
 void osm2ttl::ttl::Writer<T>::close() {
+  if (_out.empty()) {
+    return;
+  }
   _out.pop();
   if (_outFile.is_open()) {
     _outFile.close();
   }
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2ttl::ttl::Writer<T>::resolvePrefix(std::string_view p) {
+  auto prefix = _prefixes.find(std::string{p});
+  if (prefix != _prefixes.end()) {
+    return prefix->second;
+  }
+  return std::string(p);
 }
 
 // ____________________________________________________________________________
