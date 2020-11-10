@@ -16,16 +16,21 @@ class Output {
  public:
   Output(const osm2ttl::config::Config& config, const std::string& prefix);
   ~Output();
+  // open all output streams.
   void open();
+  // close all output streams.
   void close();
+  // merge closes and merges all parts, prepend given prefix and append given suffix.
   void merge(std::string_view prefix, std::string_view suffix);
+  // write the given line into the correct part for the current (openmp) thread.
   void write(std::string_view line);
-  void write(std::string_view line, int part);
+  // write the given line into the specified part.
+  void write(std::string_view line, size_t part);
 
  protected:
   const osm2ttl::config::Config _config;
   const std::string _prefix;
-  size_t _numFilesPerType;
+  size_t _numOuts;
   bool _open = false;
   // Output
   boost::iostreams::filtering_ostream* _out;

@@ -16,22 +16,23 @@ osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
                               const std::string& prefix)
     : _config(config), _prefix(prefix) {
 #if defined(_OPENMP)
-  _numFilesPerType = omp_get_max_threads();
+  _numOuts = omp_get_max_threads();
 #else
-  _numFilesPerType = 1;
+  _numOuts = 1;
 #endif
 }
 
+// ____________________________________________________________________________
 osm2ttl::util::Output::~Output() {
   close();
 }
 
 // ____________________________________________________________________________
 void osm2ttl::util::Output::open() {
-  _out = new boost::iostreams::filtering_ostream[_numFilesPerType];
-  _outFile = new std::ofstream[_numFilesPerType];
+  _out = new boost::iostreams::filtering_ostream[_numOuts];
+  _outFile = new std::ofstream[_numOuts];
 
-  for (size_t i = 0; i < _numFilesPerType; ++i) {
+  for (size_t i = 0; i < _numOuts; ++i) {
     if (_config.outputCompress) {
       _out[i].push(boost::iostreams::bzip2_compressor{});
     }
@@ -46,7 +47,7 @@ void osm2ttl::util::Output::close() {
   if (!_open) {
     return;
   }
-  for (size_t i = 0; i < _numFilesPerType; ++i) {
+  for (size_t i = 0; i < _numOuts; ++i) {
     _out[i].pop();
     if (_outFile[i].is_open()) {
       _outFile[i].close();
@@ -58,6 +59,8 @@ void osm2ttl::util::Output::close() {
 }
 
 void osm2ttl::util::Output::merge(std::string_view prefix, std::string_view suffix) {
+  // Close and flush all data before merging.
+  close();
   // Concatenated output files
   boost::iostreams::filtering_ostream out;
   std::ofstream outFile{_prefix};
@@ -67,7 +70,7 @@ void osm2ttl::util::Output::merge(std::string_view prefix, std::string_view suff
   out.push(outFile);
   out << prefix;
 
-  for (size_t i = 0; i < _numFilesPerType; ++i) {
+  for (size_t i = 0; i < _numOuts; ++i) {
     boost::iostreams::filtering_istream in;
     std::ifstream inFile{_prefix + ".part_" + std::to_string(i)};
     if (_config.outputCompress) {
@@ -95,6 +98,7 @@ void osm2ttl::util::Output::write(std::string_view line) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::write(std::string_view line, int part) {
+void osm2ttl::util::Output::write(std::string_view line, size_t part) {
+  assert(part < _numOuts);
   _out[part] << line;
 }
