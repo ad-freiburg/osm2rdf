@@ -53,6 +53,55 @@ TEST(WriterQLEVER, resolvePrefix) {
 }
 
 // ____________________________________________________________________________
+TEST(WriterNT, addPrefix) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
+  {
+    const std::string res =
+        w.resolvePrefix("test");
+    ASSERT_STREQ("test", res.c_str());
+  }
+  {
+    w.addPrefix("test", "prefix");
+    const std::string res =
+        w.resolvePrefix("test");
+    ASSERT_STREQ("prefix", res.c_str());
+  }
+}
+
+TEST(WriterTTL, addPrefix) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config};
+  {
+    const std::string res =
+        w.resolvePrefix("test");
+    ASSERT_STREQ("test", res.c_str());
+  }
+  {
+    w.addPrefix("test", "prefix");
+    const std::string res =
+        w.resolvePrefix("test");
+    ASSERT_STREQ("prefix", res.c_str());
+  }
+}
+
+TEST(WriterQLEVER, addPrefix) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config};
+  {
+    const std::string res =
+        w.resolvePrefix("test");
+    ASSERT_STREQ("test", res.c_str());
+  }
+  {
+    w.addPrefix("test", "prefix");
+    const std::string res =
+        w.resolvePrefix("test");
+    ASSERT_STREQ("prefix", res.c_str());
+  }
+}
+
+// ____________________________________________________________________________
 TEST(WriterNT, generateBlankNode) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};

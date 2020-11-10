@@ -84,55 +84,42 @@ class Writer {
 
   void writeTriple(const std::string& s, const std::string& p, const std::string& o);
 
+  // addPrefix adds the given prefix and value. If the prefix already exists false is returned.
+  bool addPrefix(std::string_view p, std::string_view v);
+  // resolvePrefix resolves the given prefix. If the prefix is unknown it is returned as provided.
+  std::string resolvePrefix(std::string_view p);
+
   // generateBlankNode creates a new unique identifier for a blank node.
-  static std::string generateBlankNode();
+  std::string generateBlankNode();
   // generateIRI creates a IRI from given prefix p and ID value v.
-  static std::string generateIRI(std::string_view p, uint64_t v);
+  std::string generateIRI(std::string_view p, uint64_t v);
   // generateIRI creates a IRI from given prefix p and string value v.
-  static std::string generateIRI(std::string_view p, std::string_view v);
+  std::string generateIRI(std::string_view p, std::string_view v);
   // generateLangTag creates a LangTag from the given string.
-  static std::string generateLangTag(std::string_view s);
+  std::string generateLangTag(std::string_view s);
   // generateLangTag creates a Literal from the given string value v.
   // If suffix s is not empty, it will be appended as is.
-  static std::string generateLiteral(std::string_view v, std::string_view s);
-  // resolvePrefix resolves the given prefix. If the prefix is unknown it is returned as provided.
-  static std::string resolvePrefix(std::string_view p);
+  std::string generateLiteral(std::string_view v, std::string_view s);
 
-  static std::string encodePN_LOCAL(std::string_view s);
-  static uint32_t utf8Codepoint(std::string_view s);
+  std::string encodePN_LOCAL(std::string_view s);
+  uint32_t utf8Codepoint(std::string_view s);
  protected:
-  static std::string formatIRI(std::string_view p, std::string_view v);
-  static std::string STRING_LITERAL_QUOTE(std::string_view s);
-  static std::string IRIREF(std::string_view p, std::string_view v);
-  static std::string PrefixedName(std::string_view p, std::string_view v);
-  static uint8_t utf8Length(char c);
-  static uint8_t utf8Length(std::string_view s);
-  static std::string UCHAR(char c);
-  static std::string encodeIRIREF(std::string_view s);
-  static std::string encodePERCENT(std::string_view s);
+  std::string formatIRI(std::string_view p, std::string_view v);
+  std::string STRING_LITERAL_QUOTE(std::string_view s);
+  std::string IRIREF(std::string_view p, std::string_view v);
+  std::string PrefixedName(std::string_view p, std::string_view v);
+  uint8_t utf8Length(char c);
+  uint8_t utf8Length(std::string_view s);
+  std::string UCHAR(char c);
+  std::string encodeIRIREF(std::string_view s);
+  std::string encodePERCENT(std::string_view s);
 
   // Config
-  static uint64_t _blankNodeCounter;
+  uint64_t _blankNodeCounter = 0;
   const osm2ttl::config::Config _config;
 
   // Prefix
-  const static inline std::unordered_map<std::string, std::string> _prefixes{
-// well-known prefixes
-      {osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "http://www.opengis.net/ont/geosparql#"},
-      {osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "http://www.wikidata.org/entity/"},
-      {osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "http://www.w3.org/2001/XMLSchema#"},
-      {osm2ttl::ttl::constants::NAMESPACE__RDF, "http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
-      {osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "http://www.opengis.net/rdf#"},
-// osm prefixes
-      {osm2ttl::ttl::constants::NAMESPACE__OSM, "https://www.openstreetmap.org/"},
-// https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
-// https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, "https://www.openstreetmap.org/node/"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, "https://www.openstreetmap.org/relation/"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, "https://www.openstreetmap.org/wiki/Key:"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "https://www.openstreetmap.org/way/"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_META, "https://www.openstreetmap.org/meta/"}
-  };
+  std::unordered_map<std::string, std::string> _prefixes;
 
   // Output
   boost::iostreams::filtering_ostream _out;
