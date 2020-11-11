@@ -32,7 +32,7 @@ namespace osm2ttl {
 namespace osm {
 
 typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Area,
-                   uint64_t, osm2ttl::osm::Area::AreaType , bool>
+                   uint64_t, osm2ttl::osm::Area::AreaType, bool>
     SpatialAreaValue;
 
 typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Node>
@@ -60,6 +60,10 @@ class GeometryHandler : public osmium::handler::Handler {
   // Calculate data
   void calculateRelations();
 
+  // reduceDAG returns a reduced DAG from a given sorted DAG
+  osm2ttl::util::DirectedGraph reduceDAG(
+      const osm2ttl::util::DirectedGraph& sourceDAG, bool showProgress);
+
  protected:
   // Stores named areas in r-tree, used for all other calculations.
   void prepareRTree();
@@ -74,11 +78,10 @@ class GeometryHandler : public osmium::handler::Handler {
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpUnnamedAreaRelations();
   std::string statisticLine(std::string_view function, std::string_view part,
-                          std::string_view check, uint64_t outerId,
-                          std::string_view outerType, uint64_t innerId,
-                          std::string_view innerType,
-                          std::chrono::nanoseconds durationNS,
-                          bool result);
+                            std::string_view check, uint64_t outerId,
+                            std::string_view outerType, uint64_t innerId,
+                            std::string_view innerType,
+                            std::chrono::nanoseconds durationNS, bool result);
   // Global config
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;

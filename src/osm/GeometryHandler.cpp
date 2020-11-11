@@ -270,35 +270,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... adjacency lists sorted ... " << std::endl;
 
-    osmium::ProgressBar progressBar{tmpDirectedAreaGraph.getNumVertices(),
-                                    true};
-    size_t entryCount = 0;
-    progressBar.update(entryCount);
-    // Reduce each adjacency list
-    const auto& vertices = tmpDirectedAreaGraph.getVertices();
-#pragma omp parallel for shared(vertices, tmpDirectedAreaGraph, \
-                                directedAreaGraph, progressBar, \
-                                entryCount) default(none)
-    for (size_t i = 0; i < vertices.size(); i++) {
-      uint64_t src = vertices[i];
-      std::vector<uint64_t> possibleEdges(tmpDirectedAreaGraph.getEdges(src));
-      std::vector<uint64_t> edges;
-      for (const auto& dst : tmpDirectedAreaGraph.getEdges(src)) {
-        const auto& dstEdges = tmpDirectedAreaGraph.getEdges(dst);
-        std::set_difference(possibleEdges.begin(), possibleEdges.end(),
-                            dstEdges.begin(), dstEdges.end(),
-                            std::back_inserter(edges));
-        possibleEdges = edges;
-        edges.clear();
-      }
-#pragma omp critical(addEdge)
-      for (const auto& dst : possibleEdges) {
-        directedAreaGraph.addEdge(src, dst);
-      }
-#pragma omp critical(progress)
-      progressBar.update(entryCount++);
-    }
-    progressBar.done();
+    directedAreaGraph = reduceDAG(tmpDirectedAreaGraph, true);
 
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... done, resulting in DAG with "
@@ -321,6 +293,41 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+osm2ttl::util::DirectedGraph osm2ttl::osm::GeometryHandler<W>::reduceDAG(
+    const osm2ttl::util::DirectedGraph& sourceDAG, bool showProgress) {
+  osm2ttl::util::DirectedGraph result;
+  osmium::ProgressBar progressBar{sourceDAG.getNumVertices(), showProgress};
+  size_t entryCount = 0;
+  progressBar.update(entryCount);
+  // Reduce each adjacency list
+  const auto& vertices = sourceDAG.getVertices();
+#pragma omp parallel for shared(vertices, sourceDAG, result, progressBar, \
+                                entryCount) default(none)
+  for (size_t i = 0; i < vertices.size(); i++) {
+    uint64_t src = vertices[i];
+    std::vector<uint64_t> possibleEdges(sourceDAG.getEdges(src));
+    std::vector<uint64_t> edges;
+    for (const auto& dst : sourceDAG.getEdges(src)) {
+      const auto& dstEdges = sourceDAG.getEdges(dst);
+      std::set_difference(possibleEdges.begin(), possibleEdges.end(),
+                          dstEdges.begin(), dstEdges.end(),
+                          std::back_inserter(edges));
+      possibleEdges = edges;
+      edges.clear();
+    }
+#pragma omp critical(addEdge)
+    for (const auto& dst : possibleEdges) {
+      result.addEdge(src, dst);
+    }
+#pragma omp critical(progress)
+    progressBar.update(entryCount++);
+  }
+  progressBar.done();
+  return result;
 }
 
 // ____________________________________________________________________________
