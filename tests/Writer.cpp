@@ -1,10 +1,10 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2ttl/ttl/Writer.h"
-
 #include "gtest/gtest.h"
+
 #include "osm2ttl/config/Config.h"
+#include "osm2ttl/ttl/Writer.h"
 
 // ____________________________________________________________________________
 TEST(WriterNT, resolvePrefix) {
