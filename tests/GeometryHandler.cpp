@@ -23,7 +23,17 @@ TEST(GeometryHandlerReduceDAG, empty) {
   ASSERT_EQ(0, res.getNumEdges());
 }
 
-TEST(GeometryHandlerReduceDAG, WhiteboardExampleAllInAll) {
+// Graph used for WhiteboardExample1
+//
+// 6   4   3
+//  \ / \ /
+//   2   0
+//   |   |
+//   |   1
+//    \ /
+//     5
+//
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllInAll) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
@@ -84,7 +94,7 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExampleAllInAll) {
   }
 }
 
-TEST(GeometryHandlerReduceDAG, WhiteboardExampleSingleThreaded) {
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1SingleThreaded) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
@@ -140,7 +150,7 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExampleSingleThreaded) {
   }
 }
 
-TEST(GeometryHandlerReduceDAG, WhiteboardExampleMultiThreaded) {
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1MultiThreaded) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
