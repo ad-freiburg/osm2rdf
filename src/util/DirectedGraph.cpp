@@ -77,7 +77,24 @@ osm2ttl::util::DirectedGraph::findSuccessorsFast(
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::dump(std::filesystem::path filename) const {
+void osm2ttl::util::DirectedGraph::dump(const std::filesystem::path& filename) const {
+  std::ofstream ofs;
+  ofs.open(filename);
+
+  ofs << "digraph osm2ttl {\nrankdir=\"BT\"\n";
+  for (const auto& [src, list] : _adjacency) {
+    ofs << src << " [label=\"" << src << "\", shape=rectangle, style=solid]\n";
+    for (const auto& dst : list) {
+      ofs << src << " -> " << dst << "\n";
+    }
+  }
+  ofs << "}\n";
+  ofs.flush();
+  ofs.close();
+}
+
+// ____________________________________________________________________________
+void osm2ttl::util::DirectedGraph::dumpOsm(const std::filesystem::path& filename) const {
   std::ofstream ofs;
   ofs.open(filename);
 

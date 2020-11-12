@@ -27,7 +27,10 @@ class DirectedGraph {
   // after data is prepared for faster lookup.
   std::vector<VertexID> findSuccessorsFast(VertexID src) const;
   // dump stores the complete graph in DOT-Format in a file at the given path.
-  void dump(std::filesystem::path filename) const;
+  void dump(const std::filesystem::path& filename) const;
+  // dumpOsm stores the complete graph in DOT-Format in a file at the given path.
+  // This variant handles osm ids and converts for later lookup.
+  void dumpOsm(const std::filesystem::path& filename) const;
   // sort sorts all adjacency lists.
   void sort();
   // prepareFindSuccessorsFast calculates for each vertex the successors and
