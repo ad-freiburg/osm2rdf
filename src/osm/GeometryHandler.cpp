@@ -231,6 +231,8 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
         for (const auto& newSkip :
              tmpDirectedAreaGraph.findSuccessors(entryId)) {
           skip.insert(newSkip);
+#pragma omp critical(addEdge)
+          tmpDirectedAreaGraph.addEdge(entryId, newSkip);
         }
       }
 #pragma omp critical(progress)

@@ -58,6 +58,7 @@ void osm2ttl::util::Output::close() {
   _open = false;
 }
 
+// ____________________________________________________________________________
 void osm2ttl::util::Output::merge(std::string_view prefix, std::string_view suffix) {
   // Close and flush all data before merging.
   close();
