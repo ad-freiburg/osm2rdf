@@ -1,7 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include <benchmark/benchmark.h>
+#include "benchmark/benchmark.h"
 
 static void UINT64T_TO_STRING(benchmark::State& state) {
   uint64_t x = state.range(0);
