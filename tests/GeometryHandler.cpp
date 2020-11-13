@@ -44,7 +44,7 @@ osm2ttl::util::DirectedGraph createWhiteboardExample1ExpectedResult() {
   return src;
 }
 
-TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllInAll) {
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllConnections) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
@@ -65,12 +65,12 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllInAll) {
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(12, src.getNumEdges());
 
-  // src.dump("/tmp/WhiteboardExample1AllInAll.source.dot");
+  // src.dump("/tmp/WhiteboardExample1AllConnections.source.dot");
   const osm2ttl::util::DirectedGraph expected =
       createWhiteboardExample1ExpectedResult();
-  // expected.dump("/tmp/WhiteboardExample1AllInAll.expected.dot");
+  // expected.dump("/tmp/WhiteboardExample1AllConnections.expected.dot");
   const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
-  // result.dump("/tmp/WhiteboardExample1AllInAll.result.dot");
+  // result.dump("/tmp/WhiteboardExample1AllConnections.result.dot");
   ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
   ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
   for (const auto& vertexId : expected.getVertices()) {
@@ -83,7 +83,7 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllInAll) {
   }
 }
 
-TEST(GeometryHandlerReduceDAG, WhiteboardExample1SingleThreaded) {
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1MinimalConnections) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
@@ -99,12 +99,12 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1SingleThreaded) {
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(7, src.getNumEdges());
 
-  // src.dump("/tmp/WhiteboardExample1SingleThreaded.source.dot");
+  // src.dump("/tmp/WhiteboardExample1MinimalConnections.source.dot");
   const osm2ttl::util::DirectedGraph expected =
       createWhiteboardExample1ExpectedResult();
-  // expected.dump("/tmp/WhiteboardExample1SingleThreaded.expected.dot");
+  // expected.dump("/tmp/WhiteboardExample1MinimalConnections.expected.dot");
   const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
-  // result.dump("/tmp/WhiteboardExample1SingleThreaded.result.dot");
+  // result.dump("/tmp/WhiteboardExample1MinimalConnections.result.dot");
   ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
   ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
   for (const auto& vertexId : expected.getVertices()) {
