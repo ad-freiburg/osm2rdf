@@ -36,11 +36,14 @@ class Timing {
   }
 
  private:
-  size_t _count;
+  size_t _count = 0;
   std::chrono::_V2::steady_clock::time_point _start;
-  std::chrono::duration<double, std::milli> _max;
-  std::chrono::duration<double, std::milli> _min;
-  std::chrono::duration<double, std::milli> _mean;
+  std::chrono::duration<double, std::milli> _max =
+      std::chrono::duration<double, std::milli>::min();
+  std::chrono::duration<double, std::milli> _min =
+      std::chrono::duration<double, std::milli>::max();
+  std::chrono::duration<double, std::milli> _mean =
+      std::chrono::duration<double, std::milli>::zero();
 };
 
 }  // namespace util
