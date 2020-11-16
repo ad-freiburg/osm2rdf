@@ -16,16 +16,16 @@ namespace util {
 class DirectedGraph {
  public:
   // Type representing all vertices inside the directed graph.
-  typedef uint64_t VertexID;
+  typedef uint64_t vertexID_t;
   // addEdge adds an edge between src and dst vertices. Allows multiple edges
   // between the same vertices.
-  void addEdge(VertexID src, VertexID dst);
+  void addEdge(vertexID_t src, vertexID_t dst);
   // findSuccessors returns the ids of all successor vertices of the given
   // vertex.
-  std::vector<VertexID> findSuccessors(VertexID src) const;
+  std::vector<vertexID_t> findSuccessors(vertexID_t src) const;
   // findSuccessorsFast returns the same result as findSuccessors but faster,
   // after data is prepared for faster lookup.
-  std::vector<VertexID> findSuccessorsFast(VertexID src) const;
+  std::vector<vertexID_t> findSuccessorsFast(vertexID_t src) const;
   // dump stores the complete graph in DOT-Format in a file at the given path.
   void dump(const std::filesystem::path& filename) const;
   // dumpOsm stores the complete graph in DOT-Format in a file at the given path.
@@ -42,15 +42,15 @@ class DirectedGraph {
   // getNumVertices returns the number of unique vertices in the graph.
   size_t getNumVertices() const;
   // getVertices returns all unique vertices in the graph.
-  std::vector<osm2ttl::util::DirectedGraph::VertexID> getVertices() const;
+  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> getVertices() const;
   // getEdges returns the stored edges for the given vertex.
-  std::vector<osm2ttl::util::DirectedGraph::VertexID> getEdges(
-      VertexID src) const;
+  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> getEdges(
+      vertexID_t src) const;
 
  protected:
-  std::vector<VertexID> findSuccessorsHelper(VertexID src) const;
-  std::unordered_map<VertexID, std::vector<VertexID>> _adjacency;
-  std::unordered_map<VertexID, std::vector<VertexID>> _successors;
+  std::vector<vertexID_t> findSuccessorsHelper(vertexID_t src) const;
+  std::unordered_map<vertexID_t, std::vector<vertexID_t>> _adjacency;
+  std::unordered_map<vertexID_t, std::vector<vertexID_t>> _successors;
   size_t _numEdges = 0;
 };
 

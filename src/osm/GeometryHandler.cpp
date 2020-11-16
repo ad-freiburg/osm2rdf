@@ -179,7 +179,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
       // Set containing all areas we are inside of
-      std::set<uint64_t> skip;
+      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
       std::vector<SpatialAreaValue> queryResult;
       spatialIndex.query(boost::geometry::index::covers(entryEnvelope),
                          std::back_inserter(queryResult));
@@ -310,9 +310,10 @@ osm2ttl::util::DirectedGraph osm2ttl::osm::GeometryHandler<W>::reduceDAG(
 #pragma omp parallel for shared(vertices, sourceDAG, result, progressBar, \
                                 entryCount) default(none)
   for (size_t i = 0; i < vertices.size(); i++) {
-    uint64_t src = vertices[i];
-    std::vector<uint64_t> possibleEdges(sourceDAG.getEdges(src));
-    std::vector<uint64_t> edges;
+    osm2ttl::util::DirectedGraph::vertexID_t src = vertices[i];
+    std::vector<osm2ttl::util::DirectedGraph::vertexID_t> possibleEdges(
+        sourceDAG.getEdges(src));
+    std::vector<osm2ttl::util::DirectedGraph::vertexID_t> edges;
     for (const auto& dst : sourceDAG.getEdges(src)) {
       const auto& dstEdges = sourceDAG.getEdges(dst);
       std::set_difference(possibleEdges.begin(), possibleEdges.end(),
@@ -345,7 +346,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
   osmium::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
-  std::vector<uint64_t> vertices = directedAreaGraph.getVertices();
+  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> vertices =
+      directedAreaGraph.getVertices();
 #pragma omp parallel for shared(                                         \
     vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,               \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, directedAreaGraph, \
@@ -440,7 +442,7 @@ osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
           osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, nodeId);
 
       // Set containing all areas we are inside of
-      std::set<uint64_t> skip;
+      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
       std::vector<SpatialAreaValue> queryResult;
       spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
@@ -556,7 +558,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
           osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, wayId);
 
       // Set containing all areas we are inside of
-      std::set<uint64_t> skip;
+      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
 
       // Check for known inclusion in areas through containing nodes
       for (const auto& nodeId : wayNodeIds) {
@@ -785,7 +787,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
           entryObjId);
 
       // Set containing all areas we are inside of
-      std::set<uint64_t> skip;
+      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
 
       std::vector<SpatialAreaValue> queryResult;
       spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),

@@ -12,8 +12,8 @@
 
 // ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::addEdge(
-    osm2ttl::util::DirectedGraph::VertexID src,
-    osm2ttl::util::DirectedGraph::VertexID dst) {
+    osm2ttl::util::DirectedGraph::vertexID_t src,
+    osm2ttl::util::DirectedGraph::vertexID_t dst) {
   _adjacency[src].push_back(dst);
   if (_adjacency.count(dst) == 0) {
     _adjacency[dst].size();
@@ -22,10 +22,10 @@ void osm2ttl::util::DirectedGraph::addEdge(
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::VertexID>
+std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
 osm2ttl::util::DirectedGraph::findSuccessors(
-    osm2ttl::util::DirectedGraph::VertexID src) const {
-  std::vector<osm2ttl::util::DirectedGraph::VertexID> tmp;
+    osm2ttl::util::DirectedGraph::vertexID_t src) const {
+  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> tmp;
   const auto& it = _adjacency.find(src);
   if (it == _adjacency.end()) {
     return tmp;
@@ -46,10 +46,10 @@ osm2ttl::util::DirectedGraph::findSuccessors(
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::VertexID>
+std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
 osm2ttl::util::DirectedGraph::findSuccessorsHelper(
-    osm2ttl::util::DirectedGraph::VertexID src) const {
-  std::vector<osm2ttl::util::DirectedGraph::VertexID> tmp;
+    osm2ttl::util::DirectedGraph::vertexID_t src) const {
+  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> tmp;
   const auto& it = _adjacency.find(src);
   if (it == _adjacency.end()) {
     return tmp;
@@ -66,12 +66,12 @@ osm2ttl::util::DirectedGraph::findSuccessorsHelper(
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::VertexID>
+std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
 osm2ttl::util::DirectedGraph::findSuccessorsFast(
-    osm2ttl::util::DirectedGraph::VertexID src) const {
+    osm2ttl::util::DirectedGraph::vertexID_t src) const {
   const auto& it = _successors.find(src);
   if (it == _successors.end()) {
-    return std::vector<osm2ttl::util::DirectedGraph::VertexID>();
+    return std::vector<osm2ttl::util::DirectedGraph::vertexID_t>();
   }
   return it->second;
 }
@@ -148,9 +148,9 @@ size_t osm2ttl::util::DirectedGraph::getNumVertices() const {
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::VertexID>
+std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
 osm2ttl::util::DirectedGraph::getVertices() const {
-  std::vector<osm2ttl::util::DirectedGraph::VertexID> result;
+  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> result;
   for (const auto& [key, _] : _adjacency) {
     result.push_back(key);
   }
@@ -158,10 +158,10 @@ osm2ttl::util::DirectedGraph::getVertices() const {
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::VertexID>
+std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
 osm2ttl::util::DirectedGraph::getEdges(
-    osm2ttl::util::DirectedGraph::VertexID src) const {
+    osm2ttl::util::DirectedGraph::vertexID_t src) const {
   const auto& tmp = _adjacency.at(src);
-  return std::move(std::vector<osm2ttl::util::DirectedGraph::VertexID>(
+  return std::move(std::vector<osm2ttl::util::DirectedGraph::vertexID_t>(
       tmp.begin(), tmp.end()));
 }
