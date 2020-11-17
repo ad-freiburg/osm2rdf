@@ -21,8 +21,10 @@ TEST(Node, FromNode) {
   // Create osm2ttl node from osmium node
   const osm2ttl::osm::Node n{buffer.get<osmium::Node>(0)};
   ASSERT_EQ(42, n.id());
+
   ASSERT_DOUBLE_EQ(7.51, n.geom().x());
   ASSERT_DOUBLE_EQ(48.0, n.geom().y());
+
   ASSERT_EQ(0, n.tags().size());
 }
 
@@ -40,8 +42,10 @@ TEST(Node, FromNodeWithTags) {
   // Create osm2ttl node from osmium node
   const osm2ttl::osm::Node n{buffer.get<osmium::Node>(0)};
   ASSERT_EQ(42, n.id());
+
   ASSERT_DOUBLE_EQ(7.51, n.geom().x());
   ASSERT_DOUBLE_EQ(48.0, n.geom().y());
+
   ASSERT_EQ(1, n.tags().size());
   ASSERT_EQ(0, n.tags().count("tag"));
   ASSERT_EQ(1, n.tags().count("city"));
