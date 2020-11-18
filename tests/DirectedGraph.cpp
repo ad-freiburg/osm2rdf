@@ -86,14 +86,6 @@ TEST(DirectedGraph, sort) {
     ASSERT_EQ(0, res[1]);
     ASSERT_EQ(2, res[2]);
   }
-  {
-    g.sort();
-    auto res = g.getEdges(1);
-    ASSERT_EQ(3, res.size());
-    ASSERT_EQ(0, res[0]);
-    ASSERT_EQ(2, res[1]);
-    ASSERT_EQ(2, res[2]);
-  }
 }
 
 TEST(DirectedGraph, prepareFindSuccessorsFast) {
@@ -202,13 +194,5 @@ TEST(DirectedGraph, getEdges) {
     ASSERT_EQ(1, res[0]);
     ASSERT_EQ(3, res[1]);
     ASSERT_EQ(2, res[2]);
-  }
-  {
-    g.sort();
-    const auto res = g.getEdges(1);
-    ASSERT_EQ(3, res.size());
-    ASSERT_EQ(1, res[0]);
-    ASSERT_EQ(2, res[1]);
-    ASSERT_EQ(3, res[2]);
   }
 }

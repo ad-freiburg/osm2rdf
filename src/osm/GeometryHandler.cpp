@@ -266,9 +266,6 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
               << std::endl;
 
     // Prepare non-reduced DAG for cleanup
-    tmpDirectedAreaGraph.sort();
-    std::cerr << osm2ttl::util::currentTimeFormatted()
-              << " ... adjacency lists sorted ... " << std::endl;
     tmpDirectedAreaGraph.prepareFindSuccessorsFast();
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... fast lookup prepared ... " << std::endl;

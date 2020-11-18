@@ -64,7 +64,6 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllInAll) {
   src.addEdge(5, 3);
   src.addEdge(5, 4);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(12, src.getNumEdges());
@@ -103,7 +102,6 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1SingleThreaded) {
   src.addEdge(2, 6);
   src.addEdge(5, 0);
   src.addEdge(5, 2);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(7, src.getNumEdges());
@@ -146,7 +144,6 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1MultiThreaded) {
   src.addEdge(5, 2);
   src.addEdge(5, 3);
   src.addEdge(5, 4);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(11, src.getNumEdges());
@@ -217,7 +214,6 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample2AllConnections) {
   src.addEdge(5, 3);
   src.addEdge(5, 4);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(15, src.getNumEdges());
@@ -257,7 +253,6 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample2MinimalConnections) {
   src.addEdge(4, 6);
   src.addEdge(5, 2);
   src.addEdge(5, 3);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(8, src.getNumEdges());
@@ -303,7 +298,6 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample2) {
   src.addEdge(5, 3);
   src.addEdge(5, 4);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(14, src.getNumEdges());
@@ -368,7 +362,6 @@ TEST(GeometryHandlerReduceDAG, LineExample1AllConnections) {
   src.addEdge(4, 5);
   src.addEdge(4, 6);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(21, src.getNumEdges());
@@ -415,7 +408,6 @@ TEST(GeometryHandlerReduceDAG, LineExample1EvenIdAllConnections) {
   src.addEdge(4, 5);
   src.addEdge(4, 6);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(15, src.getNumEdges());
@@ -459,7 +451,6 @@ TEST(GeometryHandlerReduceDAG, LineExample1OddIdAllConnections) {
   src.addEdge(3, 6);
   src.addEdge(4, 5);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(12, src.getNumEdges());
@@ -502,7 +493,6 @@ TEST(GeometryHandlerReduceDAG, LineExample1IdZeroAllConnections) {
   src.addEdge(3, 4);
   src.addEdge(4, 5);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(11, src.getNumEdges());
@@ -542,7 +532,6 @@ TEST(GeometryHandlerReduceDAG, LineExample1IdZeroOnlyOddConnections) {
   src.addEdge(3, 4);
   src.addEdge(4, 5);
   src.addEdge(5, 6);
-  src.sort();
   src.prepareFindSuccessorsFast();
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(8, src.getNumEdges());

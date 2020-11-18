@@ -31,8 +31,6 @@ class DirectedGraph {
   // dumpOsm stores the complete graph in DOT-Format in a file at the given path.
   // This variant handles osm ids and converts for later lookup.
   void dumpOsm(const std::filesystem::path& filename) const;
-  // sort sorts all adjacency lists.
-  void sort();
   // prepareFindSuccessorsFast calculates for each vertex the successors and
   // stores them in a helper map.
   void prepareFindSuccessorsFast();
@@ -52,6 +50,7 @@ class DirectedGraph {
   std::unordered_map<vertexID_t, std::vector<vertexID_t>> _adjacency;
   std::unordered_map<vertexID_t, std::vector<vertexID_t>> _successors;
   size_t _numEdges = 0;
+  bool preparedFast = false;
 };
 
 }  // namespace util

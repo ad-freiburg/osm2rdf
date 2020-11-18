@@ -69,6 +69,9 @@ osm2ttl::util::DirectedGraph::findSuccessorsHelper(
 std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
 osm2ttl::util::DirectedGraph::findSuccessorsFast(
     osm2ttl::util::DirectedGraph::vertexID_t src) const {
+  if (!preparedFast) {
+    throw std::runtime_error("findSuccessorsFast not prepared");
+  }
   const auto& it = _successors.find(src);
   if (it == _successors.end()) {
     return std::vector<osm2ttl::util::DirectedGraph::vertexID_t>();
@@ -124,19 +127,12 @@ void osm2ttl::util::DirectedGraph::dumpOsm(const std::filesystem::path& filename
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::sort() {
-  const auto& vertices = getVertices();
-#pragma omp parallel for shared(vertices) default(none)
-  for (size_t i = 0; i < vertices.size(); i++) {
-    std::sort(_adjacency[vertices[i]].begin(), _adjacency[vertices[i]].end());
-  }
-}
-// ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::prepareFindSuccessorsFast() {
   const auto& vertices = getVertices();
   for (size_t i = 0; i < vertices.size(); i++) {
     _successors[vertices[i]] = findSuccessors(vertices[i]);
   }
+  preparedFast = true;
 }
 
 // ____________________________________________________________________________
