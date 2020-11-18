@@ -35,8 +35,7 @@ osm2ttl::util::DirectedGraph::findSuccessors(
   tmp.insert(tmp.end(), it->second.begin(), it->second.end());
   // Add parents parents.
   for (const auto& dst : it->second) {
-    const auto& v = findSuccessorsHelper(dst);
-    tmp.insert(tmp.end(), v.begin(), v.end());
+    findSuccessorsHelper(dst, &tmp);
   }
   // Make unique
   std::sort(tmp.begin(), tmp.end());
@@ -46,23 +45,19 @@ osm2ttl::util::DirectedGraph::findSuccessors(
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
-osm2ttl::util::DirectedGraph::findSuccessorsHelper(
-    osm2ttl::util::DirectedGraph::vertexID_t src) const {
-  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> tmp;
+void osm2ttl::util::DirectedGraph::findSuccessorsHelper(
+    osm2ttl::util::DirectedGraph::vertexID_t src, std::vector<osm2ttl::util::DirectedGraph::vertexID_t>* tmp) const {
   const auto& it = _adjacency.find(src);
   if (it == _adjacency.end()) {
-    return tmp;
+    return;
   }
 
   // Copy direct parents.
-  tmp.insert(tmp.end(), it->second.begin(), it->second.end());
+  tmp->insert(tmp->end(), it->second.begin(), it->second.end());
   // Add parents parents.
   for (const auto& dst : it->second) {
-    const auto& v = findSuccessors(dst);
-    tmp.insert(tmp.end(), v.begin(), v.end());
+    findSuccessorsHelper(dst, tmp);
   }
-  return tmp;
 }
 
 // ____________________________________________________________________________

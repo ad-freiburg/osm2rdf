@@ -19,6 +19,8 @@ static void GeometryHandler_reduceDAG_Line_MinimalConnections(
   for (size_t i = 0; i < vertices.size() - 1; ++i) {
     dg.addEdge(vertices[i], vertices[i + 1]);
   }
+  dg.prepareFindSuccessorsFast();
+
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{
@@ -43,6 +45,8 @@ static void GeometryHandler_reduceDAG_Line_MaximalConnections(
       dg.addEdge(vertices[i], vertices[j + 1]);
     }
   }
+  dg.prepareFindSuccessorsFast();
+
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{
@@ -54,5 +58,5 @@ static void GeometryHandler_reduceDAG_Line_MaximalConnections(
 }
 BENCHMARK(GeometryHandler_reduceDAG_Line_MaximalConnections)
     ->RangeMultiplier(2)
-    ->Range(1 << 1, 1 << 8)
+    ->Range(1 << 1, 1 << 4)
     ->Complexity();

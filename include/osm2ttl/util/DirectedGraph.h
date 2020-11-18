@@ -46,7 +46,7 @@ class DirectedGraph {
       vertexID_t src) const;
 
  protected:
-  std::vector<vertexID_t> findSuccessorsHelper(vertexID_t src) const;
+  void findSuccessorsHelper(vertexID_t src, std::vector<vertexID_t>* tmp) const;
   std::unordered_map<vertexID_t, std::vector<vertexID_t>> _adjacency;
   std::unordered_map<vertexID_t, std::vector<vertexID_t>> _successors;
   size_t _numEdges = 0;
