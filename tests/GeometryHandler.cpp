@@ -44,7 +44,7 @@ osm2ttl::util::DirectedGraph createWhiteboardExample1ExpectedResult() {
   return src;
 }
 
-TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllConnections) {
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllInAll) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
@@ -65,12 +65,12 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllConnections) {
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(12, src.getNumEdges());
 
-  // src.dump("/tmp/WhiteboardExample1AllConnections.source.dot");
+  // src.dump("/tmp/WhiteboardExample1AllInAll.source.dot");
   const osm2ttl::util::DirectedGraph expected =
       createWhiteboardExample1ExpectedResult();
-  // expected.dump("/tmp/WhiteboardExample1AllConnections.expected.dot");
+  // expected.dump("/tmp/WhiteboardExample1AllInAll.expected.dot");
   const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
-  // result.dump("/tmp/WhiteboardExample1AllConnections.result.dot");
+  // result.dump("/tmp/WhiteboardExample1AllInAll.result.dot");
   ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
   ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
   for (const auto& vertexId : expected.getVertices()) {
@@ -83,7 +83,7 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1AllConnections) {
   }
 }
 
-TEST(GeometryHandlerReduceDAG, WhiteboardExample1MinimalConnections) {
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1SingleThreaded) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
@@ -99,12 +99,50 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample1MinimalConnections) {
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(7, src.getNumEdges());
 
-  // src.dump("/tmp/WhiteboardExample1MinimalConnections.source.dot");
+  // src.dump("/tmp/WhiteboardExample1SingleThreaded.source.dot");
   const osm2ttl::util::DirectedGraph expected =
       createWhiteboardExample1ExpectedResult();
-  // expected.dump("/tmp/WhiteboardExample1MinimalConnections.expected.dot");
+  // expected.dump("/tmp/WhiteboardExample1SingleThreaded.expected.dot");
   const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
-  // result.dump("/tmp/WhiteboardExample1MinimalConnections.result.dot");
+  // result.dump("/tmp/WhiteboardExample1SingleThreaded.result.dot");
+  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+  for (const auto& vertexId : expected.getVertices()) {
+    const auto& expectedEdges = expected.getEdges(vertexId);
+    const auto& resultEdges = result.getEdges(vertexId);
+    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    for (size_t i = 0; i < expectedEdges.size(); ++i) {
+      ASSERT_EQ(expectedEdges[i], expectedEdges[i]) << " error for vertex: " << vertexId << " at entry " << i;
+    }
+  }
+}
+
+TEST(GeometryHandlerReduceDAG, WhiteboardExample1MultiThreaded) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
+  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
+
+  osm2ttl::util::DirectedGraph src{};
+  src.addEdge(0, 1);
+  src.addEdge(0, 3);
+  src.addEdge(0, 4);
+  src.addEdge(1, 4);
+  src.addEdge(2, 4);
+  src.addEdge(2, 6);
+  src.addEdge(5, 0);
+  src.addEdge(5, 1);
+  src.addEdge(5, 2);
+  src.addEdge(5, 3);
+  src.addEdge(5, 4);
+  ASSERT_EQ(7, src.getNumVertices());
+  ASSERT_EQ(11, src.getNumEdges());
+
+  // src.dump("/tmp/WhiteboardExample1MultiThreaded.source.dot");
+  const osm2ttl::util::DirectedGraph expected =
+      createWhiteboardExample1ExpectedResult();
+  // expected.dump("/tmp/WhiteboardExample1MultiThreaded.expected.dot");
+  const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
+  // result.dump("/tmp/WhiteboardExample1MultiThreaded.result.dot");
   ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
   ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
   for (const auto& vertexId : expected.getVertices()) {
@@ -218,6 +256,47 @@ TEST(GeometryHandlerReduceDAG, WhiteboardExample2MinimalConnections) {
   }
 }
 
+TEST(GeometryHandlerReduceDAG, WhiteboardExample2) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
+  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
+
+  osm2ttl::util::DirectedGraph src{};
+  src.addEdge(0, 6);
+  src.addEdge(1, 0);
+  src.addEdge(1, 2);
+  src.addEdge(1, 4);
+  src.addEdge(1, 6);
+  src.addEdge(2, 0);
+  src.addEdge(2, 4);
+  src.addEdge(3, 6);
+  src.addEdge(4, 6);
+  src.addEdge(5, 0);
+  src.addEdge(5, 2);
+  src.addEdge(5, 3);
+  src.addEdge(5, 4);
+  src.addEdge(5, 6);
+  ASSERT_EQ(7, src.getNumVertices());
+  ASSERT_EQ(14, src.getNumEdges());
+
+  // src.dump("/tmp/WhiteboardExample2.source.dot");
+  const osm2ttl::util::DirectedGraph expected =
+      createWhiteboardExample2ExpectedResult();
+  // expected.dump("/tmp/WhiteboardExample2.expected.dot");
+  const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
+  // result.dump("/tmp/WhiteboardExample2.result.dot");
+  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+  for (const auto& vertexId : expected.getVertices()) {
+    const auto& expectedEdges = expected.getEdges(vertexId);
+    const auto& resultEdges = result.getEdges(vertexId);
+    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    for (size_t i = 0; i < expectedEdges.size(); ++i) {
+      ASSERT_EQ(expectedEdges[i], expectedEdges[i]) << " error for vertex: " << vertexId << " at entry " << i;
+    }
+  }
+}
+
 // LineExample1
 osm2ttl::util::DirectedGraph createLineExample1ExpectedResult() {
   osm2ttl::util::DirectedGraph src{};
@@ -266,6 +345,160 @@ TEST(GeometryHandlerReduceDAG, LineExample1AllConnections) {
   // expected.dump("/tmp/LineExample1AllConnections.expected.dot");
   const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
   // result.dump("/tmp/LineExample1AllConnections.result.dot");
+  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+  for (const auto& vertexId : expected.getVertices()) {
+    const auto& expectedEdges = expected.getEdges(vertexId);
+    const auto& resultEdges = result.getEdges(vertexId);
+    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    for (size_t i = 0; i < expectedEdges.size(); ++i) {
+      ASSERT_EQ(expectedEdges[i], expectedEdges[i]) << " error for vertex: " << vertexId << " at entry " << i;
+    }
+  }
+}
+
+TEST(GeometryHandlerReduceDAG, LineExample1EvenIdAllConnections) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
+  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
+
+  osm2ttl::util::DirectedGraph src{};
+  src.addEdge(0, 1);
+  src.addEdge(0, 2);
+  src.addEdge(0, 3);
+  src.addEdge(0, 4);
+  src.addEdge(0, 5);
+  src.addEdge(0, 6);
+  src.addEdge(1, 2);
+  src.addEdge(2, 3);
+  src.addEdge(2, 4);
+  src.addEdge(2, 5);
+  src.addEdge(2, 6);
+  src.addEdge(3, 4);
+  src.addEdge(4, 5);
+  src.addEdge(4, 6);
+  src.addEdge(5, 6);
+  ASSERT_EQ(7, src.getNumVertices());
+  ASSERT_EQ(15, src.getNumEdges());
+
+  // src.dump("/tmp/LineExample1EvenIdAllConnections.source.dot");
+  const osm2ttl::util::DirectedGraph expected =
+      createLineExample1ExpectedResult();
+  // expected.dump("/tmp/LineExample1EvenIdAllConnections.expected.dot");
+  const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
+  // result.dump("/tmp/LineExample1EvenIdAllConnections.result.dot");
+  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+  for (const auto& vertexId : expected.getVertices()) {
+    const auto& expectedEdges = expected.getEdges(vertexId);
+    const auto& resultEdges = result.getEdges(vertexId);
+    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    for (size_t i = 0; i < expectedEdges.size(); ++i) {
+      ASSERT_EQ(expectedEdges[i], expectedEdges[i]) << " error for vertex: " << vertexId << " at entry " << i;
+    }
+  }
+}
+
+TEST(GeometryHandlerReduceDAG, LineExample1OddIdAllConnections) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
+  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
+
+  osm2ttl::util::DirectedGraph src{};
+  src.addEdge(0, 1);
+  src.addEdge(1, 2);
+  src.addEdge(1, 3);
+  src.addEdge(1, 4);
+  src.addEdge(1, 5);
+  src.addEdge(1, 6);
+  src.addEdge(2, 3);
+  src.addEdge(3, 4);
+  src.addEdge(3, 5);
+  src.addEdge(3, 6);
+  src.addEdge(4, 5);
+  src.addEdge(5, 6);
+  ASSERT_EQ(7, src.getNumVertices());
+  ASSERT_EQ(12, src.getNumEdges());
+
+  // src.dump("/tmp/LineExample1OddIdAllConnections.source.dot");
+  const osm2ttl::util::DirectedGraph expected =
+      createLineExample1ExpectedResult();
+  // expected.dump("/tmp/LineExample1OddIdAllConnections.expected.dot");
+  const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
+  // result.dump("/tmp/LineExample1OddIdAllConnections.result.dot");
+  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+  for (const auto& vertexId : expected.getVertices()) {
+    const auto& expectedEdges = expected.getEdges(vertexId);
+    const auto& resultEdges = result.getEdges(vertexId);
+    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    for (size_t i = 0; i < expectedEdges.size(); ++i) {
+      ASSERT_EQ(expectedEdges[i], expectedEdges[i]) << " error for vertex: " << vertexId << " at entry " << i;
+    }
+  }
+}
+
+TEST(GeometryHandlerReduceDAG, LineExample1IdZeroAllConnections) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
+  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
+
+  osm2ttl::util::DirectedGraph src{};
+  src.addEdge(0, 1);
+  src.addEdge(0, 2);
+  src.addEdge(0, 3);
+  src.addEdge(0, 4);
+  src.addEdge(0, 5);
+  src.addEdge(0, 6);
+  src.addEdge(1, 2);
+  src.addEdge(2, 3);
+  src.addEdge(3, 4);
+  src.addEdge(4, 5);
+  src.addEdge(5, 6);
+  ASSERT_EQ(7, src.getNumVertices());
+  ASSERT_EQ(11, src.getNumEdges());
+
+  // src.dump("/tmp/LineExample1IdZeroAllConnections.source.dot");
+  const osm2ttl::util::DirectedGraph expected =
+      createLineExample1ExpectedResult();
+  // expected.dump("/tmp/LineExample1IdZeroAllConnections.expected.dot");
+  const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
+  // result.dump("/tmp/LineExample1IdZeroAllConnections.result.dot");
+  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+  for (const auto& vertexId : expected.getVertices()) {
+    const auto& expectedEdges = expected.getEdges(vertexId);
+    const auto& resultEdges = result.getEdges(vertexId);
+    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    for (size_t i = 0; i < expectedEdges.size(); ++i) {
+      ASSERT_EQ(expectedEdges[i], expectedEdges[i]) << " error for vertex: " << vertexId << " at entry " << i;
+    }
+  }
+}
+
+TEST(GeometryHandlerReduceDAG, LineExample1IdZeroOnlyOddConnections) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
+  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{config, &w};
+
+  osm2ttl::util::DirectedGraph src{};
+  src.addEdge(0, 1);
+  src.addEdge(0, 3);
+  src.addEdge(0, 5);
+  src.addEdge(1, 2);
+  src.addEdge(2, 3);
+  src.addEdge(3, 4);
+  src.addEdge(4, 5);
+  src.addEdge(5, 6);
+  ASSERT_EQ(7, src.getNumVertices());
+  ASSERT_EQ(8, src.getNumEdges());
+
+  src.dump("/tmp/LineExample1IdZeroOnlyOddConnections.source.dot");
+  const osm2ttl::util::DirectedGraph expected =
+      createLineExample1ExpectedResult();
+  expected.dump("/tmp/LineExample1IdZeroOnlyOddConnections.expected.dot");
+  const osm2ttl::util::DirectedGraph result = geometryHandler.reduceDAG(src, false);
+  result.dump("/tmp/LineExample1IdZeroOnlyOddConnections.result.dot");
   ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
   ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
   for (const auto& vertexId : expected.getVertices()) {

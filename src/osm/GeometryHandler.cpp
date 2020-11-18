@@ -231,8 +231,6 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
         for (const auto& newSkip :
              tmpDirectedAreaGraph.findSuccessors(entryId)) {
           skip.insert(newSkip);
-#pragma omp critical(addEdge)
-          tmpDirectedAreaGraph.addEdge(entryId, newSkip);
         }
       }
 #pragma omp critical(progress)
@@ -315,7 +313,7 @@ osm2ttl::util::DirectedGraph osm2ttl::osm::GeometryHandler<W>::reduceDAG(
         sourceDAG.getEdges(src));
     std::vector<osm2ttl::util::DirectedGraph::vertexID_t> edges;
     for (const auto& dst : sourceDAG.getEdges(src)) {
-      const auto& dstEdges = sourceDAG.getEdges(dst);
+      const auto& dstEdges = sourceDAG.findSuccessors(dst);
       std::set_difference(possibleEdges.begin(), possibleEdges.end(),
                           dstEdges.begin(), dstEdges.end(),
                           std::back_inserter(edges));
