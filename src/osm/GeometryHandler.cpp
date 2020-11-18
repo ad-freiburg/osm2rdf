@@ -321,8 +321,10 @@ osm2ttl::util::DirectedGraph osm2ttl::osm::GeometryHandler<W>::reduceDAG(
       edges.clear();
     }
 #pragma omp critical(addEdge)
-    for (const auto& dst : possibleEdges) {
-      result.addEdge(src, dst);
+    {
+      for (const auto& dst : possibleEdges) {
+        result.addEdge(src, dst);
+      }
     }
 #pragma omp critical(progress)
     progressBar.update(entryCount++);
