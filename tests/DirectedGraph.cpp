@@ -1,9 +1,9 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "gtest/gtest.h"
-
 #include "osm2ttl/util/DirectedGraph.h"
+
+#include "gtest/gtest.h"
 
 osm2ttl::util::DirectedGraph createEmptyDirectedGraph() {
   return osm2ttl::util::DirectedGraph{};

@@ -1,22 +1,20 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "gtest/gtest.h"
+#include "osm2ttl/osm/Node.h"
 
+#include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
-
-#include "osm2ttl/osm/Node.h"
 
 TEST(Node, FromNode) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_node(
-      buffer,
-      osmium::builder::attr::_id(42),
-      osmium::builder::attr::_location(osmium::Location(7.51, 48.0))
-      );
+      buffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Node n{buffer.get<osmium::Node>(0)};
@@ -31,13 +29,12 @@ TEST(Node, FromNode) {
 TEST(Node, FromNodeWithTags) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_node(
-      buffer,
-      osmium::builder::attr::_id(42),
+      buffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
-      osmium::builder::attr::_tag("city", "Freiburg")
-  );
+      osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Node n{buffer.get<osmium::Node>(0)};

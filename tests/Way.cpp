@@ -1,25 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "gtest/gtest.h"
+#include "osm2ttl/osm/Way.h"
 
+#include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
-
-#include "osm2ttl/osm/Way.h"
 
 TEST(Way, FromWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(
-      buffer,
-      osmium::builder::attr::_id(42),
-      osmium::builder::attr::_nodes({
-                                        {1, {48.0, 7.51}},
-                                        {2, {48.1, 7.61}},
-                                    })
-  );
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
@@ -47,16 +44,14 @@ TEST(Way, FromWay) {
 TEST(Way, FromWayWithTags) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(
-      buffer,
-      osmium::builder::attr::_id(42),
-      osmium::builder::attr::_nodes({
-                                        {1, {48.0, 7.51}},
-                                        {2, {48.1, 7.61}},
-                                    }),
-      osmium::builder::attr::_tag("city", "Freiburg")
-  );
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
@@ -87,16 +82,14 @@ TEST(Way, FromWayWithTags) {
 TEST(Way, FromClosedWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(
-      buffer,
-      osmium::builder::attr::_id(42),
-      osmium::builder::attr::_nodes({
-                                        {1, {48.0, 7.51}},
-                                        {2, {48.1, 7.61}},
-                                        {1, {48.0, 7.51}},
-                                    })
-  );
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                               {1, {48.0, 7.51}},
+                           }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
@@ -124,22 +117,19 @@ TEST(Way, FromClosedWay) {
   ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
 }
 
-
 TEST(Way, FromClosedWayWithDuplicateNodes) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(
-      buffer,
-      osmium::builder::attr::_id(42),
-      osmium::builder::attr::_nodes({
-                                        {1, {48.0, 7.51}},
-                                        {2, {48.1, 7.61}},
-                                        {2, {48.1, 7.61}},
-                                        {2, {48.1, 7.61}},
-                                        {1, {48.0, 7.51}},
-                                    })
-  );
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                               {2, {48.1, 7.61}},
+                               {2, {48.1, 7.61}},
+                               {1, {48.0, 7.51}},
+                           }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};

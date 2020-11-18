@@ -1,10 +1,10 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "gtest/gtest.h"
-
-#include "osm2ttl/config/Config.h"
 #include "osm2ttl/ttl/Writer.h"
+
+#include "gtest/gtest.h"
+#include "osm2ttl/config/Config.h"
 
 // ____________________________________________________________________________
 TEST(WriterNT, resolvePrefix) {
@@ -57,14 +57,12 @@ TEST(WriterNT, addPrefix) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
   {
-    const std::string res =
-        w.resolvePrefix("test");
+    const std::string res = w.resolvePrefix("test");
     ASSERT_STREQ("test", res.c_str());
   }
   {
     w.addPrefix("test", "prefix");
-    const std::string res =
-        w.resolvePrefix("test");
+    const std::string res = w.resolvePrefix("test");
     ASSERT_STREQ("prefix", res.c_str());
   }
 }
@@ -73,14 +71,12 @@ TEST(WriterTTL, addPrefix) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config};
   {
-    const std::string res =
-        w.resolvePrefix("test");
+    const std::string res = w.resolvePrefix("test");
     ASSERT_STREQ("test", res.c_str());
   }
   {
     w.addPrefix("test", "prefix");
-    const std::string res =
-        w.resolvePrefix("test");
+    const std::string res = w.resolvePrefix("test");
     ASSERT_STREQ("prefix", res.c_str());
   }
 }
@@ -89,14 +85,12 @@ TEST(WriterQLEVER, addPrefix) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config};
   {
-    const std::string res =
-        w.resolvePrefix("test");
+    const std::string res = w.resolvePrefix("test");
     ASSERT_STREQ("test", res.c_str());
   }
   {
     w.addPrefix("test", "prefix");
-    const std::string res =
-        w.resolvePrefix("test");
+    const std::string res = w.resolvePrefix("test");
     ASSERT_STREQ("prefix", res.c_str());
   }
 }

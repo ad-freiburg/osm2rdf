@@ -1,21 +1,18 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "gtest/gtest.h"
+#include "osm2ttl/osm/Relation.h"
 
+#include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
-
-#include "osm2ttl/osm/Relation.h"
 
 TEST(Relation, FromRelation) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_relation(
-      buffer,
-      osmium::builder::attr::_id(42)
-  );
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(buffer, osmium::builder::attr::_id(42));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Relation r{buffer.get<osmium::Relation>(0)};
@@ -29,12 +26,11 @@ TEST(Relation, FromRelation) {
 TEST(Relation, FromRelationWithTags) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_relation(
-      buffer,
-      osmium::builder::attr::_id(42),
-      osmium::builder::attr::_tag("city", "Freiburg")
-  );
+      buffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Relation r{buffer.get<osmium::Relation>(0)};
@@ -51,13 +47,12 @@ TEST(Relation, FromRelationWithTags) {
 TEST(Relation, FromRelationWithMembers) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_relation(
-      buffer,
-      osmium::builder::attr::_id(42),
+      buffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-  osmium::builder::attr::_member(osmium::item_type::way, 1, "outer")
-  );
+      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Relation r{buffer.get<osmium::Relation>(0)};
