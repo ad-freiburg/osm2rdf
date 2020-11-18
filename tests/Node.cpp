@@ -9,7 +9,7 @@
 #include "osm2ttl/osm/Node.h"
 
 TEST(Node, FromNode) {
-  // Create osmium node
+  // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_node(
@@ -18,7 +18,7 @@ TEST(Node, FromNode) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0))
       );
 
-  // Create osm2ttl node from osmium node
+  // Create osm2ttl object from osmium object
   const osm2ttl::osm::Node n{buffer.get<osmium::Node>(0)};
   ASSERT_EQ(42, n.id());
 
@@ -29,7 +29,7 @@ TEST(Node, FromNode) {
 }
 
 TEST(Node, FromNodeWithTags) {
-  // Create osmium node
+  // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_node(
@@ -39,7 +39,7 @@ TEST(Node, FromNodeWithTags) {
       osmium::builder::attr::_tag("city", "Freiburg")
   );
 
-  // Create osm2ttl node from osmium node
+  // Create osm2ttl object from osmium object
   const osm2ttl::osm::Node n{buffer.get<osmium::Node>(0)};
   ASSERT_EQ(42, n.id());
 

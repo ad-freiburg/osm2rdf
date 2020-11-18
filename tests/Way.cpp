@@ -9,7 +9,7 @@
 #include "osm2ttl/osm/Way.h"
 
 TEST(Way, FromWay) {
-  // Create osmium node
+  // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_way(
@@ -21,7 +21,7 @@ TEST(Way, FromWay) {
                                     })
   );
 
-  // Create osm2ttl node from osmium node
+  // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_FALSE(w.closed());
@@ -45,7 +45,7 @@ TEST(Way, FromWay) {
 }
 
 TEST(Way, FromWayWithTags) {
-  // Create osmium node
+  // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_way(
@@ -58,7 +58,7 @@ TEST(Way, FromWayWithTags) {
       osmium::builder::attr::_tag("city", "Freiburg")
   );
 
-  // Create osm2ttl node from osmium node
+  // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_FALSE(w.closed());
@@ -85,7 +85,7 @@ TEST(Way, FromWayWithTags) {
 }
 
 TEST(Way, FromClosedWay) {
-  // Create osmium node
+  // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_way(
@@ -98,7 +98,7 @@ TEST(Way, FromClosedWay) {
                                     })
   );
 
-  // Create osm2ttl node from osmium node
+  // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_TRUE(w.closed());
@@ -126,7 +126,7 @@ TEST(Way, FromClosedWay) {
 
 
 TEST(Way, FromClosedWayWithDuplicateNodes) {
-  // Create osmium node
+  // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer buffer{initial_buffer_size, osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_way(
@@ -141,7 +141,7 @@ TEST(Way, FromClosedWayWithDuplicateNodes) {
                                     })
   );
 
-  // Create osm2ttl node from osmium node
+  // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_TRUE(w.closed());
