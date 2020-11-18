@@ -269,6 +269,9 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     tmpDirectedAreaGraph.sort();
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... adjacency lists sorted ... " << std::endl;
+    tmpDirectedAreaGraph.prepareFindSuccessorsFast();
+    std::cerr << osm2ttl::util::currentTimeFormatted()
+              << " ... fast lookup prepared ... " << std::endl;
 
     directedAreaGraph = reduceDAG(tmpDirectedAreaGraph, true);
 
@@ -308,12 +311,12 @@ osm2ttl::util::DirectedGraph osm2ttl::osm::GeometryHandler<W>::reduceDAG(
 #pragma omp parallel for shared(vertices, sourceDAG, result, progressBar, \
                                 entryCount) default(none)
   for (size_t i = 0; i < vertices.size(); i++) {
-    osm2ttl::util::DirectedGraph::vertexID_t src = vertices[i];
+    const auto& src = vertices[i];
     std::vector<osm2ttl::util::DirectedGraph::vertexID_t> possibleEdges(
         sourceDAG.getEdges(src));
     std::vector<osm2ttl::util::DirectedGraph::vertexID_t> edges;
     for (const auto& dst : sourceDAG.getEdges(src)) {
-      const auto& dstEdges = sourceDAG.findSuccessors(dst);
+      const auto& dstEdges = sourceDAG.findSuccessorsFast(dst);
       std::set_difference(possibleEdges.begin(), possibleEdges.end(),
                           dstEdges.begin(), dstEdges.end(),
                           std::back_inserter(edges));

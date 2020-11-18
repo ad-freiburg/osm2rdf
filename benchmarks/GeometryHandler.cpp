@@ -26,6 +26,7 @@ static void GeometryHandler_reduceDAG_Line_MinimalConnections(
   for (auto _ : state) {
     geometryHandler.reduceDAG(dg, false);
   }
+  state.SetComplexityN(state.range(0));
 }
 BENCHMARK(GeometryHandler_reduceDAG_Line_MinimalConnections)
     ->RangeMultiplier(2)
@@ -49,6 +50,7 @@ static void GeometryHandler_reduceDAG_Line_MaximalConnections(
   for (auto _ : state) {
     geometryHandler.reduceDAG(dg, false);
   }
+  state.SetComplexityN(state.range(0));
 }
 BENCHMARK(GeometryHandler_reduceDAG_Line_MaximalConnections)
     ->RangeMultiplier(2)
