@@ -5,18 +5,14 @@
 
 #include "gtest/gtest.h"
 
-osm2ttl::util::DirectedGraph createEmptyDirectedGraph() {
-  return osm2ttl::util::DirectedGraph{};
-}
-
 TEST(DirectedGraph, Constructor) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
   ASSERT_EQ(0, g.getNumEdges());
 }
 
 TEST(DirectedGraph, CopyConstructor) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
   g.addEdge(1, 2);
   g.addEdge(2, 1);
@@ -33,7 +29,7 @@ TEST(DirectedGraph, CopyConstructor) {
 }
 
 TEST(DirectedGraph, addEdge) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
   ASSERT_EQ(0, g.getNumEdges());
   // Allows multiple edges between vertices
@@ -50,7 +46,7 @@ TEST(DirectedGraph, addEdge) {
 }
 
 TEST(DirectedGraph, findSuccessors) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   {
     auto res = g.findSuccessors(1);
     ASSERT_EQ(0, res.size());
@@ -78,7 +74,7 @@ TEST(DirectedGraph, findSuccessors) {
 }
 
 TEST(DirectedGraph, findSuccessorsFast) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
   g.addEdge(1, 0);
   g.addEdge(1, 2);
@@ -95,7 +91,7 @@ TEST(DirectedGraph, findSuccessorsFast) {
 }
 
 TEST(DirectedGraph, sort) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   {
     g.addEdge(1, 2);
     g.addEdge(1, 0);
@@ -111,7 +107,7 @@ TEST(DirectedGraph, sort) {
 }
 
 TEST(DirectedGraph, prepareFindSuccessorsFast) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
   g.addEdge(1, 0);
   g.addEdge(1, 2);
@@ -128,7 +124,7 @@ TEST(DirectedGraph, prepareFindSuccessorsFast) {
 }
 
 TEST(DirectedGraph, getNumEdges) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumEdges());
   // Count each edge, allows multiple edges between the same vertices.
   g.addEdge(1, 2);
@@ -142,7 +138,7 @@ TEST(DirectedGraph, getNumEdges) {
 }
 
 TEST(DirectedGraph, getNumVertices) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
   // Counts each vertex only once...
   g.addEdge(1, 1);
@@ -157,7 +153,7 @@ TEST(DirectedGraph, getNumVertices) {
 }
 
 TEST(DirectedGraph, getVertices) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   {
     auto res = g.getVertices();
     ASSERT_EQ(0, res.size());
@@ -188,7 +184,7 @@ TEST(DirectedGraph, getVertices) {
 }
 
 TEST(DirectedGraph, getEdges) {
-  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  osm2ttl::util::DirectedGraph<uint8_t> g{};
   {
     g.addEdge(1, 1);
     const auto res = g.getEdges(1);

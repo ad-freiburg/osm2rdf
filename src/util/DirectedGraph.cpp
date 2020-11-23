@@ -11,26 +11,8 @@
 #include <iostream>
 
 // ____________________________________________________________________________
-osm2ttl::util::DirectedGraph::DirectedGraph() {}
-
-// ____________________________________________________________________________
-osm2ttl::util::DirectedGraph::DirectedGraph(const DirectedGraph& other) {
-  _numEdges = other._numEdges;
-  for (const auto& entry : other._adjacency) {
-    _adjacency[entry.first] = entry.second;
-  }
-  preparedFast = other.preparedFast;
-  if (preparedFast) {
-    for (const auto& entry : other._successors) {
-      _successors[entry.first] = entry.second;
-    }
-  }
-}
-
-// ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::addEdge(
-    osm2ttl::util::DirectedGraph::vertexID_t src,
-    osm2ttl::util::DirectedGraph::vertexID_t dst) {
+template <typename T>
+void osm2ttl::util::DirectedGraph<T>::addEdge(T src, T dst) {
   _adjacency[src].push_back(dst);
   if (_adjacency.count(dst) == 0) {
     _adjacency[dst].size();
@@ -39,10 +21,9 @@ void osm2ttl::util::DirectedGraph::addEdge(
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
-osm2ttl::util::DirectedGraph::findSuccessors(
-    osm2ttl::util::DirectedGraph::vertexID_t src) const {
-  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> tmp;
+template <typename T>
+std::vector<T> osm2ttl::util::DirectedGraph<T>::findSuccessors(T src) const {
+  std::vector<T> tmp;
   const auto& it = _adjacency.find(src);
   if (it == _adjacency.end()) {
     return tmp;
@@ -62,8 +43,9 @@ osm2ttl::util::DirectedGraph::findSuccessors(
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::findSuccessorsHelper(
-    osm2ttl::util::DirectedGraph::vertexID_t src, std::vector<osm2ttl::util::DirectedGraph::vertexID_t>* tmp) const {
+template <typename T>
+void osm2ttl::util::DirectedGraph<T>::findSuccessorsHelper(
+    T src, std::vector<T>* tmp) const {
   const auto& it = _adjacency.find(src);
   if (it == _adjacency.end()) {
     return;
@@ -78,21 +60,23 @@ void osm2ttl::util::DirectedGraph::findSuccessorsHelper(
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
-osm2ttl::util::DirectedGraph::findSuccessorsFast(
-    osm2ttl::util::DirectedGraph::vertexID_t src) const {
-  if (!preparedFast) {
+template <typename T>
+std::vector<T> osm2ttl::util::DirectedGraph<T>::findSuccessorsFast(
+    T src) const {
+  if (!_preparedFast) {
     throw std::runtime_error("findSuccessorsFast not prepared");
   }
   const auto& it = _successors.find(src);
   if (it == _successors.end()) {
-    return std::vector<osm2ttl::util::DirectedGraph::vertexID_t>();
+    return std::vector<T>();
   }
   return it->second;
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::dump(const std::filesystem::path& filename) const {
+template <typename T>
+void osm2ttl::util::DirectedGraph<T>::dump(
+    const std::filesystem::path& filename) const {
   std::ofstream ofs;
   ofs.open(filename);
 
@@ -109,7 +93,9 @@ void osm2ttl::util::DirectedGraph::dump(const std::filesystem::path& filename) c
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::dumpOsm(const std::filesystem::path& filename) const {
+template <typename T>
+void osm2ttl::util::DirectedGraph<T>::dumpOsm(
+    const std::filesystem::path& filename) const {
   std::ofstream ofs;
   ofs.open(filename);
 
@@ -139,26 +125,31 @@ void osm2ttl::util::DirectedGraph::dumpOsm(const std::filesystem::path& filename
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::DirectedGraph::prepareFindSuccessorsFast() {
+template <typename T>
+void osm2ttl::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
   const auto& vertices = getVertices();
   for (size_t i = 0; i < vertices.size(); i++) {
     _successors[vertices[i]] = findSuccessors(vertices[i]);
   }
-  preparedFast = true;
+  _preparedFast = true;
 }
 
 // ____________________________________________________________________________
-size_t osm2ttl::util::DirectedGraph::getNumEdges() const { return _numEdges; }
+template <typename T>
+size_t osm2ttl::util::DirectedGraph<T>::getNumEdges() const {
+  return _numEdges;
+}
 
 // ____________________________________________________________________________
-size_t osm2ttl::util::DirectedGraph::getNumVertices() const {
+template <typename T>
+size_t osm2ttl::util::DirectedGraph<T>::getNumVertices() const {
   return _adjacency.size();
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
-osm2ttl::util::DirectedGraph::getVertices() const {
-  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> result;
+template <typename T>
+std::vector<T> osm2ttl::util::DirectedGraph<T>::getVertices() const {
+  std::vector<T> result;
   for (const auto& [key, _] : _adjacency) {
     result.push_back(key);
   }
@@ -166,8 +157,13 @@ osm2ttl::util::DirectedGraph::getVertices() const {
 }
 
 // ____________________________________________________________________________
-std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
-osm2ttl::util::DirectedGraph::getEdges(
-    osm2ttl::util::DirectedGraph::vertexID_t src) const {
+template <typename T>
+std::vector<T> osm2ttl::util::DirectedGraph<T>::getEdges(T src) const {
   return _adjacency.at(src);
 }
+
+// ____________________________________________________________________________
+template class osm2ttl::util::DirectedGraph<uint8_t>;
+template class osm2ttl::util::DirectedGraph<uint16_t>;
+template class osm2ttl::util::DirectedGraph<uint32_t>;
+template class osm2ttl::util::DirectedGraph<uint64_t>;

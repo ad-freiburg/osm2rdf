@@ -6,7 +6,6 @@
 
 #include <unordered_map>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include "boost/geometry/index/rtree.hpp"
@@ -65,10 +64,6 @@ class GeometryHandler : public osmium::handler::Handler {
   // Calculate data
   void calculateRelations();
 
-  // reduceDAG returns a reduced DAG from a given sorted DAG
-  osm2ttl::util::DirectedGraph reduceDAG(
-      const osm2ttl::util::DirectedGraph& sourceDAG, bool showProgress);
-
  protected:
   // Stores named areas in r-tree, used for all other calculations.
   void prepareRTree();
@@ -96,13 +91,16 @@ class GeometryHandler : public osmium::handler::Handler {
   // Store areas as r-tree
   SpatialIndex spatialIndex;
   // Store dag
-  osm2ttl::util::DirectedGraph directedAreaGraph;
+  osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t> directedAreaGraph;
   // Spatial Data
   std::vector<SpatialAreaValue> _spatialStorageArea;
-  std::vector<SpatialAreaValue> _spatialStorageUnnamedArea;
   std::unordered_map<osm2ttl::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
+
+  std::vector<SpatialAreaValue> _spatialStorageUnnamedArea;
+
   std::vector<SpatialNodeValue> _spatialStorageNode;
+
   std::vector<SpatialWayValue> _spatialStorageWay;
 };
 

@@ -16,6 +16,7 @@
 #include "osm2ttl/osm/Area.h"
 #include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/ttl/Writer.h"
+#include "osm2ttl/util/DirectedAcyclicGraph.h"
 #include "osm2ttl/util/DirectedGraph.h"
 #include "osm2ttl/util/Output.h"
 #include "osm2ttl/util/Time.h"
@@ -152,7 +153,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareRTree() {
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
   // Store dag
-  osm2ttl::util::DirectedGraph tmpDirectedAreaGraph;
+  osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t> tmpDirectedAreaGraph;
   {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
@@ -179,7 +180,8 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
       // Set containing all areas we are inside of
-      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
+      std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
+          skip;
       std::vector<SpatialAreaValue> queryResult;
       spatialIndex.query(boost::geometry::index::covers(entryEnvelope),
                          std::back_inserter(queryResult));
@@ -270,7 +272,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... fast lookup prepared ... " << std::endl;
 
-    directedAreaGraph = reduceDAG(tmpDirectedAreaGraph, true);
+    directedAreaGraph = osm2ttl::util::reduceDAG(tmpDirectedAreaGraph, true);
 
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... done, resulting in DAG with "
@@ -297,44 +299,6 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
 
 // ____________________________________________________________________________
 template <typename W>
-osm2ttl::util::DirectedGraph osm2ttl::osm::GeometryHandler<W>::reduceDAG(
-    const osm2ttl::util::DirectedGraph& sourceDAG, bool showProgress) {
-  osm2ttl::util::DirectedGraph result;
-  osmium::ProgressBar progressBar{sourceDAG.getNumVertices(), showProgress};
-  size_t entryCount = 0;
-  progressBar.update(entryCount);
-  // Reduce each adjacency list
-  const auto& vertices = sourceDAG.getVertices();
-#pragma omp parallel for shared(vertices, sourceDAG, result, progressBar, \
-                                entryCount) default(none)
-  for (size_t i = 0; i < vertices.size(); i++) {
-    const auto& src = vertices[i];
-    std::vector<osm2ttl::util::DirectedGraph::vertexID_t> possibleEdges(
-        sourceDAG.getEdges(src));
-    std::vector<osm2ttl::util::DirectedGraph::vertexID_t> edges;
-    for (const auto& dst : sourceDAG.getEdges(src)) {
-      const auto& dstEdges = sourceDAG.findSuccessorsFast(dst);
-      std::set_difference(possibleEdges.begin(), possibleEdges.end(),
-                          dstEdges.begin(), dstEdges.end(),
-                          std::back_inserter(edges));
-      possibleEdges = edges;
-      edges.clear();
-    }
-#pragma omp critical(addEdge)
-    {
-      for (const auto& dst : possibleEdges) {
-        result.addEdge(src, dst);
-      }
-    }
-#pragma omp critical(progress)
-    progressBar.update(entryCount++);
-  }
-  progressBar.done();
-  return result;
-}
-
-// ____________________________________________________________________________
-template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
   std::cerr << std::endl;
   std::cerr << osm2ttl::util::currentTimeFormatted()
@@ -346,8 +310,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
   osmium::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
-  std::vector<osm2ttl::util::DirectedGraph::vertexID_t> vertices =
-      directedAreaGraph.getVertices();
+  std::vector<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
+      vertices = directedAreaGraph.getVertices();
 #pragma omp parallel for shared(                                         \
     vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,               \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, directedAreaGraph, \
@@ -443,7 +407,8 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
           osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, nodeId);
 
       // Set containing all areas we are inside of
-      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
+      std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
+          skip;
       std::vector<SpatialAreaValue> queryResult;
       spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
@@ -559,7 +524,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
           osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, wayId);
 
       // Set containing all areas we are inside of
-      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
+      std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
+          skip;
 
       // Check for known inclusion in areas through containing nodes
       for (const auto& nodeId : wayNodeIds) {
@@ -577,7 +543,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
 
           intersectsByNodeInfo++;
           // Load area data for node entry
-          const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[areaId]];
+          const auto& area =
+              _spatialStorageArea[_spatialStorageAreaIndex[areaId]];
           const auto& areaEnvelope = std::get<0>(area);
           const auto& areaGeom = std::get<2>(area);
           const auto& areaObjId = std::get<3>(area);
@@ -788,7 +755,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
           entryObjId);
 
       // Set containing all areas we are inside of
-      std::set<osm2ttl::util::DirectedGraph::vertexID_t> skip;
+      std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
+          skip;
 
       std::vector<SpatialAreaValue> queryResult;
       spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),

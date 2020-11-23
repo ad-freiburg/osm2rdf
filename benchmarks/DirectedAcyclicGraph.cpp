@@ -1,19 +1,16 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "benchmark/benchmark.h"
-
 #include <iostream>
 #include <numeric>
 
-#include "osm2ttl/config/Config.h"
-#include "osm2ttl/osm/GeometryHandler.h"
-#include "osm2ttl/ttl/Writer.h"
+#include "benchmark/benchmark.h"
+#include "osm2ttl/util/DirectedAcyclicGraph.h"
 #include "osm2ttl/util/DirectedGraph.h"
 
-static void GeometryHandler_reduceDAG_Line_MinimalConnections(
+static void DirectedAcyclicGraph_reduceDAG_Line_MinimalConnections(
     benchmark::State& state) {
-  osm2ttl::util::DirectedGraph dg{};
+  osm2ttl::util::DirectedGraph<u_int16_t> dg{};
   std::vector<uint64_t> vertices(state.range(0));
   std::iota(std::begin(vertices), std::end(vertices), 0);
   for (size_t i = 0; i < vertices.size() - 1; ++i) {
@@ -21,21 +18,17 @@ static void GeometryHandler_reduceDAG_Line_MinimalConnections(
   }
   dg.prepareFindSuccessorsFast();
 
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
-  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{
-      config, &w};
   for (auto _ : state) {
-    geometryHandler.reduceDAG(dg, false);
+    osm2ttl::util::reduceDAG(dg, false);
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(GeometryHandler_reduceDAG_Line_MinimalConnections)
+BENCHMARK(DirectedAcyclicGraph_reduceDAG_Line_MinimalConnections)
 ->RangeMultiplier(2)->Range(1U << 1U, 1U << 8U)->Complexity();
 
-static void GeometryHandler_reduceDAG_Line_MaximalConnections(
+static void DirectedAcyclicGraph_reduceDAG_Line_MaximalConnections(
     benchmark::State& state) {
-  osm2ttl::util::DirectedGraph dg{};
+  osm2ttl::util::DirectedGraph<u_int16_t> dg{};
   std::vector<uint64_t> vertices(state.range(0));
   std::iota(std::begin(vertices), std::end(vertices), 0);
   for (size_t i = 0; i < vertices.size() - 1; ++i) {
@@ -45,14 +38,10 @@ static void GeometryHandler_reduceDAG_Line_MaximalConnections(
   }
   dg.prepareFindSuccessorsFast();
 
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config};
-  osm2ttl::osm::GeometryHandler<osm2ttl::ttl::format::NT> geometryHandler{
-      config, &w};
   for (auto _ : state) {
-    geometryHandler.reduceDAG(dg, false);
+    osm2ttl::util::reduceDAG(dg, false);
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(GeometryHandler_reduceDAG_Line_MaximalConnections)
+BENCHMARK(DirectedAcyclicGraph_reduceDAG_Line_MaximalConnections)
 ->RangeMultiplier(2)->Range(1U << 1U, 1U << 4U)->Complexity();
