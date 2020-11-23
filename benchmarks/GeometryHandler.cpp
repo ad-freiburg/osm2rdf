@@ -3,8 +3,8 @@
 
 #include "benchmark/benchmark.h"
 
+#include <iostream>
 #include <numeric>
-#include "omp.h"
 
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/GeometryHandler.h"
@@ -31,9 +31,7 @@ static void GeometryHandler_reduceDAG_Line_MinimalConnections(
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(GeometryHandler_reduceDAG_Line_MinimalConnections)
-    ->RangeMultiplier(2)
-    ->Range(1 << 1, 1 << 8)
-    ->Complexity();
+->RangeMultiplier(2)->Range(1U << 1U, 1U << 8U)->Complexity();
 
 static void GeometryHandler_reduceDAG_Line_MaximalConnections(
     benchmark::State& state) {
@@ -57,6 +55,4 @@ static void GeometryHandler_reduceDAG_Line_MaximalConnections(
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(GeometryHandler_reduceDAG_Line_MaximalConnections)
-    ->RangeMultiplier(2)
-    ->Range(1 << 1, 1 << 4)
-    ->Complexity();
+->RangeMultiplier(2)->Range(1U << 1U, 1U << 4U)->Complexity();
