@@ -124,7 +124,7 @@ static void Writer_QLEVER_generateLiteral_a(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_generateLiteral_a)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 
 static void Writer_QLEVER_utf8Codepoint_a(benchmark::State& state) {
@@ -137,7 +137,7 @@ static void Writer_QLEVER_utf8Codepoint_a(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_utf8Codepoint_a)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 
 static void Writer_QLEVER_utf8Codepoint_A(benchmark::State& state) {
@@ -150,7 +150,7 @@ static void Writer_QLEVER_utf8Codepoint_A(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_utf8Codepoint_A)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 
 static void Writer_QLEVER_utf8Codepoint_AT(benchmark::State& state) {
@@ -163,7 +163,7 @@ static void Writer_QLEVER_utf8Codepoint_AT(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_utf8Codepoint_AT)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 static void Writer_QLEVER_utf8Codepoint_0xFAFA(benchmark::State& state) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
@@ -179,7 +179,7 @@ static void Writer_QLEVER_utf8Codepoint_0xFAFA(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_utf8Codepoint_0xFAFA)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 static void Writer_QLEVER_encodePN_LOCAL_a(benchmark::State& state) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
@@ -191,7 +191,7 @@ static void Writer_QLEVER_encodePN_LOCAL_a(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_encodePN_LOCAL_a)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 static void Writer_QLEVER_encodePN_LOCAL_A(benchmark::State& state) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
@@ -203,7 +203,7 @@ static void Writer_QLEVER_encodePN_LOCAL_A(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_encodePN_LOCAL_A)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 static void Writer_QLEVER_encodePN_LOCAL_AT(benchmark::State& state) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
@@ -215,7 +215,7 @@ static void Writer_QLEVER_encodePN_LOCAL_AT(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_encodePN_LOCAL_AT)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
 
 static void Writer_QLEVER_encodePN_LOCAL_0xFAFA(benchmark::State& state) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
@@ -231,4 +231,4 @@ static void Writer_QLEVER_encodePN_LOCAL_0xFAFA(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(Writer_QLEVER_encodePN_LOCAL_0xFAFA)
-->RangeMultiplier(2)->Range(1<<4, 1<<11)->Complexity();
+->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
