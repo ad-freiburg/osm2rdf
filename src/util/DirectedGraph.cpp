@@ -11,6 +11,23 @@
 #include <iostream>
 
 // ____________________________________________________________________________
+osm2ttl::util::DirectedGraph::DirectedGraph() {}
+
+// ____________________________________________________________________________
+osm2ttl::util::DirectedGraph::DirectedGraph(const DirectedGraph& other) {
+  _numEdges = other._numEdges;
+  for (const auto& entry : other._adjacency) {
+    _adjacency[entry.first] = entry.second;
+  }
+  preparedFast = other.preparedFast;
+  if (preparedFast) {
+    for (const auto& entry : other._successors) {
+      _successors[entry.first] = entry.second;
+    }
+  }
+}
+
+// ____________________________________________________________________________
 void osm2ttl::util::DirectedGraph::addEdge(
     osm2ttl::util::DirectedGraph::vertexID_t src,
     osm2ttl::util::DirectedGraph::vertexID_t dst) {

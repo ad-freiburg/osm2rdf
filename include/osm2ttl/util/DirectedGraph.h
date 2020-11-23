@@ -15,6 +15,10 @@ namespace util {
 
 class DirectedGraph {
  public:
+  // Default constructor creating an empty DirectedGraph.
+  DirectedGraph();
+  // Copy-constructor creating a deep copy of the other DirectedGraph.
+  DirectedGraph(const DirectedGraph& other);
   // Type representing all vertices inside the directed graph.
   typedef uint64_t vertexID_t;
   // addEdge adds an edge between src and dst vertices. Allows multiple edges

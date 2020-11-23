@@ -9,6 +9,29 @@ osm2ttl::util::DirectedGraph createEmptyDirectedGraph() {
   return osm2ttl::util::DirectedGraph{};
 }
 
+TEST(DirectedGraph, Constructor) {
+  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  ASSERT_EQ(0, g.getNumVertices());
+  ASSERT_EQ(0, g.getNumEdges());
+}
+
+TEST(DirectedGraph, CopyConstructor) {
+  osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
+  g.addEdge(1, 2);
+  g.addEdge(1, 2);
+  g.addEdge(2, 1);
+  ASSERT_EQ(2, g.getNumVertices());
+  ASSERT_EQ(3, g.getNumEdges());
+  osm2ttl::util::DirectedGraph g2{g};
+  ASSERT_EQ(2, g2.getNumVertices());
+  ASSERT_EQ(3, g2.getNumEdges());
+  g2.addEdge(2, 3);
+  ASSERT_EQ(2, g.getNumVertices());
+  ASSERT_EQ(3, g.getNumEdges());
+  ASSERT_EQ(3, g2.getNumVertices());
+  ASSERT_EQ(4, g2.getNumEdges());
+}
+
 TEST(DirectedGraph, addEdge) {
   osm2ttl::util::DirectedGraph g = createEmptyDirectedGraph();
   ASSERT_EQ(0, g.getNumVertices());
