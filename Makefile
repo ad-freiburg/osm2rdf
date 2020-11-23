@@ -7,7 +7,7 @@ build:
 	cmake -S . -B build
 
 compile: build
-	cmake --build build --target osm2ttl
+	cmake --build build --target osm2ttl osm2ttl-maxid
 
 checkstyle:
 
