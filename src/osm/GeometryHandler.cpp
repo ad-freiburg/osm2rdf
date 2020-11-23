@@ -77,7 +77,7 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
   if (area.hasName()) {
 #pragma omp critical(areaDataInsert)
     {
-      _areaData[area.id()] = _spatialStorageArea.size();
+      _spatialStorageAreaIndex[area.id()] = _spatialStorageArea.size();
       _spatialStorageArea.emplace_back(area.envelope(), area.id(), area.geom(),
                                        area.objId(), area.geomArea(),
                                        area.fromWay());
@@ -362,7 +362,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
     entryCount) default(none)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
-    const auto& entry = _spatialStorageArea[_areaData[id]];
+    const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
     const auto& entryObjId = std::get<3>(entry);
     const auto& entryFromWay = std::get<5>(entry);
     std::string entryIRI = _writer->generateIRI(
@@ -370,7 +370,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
                      : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
         entryObjId);
     for (const auto& dst : directedAreaGraph.getEdges(id)) {
-      const auto& area = _spatialStorageArea[_areaData[dst]];
+      const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
       const auto& areaObjId = std::get<3>(area);
       const auto& areaFromWay = std::get<5>(area);
       std::string areaIRI = _writer->generateIRI(
@@ -403,9 +403,10 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
 
 // ____________________________________________________________________________
 template <typename W>
-osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
+osm2ttl::osm::NodesContainedInAreasData
+osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
   // Store for each node all relevant areas
-  NodeData nodeData;
+  NodesContainedInAreasData nodeData;
   if (!_config.noNodeDump) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
@@ -516,7 +517,7 @@ osm2ttl::osm::NodeData osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
-    const osm2ttl::osm::NodeData& nodeData) {
+    const osm2ttl::osm::NodesContainedInAreasData& nodeData) {
   if (!_config.noWayDump) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
@@ -576,7 +577,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
 
           intersectsByNodeInfo++;
           // Load area data for node entry
-          const auto& area = _spatialStorageArea[_areaData[areaId]];
+          const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[areaId]];
           const auto& areaEnvelope = std::get<0>(area);
           const auto& areaGeom = std::get<2>(area);
           const auto& areaObjId = std::get<3>(area);

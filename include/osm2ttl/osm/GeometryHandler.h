@@ -31,21 +31,26 @@
 namespace osm2ttl {
 namespace osm {
 
-typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Area,
-                   uint64_t, osm2ttl::osm::Area::AreaType, bool>
+typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Area::id_t,
+                   osm2ttl::geometry::Area, osm2ttl::osm::Area::id_t,
+                   osm2ttl::osm::Area::AreaType, bool>
     SpatialAreaValue;
 
-typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Node>
+typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Node::id_t,
+                   osm2ttl::geometry::Node>
     SpatialNodeValue;
 
-typedef std::tuple<osm2ttl::geometry::Box, uint64_t, osm2ttl::geometry::Way,
-                   std::vector<uint64_t>>
+typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Way::id_t,
+                   osm2ttl::geometry::Way,
+                   std::vector<osm2ttl::osm::Node::id_t>>
     SpatialWayValue;
 typedef boost::geometry::index::rtree<SpatialAreaValue,
                                       boost::geometry::index::quadratic<16>>
     SpatialIndex;
 
-typedef std::unordered_map<uint64_t, std::vector<uint64_t>> NodeData;
+typedef std::unordered_map<osm2ttl::osm::Node::id_t,
+                           std::vector<osm2ttl::osm::Area::id_t>>
+    NodesContainedInAreasData;
 
 template <typename W>
 class GeometryHandler : public osmium::handler::Handler {
@@ -72,9 +77,10 @@ class GeometryHandler : public osmium::handler::Handler {
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpNamedAreaRelations();
   // Calculate relations for each node.
-  NodeData dumpNodeRelations();
+  NodesContainedInAreasData dumpNodeRelations();
   // Calculate relations for each way.
-  void dumpRelationRelations(const osm2ttl::osm::NodeData& nodeData);
+  void dumpRelationRelations(
+      const osm2ttl::osm::NodesContainedInAreasData& nodeData);
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpUnnamedAreaRelations();
   std::string statisticLine(std::string_view function, std::string_view part,
@@ -94,7 +100,8 @@ class GeometryHandler : public osmium::handler::Handler {
   // Spatial Data
   std::vector<SpatialAreaValue> _spatialStorageArea;
   std::vector<SpatialAreaValue> _spatialStorageUnnamedArea;
-  std::unordered_map<uint64_t, uint64_t> _areaData;
+  std::unordered_map<osm2ttl::osm::Area::id_t, uint64_t>
+      _spatialStorageAreaIndex;
   std::vector<SpatialNodeValue> _spatialStorageNode;
   std::vector<SpatialWayValue> _spatialStorageWay;
 };
