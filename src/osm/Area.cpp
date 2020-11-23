@@ -14,15 +14,15 @@
 
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area() {
-  _id = std::numeric_limits<uint64_t>::max();
-  _objId = std::numeric_limits<uint64_t>::max();
+  _id = std::numeric_limits<osm2ttl::osm::Area::id_t>::max();
+  _objId = std::numeric_limits<osm2ttl::osm::Area::id_t>::max();
   _tagAdministrationLevel = 0;
 }
 
 // ____________________________________________________________________________
 osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
-  _objId = static_cast<unsigned long>(area.orig_id());
+  _objId = static_cast<osm2ttl::osm::Area::id_t>(area.orig_id());
   if (area.tags()["boundary"] != nullptr &&
       area.tags()["admin_level"] != nullptr) {
     _tagAdministrationLevel = static_cast<char>(
@@ -67,10 +67,12 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Area::id() const noexcept { return _id; }
+osm2ttl::osm::Area::id_t osm2ttl::osm::Area::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Area::objId() const noexcept { return _objId; }
+osm2ttl::osm::Area::id_t osm2ttl::osm::Area::objId() const noexcept {
+  return _objId;
+}
 
 // ____________________________________________________________________________
 osm2ttl::geometry::Area osm2ttl::osm::Area::geom() const noexcept {

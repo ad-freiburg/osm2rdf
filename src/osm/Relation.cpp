@@ -20,7 +20,9 @@ osm2ttl::osm::Relation::Relation(const osmium::Relation& relation) {
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Relation::id() const noexcept { return _id; }
+osm2ttl::osm::Relation::id_t osm2ttl::osm::Relation::id() const noexcept {
+  return _id;
+}
 
 // ____________________________________________________________________________
 osm2ttl::osm::TagList osm2ttl::osm::Relation::tags() const noexcept {

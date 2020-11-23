@@ -27,7 +27,7 @@ osm2ttl::osm::Node::Node(const osmium::NodeRef& nodeRef) {
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Node::id() const noexcept { return _id; }
+osm2ttl::osm::Node::id_t osm2ttl::osm::Node::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
 osm2ttl::geometry::Box osm2ttl::osm::Node::envelope() const noexcept {

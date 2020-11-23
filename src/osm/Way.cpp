@@ -13,7 +13,9 @@
 #include "osmium/osm/way.hpp"
 
 // ____________________________________________________________________________
-osm2ttl::osm::Way::Way() { _id = std::numeric_limits<uint64_t>::max(); }
+osm2ttl::osm::Way::Way() {
+  _id = std::numeric_limits<osm2ttl::osm::Way::id_t>::max();
+}
 
 // ____________________________________________________________________________
 osm2ttl::osm::Way::Way(const osmium::Way& way) {
@@ -29,7 +31,7 @@ osm2ttl::osm::Way::Way(const osmium::Way& way) {
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::Way::id() const noexcept { return _id; }
+osm2ttl::osm::Way::id_t osm2ttl::osm::Way::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
 osm2ttl::osm::TagList osm2ttl::osm::Way::tags() const noexcept { return _tags; }

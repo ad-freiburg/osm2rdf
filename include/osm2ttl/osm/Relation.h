@@ -15,14 +15,15 @@ namespace osm {
 
 class Relation {
  public:
+  typedef uint32_t id_t;
   explicit Relation(const osmium::Relation& relation);
-  [[nodiscard]] uint64_t id() const noexcept;
+  [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] std::vector<osm2ttl::osm::RelationMember> members()
       const noexcept;
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
 
  protected:
-  uint64_t _id;
+  id_t _id;
   std::vector<osm2ttl::osm::RelationMember> _members;
   osm2ttl::osm::TagList _tags;
 };

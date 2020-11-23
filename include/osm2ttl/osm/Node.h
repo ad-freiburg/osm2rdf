@@ -15,15 +15,16 @@ namespace osm {
 
 class Node {
  public:
+  typedef uint64_t id_t;
   explicit Node(const osmium::Node& node);
   explicit Node(const osmium::NodeRef& nodeRef);
-  [[nodiscard]] uint64_t id() const noexcept;
+  [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Location geom() const noexcept;
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
 
  protected:
-  uint64_t _id;
+  id_t _id;
   osm2ttl::geometry::Location _geom;
   osm2ttl::geometry::Box _envelope;
   osm2ttl::osm::TagList _tags;

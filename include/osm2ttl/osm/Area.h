@@ -19,12 +19,13 @@ namespace osm2ttl {
 namespace osm {
 
 struct Area {
+  typedef uint32_t id_t;
   typedef double AreaType;
 
   Area();
   explicit Area(const osmium::Area& area);
-  [[nodiscard]] uint64_t id() const noexcept;
-  [[nodiscard]] uint64_t objId() const noexcept;
+  [[nodiscard]] id_t id() const noexcept;
+  [[nodiscard]] id_t objId() const noexcept;
 
   [[nodiscard]] osm2ttl::geometry::Area geom() const noexcept;
   [[nodiscard]] AreaType geomArea() const noexcept;
@@ -38,8 +39,8 @@ struct Area {
   bool operator<(const osm2ttl::osm::Area& other) const;
 
  protected:
-  uint64_t _id;
-  osmium::unsigned_object_id_type _objId;
+  id_t _id;
+  id_t _objId;
   char _tagAdministrationLevel;
   bool _hasName;
   AreaType _geomArea;

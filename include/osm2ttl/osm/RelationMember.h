@@ -15,13 +15,14 @@ enum class RelationMemberType : uint8_t { UNKNOWN, NODE, RELATION, WAY };
 
 class RelationMember {
  public:
+  typedef uint64_t id_t;
   explicit RelationMember(const osmium::RelationMember& relationMember);
-  [[nodiscard]] uint64_t id() const noexcept;
+  [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] std::string role() const noexcept;
   [[nodiscard]] osm2ttl::osm::RelationMemberType type() const noexcept;
 
  protected:
-  uint64_t _id;
+  id_t _id;
   std::string _role;
   osm2ttl::osm::RelationMemberType _type;
 };

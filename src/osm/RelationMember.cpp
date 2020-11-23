@@ -32,7 +32,10 @@ osm2ttl::osm::RelationMember::RelationMember(
 }
 
 // ____________________________________________________________________________
-uint64_t osm2ttl::osm::RelationMember::id() const noexcept { return _id; }
+osm2ttl::osm::RelationMember::id_t osm2ttl::osm::RelationMember::id()
+    const noexcept {
+  return _id;
+}
 
 // ____________________________________________________________________________
 std::string osm2ttl::osm::RelationMember::role() const noexcept {

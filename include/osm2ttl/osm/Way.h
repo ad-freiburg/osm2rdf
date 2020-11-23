@@ -18,9 +18,10 @@ namespace osm {
 
 class Way {
  public:
+  typedef uint32_t id_t;
   Way();
   explicit Way(const osmium::Way& way);
-  [[nodiscard]] uint64_t id() const noexcept;
+  [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] bool closed() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Way geom() const noexcept;
@@ -28,7 +29,7 @@ class Way {
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
 
  protected:
-  uint64_t _id;
+  id_t _id;
   std::vector<osm2ttl::osm::Node> _nodes;
   osm2ttl::geometry::Way _geom;
   osm2ttl::geometry::Box _envelope;
