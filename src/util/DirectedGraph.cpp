@@ -100,7 +100,7 @@ void osm2ttl::util::DirectedGraph::dumpOsm(const std::filesystem::path& filename
   for (const auto& [id, list] : _adjacency) {
     uint64_t src = id;
     std::string shape = "rectangle";
-    if ((src & 1) == 1) {
+    if ((src & 1U) == 1) {
       shape = "ellipse";
       src -= 1;
     }
@@ -109,7 +109,7 @@ void osm2ttl::util::DirectedGraph::dumpOsm(const std::filesystem::path& filename
         << ", style=solid]\n";
     for (const auto& dstId : list) {
       uint64_t dst = dstId;
-      if ((dst & 1) == 1) {
+      if ((dst & 1U) == 1) {
         dst -= 1;
       }
       dst /= 2;
@@ -152,7 +152,5 @@ osm2ttl::util::DirectedGraph::getVertices() const {
 std::vector<osm2ttl::util::DirectedGraph::vertexID_t>
 osm2ttl::util::DirectedGraph::getEdges(
     osm2ttl::util::DirectedGraph::vertexID_t src) const {
-  const auto& tmp = _adjacency.at(src);
-  return std::move(std::vector<osm2ttl::util::DirectedGraph::vertexID_t>(
-      tmp.begin(), tmp.end()));
+  return _adjacency.at(src);
 }
