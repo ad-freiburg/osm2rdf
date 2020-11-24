@@ -75,19 +75,19 @@ std::string osm2ttl::osm::GeometryHandler<W>::statisticLine(
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
-  if (area.hasName()) {
 #pragma omp critical(areaDataInsert)
-    {
+  {
+    if (area.hasName()) {
       _spatialStorageAreaIndex[area.id()] = _spatialStorageArea.size();
       _spatialStorageArea.emplace_back(area.envelope(), area.id(), area.geom(),
                                        area.objId(), area.geomArea(),
                                        area.fromWay());
+    } else if (!area.fromWay()) {
+      // Areas from ways are handled in GeometryHandler<W>::way
+      _spatialStorageUnnamedArea.emplace_back(area.envelope(), area.id(),
+                                              area.geom(), area.objId(),
+                                              area.geomArea(), area.fromWay());
     }
-  } else if (!area.fromWay()) {
-    // Areas from ways are handled in GeometryHandler<W>::way
-    _spatialStorageUnnamedArea.emplace_back(area.envelope(), area.id(),
-                                            area.geom(), area.objId(),
-                                            area.geomArea(), area.fromWay());
   }
 }
 
