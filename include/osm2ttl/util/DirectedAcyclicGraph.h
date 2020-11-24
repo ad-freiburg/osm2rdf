@@ -50,6 +50,44 @@ osm2ttl::util::DirectedGraph<T> reduceDAG(
   return result;
 }
 
+// reduceMaximalConnectedDAG returns a reduced DAG from a given sorted and
+// maximal connected DAG
+template <typename T>
+osm2ttl::util::DirectedGraph<T> reduceMaximalConnectedDAG(
+    const osm2ttl::util::DirectedGraph<T>& sourceDAG, bool showProgress) {
+  osm2ttl::util::DirectedGraph<T> result;
+  osmium::ProgressBar progressBar{sourceDAG.getNumVertices(), showProgress};
+  size_t entryCount = 0;
+  progressBar.update(entryCount);
+  // Reduce each adjacency list
+  const auto& vertices = sourceDAG.getVertices();
+#pragma omp parallel for shared(vertices, sourceDAG, result, progressBar, \
+                                entryCount) default(none)
+  for (size_t i = 0; i < vertices.size(); i++) {
+    const auto& src = vertices[i];
+    std::vector<T> possibleEdges(sourceDAG.getEdges(src));
+    std::vector<T> edges;
+    for (const auto& dst : sourceDAG.getEdges(src)) {
+      const auto& dstEdges = sourceDAG.getEdges(dst);
+      std::set_difference(possibleEdges.begin(), possibleEdges.end(),
+                          dstEdges.begin(), dstEdges.end(),
+                          std::back_inserter(edges));
+      possibleEdges = edges;
+      edges.clear();
+    }
+#pragma omp critical(addEdge)
+    {
+      for (const auto& dst : possibleEdges) {
+        result.addEdge(src, dst);
+      }
+    }
+#pragma omp critical(progress)
+    progressBar.update(entryCount++);
+  }
+  progressBar.done();
+  return result;
+}
+
 }
 }
 

@@ -69,9 +69,10 @@ TEST(DirectedAcyclicGraph, WhiteboardExample1AllInAll) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -102,9 +103,10 @@ TEST(DirectedAcyclicGraph, WhiteboardExample1SingleThreaded) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -139,9 +141,10 @@ TEST(DirectedAcyclicGraph, WhiteboardExample1MultiThreaded) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -204,9 +207,10 @@ TEST(DirectedAcyclicGraph, WhiteboardExample2AllConnections) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -238,9 +242,10 @@ TEST(DirectedAcyclicGraph, WhiteboardExample2MinimalConnections) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -278,9 +283,10 @@ TEST(DirectedAcyclicGraph, WhiteboardExample2) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -325,22 +331,46 @@ TEST(DirectedAcyclicGraph, LineExample1AllConnections) {
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(21, src.getNumEdges());
 
-  // src.dump("/tmp/LineExample1AllConnections.source.dot");
-  const osm2ttl::util::DirectedGraph expected =
-      createLineExample1ExpectedResult();
-  // expected.dump("/tmp/LineExample1AllConnections.expected.dot");
-  const osm2ttl::util::DirectedGraph result =
-      osm2ttl::util::reduceDAG(src, false);
-  // result.dump("/tmp/LineExample1AllConnections.result.dot");
-  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
-  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
-  for (const auto& vertexId : expected.getVertices()) {
-    const auto& expectedEdges = expected.getEdges(vertexId);
-    const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
-    for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
-          << " error for vertex: " << vertexId << " at entry " << i;
+  {
+    // src.dump("/tmp/LineExample1AllConnections.source.dot");
+    const osm2ttl::util::DirectedGraph expected =
+        createLineExample1ExpectedResult();
+    // expected.dump("/tmp/LineExample1AllConnections.expected.dot");
+    const osm2ttl::util::DirectedGraph result =
+        osm2ttl::util::reduceDAG(src, false);
+    // result.dump("/tmp/LineExample1AllConnections.result.dot");
+    ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+    ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+    for (const auto& vertexId : expected.getVertices()) {
+      const auto& expectedEdges = expected.getEdges(vertexId);
+      const auto& resultEdges = result.getEdges(vertexId);
+      ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+          << " error for vertex: " << vertexId;
+      for (size_t i = 0; i < expectedEdges.size(); ++i) {
+        ASSERT_EQ(expectedEdges[i], resultEdges[i])
+            << " error for vertex: " << vertexId << " at entry " << i;
+      }
+    }
+  }
+  {
+    // src.dump("/tmp/LineExample1AllConnections.source.dot");
+    const osm2ttl::util::DirectedGraph expected =
+        createLineExample1ExpectedResult();
+    // expected.dump("/tmp/LineExample1AllConnections.expected.dot");
+    const osm2ttl::util::DirectedGraph result =
+        osm2ttl::util::reduceMaximalConnectedDAG(src, false);
+    // result.dump("/tmp/LineExample1AllConnections.result.dot");
+    ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+    ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+    for (const auto& vertexId : expected.getVertices()) {
+      const auto& expectedEdges = expected.getEdges(vertexId);
+      const auto& resultEdges = result.getEdges(vertexId);
+      ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+          << " error for vertex: " << vertexId;
+      for (size_t i = 0; i < expectedEdges.size(); ++i) {
+        ASSERT_EQ(expectedEdges[i], resultEdges[i])
+            << " error for vertex: " << vertexId << " at entry " << i;
+      }
     }
   }
 }
@@ -378,9 +408,10 @@ TEST(DirectedAcyclicGraph, LineExample1EvenIdAllConnections) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -416,9 +447,10 @@ TEST(DirectedAcyclicGraph, LineExample1OddIdAllConnections) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -453,9 +485,10 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroAllConnections) {
   for (const auto& vertexId : expected.getVertices()) {
     const auto& expectedEdges = expected.getEdges(vertexId);
     const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
+    ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+        << " error for vertex: " << vertexId;
     for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
+      ASSERT_EQ(expectedEdges[i], resultEdges[i])
           << " error for vertex: " << vertexId << " at entry " << i;
     }
   }
@@ -475,22 +508,45 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
   ASSERT_EQ(7, src.getNumVertices());
   ASSERT_EQ(8, src.getNumEdges());
 
-  // src.dump("/tmp/LineExample1IdZeroOnlyOddConnections.source.dot");
-  const osm2ttl::util::DirectedGraph expected =
-      createLineExample1ExpectedResult();
-  // expected.dump("/tmp/LineExample1IdZeroOnlyOddConnections.expected.dot");
-  const osm2ttl::util::DirectedGraph result =
-      osm2ttl::util::reduceDAG(src, false);
-  // result.dump("/tmp/LineExample1IdZeroOnlyOddConnections.result.dot");
-  ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
-  ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
-  for (const auto& vertexId : expected.getVertices()) {
-    const auto& expectedEdges = expected.getEdges(vertexId);
-    const auto& resultEdges = result.getEdges(vertexId);
-    ASSERT_EQ(expectedEdges.size(), expectedEdges.size());
-    for (size_t i = 0; i < expectedEdges.size(); ++i) {
-      ASSERT_EQ(expectedEdges[i], expectedEdges[i])
-          << " error for vertex: " << vertexId << " at entry " << i;
+  {
+    // src.dump("/tmp/LineExample1IdZeroOnlyOddConnections.source.dot");
+    const osm2ttl::util::DirectedGraph expected =
+        createLineExample1ExpectedResult();
+    // expected.dump("/tmp/LineExample1IdZeroOnlyOddConnections.expected.dot");
+    const osm2ttl::util::DirectedGraph result =
+        osm2ttl::util::reduceDAG(src, false);
+    // result.dump("/tmp/LineExample1IdZeroOnlyOddConnections.result.dot");
+    ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+    ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+    for (const auto& vertexId : expected.getVertices()) {
+      const auto& expectedEdges = expected.getEdges(vertexId);
+      const auto& resultEdges = result.getEdges(vertexId);
+      ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+          << " error for vertex: " << vertexId;
+      for (size_t i = 0; i < expectedEdges.size(); ++i) {
+        ASSERT_EQ(expectedEdges[i], resultEdges[i])
+            << " error for vertex: " << vertexId << " at entry " << i;
+      }
     }
+  }
+  {
+    // Check that reduceMaximalConnectedDAG does NOT produce correct result
+    // src.dump("/tmp/LineExample1IdZeroOnlyOddConnections.source.dot");
+    const osm2ttl::util::DirectedGraph expected =
+        createLineExample1ExpectedResult();
+    // expected.dump("/tmp/LineExample1IdZeroOnlyOddConnections.expected.dot");
+    const osm2ttl::util::DirectedGraph result =
+        osm2ttl::util::reduceMaximalConnectedDAG(src, false);
+    // result.dump("/tmp/LineExample1IdZeroOnlyOddConnections.result.dot");
+    ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+    // some connections are missing - this is expected
+    ASSERT_NE(expected.getNumEdges(), result.getNumEdges());
+    ASSERT_NE(expected.getEdges(0).size(), result.getEdges(0).size());
+    ASSERT_EQ(expected.getEdges(1).size(), result.getEdges(1).size());
+    ASSERT_EQ(expected.getEdges(2).size(), result.getEdges(2).size());
+    ASSERT_EQ(expected.getEdges(3).size(), result.getEdges(3).size());
+    ASSERT_EQ(expected.getEdges(4).size(), result.getEdges(4).size());
+    ASSERT_EQ(expected.getEdges(5).size(), result.getEdges(5).size());
+    ASSERT_EQ(expected.getEdges(6).size(), result.getEdges(6).size());
   }
 }
