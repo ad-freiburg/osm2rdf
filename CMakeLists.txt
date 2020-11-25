@@ -94,8 +94,9 @@ function(get_git_sha1 _var)
     find_package(Git QUIET)
   endif ()
 
-  execute_process(
-          COMMAND git rev-parse --short HEAD
+  execute_process(COMMAND
+          "${GIT_EXECUTABLE}"
+          rev-parse --short HEAD --
           WORKING_DIRECTORY
           "${CMAKE_SOURCE_DIR}"
           RESULT_VARIABLE

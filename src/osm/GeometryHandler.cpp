@@ -442,7 +442,8 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
         }
         containsOk++;
         skip.insert(areaId);
-        for (const auto& newSkip : directedAreaGraph.findSuccessorsFast(areaId)) {
+        for (const auto& newSkip :
+             directedAreaGraph.findSuccessorsFast(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
@@ -571,7 +572,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
                 "way", std::chrono::nanoseconds(end - start),
                 isCoveredByEnvelope));
           }
-          for (const auto& newSkip : directedAreaGraph.findSuccessorsFast(areaId)) {
+          for (const auto& newSkip :
+               directedAreaGraph.findSuccessorsFast(areaId)) {
             skip.insert(newSkip);
           }
           if (!isCoveredByEnvelope) {
@@ -638,7 +640,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
         }
         intersectsOk++;
 
-        for (const auto& newSkip : directedAreaGraph.findSuccessorsFast(areaId)) {
+        for (const auto& newSkip :
+             directedAreaGraph.findSuccessorsFast(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
@@ -796,7 +799,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         }
         intersectsOk++;
 
-        for (const auto& newSkip : directedAreaGraph.findSuccessorsFast(areaId)) {
+        for (const auto& newSkip :
+             directedAreaGraph.findSuccessorsFast(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
