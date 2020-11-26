@@ -29,6 +29,7 @@ struct Config {
   bool addAreaSources = false;
   bool addEnvelope = false;
   bool addMemberNodes = false;
+  bool adminRelationsOnly = false;
   bool expandedData = false;
   bool metaData = false;
   bool skipWikiLinks = false;

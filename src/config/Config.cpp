@@ -102,6 +102,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       "", "add-member-nodes",
       "Add nodes triples for members of ways and"
       "relations. This does not add information to the ways or relations.");
+  auto adminRelationsOnlyOp =
+      op.add<popl::Switch>("", "admin-relations-only",
+                           "Only dump nodes and relations with admin-level");
   auto skipWikiLinksOp = op.add<popl::Switch>(
       "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
   auto storeConfigOp =
@@ -175,6 +178,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addAreaSources = addAreaSourcesOp->is_set();
     addEnvelope = addEnvelopeOp->is_set();
     addMemberNodes = addMemberNodesOp->is_set();
+    adminRelationsOnly = adminRelationsOnlyOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     expandedData = expandedDataOp->is_set();
     wktSimplify = wktSimplifyOp->value();

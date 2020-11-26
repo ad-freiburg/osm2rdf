@@ -108,6 +108,9 @@ void osm2ttl::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
     return;
   }
   _areasSeen++;
+  if (_config.adminRelationsOnly && area.tags()["admin_level"] == nullptr) {
+    return;
+  }
   const auto& a = osm2ttl::osm::Area(area);
   if (!_config.noDump) {
     _areasDumped++;
@@ -126,6 +129,9 @@ void osm2ttl::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
     return;
   }
   _nodesSeen++;
+  if (_config.adminRelationsOnly) {
+    return;
+  }
   const auto& n = osm2ttl::osm::Node(node);
   if (node.tags().empty()) {
     return;
@@ -148,10 +154,13 @@ void osm2ttl::osm::OsmiumHandler<W>::relation(
     return;
   }
   _relationsSeen++;
-  const auto& r = osm2ttl::osm::Relation(relation);
   if (relation.tags().empty()) {
     return;
   }
+  if (_config.adminRelationsOnly && relation.tags()["admin_level"] == nullptr) {
+    return;
+  }
+  const auto& r = osm2ttl::osm::Relation(relation);
   if (!_config.noDump) {
     _relationsDumped++;
     _dumpHandler.relation(r);
@@ -165,10 +174,13 @@ void osm2ttl::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
     return;
   }
   _waysSeen++;
-  const auto& w = osm2ttl::osm::Way(way);
   if (way.tags().empty()) {
     return;
   }
+  if (_config.adminRelationsOnly) {
+    return;
+  }
+  const auto& w = osm2ttl::osm::Way(way);
   if (!_config.noDump) {
     _waysDumped++;
     _dumpHandler.way(w);

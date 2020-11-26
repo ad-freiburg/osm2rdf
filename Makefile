@@ -1,7 +1,7 @@
 all: compile checkstyle test benchmark
 
 clean:
-	rm -rf *build*
+	rm -rf build
 
 build:
 	cmake -S . -B build
