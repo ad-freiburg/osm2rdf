@@ -10,6 +10,7 @@ static const int Base10Base = 10;
 
 #include "boost/geometry/geometries/geometries.hpp"
 #include "osm2ttl/geometry/Area.h"
+#include "osm2ttl/geometry/Global.h"
 #include "osm2ttl/osm/Box.h"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/box.hpp"
@@ -20,7 +21,6 @@ namespace osm {
 
 struct Area {
   typedef uint32_t id_t;
-  typedef double area_t;
 
   Area();
   explicit Area(const osmium::Area& area);
@@ -28,9 +28,9 @@ struct Area {
   [[nodiscard]] id_t objId() const noexcept;
 
   [[nodiscard]] osm2ttl::geometry::Area geom() const noexcept;
-  [[nodiscard]] area_t geomArea() const noexcept;
+  [[nodiscard]] osm2ttl::geometry::area_result_t geomArea() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
-  [[nodiscard]] area_t envelopeArea() const noexcept;
+  [[nodiscard]] osm2ttl::geometry::area_result_t envelopeArea() const noexcept;
   [[nodiscard]] char tagAdministrationLevel() const noexcept;
   [[nodiscard]] bool fromWay() const noexcept;
   [[nodiscard]] bool hasName() const noexcept;
@@ -43,8 +43,8 @@ struct Area {
   id_t _objId;
   char _tagAdministrationLevel;
   bool _hasName;
-  area_t _geomArea;
-  area_t _envelopeArea;
+  osm2ttl::geometry::area_result_t _geomArea;
+  osm2ttl::geometry::area_result_t _envelopeArea;
   osm2ttl::geometry::Area _geom;
   osm2ttl::geometry::Box _envelope;
 };

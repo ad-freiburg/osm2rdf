@@ -5,6 +5,7 @@
 
 #include "boost/geometry/algorithms/envelope.hpp"
 #include "osm2ttl/geometry/Box.h"
+#include "osm2ttl/geometry/Global.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
@@ -13,7 +14,11 @@
 osm2ttl::osm::Node::Node(const osmium::Node& node) {
   _id = node.positive_id();
   const auto& loc = node.location();
-  _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
+  if constexpr (std::is_integral<osm2ttl::geometry::location_coordinate_t>::value) {
+    _geom = osm2ttl::geometry::Location(loc.x(), loc.y());
+  } else {
+    _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
+  }
   boost::geometry::envelope(_geom, _envelope);
   _tags = osm2ttl::osm::convertTagList(node.tags());
 }
@@ -22,7 +27,11 @@ osm2ttl::osm::Node::Node(const osmium::Node& node) {
 osm2ttl::osm::Node::Node(const osmium::NodeRef& nodeRef) {
   _id = nodeRef.positive_ref();
   const auto& loc = nodeRef.location();
-  _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
+  if constexpr (std::is_integral<osm2ttl::geometry::location_coordinate_t>::value) {
+    _geom = osm2ttl::geometry::Location(loc.x(), loc.y());
+  } else {
+    _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
+  }
   boost::geometry::envelope(_geom, _envelope);
 }
 

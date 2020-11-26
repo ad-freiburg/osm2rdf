@@ -4,11 +4,12 @@
 #ifndef OSM2TTL_GEOMETRY_LOCATION_H_
 #define OSM2TTL_GEOMETRY_LOCATION_H_
 
-#include <boost/geometry/geometries/point_xy.hpp>
+#include "boost/geometry/geometries/point_xy.hpp"
+#include "osm2ttl/geometry/Global.h"
 
 namespace osm2ttl {
 namespace geometry {
-typedef boost::geometry::model::d2::point_xy<double> Location;
+typedef boost::geometry::model::d2::point_xy<osm2ttl::geometry::location_coordinate_t> Location;
 }  // namespace geometry
 }  // namespace osm2ttl
 

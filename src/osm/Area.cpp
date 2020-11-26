@@ -9,6 +9,7 @@
 #include "boost/geometry.hpp"
 #include "osm2ttl/geometry/Area.h"
 #include "osm2ttl/geometry/Box.h"
+#include "osm2ttl/geometry/Global.h"
 #include "osm2ttl/osm/Node.h"
 #include "osmium/osm/area.hpp"
 
@@ -60,8 +61,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   // Correct possibly invalid geometry...
   boost::geometry::correct(_geom);
   boost::geometry::envelope(_geom, _envelope);
-  _geomArea = boost::geometry::area(_geom);
-  _envelopeArea = boost::geometry::area(_envelope);
+  _geomArea = boost::geometry::area(_geom, osm2ttl::geometry::area_strategy());
+  _envelopeArea = boost::geometry::area(_envelope, osm2ttl::geometry::area_strategy());
   assert(_geomArea > 0);
   assert(_envelopeArea > 0);
 }
@@ -85,12 +86,12 @@ osm2ttl::geometry::Box osm2ttl::osm::Area::envelope() const noexcept {
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::Area::area_t osm2ttl::osm::Area::geomArea() const noexcept {
+osm2ttl::geometry::area_result_t osm2ttl::osm::Area::geomArea() const noexcept {
   return _geomArea;
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::Area::area_t osm2ttl::osm::Area::envelopeArea() const noexcept {
+osm2ttl::geometry::area_result_t osm2ttl::osm::Area::envelopeArea() const noexcept {
   return _envelopeArea;
 }
 
