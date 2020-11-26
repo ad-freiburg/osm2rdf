@@ -152,7 +152,7 @@ configure_file (
         "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h"
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0  -march=native")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0  -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS} -Og -g -DLOGLEVEL=3 -DOSM2NT_DBG=1")
 set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -Os")
 set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS} -DLOGLEVEL=2 -O3")

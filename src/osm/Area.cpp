@@ -85,12 +85,12 @@ osm2ttl::geometry::Box osm2ttl::osm::Area::envelope() const noexcept {
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::Area::AreaType osm2ttl::osm::Area::geomArea() const noexcept {
+osm2ttl::osm::Area::area_t osm2ttl::osm::Area::geomArea() const noexcept {
   return _geomArea;
 }
 
 // ____________________________________________________________________________
-osm2ttl::osm::Area::AreaType osm2ttl::osm::Area::envelopeArea() const noexcept {
+osm2ttl::osm::Area::area_t osm2ttl::osm::Area::envelopeArea() const noexcept {
   return _envelopeArea;
 }
 

@@ -20,7 +20,7 @@ namespace osm {
 
 struct Area {
   typedef uint32_t id_t;
-  typedef double AreaType;
+  typedef double area_t;
 
   Area();
   explicit Area(const osmium::Area& area);
@@ -28,9 +28,9 @@ struct Area {
   [[nodiscard]] id_t objId() const noexcept;
 
   [[nodiscard]] osm2ttl::geometry::Area geom() const noexcept;
-  [[nodiscard]] AreaType geomArea() const noexcept;
+  [[nodiscard]] area_t geomArea() const noexcept;
   [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
-  [[nodiscard]] AreaType envelopeArea() const noexcept;
+  [[nodiscard]] area_t envelopeArea() const noexcept;
   [[nodiscard]] char tagAdministrationLevel() const noexcept;
   [[nodiscard]] bool fromWay() const noexcept;
   [[nodiscard]] bool hasName() const noexcept;
@@ -43,8 +43,8 @@ struct Area {
   id_t _objId;
   char _tagAdministrationLevel;
   bool _hasName;
-  AreaType _geomArea;
-  AreaType _envelopeArea;
+  area_t _geomArea;
+  area_t _envelopeArea;
   osm2ttl::geometry::Area _geom;
   osm2ttl::geometry::Box _envelope;
 };
