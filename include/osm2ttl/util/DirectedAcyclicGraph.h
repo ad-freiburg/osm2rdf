@@ -85,7 +85,7 @@ osm2ttl::util::DirectedGraph<T> reduceMaximalConnectedDAG(
                                 entryCount) default(none)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto& src = vertices[i];
-    std::vector<T> possibleEdges(sourceDAG.getEdgesFast(src));
+    std::vector<T> possibleEdges(sourceDAG.getEdges(src));
 #ifndef NDEBUG
     auto sortedPossibleEdges = possibleEdges;
     std::sort(sortedPossibleEdges.begin(), sortedPossibleEdges.end());
@@ -97,8 +97,8 @@ osm2ttl::util::DirectedGraph<T> reduceMaximalConnectedDAG(
     }
 #endif
     std::vector<T> edges;
-    for (const auto& dst : sourceDAG.getEdgesFast(src)) {
-      const auto& dstEdges = sourceDAG.getEdgesFast(dst);
+    for (const auto& dst : sourceDAG.getEdges(src)) {
+      const auto& dstEdges = sourceDAG.getEdges(dst);
 #ifndef NDEBUG
       auto sortedEdges = dstEdges;
       std::sort(sortedEdges.begin(), sortedEdges.end());

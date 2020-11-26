@@ -530,7 +530,67 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
     }
   }
   {
-    // Check that reduceMaximalConnectedDAG does NOT produce correct result
+    // Check that reduceMaximalConnectedDAG does produce correct result as each
+    // node knows the one missing. This would not work if more then one node
+    // would be skipped... see different test.
+    // src.dump("/tmp/LineExample1IdZeroOnlyOddConnections.source.dot");
+    const osm2ttl::util::DirectedGraph expected =
+        createLineExample1ExpectedResult();
+    // expected.dump("/tmp/LineExample1IdZeroOnlyOddConnections.expected.dot");
+    const osm2ttl::util::DirectedGraph result =
+        osm2ttl::util::reduceMaximalConnectedDAG(src, false);
+    // result.dump("/tmp/LineExample1IdZeroOnlyOddConnections.result.dot");
+    ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+    // some connections are missing - this is expected
+    ASSERT_NE(expected.getNumEdges(), result.getNumEdges());
+    ASSERT_NE(expected.getEdges(0).size(), result.getEdges(0).size());
+    ASSERT_EQ(expected.getEdges(1).size(), result.getEdges(1).size());
+    ASSERT_EQ(expected.getEdges(2).size(), result.getEdges(2).size());
+    ASSERT_EQ(expected.getEdges(3).size(), result.getEdges(3).size());
+    ASSERT_EQ(expected.getEdges(4).size(), result.getEdges(4).size());
+    ASSERT_EQ(expected.getEdges(5).size(), result.getEdges(5).size());
+    ASSERT_EQ(expected.getEdges(6).size(), result.getEdges(6).size());
+  }
+}
+
+TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOneAdditionalConnections) {
+  osm2ttl::util::DirectedGraph<uint8_t> src{};
+  src.addEdge(0, 1);
+  src.addEdge(0, 4);
+  src.addEdge(1, 2);
+  src.addEdge(2, 3);
+  src.addEdge(3, 4);
+  src.addEdge(4, 5);
+  src.addEdge(5, 6);
+  src.prepareFindSuccessorsFast();
+  ASSERT_EQ(7, src.getNumVertices());
+  ASSERT_EQ(7, src.getNumEdges());
+
+  {
+    // src.dump("/tmp/LineExample1IdZeroOnlyOddConnections.source.dot");
+    const osm2ttl::util::DirectedGraph expected =
+        createLineExample1ExpectedResult();
+    // expected.dump("/tmp/LineExample1IdZeroOnlyOddConnections.expected.dot");
+    const osm2ttl::util::DirectedGraph result =
+        osm2ttl::util::reduceDAG(src, false);
+    // result.dump("/tmp/LineExample1IdZeroOnlyOddConnections.result.dot");
+    ASSERT_EQ(expected.getNumVertices(), result.getNumVertices());
+    ASSERT_EQ(expected.getNumEdges(), result.getNumEdges());
+    for (const auto& vertexId : expected.getVertices()) {
+      const auto& expectedEdges = expected.getEdges(vertexId);
+      const auto& resultEdges = result.getEdges(vertexId);
+      ASSERT_EQ(expectedEdges.size(), resultEdges.size())
+                    << " error for vertex: " << vertexId;
+      for (size_t i = 0; i < expectedEdges.size(); ++i) {
+        ASSERT_EQ(expectedEdges[i], resultEdges[i])
+                      << " error for vertex: " << vertexId << " at entry " << i;
+      }
+    }
+  }
+  {
+    // Check that reduceMaximalConnectedDAG does produce correct result as each
+    // node knows the one missing. This would not work if more then one node
+    // would be skipped... see different test.
     // src.dump("/tmp/LineExample1IdZeroOnlyOddConnections.source.dot");
     const osm2ttl::util::DirectedGraph expected =
         createLineExample1ExpectedResult();
