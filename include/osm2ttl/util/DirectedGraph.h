@@ -22,10 +22,10 @@ class DirectedGraph {
   void addEdge(T src, T dst);
   // findSuccessors returns the ids of all successor vertices of the given
   // vertex.
-  std::vector<T> findSuccessors(T src) const;
+  [[nodiscard]] std::vector<T> findSuccessors(T src) const;
   // findSuccessorsFast returns the same result as findSuccessors but faster,
   // after data is prepared for faster lookup.
-  std::vector<T> findSuccessorsFast(T src) const;
+  [[nodiscard]] std::vector<T> findSuccessorsFast(T src) const;
   // dump stores the complete graph in DOT-Format in a file at the given path.
   void dump(const std::filesystem::path& filename) const;
   // dumpOsm stores the complete graph in DOT-Format in a file at the given
@@ -43,6 +43,8 @@ class DirectedGraph {
   [[nodiscard]] std::vector<T> getVertices() const;
   // getEdges returns the stored edges for the given vertex.
   [[nodiscard]] std::vector<T> getEdges(T src) const;
+  // getEdges returns the stored edges but uses "fast" storage for lookup.
+  [[nodiscard]] std::vector<T> getEdgesFast(T src) const;
 
  protected:
   void findSuccessorsHelper(T src, std::vector<T>* tmp) const;

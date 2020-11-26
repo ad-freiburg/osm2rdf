@@ -163,6 +163,15 @@ std::vector<T> osm2ttl::util::DirectedGraph<T>::getEdges(T src) const {
 }
 
 // ____________________________________________________________________________
+template <typename T>
+std::vector<T> osm2ttl::util::DirectedGraph<T>::getEdgesFast(T src) const {
+  if (!_preparedFast) {
+    throw std::runtime_error("findSuccessorsFast not prepared");
+  }
+  return _successors.at(src);
+}
+
+// ____________________________________________________________________________
 template class osm2ttl::util::DirectedGraph<uint8_t>;
 template class osm2ttl::util::DirectedGraph<uint16_t>;
 template class osm2ttl::util::DirectedGraph<uint32_t>;
