@@ -3,8 +3,9 @@
 
 #include "osm2ttl/util/Output.h"
 
-#include <fstream>
 #include <cstdio>
+#include <fstream>
+#include <iostream>
 
 #include "boost/iostreams/filter/bzip2.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
@@ -23,12 +24,16 @@ osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
 }
 
 // ____________________________________________________________________________
-osm2ttl::util::Output::~Output() {
-  close();
-}
+osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
+                              const std::string& prefix, size_t partCount)
+    : _config(config), _prefix(prefix), _numOuts(partCount) {}
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::open() {
+osm2ttl::util::Output::~Output() { close(); }
+
+// ____________________________________________________________________________
+bool osm2ttl::util::Output::open() {
+  assert(_numOuts > 0);
   _out = new boost::iostreams::filtering_ostream[_numOuts];
   _outFile = new std::ofstream[_numOuts];
 
@@ -37,16 +42,25 @@ void osm2ttl::util::Output::open() {
       _out[i].push(boost::iostreams::bzip2_compressor{});
     }
     _outFile[i].open(_prefix + ".part_" + std::to_string(i));
+    if (!_outFile[i].is_open()) {
+      return false;
+    }
     _out[i].push(_outFile[i]);
   }
   _open = true;
+  return true;
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::close() {
+void osm2ttl::util::Output::close() { close("", ""); }
+
+// ____________________________________________________________________________
+void osm2ttl::util::Output::close(std::string_view prefix,
+                                  std::string_view suffix) {
   if (!_open) {
     return;
   }
+
   for (size_t i = 0; i < _numOuts; ++i) {
     _out[i].pop();
     if (_outFile[i].is_open()) {
@@ -56,12 +70,25 @@ void osm2ttl::util::Output::close() {
   delete[] _outFile;
   delete[] _out;
   _open = false;
+
+  // Handle merging of files
+  switch (_config.mergeOutput) {
+    case osm2ttl::util::OutputMergeMode::MERGE:
+      merge(prefix, suffix);
+      return;
+    case osm2ttl::util::OutputMergeMode::CONCATENATE:
+      concatinate(prefix, suffix);
+      return;
+    case osm2ttl::util::OutputMergeMode::NONE:
+    default:
+      none(prefix, suffix);
+      return;
+  }
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::merge(std::string_view prefix, std::string_view suffix) {
-  // Close and flush all data before merging.
-  close();
+void osm2ttl::util::Output::merge(std::string_view prefix,
+                                  std::string_view suffix) {
   // Concatenated output files
   boost::iostreams::filtering_ostream out;
   std::ofstream outFile{_prefix};
@@ -87,6 +114,40 @@ void osm2ttl::util::Output::merge(std::string_view prefix, std::string_view suff
   out << suffix;
   out.pop();
   outFile.close();
+}
+
+// ____________________________________________________________________________
+void osm2ttl::util::Output::concatinate(std::string_view prefix,
+                                        std::string_view suffix) {
+  // Concatenated output files
+  std::ofstream outFile{_prefix, std::ios_base::binary};
+  outFile << prefix;
+
+  for (size_t i = 0; i < _numOuts; ++i) {
+    std::ifstream inFile{_prefix + ".part_" + std::to_string(i),
+                         std::ios_base::binary};
+    outFile << inFile.rdbuf();
+    std::remove(std::string(_prefix + ".part_" + std::to_string(i)).c_str());
+  }
+
+  outFile << suffix;
+  outFile.close();
+}
+
+// ____________________________________________________________________________
+void osm2ttl::util::Output::none(std::string_view prefix,
+                                 std::string_view suffix) {
+  // Concatenated output files
+  {
+    std::ofstream outFile{_prefix + ".prefix"};
+    outFile << prefix;
+    outFile.close();
+  }
+  {
+    std::ofstream outFile{_prefix + ".suffix"};
+    outFile << suffix;
+    outFile.close();
+  }
 }
 
 // ____________________________________________________________________________

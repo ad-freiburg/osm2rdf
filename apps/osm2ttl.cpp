@@ -17,18 +17,19 @@ template <typename T>
 void run(osm2ttl::config::Config& config) {
   // Setup
   // Input file reference
-  osm2ttl::ttl::Writer<T> writer{config};
-  if (!writer.open()) {
+  osm2ttl::util::Output output{config, config.output};
+  if (!output.open()) {
     std::cerr << "Error opening outputfile: " << config.output << std::endl;
     exit(1);
   }
+  osm2ttl::ttl::Writer<T> writer{config, &output};
   writer.writeHeader();
 
   osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   // All work done, close output
-  writer.close();
+  output.close();
 }
 
 // ____________________________________________________________________________

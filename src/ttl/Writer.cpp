@@ -17,8 +17,9 @@
 static const int k0xB7 = 0xB7;
 // ____________________________________________________________________________
 template <typename T>
-osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
-    : _config(config) {
+osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config,
+                                osm2ttl::util::Output* output)
+    : _config(config), _out(output) {
   _prefixes = {
       // well-known prefixes
       {osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL,
@@ -99,36 +100,7 @@ osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config)
 
 // ____________________________________________________________________________
 template <typename T>
-osm2ttl::ttl::Writer<T>::~Writer() {
-  close();
-}
-
-// ____________________________________________________________________________
-template <typename T>
-bool osm2ttl::ttl::Writer<T>::open() {
-  if (_config.outputCompress) {
-    _out.push(boost::iostreams::bzip2_compressor{});
-  }
-  if (!_config.output.empty()) {
-    _outFile.open(_config.output);
-    _out.push(_outFile);
-    return _outFile.is_open();
-  }
-  _out.push(std::cout);
-  return true;
-}
-
-// ____________________________________________________________________________
-template <typename T>
-void osm2ttl::ttl::Writer<T>::close() {
-  if (_out.empty()) {
-    return;
-  }
-  _out.pop();
-  if (_outFile.is_open()) {
-    _outFile.close();
-  }
-}
+osm2ttl::ttl::Writer<T>::~Writer() {}
 
 // ____________________________________________________________________________
 template <typename T>
@@ -230,8 +202,7 @@ template <typename T>
 void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
-#pragma omp critical(writeTriple)
-  { _out << s + " " + p + " " + o + " .\n"; }
+  _out->write(s + " " + p + " " + o + " .\n");
 }
 
 // ____________________________________________________________________________

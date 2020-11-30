@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include "osm2ttl/ttl/Format.h"
+#include "osm2ttl/util/OutputMergeMode.h"
 
 namespace osm2ttl {
 namespace config {
@@ -53,6 +54,7 @@ struct Config {
   // Output, empty for stdout
   std::filesystem::path output;
   std::string outputFormat;
+  osm2ttl::util::OutputMergeMode mergeOutput = osm2ttl::util::OutputMergeMode::CONCATENATE;
   bool outputCompress = true;
 
   // osmium location cache

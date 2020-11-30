@@ -53,12 +53,8 @@ static const int NUM_BITS_IN_BYTE = 8;
 static const int MASK_BITS_OF_ONE_BYTE = 0xFF;
 static const int NUM_BITS_IN_NIBBLE = 4;
 
-#include <fstream>
-#include <ostream>
 #include <string>
 
-#include "boost/iostreams/filtering_stream.hpp"
-#include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/osm/Area.h"
@@ -68,6 +64,8 @@ static const int NUM_BITS_IN_NIBBLE = 4;
 #include "osm2ttl/osm/Tag.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osm2ttl/osm/Way.h"
+#include "osm2ttl/ttl/Constants.h"
+#include "osm2ttl/util/Output.h"
 
 namespace osm2ttl {
 namespace ttl {
@@ -75,10 +73,8 @@ namespace ttl {
 template<typename T>
 class Writer {
  public:
-  explicit Writer(const osm2ttl::config::Config& config);
+  Writer(const osm2ttl::config::Config& config, osm2ttl::util::Output* output);
   ~Writer();
-  bool open();
-  void close();
 
   void writeHeader();
 
@@ -122,8 +118,7 @@ class Writer {
   std::unordered_map<std::string, std::string> _prefixes;
 
   // Output
-  boost::iostreams::filtering_ostream _out;
-  std::ofstream _outFile;
+  osm2ttl::util::Output* _out;
 };
 }  // namespace ttl
 }  // namespace osm2ttl

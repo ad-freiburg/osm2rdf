@@ -128,10 +128,7 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Closing statistics files..." << std::endl;
-    _statistics.close();
-    std::cerr << osm2ttl::util::currentTimeFormatted()
-              << " ... merging them ..." << std::endl;
-    _statistics.merge("[\n", "{}\n]");
+    _statistics.close("[\n", "{}\n]");
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
