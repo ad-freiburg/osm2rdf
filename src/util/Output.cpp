@@ -41,7 +41,7 @@ bool osm2ttl::util::Output::open() {
     if (_config.outputCompress) {
       _out[i].push(boost::iostreams::bzip2_compressor{});
     }
-    _outFile[i].open(_prefix + ".part_" + std::to_string(i));
+    _outFile[i].open(partFilename(i));
     if (!_outFile[i].is_open()) {
       return false;
     }
@@ -87,6 +87,25 @@ void osm2ttl::util::Output::close(std::string_view prefix,
 }
 
 // ____________________________________________________________________________
+std::string osm2ttl::util::Output::partFilename(int part) {
+  size_t numDigits = 1;
+  if (_numOuts > 9) {
+    numDigits++;
+  }
+  if (_numOuts > 99) {
+    numDigits++;
+  }
+  std::ostringstream oss;
+  oss << _prefix << ".part_" << std::setfill('0') << std::setw(numDigits);
+  if (part == -2) {
+    oss << _numOuts;
+  } else {
+    oss << (part + 1);
+  }
+  return oss.str();
+}
+
+// ____________________________________________________________________________
 void osm2ttl::util::Output::merge(std::string_view prefix,
                                   std::string_view suffix) {
   // Concatenated output files
@@ -100,7 +119,8 @@ void osm2ttl::util::Output::merge(std::string_view prefix,
 
   for (size_t i = 0; i < _numOuts; ++i) {
     boost::iostreams::filtering_istream in;
-    std::ifstream inFile{_prefix + ".part_" + std::to_string(i)};
+    std::string filename = partFilename(i);
+    std::ifstream inFile{filename};
     if (_config.outputCompress) {
       in.push(boost::iostreams::bzip2_decompressor{});
     }
@@ -108,7 +128,7 @@ void osm2ttl::util::Output::merge(std::string_view prefix,
     out << in.rdbuf();
     in.pop();
     inFile.close();
-    std::remove(std::string(_prefix + ".part_" + std::to_string(i)).c_str());
+    std::remove(filename.c_str());
   }
 
   out << suffix;
@@ -124,10 +144,10 @@ void osm2ttl::util::Output::concatinate(std::string_view prefix,
   outFile << prefix;
 
   for (size_t i = 0; i < _numOuts; ++i) {
-    std::ifstream inFile{_prefix + ".part_" + std::to_string(i),
-                         std::ios_base::binary};
+    std::string filename = partFilename(i);
+    std::ifstream inFile{filename, std::ios_base::binary};
     outFile << inFile.rdbuf();
-    std::remove(std::string(_prefix + ".part_" + std::to_string(i)).c_str());
+    std::remove(filename.c_str());
   }
 
   outFile << suffix;
@@ -139,12 +159,12 @@ void osm2ttl::util::Output::none(std::string_view prefix,
                                  std::string_view suffix) {
   // Concatenated output files
   {
-    std::ofstream outFile{_prefix + ".prefix"};
+    std::ofstream outFile{partFilename(-1)};
     outFile << prefix;
     outFile.close();
   }
   {
-    std::ofstream outFile{_prefix + ".suffix"};
+    std::ofstream outFile{partFilename(-2)};
     outFile << suffix;
     outFile.close();
   }

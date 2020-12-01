@@ -29,6 +29,7 @@ class Output {
   void write(std::string_view line, size_t part);
 
  protected:
+  std::string partFilename(int part);
   // merge closes and merges all parts, prepend given prefix and append given suffix.
   void merge(std::string_view prefix, std::string_view suffix);
   void concatinate(std::string_view prefix, std::string_view suffix);
