@@ -48,4 +48,4 @@ docker-eu:
 	mkdir input || true
 	mkdir output || true
 	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/europa-latest.osm.pbf -o /output/europa-latest.osm.ttl --add-inverse-relation-direction
+	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europa-latest.osm.ttl --add-inverse-relation-direction --store-locations-on-disk
