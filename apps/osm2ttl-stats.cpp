@@ -86,12 +86,31 @@ class OsmiumIdHandler : public osmium::handler::Handler {
                 << "num relations: " << _countRelations << "\n"
                 << osm2ttl::util::formattedTimeSpacer
                 << "num ways:      " << _countWays << std::endl;
+
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "num required nodes:     " << _requiredNodes.size() << "\n"
+                << osm2ttl::util::formattedTimeSpacer
+                << "num required relations: " << _requiredRelations.size()
+                << "\n"
+                << osm2ttl::util::formattedTimeSpacer
+                << "num required ways:      " << _requiredWays.size()
+                << std::endl;
     }
   }
 
   void area(const osmium::Area& area) {
     _countAreas++;
     _maxAreaId = std::max(_maxAreaId, area.positive_id());
+    for (const auto& outer : area.outer_rings()) {
+      for (const auto& node_ref : outer) {
+        _requiredNodes.insert(node_ref.positive_ref());
+      }
+      for (const auto& inner : area.inner_rings(outer)) {
+        for (const auto& node_ref : inner) {
+          _requiredNodes.insert(node_ref.positive_ref());
+        }
+      }
+    }
   }
 
   void node(const osmium::Node& node) {
@@ -102,11 +121,27 @@ class OsmiumIdHandler : public osmium::handler::Handler {
   void relation(const osmium::Relation& relation) {
     _countRelations++;
     _maxRelationId = std::max(_maxRelationId, relation.positive_id());
+    for (const auto& member : relation.members()) {
+      switch (member.type()) {
+        case osmium::item_type::node:
+          _requiredNodes.insert(member.positive_ref());
+          break;
+        case osmium::item_type::relation:
+          _requiredRelations.insert(member.positive_ref());
+          break;
+        case osmium::item_type::way:
+          _requiredWays.insert(member.positive_ref());
+          break;
+      }
+    }
   }
 
   void way(const osmium::Way& way) {
     _countWays++;
     _maxWayId = std::max(_maxWayId, way.positive_id());
+    for (const auto& node_ref : way.nodes()) {
+      _requiredNodes.insert(node_ref.positive_ref());
+    }
   }
 
   static std::string idInfo(const uint64_t max) {
@@ -141,6 +176,10 @@ class OsmiumIdHandler : public osmium::handler::Handler {
   uint64_t _maxRelationId = 0;
   uint64_t _countWays = 0;
   uint64_t _maxWayId = 0;
+
+  std::set<uint64_t> _requiredNodes;
+  std::set<uint64_t> _requiredRelations;
+  std::set<uint64_t> _requiredWays;
 };
 
 // ____________________________________________________________________________
