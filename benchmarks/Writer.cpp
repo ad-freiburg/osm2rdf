@@ -128,6 +128,7 @@ BENCHMARK(Writer_QLEVER_generateLiteral_a)
     ->Range(1U << 4U, 1U << 11U)
     ->Complexity();
 
+/*
 static void Writer_QLEVER_utf8Codepoint_a(benchmark::State& state) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
@@ -247,3 +248,4 @@ BENCHMARK(Writer_QLEVER_encodePN_LOCAL_0xFAFA)
     ->RangeMultiplier(2)
     ->Range(1U << 4U, 1U << 11U)
     ->Complexity();
+*/
