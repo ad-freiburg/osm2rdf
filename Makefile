@@ -18,7 +18,7 @@ benchmark: build
 	cmake --build build --target run_benchmarks
 
 run: compile
-	for FILE in $(shell ls -Sr input); do ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever" --write-statistics; done
+	for FILE in $(shell ls -Sr input); do ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; done
 
 perf: compile
 	for FILE in $(shell ls -Sr input); do time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
@@ -48,4 +48,4 @@ docker-eu:
 	mkdir input || true
 	mkdir output || true
 	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europa-latest.osm.ttl --add-inverse-relation-direction --store-locations-on-disk
+	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl --add-inverse-relation-direction --store-locations-on-disk
