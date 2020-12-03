@@ -22,6 +22,7 @@ static const int k0xE0 = 0xE0;
 static const int k0xF0 = 0xF0;
 static const int k0xF6 = 0xF6;
 static const int k0xF8 = 0xF8;
+static const int k0xFF = 0xFF;
 static const int k0x2FF = 0x2FF;
 static const int k0x370 = 0x370;
 static const int k0x37D = 0x37D;
@@ -50,8 +51,8 @@ static const int UTF8_CODEPOINT_OFFSET_BYTE4 = 18;
 static const int UTF8_CODEPOINT_OFFSET_BYTE3 = 12;
 static const int UTF8_CODEPOINT_OFFSET_BYTE2 = 6;
 static const int NUM_BITS_IN_BYTE = 8;
-static const int MASK_BITS_OF_ONE_BYTE = 0xFF;
 static const int NUM_BITS_IN_NIBBLE = 4;
+static const int MASK_BITS_OF_ONE_BYTE = k0xFF;
 
 #include <string>
 
@@ -119,6 +120,7 @@ class Writer {
   FRIEND_TEST(WriterGrammarNT, RULE_8_IRIREF_CONVERT);
   FRIEND_TEST(WriterGrammarTTL, RULE_18_IRIREF_CONVERT);
 
+  std::string encodePERCENT(char c);
   std::string encodePERCENT(std::string_view s);
   std::string encodePERCENT(uint32_t codepoint);
   FRIEND_TEST(WriterGrammarTTL, RULE_170s_PERCENT_CODEPOINT);

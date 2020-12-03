@@ -340,19 +340,21 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(
 // ____________________________________________________________________________
 template <typename T>
 uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
-  if ((c & k0x80) == 0) {
+  uint8_t cp = static_cast<uint8_t>(c);
+  if ((cp & k0x80) == 0) {
     return k1Byte;
   }
-  if ((c & k0xE0) == k0xC0) {
+  if ((cp & k0xE0) == k0xC0) {
     return k2Byte;
   }
-  if ((c & k0xF0) == k0xE0) {
+  if ((cp & k0xF0) == k0xE0) {
     return k3Byte;
   }
-  if ((c & k0xF8) == k0xF0) {
+  if ((cp & k0xF8) == k0xF0) {
     return k4Byte;
   }
-  throw std::domain_error("Invalid UTF-8 Sequence start " + std::to_string(c));
+  throw std::domain_error("Invalid UTF-8 Sequence start " + std::to_string(cp) +
+                          "(dec)");
 }
 
 // ____________________________________________________________________________
@@ -473,6 +475,12 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(
     pos += length - 1;
   }
   return tmp;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2ttl::ttl::Writer<T>::encodePERCENT(char c) {
+  return encodePERCENT(static_cast<uint32_t>(c));
 }
 
 // ____________________________________________________________________________
@@ -630,6 +638,11 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
         currentChar == '@' || currentChar == '~') {
       tmp += '\\';
       tmp += currentChar;
+      continue;
+    }
+    // Percent encoding has 2 HEX slots -> use for rest of ascii 0x00 - 0x7F
+    if (currentChar >= 0x00) {
+      tmp += encodePERCENT(currentChar);
       continue;
     }
     uint8_t length = utf8Length(currentChar);

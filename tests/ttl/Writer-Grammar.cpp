@@ -97,6 +97,7 @@ TEST(WriterGrammarNT, RULE_10_UCHAR_UTF8) {
   ASSERT_EQ("\\u0061", w.UCHAR("\u0061"));
   ASSERT_EQ("\\u007f", w.UCHAR("\u007f"));
 
+  ASSERT_EQ("\\u0082", w.UCHAR("\u0082"));
   ASSERT_EQ("\\u00ff", w.UCHAR("\u00ff"));
   ASSERT_EQ("\\u0fff", w.UCHAR("\u0fff"));
   ASSERT_EQ("\\uffff", w.UCHAR("\uffff"));
@@ -212,6 +213,7 @@ TEST(WriterGrammarTTL, RULE_26_UCHAR_UTF8) {
   ASSERT_EQ("\\u0061", w.UCHAR("\u0061"));
   ASSERT_EQ("\\u007f", w.UCHAR("\u007f"));
 
+  ASSERT_EQ("\\u0082", w.UCHAR("\u0082"));
   ASSERT_EQ("\\u00ff", w.UCHAR("\u00ff"));
   ASSERT_EQ("\\u0fff", w.UCHAR("\u0fff"));
   ASSERT_EQ("\\uffff", w.UCHAR("\uffff"));
@@ -280,6 +282,8 @@ TEST(WriterGrammarTTL, RULE_168s_PN_LOCAL) {
   ASSERT_EQ("_\\~.-\\!\\$\\&\\'", w.encodePN_LOCAL("_~.-!$&'"));
   ASSERT_EQ("\\(\\)\\*\\+\\,\\;\\=\\/", w.encodePN_LOCAL("()*+,;=/"));
   ASSERT_EQ("\\?\\#\\@\\%", w.encodePN_LOCAL("?#@%"));
+  // Encode all missing <= 0xFF
+  ASSERT_EQ("%7b%7c%7d", w.encodePN_LOCAL("{|}"));
   // UTF8-Codepoint ranges ...
   ASSERT_EQ("\u00c0\u00d6", w.encodePN_LOCAL("\u00c0\u00d6"));
   ASSERT_EQ("\u00d8\u00f6", w.encodePN_LOCAL("\u00d8\u00f6"));
@@ -317,6 +321,9 @@ TEST(WriterGrammarTTL, RULE_170s_PERCENT_CODEPOINT) {
 
   ASSERT_EQ("%00", w.encodePERCENT(0x00U));
   ASSERT_EQ("%64", w.encodePERCENT(0x64U));
+  ASSERT_EQ("%7c", w.encodePERCENT(0x7CU));
+  ASSERT_EQ("%82", w.encodePERCENT(0x82U));
+  ASSERT_EQ("%ff", w.encodePERCENT(0xFFU));
   ASSERT_EQ("%0f%ff%64", w.encodePERCENT(0xfff64U));
 }
 
@@ -333,6 +340,7 @@ TEST(WriterGrammarTTL, RULE_170s_PERCENT_ASCII) {
   ASSERT_EQ("%40", w.encodePERCENT('@'));
   ASSERT_EQ("%41", w.encodePERCENT('A'));
   ASSERT_EQ("%61", w.encodePERCENT('a'));
+  ASSERT_EQ("%7c", w.encodePERCENT('|'));
   ASSERT_EQ("%7f", w.encodePERCENT('\u007f'));  // DEL
 }
 
@@ -352,6 +360,7 @@ TEST(WriterGrammarTTL, RULE_170s_PERCENT_UTF8) {
   ASSERT_EQ("%61", w.encodePERCENT("\u0061"));
   ASSERT_EQ("%7f", w.encodePERCENT("\u007f"));
 
+  ASSERT_EQ("%82", w.encodePERCENT("\u0082"));
   ASSERT_EQ("%ff", w.encodePERCENT("\u00ff"));
   ASSERT_EQ("%0f%ff", w.encodePERCENT("\u0fff"));
   ASSERT_EQ("%ff%ff", w.encodePERCENT("\uffff"));
