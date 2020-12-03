@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 
@@ -257,6 +258,10 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::formatIRI(
 template <typename T>
 std::string osm2ttl::ttl::Writer<T>::IRIREF(std::string_view p,
                                             std::string_view v) {
+  // NT:  [8]    IRIREF
+  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
+  // TTL: [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
   return "<" + encodeIRIREF(p) + encodeIRIREF(v) + ">";
 }
 
@@ -264,7 +269,9 @@ std::string osm2ttl::ttl::Writer<T>::IRIREF(std::string_view p,
 template <typename T>
 std::string osm2ttl::ttl::Writer<T>::PrefixedName(std::string_view p,
                                                   std::string_view v) {
-  return std::string(p) + ":" + encodePN_LOCAL(v);
+  // TTL: [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  return encodePN_PREFIX(p) + ":" + encodePN_LOCAL(v);
 }
 
 // ____________________________________________________________________________
@@ -301,6 +308,36 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
+std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(std::string_view s) {
+  // TTL: [23]  STRING_LITERAL_QUOTE
+  //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_SINGLE_QUOTE
+  std::string tmp;
+  tmp.reserve(s.size() * 2);
+  tmp += "\'";
+  for (const auto c : s) {
+    switch (c) {
+      case '\'':  // #x22
+        tmp += "\\\'";
+        break;
+      case '\\':  // #x5C
+        tmp += "\\\\";
+        break;
+      case '\n':  // #x0A
+        tmp += "\\n";
+        break;
+      case '\r':  // #x0D
+        tmp += "\\r";
+        break;
+      default:
+        tmp += c;
+    }
+  }
+  tmp += "\'";
+  return tmp;
+}
+
+// ____________________________________________________________________________
+template <typename T>
 uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
   if ((c & k0x80) == 0) {
     return k1Byte;
@@ -320,6 +357,9 @@ uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
 // ____________________________________________________________________________
 template <typename T>
 uint8_t osm2ttl::ttl::Writer<T>::utf8Length(std::string_view s) {
+  if (s.empty()) {
+    return 0;
+  }
   return utf8Length(s[0]);
 }
 
@@ -347,19 +387,37 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s) {
       //  1111111 = 7F
       return (s[0] & k0x7F);
     default:
-      throw std::domain_error("Invalid UTF-8 Sequence: " + std::string{s});
+      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{s} + "'");
   }
 }
 
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2ttl::ttl::Writer<T>::UCHAR(char c) {
+  return UCHAR(static_cast<uint32_t>(c));
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2ttl::ttl::Writer<T>::UCHAR(std::string_view s) {
+  return UCHAR(utf8Codepoint(s));
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2ttl::ttl::Writer<T>::UCHAR(uint32_t codepoint) {
   // NT:  [10]  UCHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
   std::ostringstream tmp;
-  tmp << "\\u00" << std::hex << ((c & k0xF0) >> 4) << std::hex << (c & k0x0F);
+  tmp << std::setfill('0');
+  if (codepoint > 0xFFFFU) {
+    tmp << "\\U" << std::setw(8);
+  } else {
+    tmp << "\\u" << std::setw(4);
+  }
+  tmp << std::hex << codepoint;
   return tmp.str();
 }
 
@@ -375,13 +433,13 @@ std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(std::string_view s) {
   for (size_t pos = 0; pos < s.size(); ++pos) {
     // Force non-allowed chars to UCHAR
     auto c = s[pos];
-    if ((s[pos] >= 0 && c <= ' ') || c == '<' || c == '>' || c == '{' ||
+    if ((c >= 0x00 && c <= 0x20) || c == '<' || c == '>' || c == '{' ||
         c == '}' || c == '\"' || c == '|' || c == '^' || c == '`' ||
         c == '\\') {
-      tmp += UCHAR(s[pos]);
+      tmp += UCHAR(c);
       continue;
     }
-    uint8_t length = utf8Length(s[pos]);
+    uint8_t length = utf8Length(c);
     tmp += s.substr(pos, length);
     pos += length - 1;
   }
@@ -418,22 +476,96 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2ttl::ttl::Writer<T>::encodePERCENT(std::string_view s) {
+  return encodePERCENT(utf8Codepoint(s));
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2ttl::ttl::Writer<T>::encodePERCENT(uint32_t codepoint) {
   // TTL: [170s] PERCENT
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
+  std::vector<std::string> parts;
+  parts.reserve(4);
+
+  // Generate parts
   std::ostringstream tmp;
-  uint32_t c = utf8Codepoint(s);
-  uint32_t mask = MASK_BITS_OF_ONE_BYTE;
-  bool echo = false;
-  for (int shift = 3; shift >= 0; --shift) {
-    uint8_t v = (c & (mask << (shift * NUM_BITS_IN_BYTE)) >> shift);
-    echo |= (v > 0);
-    if (!echo) {
-      continue;
-    }
-    tmp << "%" << std::hex << ((v & k0xF0) >> NUM_BITS_IN_NIBBLE) << std::hex
-        << (v & k0x0F);
+  tmp << std::setfill('0');
+  do {
+    tmp << "%" << std::setw(2) << std::hex << (codepoint & 0xFFU);
+    parts.push_back(tmp.str());
+    tmp.seekp(0);
+    codepoint = codepoint >> 8;
+  } while (codepoint > 0);
+
+  // Revert order of string parts
+  std::reverse(parts.begin(), parts.end());
+  for (const auto& part: parts) {
+    tmp << part;
   }
   return tmp.str();
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2ttl::ttl::Writer<T>::encodePN_PREFIX(std::string_view s) {
+  // TTL: [167s] PN_LOCAL
+  //      https://www.w3.org/TR/turtle/#grammar-production-PN_PREFIX
+  std::string tmp;
+  tmp.reserve(s.size() * 2);
+  for (size_t pos = 0; pos < s.size(); ++pos) {
+    // PN_PREFIX     ::= PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
+    //
+    // PN_CHARS_U    ::= PN_CHARS_BASE | '_'
+    //
+    // PN_CHARS      ::= PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x036F] |
+    //                   [#x203F-#x2040]
+    //
+    // PN_CHARS_BASE ::= [A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] |
+    //                   [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] |
+    //                   [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] |
+    //                   [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] |
+    //                   [#x10000-#xEFFFF]
+
+    auto currentChar = s[pos];
+    // _, :, A-Z, a-z, and 0-9 always allowed:
+    if ((currentChar >= 'A' && currentChar <= 'Z') ||
+        (currentChar >= 'a' && currentChar <= 'z')) {
+      tmp += currentChar;
+      continue;
+    }
+    // First chars are never 0-9, _ or -
+    if (pos > 0) {
+      if ((currentChar >= '0' && currentChar <= '9') ||
+          currentChar == '_' || currentChar == '-') {
+        tmp += currentChar;
+        continue;
+      }
+      if (currentChar == '.' && pos < s.size() - 1) {
+        tmp += currentChar;
+        continue;
+      }
+    }
+    uint8_t length = utf8Length(currentChar);
+    std::string_view sub = s.substr(pos, length);
+    uint32_t c = utf8Codepoint(sub);
+    // Handle allowed Codepoints for CHARS_U
+    if ((c >= k0xC0 && c <= k0xD6) || (c >= k0xD8 && c <= k0xF6) ||
+        (c >= k0xF8 && c <= k0x2FF) || (c >= k0x370 && c <= k0x37D) ||
+        (c >= k0x37F && c <= k0x1FFF) || (c >= k0x200C && c <= k0x200D) ||
+        (c >= k0x2070 && c <= k0x218F) || (c >= k0x2C00 && c <= k0x2FEF) ||
+        (c >= k0x3001 && c <= k0xD7FF) || (c >= k0xF900 && c <= k0xFDCF) ||
+        (c >= k0xFDF0 && c <= k0xFFFD) || (c >= k0x10000 && c <= k0xEFFFF)) {
+      tmp += sub;
+    } else if (pos > 0 && (c == k0xB7 || (c >= k0x300 && c <= k0x36F) ||
+        (c >= k0x203F && c <= k0x2040))) {
+      tmp += sub;
+    } else {
+      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{sub} + "' '"+encodePERCENT(sub)+"'");
+    }
+    // Shift new pos according to utf8-bytecount
+    pos += length - 1;
+  }
+  return tmp;
 }
 
 // ____________________________________________________________________________
@@ -483,16 +615,17 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
       tmp += currentChar;
       continue;
     }
-    // First char is nevvr -
+    // First char is never -
     if (currentChar == '-' && pos > 0) {
       tmp += currentChar;
       continue;
     }
     // Handle PN_LOCAL_ESC
-    if (currentChar == '!' || (currentChar >= '#' && currentChar <= '@') ||
+    if (currentChar == '!' || (currentChar >= '#' && currentChar <= '/') ||
         currentChar == ';' || currentChar == '=' || currentChar == '?' ||
-        currentChar == '~') {
-      tmp += '\\' + currentChar;
+        currentChar == '@' || currentChar == '~') {
+      tmp += '\\';
+      tmp += currentChar;
       continue;
     }
     uint8_t length = utf8Length(currentChar);
@@ -510,8 +643,9 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
                            (c >= k0x203F && c <= k0x2040))) {
       tmp += sub;
     } else {
-      // Escape all other symbols
-      tmp += encodePERCENT(sub);
+      //TODO(lehmanna): handle all other symbols?
+      // PLX only allows "\X" and PERCENT "% HEX HEX" -> no utf8?
+      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{sub} + "' '"+encodePERCENT(sub)+"'");
     }
     // Shift new pos according to utf8-bytecount
     pos += length - 1;

@@ -55,6 +55,8 @@ static const int NUM_BITS_IN_NIBBLE = 4;
 
 #include <string>
 
+#include "gtest/gtest_prod.h"
+
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/osm/Area.h"
@@ -97,18 +99,56 @@ class Writer {
   // If suffix s is not empty, it will be appended as is.
   std::string generateLiteral(std::string_view v, std::string_view s);
 
+  std::string encodePN_PREFIX(std::string_view s);
+  FRIEND_TEST(WriterGrammarTTL, RULE_167s_PN_PREFIX);
+
   std::string encodePN_LOCAL(std::string_view s);
+  FRIEND_TEST(WriterGrammarTTL, RULE_168s_PN_LOCAL);
+
   uint32_t utf8Codepoint(std::string_view s);
+  FRIEND_TEST(WriterGrammar, UTF8_CODEPOINT_ASCII);
+  FRIEND_TEST(WriterGrammar, UTF8_CODEPOINT_UTF8);
  protected:
   std::string formatIRI(std::string_view p, std::string_view v);
+
   std::string STRING_LITERAL_QUOTE(std::string_view s);
+  FRIEND_TEST(WriterGrammarNT, RULE_9_STRING_LITERAL_QUOTE);
+  FRIEND_TEST(WriterGrammarTTL, RULE_22_STRING_LITERAL_QUOTE);
+
+  std::string STRING_LITERAL_SINGLE_QUOTE(std::string_view s);
+  FRIEND_TEST(WriterGrammarTTL, RULE_23_STRING_LITERAL_SINGLE_QUOTE);
+
   std::string IRIREF(std::string_view p, std::string_view v);
+  FRIEND_TEST(WriterGrammarNT, RULE_8_IRIREF);
+  FRIEND_TEST(WriterGrammarTTL, RULE_18_IRIREF);
+
   std::string PrefixedName(std::string_view p, std::string_view v);
+  FRIEND_TEST(WriterGrammarTTL, RULE_136s_PREFIXEDNAME);
+
   uint8_t utf8Length(char c);
   uint8_t utf8Length(std::string_view s);
+  FRIEND_TEST(WriterGrammar, UTF8_LENGTH_ASCII);
+  FRIEND_TEST(WriterGrammar, UTF8_LENGTH_UTF8);
+
   std::string UCHAR(char c);
+  std::string UCHAR(std::string_view s);
+  std::string UCHAR(uint32_t codepoint);
+  FRIEND_TEST(WriterGrammarNT, RULE_10_UCHAR_CODEPOINT);
+  FRIEND_TEST(WriterGrammarNT, RULE_10_UCHAR_ASCII);
+  FRIEND_TEST(WriterGrammarNT, RULE_10_UCHAR_UTF8);
+  FRIEND_TEST(WriterGrammarTTL, RULE_26_UCHAR_CODEPOINT);
+  FRIEND_TEST(WriterGrammarTTL, RULE_26_UCHAR_ASCII);
+  FRIEND_TEST(WriterGrammarTTL, RULE_26_UCHAR_UTF8);
+
   std::string encodeIRIREF(std::string_view s);
+  FRIEND_TEST(WriterGrammarNT, RULE_8_IRIREF_CONVERT);
+  FRIEND_TEST(WriterGrammarTTL, RULE_18_IRIREF_CONVERT);
+
   std::string encodePERCENT(std::string_view s);
+  std::string encodePERCENT(uint32_t codepoint);
+  FRIEND_TEST(WriterGrammarTTL, RULE_170s_PERCENT_CODEPOINT);
+  FRIEND_TEST(WriterGrammarTTL, RULE_170s_PERCENT_ASCII);
+  FRIEND_TEST(WriterGrammarTTL, RULE_170s_PERCENT_UTF8);
 
   // Config
   uint64_t _blankNodeCounter = 0;

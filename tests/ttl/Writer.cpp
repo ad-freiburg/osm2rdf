@@ -6,6 +6,8 @@
 #include "gtest/gtest.h"
 #include "osm2ttl/config/Config.h"
 
+namespace osm2ttl::ttl {
+
 // ____________________________________________________________________________
 TEST(WriterNT, resolvePrefix) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
@@ -525,4 +527,6 @@ TEST(WriterQLEVER, prefixedNameWith0x79) {
     const std::string res = w.generateIRI("osmrel", s);
     ASSERT_STREQ("osmrel:guidepost%7f", res.c_str());
   }
+}
+
 }
