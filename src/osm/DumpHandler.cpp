@@ -65,6 +65,12 @@ void osm2ttl::osm::DumpHandler<W>::relation(
   for (const auto& member : relation.members()) {
     const std::string& role = member.role();
     if (role != "outer" && role != "inner") {
+      std::string node = _writer->generateBlankNode();
+      _writer->writeTriple(
+          s,
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+                               "member"),
+          node);
       std::string type = osm2ttl::ttl::constants::NAMESPACE__OSM;
       if (member.type() == osm2ttl::osm::RelationMemberType::NODE) {
         type = osm2ttl::ttl::constants::NAMESPACE__OSM_NODE;
@@ -74,10 +80,15 @@ void osm2ttl::osm::DumpHandler<W>::relation(
         type = osm2ttl::ttl::constants::NAMESPACE__OSM_WAY;
       }
       _writer->writeTriple(
-          s,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
-                               role),
+          node,
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM,
+                               "id"),
           _writer->generateIRI(type, member.id()));
+      _writer->writeTriple(
+          node,
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM,
+                               "role"),
+          _writer->generateLiteral(type, ""));
     }
   }
 }

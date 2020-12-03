@@ -517,16 +517,4 @@ TEST(WriterQLEVER, generateLiteral) {
   }
 }
 
-// ____________________________________________________________________________
-TEST(WriterQLEVER, prefixedNameWith0x79) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
-  {
-    std::string s{"guidepost"};
-    s.append(1, 0x7F);
-    const std::string res = w.generateIRI("osmrel", s);
-    ASSERT_STREQ("osmrel:guidepost%7f", res.c_str());
-  }
-}
-
 }

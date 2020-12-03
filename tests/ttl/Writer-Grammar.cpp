@@ -4,7 +4,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/ttl/Writer.h"
 
@@ -18,7 +17,8 @@ TEST(WriterGrammarNT, RULE_8_IRIREF) {
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
 
   ASSERT_EQ("<prefixsuffix>", w.IRIREF("prefix", "suffix"));
-  ASSERT_EQ("<\\u003cprefix\\u003e\\u003csuffix\\u003e>", w.IRIREF("<prefix>", "<suffix>"));
+  ASSERT_EQ("<\\u003cprefix\\u003e\\u003csuffix\\u003e>",
+            w.IRIREF("<prefix>", "<suffix>"));
 }
 
 // ____________________________________________________________________________
@@ -30,9 +30,11 @@ TEST(WriterGrammarNT, RULE_8_IRIREF_CONVERT) {
 
   ASSERT_EQ("", w.encodeIRIREF(""));
   ASSERT_EQ("allöwed", w.encodeIRIREF("allöwed"));
-  ASSERT_EQ("\\u003c\\u003e\\u0022\\u007b\\u007d\\u007c\\u005e\\u0060\\u005c", w.encodeIRIREF("<>\"{}|^`\\"));
+  ASSERT_EQ("\\u003c\\u003e\\u0022\\u007b\\u007d\\u007c\\u005e\\u0060\\u005c",
+            w.encodeIRIREF("<>\"{}|^`\\"));
   using namespace std::literals::string_literals;
-  ASSERT_EQ("\\u0000\\u0001\\u0019\\u0020", w.encodeIRIREF("\u0000\u0001\u0019\u0020"s));
+  ASSERT_EQ("\\u0000\\u0001\\u0019\\u0020",
+            w.encodeIRIREF("\u0000\u0001\u0019\u0020"s));
 }
 
 // ____________________________________________________________________________
@@ -112,7 +114,8 @@ TEST(WriterGrammarTTL, RULE_18_IRIREF) {
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("<prefixsuffix>", w.IRIREF("prefix", "suffix"));
-  ASSERT_EQ("<\\u003cprefix\\u003e\\u003csuffix\\u003e>", w.IRIREF("<prefix>", "<suffix>"));
+  ASSERT_EQ("<\\u003cprefix\\u003e\\u003csuffix\\u003e>",
+            w.IRIREF("<prefix>", "<suffix>"));
 }
 
 // ____________________________________________________________________________
@@ -124,9 +127,11 @@ TEST(WriterGrammarTTL, RULE_18_IRIREF_CONVERT) {
 
   ASSERT_EQ("", w.encodeIRIREF(""));
   ASSERT_EQ("allöwed", w.encodeIRIREF("allöwed"));
-  ASSERT_EQ("\\u003c\\u003e\\u0022\\u007b\\u007d\\u007c\\u005e\\u0060\\u005c", w.encodeIRIREF("<>\"{}|^`\\"));
+  ASSERT_EQ("\\u003c\\u003e\\u0022\\u007b\\u007d\\u007c\\u005e\\u0060\\u005c",
+            w.encodeIRIREF("<>\"{}|^`\\"));
   using namespace std::literals::string_literals;
-  ASSERT_EQ("\\u0000\\u0001\\u0019\\u0020", w.encodeIRIREF("\u0000\u0001\u0019\u0020"s));
+  ASSERT_EQ("\\u0000\\u0001\\u0019\\u0020",
+            w.encodeIRIREF("\u0000\u0001\u0019\u0020"s));
 }
 
 // ____________________________________________________________________________
@@ -370,7 +375,6 @@ TEST(WriterGrammar, UTF8_LENGTH_ASCII) {
   ASSERT_EQ(1, w.utf8Length('A'));
   ASSERT_EQ(1, w.utf8Length('a'));
   ASSERT_EQ(1, w.utf8Length('\u007f'));  // DEL
-
 }
 
 // ____________________________________________________________________________

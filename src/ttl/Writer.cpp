@@ -6,8 +6,8 @@
 #include <osm2ttl/ttl/Constants.h>
 
 #include <algorithm>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -308,7 +308,8 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(std::string_view s) {
+std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(
+    std::string_view s) {
   // TTL: [23]  STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_SINGLE_QUOTE
   std::string tmp;
@@ -387,7 +388,8 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s) {
       //  1111111 = 7F
       return (s[0] & k0x7F);
     default:
-      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{s} + "'");
+      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{s} +
+                              "'");
   }
 }
 
@@ -499,7 +501,7 @@ std::string osm2ttl::ttl::Writer<T>::encodePERCENT(uint32_t codepoint) {
 
   // Revert order of string parts
   std::reverse(parts.begin(), parts.end());
-  for (const auto& part: parts) {
+  for (const auto& part : parts) {
     tmp << part;
   }
   return tmp.str();
@@ -535,8 +537,8 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_PREFIX(std::string_view s) {
     }
     // First chars are never 0-9, _ or -
     if (pos > 0) {
-      if ((currentChar >= '0' && currentChar <= '9') ||
-          currentChar == '_' || currentChar == '-') {
+      if ((currentChar >= '0' && currentChar <= '9') || currentChar == '_' ||
+          currentChar == '-') {
         tmp += currentChar;
         continue;
       }
@@ -557,10 +559,12 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_PREFIX(std::string_view s) {
         (c >= k0xFDF0 && c <= k0xFFFD) || (c >= k0x10000 && c <= k0xEFFFF)) {
       tmp += sub;
     } else if (pos > 0 && (c == k0xB7 || (c >= k0x300 && c <= k0x36F) ||
-        (c >= k0x203F && c <= k0x2040))) {
+                           (c >= k0x203F && c <= k0x2040))) {
       tmp += sub;
     } else {
-      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{sub} + "' '"+encodePERCENT(sub)+"'");
+      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{sub} +
+                              "' '" + encodePERCENT(sub) +
+                              "' A:" + std::string(s));
     }
     // Shift new pos according to utf8-bytecount
     pos += length - 1;
@@ -643,9 +647,11 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
                            (c >= k0x203F && c <= k0x2040))) {
       tmp += sub;
     } else {
-      //TODO(lehmanna): handle all other symbols?
+      // TODO(lehmanna): handle all other symbols?
       // PLX only allows "\X" and PERCENT "% HEX HEX" -> no utf8?
-      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{sub} + "' '"+encodePERCENT(sub)+"'");
+      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{sub} +
+                              "' '" + encodePERCENT(sub) +
+                              "' B:" + std::string(s));
     }
     // Shift new pos according to utf8-bytecount
     pos += length - 1;
