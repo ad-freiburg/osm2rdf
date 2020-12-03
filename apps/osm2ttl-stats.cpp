@@ -63,8 +63,7 @@ class OsmiumIdHandler : public osmium::handler::Handler {
       reader.close();
       delete locationHandler;
       std::cerr << osm2ttl::util::currentTimeFormatted()
-                << "... done reading (libosmium)"
-                << std::endl;
+                << "... done reading (libosmium)" << std::endl;
 
       std::cerr << osm2ttl::util::currentTimeFormatted()
                 << "max area id:     " << _maxAreaId << " "
@@ -78,22 +77,35 @@ class OsmiumIdHandler : public osmium::handler::Handler {
                 << osm2ttl::util::formattedTimeSpacer
                 << "max way id:      " << _maxWayId << " " << idInfo(_maxWayId)
                 << std::endl;
+
+      std::cerr << osm2ttl::util::currentTimeFormatted()
+                << "num areas:     " << _countAreas << "\n"
+                << osm2ttl::util::formattedTimeSpacer
+                << "num nodes:     " << _countNodes << "\n"
+                << osm2ttl::util::formattedTimeSpacer
+                << "num relations: " << _countRelations << "\n"
+                << osm2ttl::util::formattedTimeSpacer
+                << "num ways:      " << _countWays << std::endl;
     }
   }
 
   void area(const osmium::Area& area) {
+    _countAreas++;
     _maxAreaId = std::max(_maxAreaId, area.positive_id());
   }
 
   void node(const osmium::Node& node) {
+    _countNodes++;
     _maxNodeId = std::max(_maxNodeId, node.positive_id());
   }
 
   void relation(const osmium::Relation& relation) {
+    _countRelations++;
     _maxRelationId = std::max(_maxRelationId, relation.positive_id());
   }
 
   void way(const osmium::Way& way) {
+    _countWays++;
     _maxWayId = std::max(_maxWayId, way.positive_id());
   }
 
@@ -121,16 +133,20 @@ class OsmiumIdHandler : public osmium::handler::Handler {
 
  protected:
   osm2ttl::config::Config _config;
+  uint64_t _countAreas = 0;
   uint64_t _maxAreaId = 0;
+  uint64_t _countNodes = 0;
   uint64_t _maxNodeId = 0;
+  uint64_t _countRelations = 0;
   uint64_t _maxRelationId = 0;
+  uint64_t _countWays = 0;
   uint64_t _maxWayId = 0;
 };
 
 // ____________________________________________________________________________
 int main(int argc, char** argv) {
   std::cerr << osm2ttl::util::currentTimeFormatted()
-            << "osm2ttl-maxid :: " << osm2ttl::version::GIT_INFO << " :: BEGIN"
+            << "osm2ttl-stats :: " << osm2ttl::version::GIT_INFO << " :: BEGIN"
             << std::endl;
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   config.fromArgs(argc, argv);
@@ -141,13 +157,13 @@ int main(int argc, char** argv) {
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
     std::cerr << osm2ttl::util::currentTimeFormatted()
-              << "osm2ttl-maxid :: " << osm2ttl::version::GIT_INFO
+              << "osm2ttl-stats :: " << osm2ttl::version::GIT_INFO
               << " :: ERROR" << std::endl;
     std::cerr << e.what() << std::endl;
     std::exit(1);
   }
   std::cerr << osm2ttl::util::currentTimeFormatted()
-            << "osm2ttl-maxid :: " << osm2ttl::version::GIT_INFO
+            << "osm2ttl-stats :: " << osm2ttl::version::GIT_INFO
             << " :: FINISHED" << std::endl;
   std::exit(0);
 }
