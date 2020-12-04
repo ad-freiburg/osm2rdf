@@ -86,6 +86,8 @@ osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config,
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "node");
   osm2ttl::ttl::constants::IRI__OSM_RELATION =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "relation");
+  osm2ttl::ttl::constants::IRI__OSM_TAG =
+      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "tag");
   osm2ttl::ttl::constants::IRI__OSM_WAY =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "way");
   osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA =

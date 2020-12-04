@@ -42,6 +42,7 @@ inline std::string IRI__OSMWAY_UNIQUENODECOUNT;
 inline std::string IRI__OSM_ENVELOPE;
 inline std::string IRI__OSM_NODE;
 inline std::string IRI__OSM_RELATION;
+inline std::string IRI__OSM_TAG;
 inline std::string IRI__OSM_WAY;
 inline std::string IRI__OSM_WIKIPEDIA;
 inline std::string IRI__RDF_TYPE;

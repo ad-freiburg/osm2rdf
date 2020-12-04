@@ -81,13 +81,11 @@ void osm2ttl::osm::DumpHandler<W>::relation(
       }
       _writer->writeTriple(
           node,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM,
-                               "id"),
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "id"),
           _writer->generateIRI(type, member.id()));
       _writer->writeTriple(
           node,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM,
-                               "role"),
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "role"),
           _writer->generateLiteral(type, ""));
     }
   }
@@ -208,10 +206,28 @@ void osm2ttl::osm::DumpHandler<W>::writeTag(const std::string& s,
         _writer->generateLiteral(
             value, "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
   } else {
-    _writer->writeTriple(
-        s,
-        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
-        _writer->generateLiteral(value, ""));
+    try {
+      _writer->writeTriple(
+          s,
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
+          _writer->generateLiteral(value, ""));
+    } catch (const std::domain_error&) {
+      std::string blankNode = _writer->generateBlankNode();
+      _writer->writeTriple(
+          s,
+          osm2ttl::ttl::constants::IRI__OSM_TAG,
+          blankNode);
+      _writer->writeTriple(
+          blankNode,
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+                               "key"),
+          _writer->generateLiteral(key, ""));
+      _writer->writeTriple(
+          blankNode,
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+                               "value"),
+          _writer->generateLiteral(value, ""));
+    }
   }
 }
 
