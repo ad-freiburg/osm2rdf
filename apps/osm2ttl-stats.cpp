@@ -177,9 +177,9 @@ class OsmiumIdHandler : public osmium::handler::Handler {
   uint64_t _countWays = 0;
   uint64_t _maxWayId = 0;
 
-  std::set<uint64_t> _requiredNodes;
-  std::set<uint64_t> _requiredRelations;
-  std::set<uint64_t> _requiredWays;
+  std::unordered_set<uint64_t> _requiredNodes;
+  std::unordered_set<uint64_t> _requiredRelations;
+  std::unordered_set<uint64_t> _requiredWays;
 };
 
 // ____________________________________________________________________________
