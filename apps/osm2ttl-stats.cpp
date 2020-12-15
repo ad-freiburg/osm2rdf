@@ -132,6 +132,8 @@ class OsmiumIdHandler : public osmium::handler::Handler {
         case osmium::item_type::way:
           _requiredWays.insert(member.positive_ref());
           break;
+        default:
+          break;
       }
     }
   }
