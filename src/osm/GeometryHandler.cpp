@@ -165,9 +165,6 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     size_t skippedByDAG = 0;
     size_t skippedBySize = 0;
     progressBar.update(entryCount);
-    // Shuffle nodes to improve parallel workloads
-    /*std::shuffle(_spatialStorageArea.begin(), _spatialStorageArea.end(),
-                 std::mt19937(std::random_device()()));*/
     std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
               [](const auto& a, const auto& b) {
                 return std::get<4>(a) < std::get<4>(b);
@@ -386,9 +383,6 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     size_t containsOk = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
-    // Shuffle nodes to improve parallel workloads
-    std::shuffle(_spatialStorageNode.begin(), _spatialStorageNode.end(),
-                 std::mt19937(std::random_device()()));
 #pragma omp parallel for shared(                                            \
     osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, spatialIndex,             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                            \
@@ -503,13 +497,6 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
     size_t containsOkEnvelope = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
-    // Shuffle ways to improve parallel workloads
-    /*std::shuffle(_spatialStorageWay.begin(), _spatialStorageWay.end(),
-                 std::mt19937(std::random_device()()));*/
-    std::sort(_spatialStorageWay.begin(), _spatialStorageWay.end(),
-              [](const auto& a, const auto& b) {
-                return static_cast<WayNodeList>(std::get<3>(a)).size() < static_cast<WayNodeList>(std::get<3>(b)).size();
-              });
 #pragma omp parallel for shared(                                             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData,                   \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                        \
@@ -736,14 +723,6 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     size_t skippedByDAG = 0;
     size_t containsOkEnvelope = 0;
     progressBar.update(entryCount);
-    // Shuffle ways to improve parallel workloads
-    /*std::shuffle(_spatialStorageUnnamedArea.begin(),
-                 _spatialStorageUnnamedArea.end(),
-                 std::mt19937(std::random_device()()));*/
-    std::sort(_spatialStorageUnnamedArea.begin(), _spatialStorageUnnamedArea.end(),
-              [](const auto& a, const auto& b) {
-                return std::get<4>(a) < std::get<4>(b);
-              });
 #pragma omp parallel for shared(                                             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                        \
