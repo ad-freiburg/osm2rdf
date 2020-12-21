@@ -39,9 +39,9 @@ typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Node::id_t,
                    osm2ttl::geometry::Node>
     SpatialNodeValue;
 
+typedef std::vector<osm2ttl::osm::Node::id_t> WayNodeList;
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Way::id_t,
-                   osm2ttl::geometry::Way,
-                   std::vector<osm2ttl::osm::Node::id_t>>
+                   osm2ttl::geometry::Way, WayNodeList>
     SpatialWayValue;
 typedef boost::geometry::index::rtree<SpatialAreaValue,
                                       boost::geometry::index::quadratic<16>>

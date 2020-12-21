@@ -166,11 +166,15 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     size_t skippedBySize = 0;
     progressBar.update(entryCount);
     // Shuffle nodes to improve parallel workloads
-    std::shuffle(_spatialStorageArea.begin(), _spatialStorageArea.end(),
-                 std::mt19937(std::random_device()()));
+    /*std::shuffle(_spatialStorageArea.begin(), _spatialStorageArea.end(),
+                 std::mt19937(std::random_device()()));*/
+    std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
+              [](const auto& a, const auto& b) {
+                return std::get<4>(a) < std::get<4>(b);
+              });
 #pragma omp parallel for shared(spatialIndex, tmpDirectedAreaGraph,           \
     entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
-    contains, containsOk) default(none) schedule(guided)
+    contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
@@ -320,7 +324,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                    \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA,                   \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY_AREA, progressBar,  \
-    entryCount) default(none) schedule(guided)
+    entryCount) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
     const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
@@ -394,7 +398,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
     directedAreaGraph, progressBar, entryCount) reduction(+:checks,         \
-    skippedByDAG, contains, containsOk) default(none) schedule(guided)
+    skippedByDAG, contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _spatialStorageNode.size(); i++) {
       const auto& node = _spatialStorageNode[i];
       const auto& nodeEnvelope = std::get<0>(node);
@@ -500,8 +504,12 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
     // Shuffle ways to improve parallel workloads
-    std::shuffle(_spatialStorageWay.begin(), _spatialStorageWay.end(),
-                 std::mt19937(std::random_device()()));
+    /*std::shuffle(_spatialStorageWay.begin(), _spatialStorageWay.end(),
+                 std::mt19937(std::random_device()()));*/
+    std::sort(_spatialStorageWay.begin(), _spatialStorageWay.end(),
+              [](const auto& a, const auto& b) {
+                return static_cast<WayNodeList>(std::get<3>(a)).size() < static_cast<WayNodeList>(std::get<3>(b)).size();
+              });
 #pragma omp parallel for shared(                                             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData,                   \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                        \
@@ -511,7 +519,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
     spatialIndex,  progressBar, entryCount) reduction(+:checks,skippedByDAG, \
     intersectsByNodeInfo, intersects, intersectsOk, contains, containsOk, containsOkEnvelope)    \
-    default(none) schedule(guided)
+    default(none) schedule(dynamic)
     for (size_t i = 0; i < _spatialStorageWay.size(); i++) {
       const auto& way = _spatialStorageWay[i];
       const auto& wayEnvelope = std::get<0>(way);
@@ -729,9 +737,13 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     size_t containsOkEnvelope = 0;
     progressBar.update(entryCount);
     // Shuffle ways to improve parallel workloads
-    std::shuffle(_spatialStorageUnnamedArea.begin(),
+    /*std::shuffle(_spatialStorageUnnamedArea.begin(),
                  _spatialStorageUnnamedArea.end(),
-                 std::mt19937(std::random_device()()));
+                 std::mt19937(std::random_device()()));*/
+    std::sort(_spatialStorageUnnamedArea.begin(), _spatialStorageUnnamedArea.end(),
+              [](const auto& a, const auto& b) {
+                return std::get<4>(a) < std::get<4>(b);
+              });
 #pragma omp parallel for shared(                                             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                        \
@@ -741,7 +753,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
     spatialIndex,  progressBar, entryCount) reduction(+:checks,skippedByDAG, \
     intersects, intersectsOk, contains, containsOk, containsOkEnvelope)      \
-    default(none) schedule(guided)
+    default(none) schedule(dynamic)
     for (size_t i = 0; i < _spatialStorageUnnamedArea.size(); i++) {
       const auto& entry = _spatialStorageUnnamedArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
