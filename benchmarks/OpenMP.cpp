@@ -68,7 +68,13 @@ void run(size_t n, omp_sched_t st, int ss) {
     std::ostringstream stringStream2;
     stringStream2 << "Thread"
                   << " " << i;
-    std::cout << "  " << std::setw(48) << std::left << stringStream2.str()
+    std::ostringstream stringStream3;
+
+    for (const auto v : result[i]) {
+      stringStream3 << v << " ";
+    }
+    std::cout << "  " << std::setw(14) << std::left << stringStream2.str()
+              << std::setw(34) << std::left << stringStream3.str().substr(0, 33)
               << std::setw(12) << std::right << iterations[i] << std::setw(14)
               << std::fixed << std::setprecision(3) << timing[i].count()
               << " ms" << std::endl;
