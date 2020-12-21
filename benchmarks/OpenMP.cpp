@@ -60,7 +60,7 @@ void run(size_t n, omp_sched_t st, int ss) {
       stringStream << "?";
       break;
   }
-  stringStream << "_" << n;
+  stringStream << "_" << n << "_" << ss;
   std::cout << std::setw(50) << std::left << stringStream.str() << std::setw(12)
             << std::right << "" << std::setw(14) << std::fixed
             << std::setprecision(3) << dur.count() << " ms" << std::endl;
@@ -76,7 +76,8 @@ void run(size_t n, omp_sched_t st, int ss) {
 }
 
 int main() {
-  std::vector<int> runs{117, 265, 567, 934};
+  std::vector<int> runs{117, 265, 567, 934, 1<<4, 1<<6, 1<<8, 1<<9, 1<<10};
+  std::sort(runs.begin(), runs.end());
   std::cout << "---------------------------------------------------------------"
                "----------------"
             << std::endl;
@@ -88,12 +89,21 @@ int main() {
             << std::endl;
   for (const auto n : runs) {
     run(n, omp_sched_static, 0);
+    for (size_t i = 1; i < (n / omp_get_max_threads()); i *= 2) {
+      run(n, omp_sched_static, i);
+    }
   }
   for (const auto n : runs) {
     run(n, omp_sched_dynamic, 0);
+    for (size_t i = 1; i < (n / omp_get_max_threads()); i *= 2) {
+      run(n, omp_sched_dynamic, i);
+    }
   }
   for (const auto n : runs) {
     run(n, omp_sched_guided, 0);
+    for (size_t i = 1; i < (n / omp_get_max_threads()); i *= 2) {
+      run(n, omp_sched_guided, i);
+    }
   }
   return 0;
 }
