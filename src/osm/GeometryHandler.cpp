@@ -170,7 +170,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
                  std::mt19937(std::random_device()()));
 #pragma omp parallel for shared(spatialIndex, tmpDirectedAreaGraph,           \
     entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
-    contains, containsOk) default(none)
+    contains, containsOk) default(none) schedule(guided)
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
@@ -320,7 +320,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                    \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA,                   \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY_AREA, progressBar,  \
-    entryCount) default(none)
+    entryCount) default(none) schedule(guided)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
     const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
@@ -394,7 +394,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
     directedAreaGraph, progressBar, entryCount) reduction(+:checks,         \
-    skippedByDAG, contains, containsOk) default(none)
+    skippedByDAG, contains, containsOk) default(none) schedule(guided)
     for (size_t i = 0; i < _spatialStorageNode.size(); i++) {
       const auto& node = _spatialStorageNode[i];
       const auto& nodeEnvelope = std::get<0>(node);
@@ -511,7 +511,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
     spatialIndex,  progressBar, entryCount) reduction(+:checks,skippedByDAG, \
     intersectsByNodeInfo, intersects, intersectsOk, contains, containsOk, containsOkEnvelope)    \
-    default(none)
+    default(none) schedule(guided)
     for (size_t i = 0; i < _spatialStorageWay.size(); i++) {
       const auto& way = _spatialStorageWay[i];
       const auto& wayEnvelope = std::get<0>(way);
@@ -741,7 +741,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
     spatialIndex,  progressBar, entryCount) reduction(+:checks,skippedByDAG, \
     intersects, intersectsOk, contains, containsOk, containsOkEnvelope)      \
-    default(none)
+    default(none) schedule(guided)
     for (size_t i = 0; i < _spatialStorageUnnamedArea.size(); i++) {
       const auto& entry = _spatialStorageUnnamedArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
