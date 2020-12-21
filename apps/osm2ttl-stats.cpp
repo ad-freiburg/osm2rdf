@@ -191,6 +191,7 @@ int main(int argc, char** argv) {
             << std::endl;
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   config.fromArgs(argc, argv);
+  std::cerr << config.getInfo(osm2ttl::util::formattedTimeSpacer) << std::endl;
 
   try {
     OsmiumIdHandler osmiumIdHandler{config};

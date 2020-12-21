@@ -9,6 +9,7 @@
 
 #include "osm2ttl/ttl/Format.h"
 #include "popl.hpp"
+#include "omp.h"
 
 // ____________________________________________________________________________
 void osm2ttl::config::Config::load(const std::string& filename) {}
@@ -67,6 +68,8 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     oss << "\n"
         << prefix << "Storing statistics about geometry calculations - SLOW!";
   }
+  oss << "\n" << prefix << "--- OpenMP ---";
+  oss << "\n" << prefix << "Max Threads: " << omp_get_max_threads();
   return oss.str();
 }
 
