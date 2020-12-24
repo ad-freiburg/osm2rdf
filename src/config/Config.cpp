@@ -43,18 +43,18 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n" << prefix << "Ignoring ways in dump";
     }
   }
-  oss << "\n" << prefix << "--- Relations ---";
-  if (noRelationDump) {
-    oss << "\n" << prefix << "Not dumping relations";
+  oss << "\n" << prefix << "--- Contains ---";
+  if (noContains) {
+    oss << "\n" << prefix << "Not dumping any geometric relations";
   } else {
     if (noAreaDump) {
-      oss << "\n" << prefix << "Ignoring areas in relations";
+      oss << "\n" << prefix << "Ignoring areas in geometric relations";
     }
     if (noNodeDump) {
-      oss << "\n" << prefix << "Ignoring nodes in relations";
+      oss << "\n" << prefix << "Ignoring nodes in geometric relations";
     }
     if (noWayDump) {
-      oss << "\n" << prefix << "Ignoring ways in relations";
+      oss << "\n" << prefix << "Ignoring ways in geometric relations";
     }
     if (addInverseRelationDirection) {
       oss << "\n" << prefix << "Adding ogc:contained_by and ogc:intersected_by";
