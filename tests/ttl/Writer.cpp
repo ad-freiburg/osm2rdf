@@ -117,7 +117,7 @@ TEST(WriterNT, generateBlankNode) {
 
 TEST(WriterTTL, generateBlankNode) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
     ASSERT_STREQ("_:0", res.c_str());
@@ -134,7 +134,7 @@ TEST(WriterTTL, generateBlankNode) {
 
 TEST(WriterQLEVER, generateBlankNode) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
     ASSERT_STREQ("_:0", res.c_str());
