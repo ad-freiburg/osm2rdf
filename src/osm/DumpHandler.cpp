@@ -3,6 +3,7 @@
 
 #include "osm2ttl/osm/DumpHandler.h"
 
+#include <iostream>
 #include <iomanip>
 
 #include "boost/geometry.hpp"
@@ -150,27 +151,51 @@ template <typename G>
 void osm2ttl::osm::DumpHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
-  const double onePercent = 0.01;
-  G geom{g};
+  G geom;
+  // const double onePercent = 0.01;
+  // G geom; // {g};
+  auto wkt_precision = _config.wktPrecision;
+  bool verbose = false;
   if (_config.wktSimplify > 0 &&
       boost::geometry::num_points(g) > _config.wktSimplify) {
-    osm2ttl::geometry::Box box;
-    boost::geometry::envelope(geom, box);
+    // NOTE(Hannah): Box computed by envelope has infinite coordinates. When
+    // computing max_corner - min_corner one obtains -inf. When using
+    // boost:geometry:perimeter (on the box), one gets 0. 
+    //
+    // osm2ttl::geometry::Box box;
+    // boost::geometry::envelope(geom, box);
+
+    // On osm-saarland, for *every* osmrel or osmway, exactly one of perimeter
+    // and length was zero. My guess: it has a perimeter if and only if it is an
+    // area (which can happen for both osmrel or osmway), otherwise the
+    // perimeter is 0 and it has a length. Bottom line: just take the MAX:
+    //
+    // NOTE: The factor 0.125 is there because on osm-saarland that gave an average
+    // number of nodes in the simplified geometry that was close to wktSimplify.
+    auto perimeter_or_length = std::max(
+        boost::geometry::perimeter(g), boost::geometry::length(g));
+    if (verbose)
+      std::cout << "INFO: Geometry of " << s << " has perimeter or length "
+                << perimeter_or_length << std::endl;
     boost::geometry::simplify(
-        g, geom,
-        std::min(
-            boost::geometry::get<boost::geometry::max_corner, 0>(box) -
-                boost::geometry::get<boost::geometry::min_corner, 0>(box),
-            boost::geometry::get<boost::geometry::max_corner, 1>(box) -
-                boost::geometry::get<boost::geometry::min_corner, 1>(box)) /
-            (onePercent * _config.wktDeviation));
+        g, geom, 0.125 * perimeter_or_length / _config.wktSimplify);
     // If empty geometry -> use original
     if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
+      if (verbose)
+        std::cout << "WARN: Geometry for " << s << " could not be simplified"
+                  << ", #points = " << boost::geometry::num_points(g)
+                  << std::endl;
       geom = g;
+    } else {
+      wkt_precision = 2;
+      if (verbose)
+        std::cout << "INFO: Simplified geometry for " << s << ", #points "
+                  << boost::geometry::num_points(g) << " -> "
+                  << boost::geometry::num_points(geom) << std::endl;
     }
   }
   std::ostringstream tmp;
-  tmp << std::fixed << std::setprecision(_config.wktPrecision)
+  tmp << std::fixed << std::setprecision(wkt_precision)
       << boost::geometry::wkt(geom);
   _writer->writeTriple(
       s, p,
