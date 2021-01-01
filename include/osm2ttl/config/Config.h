@@ -49,7 +49,7 @@ struct Config {
   // Output modifiers
   uint16_t wktSimplify = 250;
   uint8_t wktDeviation = 5;
-  uint8_t wktPrecision = 12;
+  uint8_t wktPrecision = 4;
 
   // Output, empty for stdout
   std::filesystem::path output;

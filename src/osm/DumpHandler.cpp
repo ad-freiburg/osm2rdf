@@ -151,34 +151,38 @@ template <typename G>
 void osm2ttl::osm::DumpHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
-  G geom;
-  // const double onePercent = 0.01;
-  // G geom; // {g};
-  auto wkt_precision = _config.wktPrecision;
-  bool verbose = false;
-  if (_config.wktSimplify > 0 &&
-      boost::geometry::num_points(g) > _config.wktSimplify) {
-    // NOTE(Hannah): Box computed by envelope has infinite coordinates. When
-    // computing max_corner - min_corner one obtains -inf. When using
-    // boost:geometry:perimeter (on the box), one gets 0. 
-    //
-    // osm2ttl::geometry::Box box;
-    // boost::geometry::envelope(geom, box);
+  G geom{g};
+  auto num_points = boost::geometry::num_points(g);
 
-    // On osm-saarland, for *every* osmrel or osmway, exactly one of perimeter
-    // and length was zero. My guess: it has a perimeter if and only if it is an
-    // area (which can happen for both osmrel or osmway), otherwise the
-    // perimeter is 0 and it has a length. Bottom line: just take the MAX:
+  // For shapes with few nodes, be more precise (5 digits after the dot is
+  // very precise: one degree of latitude or longitude corresponds to roughly
+  // 100 km, so 1e-5 of it is about 1m).
+  uint8_t wkt_precision = num_points <= 20 ? 5 : 4;
+  // auto wkt_precision = _config.wktPrecision;
+  bool verbose = false;
+  if (_config.wktSimplify > 0 && num_points > _config.wktSimplify) {
+    // NOTE(Hannah): The following are important to know
     //
-    // NOTE: The factor 0.125 is there because on osm-saarland that gave an average
-    // number of nodes in the simplified geometry that was close to wktSimplify.
+    // 1. When computing the bounding box with "osm2ttl::geometry::Box box;
+    // boost::geometry::envelope(geom, box);", the corners have infinite
+    // coordinates and boost:geometry:perimeter on the box yields 0.
+
+    // 2. For every OSM way or relations, exactly one of the perimeter or the
+    // length is zero. My theory: if it's an area, perimeter is defined,
+    // otherwise length. Therefore, we simply take the MAX of the two.
+    //
+    // 3. The fourth argument to boost::geometry::simplify is about the target
+    // distance between two nodes on the boundary. For example, when the length
+    // of the shape is 10km, and wktSimplify is 100 (at most that many points),
+    // we require a max distance of 0.1 * 10.000m / 100 = 10m. TODO: why 0.1 and
+    // not closer to 1?
     auto perimeter_or_length = std::max(
         boost::geometry::perimeter(g), boost::geometry::length(g));
     if (verbose)
       std::cout << "INFO: Geometry of " << s << " has perimeter or length "
                 << perimeter_or_length << std::endl;
     boost::geometry::simplify(
-        g, geom, 0.125 * perimeter_or_length / _config.wktSimplify);
+        g, geom, 0.1 * perimeter_or_length / _config.wktSimplify);
     // If empty geometry -> use original
     if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
       if (verbose)
@@ -187,7 +191,7 @@ void osm2ttl::osm::DumpHandler<W>::writeBoostGeometry(const std::string& s,
                   << std::endl;
       geom = g;
     } else {
-      wkt_precision = 2;
+      wkt_precision = 4;
       if (verbose)
         std::cout << "INFO: Simplified geometry for " << s << ", #points "
                   << boost::geometry::num_points(g) << " -> "
