@@ -79,14 +79,14 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
   {
     if (area.hasName()) {
       _spatialStorageAreaIndex[area.id()] = _spatialStorageArea.size();
-      _spatialStorageArea.emplace_back(area.envelope(), area.id(), area.geom(),
-                                       area.objId(), area.geomArea(),
-                                       area.fromWay());
+      _spatialStorageArea.push_back(
+          SpatialAreaValue(area.envelope(), area.id(), area.geom(),
+                           area.objId(), area.geomArea(), area.fromWay()));
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
-      _spatialStorageUnnamedArea.emplace_back(area.envelope(), area.id(),
-                                              area.geom(), area.objId(),
-                                              area.geomArea(), area.fromWay());
+      _spatialStorageUnnamedArea.push_back(
+          SpatialAreaValue(area.envelope(), area.id(), area.geom(),
+                           area.objId(), area.geomArea(), area.fromWay()));
     }
   }
 }
@@ -95,7 +95,8 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::node(const osm2ttl::osm::Node& node) {
 #pragma omp critical(nodeDataInsert)
-  _spatialStorageNode.emplace_back(node.envelope(), node.id(), node.geom());
+  _spatialStorageNode.push_back(
+      SpatialNodeValue(node.envelope(), node.id(), node.geom()));
 }
 
 // ____________________________________________________________________________
@@ -107,8 +108,8 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osm2ttl::osm::Way& way) {
     nodeIds.push_back(nodeRef.id());
   }
 #pragma omp critical(wayDataInsert)
-  _spatialStorageWay.emplace_back(way.envelope(), way.id(), way.geom(),
-                                  nodeIds);
+  _spatialStorageWay.push_back(
+      SpatialWayValue(way.envelope(), way.id(), way.geom(), nodeIds));
 }
 
 // ____________________________________________________________________________
@@ -153,6 +154,15 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
   osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t> tmpDirectedAreaGraph;
   {
     std::cerr << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " Sorting "
+              << _spatialStorageArea.size() << " areas ... " << std::endl;
+    std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
+              [](const auto& a, const auto& b) {
+                return std::get<4>(a) < std::get<4>(b);
+              });
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done "
+              << std::endl;
+
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Generating non-reduced DAG from "
               << _spatialStorageArea.size() << " areas ... " << std::endl;
@@ -165,10 +175,6 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     size_t skippedByDAG = 0;
     size_t skippedBySize = 0;
     progressBar.update(entryCount);
-    std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
-              [](const auto& a, const auto& b) {
-                return std::get<4>(a) < std::get<4>(b);
-              });
 #pragma omp parallel for shared(spatialIndex, tmpDirectedAreaGraph,           \
     entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
     contains, containsOk) default(none) schedule(dynamic)

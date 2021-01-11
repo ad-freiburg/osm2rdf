@@ -14,18 +14,19 @@ target_include_directories(osm2ttl_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../
 # We need this directory, and users of our library will need it too
 target_include_directories(osm2ttl_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../include")
 
-# This depends on (header only) boost
+# This depends on (header only) boost (Boost::boost)
 target_link_libraries(osm2ttl_library PRIVATE
-  Boost::boost
-  Threads::Threads
-  ${EXPAT_LIBRARIES}
-  ${BZIP2_LIBRARIES}
-  ${ZLIB_LIBRARIES})
+        Boost::boost
+        Threads::Threads
+        ${EXPAT_LIBRARIES}
+        ${BZIP2_LIBRARIES}
+        ${ZLIB_LIBRARIES}
+        ${STXXL_LIBRARIES})
 
 # Link OpenMP if found
-if(OpenMP_CXX_FOUND)
+if (OpenMP_CXX_FOUND)
     target_link_libraries(osm2ttl_library PUBLIC OpenMP::OpenMP_CXX)
-endif()
+endif ()
 
 # All users of this library will need at least C++17
 target_compile_features(osm2ttl_library PUBLIC cxx_std_17)

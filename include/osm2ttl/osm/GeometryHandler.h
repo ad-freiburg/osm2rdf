@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <stxxl.h>
 
 #include "boost/geometry/index/rtree.hpp"
 #include "osm2ttl/config/Config.h"
@@ -27,6 +28,7 @@
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/way.hpp"
 
+
 namespace osm2ttl {
 namespace osm {
 
@@ -35,14 +37,22 @@ typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Area::id_t,
                    osm2ttl::geometry::area_result_t, bool>
     SpatialAreaValue;
 
+typedef stxxl::vector<SpatialAreaValue> SpatialAreaVector;
+//typedef std::vector<SpatialAreaValue> SpatialAreaVector;
+
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Node::id_t,
                    osm2ttl::geometry::Node>
     SpatialNodeValue;
+typedef stxxl::vector<SpatialNodeValue> SpatialNodeVector;
+//typedef std::vector<SpatialNodeValue> SpatialNodeVector;
 
 typedef std::vector<osm2ttl::osm::Node::id_t> WayNodeList;
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Way::id_t,
                    osm2ttl::geometry::Way, WayNodeList>
     SpatialWayValue;
+typedef stxxl::vector<SpatialWayValue> SpatialWayVector;
+//typedef std::vector<SpatialWayValue> SpatialWayVector;
+
 typedef boost::geometry::index::rtree<SpatialAreaValue,
                                       boost::geometry::index::quadratic<16>>
     SpatialIndex;
@@ -93,15 +103,15 @@ class GeometryHandler : public osmium::handler::Handler {
   // Store dag
   osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t> directedAreaGraph;
   // Spatial Data
-  std::vector<SpatialAreaValue> _spatialStorageArea;
+  SpatialAreaVector _spatialStorageArea;
   std::unordered_map<osm2ttl::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
 
-  std::vector<SpatialAreaValue> _spatialStorageUnnamedArea;
+  SpatialAreaVector _spatialStorageUnnamedArea;
 
-  std::vector<SpatialNodeValue> _spatialStorageNode;
+  SpatialNodeVector _spatialStorageNode;
 
-  std::vector<SpatialWayValue> _spatialStorageWay;
+  SpatialWayVector _spatialStorageWay;
 };
 
 }  // namespace osm
