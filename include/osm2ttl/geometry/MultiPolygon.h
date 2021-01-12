@@ -5,6 +5,8 @@
 #define OSM2TTL_GEOMETRY_MULTIPOLYGON_H_
 
 #include "boost/geometry/geometries/geometries.hpp"
+#include "boost/serialization/nvp.hpp"
+#include "boost/serialization/vector.hpp"
 #include "osm2ttl/geometry/Polygon.h"
 
 namespace osm2ttl {
@@ -13,5 +15,15 @@ typedef boost::geometry::model::multi_polygon<osm2ttl::geometry::Polygon>
     MultiPolygon;
 }  // namespace geometry
 }  // namespace osm2ttl
+
+namespace boost {
+namespace serialization {
+template <class Archive>
+void serialize(Archive& ar, osm2ttl::geometry::MultiPolygon & m,
+               [[maybe_unused]] const unsigned int version) {
+  ar& boost::serialization::make_nvp("polygons", static_cast<std::vector<osm2ttl::geometry::Polygon>&>(m));
+}
+}  // namespace serialization
+}  // namespace boost
 
 #endif  // OSM2TTL_GEOMETRY_MULTIPOLYGON_H_

@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "boost/archive/text_iarchive.hpp"
 #include "boost/geometry.hpp"
 #include "boost/geometry/index/rtree.hpp"
 #include "boost/thread.hpp"
@@ -32,7 +33,24 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
     const osm2ttl::config::Config& config, osm2ttl::ttl::Writer<W>* writer)
     : _config(config),
       _writer(writer),
-      _statistics(config, config.statisticsPath.string()) {}
+      _statistics(config, config.statisticsPath.string()),
+      _ofsNamedAreas(config.getTempPath("spatial", "areas_named")),
+      _oaNamedAreas(_ofsNamedAreas),
+      _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed")),
+      _oaUnnamedAreas(_ofsUnnamedAreas),
+      _ofsWays(config.getTempPath("spatial", "ways")),
+      _oaWays(_ofsWays),
+      _ofsNodes(config.getTempPath("spatial", "nodes")),
+      _oaNodes(_ofsNodes) {
+  _ofsNamedAreas << std::scientific;
+  _ofsUnnamedAreas << std::scientific;
+  _ofsWays << std::scientific;
+  _ofsNodes << std::scientific;
+}
+
+// ___________________________________________________________________________
+template <typename W>
+osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() {}
 
 // ____________________________________________________________________________
 template <typename W>
@@ -78,15 +96,16 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
-      _spatialStorageAreaIndex[area.id()] = _spatialStorageArea.size();
-      _spatialStorageArea.push_back(
-          SpatialAreaValue(area.envelope(), area.id(), area.geom(),
-                           area.objId(), area.geomArea(), area.fromWay()));
+      _oaNamedAreas << SpatialAreaValue(area.envelope(), area.id(), area.geom(),
+                                        area.objId(), area.geomArea(),
+                                        area.fromWay());
+      _numNamedAreas++;
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
-      _spatialStorageUnnamedArea.push_back(
-          SpatialAreaValue(area.envelope(), area.id(), area.geom(),
-                           area.objId(), area.geomArea(), area.fromWay()));
+      _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(),
+                                          area.geom(), area.objId(),
+                                          area.geomArea(), area.fromWay());
+      _numUnnamedAreas++;
     }
   }
 }
@@ -95,8 +114,10 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::node(const osm2ttl::osm::Node& node) {
 #pragma omp critical(nodeDataInsert)
-  _spatialStorageNode.push_back(
-      SpatialNodeValue(node.envelope(), node.id(), node.geom()));
+  {
+    _oaNodes << SpatialNodeValue(node.envelope(), node.id(), node.geom());
+    _numNodes++;
+  }
 }
 
 // ____________________________________________________________________________
@@ -108,8 +129,10 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osm2ttl::osm::Way& way) {
     nodeIds.push_back(nodeRef.id());
   }
 #pragma omp critical(wayDataInsert)
-  _spatialStorageWay.push_back(
-      SpatialWayValue(way.envelope(), way.id(), way.geom(), nodeIds));
+  {
+    _oaWays << SpatialWayValue(way.envelope(), way.id(), way.geom(), nodeIds);
+    _numWays++;
+  }
 }
 
 // ____________________________________________________________________________
@@ -118,12 +141,13 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
   if (_config.writeStatistics) {
     _statistics.open();
   }
+  loadNamedAreas();
   prepareRTree();
   prepareDAG();
   dumpNamedAreaRelations();
   dumpUnnamedAreaRelations();
   const auto& nodeData = dumpNodeRelations();
-  dumpRelationRelations(nodeData);
+  dumpWayRelations(nodeData);
 
   if (_config.writeStatistics) {
     std::cerr << std::endl;
@@ -133,6 +157,27 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2ttl::osm::GeometryHandler<W>::loadNamedAreas() {
+  std::cerr << osm2ttl::util::currentTimeFormatted() << " Loading "
+            << _numNamedAreas << " named areas ... " << std::endl;
+  _spatialStorageArea.resize(_numNamedAreas);
+  if (_ofsNamedAreas.is_open()) {
+    _ofsNamedAreas.close();
+  }
+  std::ifstream ifs(_config.getTempPath("spatial", "areas_named"));
+  boost::archive::text_iarchive ia(ifs);
+  for (size_t i = 0; i < _numNamedAreas; ++i) {
+    SpatialAreaValue v;
+    ia >> v;
+    _spatialStorageArea[i] = v;
+    _spatialStorageAreaIndex[std::get<1>(v)] = i;
+  }
+  std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
+            << std::endl;
 }
 
 // ____________________________________________________________________________
@@ -377,12 +422,28 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
   NodesContainedInAreasData nodeData;
   if (!_config.noNodeDump) {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted()
-              << " Contains relations for " << _spatialStorageNode.size()
-              << " nodes in " << spatialIndex.size() << " areas ..."
-              << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "Contains relations for nodes in " << spatialIndex.size()
+              << " areas ..." << std::endl;
 
-    osmium::ProgressBar progressBar{_spatialStorageNode.size(), true};
+    std::cerr << osm2ttl::util::currentTimeFormatted() << "  "
+              << "Loading " << _numNodes << " nodes ... " << std::endl;
+    SpatialNodeVector spatialStorageNode;
+    spatialStorageNode.resize(_numNodes);
+    if (_ofsNodes.is_open()) {
+      _ofsNodes.close();
+    }
+    std::ifstream ifs(_config.getTempPath("spatial", "nodes"));
+    boost::archive::text_iarchive ia(ifs);
+    for (size_t i = 0; i < spatialStorageNode.size(); ++i) {
+      SpatialNodeValue v;
+      ia >> v;
+      spatialStorageNode[i] = v;
+    }
+    std::cerr << osm2ttl::util::currentTimeFormatted() << "  "
+              << "... done" << std::endl;
+
+    osmium::ProgressBar progressBar{spatialStorageNode.size(), true};
     size_t entryCount = 0;
     size_t checks = 0;
     size_t contains = 0;
@@ -397,10 +458,10 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                         \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
-    directedAreaGraph, progressBar, entryCount) reduction(+:checks,         \
+    directedAreaGraph, progressBar, entryCount, spatialStorageNode) reduction(+:checks,         \
     skippedByDAG, contains, containsOk) default(none) schedule(dynamic)
-    for (size_t i = 0; i < _spatialStorageNode.size(); i++) {
-      const auto& node = _spatialStorageNode[i];
+    for (size_t i = 0; i < spatialStorageNode.size(); i++) {
+      const auto& node = spatialStorageNode[i];
       const auto& nodeEnvelope = std::get<0>(node);
       const auto& nodeId = std::get<1>(node);
       const auto& nodeGeom = std::get<2>(node);
@@ -470,12 +531,12 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " " << "... done with "
               << checks << " checks, " << skippedByDAG << " skipped by DAG"
               << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
               << (checks - skippedByDAG) << " checks performed" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer << " contains: " << contains
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " " << "contains: " << contains
               << " yes: " << containsOk << std::endl;
   }
   return nodeData;
@@ -483,16 +544,32 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
+void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2ttl::osm::NodesContainedInAreasData& nodeData) {
   if (!_config.noWayDump) {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted()
-              << " Contains relations for " << _spatialStorageWay.size()
-              << " ways in " << spatialIndex.size() << " areas ..."
-              << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "Contains relations for ways in " << spatialIndex.size()
+              << " areas ..." << std::endl;
 
-    osmium::ProgressBar progressBar{_spatialStorageWay.size(), true};
+    std::cerr << osm2ttl::util::currentTimeFormatted() << "  "
+              << "Loading " << _numWays << " ways ... " << std::endl;
+    SpatialWayVector spatialStorageWay;
+    spatialStorageWay.resize(_numWays);
+    if (_ofsWays.is_open()) {
+      _ofsWays.close();
+    }
+    std::ifstream ifs(_config.getTempPath("spatial", "ways"));
+    boost::archive::text_iarchive ia(ifs);
+    for (size_t i = 0; i < spatialStorageWay.size(); ++i) {
+      SpatialWayValue v;
+      ia >> v;
+      spatialStorageWay[i] = v;
+    }
+    std::cerr << osm2ttl::util::currentTimeFormatted() << "  "
+              << "... done" << std::endl;
+
+    osmium::ProgressBar progressBar{spatialStorageWay.size(), true};
     size_t entryCount = 0;
     size_t checks = 0;
     size_t intersects = 0;
@@ -510,11 +587,11 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
-    spatialIndex,  progressBar, entryCount) reduction(+:checks,skippedByDAG, \
+    spatialIndex,  progressBar, entryCount, spatialStorageWay) reduction(+:checks,skippedByDAG, \
     intersectsByNodeInfo, intersects, intersectsOk, contains, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
-    for (size_t i = 0; i < _spatialStorageWay.size(); i++) {
-      const auto& way = _spatialStorageWay[i];
+    for (size_t i = 0; i < spatialStorageWay.size(); i++) {
+      const auto& way = spatialStorageWay[i];
       const auto& wayEnvelope = std::get<0>(way);
       const auto& wayId = std::get<1>(way);
       const auto& wayGeom = std::get<2>(way);
@@ -692,18 +769,19 @@ void osm2ttl::osm::GeometryHandler<W>::dumpRelationRelations(
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
-              << checks << " checks, " << skippedByDAG << " skipped by DAG"
-              << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "... done with " << checks << " checks, " << skippedByDAG
+              << " skipped by DAG" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
               << (checks - skippedByDAG) << " checks performed" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " intersect info by nodes: " << intersectsByNodeInfo
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << "intersect info by nodes: " << intersectsByNodeInfo
               << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " intersect: " << intersects << " yes: " << intersectsOk
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << "intersect: " << intersects << " yes: " << intersectsOk
               << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer << " contains: " << contains
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << "contains: " << contains
               << " contains envelope: " << containsOkEnvelope
               << " yes: " << containsOk << std::endl;
   }
@@ -714,12 +792,29 @@ template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
   if (!_config.noAreaDump) {
     std::cerr << std::endl;
-    std::cerr << osm2ttl::util::currentTimeFormatted()
-              << " Contains relations for " << _spatialStorageUnnamedArea.size()
-              << " unnamed areas in " << spatialIndex.size() << " areas ..."
-              << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "Contains relations for unnamed areas in "
+              << spatialIndex.size() << " areas ..." << std::endl;
 
-    osmium::ProgressBar progressBar{_spatialStorageUnnamedArea.size(), true};
+    std::cerr << osm2ttl::util::currentTimeFormatted() << "  "
+              << "Loading " << _numUnnamedAreas << " unnamed areas ... "
+              << std::endl;
+    SpatialAreaVector spatialStorageUnnamedArea;
+    spatialStorageUnnamedArea.resize(_numUnnamedAreas);
+    if (_ofsUnnamedAreas.is_open()) {
+      _ofsUnnamedAreas.close();
+    }
+    std::ifstream ifs(_config.getTempPath("spatial", "areas_unnamed"));
+    boost::archive::text_iarchive ia(ifs);
+    for (size_t i = 0; i < spatialStorageUnnamedArea.size(); ++i) {
+      SpatialAreaValue v;
+      ia >> v;
+      spatialStorageUnnamedArea[i] = v;
+    }
+    std::cerr << osm2ttl::util::currentTimeFormatted() << "  "
+              << "... done" << std::endl;
+
+    osmium::ProgressBar progressBar{spatialStorageUnnamedArea.size(), true};
     size_t entryCount = 0;
     size_t checks = 0;
     size_t intersects = 0;
@@ -736,11 +831,11 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
-    spatialIndex,  progressBar, entryCount) reduction(+:checks,skippedByDAG, \
+    spatialIndex,  progressBar, entryCount, spatialStorageUnnamedArea) reduction(+:checks,skippedByDAG, \
     intersects, intersectsOk, contains, containsOk, containsOkEnvelope)      \
     default(none) schedule(dynamic)
-    for (size_t i = 0; i < _spatialStorageUnnamedArea.size(); i++) {
-      const auto& entry = _spatialStorageUnnamedArea[i];
+    for (size_t i = 0; i < spatialStorageUnnamedArea.size(); i++) {
+      const auto& entry = spatialStorageUnnamedArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
@@ -848,15 +943,16 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done with "
-              << checks << " checks, " << skippedByDAG << " skipped by DAG"
-              << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "... done with " << checks << " checks, " << skippedByDAG
+              << " skipped by DAG" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
               << (checks - skippedByDAG) << " checks performed" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer
-              << " intersect: " << intersects << " yes: " << intersectsOk
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << "intersect: " << intersects << " yes: " << intersectsOk
               << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer << " contains: " << contains
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << "contains: " << contains
               << " contains envelope: " << containsOkEnvelope
               << " yes: " << containsOk << std::endl;
   }

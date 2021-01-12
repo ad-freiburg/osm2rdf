@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <stxxl.h>
 
+#include "boost/archive/text_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Area.h"
@@ -37,21 +37,18 @@ typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Area::id_t,
                    osm2ttl::geometry::area_result_t, bool>
     SpatialAreaValue;
 
-typedef stxxl::vector<SpatialAreaValue> SpatialAreaVector;
-//typedef std::vector<SpatialAreaValue> SpatialAreaVector;
+typedef std::vector<SpatialAreaValue> SpatialAreaVector;
 
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Node::id_t,
                    osm2ttl::geometry::Node>
     SpatialNodeValue;
-typedef stxxl::vector<SpatialNodeValue> SpatialNodeVector;
-//typedef std::vector<SpatialNodeValue> SpatialNodeVector;
+typedef std::vector<SpatialNodeValue> SpatialNodeVector;
 
 typedef std::vector<osm2ttl::osm::Node::id_t> WayNodeList;
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Way::id_t,
                    osm2ttl::geometry::Way, WayNodeList>
     SpatialWayValue;
-typedef stxxl::vector<SpatialWayValue> SpatialWayVector;
-//typedef std::vector<SpatialWayValue> SpatialWayVector;
+typedef std::vector<SpatialWayValue> SpatialWayVector;
 
 typedef boost::geometry::index::rtree<SpatialAreaValue,
                                       boost::geometry::index::quadratic<16>>
@@ -66,6 +63,7 @@ class GeometryHandler : public osmium::handler::Handler {
  public:
   GeometryHandler(const osm2ttl::config::Config& config,
                   osm2ttl::ttl::Writer<W>* writer);
+  ~GeometryHandler();
 
   // Store data
   void area(const osm2ttl::osm::Area& area);
@@ -75,6 +73,8 @@ class GeometryHandler : public osmium::handler::Handler {
   void calculateRelations();
 
  protected:
+  // Load stored named areas.
+  void loadNamedAreas();
   // Stores named areas in r-tree, used for all other calculations.
   void prepareRTree();
   // Generate DAG for areas using prepared r-tree.
@@ -84,7 +84,7 @@ class GeometryHandler : public osmium::handler::Handler {
   // Calculate relations for each node.
   NodesContainedInAreasData dumpNodeRelations();
   // Calculate relations for each way.
-  void dumpRelationRelations(
+  void dumpWayRelations(
       const osm2ttl::osm::NodesContainedInAreasData& nodeData);
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpUnnamedAreaRelations();
@@ -107,14 +107,55 @@ class GeometryHandler : public osmium::handler::Handler {
   std::unordered_map<osm2ttl::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
 
-  SpatialAreaVector _spatialStorageUnnamedArea;
-
-  SpatialNodeVector _spatialStorageNode;
-
-  SpatialWayVector _spatialStorageWay;
+  size_t _numNamedAreas = 0;
+  std::ofstream _ofsNamedAreas;
+  boost::archive::text_oarchive _oaNamedAreas;
+  size_t _numUnnamedAreas = 0;
+  std::ofstream _ofsUnnamedAreas;
+  boost::archive::text_oarchive _oaUnnamedAreas;
+  size_t _numWays = 0;
+  std::ofstream _ofsWays;
+  boost::archive::text_oarchive _oaWays;
+  size_t _numNodes = 0;
+  std::ofstream _ofsNodes;
+  boost::archive::text_oarchive _oaNodes;
 };
 
 }  // namespace osm
 }  // namespace osm2ttl
+
+namespace boost {
+namespace serialization {
+
+template<class Archive>
+void serialize(Archive & ar, osm2ttl::osm::SpatialNodeValue & v, [[maybe_unused]] const unsigned int version)
+{
+  ar & boost::serialization::make_nvp("envelope", std::get<0>(v));
+  ar & boost::serialization::make_nvp("id", std::get<1>(v));
+  ar & boost::serialization::make_nvp("geom", std::get<2>(v));
+}
+
+template<class Archive>
+void serialize(Archive & ar, osm2ttl::osm::SpatialWayValue & v, [[maybe_unused]] const unsigned int version)
+{
+  ar & boost::serialization::make_nvp("envelope", std::get<0>(v));
+  ar & boost::serialization::make_nvp("id", std::get<1>(v));
+  ar & boost::serialization::make_nvp("geom", std::get<2>(v));
+  ar & boost::serialization::make_nvp("nodeIds", std::get<3>(v));
+}
+
+template<class Archive>
+void serialize(Archive & ar, osm2ttl::osm::SpatialAreaValue & v, [[maybe_unused]] const unsigned int version)
+{
+  ar & boost::serialization::make_nvp("envelope", std::get<0>(v));
+  ar & boost::serialization::make_nvp("id", std::get<1>(v));
+  ar & boost::serialization::make_nvp("geom", std::get<2>(v));
+  ar & boost::serialization::make_nvp("objId", std::get<3>(v));
+  ar & boost::serialization::make_nvp("geomArea", std::get<4>(v));
+  ar & boost::serialization::make_nvp("fromWay", std::get<5>(v));
+}
+
+} // namespace serialization
+} // namespace boost
 
 #endif  // OSM2TTL_OSM_GEOMETRYHANDLER_H_

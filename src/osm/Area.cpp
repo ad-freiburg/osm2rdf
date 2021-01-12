@@ -29,9 +29,7 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
     _tagAdministrationLevel = static_cast<char>(
         strtol(area.tags()["admin_level"], nullptr, Base10Base));
   }
-  if (area.tags()["name"] != nullptr) {
-    _hasName = true;
-  }
+  _hasName = (area.tags()["name"] != nullptr);
 
   auto outerRings = area.outer_rings();
   _geom.resize(outerRings.size());
