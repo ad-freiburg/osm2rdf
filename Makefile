@@ -26,26 +26,25 @@ perf: compile
 perf-st: compile
 	for FILE in $(shell ls -Sr input); do export OMP_NUM_THREADS=1 && export OMP_THREAD_LIMIT=1 && time perf record ./build/apps/osm2ttl "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; perf report; done
 
-docker-fr:
+docker-dirs:
 	mkdir input || true
 	mkdir output || true
+	chmod 777 output
+	mkdir scratch || true
+	chmod 777 scratch
+
+docker-fr: docker-dirs
 	wharfer build -t osm2ttl .
 	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
-docker-bw:
-	mkdir input || true
-	mkdir output || true
+docker-bw: docker-dirs
 	wharfer build -t osm2ttl .
 	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
-docker-de:
-	mkdir input || true
-	mkdir output || true
+docker-de: docker-dirs
 	wharfer build -t osm2ttl .
 	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
-docker-eu:
-	mkdir input || true
-	mkdir output || true
+docker-eu: docker-dirs
 	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:scratch/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction --store-locations-on-disk
+	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
