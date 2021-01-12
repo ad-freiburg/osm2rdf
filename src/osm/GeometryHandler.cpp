@@ -34,15 +34,12 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
     : _config(config),
       _writer(writer),
       _statistics(config, config.statisticsPath.string()),
-      _ofsNamedAreas(config.getTempPath("spatial", "areas_named")),
-      _oaNamedAreas(_ofsNamedAreas),
       _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed")),
       _oaUnnamedAreas(_ofsUnnamedAreas),
       _ofsWays(config.getTempPath("spatial", "ways")),
       _oaWays(_ofsWays),
       _ofsNodes(config.getTempPath("spatial", "nodes")),
       _oaNodes(_ofsNodes) {
-  _ofsNamedAreas << std::scientific;
   _ofsUnnamedAreas << std::scientific;
   _ofsWays << std::scientific;
   _ofsNodes << std::scientific;
@@ -96,10 +93,10 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
-      _oaNamedAreas << SpatialAreaValue(area.envelope(), area.id(), area.geom(),
-                                        area.objId(), area.geomArea(),
-                                        area.fromWay());
-      _numNamedAreas++;
+      _spatialStorageAreaIndex[area.id()] = _spatialStorageArea.size();
+      _spatialStorageArea.push_back(
+          SpatialAreaValue(area.envelope(), area.id(), area.geom(),
+                           area.objId(), area.geomArea(), area.fromWay()));
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
       _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(),
@@ -141,7 +138,6 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
   if (_config.writeStatistics) {
     _statistics.open();
   }
-  loadNamedAreas();
   prepareRTree();
   prepareDAG();
   dumpNamedAreaRelations();
@@ -157,27 +153,6 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
-}
-
-// ____________________________________________________________________________
-template <typename W>
-void osm2ttl::osm::GeometryHandler<W>::loadNamedAreas() {
-  std::cerr << osm2ttl::util::currentTimeFormatted() << " Loading "
-            << _numNamedAreas << " named areas ... " << std::endl;
-  _spatialStorageArea.resize(_numNamedAreas);
-  if (_ofsNamedAreas.is_open()) {
-    _ofsNamedAreas.close();
-  }
-  std::ifstream ifs(_config.getTempPath("spatial", "areas_named"));
-  boost::archive::text_iarchive ia(ifs);
-  for (size_t i = 0; i < _numNamedAreas; ++i) {
-    SpatialAreaValue v;
-    ia >> v;
-    _spatialStorageArea[i] = v;
-    _spatialStorageAreaIndex[std::get<1>(v)] = i;
-  }
-  std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
-            << std::endl;
 }
 
 // ____________________________________________________________________________
@@ -383,6 +358,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
                      : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
         entryObjId);
     for (const auto& dst : directedAreaGraph.getEdges(id)) {
+      assert(_spatialStorageAreaIndex[dst] < _spatialStorageArea.size());
       const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
       const auto& areaObjId = std::get<3>(area);
       const auto& areaFromWay = std::get<5>(area);
@@ -531,13 +507,14 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     }
     progressBar.done();
 
-    std::cerr << osm2ttl::util::currentTimeFormatted() << " " << "... done with "
-              << checks << " checks, " << skippedByDAG << " skipped by DAG"
-              << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "... done with " << checks << " checks, " << skippedByDAG
+              << " skipped by DAG" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
               << (checks - skippedByDAG) << " checks performed" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer << " " << "contains: " << contains
-              << " yes: " << containsOk << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
+              << "contains: " << contains << " yes: " << containsOk
+              << std::endl;
   }
   return nodeData;
 }

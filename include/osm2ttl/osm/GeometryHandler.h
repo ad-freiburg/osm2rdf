@@ -73,8 +73,6 @@ class GeometryHandler : public osmium::handler::Handler {
   void calculateRelations();
 
  protected:
-  // Load stored named areas.
-  void loadNamedAreas();
   // Stores named areas in r-tree, used for all other calculations.
   void prepareRTree();
   // Generate DAG for areas using prepared r-tree.
@@ -107,9 +105,6 @@ class GeometryHandler : public osmium::handler::Handler {
   std::unordered_map<osm2ttl::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
 
-  size_t _numNamedAreas = 0;
-  std::ofstream _ofsNamedAreas;
-  boost::archive::text_oarchive _oaNamedAreas;
   size_t _numUnnamedAreas = 0;
   std::ofstream _ofsUnnamedAreas;
   boost::archive::text_oarchive _oaUnnamedAreas;
