@@ -38,8 +38,6 @@ struct Config {
 
   // Default settings for data
   std::string osm2ttlPrefix = "osmadd";
-  std::string stxxlSize = "10G";
-  std::string stxxlDisk = "";
 
   // Dot
   bool writeDotFiles = false;
@@ -68,7 +66,6 @@ struct Config {
   void load(const std::string& filename);
   void save(const std::string& filename);
   void fromArgs(int argc, char** argv);
-  void configureSTXXL() const;
   std::string getInfo(std::string_view prefix) const;
   std::filesystem::path getTempPath(const std::string& p,
                                     const std::string& s) const;

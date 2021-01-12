@@ -71,12 +71,6 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   }
   oss << "\n" << prefix << "--- OpenMP ---";
   oss << "\n" << prefix << "Max Threads: " << omp_get_max_threads();
-  oss << "\n" << prefix << "--- STXXL ---";
-  oss << "\n" << prefix << "Disk-Size: " << stxxlSize;
-  if (stxxlSize == "0") {
-    oss << " (autogrow)";
-  }
-  oss << "\n" << prefix << "Location:  " << stxxlDisk;
   return oss.str();
 }
 
@@ -127,9 +121,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto osm2ttlPrefixOp =
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
           "", "oms2ttl-prefix", "Prefix for own IRIs", osm2ttlPrefix);
-  auto stxxlSizeOp =
-      op.add<popl::Value<std::string>, popl::Attribute::advanced>(
-          "", "stxxl-disk-size", "Size for the STXXL-Disk", stxxlSize);
 
   auto wktSimplifyOp = op.add<popl::Value<uint16_t>>(
       "s", "wkt-simplify",
@@ -198,7 +189,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
-    stxxlSize = stxxlSizeOp->value();
 
     // Dot
     writeDotFiles = writeDotFilesOp->is_set();
@@ -230,7 +220,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
                 << op.help() << "\n";
       exit(1);
     }
-    stxxlDisk = getTempPath("stxxl", "###").string();
 
     // Handle input
     if (op.non_option_args().size() != 1) {
@@ -269,16 +258,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
     exit(1);
   }
-}
-
-// ____________________________________________________________________________
-void osm2ttl::config::Config::configureSTXXL() const {
-  std::ofstream stxxl;
-  stxxl.open(".stxxl", std::ios::out);
-  stxxl << "disk=" << stxxlDisk << ","
-        << stxxlSize
-        << ",syscall" << " " << "autogrow unlink" << std::endl;
-  stxxl.close();
 }
 
 // ____________________________________________________________________________
