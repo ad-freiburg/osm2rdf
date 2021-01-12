@@ -26,6 +26,7 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   oss << "\n" << prefix << "Input:         " << input;
   oss << "\n" << prefix << "Output:        " << output;
   oss << "\n" << prefix << "Output format: " << outputFormat;
+  oss << "\n" << prefix << "Cache:         " << cache;
   oss << "\n" << prefix << "--- Dump ---";
   oss << "\n" << prefix << "Prefix for own IRIs: " << osm2ttlPrefix;
   if (noDump) {
