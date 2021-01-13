@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "boost/archive/text_iarchive.hpp"
+#include "boost/archive/binary_iarchive.hpp"
 #include "boost/geometry.hpp"
 #include "boost/geometry/index/rtree.hpp"
 #include "boost/thread.hpp"
@@ -34,11 +34,12 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
     : _config(config),
       _writer(writer),
       _statistics(config, config.statisticsPath.string()),
-      _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed")),
+      _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed"),
+                       std::ios::binary),
       _oaUnnamedAreas(_ofsUnnamedAreas),
-      _ofsWays(config.getTempPath("spatial", "ways")),
+      _ofsWays(config.getTempPath("spatial", "ways"), std::ios::binary),
       _oaWays(_ofsWays),
-      _ofsNodes(config.getTempPath("spatial", "nodes")),
+      _ofsNodes(config.getTempPath("spatial", "nodes"), std::ios::binary),
       _oaNodes(_ofsNodes) {
   _ofsUnnamedAreas << std::scientific;
   _ofsWays << std::scientific;
@@ -399,14 +400,15 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
   if (!_config.noNodeDump) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
-              << "Contains relations for " << _numNodes << " nodes in " << spatialIndex.size()
-              << " areas ..." << std::endl;
+              << "Contains relations for " << _numNodes << " nodes in "
+              << spatialIndex.size() << " areas ..." << std::endl;
 
     if (_ofsNodes.is_open()) {
       _ofsNodes.close();
     }
-    std::ifstream ifs(_config.getTempPath("spatial", "nodes"));
-    boost::archive::text_iarchive ia(ifs);
+    std::ifstream ifs(_config.getTempPath("spatial", "nodes"),
+                      std::ios::binary);
+    boost::archive::binary_iarchive ia(ifs);
 
     osmium::ProgressBar progressBar{_numNodes, true};
     size_t entryCount = 0;
@@ -517,14 +519,14 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
   if (!_config.noWayDump) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
-              << "Contains relations for " << _numWays << " ways in " << spatialIndex.size()
-              << " areas ..." << std::endl;
+              << "Contains relations for " << _numWays << " ways in "
+              << spatialIndex.size() << " areas ..." << std::endl;
 
     if (_ofsWays.is_open()) {
       _ofsWays.close();
     }
-    std::ifstream ifs(_config.getTempPath("spatial", "ways"));
-    boost::archive::text_iarchive ia(ifs);
+    std::ifstream ifs(_config.getTempPath("spatial", "ways"), std::ios::binary);
+    boost::archive::binary_iarchive ia(ifs);
 
     osmium::ProgressBar progressBar{_numWays, true};
     size_t entryCount = 0;
@@ -752,14 +754,16 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
   if (!_config.noAreaDump) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
-              << "Contains relations for " << _numUnnamedAreas << "unnamed areas in "
-              << spatialIndex.size() << " areas ..." << std::endl;
+              << "Contains relations for " << _numUnnamedAreas
+              << "unnamed areas in " << spatialIndex.size() << " areas ..."
+              << std::endl;
 
     if (_ofsUnnamedAreas.is_open()) {
       _ofsUnnamedAreas.close();
     }
-    std::ifstream ifs(_config.getTempPath("spatial", "areas_unnamed"));
-    boost::archive::text_iarchive ia(ifs);
+    std::ifstream ifs(_config.getTempPath("spatial", "areas_unnamed"),
+                      std::ios::binary);
+    boost::archive::binary_iarchive ia(ifs);
 
     osmium::ProgressBar progressBar{_numUnnamedAreas, true};
     size_t entryCount = 0;

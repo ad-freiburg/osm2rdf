@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include "boost/archive/text_oarchive.hpp"
+#include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Area.h"
@@ -107,13 +107,13 @@ class GeometryHandler : public osmium::handler::Handler {
 
   size_t _numUnnamedAreas = 0;
   std::ofstream _ofsUnnamedAreas;
-  boost::archive::text_oarchive _oaUnnamedAreas;
+  boost::archive::binary_oarchive _oaUnnamedAreas;
   size_t _numWays = 0;
   std::ofstream _ofsWays;
-  boost::archive::text_oarchive _oaWays;
+  boost::archive::binary_oarchive _oaWays;
   size_t _numNodes = 0;
   std::ofstream _ofsNodes;
-  boost::archive::text_oarchive _oaNodes;
+  boost::archive::binary_oarchive _oaNodes;
 };
 
 }  // namespace osm
