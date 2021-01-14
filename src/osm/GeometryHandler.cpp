@@ -3,6 +3,7 @@
 
 #include "osm2ttl/osm/GeometryHandler.h"
 
+
 #include <iostream>
 #include <memory>
 #include <random>
@@ -19,10 +20,9 @@
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/DirectedAcyclicGraph.h"
 #include "osm2ttl/util/DirectedGraph.h"
+#include "osm2ttl/util/ProgressBar.h"
 #include "osm2ttl/util/Output.h"
 #include "osm2ttl/util/Time.h"
-#include "osmium/index/map/sparse_file_array.hpp"
-#include "osmium/util/progress_bar.hpp"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-loop-convert"
@@ -188,7 +188,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
               << " Generating non-reduced DAG from "
               << _spatialStorageArea.size() << " areas ... " << std::endl;
 
-    osmium::ProgressBar progressBar{_spatialStorageArea.size(), true};
+    osm2ttl::util::ProgressBar progressBar{_spatialStorageArea.size(), true};
     size_t entryCount = 0;
     size_t checks = 0;
     size_t contains = 0;
@@ -332,7 +332,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
             << directedAreaGraph.getNumVertices() << " vertices ... "
             << std::endl;
 
-  osmium::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
+  osm2ttl::util::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
   std::vector<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
@@ -410,7 +410,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
                       std::ios::binary);
     boost::archive::binary_iarchive ia(ifs);
 
-    osmium::ProgressBar progressBar{_numNodes, true};
+    osm2ttl::util::ProgressBar progressBar{_numNodes, true};
     size_t entryCount = 0;
     size_t checks = 0;
     size_t contains = 0;
@@ -528,7 +528,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     std::ifstream ifs(_config.getTempPath("spatial", "ways"), std::ios::binary);
     boost::archive::binary_iarchive ia(ifs);
 
-    osmium::ProgressBar progressBar{_numWays, true};
+    osm2ttl::util::ProgressBar progressBar{_numWays, true};
     size_t entryCount = 0;
     size_t checks = 0;
     size_t intersects = 0;
@@ -765,7 +765,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
                       std::ios::binary);
     boost::archive::binary_iarchive ia(ifs);
 
-    osmium::ProgressBar progressBar{_numUnnamedAreas, true};
+    osm2ttl::util::ProgressBar progressBar{_numUnnamedAreas, true};
     size_t entryCount = 0;
     size_t checks = 0;
     size_t intersects = 0;
