@@ -58,7 +58,7 @@ struct Config {
   bool outputCompress = true;
 
   // osmium location cache
-  std::filesystem::path cache{"/tmp/"};
+  std::filesystem::path cache{std::filesystem::temp_directory_path()};
 
   // Input file
   std::filesystem::path input;

@@ -28,6 +28,10 @@ class Output {
   void write(std::string_view line);
   // write the given line into the specified part.
   void write(std::string_view line, size_t part);
+  // flush all part.
+  void flush();
+  // flush the given part.
+  void flush(size_t part);
 
  protected:
   std::string partFilename(int part);

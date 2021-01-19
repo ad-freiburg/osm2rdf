@@ -184,3 +184,15 @@ void osm2ttl::util::Output::write(std::string_view line, size_t part) {
   assert(part < _numOuts);
   _out[part] << line;
 }
+
+// ____________________________________________________________________________
+void osm2ttl::util::Output::flush() {
+  for (size_t i = 0; i < _numOuts; ++i) {
+    flush(i);
+  }
+}
+
+// ____________________________________________________________________________
+void osm2ttl::util::Output::flush(size_t part) {
+  _out[part].flush();
+}
