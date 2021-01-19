@@ -21,7 +21,6 @@
 #include "osm2ttl/util/DirectedAcyclicGraph.h"
 #include "osm2ttl/util/DirectedGraph.h"
 #include "osm2ttl/util/ProgressBar.h"
-#include "osm2ttl/util/Output.h"
 #include "osm2ttl/util/Time.h"
 
 #pragma clang diagnostic push
@@ -48,7 +47,7 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
 
 // ___________________________________________________________________________
 template <typename W>
-osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() {}
+osm2ttl::osm::GeometryHandler<W>::~GeometryHandler() = default;
 
 // ____________________________________________________________________________
 template <typename W>

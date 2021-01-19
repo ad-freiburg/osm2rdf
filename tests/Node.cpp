@@ -7,6 +7,8 @@
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
+namespace osm2ttl::osm {
+
 TEST(Node, FromNode) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -47,4 +49,6 @@ TEST(Node, FromNodeWithTags) {
   ASSERT_EQ(0, n.tags().count("tag"));
   ASSERT_EQ(1, n.tags().count("city"));
   ASSERT_STREQ("Freiburg", n.tags().at("city").c_str());
+}
+
 }

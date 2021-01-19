@@ -7,6 +7,8 @@
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
+namespace osm2ttl::osm {
+
 TEST(Relation, FromRelation) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -67,4 +69,6 @@ TEST(Relation, FromRelationWithMembers) {
   ASSERT_EQ(osm2ttl::osm::RelationMemberType::WAY, r.members().at(1).type());
   ASSERT_EQ(1, r.members().at(1).id());
   ASSERT_EQ("outer", r.members().at(1).role());
+}
+
 }

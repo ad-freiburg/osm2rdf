@@ -7,6 +7,8 @@
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
+namespace osm2ttl::osm {
+
 TEST(Way, FromWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -157,4 +159,6 @@ TEST(Way, FromClosedWayWithDuplicateNodes) {
   ASSERT_DOUBLE_EQ(7.51, w.envelope().min_corner().y());
   ASSERT_DOUBLE_EQ(48.1, w.envelope().max_corner().x());
   ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
+}
+
 }

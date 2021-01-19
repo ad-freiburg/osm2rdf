@@ -5,6 +5,8 @@
 
 #include "gtest/gtest.h"
 
+namespace osm2ttl::util {
+
 TEST(DirectedGraph, Constructor) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
@@ -78,9 +80,7 @@ TEST(DirectedGraph, findSuccessorsFast) {
   g.addEdge(1, 2);
   g.addEdge(1, 0);
   g.addEdge(1, 2);
-  {
-    ASSERT_ANY_THROW(g.findSuccessorsFast(1));
-  }
+  { ASSERT_ANY_THROW(g.findSuccessorsFast(1)); }
   {
     g.prepareFindSuccessorsFast();
     const auto res = g.findSuccessorsFast(1);
@@ -111,9 +111,7 @@ TEST(DirectedGraph, prepareFindSuccessorsFast) {
   g.addEdge(1, 2);
   g.addEdge(1, 0);
   g.addEdge(1, 2);
-  {
-    ASSERT_ANY_THROW(g.findSuccessorsFast(1));
-  }
+  { ASSERT_ANY_THROW(g.findSuccessorsFast(1)); }
   {
     g.prepareFindSuccessorsFast();
     const auto res = g.findSuccessorsFast(1);
@@ -212,4 +210,6 @@ TEST(DirectedGraph, getEdges) {
     ASSERT_EQ(3, res[1]);
     ASSERT_EQ(2, res[2]);
   }
+}
+
 }

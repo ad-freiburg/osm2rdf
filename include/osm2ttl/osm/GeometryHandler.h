@@ -10,6 +10,7 @@
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
+#include "gtest/gtest_prod.h"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/geometry/Area.h"
 #include "osm2ttl/geometry/Location.h"
@@ -108,10 +109,13 @@ class GeometryHandler : public osmium::handler::Handler {
   size_t _numUnnamedAreas = 0;
   std::ofstream _ofsUnnamedAreas;
   boost::archive::binary_oarchive _oaUnnamedAreas;
+
   size_t _numWays = 0;
   std::ofstream _ofsWays;
   boost::archive::binary_oarchive _oaWays;
+
   size_t _numNodes = 0;
+  FRIEND_TEST(GeometryHandler, addNode);
   std::ofstream _ofsNodes;
   boost::archive::binary_oarchive _oaNodes;
 };

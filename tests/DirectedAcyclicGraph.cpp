@@ -6,6 +6,8 @@
 #include "gtest/gtest.h"
 #include "osm2ttl/util/DirectedGraph.h"
 
+namespace osm2ttl::util {
+
 TEST(DirectedAcyclicGraph, empty) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   ASSERT_EQ(0, src.getNumVertices());
@@ -580,10 +582,10 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOneAdditionalConnections) {
       const auto& expectedEdges = expected.getEdges(vertexId);
       const auto& resultEdges = result.getEdges(vertexId);
       ASSERT_EQ(expectedEdges.size(), resultEdges.size())
-                    << " error for vertex: " << vertexId;
+          << " error for vertex: " << vertexId;
       for (size_t i = 0; i < expectedEdges.size(); ++i) {
         ASSERT_EQ(expectedEdges[i], resultEdges[i])
-                      << " error for vertex: " << vertexId << " at entry " << i;
+            << " error for vertex: " << vertexId << " at entry " << i;
       }
     }
   }
@@ -609,4 +611,6 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOneAdditionalConnections) {
     ASSERT_EQ(expected.getEdges(5).size(), result.getEdges(5).size());
     ASSERT_EQ(expected.getEdges(6).size(), result.getEdges(6).size());
   }
+}
+
 }
