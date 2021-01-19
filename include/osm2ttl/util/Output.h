@@ -7,6 +7,7 @@
 #include <fstream>
 
 #include "boost/iostreams/filtering_stream.hpp"
+#include "gtest/gtest_prod.h"
 #include "osm2ttl/config/Config.h"
 
 namespace osm2ttl {
@@ -30,6 +31,7 @@ class Output {
 
  protected:
   std::string partFilename(int part);
+  FRIEND_TEST(Output, partFilename);
   // merge closes and merges all parts, prepend given prefix and append given suffix.
   void merge(std::string_view prefix, std::string_view suffix);
   void concatinate(std::string_view prefix, std::string_view suffix);

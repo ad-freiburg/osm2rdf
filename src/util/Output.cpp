@@ -4,7 +4,6 @@
 #include "osm2ttl/util/Output.h"
 
 #include <cstdio>
-#include <fstream>
 #include <iostream>
 
 #include "boost/iostreams/filter/bzip2.hpp"
@@ -88,6 +87,8 @@ void osm2ttl::util::Output::close(std::string_view prefix,
 
 // ____________________________________________________________________________
 std::string osm2ttl::util::Output::partFilename(int part) {
+  assert(part >= -2);
+  assert(part < static_cast<int>(_numOuts));
   size_t numDigits = 1;
   if (_numOuts > 9) {
     numDigits++;
@@ -98,10 +99,9 @@ std::string osm2ttl::util::Output::partFilename(int part) {
   std::ostringstream oss;
   oss << _prefix << ".part_" << std::setfill('0') << std::setw(numDigits);
   if (part == -2) {
-    oss << _numOuts;
-  } else {
-    oss << (part + 1);
+    part = static_cast<int>(_numOuts);
   }
+  oss << (part + 1);
   return oss.str();
 }
 
