@@ -42,6 +42,7 @@ TEST(OutputMergeMode, NONE) {
   osm2ttl::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
+  ASSERT_EQ(parts, countFilesInPath(config.output));
   o.write("a", 0);
   o.write("b", 1);
   o.write("c", 2);
@@ -69,6 +70,7 @@ TEST(OutputMergeMode, CONCATENATE) {
   osm2ttl::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
+  ASSERT_EQ(parts, countFilesInPath(config.output));
   o.write("a", 0);
   o.write("b", 1);
   o.write("c", 2);
@@ -96,6 +98,7 @@ TEST(OutputMergeMode, MERGE) {
   osm2ttl::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
+  ASSERT_EQ(parts, countFilesInPath(config.output));
   o.write("a", 0);
   o.write("b", 1);
   o.write("c", 2);
