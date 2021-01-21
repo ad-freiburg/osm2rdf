@@ -4,6 +4,7 @@
 #include "osm2ttl/osm/DumpHandler.h"
 
 #include <iomanip>
+#include <iostream>
 
 #include "boost/geometry.hpp"
 #include "osm2ttl/config/Config.h"
@@ -273,6 +274,10 @@ void osm2ttl::osm::DumpHandler<W>::writeTagList(
               _writer->generateIRI("https://www.wikipedia.org/wiki/", value));
         }
       }
+    }
+    auto pipe = key.find('|');
+    if (pipe != std::string::npos) {
+      std::cerr << "Found pipe in: '" << key << "' with value: '" << value << "' for: " << s << std::endl;
     }
   }
 }
