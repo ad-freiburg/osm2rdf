@@ -754,7 +754,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numUnnamedAreas
-              << "unnamed areas in " << spatialIndex.size() << " areas ..."
+              << " unnamed areas in " << spatialIndex.size() << " areas ..."
               << std::endl;
 
     if (_ofsUnnamedAreas.is_open()) {
