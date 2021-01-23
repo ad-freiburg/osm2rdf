@@ -3,7 +3,6 @@
 
 #include "osm2ttl/osm/GeometryHandler.h"
 
-
 #include <iostream>
 #include <memory>
 #include <random>

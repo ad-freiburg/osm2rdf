@@ -4,7 +4,6 @@
 #ifndef OSM2TTL_UTIL_DIRECTEDACYLICGRAPH_H
 #define OSM2TTL_UTIL_DIRECTEDACYLICGRAPH_H
 
-#include <stdlib.h>
 
 #include <algorithm>
 
@@ -29,29 +28,9 @@ osm2ttl::util::DirectedGraph<T> reduceDAG(
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto& src = vertices[i];
     std::vector<T> possibleEdges(sourceDAG.getEdgesFast(src));
-#ifndef NDEBUG
-    auto sortedPossibleEdges = possibleEdges;
-    std::sort(sortedPossibleEdges.begin(), sortedPossibleEdges.end());
-    const auto& it = std::unique(sortedPossibleEdges.begin(), sortedPossibleEdges.end());
-    sortedPossibleEdges.resize(std::distance(sortedPossibleEdges.begin(), it));
-    assert(sortedPossibleEdges.size() == possibleEdges.size());
-    for (size_t verifyI = 0; verifyI < possibleEdges.size(); ++verifyI) {
-      assert(sortedPossibleEdges[verifyI] == possibleEdges[verifyI]);
-    }
-#endif
     std::vector<T> edges;
     for (const auto& dst : sourceDAG.getEdgesFast(src)) {
       const auto& dstEdges = sourceDAG.findSuccessorsFast(dst);
-#ifndef NDEBUG
-      auto sortedEdges = dstEdges;
-      std::sort(sortedEdges.begin(), sortedEdges.end());
-      const auto& it = std::unique(sortedEdges.begin(), sortedEdges.end());
-      sortedEdges.resize(std::distance(sortedEdges.begin(), it));
-      assert(sortedEdges.size() == dstEdges.size());
-      for (size_t verifyI = 0; verifyI < dstEdges.size(); ++verifyI) {
-        assert(sortedEdges[verifyI] == dstEdges[verifyI]);
-      }
-#endif
       std::set_difference(possibleEdges.begin(), possibleEdges.end(),
                           dstEdges.begin(), dstEdges.end(),
                           std::back_inserter(edges));
@@ -87,29 +66,9 @@ osm2ttl::util::DirectedGraph<T> reduceMaximalConnectedDAG(
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto& src = vertices[i];
     std::vector<T> possibleEdges(sourceDAG.getEdges(src));
-#ifndef NDEBUG
-    auto sortedPossibleEdges = possibleEdges;
-    std::sort(sortedPossibleEdges.begin(), sortedPossibleEdges.end());
-    const auto& it = std::unique(sortedPossibleEdges.begin(), sortedPossibleEdges.end());
-    sortedPossibleEdges.resize(std::distance(sortedPossibleEdges.begin(), it));
-    assert(sortedPossibleEdges.size() == possibleEdges.size());
-    for (size_t verifyI = 0; verifyI < possibleEdges.size(); ++verifyI) {
-      assert(sortedPossibleEdges[verifyI] == possibleEdges[verifyI]);
-    }
-#endif
     std::vector<T> edges;
     for (const auto& dst : sourceDAG.getEdges(src)) {
       const auto& dstEdges = sourceDAG.getEdges(dst);
-#ifndef NDEBUG
-      auto sortedEdges = dstEdges;
-      std::sort(sortedEdges.begin(), sortedEdges.end());
-      const auto& it = std::unique(sortedEdges.begin(), sortedEdges.end());
-      sortedEdges.resize(std::distance(sortedEdges.begin(), it));
-      assert(sortedEdges.size() == dstEdges.size());
-      for (size_t verifyI = 0; verifyI < dstEdges.size(); ++verifyI) {
-        assert(sortedEdges[verifyI] == dstEdges[verifyI]);
-      }
-#endif
       std::set_difference(possibleEdges.begin(), possibleEdges.end(),
                           dstEdges.begin(), dstEdges.end(),
                           std::back_inserter(edges));
