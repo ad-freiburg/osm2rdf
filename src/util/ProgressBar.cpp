@@ -26,9 +26,12 @@ void osm2ttl::util::ProgressBar::update(std::size_t count) {
   }
   const std::size_t percent = 100 * (count) / _maxValue;
   const auto num = static_cast<std::size_t>(percent * (_width / 100.0));
+
+  // Only update if percent changed or timediff > 1 second
   if (_percent == percent && std::difftime(std::time(nullptr), _last) < 1) {
     return;
   }
+
   _percent = percent;
   _oldValue = count;
   std::cerr << '[';
@@ -42,11 +45,15 @@ void osm2ttl::util::ProgressBar::update(std::size_t count) {
     std::cerr << ' ';
   }
   std::cerr << ']';
+
   // %
   std::cerr << ' ' << std::setw(3) << std::right << percent << "%";
+
   // [x/y]
   std::cerr << " [" << std::setw(_countWidth) << std::right << count << "/"
             << _maxValue << "]\r";
+
+  // Update last update time
   _last = std::time(nullptr);
 }
 
