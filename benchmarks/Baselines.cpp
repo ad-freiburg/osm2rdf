@@ -11,7 +11,9 @@ static void UINT32T_TO_STRING(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(UINT32T_TO_STRING)
-->RangeMultiplier(2)->Range(1U<<0U, 1U<<30U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 0U, 1U << 30U)
+    ->Complexity();
 
 static void UINT64T_TO_STRING(benchmark::State& state) {
   uint64_t x = state.range(0);
@@ -21,7 +23,9 @@ static void UINT64T_TO_STRING(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(UINT64T_TO_STRING)
-->RangeMultiplier(2)->Range(1U<<0U, 1U<<30U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 0U, 1U << 30U)
+    ->Complexity();
 
 static void DUMMY(benchmark::State& state) {
   for (auto _ : state) {
@@ -35,5 +39,4 @@ static void DUMMY(benchmark::State& state) {
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(DUMMY)
-->RangeMultiplier(2)->Range(1U<<4U, 1U<<11U)->Complexity();
+BENCHMARK(DUMMY)->RangeMultiplier(2)->Range(1U << 4U, 1U << 11U)->Complexity();

@@ -82,7 +82,8 @@ void run(size_t n, omp_sched_t st, int ss) {
 }
 
 int main() {
-  std::vector<int> runs{117, 265, 567, 934, 1<<4, 1<<6, 1<<8, 1<<9, 1<<10};
+  std::vector<int> runs{117,    265,    567,    934,    1 << 4,
+                        1 << 6, 1 << 8, 1 << 9, 1 << 10};
   std::sort(runs.begin(), runs.end());
   std::cout << "---------------------------------------------------------------"
                "----------------"

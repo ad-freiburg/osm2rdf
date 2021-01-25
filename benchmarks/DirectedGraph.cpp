@@ -1,11 +1,11 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "benchmark/benchmark.h"
+#include "osm2ttl/util/DirectedGraph.h"
 
 #include <numeric>
 
-#include "osm2ttl/util/DirectedGraph.h"
+#include "benchmark/benchmark.h"
 
 static void DirectedGraph_findSuccessors_First(benchmark::State& state) {
   osm2ttl::util::DirectedGraph<uint16_t> dg;
@@ -20,7 +20,9 @@ static void DirectedGraph_findSuccessors_First(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(DirectedGraph_findSuccessors_First)
-->RangeMultiplier(2)->Range(1U<<1U, 1U<<10U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 1U, 1U << 10U)
+    ->Complexity();
 
 static void DirectedGraph_findSuccessors_Last(benchmark::State& state) {
   osm2ttl::util::DirectedGraph<uint16_t> dg;
@@ -35,7 +37,9 @@ static void DirectedGraph_findSuccessors_Last(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(DirectedGraph_findSuccessors_Last)
-->RangeMultiplier(2)->Range(1U<<1U, 1U<<10U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 1U, 1U << 10U)
+    ->Complexity();
 
 static void DirectedGraph_findSuccessorsFast_First(benchmark::State& state) {
   osm2ttl::util::DirectedGraph<uint16_t> dg;
@@ -51,7 +55,9 @@ static void DirectedGraph_findSuccessorsFast_First(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(DirectedGraph_findSuccessorsFast_First)
-->RangeMultiplier(2)->Range(1U<<1U, 1U<<10U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 1U, 1U << 10U)
+    ->Complexity();
 
 static void DirectedGraph_findSuccessorsFast_Last(benchmark::State& state) {
   osm2ttl::util::DirectedGraph<uint16_t> dg;
@@ -67,4 +73,6 @@ static void DirectedGraph_findSuccessorsFast_Last(benchmark::State& state) {
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(DirectedGraph_findSuccessorsFast_Last)
-->RangeMultiplier(2)->Range(1U<<1U, 1U<<10U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 1U, 1U << 10U)
+    ->Complexity();

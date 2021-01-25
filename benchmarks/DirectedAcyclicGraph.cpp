@@ -1,11 +1,12 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
+#include "osm2ttl/util/DirectedAcyclicGraph.h"
+
 #include <iostream>
 #include <numeric>
 
 #include "benchmark/benchmark.h"
-#include "osm2ttl/util/DirectedAcyclicGraph.h"
 #include "osm2ttl/util/DirectedGraph.h"
 
 static void DirectedAcyclicGraph_reduceDAG_Line_MinimalConnections(
@@ -24,7 +25,9 @@ static void DirectedAcyclicGraph_reduceDAG_Line_MinimalConnections(
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(DirectedAcyclicGraph_reduceDAG_Line_MinimalConnections)
-->RangeMultiplier(2)->Range(1U << 1U, 1U << 8U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 1U, 1U << 8U)
+    ->Complexity();
 
 static void DirectedAcyclicGraph_reduceDAG_Line_MaximalConnections(
     benchmark::State& state) {
@@ -44,4 +47,6 @@ static void DirectedAcyclicGraph_reduceDAG_Line_MaximalConnections(
   state.SetComplexityN(state.range(0));
 }
 BENCHMARK(DirectedAcyclicGraph_reduceDAG_Line_MaximalConnections)
-->RangeMultiplier(2)->Range(1U << 1U, 1U << 4U)->Complexity();
+    ->RangeMultiplier(2)
+    ->Range(1U << 1U, 1U << 4U)
+    ->Complexity();
