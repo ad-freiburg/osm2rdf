@@ -35,10 +35,10 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
       _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed"),
                        std::ios::binary),
       _oaUnnamedAreas(_ofsUnnamedAreas),
-      _ofsWays(config.getTempPath("spatial", "ways"), std::ios::binary),
-      _oaWays(_ofsWays),
       _ofsNodes(config.getTempPath("spatial", "nodes"), std::ios::binary),
-      _oaNodes(_ofsNodes) {
+      _oaNodes(_ofsNodes),
+      _ofsWays(config.getTempPath("spatial", "ways"), std::ios::binary),
+      _oaWays(_ofsWays) {
   _ofsUnnamedAreas << std::scientific;
   _ofsWays << std::scientific;
   _ofsNodes << std::scientific;
