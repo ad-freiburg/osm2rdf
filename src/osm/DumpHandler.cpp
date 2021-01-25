@@ -210,14 +210,12 @@ void osm2ttl::osm::DumpHandler<W>::writeTag(const std::string& s,
     try {
       _writer->writeTriple(
           s,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
+          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+                               key),
           _writer->generateLiteral(value, ""));
     } catch (const std::domain_error&) {
       std::string blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(
-          s,
-          osm2ttl::ttl::constants::IRI__OSM_TAG,
-          blankNode);
+      _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSM_TAG, blankNode);
       _writer->writeTriple(
           blankNode,
           _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
@@ -277,7 +275,8 @@ void osm2ttl::osm::DumpHandler<W>::writeTagList(
     }
     auto pipe = key.find('|');
     if (pipe != std::string::npos) {
-      std::cerr << "Found pipe in: '" << key << "' with value: '" << value << "' for: " << s << std::endl;
+      std::cerr << "Found pipe in: '" << key << "' with value: '" << value
+                << "' for: " << s << std::endl;
     }
   }
 }

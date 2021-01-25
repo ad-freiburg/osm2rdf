@@ -4,9 +4,9 @@
 #include "osm2ttl/util/ProgressBar.h"
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
-#include <chrono>
 #include <iomanip>
 #include <iostream>
 
@@ -15,7 +15,7 @@ osm2ttl::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
     : _maxValue(maxValue),
       _show(show),
       _countWidth(floor(log10(maxValue)) + 1),
-      _width(80 - _countWidth * 2 - 4 - 5 -2),
+      _width(80 - _countWidth * 2 - 4 - 5 - 2),
       _percent(101),
       _last(std::time(nullptr)) {}
 

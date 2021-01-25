@@ -193,6 +193,4 @@ void osm2ttl::util::Output::flush() {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::flush(size_t part) {
-  _out[part].flush();
-}
+void osm2ttl::util::Output::flush(size_t part) { _out[part].flush(); }

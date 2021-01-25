@@ -330,7 +330,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
             << directedAreaGraph.getNumVertices() << " vertices ... "
             << std::endl;
 
-  osm2ttl::util::ProgressBar progressBar{directedAreaGraph.getNumVertices(), true};
+  osm2ttl::util::ProgressBar progressBar{directedAreaGraph.getNumVertices(),
+                                         true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
   std::vector<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>

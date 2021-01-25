@@ -14,7 +14,8 @@
 osm2ttl::osm::Node::Node(const osmium::Node& node) {
   _id = node.positive_id();
   const auto& loc = node.location();
-  if constexpr (std::is_integral<osm2ttl::geometry::location_coordinate_t>::value) {
+  if constexpr (std::is_integral<
+                    osm2ttl::geometry::location_coordinate_t>::value) {
     _geom = osm2ttl::geometry::Location(loc.x(), loc.y());
   } else {
     _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
@@ -27,7 +28,8 @@ osm2ttl::osm::Node::Node(const osmium::Node& node) {
 osm2ttl::osm::Node::Node(const osmium::NodeRef& nodeRef) {
   _id = nodeRef.positive_ref();
   const auto& loc = nodeRef.location();
-  if constexpr (std::is_integral<osm2ttl::geometry::location_coordinate_t>::value) {
+  if constexpr (std::is_integral<
+                    osm2ttl::geometry::location_coordinate_t>::value) {
     _geom = osm2ttl::geometry::Location(loc.x(), loc.y());
   } else {
     _geom = osm2ttl::geometry::Location(loc.lon(), loc.lat());
