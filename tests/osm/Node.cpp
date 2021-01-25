@@ -51,4 +51,4 @@ TEST(Node, FromNodeWithTags) {
   ASSERT_STREQ("Freiburg", n.tags().at("city").c_str());
 }
 
-}
+}  // namespace osm2ttl::osm

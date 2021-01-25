@@ -71,4 +71,4 @@ TEST(Relation, FromRelationWithMembers) {
   ASSERT_EQ("outer", r.members().at(1).role());
 }
 
-}
+}  // namespace osm2ttl::osm

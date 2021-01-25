@@ -613,4 +613,4 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOneAdditionalConnections) {
   }
 }
 
-}
+}  // namespace osm2ttl::util

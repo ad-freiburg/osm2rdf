@@ -12,9 +12,7 @@
 
 namespace osm2ttl::geometry {
 
-osm2ttl::geometry::Box getDefaultObject() {
-  return osm2ttl::geometry::Box();
-}
+osm2ttl::geometry::Box getDefaultObject() { return osm2ttl::geometry::Box(); }
 
 osm2ttl::geometry::Box getFilledObject() {
   osm2ttl::geometry::Box obj;
@@ -35,20 +33,28 @@ TEST(Box, serializationBinary) {
   boost::archive::binary_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::binary_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.min_corner().x(), loadedDefaultObject.min_corner().x());
-  ASSERT_EQ(origDefaultObject.min_corner().y(), loadedDefaultObject.min_corner().y());
-  ASSERT_EQ(origDefaultObject.max_corner().x(), loadedDefaultObject.max_corner().x());
-  ASSERT_EQ(origDefaultObject.max_corner().y(), loadedDefaultObject.max_corner().y());
-  ASSERT_EQ(origFilledObject.min_corner().x(), loadedFilledObject.min_corner().x());
-  ASSERT_EQ(origFilledObject.min_corner().y(), loadedFilledObject.min_corner().y());
-  ASSERT_EQ(origFilledObject.max_corner().x(), loadedFilledObject.max_corner().x());
-  ASSERT_EQ(origFilledObject.max_corner().y(), loadedFilledObject.max_corner().y());
+  ASSERT_EQ(origDefaultObject.min_corner().x(),
+            loadedDefaultObject.min_corner().x());
+  ASSERT_EQ(origDefaultObject.min_corner().y(),
+            loadedDefaultObject.min_corner().y());
+  ASSERT_EQ(origDefaultObject.max_corner().x(),
+            loadedDefaultObject.max_corner().x());
+  ASSERT_EQ(origDefaultObject.max_corner().y(),
+            loadedDefaultObject.max_corner().y());
+  ASSERT_EQ(origFilledObject.min_corner().x(),
+            loadedFilledObject.min_corner().x());
+  ASSERT_EQ(origFilledObject.min_corner().y(),
+            loadedFilledObject.min_corner().y());
+  ASSERT_EQ(origFilledObject.max_corner().x(),
+            loadedFilledObject.max_corner().x());
+  ASSERT_EQ(origFilledObject.max_corner().y(),
+            loadedFilledObject.max_corner().y());
 }
 
 TEST(Box, serializationText) {
@@ -63,20 +69,28 @@ TEST(Box, serializationText) {
   boost::archive::text_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::text_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.min_corner().x(), loadedDefaultObject.min_corner().x());
-  ASSERT_EQ(origDefaultObject.min_corner().y(), loadedDefaultObject.min_corner().y());
-  ASSERT_EQ(origDefaultObject.max_corner().x(), loadedDefaultObject.max_corner().x());
-  ASSERT_EQ(origDefaultObject.max_corner().y(), loadedDefaultObject.max_corner().y());
-  ASSERT_EQ(origFilledObject.min_corner().x(), loadedFilledObject.min_corner().x());
-  ASSERT_EQ(origFilledObject.min_corner().y(), loadedFilledObject.min_corner().y());
-  ASSERT_EQ(origFilledObject.max_corner().x(), loadedFilledObject.max_corner().x());
-  ASSERT_EQ(origFilledObject.max_corner().y(), loadedFilledObject.max_corner().y());
+  ASSERT_EQ(origDefaultObject.min_corner().x(),
+            loadedDefaultObject.min_corner().x());
+  ASSERT_EQ(origDefaultObject.min_corner().y(),
+            loadedDefaultObject.min_corner().y());
+  ASSERT_EQ(origDefaultObject.max_corner().x(),
+            loadedDefaultObject.max_corner().x());
+  ASSERT_EQ(origDefaultObject.max_corner().y(),
+            loadedDefaultObject.max_corner().y());
+  ASSERT_EQ(origFilledObject.min_corner().x(),
+            loadedFilledObject.min_corner().x());
+  ASSERT_EQ(origFilledObject.min_corner().y(),
+            loadedFilledObject.min_corner().y());
+  ASSERT_EQ(origFilledObject.max_corner().x(),
+            loadedFilledObject.max_corner().x());
+  ASSERT_EQ(origFilledObject.max_corner().y(),
+            loadedFilledObject.max_corner().y());
 }
 
-}
+}  // namespace osm2ttl::geometry

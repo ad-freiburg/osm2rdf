@@ -37,7 +37,7 @@ TEST(Linestring, serializationBinary) {
   boost::archive::binary_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::binary_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -63,7 +63,7 @@ TEST(Linestring, serializationText) {
   boost::archive::text_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::text_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -77,4 +77,4 @@ TEST(Linestring, serializationText) {
   }
 }
 
-}
+}  // namespace osm2ttl::geometry

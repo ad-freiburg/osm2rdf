@@ -10,7 +10,8 @@
 namespace osm2ttl::util {
 
 size_t countFilesInPath(const std::filesystem::path path) {
-  return std::distance(std::filesystem::directory_iterator(path), std::filesystem::directory_iterator());
+  return std::distance(std::filesystem::directory_iterator(path),
+                       std::filesystem::directory_iterator());
 }
 
 TEST(Output, partFilename) {
@@ -35,7 +36,7 @@ TEST(OutputMergeMode, NONE) {
   std::filesystem::create_directories(config.output);
   ASSERT_TRUE(std::filesystem::exists(config.output));
   ASSERT_TRUE(std::filesystem::is_directory(config.output));
-  std::filesystem::path output {config.output};
+  std::filesystem::path output{config.output};
   output /= "file";
 
   size_t parts = 4;
@@ -63,7 +64,7 @@ TEST(OutputMergeMode, CONCATENATE) {
   std::filesystem::create_directories(config.output);
   ASSERT_TRUE(std::filesystem::exists(config.output));
   ASSERT_TRUE(std::filesystem::is_directory(config.output));
-  std::filesystem::path output {config.output};
+  std::filesystem::path output{config.output};
   output /= "file";
 
   size_t parts = 4;
@@ -91,7 +92,7 @@ TEST(OutputMergeMode, MERGE) {
   std::filesystem::create_directories(config.output);
   ASSERT_TRUE(std::filesystem::exists(config.output));
   ASSERT_TRUE(std::filesystem::is_directory(config.output));
-  std::filesystem::path output {config.output};
+  std::filesystem::path output{config.output};
   output /= "file";
 
   size_t parts = 4;
@@ -111,4 +112,4 @@ TEST(OutputMergeMode, MERGE) {
   ASSERT_FALSE(std::filesystem::exists(config.output));
 }
 
-}
+}  // namespace osm2ttl::util

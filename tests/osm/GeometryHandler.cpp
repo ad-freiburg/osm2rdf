@@ -45,12 +45,12 @@ TEST(GeometryHandler, addNamedAreaFromRelation) {
   osmium::builder::add_area(buffer, osmium::builder::attr::_id(areaId),
                             osmium::builder::attr::_tag("name", "Name"),
                             osmium::builder::attr::_outer_ring({
-                                                                   {1, {48.0, 7.51}},
-                                                                   {2, {48.0, 7.61}},
-                                                                   {3, {48.1, 7.61}},
-                                                                   {4, {48.1, 7.51}},
-                                                                   {1, {48.0, 7.51}},
-                                                               }));
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
@@ -59,7 +59,8 @@ TEST(GeometryHandler, addNamedAreaFromRelation) {
   ASSERT_EQ(0, gh._spatialStorageArea.size());
   gh.area(a);
   ASSERT_EQ(1, gh._spatialStorageArea.size());
-  ASSERT_NE(gh._spatialStorageAreaIndex.end(), gh._spatialStorageAreaIndex.find(areaId));
+  ASSERT_NE(gh._spatialStorageAreaIndex.end(),
+            gh._spatialStorageAreaIndex.find(areaId));
   ASSERT_EQ(0, gh._spatialStorageAreaIndex[areaId]);
 
   // Cleanup
@@ -86,12 +87,12 @@ TEST(GeometryHandler, addNamedAreaFromWay) {
   osmium::builder::add_area(buffer, osmium::builder::attr::_id(areaId),
                             osmium::builder::attr::_tag("name", "Name"),
                             osmium::builder::attr::_outer_ring({
-                                                                   {1, {48.0, 7.51}},
-                                                                   {2, {48.0, 7.61}},
-                                                                   {3, {48.1, 7.61}},
-                                                                   {4, {48.1, 7.51}},
-                                                                   {1, {48.0, 7.51}},
-                                                               }));
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
@@ -100,7 +101,8 @@ TEST(GeometryHandler, addNamedAreaFromWay) {
   ASSERT_EQ(0, gh._spatialStorageArea.size());
   gh.area(a);
   ASSERT_EQ(1, gh._spatialStorageArea.size());
-  ASSERT_NE(gh._spatialStorageAreaIndex.end(), gh._spatialStorageAreaIndex.find(areaId));
+  ASSERT_NE(gh._spatialStorageAreaIndex.end(),
+            gh._spatialStorageAreaIndex.find(areaId));
   ASSERT_EQ(0, gh._spatialStorageAreaIndex[areaId]);
 
   // Cleanup
@@ -126,12 +128,12 @@ TEST(GeometryHandler, addUnnamedAreaFromRelation) {
                                 osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_area(buffer, osmium::builder::attr::_id(areaId),
                             osmium::builder::attr::_outer_ring({
-                                                                   {1, {48.0, 7.51}},
-                                                                   {2, {48.0, 7.61}},
-                                                                   {3, {48.1, 7.61}},
-                                                                   {4, {48.1, 7.51}},
-                                                                   {1, {48.0, 7.51}},
-                                                               }));
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
@@ -163,12 +165,12 @@ TEST(GeometryHandler, addUnnamedAreaFromWay) {
                                 osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_area(buffer, osmium::builder::attr::_id(areaId),
                             osmium::builder::attr::_outer_ring({
-                                                                   {1, {48.0, 7.51}},
-                                                                   {2, {48.0, 7.61}},
-                                                                   {3, {48.1, 7.61}},
-                                                                   {4, {48.1, 7.51}},
-                                                                   {1, {48.0, 7.51}},
-                                                               }));
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
@@ -230,9 +232,9 @@ TEST(GeometryHandler, addWay) {
                                 osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
                            osmium::builder::attr::_nodes({
-                                                             {1, {48.0, 7.51}},
-                                                             {2, {48.1, 7.61}},
-                                                         }));
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
@@ -247,4 +249,4 @@ TEST(GeometryHandler, addWay) {
   std::filesystem::remove_all(config.output);
 }
 
-}
+}  // namespace osm2ttl::osm

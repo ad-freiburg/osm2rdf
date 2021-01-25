@@ -12,9 +12,7 @@
 
 namespace osm2ttl::geometry {
 
-osm2ttl::geometry::Ring getDefaultObject() {
-  return osm2ttl::geometry::Ring();
-}
+osm2ttl::geometry::Ring getDefaultObject() { return osm2ttl::geometry::Ring(); }
 
 osm2ttl::geometry::Ring getFilledObject() {
   osm2ttl::geometry::Ring obj;
@@ -37,7 +35,7 @@ TEST(Ring, serializationBinary) {
   boost::archive::binary_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::binary_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -63,7 +61,7 @@ TEST(Ring, serializationText) {
   boost::archive::text_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::text_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -77,4 +75,4 @@ TEST(Ring, serializationText) {
   }
 }
 
-}
+}  // namespace osm2ttl::geometry

@@ -32,7 +32,7 @@ TEST(Location, serializationBinary) {
   boost::archive::binary_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::binary_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -56,7 +56,7 @@ TEST(Location, serializationText) {
   boost::archive::text_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::text_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -68,4 +68,4 @@ TEST(Location, serializationText) {
   ASSERT_EQ(origFilledObject.y(), loadedFilledObject.y());
 }
 
-}
+}  // namespace osm2ttl::geometry

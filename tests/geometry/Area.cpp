@@ -12,9 +12,7 @@
 
 namespace osm2ttl::geometry {
 
-osm2ttl::geometry::Area getDefaultObject() {
-  return osm2ttl::geometry::Area();
-}
+osm2ttl::geometry::Area getDefaultObject() { return osm2ttl::geometry::Area(); }
 
 osm2ttl::geometry::Area getFilledObject() {
   osm2ttl::geometry::Area obj;
@@ -49,7 +47,7 @@ TEST(Area, serializationBinary) {
   boost::archive::binary_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::binary_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -58,16 +56,22 @@ TEST(Area, serializationBinary) {
   ASSERT_EQ(origDefaultObject.size(), loadedDefaultObject.size());
   ASSERT_EQ(origFilledObject.size(), loadedFilledObject.size());
   for (size_t i = 0; i < origFilledObject.size(); ++i) {
-    ASSERT_EQ(origFilledObject[i].outer().size(), loadedFilledObject[i].outer().size());
+    ASSERT_EQ(origFilledObject[i].outer().size(),
+              loadedFilledObject[i].outer().size());
     for (size_t j = 0; j < origFilledObject[i].outer().size(); ++j) {
-      ASSERT_EQ(origFilledObject[i].outer()[j].x(), loadedFilledObject[i].outer()[j].x());
-      ASSERT_EQ(origFilledObject[i].outer()[j].y(), loadedFilledObject[i].outer()[j].y());
+      ASSERT_EQ(origFilledObject[i].outer()[j].x(),
+                loadedFilledObject[i].outer()[j].x());
+      ASSERT_EQ(origFilledObject[i].outer()[j].y(),
+                loadedFilledObject[i].outer()[j].y());
     }
     for (size_t k = 0; k < origFilledObject[i].inners().size(); ++k) {
-      ASSERT_EQ(origFilledObject[i].inners()[k].size(), loadedFilledObject[i].inners()[k].size());
+      ASSERT_EQ(origFilledObject[i].inners()[k].size(),
+                loadedFilledObject[i].inners()[k].size());
       for (size_t j = 0; j < origFilledObject[i].inners()[k].size(); ++j) {
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].x(), loadedFilledObject[i].inners()[k][j].x());
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].y(), loadedFilledObject[i].inners()[k][j].y());
+        ASSERT_EQ(origFilledObject[i].inners()[k][j].x(),
+                  loadedFilledObject[i].inners()[k][j].x());
+        ASSERT_EQ(origFilledObject[i].inners()[k][j].y(),
+                  loadedFilledObject[i].inners()[k][j].y());
       }
     }
   }
@@ -85,7 +89,7 @@ TEST(Area, serializationText) {
   boost::archive::text_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::text_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
@@ -94,19 +98,25 @@ TEST(Area, serializationText) {
   ASSERT_EQ(origDefaultObject.size(), loadedDefaultObject.size());
   ASSERT_EQ(origFilledObject.size(), loadedFilledObject.size());
   for (size_t i = 0; i < origFilledObject.size(); ++i) {
-    ASSERT_EQ(origFilledObject[i].outer().size(), loadedFilledObject[i].outer().size());
+    ASSERT_EQ(origFilledObject[i].outer().size(),
+              loadedFilledObject[i].outer().size());
     for (size_t j = 0; j < origFilledObject[i].outer().size(); ++j) {
-      ASSERT_EQ(origFilledObject[i].outer()[j].x(), loadedFilledObject[i].outer()[j].x());
-      ASSERT_EQ(origFilledObject[i].outer()[j].y(), loadedFilledObject[i].outer()[j].y());
+      ASSERT_EQ(origFilledObject[i].outer()[j].x(),
+                loadedFilledObject[i].outer()[j].x());
+      ASSERT_EQ(origFilledObject[i].outer()[j].y(),
+                loadedFilledObject[i].outer()[j].y());
     }
     for (size_t k = 0; k < origFilledObject[i].inners().size(); ++k) {
-      ASSERT_EQ(origFilledObject[i].inners()[k].size(), loadedFilledObject[i].inners()[k].size());
+      ASSERT_EQ(origFilledObject[i].inners()[k].size(),
+                loadedFilledObject[i].inners()[k].size());
       for (size_t j = 0; j < origFilledObject[i].inners()[k].size(); ++j) {
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].x(), loadedFilledObject[i].inners()[k][j].x());
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].y(), loadedFilledObject[i].inners()[k][j].y());
+        ASSERT_EQ(origFilledObject[i].inners()[k][j].x(),
+                  loadedFilledObject[i].inners()[k][j].x());
+        ASSERT_EQ(origFilledObject[i].inners()[k][j].y(),
+                  loadedFilledObject[i].inners()[k][j].y());
       }
     }
   }
 }
 
-}
+}  // namespace osm2ttl::geometry

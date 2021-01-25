@@ -19,4 +19,4 @@ TEST(CacheFile, constructorAndAutoRemove) {
   ASSERT_FALSE(std::filesystem::exists(location));
 }
 
-}
+}  // namespace osm2ttl::util

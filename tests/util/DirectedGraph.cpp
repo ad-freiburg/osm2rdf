@@ -212,4 +212,4 @@ TEST(DirectedGraph, getEdges) {
   }
 }
 
-}
+}  // namespace osm2ttl::util

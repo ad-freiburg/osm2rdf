@@ -517,4 +517,4 @@ TEST(WriterQLEVER, generateLiteral) {
   }
 }
 
-}
+}  // namespace osm2ttl::ttl

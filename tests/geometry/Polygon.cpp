@@ -43,24 +43,31 @@ TEST(Polygon, serializationBinary) {
   boost::archive::binary_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::binary_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.outer().size(), loadedDefaultObject.outer().size());
-  ASSERT_EQ(origDefaultObject.inners().size(), loadedDefaultObject.inners().size());
+  ASSERT_EQ(origDefaultObject.outer().size(),
+            loadedDefaultObject.outer().size());
+  ASSERT_EQ(origDefaultObject.inners().size(),
+            loadedDefaultObject.inners().size());
   ASSERT_EQ(origFilledObject.outer().size(), loadedFilledObject.outer().size());
   for (size_t j = 0; j < origFilledObject.outer().size(); ++j) {
-    ASSERT_EQ(origFilledObject.outer()[j].x(), loadedFilledObject.outer()[j].x());
-    ASSERT_EQ(origFilledObject.outer()[j].y(), loadedFilledObject.outer()[j].y());
+    ASSERT_EQ(origFilledObject.outer()[j].x(),
+              loadedFilledObject.outer()[j].x());
+    ASSERT_EQ(origFilledObject.outer()[j].y(),
+              loadedFilledObject.outer()[j].y());
   }
   for (size_t k = 0; k < origFilledObject.inners().size(); ++k) {
-    ASSERT_EQ(origFilledObject.inners()[k].size(), loadedFilledObject.inners()[k].size());
+    ASSERT_EQ(origFilledObject.inners()[k].size(),
+              loadedFilledObject.inners()[k].size());
     for (size_t j = 0; j < origFilledObject.inners()[k].size(); ++j) {
-      ASSERT_EQ(origFilledObject.inners()[k][j].x(), loadedFilledObject.inners()[k][j].x());
-      ASSERT_EQ(origFilledObject.inners()[k][j].y(), loadedFilledObject.inners()[k][j].y());
+      ASSERT_EQ(origFilledObject.inners()[k][j].x(),
+                loadedFilledObject.inners()[k][j].x());
+      ASSERT_EQ(origFilledObject.inners()[k][j].y(),
+                loadedFilledObject.inners()[k][j].y());
     }
   }
 }
@@ -77,26 +84,33 @@ TEST(Polygon, serializationText) {
   boost::archive::text_oarchive oa(buffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  //std::cerr << buffer.str() << std::endl;
+  // std::cerr << buffer.str() << std::endl;
   boost::archive::text_iarchive ia(buffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.outer().size(), loadedDefaultObject.outer().size());
-  ASSERT_EQ(origDefaultObject.inners().size(), loadedDefaultObject.inners().size());
+  ASSERT_EQ(origDefaultObject.outer().size(),
+            loadedDefaultObject.outer().size());
+  ASSERT_EQ(origDefaultObject.inners().size(),
+            loadedDefaultObject.inners().size());
   ASSERT_EQ(origFilledObject.outer().size(), loadedFilledObject.outer().size());
   for (size_t j = 0; j < origFilledObject.outer().size(); ++j) {
-    ASSERT_EQ(origFilledObject.outer()[j].x(), loadedFilledObject.outer()[j].x());
-    ASSERT_EQ(origFilledObject.outer()[j].y(), loadedFilledObject.outer()[j].y());
+    ASSERT_EQ(origFilledObject.outer()[j].x(),
+              loadedFilledObject.outer()[j].x());
+    ASSERT_EQ(origFilledObject.outer()[j].y(),
+              loadedFilledObject.outer()[j].y());
   }
   for (size_t k = 0; k < origFilledObject.inners().size(); ++k) {
-    ASSERT_EQ(origFilledObject.inners()[k].size(), loadedFilledObject.inners()[k].size());
+    ASSERT_EQ(origFilledObject.inners()[k].size(),
+              loadedFilledObject.inners()[k].size());
     for (size_t j = 0; j < origFilledObject.inners()[k].size(); ++j) {
-      ASSERT_EQ(origFilledObject.inners()[k][j].x(), loadedFilledObject.inners()[k][j].x());
-      ASSERT_EQ(origFilledObject.inners()[k][j].y(), loadedFilledObject.inners()[k][j].y());
+      ASSERT_EQ(origFilledObject.inners()[k][j].x(),
+                loadedFilledObject.inners()[k][j].x());
+      ASSERT_EQ(origFilledObject.inners()[k][j].y(),
+                loadedFilledObject.inners()[k][j].y());
     }
   }
 }
 
-}
+}  // namespace osm2ttl::geometry
