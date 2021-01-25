@@ -6,10 +6,8 @@
 
 #include "osm2ttl/geometry/Linestring.h"
 
-namespace osm2ttl {
-namespace geometry {
+namespace osm2ttl::geometry {
 typedef osm2ttl::geometry::Linestring Way;
-}  // namespace geometry
-}  // namespace osm2ttl
+}  // namespace osm2ttl::geometry
 
 #endif  // OSM2TTL_GEOMETRY_WAY_H_

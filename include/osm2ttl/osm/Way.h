@@ -13,8 +13,7 @@
 #include "osm2ttl/osm/TagList.h"
 #include "osmium/osm/way.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 class Way {
  public:
@@ -36,7 +35,6 @@ class Way {
   osm2ttl::osm::TagList _tags;
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_WAY_H_

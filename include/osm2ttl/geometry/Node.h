@@ -6,10 +6,8 @@
 
 #include "osm2ttl/geometry/Location.h"
 
-namespace osm2ttl {
-namespace geometry {
+namespace osm2ttl::geometry {
 typedef osm2ttl::geometry::Location Node;
-}  // namespace geometry
-}  // namespace osm2ttl
+}  // namespace osm2ttl::geometry
 
 #endif  // OSM2TTL_GEOMETRY_NODE_H_

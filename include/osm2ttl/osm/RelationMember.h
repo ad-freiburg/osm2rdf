@@ -8,8 +8,7 @@
 
 #include "osmium/osm/relation.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 enum class RelationMemberType : uint8_t { UNKNOWN, NODE, RELATION, WAY };
 
@@ -27,7 +26,6 @@ class RelationMember {
   osm2ttl::osm::RelationMemberType _type;
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_RELATIONMEMBER_H_

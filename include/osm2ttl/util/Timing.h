@@ -9,8 +9,7 @@
 #include <sstream>
 #include <string>
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
 class Timing {
  public:
@@ -46,7 +45,6 @@ class Timing {
       std::chrono::duration<double, std::milli>::zero();
 };
 
-}  // namespace util
-}  // namespace osm2ttl
+}  // namespace osm2ttl::util
 
 #endif  // OSM2TTL_UTIL_TIMING_H_

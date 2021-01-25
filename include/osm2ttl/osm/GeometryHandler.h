@@ -29,9 +29,7 @@
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/way.hpp"
 
-
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Area::id_t,
                    osm2ttl::geometry::Area, osm2ttl::osm::Area::id_t,
@@ -125,41 +123,38 @@ class GeometryHandler : public osmium::handler::Handler {
   boost::archive::binary_oarchive _oaWays;
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
-namespace boost {
-namespace serialization {
+namespace boost::serialization {
 
-template<class Archive>
-void serialize(Archive & ar, osm2ttl::osm::SpatialNodeValue & v, [[maybe_unused]] const unsigned int version)
-{
-  ar & boost::serialization::make_nvp("envelope", std::get<0>(v));
-  ar & boost::serialization::make_nvp("id", std::get<1>(v));
-  ar & boost::serialization::make_nvp("geom", std::get<2>(v));
+template <class Archive>
+void serialize(Archive& ar, osm2ttl::osm::SpatialNodeValue& v,
+               [[maybe_unused]] const unsigned int version) {
+  ar& boost::serialization::make_nvp("envelope", std::get<0>(v));
+  ar& boost::serialization::make_nvp("id", std::get<1>(v));
+  ar& boost::serialization::make_nvp("geom", std::get<2>(v));
 }
 
-template<class Archive>
-void serialize(Archive & ar, osm2ttl::osm::SpatialWayValue & v, [[maybe_unused]] const unsigned int version)
-{
-  ar & boost::serialization::make_nvp("envelope", std::get<0>(v));
-  ar & boost::serialization::make_nvp("id", std::get<1>(v));
-  ar & boost::serialization::make_nvp("geom", std::get<2>(v));
-  ar & boost::serialization::make_nvp("nodeIds", std::get<3>(v));
+template <class Archive>
+void serialize(Archive& ar, osm2ttl::osm::SpatialWayValue& v,
+               [[maybe_unused]] const unsigned int version) {
+  ar& boost::serialization::make_nvp("envelope", std::get<0>(v));
+  ar& boost::serialization::make_nvp("id", std::get<1>(v));
+  ar& boost::serialization::make_nvp("geom", std::get<2>(v));
+  ar& boost::serialization::make_nvp("nodeIds", std::get<3>(v));
 }
 
-template<class Archive>
-void serialize(Archive & ar, osm2ttl::osm::SpatialAreaValue & v, [[maybe_unused]] const unsigned int version)
-{
-  ar & boost::serialization::make_nvp("envelope", std::get<0>(v));
-  ar & boost::serialization::make_nvp("id", std::get<1>(v));
-  ar & boost::serialization::make_nvp("geom", std::get<2>(v));
-  ar & boost::serialization::make_nvp("objId", std::get<3>(v));
-  ar & boost::serialization::make_nvp("geomArea", std::get<4>(v));
-  ar & boost::serialization::make_nvp("fromWay", std::get<5>(v));
+template <class Archive>
+void serialize(Archive& ar, osm2ttl::osm::SpatialAreaValue& v,
+               [[maybe_unused]] const unsigned int version) {
+  ar& boost::serialization::make_nvp("envelope", std::get<0>(v));
+  ar& boost::serialization::make_nvp("id", std::get<1>(v));
+  ar& boost::serialization::make_nvp("geom", std::get<2>(v));
+  ar& boost::serialization::make_nvp("objId", std::get<3>(v));
+  ar& boost::serialization::make_nvp("geomArea", std::get<4>(v));
+  ar& boost::serialization::make_nvp("fromWay", std::get<5>(v));
 }
 
-} // namespace serialization
-} // namespace boost
+}  // namespace boost::serialization
 
 #endif  // OSM2TTL_OSM_GEOMETRYHANDLER_H_

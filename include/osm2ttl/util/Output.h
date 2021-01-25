@@ -10,8 +10,7 @@
 #include "gtest/gtest_prod.h"
 #include "osm2ttl/config/Config.h"
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
 class Output {
  public:
@@ -36,7 +35,8 @@ class Output {
  protected:
   std::string partFilename(int part);
   FRIEND_TEST(Output, partFilename);
-  // merge closes and merges all parts, prepend given prefix and append given suffix.
+  // merge closes and merges all parts, prepend given prefix and append given
+  // suffix.
   void merge(std::string_view prefix, std::string_view suffix);
   void concatinate(std::string_view prefix, std::string_view suffix);
   void none(std::string_view prefix, std::string_view suffix);
@@ -49,7 +49,6 @@ class Output {
   std::ofstream* _outFile;
 };
 
-}  // namespace util
-}  // namespace osm2ttl
+}  // namespace osm2ttl::util
 
 #endif  // OSM2TTL_UTIL_OUTPUT_H

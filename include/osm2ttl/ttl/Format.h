@@ -7,14 +7,10 @@
 #include <string>
 #include <unordered_map>
 
-namespace osm2ttl {
-namespace ttl {
-namespace format {
+namespace osm2ttl::ttl::format {
 struct QLEVER {};
 struct TTL {};
 struct NT {};
-}  // namespace format
-}  // namespace ttl
-}  // namespace osm2ttl
+}  // namespace osm2ttl::ttl::format
 
 #endif  // OSM2TTL_TTL_OUTPUTFORMAT_H_

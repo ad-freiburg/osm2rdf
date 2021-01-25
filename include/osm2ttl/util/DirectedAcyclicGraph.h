@@ -4,21 +4,20 @@
 #ifndef OSM2TTL_UTIL_DIRECTEDACYLICGRAPH_H
 #define OSM2TTL_UTIL_DIRECTEDACYLICGRAPH_H
 
-
 #include <algorithm>
 
 #include "DirectedGraph.h"
 #include "ProgressBar.h"
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
 // reduceDAG returns a reduced DAG from a given sorted DAG
 template <typename T>
 osm2ttl::util::DirectedGraph<T> reduceDAG(
     const osm2ttl::util::DirectedGraph<T>& sourceDAG, bool showProgress) {
   osm2ttl::util::DirectedGraph<T> result;
-  osm2ttl::util::ProgressBar progressBar{sourceDAG.getNumVertices(), showProgress};
+  osm2ttl::util::ProgressBar progressBar{sourceDAG.getNumVertices(),
+                                         showProgress};
   size_t entryCount = 0;
   progressBar.update(entryCount);
   // Reduce each adjacency list
@@ -56,7 +55,8 @@ template <typename T>
 osm2ttl::util::DirectedGraph<T> reduceMaximalConnectedDAG(
     const osm2ttl::util::DirectedGraph<T>& sourceDAG, bool showProgress) {
   osm2ttl::util::DirectedGraph<T> result;
-  osm2ttl::util::ProgressBar progressBar{sourceDAG.getNumVertices(), showProgress};
+  osm2ttl::util::ProgressBar progressBar{sourceDAG.getNumVertices(),
+                                         showProgress};
   size_t entryCount = 0;
   progressBar.update(entryCount);
   // Reduce each adjacency list
@@ -88,7 +88,6 @@ osm2ttl::util::DirectedGraph<T> reduceMaximalConnectedDAG(
   return result;
 }
 
-}
-}
+}  // namespace osm2ttl::util
 
 #endif  // OSM2TTL_UTIL_DIRECTEDACYLICGRAPH_H

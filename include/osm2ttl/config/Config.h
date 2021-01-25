@@ -11,8 +11,7 @@
 #include "osm2ttl/ttl/Format.h"
 #include "osm2ttl/util/OutputMergeMode.h"
 
-namespace osm2ttl {
-namespace config {
+namespace osm2ttl::config {
 
 struct Config {
   // Select what to do
@@ -54,7 +53,8 @@ struct Config {
   // Output, empty for stdout
   std::filesystem::path output;
   std::string outputFormat;
-  osm2ttl::util::OutputMergeMode mergeOutput = osm2ttl::util::OutputMergeMode::CONCATENATE;
+  osm2ttl::util::OutputMergeMode mergeOutput =
+      osm2ttl::util::OutputMergeMode::CONCATENATE;
   bool outputCompress = true;
 
   // osmium location cache
@@ -66,9 +66,9 @@ struct Config {
   void load(const std::string& filename);
   void save(const std::string& filename);
   void fromArgs(int argc, char** argv);
-  std::string getInfo(std::string_view prefix) const;
-  std::filesystem::path getTempPath(const std::string& p,
-                                    const std::string& s) const;
+  [[nodiscard]] std::string getInfo(std::string_view prefix) const;
+  [[nodiscard]] std::filesystem::path getTempPath(const std::string& p,
+                                                  const std::string& s) const;
 
   static Config& getInstance() {
     static Config instance;
@@ -76,9 +76,8 @@ struct Config {
   }
 
  private:
-  Config() {}
+  Config() = default;
 };
-}  // namespace config
-}  // namespace osm2ttl
+}  // namespace osm2ttl::config
 
 #endif  // OSM2TTL_CONFIG_CONFIG_H_

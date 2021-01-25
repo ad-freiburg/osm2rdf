@@ -7,12 +7,10 @@
 #include <string>
 #include <utility>
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 typedef std::pair<std::string, std::string> Tag;
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_TAG_H_

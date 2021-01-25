@@ -6,10 +6,8 @@
 
 #include "osm2ttl/geometry/MultiPolygon.h"
 
-namespace osm2ttl {
-namespace geometry {
+namespace osm2ttl::geometry {
 typedef osm2ttl::geometry::MultiPolygon Area;
-}  // namespace geometry
-}  // namespace osm2ttl
+}  // namespace osm2ttl::geometry
 
 #endif  // OSM2TTL_GEOMETRY_AREA_H_

@@ -10,21 +10,17 @@
 #include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/geometry/Ring.h"
 
-namespace osm2ttl {
-namespace geometry {
+namespace osm2ttl::geometry {
 typedef boost::geometry::model::polygon<osm2ttl::geometry::Location> Polygon;
-}  // namespace geometry
-}  // namespace osm2ttl
+}  // namespace osm2ttl::geometry
 
-namespace boost {
-namespace serialization {
+namespace boost::serialization {
 template <class Archive>
 void serialize(Archive& ar, osm2ttl::geometry::Polygon& m,
                [[maybe_unused]] const unsigned int version) {
-  ar & boost::serialization::make_nvp("outer", m.outer());
-  ar & boost::serialization::make_nvp("inners", m.inners());
+  ar& boost::serialization::make_nvp("outer", m.outer());
+  ar& boost::serialization::make_nvp("inners", m.inners());
 }
-}  // namespace serialization
-}  // namespace boost
+}  // namespace boost::serialization
 
 #endif  // OSM2TTL_GEOMETRY_POLYGON_H_

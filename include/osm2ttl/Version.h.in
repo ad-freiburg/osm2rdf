@@ -4,12 +4,10 @@
 #ifndef OSM2TTL_VERSION_H
 #define OSM2TTL_VERSION_H
 
-namespace osm2ttl {
-namespace version {
+namespace osm2ttl::version {
 
 const char* GIT_INFO = "@VERSION_GIT_FULL@";
 
-}  // namespace version
-}  // namespace osm2ttl
+}  // namespace osm2ttl::version
 
 #endif  // OSM2TTL_VERSION_H

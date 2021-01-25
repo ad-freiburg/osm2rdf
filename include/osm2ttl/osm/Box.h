@@ -6,8 +6,7 @@
 
 #include "osm2ttl/geometry/Box.h"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 class Box {
  public:
@@ -18,7 +17,6 @@ class Box {
   osm2ttl::geometry::Box _geom{};
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_BOX_H_

@@ -9,8 +9,7 @@
 
 #include "gtest/gtest_prod.h"
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
 class ProgressBar {
  public:
@@ -29,7 +28,6 @@ class ProgressBar {
   std::time_t _last;
 };
 
-}  // namespace util
-}  // namespace osm2ttl
+}  // namespace osm2ttl::util
 
 #endif  // OSM2TTL_UTIL_PROGRESSBAR_H_

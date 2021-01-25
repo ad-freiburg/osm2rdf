@@ -4,20 +4,18 @@
 #ifndef OSM2TTL_OSM_LOCATIONHANDLER_H_
 #define OSM2TTL_OSM_LOCATIONHANDLER_H_
 
-#include "osmium/handler.hpp"
-#include "osmium/handler/node_locations_for_ways.hpp"
-#include "osmium/index/map/sparse_file_array.hpp"
-#include "osmium/index/map/flex_mem.hpp"
-#include "osmium/osm/node.hpp"
-#include "osmium/osm/types.hpp"
-#include "osmium/osm/relation.hpp"
-#include "osmium/osm/way.hpp"
-
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/util/CacheFile.h"
+#include "osmium/handler.hpp"
+#include "osmium/handler/node_locations_for_ways.hpp"
+#include "osmium/index/map/flex_mem.hpp"
+#include "osmium/index/map/sparse_file_array.hpp"
+#include "osmium/osm/node.hpp"
+#include "osmium/osm/relation.hpp"
+#include "osmium/osm/types.hpp"
+#include "osmium/osm/way.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 // Partially based on osmium::handler::ObjectRelations
 class LocationHandler : public osmium::handler::Handler {
@@ -29,7 +27,7 @@ class LocationHandler : public osmium::handler::Handler {
   static LocationHandler* create(const osm2ttl::config::Config& config);
 };
 
-template<typename T>
+template <typename T>
 class LocationHandlerImpl : public LocationHandler {
  public:
   explicit LocationHandlerImpl(const osm2ttl::config::Config& config);
@@ -40,9 +38,10 @@ class LocationHandlerImpl : public LocationHandler {
   osmium::handler::NodeLocationsForWays<T> _handler;
 };
 
-template<>
+template <>
 class LocationHandlerImpl<osmium::index::map::SparseFileArray<
-osmium::unsigned_object_id_type, osmium::Location>>: public LocationHandler {
+    osmium::unsigned_object_id_type, osmium::Location>>
+    : public LocationHandler {
  public:
   explicit LocationHandlerImpl(const osm2ttl::config::Config& config);
   void node(const osmium::Node& node);
@@ -50,19 +49,19 @@ osmium::unsigned_object_id_type, osmium::Location>>: public LocationHandler {
  protected:
   osm2ttl::util::CacheFile _cacheFile;
   osmium::index::map::SparseFileArray<osmium::unsigned_object_id_type,
-                                      osmium::Location> _index;
-  osmium::handler::NodeLocationsForWays<
-    osmium::index::map::SparseFileArray<
-      osmium::unsigned_object_id_type, osmium::Location>> _handler;
+                                      osmium::Location>
+      _index;
+  osmium::handler::NodeLocationsForWays<osmium::index::map::SparseFileArray<
+      osmium::unsigned_object_id_type, osmium::Location>>
+      _handler;
 };
 
 using LocationHandlerRAM = LocationHandlerImpl<osmium::index::map::FlexMem<
-  osmium::unsigned_object_id_type, osmium::Location>>;
-using LocationHandlerFS = LocationHandlerImpl<
-  osmium::index::map::SparseFileArray<osmium::unsigned_object_id_type,
-    osmium::Location>>;
+    osmium::unsigned_object_id_type, osmium::Location>>;
+using LocationHandlerFS =
+    LocationHandlerImpl<osmium::index::map::SparseFileArray<
+        osmium::unsigned_object_id_type, osmium::Location>>;
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_LOCATIONHANDLER_H_

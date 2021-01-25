@@ -16,8 +16,7 @@ static const int Base10Base = 10;
 #include "osmium/osm/box.hpp"
 #include "osmium/osm/types.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 struct Area {
   typedef uint32_t id_t;
@@ -49,7 +48,6 @@ struct Area {
   osm2ttl::geometry::Box _envelope;
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_AREA_H_

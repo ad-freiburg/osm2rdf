@@ -10,8 +10,7 @@
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 class Node {
  public:
@@ -30,7 +29,6 @@ class Node {
   osm2ttl::osm::TagList _tags;
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_NODE_H_

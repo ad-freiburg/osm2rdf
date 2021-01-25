@@ -14,13 +14,13 @@
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/way.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 template <typename W>
 class OsmiumHandler : public osmium::handler::Handler {
  public:
-  OsmiumHandler(const osm2ttl::config::Config& config, osm2ttl::ttl::Writer<W>* writer);
+  OsmiumHandler(const osm2ttl::config::Config& config,
+                osm2ttl::ttl::Writer<W>* writer);
   void handle();
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
@@ -44,7 +44,6 @@ class OsmiumHandler : public osmium::handler::Handler {
   size_t _waysDumped = 0;
   size_t _wayGeometriesHandled = 0;
 };
-}
-}
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_OSMIUMHANDLER_H

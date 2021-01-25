@@ -69,10 +69,9 @@ static const int MASK_BITS_OF_ONE_BYTE = k0xFF;
 #include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/util/Output.h"
 
-namespace osm2ttl {
-namespace ttl {
+namespace osm2ttl::ttl {
 
-template<typename T>
+template <typename T>
 class Writer {
  public:
   Writer(const osm2ttl::config::Config& config, osm2ttl::util::Output* output);
@@ -80,11 +79,14 @@ class Writer {
 
   void writeHeader();
 
-  void writeTriple(const std::string& s, const std::string& p, const std::string& o);
+  void writeTriple(const std::string& s, const std::string& p,
+                   const std::string& o);
 
-  // addPrefix adds the given prefix and value. If the prefix already exists false is returned.
+  // addPrefix adds the given prefix and value. If the prefix already exists
+  // false is returned.
   bool addPrefix(std::string_view p, std::string_view v);
-  // resolvePrefix resolves the given prefix. If the prefix is unknown it is returned as provided.
+  // resolvePrefix resolves the given prefix. If the prefix is unknown it is
+  // returned as provided.
   std::string resolvePrefix(std::string_view p);
 
   // generateBlankNode creates a new unique identifier for a blank node.
@@ -98,8 +100,8 @@ class Writer {
   // generateLangTag creates a Literal from the given string value v.
   // If suffix s is not empty, it will be appended as is.
   std::string generateLiteral(std::string_view v, std::string_view s);
- protected:
 
+ protected:
   std::string formatIRI(std::string_view p, std::string_view v);
 
   std::string STRING_LITERAL_QUOTE(std::string_view s);
@@ -162,7 +164,6 @@ class Writer {
   // Output
   osm2ttl::util::Output* _out;
 };
-}  // namespace ttl
-}  // namespace osm2ttl
+}  // namespace osm2ttl::ttl
 
 #endif  // OSM2TTL_TTL_WRITER_H_

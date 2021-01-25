@@ -9,21 +9,18 @@
 #include "boost/serialization/vector.hpp"
 #include "osm2ttl/geometry/Location.h"
 
-namespace osm2ttl {
-namespace geometry {
+namespace osm2ttl::geometry {
 typedef boost::geometry::model::linestring<osm2ttl::geometry::Location>
     Linestring;
-}  // namespace geometry
-}  // namespace osm2ttl
+}  // namespace osm2ttl::geometry
 
-namespace boost {
-namespace serialization {
+namespace boost::serialization {
 template <class Archive>
 void serialize(Archive& ar, osm2ttl::geometry::Linestring& m,
                [[maybe_unused]] const unsigned int version) {
-  ar& boost::serialization::make_nvp("locations", static_cast<std::vector<osm2ttl::geometry::Location>&>(m));
+  ar& boost::serialization::make_nvp(
+      "locations", static_cast<std::vector<osm2ttl::geometry::Location>&>(m));
 }
-}  // namespace serialization
-}  // namespace boost
+}  // namespace boost::serialization
 
 #endif  // OSM2TTL_GEOMETRY_LINESTRING_H_

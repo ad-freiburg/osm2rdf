@@ -4,12 +4,10 @@
 #ifndef OSM2TTL_UTIL_OUTPUTMERGEMODE_H
 #define OSM2TTL_UTIL_OUTPUTMERGEMODE_H
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
-enum class OutputMergeMode : uint8_t {NONE, MERGE, CONCATENATE};
+enum class OutputMergeMode : uint8_t { NONE, MERGE, CONCATENATE };
 
-}
 }
 
 #endif  // OSM2TTL_UTIL_OUTPUTMERGEMODE_H

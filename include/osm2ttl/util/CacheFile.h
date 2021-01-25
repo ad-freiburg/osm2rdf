@@ -6,8 +6,7 @@
 
 #include <filesystem>
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
 class CacheFile {
  public:
@@ -23,7 +22,6 @@ class CacheFile {
   int _fileDescriptor = -1;
 };
 
-}  // namespace util
-}  // namespace osm2ttl
+}  // namespace osm2ttl::util
 
 #endif  // OSM2TTL_UTIL_CACHEFILE_H_

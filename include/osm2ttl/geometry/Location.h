@@ -9,16 +9,13 @@
 #include "boost/serialization/split_free.hpp"
 #include "osm2ttl/geometry/Global.h"
 
-namespace osm2ttl {
-namespace geometry {
+namespace osm2ttl::geometry {
 typedef boost::geometry::model::d2::point_xy<
     osm2ttl::geometry::location_coordinate_t>
     Location;
-}  // namespace geometry
-}  // namespace osm2ttl
+}  // namespace osm2ttl::geometry
 
-namespace boost {
-namespace serialization {
+namespace boost::serialization {
 template <class Archive>
 void save(Archive& ar, const osm2ttl::geometry::Location& m,
           [[maybe_unused]] const unsigned int version) {
@@ -35,8 +32,7 @@ void load(Archive& ar, osm2ttl::geometry::Location& m,
   m.x(x);
   m.y(y);
 }
-}  // namespace serialization
-}  // namespace boost
+}  // namespace boost::serialization
 
 BOOST_SERIALIZATION_SPLIT_FREE(osm2ttl::geometry::Location)
 #endif  // OSM2TTL_GEOMETRY_LOCATION_H_

@@ -6,9 +6,7 @@
 
 #include <string>
 
-namespace osm2ttl {
-namespace ttl {
-namespace constants {
+namespace osm2ttl::ttl::constants {
 
 // Real constants
 const static inline std::string NAMESPACE__GEOSPARQL = "geo";
@@ -51,8 +49,6 @@ inline std::string IRI__XSD_INTEGER;
 inline std::string LITERAL__NO;
 inline std::string LITERAL__YES;
 
-}  // namespace constants
-}  // namespace ttl
-}  // namespace osm2ttl
+}  // namespace osm2ttl::ttl::constants
 
 #endif  // OSM2TTL_TTL_CONSTANTS_H

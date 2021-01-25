@@ -9,8 +9,7 @@
 #include <sstream>
 #include <string>
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
 inline const char* formattedTimeSpacer = "                          ";
 
@@ -30,7 +29,6 @@ inline std::string currentTimeFormatted() {
   return oss.str();
 }
 
-}  // namespace util
-}  // namespace osm2ttl
+}  // namespace osm2ttl::util
 
 #endif  // OSM2TTL_UTIL_TIME_H

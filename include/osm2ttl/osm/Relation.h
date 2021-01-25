@@ -10,8 +10,7 @@
 #include "osm2ttl/osm/TagList.h"
 #include "osmium/osm/relation.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 class Relation {
  public:
@@ -28,7 +27,6 @@ class Relation {
   osm2ttl::osm::TagList _tags;
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_RELATION_H_

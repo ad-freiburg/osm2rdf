@@ -14,8 +14,7 @@
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/way.hpp"
 
-namespace osm2ttl {
-namespace osm {
+namespace osm2ttl::osm {
 
 template <typename W>
 class DumpHandler : public osmium::handler::Handler {
@@ -27,9 +26,8 @@ class DumpHandler : public osmium::handler::Handler {
   void relation(const osm2ttl::osm::Relation& relation);
   void way(const osm2ttl::osm::Way& way);
 
-
  protected:
-  template<typename G>
+  template <typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
                           const G& g);
 
@@ -42,7 +40,6 @@ class DumpHandler : public osmium::handler::Handler {
   osm2ttl::ttl::Writer<W>* _writer;
 };
 
-}  // namespace osm
-}  // namespace osm2ttl
+}  // namespace osm2ttl::osm
 
 #endif  // OSM2TTL_OSM_DUMPHANDLER_H_

@@ -10,8 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace osm2ttl {
-namespace util {
+namespace osm2ttl::util {
 
 template <typename T>
 class DirectedGraph {
@@ -54,7 +53,6 @@ class DirectedGraph {
   bool _preparedFast = false;
 };
 
-}  // namespace util
-}  // namespace osm2ttl
+}  // namespace osm2ttl::util
 
 #endif  // OSM2TTL_UTIL_DIRECTEDGRAPH_H

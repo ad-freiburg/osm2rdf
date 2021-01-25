@@ -9,21 +9,17 @@
 #include "boost/serialization/split_free.hpp"
 #include "osm2ttl/geometry/Location.h"
 
-namespace osm2ttl {
-namespace geometry {
+namespace osm2ttl::geometry {
 typedef boost::geometry::model::box<osm2ttl::geometry::Location> Box;
-}  // namespace geometry
-}  // namespace osm2ttl
+}  // namespace osm2ttl::geometry
 
-namespace boost {
-namespace serialization {
+namespace boost::serialization {
 template <class Archive>
 void serialize(Archive& ar, osm2ttl::geometry::Box& m,
                [[maybe_unused]] const unsigned int version) {
-  ar & boost::serialization::make_nvp("min_corner", m.min_corner());
-  ar & boost::serialization::make_nvp("max_corner", m.max_corner());
+  ar& boost::serialization::make_nvp("min_corner", m.min_corner());
+  ar& boost::serialization::make_nvp("max_corner", m.max_corner());
 }
-}  // namespace serialization
-}  // namespace boost
+}  // namespace boost::serialization
 
 #endif  // OSM2TTL_GEOMETRY_BOX_H_
