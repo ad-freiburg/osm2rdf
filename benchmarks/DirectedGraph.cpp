@@ -34,7 +34,7 @@ static void DirectedGraph_findSuccessors_Last(benchmark::State& state) {
   }
   std::vector<uint16_t> x;
   for (auto _ : state) {
-    x = dg.findSuccessors(vertices.size());
+    x = dg.findSuccessors(vertices.size()-1);
   }
   state.SetComplexityN(state.range(0));
 }
@@ -72,7 +72,7 @@ static void DirectedGraph_findSuccessorsFast_Last(benchmark::State& state) {
   dg.prepareFindSuccessorsFast();
   std::vector<uint16_t> x;
   for (auto _ : state) {
-    x = dg.findSuccessorsFast(vertices.size());
+    x = dg.findSuccessorsFast(vertices.size()-1);
   }
   state.SetComplexityN(state.range(0));
 }
