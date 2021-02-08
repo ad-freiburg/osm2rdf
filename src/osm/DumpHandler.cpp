@@ -273,11 +273,6 @@ void osm2ttl::osm::DumpHandler<W>::writeTagList(
         }
       }
     }
-    auto pipe = key.find('|');
-    if (pipe != std::string::npos) {
-      std::cerr << "Found pipe in: '" << key << "' with value: '" << value
-                << "' for: " << s << std::endl;
-    }
   }
 }
 
