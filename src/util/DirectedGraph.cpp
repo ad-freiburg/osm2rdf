@@ -24,17 +24,8 @@ void osm2ttl::util::DirectedGraph<T>::addEdge(T src, T dst) {
 template <typename T>
 std::vector<T> osm2ttl::util::DirectedGraph<T>::findSuccessors(T src) const {
   std::vector<T> tmp;
-  const auto& it = _adjacency.find(src);
-  if (it == _adjacency.end()) {
-    return tmp;
-  }
-
-  // Copy direct parents.
-  tmp.insert(tmp.end(), it->second.begin(), it->second.end());
-  // Add parents parents.
-  for (const auto& dst : it->second) {
-    findSuccessorsHelper(dst, &tmp);
-  }
+  // Collect parents
+  findSuccessorsHelper(src, &tmp);
   // Make unique
   std::sort(tmp.begin(), tmp.end());
   const auto it2 = std::unique(tmp.begin(), tmp.end());
