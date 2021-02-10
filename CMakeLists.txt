@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16...3.18)
-
+# ----------------------------------------------------------------------------
+# Project
+# ----------------------------------------------------------------------------
 project(
         osm2ttl
         VERSION 0.5
@@ -10,6 +12,18 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# ----------------------------------------------------------------------------
+# Global settings
+# ----------------------------------------------------------------------------
+#set(CMAKE_VERBOSE_MAKEFILE ON)
+add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
+add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
+# Basic optimization
+add_compile_options(-march=native -flto)
+# Enable fast-math
+add_compile_options(-ffast-math)
+
+# ----------------------------------------------------------------------------
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -154,16 +168,6 @@ configure_file(
         "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h"
 )
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-missing-field-initializers -DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0 -march=native -flto")
-message(STATUS "CMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}")
-#set(CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_CXX_FLAGS_DEBUG} -Og -DLOGLEVEL=3 -DOSM2NT_DBG=1")
-#message(STATUS "CMAKE_CXX_FLAGS_DEBUG=${CMAKE_CXX_FLAGS_DEBUG}")
-#set(CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_CXX_FLAGS_MINSIZEREL} -DLOGLEVEL=2")
-#message(STATUS "CMAKE_CXX_FLAGS_MINSIZEREL=${CMAKE_CXX_FLAGS_MINSIZEREL}")
-##set(CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_CXX_FLAGS_RELEASE} -DLOGLEVEL=2")
-#message(STATUS "CMAKE_CXX_FLAGS_RELEASE=${CMAKE_CXX_FLAGS_RELEASE}")
-#set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -DLOGLEVEL=3 -g")
-#message(STATUS "CMAKE_CXX_FLAGS_RELWITHDEBINFO=${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
 if (CLANG_TIDY_EXE)
     set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=-*,readability-*")
 endif ()
