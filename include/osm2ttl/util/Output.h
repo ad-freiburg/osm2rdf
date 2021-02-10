@@ -7,7 +7,6 @@
 #include <fstream>
 
 #include "boost/iostreams/filtering_stream.hpp"
-#include "gtest/gtest_prod.h"
 #include "osm2ttl/config/Config.h"
 
 namespace osm2ttl::util {
@@ -31,14 +30,14 @@ class Output {
   void flush();
   // flush the given part.
   void flush(size_t part);
+  // filename for given part. Special handling for -1 and -2.
+  std::string partFilename(int part);
 
  protected:
-  std::string partFilename(int part);
-  FRIEND_TEST(Output, partFilename);
   // merge closes and merges all parts, prepend given prefix and append given
   // suffix.
   void merge(std::string_view prefix, std::string_view suffix);
-  void concatinate(std::string_view prefix, std::string_view suffix);
+  void concatenate(std::string_view prefix, std::string_view suffix);
   void none(std::string_view prefix, std::string_view suffix);
   const osm2ttl::config::Config _config;
   const std::string _prefix;

@@ -76,7 +76,7 @@ void osm2ttl::util::Output::close(std::string_view prefix,
       merge(prefix, suffix);
       return;
     case osm2ttl::util::OutputMergeMode::CONCATENATE:
-      concatinate(prefix, suffix);
+      concatenate(prefix, suffix);
       return;
     case osm2ttl::util::OutputMergeMode::NONE:
     default:
@@ -137,7 +137,7 @@ void osm2ttl::util::Output::merge(std::string_view prefix,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::concatinate(std::string_view prefix,
+void osm2ttl::util::Output::concatenate(std::string_view prefix,
                                         std::string_view suffix) {
   // Concatenated output files
   std::ofstream outFile{_prefix, std::ios_base::binary};
