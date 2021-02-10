@@ -19,16 +19,17 @@ TEST(DirectedAcyclicGraph, empty) {
   ASSERT_EQ(0, res.getNumEdges());
 }
 
-// Graph used for WhiteboardExample1
-//
-// 6   4   3
-//  \ / \ /
-//   2   0
-//   |   |
-//   |   1
-//    \ /
-//     5
-//
+/*
+Graph used for WhiteboardExample1
+
+6   4    3
+ \ / \   |
+  2   1  |
+  |   | /
+  |   0
+   \ /
+    5
+*/
 osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample1ExpectedResult() {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -152,17 +153,18 @@ TEST(DirectedAcyclicGraph, WhiteboardExample1MultiThreaded) {
   }
 }
 
-// Graph used for WhiteboardExample2
-//
-//     6
-//    /|\
-//   |  \ \
-//   4   0 |
-//    \ /  |
-//     2   3
-//    / \ /
-//   1   5
-//
+/*
+Graph used for WhiteboardExample2
+
+  6
+ /|\
+|  \ \
+4   0 |
+ \ /  |
+  2   3
+ / \ /
+1   5
+*/
 osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample2ExpectedResult() {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);

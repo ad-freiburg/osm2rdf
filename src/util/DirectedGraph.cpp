@@ -68,14 +68,14 @@ std::vector<T> osm2ttl::util::DirectedGraph<T>::findSuccessorsFast(
 template <typename T>
 void osm2ttl::util::DirectedGraph<T>::dump(
     const std::filesystem::path& filename) const {
-  std::ofstream ofs;
-  ofs.open(filename);
+  std::ofstream ofs(filename, std::ofstream::out);
 
   ofs << "digraph osm2ttl {\nrankdir=\"BT\"\n";
   for (const auto& [src, list] : _adjacency) {
-    ofs << src << " [label=\"" << src << "\", shape=rectangle, style=solid]\n";
+    ofs << std::to_string(src) << " [label=\"" << std::to_string(src)
+        << "\", shape=rectangle, style=solid]\n";
     for (const auto& dst : list) {
-      ofs << src << " -> " << dst << "\n";
+      ofs << std::to_string(src) << " -> " << std::to_string(dst) << "\n";
     }
   }
   ofs << "}\n";
@@ -87,8 +87,7 @@ void osm2ttl::util::DirectedGraph<T>::dump(
 template <typename T>
 void osm2ttl::util::DirectedGraph<T>::dumpOsm(
     const std::filesystem::path& filename) const {
-  std::ofstream ofs;
-  ofs.open(filename);
+  std::ofstream ofs(filename, std::ofstream::out);
 
   ofs << "digraph osm2ttl {\nrankdir=\"BT\"\n";
   for (const auto& [id, list] : _adjacency) {
@@ -99,15 +98,15 @@ void osm2ttl::util::DirectedGraph<T>::dumpOsm(
       src -= 1;
     }
     src /= 2;
-    ofs << src << " [label=\"" << src << "\", shape=" << shape
-        << ", style=solid]\n";
+    ofs << std::to_string(src) << " [label=\"" << std::to_string(src)
+        << "\", shape=" << shape << ", style=solid]\n";
     for (const auto& dstId : list) {
       uint64_t dst = dstId;
       if ((dst & 1U) == 1) {
         dst -= 1;
       }
       dst /= 2;
-      ofs << src << " -> " << dst << "\n";
+      ofs << std::to_string(src) << " -> " << std::to_string(dst) << "\n";
     }
   }
   ofs << "}\n";
