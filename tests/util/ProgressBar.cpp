@@ -12,47 +12,47 @@ namespace osm2ttl::util {
 TEST(ProgressBar, countWidth) {
   {
     osm2ttl::util::ProgressBar pg{1, false};
-    ASSERT_EQ(1, pg._countWidth);
+    ASSERT_EQ(1, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{9, false};
-    ASSERT_EQ(1, pg._countWidth);
+    ASSERT_EQ(1, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{10, false};
-    ASSERT_EQ(2, pg._countWidth);
+    ASSERT_EQ(2, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{99, false};
-    ASSERT_EQ(2, pg._countWidth);
+    ASSERT_EQ(2, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{100, false};
-    ASSERT_EQ(3, pg._countWidth);
+    ASSERT_EQ(3, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{999, false};
-    ASSERT_EQ(3, pg._countWidth);
+    ASSERT_EQ(3, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{1000, false};
-    ASSERT_EQ(4, pg._countWidth);
+    ASSERT_EQ(4, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{10000, false};
-    ASSERT_EQ(5, pg._countWidth);
+    ASSERT_EQ(5, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{100000, false};
-    ASSERT_EQ(6, pg._countWidth);
+    ASSERT_EQ(6, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{1000000, false};
-    ASSERT_EQ(7, pg._countWidth);
+    ASSERT_EQ(7, pg.countWidth());
   }
   {
     osm2ttl::util::ProgressBar pg{10000000, false};
-    ASSERT_EQ(8, pg._countWidth);
+    ASSERT_EQ(8, pg.countWidth());
   }
 }
 

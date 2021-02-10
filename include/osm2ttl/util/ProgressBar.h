@@ -7,8 +7,6 @@
 #include <cstdio>
 #include <ctime>
 
-#include "gtest/gtest_prod.h"
-
 namespace osm2ttl::util {
 
 class ProgressBar {
@@ -17,15 +15,16 @@ class ProgressBar {
   void update(std::size_t count);
   void done();
 
+  std::size_t countWidth() const;
+
  protected:
   std::size_t _maxValue;
   std::size_t _oldValue;
-  bool _show;
-  int _countWidth;
-  FRIEND_TEST(ProgressBar, countWidth);
+  std::size_t _countWidth;
   std::size_t _width;
   std::size_t _percent;
   std::time_t _last;
+  bool _show;
 };
 
 }  // namespace osm2ttl::util

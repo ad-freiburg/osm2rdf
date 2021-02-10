@@ -13,11 +13,11 @@
 // ____________________________________________________________________________
 osm2ttl::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
     : _maxValue(maxValue),
-      _show(show),
       _countWidth(floor(log10(maxValue)) + 1),
       _width(80 - _countWidth * 2 - 4 - 5 - 2),
       _percent(101),
-      _last(std::time(nullptr)) {}
+      _last(std::time(nullptr)),
+      _show(show) {}
 
 // ____________________________________________________________________________
 void osm2ttl::util::ProgressBar::update(std::size_t count) {
@@ -64,4 +64,9 @@ void osm2ttl::util::ProgressBar::done() {
   }
   update(_maxValue);
   std::cerr << std::endl;
+}
+
+// ____________________________________________________________________________
+std::size_t osm2ttl::util::ProgressBar::countWidth() const {
+  return _countWidth;
 }
