@@ -77,8 +77,10 @@ class Writer {
   Writer(const osm2ttl::config::Config& config, osm2ttl::util::Output* output);
   ~Writer();
 
+  // Write the header (does nothing for NT)
   void writeHeader();
 
+  // Write a single RDF line. The contents of s, p, and o are not checked.
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o);
 
@@ -101,7 +103,10 @@ class Writer {
   // If suffix s is not empty, it will be appended as is.
   std::string generateLiteral(std::string_view v, std::string_view s);
 
- protected:
+  // -------------------------------------------------------------------------
+  // Following functions are used by the ones above. These functions implement
+  // the grammars.
+  // -------------------------------------------------------------------------
   std::string formatIRI(std::string_view p, std::string_view v);
 
   std::string STRING_LITERAL_QUOTE(std::string_view s);
@@ -154,6 +159,7 @@ class Writer {
   FRIEND_TEST(WriterGrammarTTL, RULE_26_UCHAR_ASCII);
   FRIEND_TEST(WriterGrammarTTL, RULE_26_UCHAR_UTF8);
 
+ protected:
   // Config
   uint64_t _blankNodeCounter = 0;
   const osm2ttl::config::Config _config;
