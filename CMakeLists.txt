@@ -24,6 +24,23 @@ add_compile_options(-march=native -flto)
 add_compile_options(-ffast-math)
 
 # ----------------------------------------------------------------------------
+# External programs
+# ----------------------------------------------------------------------------
+find_program(
+        CLANG_TIDY_EXE
+        NAMES "clang-tidy"
+        DOC "Path to clang-tidy executable"
+)
+
+find_program(
+        CPPCHECK_EXE
+        NAMES "cppcheck"
+        DOC "Path to cppcheck executable"
+)
+
+# ----------------------------------------------------------------------------
+# Configure dependencies
+# ----------------------------------------------------------------------------
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -98,18 +115,6 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     endif ()
 endif ()
 
-find_program(
-        CLANG_TIDY_EXE
-        NAMES "clang-tidy"
-        DOC "Path to clang-tidy executable"
-)
-
-find_program(
-        CPPCHECK_EXE
-        NAMES "cppcheck"
-        DOC "Path to cppcheck executable"
-)
-
 # Based on https://github.com/ad-freiburg/pfaedle/blob/master/cmake/GetGitRevisionDescription.cmake
 function(get_git_sha1 _var)
     if (NOT GIT_FOUND)
@@ -168,7 +173,7 @@ else ()
     set(VERSION_GIT_FULL "${VERSION_GIT}-${VERSION_GIT_IS_DIRTY}")
 endif ()
 
-
+# Configure project
 configure_file(
         "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h.in"
         "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h"
