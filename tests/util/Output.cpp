@@ -14,7 +14,7 @@ size_t countFilesInPath(const std::filesystem::path path) {
                        std::filesystem::directory_iterator());
 }
 
-TEST(Output, partFilename) {
+TEST(Output, partFilenameSingleDigit) {
   osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
   osm2ttl::util::Output o{config, "test", 4};
   // Normal parts
@@ -26,6 +26,32 @@ TEST(Output, partFilename) {
   // Handle prefix (-1) and suffix (-2) parts
   ASSERT_EQ("test.part_0", o.partFilename(-1));
   ASSERT_EQ("test.part_5", o.partFilename(-2));
+}
+
+TEST(Output, partFilenameMultipleDigits) {
+  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::util::Output o{config, "test", 16};
+  // Normal parts
+  ASSERT_EQ("test.part_01", o.partFilename(0));
+  ASSERT_EQ("test.part_02", o.partFilename(1));
+  ASSERT_EQ("test.part_03", o.partFilename(2));
+  ASSERT_EQ("test.part_04", o.partFilename(3));
+  ASSERT_EQ("test.part_05", o.partFilename(4));
+  ASSERT_EQ("test.part_06", o.partFilename(5));
+  ASSERT_EQ("test.part_07", o.partFilename(6));
+  ASSERT_EQ("test.part_08", o.partFilename(7));
+  ASSERT_EQ("test.part_09", o.partFilename(8));
+  ASSERT_EQ("test.part_10", o.partFilename(9));
+  ASSERT_EQ("test.part_11", o.partFilename(10));
+  ASSERT_EQ("test.part_12", o.partFilename(11));
+  ASSERT_EQ("test.part_13", o.partFilename(12));
+  ASSERT_EQ("test.part_14", o.partFilename(13));
+  ASSERT_EQ("test.part_15", o.partFilename(14));
+  ASSERT_EQ("test.part_16", o.partFilename(15));
+
+  // Handle prefix (-1) and suffix (-2) parts
+  ASSERT_EQ("test.part_00", o.partFilename(-1));
+  ASSERT_EQ("test.part_17", o.partFilename(-2));
 }
 
 TEST(OutputMergeMode, NONE) {

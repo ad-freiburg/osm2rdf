@@ -3,6 +3,7 @@
 
 #include "osm2ttl/util/Output.h"
 
+#include <cmath>
 #include <cstdio>
 #include <iostream>
 
@@ -14,18 +15,22 @@
 // ____________________________________________________________________________
 osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
                               const std::string& prefix)
-    : _config(config), _prefix(prefix) {
+    : Output(config, prefix,
 #if defined(_OPENMP)
-  _numOuts = omp_get_max_threads();
+             omp_get_max_threads()
 #else
-  _numOuts = 1;
+             1
 #endif
+      ) {
 }
 
 // ____________________________________________________________________________
 osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
                               const std::string& prefix, size_t partCount)
-    : _config(config), _prefix(prefix), _numOuts(partCount) {}
+    : _config(config),
+      _prefix(prefix),
+      _numOuts(partCount),
+      _numOutsDigits(std::floor(std::log10(_numOuts)) + 1) {}
 
 // ____________________________________________________________________________
 osm2ttl::util::Output::~Output() { close(); }
@@ -89,15 +94,8 @@ void osm2ttl::util::Output::close(std::string_view prefix,
 std::string osm2ttl::util::Output::partFilename(int part) {
   assert(part >= -2);
   assert(part < static_cast<int>(_numOuts));
-  size_t numDigits = 1;
-  if (_numOuts > 9) {
-    numDigits++;
-  }
-  if (_numOuts > 99) {
-    numDigits++;
-  }
   std::ostringstream oss;
-  oss << _prefix << ".part_" << std::setfill('0') << std::setw(numDigits);
+  oss << _prefix << ".part_" << std::setfill('0') << std::setw(_numOutsDigits);
   if (part == -2) {
     part = static_cast<int>(_numOuts);
   }

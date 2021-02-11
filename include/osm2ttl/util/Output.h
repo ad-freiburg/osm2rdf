@@ -41,7 +41,8 @@ class Output {
   void none(std::string_view prefix, std::string_view suffix);
   const osm2ttl::config::Config _config;
   const std::string _prefix;
-  size_t _numOuts;
+  std::size_t _numOuts;
+  std::size_t _numOutsDigits;
   bool _open = false;
   // Output
   boost::iostreams::filtering_ostream* _out;
