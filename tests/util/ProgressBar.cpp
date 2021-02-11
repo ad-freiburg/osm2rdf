@@ -11,6 +11,10 @@ namespace osm2ttl::util {
 
 TEST(ProgressBar, countWidth) {
   {
+    osm2ttl::util::ProgressBar pg{0, false};
+    ASSERT_EQ(1, pg.countWidth());
+  }
+  {
     osm2ttl::util::ProgressBar pg{1, false};
     ASSERT_EQ(1, pg.countWidth());
   }
@@ -73,7 +77,22 @@ TEST(ProgressBar, hidden) {
   ASSERT_EQ("", buffer.str());
 }
 
-TEST(ProgressBar, directlyDone) {
+TEST(ProgressBar, directlyDoneZero) {
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cerr.rdbuf();
+  std::cerr.rdbuf(buffer.rdbuf());
+
+  osm2ttl::util::ProgressBar pg{0, true};
+  pg.done();
+
+  std::cerr.rdbuf(sbuf);
+  ASSERT_EQ(
+      "[===================================================================] "
+      "100% [0/0]\r\n",
+      buffer.str());
+}
+
+TEST(ProgressBar, directlyDoneOne) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
@@ -85,6 +104,22 @@ TEST(ProgressBar, directlyDone) {
   ASSERT_EQ(
       "[===================================================================] "
       "100% [1/1]\r\n",
+      buffer.str());
+}
+
+TEST(ProgressBar, zeroSteps) {
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cerr.rdbuf();
+  std::cerr.rdbuf(buffer.rdbuf());
+
+  osm2ttl::util::ProgressBar pg{0, true};
+  pg.update(0);
+  pg.done();
+
+  std::cerr.rdbuf(sbuf);
+  ASSERT_EQ(
+      "[===================================================================] "
+      "100% [0/0]\r\n",
       buffer.str());
 }
 

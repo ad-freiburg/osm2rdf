@@ -4,6 +4,8 @@
 #ifndef OSM2TTL_UTIL_PROGRESSBAR_H_
 #define OSM2TTL_UTIL_PROGRESSBAR_H_
 
+static const int k100Percent = 100;
+static const int kTerminalWidth = 80;
 #include <cstdio>
 #include <ctime>
 

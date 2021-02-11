@@ -13,19 +13,28 @@
 // ____________________________________________________________________________
 osm2ttl::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
     : _maxValue(maxValue),
-      _countWidth(floor(log10(maxValue)) + 1),
-      _width(80 - _countWidth * 2 - 4 - 5 - 2),
-      _percent(101),
+      _countWidth(std::floor(std::log10(maxValue)) + 1),
+      _percent(k100Percent + 1),
       _last(std::time(nullptr)),
-      _show(show) {}
+      _show(show) {
+  // Handle special case of 0 elements
+  if (maxValue == 0) {
+    _countWidth = 1;
+  }
+  _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2;
+}
 
 // ____________________________________________________________________________
 void osm2ttl::util::ProgressBar::update(std::size_t count) {
   if (!_show) {
     return;
   }
-  const std::size_t percent = 100 * (count) / _maxValue;
+  std::size_t percent = k100Percent;
+  if (_maxValue > 0) {
+    percent = k100Percent * (count) / _maxValue;
+  }
   const auto num = static_cast<std::size_t>(percent * (_width / 100.0));
+  assert(num <= _width);
 
   // Only update if percent changed or timediff > 1 second
   if (_percent == percent && std::difftime(std::time(nullptr), _last) < 1) {
