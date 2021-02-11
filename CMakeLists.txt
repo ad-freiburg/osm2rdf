@@ -104,6 +104,12 @@ find_program(
         DOC "Path to clang-tidy executable"
 )
 
+find_program(
+        CPPCHECK_EXE
+        NAMES "cppcheck"
+        DOC "Path to cppcheck executable"
+)
+
 # Based on https://github.com/ad-freiburg/pfaedle/blob/master/cmake/GetGitRevisionDescription.cmake
 function(get_git_sha1 _var)
     if (NOT GIT_FOUND)
@@ -169,7 +175,16 @@ configure_file(
 )
 
 if (CLANG_TIDY_EXE)
-    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=-*,readability-*")
+    message(STATUS "Found CLANG_TIDY_EXE at ${CLANG_TIDY_EXE}, enabling checks")
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=-*,readability-*")
+else()
+    message(STATUS "CLANG_TIDY_EXE not found")
+endif ()
+if (CPPCHECK_EXE)
+    message(STATUS "Found CPPCHECK_EXE at ${CPPCHECK_EXE}, enabling checks")
+    set(CMAKE_CXX_CPPCHECK "${CPPCHECK_EXE}")
+else()
+    message(STATUS "CPPCHECK_EXE not found")
 endif ()
 
 # The compiled library code is here
