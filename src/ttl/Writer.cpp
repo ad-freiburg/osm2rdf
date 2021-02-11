@@ -15,7 +15,6 @@
 #include "osm2ttl/config/Config.h"
 #include "osmium/osm/item_type.hpp"
 
-static const int k0xB7 = 0xB7;
 // ____________________________________________________________________________
 template <typename T>
 osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config,
@@ -418,7 +417,7 @@ std::string osm2ttl::ttl::Writer<T>::UCHAR(uint32_t codepoint) {
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
   std::ostringstream tmp;
   tmp << std::setfill('0');
-  if (codepoint > 0xFFFFU) {
+  if (codepoint > k0xFFFFU) {
     tmp << "\\U" << std::setw(8);
   } else {
     tmp << "\\u" << std::setw(4);
@@ -503,10 +502,10 @@ std::string osm2ttl::ttl::Writer<T>::encodePERCENT(uint32_t codepoint) {
   std::ostringstream tmp;
   tmp << std::setfill('0');
   do {
-    tmp << "%" << std::setw(2) << std::hex << (codepoint & 0xFFU);
+    tmp << "%" << std::setw(2) << std::hex << (codepoint & k0xFFU);
     parts.push_back(tmp.str());
     tmp.seekp(0);
-    codepoint = codepoint >> 8;
+    codepoint = codepoint >> NUM_BITS_IN_BYTE;
   } while (codepoint > 0);
 
   // Revert order of string parts
