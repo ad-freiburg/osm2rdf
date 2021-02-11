@@ -29,7 +29,7 @@ BENCHMARK(UINT64T_TO_STRING)
 
 static void DUMMY(benchmark::State& state) {
   for (auto _ : state) {
-    size_t s;
+    size_t s = 0;
     for (int64_t i = 0; i < state.range(0); ++i) {
       for (int64_t j = 0; j < state.range(0); ++j) {
         s += j;
