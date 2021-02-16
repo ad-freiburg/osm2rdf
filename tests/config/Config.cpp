@@ -3,15 +3,14 @@
 
 #include "osm2ttl/config/Config.h"
 
+#include "gtest/gtest.h"
 #include "osm2ttl/config/ExitCode.h"
 #include "osm2ttl/util/CacheFile.h"
-
-#include "gtest/gtest.h"
 
 namespace osm2ttl::config {
 
 // ____________________________________________________________________________
-void assertDefaultConfig(const osm2ttl::config::Config config) {
+void assertDefaultConfig(const osm2ttl::config::Config& config) {
   ASSERT_FALSE(config.noDump);
   ASSERT_FALSE(config.noContains);
   ASSERT_FALSE(config.storeLocationsOnDisk);
@@ -220,10 +219,8 @@ TEST(Config, fromArgsInputIsDirectory) {
   assertDefaultConfig(config);
 
   const int argc = 2;
-  char* argv[argc] = {
-      const_cast<char*>(""),
-      const_cast<char*>(
-          std::filesystem::temp_directory_path().string().c_str())};
+  char* argv[argc] = {const_cast<char*>(""),
+                      const_cast<char*>(config.cache.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
