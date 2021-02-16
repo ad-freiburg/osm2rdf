@@ -13,7 +13,7 @@ namespace osm2ttl::ttl {
 TEST(WriterGrammarNT, RULE_8_IRIREF) {
   // NT:  [8]    IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
 
   ASSERT_EQ("<prefixsuffix>", w.IRIREF("prefix", "suffix"));
@@ -25,7 +25,7 @@ TEST(WriterGrammarNT, RULE_8_IRIREF) {
 TEST(WriterGrammarNT, RULE_8_IRIREF_CONVERT) {
   // NT:  [8]    IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
 
   ASSERT_EQ("", w.encodeIRIREF(""));
@@ -41,7 +41,7 @@ TEST(WriterGrammarNT, RULE_8_IRIREF_CONVERT) {
 TEST(WriterGrammarNT, RULE_9_STRING_LITERAL_QUOTE) {
   // NT:  [9]   STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/n-triples/#grammar-production-STRING_LITERAL_QUOTE
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
 
   ASSERT_EQ("\"\"", w.STRING_LITERAL_QUOTE(""));
@@ -57,7 +57,7 @@ TEST(WriterGrammarNT, RULE_9_STRING_LITERAL_QUOTE) {
 TEST(WriterGrammarNT, RULE_10_UCHAR_CODEPOINT) {
   // NT:  [10]  UCHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
 
   ASSERT_EQ("\\u0000", w.UCHAR(0x00U));
@@ -69,7 +69,7 @@ TEST(WriterGrammarNT, RULE_10_UCHAR_CODEPOINT) {
 TEST(WriterGrammarNT, RULE_10_UCHAR_ASCII) {
   // NT:  [10]  UCHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
 
   ASSERT_EQ("\\u0000", w.UCHAR('\0'));  // NUL
@@ -85,7 +85,7 @@ TEST(WriterGrammarNT, RULE_10_UCHAR_ASCII) {
 TEST(WriterGrammarNT, RULE_10_UCHAR_UTF8) {
   // NT:  [10]  UCHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
 
   using namespace std::literals::string_literals;
@@ -111,7 +111,7 @@ TEST(WriterGrammarNT, RULE_10_UCHAR_UTF8) {
 TEST(WriterGrammarTTL, RULE_18_IRIREF) {
   // TTL: [18]   IRIREF (same as NT)
   //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("<prefixsuffix>", w.IRIREF("prefix", "suffix"));
@@ -123,7 +123,7 @@ TEST(WriterGrammarTTL, RULE_18_IRIREF) {
 TEST(WriterGrammarTTL, RULE_18_IRIREF_CONVERT) {
   // TTL: [18]   IRIREF (same as NT)
   //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("", w.encodeIRIREF(""));
@@ -139,7 +139,7 @@ TEST(WriterGrammarTTL, RULE_18_IRIREF_CONVERT) {
 TEST(WriterGrammarTTL, RULE_22_STRING_LITERAL_QUOTE) {
   // TTL: [22]  STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("\"\"", w.STRING_LITERAL_QUOTE(""));
@@ -156,7 +156,7 @@ TEST(WriterGrammarTTL, RULE_22_STRING_LITERAL_QUOTE) {
 TEST(WriterGrammarTTL, RULE_23_STRING_LITERAL_SINGLE_QUOTE) {
   // TTL: [23]  STRING_LITERAL_SINGLE_QUOTE
   //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_SINGLE_QUOTE
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("''", w.STRING_LITERAL_SINGLE_QUOTE(""));
@@ -173,7 +173,7 @@ TEST(WriterGrammarTTL, RULE_23_STRING_LITERAL_SINGLE_QUOTE) {
 TEST(WriterGrammarTTL, RULE_26_UCHAR_CODEPOINT) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("\\u0000", w.UCHAR(0x00U));
@@ -185,7 +185,7 @@ TEST(WriterGrammarTTL, RULE_26_UCHAR_CODEPOINT) {
 TEST(WriterGrammarTTL, RULE_26_UCHAR_ASCII) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("\\u0000", w.UCHAR('\0'));  // NUL
@@ -201,7 +201,7 @@ TEST(WriterGrammarTTL, RULE_26_UCHAR_ASCII) {
 TEST(WriterGrammarTTL, RULE_26_UCHAR_UTF8) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   using namespace std::literals::string_literals;
@@ -225,7 +225,7 @@ TEST(WriterGrammarTTL, RULE_26_UCHAR_UTF8) {
 TEST(WriterGrammarTTL, RULE_136s_PREFIXEDNAME) {
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("prefix:suffix", w.PrefixedName("prefix", "suffix"));
@@ -241,7 +241,7 @@ TEST(WriterGrammarTTL, RULE_136s_PREFIXEDNAME) {
 TEST(WriterGrammarTTL, RULE_167s_PN_PREFIX) {
   // TTL: [167s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_PREFIX
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("AZaz", w.encodePN_PREFIX("AZaz"));
@@ -264,7 +264,7 @@ TEST(WriterGrammarTTL, RULE_167s_PN_PREFIX) {
 TEST(WriterGrammarTTL, RULE_168s_PN_LOCAL) {
   // TTL: [168s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("_:AZaz09", w.encodePN_LOCAL("_:AZaz09"));
@@ -316,7 +316,7 @@ TEST(WriterGrammarTTL, RULE_168s_PN_LOCAL) {
 TEST(WriterGrammarTTL, RULE_170s_PERCENT_CODEPOINT) {
   // TTL: [170s] PERCENT
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("%00", w.encodePERCENT(0x00U));
@@ -331,7 +331,7 @@ TEST(WriterGrammarTTL, RULE_170s_PERCENT_CODEPOINT) {
 TEST(WriterGrammarTTL, RULE_170s_PERCENT_ASCII) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ("%00", w.encodePERCENT('\0'));  // NUL
@@ -348,7 +348,7 @@ TEST(WriterGrammarTTL, RULE_170s_PERCENT_ASCII) {
 TEST(WriterGrammarTTL, RULE_170s_PERCENT_UTF8) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   using namespace std::literals::string_literals;
@@ -374,7 +374,7 @@ TEST(WriterGrammarTTL, RULE_170s_PERCENT_UTF8) {
 
 // ____________________________________________________________________________
 TEST(WriterGrammar, UTF8_LENGTH_ASCII) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ(1, w.utf8Length('\0'));  // NUL
@@ -390,7 +390,7 @@ TEST(WriterGrammar, UTF8_LENGTH_ASCII) {
 TEST(WriterGrammar, UTF8_LENGTH_UTF8) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ(0, w.utf8Length(""));
@@ -404,7 +404,7 @@ TEST(WriterGrammar, UTF8_LENGTH_UTF8) {
 
 // ____________________________________________________________________________
 TEST(WriterGrammar, UTF8_CODEPOINT_ASCII) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   using namespace std::literals::string_literals;
@@ -421,7 +421,7 @@ TEST(WriterGrammar, UTF8_CODEPOINT_ASCII) {
 TEST(WriterGrammar, UTF8_CODEPOINT_UTF8) {
   // TTL: [26]  UCHAR
   //      https://www.w3.org/TR/turtle/#grammar-production-UCHAR
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
 
   ASSERT_EQ(0x7FU, w.utf8Codepoint("\u007f"));

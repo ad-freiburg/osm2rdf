@@ -15,7 +15,7 @@ size_t countFilesInPath(const std::filesystem::path path) {
 }
 
 TEST(Output, partFilenameSingleDigit) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::util::Output o{config, "test", 4};
   // Normal parts
   ASSERT_EQ("test.part_1", o.partFilename(0));
@@ -29,7 +29,7 @@ TEST(Output, partFilenameSingleDigit) {
 }
 
 TEST(Output, partFilenameMultipleDigits) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::util::Output o{config, "test", 16};
   // Normal parts
   ASSERT_EQ("test.part_01", o.partFilename(0));
@@ -55,7 +55,7 @@ TEST(Output, partFilenameMultipleDigits) {
 }
 
 TEST(OutputMergeMode, NONE) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   config.output = config.getTempPath("OutputMergeMode", "NONE");
   config.mergeOutput = OutputMergeMode::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
@@ -83,7 +83,7 @@ TEST(OutputMergeMode, NONE) {
 }
 
 TEST(OutputMergeMode, CONCATENATE) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   config.output = config.getTempPath("OutputMergeMode", "CONCATENATE");
   config.mergeOutput = OutputMergeMode::CONCATENATE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
@@ -111,7 +111,7 @@ TEST(OutputMergeMode, CONCATENATE) {
 }
 
 TEST(OutputMergeMode, MERGE) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   config.output = config.getTempPath("OutputMergeMode", "MERGE");
   config.mergeOutput = OutputMergeMode::MERGE;
   ASSERT_FALSE(std::filesystem::exists(config.output));

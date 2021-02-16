@@ -189,7 +189,7 @@ int main(int argc, char** argv) {
   std::cerr << osm2ttl::util::currentTimeFormatted()
             << "osm2ttl-stats :: " << osm2ttl::version::GIT_INFO << " :: BEGIN"
             << std::endl;
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   config.fromArgs(argc, argv);
   std::cerr << config.getInfo(osm2ttl::util::formattedTimeSpacer) << std::endl;
 

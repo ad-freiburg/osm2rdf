@@ -8,7 +8,7 @@
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateBlankNode(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   for (auto _ : state) {
     w.generateBlankNode();
@@ -17,7 +17,7 @@ static void Writer_NT_generateBlankNode(benchmark::State& state) {
 BENCHMARK(Writer_NT_generateBlankNode);
 
 static void Writer_TTL_generateBlankNode(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   for (auto _ : state) {
     w.generateBlankNode();
@@ -26,7 +26,7 @@ static void Writer_TTL_generateBlankNode(benchmark::State& state) {
 BENCHMARK(Writer_TTL_generateBlankNode);
 
 static void Writer_QLEVER_generateBlankNode(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   for (auto _ : state) {
     w.generateBlankNode();
@@ -36,7 +36,7 @@ BENCHMARK(Writer_QLEVER_generateBlankNode);
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateLangTag(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   for (auto _ : state) {
     w.generateLangTag("de");
@@ -45,7 +45,7 @@ static void Writer_NT_generateLangTag(benchmark::State& state) {
 BENCHMARK(Writer_NT_generateLangTag);
 
 static void Writer_TTL_generateLangTag(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   for (auto _ : state) {
     w.generateLangTag("de");
@@ -54,7 +54,7 @@ static void Writer_TTL_generateLangTag(benchmark::State& state) {
 BENCHMARK(Writer_TTL_generateLangTag);
 
 static void Writer_QLEVER_generateLangTag(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   for (auto _ : state) {
     w.generateLangTag("de");
@@ -64,7 +64,7 @@ BENCHMARK(Writer_QLEVER_generateLangTag);
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateIRI(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   for (auto _ : state) {
     w.generateIRI("wd", "Q42");
@@ -73,7 +73,7 @@ static void Writer_NT_generateIRI(benchmark::State& state) {
 BENCHMARK(Writer_NT_generateIRI);
 
 static void Writer_TTL_generateIRI(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   for (auto _ : state) {
     w.generateIRI("wd", "Q42");
@@ -82,7 +82,7 @@ static void Writer_TTL_generateIRI(benchmark::State& state) {
 BENCHMARK(Writer_TTL_generateIRI);
 
 static void Writer_QLEVER_generateIRI(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   for (auto _ : state) {
     w.generateIRI("wd", "Q42");
@@ -92,7 +92,7 @@ BENCHMARK(Writer_QLEVER_generateIRI);
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateLiteral(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   for (auto _ : state) {
     w.generateLiteral("Lorem ipsum dolor sit amet", "");
@@ -101,7 +101,7 @@ static void Writer_NT_generateLiteral(benchmark::State& state) {
 BENCHMARK(Writer_NT_generateLiteral);
 
 static void Writer_TTL_generateLiteral(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   for (auto _ : state) {
     w.generateLiteral("Lorem ipsum dolor sit amet", "");
@@ -110,7 +110,7 @@ static void Writer_TTL_generateLiteral(benchmark::State& state) {
 BENCHMARK(Writer_TTL_generateLiteral);
 
 static void Writer_QLEVER_generateLiteral(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   for (auto _ : state) {
     w.generateLiteral("Lorem ipsum dolor sit amet", "");
@@ -120,7 +120,7 @@ BENCHMARK(Writer_QLEVER_generateLiteral);
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateLiteral_a(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   std::string s(state.range(0), 'a');
   for (auto _ : state) {
@@ -134,7 +134,7 @@ BENCHMARK(Writer_NT_generateLiteral_a)
     ->Complexity();
 
 static void Writer_TTL_generateLiteral_a(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   std::string s(state.range(0), 'a');
   for (auto _ : state) {
@@ -148,7 +148,7 @@ BENCHMARK(Writer_TTL_generateLiteral_a)
     ->Complexity();
 
 static void Writer_QLEVER_generateLiteral_a(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), 'a');
   for (auto _ : state) {
@@ -163,7 +163,7 @@ BENCHMARK(Writer_QLEVER_generateLiteral_a)
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateLiteral_A(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   std::string s(state.range(0), 'A');
   for (auto _ : state) {
@@ -177,7 +177,7 @@ BENCHMARK(Writer_NT_generateLiteral_A)
     ->Complexity();
 
 static void Writer_TTL_generateLiteral_A(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   std::string s(state.range(0), 'A');
   for (auto _ : state) {
@@ -191,7 +191,7 @@ BENCHMARK(Writer_TTL_generateLiteral_A)
     ->Complexity();
 
 static void Writer_QLEVER_generateLiteral_A(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), 'A');
   for (auto _ : state) {
@@ -206,7 +206,7 @@ BENCHMARK(Writer_QLEVER_generateLiteral_A)
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateLiteral_AT(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   std::string s(state.range(0), '@');
   for (auto _ : state) {
@@ -220,7 +220,7 @@ BENCHMARK(Writer_NT_generateLiteral_AT)
     ->Complexity();
 
 static void Writer_TTL_generateLiteral_AT(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   std::string s(state.range(0), '@');
   for (auto _ : state) {
@@ -234,7 +234,7 @@ BENCHMARK(Writer_TTL_generateLiteral_AT)
     ->Complexity();
 
 static void Writer_QLEVER_generateLiteral_AT(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), '@');
   for (auto _ : state) {
@@ -249,7 +249,7 @@ BENCHMARK(Writer_QLEVER_generateLiteral_AT)
 
 // ---------------------------------------------------------------------------
 static void Writer_NT_generateLiteral_0xFAFA(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   std::string s{u8"\ufafa"};
   s.reserve(s.length() * state.range(0));
@@ -267,7 +267,7 @@ BENCHMARK(Writer_NT_generateLiteral_0xFAFA)
     ->Complexity();
 
 static void Writer_TTL_generateLiteral_0xFAFA(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   std::string s{u8"\ufafa"};
   s.reserve(s.length() * state.range(0));
@@ -285,7 +285,7 @@ BENCHMARK(Writer_TTL_generateLiteral_0xFAFA)
     ->Complexity();
 
 static void Writer_QLEVER_generateLiteral_0xFAFA(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s{u8"\ufafa"};
   s.reserve(s.length() * state.range(0));
@@ -304,7 +304,7 @@ BENCHMARK(Writer_QLEVER_generateLiteral_0xFAFA)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_utf8Codepoint_a(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), 'A');
   for (auto _ : state) {
@@ -319,7 +319,7 @@ BENCHMARK(Writer_QLEVER_utf8Codepoint_a)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_utf8Codepoint_A(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), 'A');
   for (auto _ : state) {
@@ -334,7 +334,7 @@ BENCHMARK(Writer_QLEVER_utf8Codepoint_A)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_utf8Codepoint_AT(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), '@');
   for (auto _ : state) {
@@ -349,7 +349,7 @@ BENCHMARK(Writer_QLEVER_utf8Codepoint_AT)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_utf8Codepoint_0xFAFA(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s{u8"\ufafa"};
   s.reserve(s.length() * state.range(0));
@@ -368,7 +368,7 @@ BENCHMARK(Writer_QLEVER_utf8Codepoint_0xFAFA)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_encodePN_LOCAL_a(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), 'a');
   for (auto _ : state) {
@@ -383,7 +383,7 @@ BENCHMARK(Writer_QLEVER_encodePN_LOCAL_a)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_encodePN_LOCAL_A(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), 'A');
   for (auto _ : state) {
@@ -398,7 +398,7 @@ BENCHMARK(Writer_QLEVER_encodePN_LOCAL_A)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_encodePN_LOCAL_AT(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s(state.range(0), '@');
   for (auto _ : state) {
@@ -413,7 +413,7 @@ BENCHMARK(Writer_QLEVER_encodePN_LOCAL_AT)
 
 // ---------------------------------------------------------------------------
 static void Writer_QLEVER_encodePN_LOCAL_0xFAFA(benchmark::State& state) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   std::string s{u8"\ufafa"};
   s.reserve(s.length() * state.range(0));

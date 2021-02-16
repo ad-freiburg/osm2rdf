@@ -154,11 +154,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     if (helpOp->count() > 0) {
       if (helpOp->count() == 1) {
-        std::cout << op << "\n";
+        std::cerr << op << "\n";
       } else if (helpOp->count() == 2) {
-        std::cout << op.help(popl::Attribute::advanced) << "\n";
+        std::cerr << op.help(popl::Attribute::advanced) << "\n";
       } else {
-        std::cout << op.help(popl::Attribute::expert) << "\n";
+        std::cerr << op.help(popl::Attribute::expert) << "\n";
       }
       exit(0);
     }
@@ -211,27 +211,36 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     // osmium location cache
-    if (cacheOp->is_set() || cache.empty()) {
-      cache = std::filesystem::absolute(cacheOp->value()).string();
-    }
+    cache = std::filesystem::absolute(cacheOp->value()).string();
 
     // Check cache location
+    if (!std::filesystem::exists(cache)) {
+      std::cerr << "Cache location does not exist: " << cache << "\n"
+                << op.help() << "\n";
+      exit(21);
+    }
     if (!std::filesystem::is_directory(cache)) {
       std::cerr << "Cache location not a directory: " << cache << "\n"
                 << op.help() << "\n";
-      exit(1);
+      exit(22);
     }
 
     // Handle input
     if (op.non_option_args().size() != 1) {
-      std::cerr << op << "\n";
-      exit(1);
+      std::cerr << "No input specified!\n"
+                << op.help() << "\n";
+      exit(10);
     }
     input = op.non_option_args()[0];
     if (!std::filesystem::exists(input)) {
       std::cerr << "Input does not exist: " << input << "\n"
                 << op.help() << "\n";
-      exit(1);
+      exit(11);
+    }
+    if (std::filesystem::is_directory(input)) {
+      std::cerr << "Input is a directory: " << input << "\n"
+                << op.help() << "\n";
+      exit(12);
     }
   } catch (const popl::invalid_option& e) {
     std::cerr << "Invalid Option Exception: " << e.what() << "\n";

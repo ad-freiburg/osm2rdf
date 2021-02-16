@@ -10,7 +10,7 @@ namespace osm2ttl::ttl {
 
 // ____________________________________________________________________________
 TEST(WriterNT, resolvePrefix) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
@@ -25,7 +25,7 @@ TEST(WriterNT, resolvePrefix) {
 }
 
 TEST(WriterTTL, resolvePrefix) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
@@ -40,7 +40,7 @@ TEST(WriterTTL, resolvePrefix) {
 }
 
 TEST(WriterQLEVER, resolvePrefix) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
@@ -56,7 +56,7 @@ TEST(WriterQLEVER, resolvePrefix) {
 
 // ____________________________________________________________________________
 TEST(WriterNT, addPrefix) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.resolvePrefix("test");
@@ -70,7 +70,7 @@ TEST(WriterNT, addPrefix) {
 }
 
 TEST(WriterTTL, addPrefix) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.resolvePrefix("test");
@@ -84,7 +84,7 @@ TEST(WriterTTL, addPrefix) {
 }
 
 TEST(WriterQLEVER, addPrefix) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.resolvePrefix("test");
@@ -99,7 +99,7 @@ TEST(WriterQLEVER, addPrefix) {
 
 // ____________________________________________________________________________
 TEST(WriterNT, generateBlankNode) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
@@ -116,7 +116,7 @@ TEST(WriterNT, generateBlankNode) {
 }
 
 TEST(WriterTTL, generateBlankNode) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
@@ -133,7 +133,7 @@ TEST(WriterTTL, generateBlankNode) {
 }
 
 TEST(WriterQLEVER, generateBlankNode) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
@@ -151,7 +151,7 @@ TEST(WriterQLEVER, generateBlankNode) {
 
 // ____________________________________________________________________________
 TEST(WriterNT, generateIRI_ID) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
@@ -183,7 +183,7 @@ TEST(WriterNT, generateIRI_ID) {
 }
 
 TEST(WriterTTL, generateIRI_ID) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   {
     const std::string res =
@@ -210,7 +210,7 @@ TEST(WriterTTL, generateIRI_ID) {
 }
 
 TEST(WriterQLEVER, generateIRI_ID) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res =
@@ -238,7 +238,7 @@ TEST(WriterQLEVER, generateIRI_ID) {
 
 // ____________________________________________________________________________
 TEST(WriterNT, generateIRI_String) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
@@ -268,7 +268,7 @@ TEST(WriterNT, generateIRI_String) {
 }
 
 TEST(WriterTTL, generateIRI_String) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   {
     const std::string res =
@@ -293,7 +293,7 @@ TEST(WriterTTL, generateIRI_String) {
 }
 
 TEST(WriterQLEVER, generateIRI_String) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res =
@@ -319,7 +319,7 @@ TEST(WriterQLEVER, generateIRI_String) {
 
 // ____________________________________________________________________________
 TEST(WriterNT, generateLangTag) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateLangTag("one");
@@ -356,7 +356,7 @@ TEST(WriterNT, generateLangTag) {
 }
 
 TEST(WriterTTL, generateLangTag) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateLangTag("one");
@@ -393,7 +393,7 @@ TEST(WriterTTL, generateLangTag) {
 }
 
 TEST(WriterQLEVER, generateLangTag) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateLangTag("one");
@@ -431,7 +431,7 @@ TEST(WriterQLEVER, generateLangTag) {
 
 // ____________________________________________________________________________
 TEST(WriterNT, generateLiteral) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateLiteral("one", "");
@@ -460,7 +460,7 @@ TEST(WriterNT, generateLiteral) {
 }
 
 TEST(WriterTTL, generateLiteral) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateLiteral("one", "");
@@ -489,7 +489,7 @@ TEST(WriterTTL, generateLiteral) {
 }
 
 TEST(WriterQLEVER, generateLiteral) {
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateLiteral("one", "");

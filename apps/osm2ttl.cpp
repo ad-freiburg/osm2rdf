@@ -14,7 +14,7 @@
 #include "osm2ttl/util/Time.h"
 
 template <typename T>
-void run(osm2ttl::config::Config& config) {
+void run(const osm2ttl::config::Config& config) {
   // Setup
   // Input file reference
   osm2ttl::util::Output output{config, config.output};
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
   std::cerr << osm2ttl::util::currentTimeFormatted()
             << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: BEGIN"
             << std::endl;
-  osm2ttl::config::Config& config = osm2ttl::config::Config::getInstance();
+  osm2ttl::config::Config config;
   config.fromArgs(argc, argv);
   std::cerr << config.getInfo(osm2ttl::util::formattedTimeSpacer) << std::endl;
 

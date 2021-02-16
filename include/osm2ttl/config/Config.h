@@ -20,10 +20,10 @@ struct Config {
   bool storeLocationsOnDisk = false;
 
   // Select types to dump
+  bool noAreaDump = false;
   bool noNodeDump = false;
   bool noRelationDump = false;
   bool noWayDump = false;
-  bool noAreaDump = false;
 
   // Select amount to dump
   bool addAreaSources = false;
@@ -69,14 +69,6 @@ struct Config {
   [[nodiscard]] std::string getInfo(std::string_view prefix) const;
   [[nodiscard]] std::filesystem::path getTempPath(const std::string& p,
                                                   const std::string& s) const;
-
-  static Config& getInstance() {
-    static Config instance;
-    return instance;
-  }
-
- private:
-  Config() = default;
 };
 }  // namespace osm2ttl::config
 
