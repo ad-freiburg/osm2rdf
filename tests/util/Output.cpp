@@ -54,6 +54,39 @@ TEST(Output, partFilenameMultipleDigits) {
   ASSERT_EQ("test.part_17", o.partFilename(-2));
 }
 
+TEST(Output, WriteIntoCurrentPart) {
+  osm2ttl::config::Config config;
+  config.output = config.getTempPath("Output", "WriteIntoCurrentPart");
+  config.mergeOutput = OutputMergeMode::NONE;
+  ASSERT_FALSE(std::filesystem::exists(config.output));
+  std::filesystem::create_directories(config.output);
+  ASSERT_TRUE(std::filesystem::exists(config.output));
+  ASSERT_TRUE(std::filesystem::is_directory(config.output));
+  std::filesystem::path output{config.output};
+  output /= "file";
+
+  size_t parts = 4;
+  osm2ttl::util::Output o{config, output, parts};
+  ASSERT_EQ(0, countFilesInPath(config.output));
+  o.open();
+  ASSERT_EQ(parts, countFilesInPath(config.output));
+  o.write("a");
+  o.write("b");
+  o.write("c");
+  o.write("d");
+  o.flush();
+  o.close();
+
+  // All data should be written by thread with id 0
+  for (size_t i = 1; i < parts; ++i) {
+    ASSERT_GT(std::filesystem::file_size(o.partFilename(0)),
+              std::filesystem::file_size(o.partFilename(i)));
+  }
+
+  std::filesystem::remove_all(config.output);
+  ASSERT_FALSE(std::filesystem::exists(config.output));
+}
+
 TEST(OutputMergeMode, NONE) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("OutputMergeMode", "NONE");
