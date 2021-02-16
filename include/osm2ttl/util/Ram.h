@@ -14,8 +14,16 @@ constexpr int64_t KILO = 1024;
 constexpr int64_t MEGA = KILO * KILO;
 constexpr int64_t GIGA = KILO * MEGA;
 
-int64_t available();
-int64_t physPages();
+// ____________________________________________________________________________
+int64_t available() {
+  return sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
+}
+
+// ____________________________________________________________________________
+int64_t physPages() {
+  return sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
+}
+
 
 }  // namespace osm2ttl::util::ram
 
