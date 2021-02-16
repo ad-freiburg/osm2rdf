@@ -81,12 +81,16 @@ TEST(DirectedGraph, findSuccessorsFast) {
   g.addEdge(1, 0);
   g.addEdge(1, 2);
   { ASSERT_ANY_THROW(g.findSuccessorsFast(1)); }
+  g.prepareFindSuccessorsFast();
   {
-    g.prepareFindSuccessorsFast();
     const auto res = g.findSuccessorsFast(1);
     ASSERT_EQ(2, res.size());
     ASSERT_EQ(0, res[0]);
     ASSERT_EQ(2, res[1]);
+  }
+  {
+    const auto res = g.findSuccessorsFast(4);
+    ASSERT_EQ(0, res.size());
   }
 }
 
