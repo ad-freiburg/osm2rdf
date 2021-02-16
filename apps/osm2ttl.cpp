@@ -8,6 +8,7 @@
 
 #include "osm2ttl/Version.h"
 #include "osm2ttl/config/Config.h"
+#include "osm2ttl/config/ExitCode.h"
 #include "osm2ttl/osm/OsmiumHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/Ram.h"
@@ -62,7 +63,7 @@ int main(int argc, char** argv) {
                 << std::endl;
       std::cerr << "Unknown output format: " << config.outputFormat
                 << std::endl;
-      std::exit(1);
+      std::exit(osm2ttl::config::ExitCode::FAILURE);
     }
   } catch (const std::exception& e) {
     // All exceptions used by the Osmium library derive from std::exception.
@@ -70,10 +71,10 @@ int main(int argc, char** argv) {
               << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: ERROR"
               << std::endl;
     std::cerr << e.what() << std::endl;
-    std::exit(1);
+    std::exit(osm2ttl::config::ExitCode::EXCEPTION);
   }
   std::cerr << osm2ttl::util::currentTimeFormatted()
             << "osm2ttl :: " << osm2ttl::version::GIT_INFO << " :: FINISHED"
             << std::endl;
-  std::exit(0);
+  std::exit(osm2ttl::config::ExitCode::SUCCESS);
 }

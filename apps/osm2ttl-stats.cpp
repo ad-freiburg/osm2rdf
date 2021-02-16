@@ -7,6 +7,7 @@
 
 #include "osm2ttl/Version.h"
 #include "osm2ttl/config/Config.h"
+#include "osm2ttl/config/ExitCode.h"
 #include "osm2ttl/osm/LocationHandler.h"
 #include "osm2ttl/util/Time.h"
 #include "osmium/area/assembler.hpp"
@@ -202,10 +203,10 @@ int main(int argc, char** argv) {
               << "osm2ttl-stats :: " << osm2ttl::version::GIT_INFO
               << " :: ERROR" << std::endl;
     std::cerr << e.what() << std::endl;
-    std::exit(1);
+    std::exit(osm2ttl::config::ExitCode::EXCEPTION);
   }
   std::cerr << osm2ttl::util::currentTimeFormatted()
             << "osm2ttl-stats :: " << osm2ttl::version::GIT_INFO
             << " :: FINISHED" << std::endl;
-  std::exit(0);
+  std::exit(osm2ttl::config::ExitCode::SUCCESS);
 }

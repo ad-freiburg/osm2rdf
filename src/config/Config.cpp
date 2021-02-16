@@ -9,6 +9,7 @@
 #include <string>
 
 #include "omp.h"
+#include "osm2ttl/config/ExitCode.h"
 #include "osm2ttl/ttl/Format.h"
 #include "popl.hpp"
 
@@ -160,7 +161,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       } else {
         std::cerr << op.help(popl::Attribute::expert) << "\n";
       }
-      exit(0);
+      exit(osm2ttl::config::ExitCode::SUCCESS);
     }
 
     // Handle config
@@ -217,30 +218,30 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     if (!std::filesystem::exists(cache)) {
       std::cerr << "Cache location does not exist: " << cache << "\n"
                 << op.help() << "\n";
-      exit(21);
+      exit(osm2ttl::config::ExitCode::CACHE_NOT_EXISTS);
     }
     if (!std::filesystem::is_directory(cache)) {
       std::cerr << "Cache location not a directory: " << cache << "\n"
                 << op.help() << "\n";
-      exit(22);
+      exit(osm2ttl::config::ExitCode::CACHE_NOT_DIRECTORY);
     }
 
     // Handle input
     if (op.non_option_args().size() != 1) {
       std::cerr << "No input specified!\n"
                 << op.help() << "\n";
-      exit(10);
+      exit(osm2ttl::config::ExitCode::INPUT_MISSING);
     }
     input = op.non_option_args()[0];
     if (!std::filesystem::exists(input)) {
       std::cerr << "Input does not exist: " << input << "\n"
                 << op.help() << "\n";
-      exit(11);
+      exit(osm2ttl::config::ExitCode::INPUT_NOT_EXISTS);
     }
     if (std::filesystem::is_directory(input)) {
       std::cerr << "Input is a directory: " << input << "\n"
                 << op.help() << "\n";
-      exit(12);
+      exit(osm2ttl::config::ExitCode::INPUT_IS_DIRECTORY);
     }
   } catch (const popl::invalid_option& e) {
     std::cerr << "Invalid Option Exception: " << e.what() << "\n";
@@ -266,7 +267,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       std::cerr << "option: " << e.option()->name(e.what_name()) << "\n";
       std::cerr << "value:  " << e.value() << "\n";
     }
-    exit(1);
+    exit(osm2ttl::config::ExitCode::FAILURE);
   }
 }
 

@@ -3,7 +3,8 @@
 
 #include "osm2ttl/config/Config.h"
 
-#include <osm2ttl/util/CacheFile.h>
+#include "osm2ttl/config/ExitCode.h"
+#include "osm2ttl/util/CacheFile.h"
 
 #include "gtest/gtest.h"
 
@@ -60,7 +61,8 @@ TEST(Config, fromArgsHelpShort) {
   const int argc = 2;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-h")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(0),
+  ASSERT_EXIT(config.fromArgs(argc, argv),
+              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
@@ -71,7 +73,8 @@ TEST(Config, fromArgsHelpLong) {
   const int argc = 2;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("--help")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(0),
+  ASSERT_EXIT(config.fromArgs(argc, argv),
+              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
@@ -83,7 +86,8 @@ TEST(Config, fromArgsHelpAdvanced) {
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-h"),
                       const_cast<char*>("-h")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(0),
+  ASSERT_EXIT(config.fromArgs(argc, argv),
+              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
               "--add-inverse-relation-direction");
 }
 
@@ -95,7 +99,8 @@ TEST(Config, fromArgsHelpExpert) {
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-h"),
                       const_cast<char*>("-h"), const_cast<char*>("-h")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(0),
+  ASSERT_EXIT(config.fromArgs(argc, argv),
+              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
@@ -149,8 +154,10 @@ TEST(Config, fromArgsCacheNotFoundShort) {
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-t"),
                       const_cast<char*>("/i/do/not/exist")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(21),
-              "^Cache location does not exist: \".+\"");
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::CACHE_NOT_EXISTS),
+      "^Cache location does not exist: \".+\"");
 }
 TEST(Config, fromArgsCacheNotFoundLong) {
   osm2ttl::config::Config config;
@@ -160,8 +167,10 @@ TEST(Config, fromArgsCacheNotFoundLong) {
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("--cache"),
                       const_cast<char*>("/i/do/not/exist")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(21),
-              "^Cache location does not exist: \".+\"");
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::CACHE_NOT_EXISTS),
+      "^Cache location does not exist: \".+\"");
 }
 
 TEST(Config, fromArgsCacheIsNotDirectory) {
@@ -172,8 +181,10 @@ TEST(Config, fromArgsCacheIsNotDirectory) {
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("--cache"),
                       const_cast<char*>("/tmp/dummy")};
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(22),
-              "^Cache location not a directory: \".+\"");
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::CACHE_NOT_DIRECTORY),
+      "^Cache location not a directory: \".+\"");
 }
 
 // ____________________________________________________________________________
@@ -184,8 +195,10 @@ TEST(Config, fromArgsEmpty) {
   const int argc = 1;
   char* argv[argc] = {const_cast<char*>("")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(10),
-              "^No input specified!");
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::INPUT_MISSING),
+      "^No input specified!");
 }
 
 TEST(Config, fromArgsInputNotFound) {
@@ -196,8 +209,10 @@ TEST(Config, fromArgsInputNotFound) {
   char* argv[argc] = {const_cast<char*>(""),
                       const_cast<char*>("/i/do/not/exist")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(11),
-              "^Input does not exist: \".+\"");
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::INPUT_NOT_EXISTS),
+      "^Input does not exist: \".+\"");
 }
 
 TEST(Config, fromArgsInputIsDirectory) {
@@ -210,8 +225,10 @@ TEST(Config, fromArgsInputIsDirectory) {
       const_cast<char*>(
           std::filesystem::temp_directory_path().string().c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv), ::testing::ExitedWithCode(12),
-              "^Input is a directory: \".+\"");
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::INPUT_IS_DIRECTORY),
+      "^Input is a directory: \".+\"");
 }
 
 }  // namespace osm2ttl::config
