@@ -13,6 +13,12 @@ namespace osm2ttl::geometry {
 typedef boost::geometry::model::d2::point_xy<
     osm2ttl::geometry::location_coordinate_t>
     Location;
+
+bool operator==(const osm2ttl::geometry::Location& l1,
+                const osm2ttl::geometry::Location& l2) {
+  return l1.x() == l2.x() && l1.y() == l2.y();
+}
+
 }  // namespace osm2ttl::geometry
 
 namespace boost::serialization {
