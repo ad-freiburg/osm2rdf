@@ -37,6 +37,140 @@ osm2ttl::geometry::MultiPolygon getFilledObject() {
   return obj;
 }
 
+TEST(MultiPolygon, equalsOperator) {
+  osm2ttl::geometry::MultiPolygon o1;
+  o1.resize(2);
+  o1[0].outer().reserve(3);
+  o1[0].outer().push_back(Location{0, 0});
+  o1[0].outer().push_back(Location{0, 1});
+  o1[0].outer().push_back(Location{1, 0});
+  o1[0].inners().resize(0);
+  o1[1].outer().reserve(4);
+  o1[1].outer().push_back(Location{10, 10});
+  o1[1].outer().push_back(Location{10, 20});
+  o1[1].outer().push_back(Location{20, 20});
+  o1[1].outer().push_back(Location{20, 10});
+  o1[1].inners().resize(1);
+  o1[1].inners()[0].reserve(3);
+  o1[1].inners()[0].push_back(Location{14, 14});
+  o1[1].inners()[0].push_back(Location{14, 16});
+  o1[1].inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::MultiPolygon o2;
+  o2.resize(2);
+  o2[0].outer().reserve(3);
+  o2[0].outer().push_back(Location{0, 0});
+  o2[0].outer().push_back(Location{1, 0});
+  o2[0].outer().push_back(Location{0, 1});
+  o2[0].inners().resize(0);
+  o2[1].outer().reserve(4);
+  o2[1].outer().push_back(Location{10, 10});
+  o2[1].outer().push_back(Location{10, 20});
+  o2[1].outer().push_back(Location{20, 20});
+  o2[1].outer().push_back(Location{20, 10});
+  o2[1].inners().resize(1);
+  o2[1].inners()[0].reserve(3);
+  o2[1].inners()[0].push_back(Location{14, 14});
+  o2[1].inners()[0].push_back(Location{14, 16});
+  o2[1].inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::MultiPolygon o3;
+  o3.resize(2);
+  o3[0].outer().reserve(3);
+  o3[0].outer().push_back(Location{0, 0});
+  o3[0].outer().push_back(Location{0, 1});
+  o3[0].outer().push_back(Location{1, 0});
+  o3[0].inners().resize(0);
+  o3[1].outer().reserve(4);
+  o3[1].outer().push_back(Location{10, 10});
+  o3[1].outer().push_back(Location{10, 20});
+  o3[1].outer().push_back(Location{20, 20});
+  o3[1].outer().push_back(Location{20, 10});
+  o3[1].inners().resize(1);
+  o3[1].inners()[0].reserve(2);
+  o3[1].inners()[0].push_back(Location{14, 14});
+  o3[1].inners()[0].push_back(Location{14, 16});
+
+  ASSERT_TRUE(o1 == o1);
+  ASSERT_FALSE(o1 == o2);
+  ASSERT_FALSE(o1 == o3);
+
+  ASSERT_FALSE(o2 == o1);
+  ASSERT_TRUE(o2 == o2);
+  ASSERT_FALSE(o2 == o3);
+
+  ASSERT_FALSE(o3 == o1);
+  ASSERT_FALSE(o3 == o2);
+  ASSERT_TRUE(o3 == o3);
+}
+
+TEST(MultiPolygon, notEqualsOperator) {
+  osm2ttl::geometry::MultiPolygon o1;
+  o1.resize(2);
+  o1[0].outer().reserve(3);
+  o1[0].outer().push_back(Location{0, 0});
+  o1[0].outer().push_back(Location{0, 1});
+  o1[0].outer().push_back(Location{1, 0});
+  o1[0].inners().resize(0);
+  o1[1].outer().reserve(4);
+  o1[1].outer().push_back(Location{10, 10});
+  o1[1].outer().push_back(Location{10, 20});
+  o1[1].outer().push_back(Location{20, 20});
+  o1[1].outer().push_back(Location{20, 10});
+  o1[1].inners().resize(1);
+  o1[1].inners()[0].reserve(3);
+  o1[1].inners()[0].push_back(Location{14, 14});
+  o1[1].inners()[0].push_back(Location{14, 16});
+  o1[1].inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::MultiPolygon o2;
+  o2.resize(2);
+  o2[0].outer().reserve(3);
+  o2[0].outer().push_back(Location{0, 0});
+  o2[0].outer().push_back(Location{1, 0});
+  o2[0].outer().push_back(Location{0, 1});
+  o2[0].inners().resize(0);
+  o2[1].outer().reserve(4);
+  o2[1].outer().push_back(Location{10, 10});
+  o2[1].outer().push_back(Location{10, 20});
+  o2[1].outer().push_back(Location{20, 20});
+  o2[1].outer().push_back(Location{20, 10});
+  o2[1].inners().resize(1);
+  o2[1].inners()[0].reserve(3);
+  o2[1].inners()[0].push_back(Location{14, 14});
+  o2[1].inners()[0].push_back(Location{14, 16});
+  o2[1].inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::MultiPolygon o3;
+  o3.resize(2);
+  o3[0].outer().reserve(3);
+  o3[0].outer().push_back(Location{0, 0});
+  o3[0].outer().push_back(Location{0, 1});
+  o3[0].outer().push_back(Location{1, 0});
+  o3[0].inners().resize(0);
+  o3[1].outer().reserve(4);
+  o3[1].outer().push_back(Location{10, 10});
+  o3[1].outer().push_back(Location{10, 20});
+  o3[1].outer().push_back(Location{20, 20});
+  o3[1].outer().push_back(Location{20, 10});
+  o3[1].inners().resize(1);
+  o3[1].inners()[0].reserve(2);
+  o3[1].inners()[0].push_back(Location{14, 14});
+  o3[1].inners()[0].push_back(Location{14, 16});
+
+  ASSERT_FALSE(o1 != o1);
+  ASSERT_TRUE(o1 != o2);
+  ASSERT_TRUE(o1 != o3);
+
+  ASSERT_TRUE(o2 != o1);
+  ASSERT_FALSE(o2 != o2);
+  ASSERT_TRUE(o2 != o3);
+
+  ASSERT_TRUE(o3 != o1);
+  ASSERT_TRUE(o3 != o2);
+  ASSERT_FALSE(o3 != o3);
+}
+
 TEST(MultiPolygon, serializationBinary) {
   std::stringstream buffer;
 

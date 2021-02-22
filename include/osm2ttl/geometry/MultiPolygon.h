@@ -12,6 +12,24 @@
 namespace osm2ttl::geometry {
 typedef boost::geometry::model::multi_polygon<osm2ttl::geometry::Polygon>
     MultiPolygon;
+
+bool operator==(const osm2ttl::geometry::MultiPolygon& lhs,
+                const osm2ttl::geometry::MultiPolygon& rhs) {
+  if (lhs.size() != rhs.size()) {
+    return false;
+  }
+  for (size_t i = 0; i < lhs.size(); ++i) {
+    if (lhs[i] != rhs[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool operator!=(const osm2ttl::geometry::MultiPolygon& lhs,
+                const osm2ttl::geometry::MultiPolygon& rhs) {
+  return !(lhs == rhs);
+}
 }  // namespace osm2ttl::geometry
 
 namespace boost::serialization {
