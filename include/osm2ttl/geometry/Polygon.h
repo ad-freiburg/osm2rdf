@@ -13,25 +13,25 @@
 namespace osm2ttl::geometry {
 typedef boost::geometry::model::polygon<osm2ttl::geometry::Location> Polygon;
 
-bool operator==(const osm2ttl::geometry::Polygon& l1,
-                const osm2ttl::geometry::Polygon& l2) {
-  if (l1.outer() != l2.outer()) {
+bool operator==(const osm2ttl::geometry::Polygon& lhs,
+                const osm2ttl::geometry::Polygon& rhs) {
+  if (lhs.outer() != rhs.outer()) {
     return false;
   }
-  if (l1.inners().size() != l2.inners().size()) {
+  if (lhs.inners().size() != rhs.inners().size()) {
     return false;
   }
-  for (size_t i = 0; i < l1.inners().size(); ++i) {
-    if (l1.inners()[i] != l2.inners()[i]) {
+  for (size_t i = 0; i < lhs.inners().size(); ++i) {
+    if (lhs.inners()[i] != rhs.inners()[i]) {
       return false;
     }
   }
   return true;
 }
 
-bool operator!=(const osm2ttl::geometry::Polygon& l1,
-                const osm2ttl::geometry::Polygon& l2) {
-  return !(l1 == l2);
+bool operator!=(const osm2ttl::geometry::Polygon& lhs,
+                const osm2ttl::geometry::Polygon& rhs) {
+  return !(lhs == rhs);
 }
 }  // namespace osm2ttl::geometry
 

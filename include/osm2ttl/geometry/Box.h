@@ -12,14 +12,14 @@
 namespace osm2ttl::geometry {
 typedef boost::geometry::model::box<osm2ttl::geometry::Location> Box;
 
-bool operator==(const osm2ttl::geometry::Box& b1,
-                const osm2ttl::geometry::Box& b2) {
-  return b1.min_corner() == b2.min_corner() &&
-         b1.max_corner() == b2.max_corner();
+bool operator==(const osm2ttl::geometry::Box& lhs,
+                const osm2ttl::geometry::Box& rhs) {
+  return lhs.min_corner() == rhs.min_corner() &&
+         lhs.max_corner() == rhs.max_corner();
 }
-bool operator!=(const osm2ttl::geometry::Box& b1,
-                const osm2ttl::geometry::Box& b2) {
-  return !(b1 == b2);
+bool operator!=(const osm2ttl::geometry::Box& lhs,
+                const osm2ttl::geometry::Box& rhs) {
+  return !(lhs == rhs);
 }
 }  // namespace osm2ttl::geometry
 

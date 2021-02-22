@@ -13,22 +13,22 @@ namespace osm2ttl::geometry {
 typedef boost::geometry::model::linestring<osm2ttl::geometry::Location>
     Linestring;
 
-bool operator==(const osm2ttl::geometry::Linestring& l1,
-                const osm2ttl::geometry::Linestring& l2) {
-  if (l1.size() != l2.size()) {
+bool operator==(const osm2ttl::geometry::Linestring& lhs,
+                const osm2ttl::geometry::Linestring& rhs) {
+  if (lhs.size() != rhs.size()) {
     return false;
   }
-  for (size_t i = 0; i < l1.size(); ++i) {
-    if (l1[i] != l2[i]) {
+  for (size_t i = 0; i < lhs.size(); ++i) {
+    if (lhs[i] != rhs[i]) {
       return false;
     }
   }
   return true;
 }
 
-bool operator!=(const osm2ttl::geometry::Linestring& l1,
-                const osm2ttl::geometry::Linestring& l2) {
-  return !(l1 == l2);
+bool operator!=(const osm2ttl::geometry::Linestring& lhs,
+                const osm2ttl::geometry::Linestring& rhs) {
+  return !(lhs == rhs);
 }
 }  // namespace osm2ttl::geometry
 
