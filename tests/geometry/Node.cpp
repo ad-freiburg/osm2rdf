@@ -18,6 +18,43 @@ osm2ttl::geometry::Node getFilledObject() {
   return osm2ttl::geometry::Node(10, 20);
 }
 
+
+TEST(Node, equalsOperator) {
+  osm2ttl::geometry::Node o1(10, 10);
+  osm2ttl::geometry::Node o2(10, 20);
+  osm2ttl::geometry::Node o3(20, 10);
+
+  ASSERT_TRUE(o1 == o1);
+  ASSERT_FALSE(o1 == o2);
+  ASSERT_FALSE(o1 == o3);
+
+  ASSERT_FALSE(o2 == o1);
+  ASSERT_TRUE(o2 == o2);
+  ASSERT_FALSE(o2 == o3);
+
+  ASSERT_FALSE(o3 == o1);
+  ASSERT_FALSE(o3 == o2);
+  ASSERT_TRUE(o3 == o3);
+}
+
+TEST(Node, notEqualsOperator) {
+  osm2ttl::geometry::Node o1(10, 10);
+  osm2ttl::geometry::Node o2(10, 20);
+  osm2ttl::geometry::Node o3(20, 10);
+
+  ASSERT_FALSE(o1 != o1);
+  ASSERT_TRUE(o1 != o2);
+  ASSERT_TRUE(o1 != o3);
+
+  ASSERT_TRUE(o2 != o1);
+  ASSERT_FALSE(o2 != o2);
+  ASSERT_TRUE(o2 != o3);
+
+  ASSERT_TRUE(o3 != o1);
+  ASSERT_TRUE(o3 != o2);
+  ASSERT_FALSE(o3 != o3);
+}
+
 TEST(Node, serializationBinary) {
   std::stringstream buffer;
 
