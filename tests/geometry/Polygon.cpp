@@ -31,6 +31,105 @@ osm2ttl::geometry::Polygon getFilledObject() {
   return obj;
 }
 
+
+TEST(Polygon, equalsOperator) {
+  osm2ttl::geometry::Polygon o1;
+  o1.outer().reserve(4);
+  o1.outer().push_back(Location{10, 10});
+  o1.outer().push_back(Location{10, 20});
+  o1.outer().push_back(Location{20, 20});
+  o1.outer().push_back(Location{20, 10});
+  o1.inners().resize(1);
+  o1.inners()[0].reserve(3);
+  o1.inners()[0].push_back(Location{14, 14});
+  o1.inners()[0].push_back(Location{14, 16});
+  o1.inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::Polygon o2;
+  o2.outer().reserve(4);
+  o2.outer().push_back(Location{10, 10});
+  o2.outer().push_back(Location{20, 20});
+  o2.outer().push_back(Location{10, 20});
+  o2.outer().push_back(Location{20, 10});
+  o2.inners().resize(1);
+  o2.inners()[0].reserve(3);
+  o2.inners()[0].push_back(Location{14, 14});
+  o2.inners()[0].push_back(Location{14, 16});
+  o2.inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::Polygon o3;
+  o3.outer().reserve(3);
+  o3.outer().push_back(Location{10, 10});
+  o3.outer().push_back(Location{10, 20});
+  o3.outer().push_back(Location{20, 20});
+  o3.inners().resize(1);
+  o3.inners()[0].reserve(3);
+  o3.inners()[0].push_back(Location{14, 14});
+  o3.inners()[0].push_back(Location{14, 16});
+  o3.inners()[0].push_back(Location{16, 14});
+
+  ASSERT_TRUE(o1 == o1);
+  ASSERT_FALSE(o1 == o2);
+  ASSERT_FALSE(o1 == o3);
+
+  ASSERT_FALSE(o2 == o1);
+  ASSERT_TRUE(o2 == o2);
+  ASSERT_FALSE(o2 == o3);
+
+  ASSERT_FALSE(o3 == o1);
+  ASSERT_FALSE(o3 == o2);
+  ASSERT_TRUE(o3 == o3);
+}
+
+TEST(Polygon, notEqualsOperator) {
+  osm2ttl::geometry::Polygon o1;
+  o1.outer().reserve(4);
+  o1.outer().push_back(Location{10, 10});
+  o1.outer().push_back(Location{10, 20});
+  o1.outer().push_back(Location{20, 20});
+  o1.outer().push_back(Location{20, 10});
+  o1.inners().resize(1);
+  o1.inners()[0].reserve(3);
+  o1.inners()[0].push_back(Location{14, 14});
+  o1.inners()[0].push_back(Location{14, 16});
+  o1.inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::Polygon o2;
+  o2.outer().reserve(4);
+  o2.outer().push_back(Location{10, 10});
+  o2.outer().push_back(Location{20, 20});
+  o2.outer().push_back(Location{10, 20});
+  o2.outer().push_back(Location{20, 10});
+  o2.inners().resize(1);
+  o2.inners()[0].reserve(3);
+  o2.inners()[0].push_back(Location{14, 14});
+  o2.inners()[0].push_back(Location{14, 16});
+  o2.inners()[0].push_back(Location{16, 14});
+
+  osm2ttl::geometry::Polygon o3;
+  o3.outer().reserve(3);
+  o3.outer().push_back(Location{10, 10});
+  o3.outer().push_back(Location{10, 20});
+  o3.outer().push_back(Location{20, 20});
+  o3.inners().resize(1);
+  o3.inners()[0].reserve(3);
+  o3.inners()[0].push_back(Location{14, 14});
+  o3.inners()[0].push_back(Location{14, 16});
+  o3.inners()[0].push_back(Location{16, 14});
+
+  ASSERT_FALSE(o1 != o1);
+  ASSERT_TRUE(o1 != o2);
+  ASSERT_TRUE(o1 != o3);
+
+  ASSERT_TRUE(o2 != o1);
+  ASSERT_FALSE(o2 != o2);
+  ASSERT_TRUE(o2 != o3);
+
+  ASSERT_TRUE(o3 != o1);
+  ASSERT_TRUE(o3 != o2);
+  ASSERT_FALSE(o3 != o3);
+}
+
 TEST(Polygon, serializationBinary) {
   std::stringstream buffer;
 
