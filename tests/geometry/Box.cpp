@@ -91,22 +91,8 @@ TEST(Box, serializationBinary) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.min_corner().x(),
-            loadedDefaultObject.min_corner().x());
-  ASSERT_EQ(origDefaultObject.min_corner().y(),
-            loadedDefaultObject.min_corner().y());
-  ASSERT_EQ(origDefaultObject.max_corner().x(),
-            loadedDefaultObject.max_corner().x());
-  ASSERT_EQ(origDefaultObject.max_corner().y(),
-            loadedDefaultObject.max_corner().y());
-  ASSERT_EQ(origFilledObject.min_corner().x(),
-            loadedFilledObject.min_corner().x());
-  ASSERT_EQ(origFilledObject.min_corner().y(),
-            loadedFilledObject.min_corner().y());
-  ASSERT_EQ(origFilledObject.max_corner().x(),
-            loadedFilledObject.max_corner().x());
-  ASSERT_EQ(origFilledObject.max_corner().y(),
-            loadedFilledObject.max_corner().y());
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 TEST(Box, serializationText) {
@@ -127,22 +113,8 @@ TEST(Box, serializationText) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.min_corner().x(),
-            loadedDefaultObject.min_corner().x());
-  ASSERT_EQ(origDefaultObject.min_corner().y(),
-            loadedDefaultObject.min_corner().y());
-  ASSERT_EQ(origDefaultObject.max_corner().x(),
-            loadedDefaultObject.max_corner().x());
-  ASSERT_EQ(origDefaultObject.max_corner().y(),
-            loadedDefaultObject.max_corner().y());
-  ASSERT_EQ(origFilledObject.min_corner().x(),
-            loadedFilledObject.min_corner().x());
-  ASSERT_EQ(origFilledObject.min_corner().y(),
-            loadedFilledObject.min_corner().y());
-  ASSERT_EQ(origFilledObject.max_corner().x(),
-            loadedFilledObject.max_corner().x());
-  ASSERT_EQ(origFilledObject.max_corner().y(),
-            loadedFilledObject.max_corner().y());
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 }  // namespace osm2ttl::geometry

@@ -72,10 +72,8 @@ TEST(Node, serializationBinary) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.x(), loadedDefaultObject.x());
-  ASSERT_EQ(origDefaultObject.y(), loadedDefaultObject.y());
-  ASSERT_EQ(origFilledObject.x(), loadedFilledObject.x());
-  ASSERT_EQ(origFilledObject.y(), loadedFilledObject.y());
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 TEST(Node, serializationText) {
@@ -96,10 +94,8 @@ TEST(Node, serializationText) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.x(), loadedDefaultObject.x());
-  ASSERT_EQ(origDefaultObject.y(), loadedDefaultObject.y());
-  ASSERT_EQ(origFilledObject.x(), loadedFilledObject.x());
-  ASSERT_EQ(origFilledObject.y(), loadedFilledObject.y());
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 }  // namespace osm2ttl::geometry

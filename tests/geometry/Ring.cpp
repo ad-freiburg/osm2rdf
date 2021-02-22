@@ -97,12 +97,8 @@ TEST(Ring, serializationBinary) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.size(), loadedDefaultObject.size());
-  ASSERT_EQ(origFilledObject.size(), loadedFilledObject.size());
-  for (size_t i = 0; i < loadedFilledObject.size(); ++i) {
-    ASSERT_EQ(origFilledObject[i].x(), loadedFilledObject[i].x());
-    ASSERT_EQ(origFilledObject[i].y(), loadedFilledObject[i].y());
-  }
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 TEST(Ring, serializationText) {
@@ -123,12 +119,8 @@ TEST(Ring, serializationText) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.size(), loadedDefaultObject.size());
-  ASSERT_EQ(origFilledObject.size(), loadedFilledObject.size());
-  for (size_t i = 0; i < loadedFilledObject.size(); ++i) {
-    ASSERT_EQ(origFilledObject[i].x(), loadedFilledObject[i].x());
-    ASSERT_EQ(origFilledObject[i].y(), loadedFilledObject[i].y());
-  }
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 }  // namespace osm2ttl::geometry

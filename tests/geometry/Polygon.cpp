@@ -147,27 +147,8 @@ TEST(Polygon, serializationBinary) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.outer().size(),
-            loadedDefaultObject.outer().size());
-  ASSERT_EQ(origDefaultObject.inners().size(),
-            loadedDefaultObject.inners().size());
-  ASSERT_EQ(origFilledObject.outer().size(), loadedFilledObject.outer().size());
-  for (size_t j = 0; j < origFilledObject.outer().size(); ++j) {
-    ASSERT_EQ(origFilledObject.outer()[j].x(),
-              loadedFilledObject.outer()[j].x());
-    ASSERT_EQ(origFilledObject.outer()[j].y(),
-              loadedFilledObject.outer()[j].y());
-  }
-  for (size_t k = 0; k < origFilledObject.inners().size(); ++k) {
-    ASSERT_EQ(origFilledObject.inners()[k].size(),
-              loadedFilledObject.inners()[k].size());
-    for (size_t j = 0; j < origFilledObject.inners()[k].size(); ++j) {
-      ASSERT_EQ(origFilledObject.inners()[k][j].x(),
-                loadedFilledObject.inners()[k][j].x());
-      ASSERT_EQ(origFilledObject.inners()[k][j].y(),
-                loadedFilledObject.inners()[k][j].y());
-    }
-  }
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 TEST(Polygon, serializationText) {
@@ -188,27 +169,8 @@ TEST(Polygon, serializationText) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.outer().size(),
-            loadedDefaultObject.outer().size());
-  ASSERT_EQ(origDefaultObject.inners().size(),
-            loadedDefaultObject.inners().size());
-  ASSERT_EQ(origFilledObject.outer().size(), loadedFilledObject.outer().size());
-  for (size_t j = 0; j < origFilledObject.outer().size(); ++j) {
-    ASSERT_EQ(origFilledObject.outer()[j].x(),
-              loadedFilledObject.outer()[j].x());
-    ASSERT_EQ(origFilledObject.outer()[j].y(),
-              loadedFilledObject.outer()[j].y());
-  }
-  for (size_t k = 0; k < origFilledObject.inners().size(); ++k) {
-    ASSERT_EQ(origFilledObject.inners()[k].size(),
-              loadedFilledObject.inners()[k].size());
-    for (size_t j = 0; j < origFilledObject.inners()[k].size(); ++j) {
-      ASSERT_EQ(origFilledObject.inners()[k][j].x(),
-                loadedFilledObject.inners()[k][j].x());
-      ASSERT_EQ(origFilledObject.inners()[k][j].y(),
-                loadedFilledObject.inners()[k][j].y());
-    }
-  }
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 }  // namespace osm2ttl::geometry

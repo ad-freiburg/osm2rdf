@@ -187,28 +187,8 @@ TEST(Area, serializationBinary) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.size(), loadedDefaultObject.size());
-  ASSERT_EQ(origFilledObject.size(), loadedFilledObject.size());
-  for (size_t i = 0; i < origFilledObject.size(); ++i) {
-    ASSERT_EQ(origFilledObject[i].outer().size(),
-              loadedFilledObject[i].outer().size());
-    for (size_t j = 0; j < origFilledObject[i].outer().size(); ++j) {
-      ASSERT_EQ(origFilledObject[i].outer()[j].x(),
-                loadedFilledObject[i].outer()[j].x());
-      ASSERT_EQ(origFilledObject[i].outer()[j].y(),
-                loadedFilledObject[i].outer()[j].y());
-    }
-    for (size_t k = 0; k < origFilledObject[i].inners().size(); ++k) {
-      ASSERT_EQ(origFilledObject[i].inners()[k].size(),
-                loadedFilledObject[i].inners()[k].size());
-      for (size_t j = 0; j < origFilledObject[i].inners()[k].size(); ++j) {
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].x(),
-                  loadedFilledObject[i].inners()[k][j].x());
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].y(),
-                  loadedFilledObject[i].inners()[k][j].y());
-      }
-    }
-  }
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 TEST(Area, serializationText) {
@@ -229,28 +209,8 @@ TEST(Area, serializationText) {
   ia >> loadedFilledObject;
 
   // Compare
-  ASSERT_EQ(origDefaultObject.size(), loadedDefaultObject.size());
-  ASSERT_EQ(origFilledObject.size(), loadedFilledObject.size());
-  for (size_t i = 0; i < origFilledObject.size(); ++i) {
-    ASSERT_EQ(origFilledObject[i].outer().size(),
-              loadedFilledObject[i].outer().size());
-    for (size_t j = 0; j < origFilledObject[i].outer().size(); ++j) {
-      ASSERT_EQ(origFilledObject[i].outer()[j].x(),
-                loadedFilledObject[i].outer()[j].x());
-      ASSERT_EQ(origFilledObject[i].outer()[j].y(),
-                loadedFilledObject[i].outer()[j].y());
-    }
-    for (size_t k = 0; k < origFilledObject[i].inners().size(); ++k) {
-      ASSERT_EQ(origFilledObject[i].inners()[k].size(),
-                loadedFilledObject[i].inners()[k].size());
-      for (size_t j = 0; j < origFilledObject[i].inners()[k].size(); ++j) {
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].x(),
-                  loadedFilledObject[i].inners()[k][j].x());
-        ASSERT_EQ(origFilledObject[i].inners()[k][j].y(),
-                  loadedFilledObject[i].inners()[k][j].y());
-      }
-    }
-  }
+  ASSERT_TRUE(origDefaultObject == loadedDefaultObject);
+  ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
 }  // namespace osm2ttl::geometry
