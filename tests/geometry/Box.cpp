@@ -21,7 +21,6 @@ osm2ttl::geometry::Box getFilledObject() {
   return obj;
 }
 
-
 TEST(Box, equalsOperator) {
   osm2ttl::geometry::Box o1;
   o1.min_corner() = Location{50, 50};

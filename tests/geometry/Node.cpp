@@ -18,7 +18,6 @@ osm2ttl::geometry::Node getFilledObject() {
   return osm2ttl::geometry::Node(10, 20);
 }
 
-
 TEST(Node, equalsOperator) {
   osm2ttl::geometry::Node o1(10, 10);
   osm2ttl::geometry::Node o2(10, 20);

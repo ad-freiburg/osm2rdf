@@ -25,7 +25,6 @@ osm2ttl::geometry::Linestring getFilledObject() {
   return obj;
 }
 
-
 TEST(Linestring, equalsOperator) {
   osm2ttl::geometry::Linestring o1;
   o1.push_back(Location{0, 0});

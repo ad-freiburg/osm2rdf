@@ -23,7 +23,6 @@ osm2ttl::geometry::Ring getFilledObject() {
   return obj;
 }
 
-
 TEST(Ring, equalsOperator) {
   osm2ttl::geometry::Ring o1;
   o1.push_back(Location{0, 0});

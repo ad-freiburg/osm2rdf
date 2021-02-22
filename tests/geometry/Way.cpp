@@ -23,7 +23,6 @@ osm2ttl::geometry::Way getFilledObject() {
   return obj;
 }
 
-
 TEST(Way, equalsOperator) {
   osm2ttl::geometry::Way o1;
   o1.push_back(Location{0, 0});

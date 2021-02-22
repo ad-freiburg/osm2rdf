@@ -31,7 +31,6 @@ osm2ttl::geometry::Polygon getFilledObject() {
   return obj;
 }
 
-
 TEST(Polygon, equalsOperator) {
   osm2ttl::geometry::Polygon o1;
   o1.outer().reserve(4);
