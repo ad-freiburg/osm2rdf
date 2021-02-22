@@ -122,7 +122,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
           "", "store-config", "Path to store calculated config.");
   auto expandedDataOp =
       op.add<popl::Switch>("x", "expanded-data", "Add expanded data");
-  auto metaDataOp = op.add<popl::Switch>("m", "meta-data", "Add meta-data");
 
   auto osm2ttlPrefixOp =
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
