@@ -21,6 +21,33 @@ osm2ttl::geometry::Box getFilledObject() {
   return obj;
 }
 
+
+TEST(Box, equalsOperator) {
+  osm2ttl::geometry::Box b1;
+  b1.min_corner() = Location{50, 50};
+  b1.max_corner() = Location{200, 200};
+
+  osm2ttl::geometry::Box b2;
+  b2.min_corner() = Location{50, 200};
+  b2.max_corner() = Location{200, 200};
+
+  osm2ttl::geometry::Box b3;
+  b3.min_corner() = Location{200, 200};
+  b3.max_corner() = Location{50, 50};
+
+  ASSERT_TRUE(b1 == b1);
+  ASSERT_FALSE(b1 == b2);
+  ASSERT_FALSE(b1 == b3);
+
+  ASSERT_FALSE(b2 == b1);
+  ASSERT_TRUE(b2 == b2);
+  ASSERT_FALSE(b2 == b3);
+
+  ASSERT_FALSE(b3 == b1);
+  ASSERT_FALSE(b3 == b2);
+  ASSERT_TRUE(b3 == b3);
+}
+
 TEST(Box, serializationBinary) {
   std::stringstream buffer;
 
