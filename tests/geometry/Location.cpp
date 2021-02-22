@@ -21,39 +21,39 @@ osm2ttl::geometry::Location getFilledObject() {
 }
 
 TEST(Location, equalsOperator) {
-  osm2ttl::geometry::Location l1(10, 10);
-  osm2ttl::geometry::Location l2(10, 20);
-  osm2ttl::geometry::Location l3(20, 10);
+  osm2ttl::geometry::Location o1(10, 10);
+  osm2ttl::geometry::Location o2(10, 20);
+  osm2ttl::geometry::Location o3(20, 10);
 
-  ASSERT_TRUE(l1 == l1);
-  ASSERT_FALSE(l1 == l2);
-  ASSERT_FALSE(l1 == l3);
+  ASSERT_TRUE(o1 == o1);
+  ASSERT_FALSE(o1 == o2);
+  ASSERT_FALSE(o1 == o3);
 
-  ASSERT_FALSE(l2 == l1);
-  ASSERT_TRUE(l2 == l2);
-  ASSERT_FALSE(l2 == l3);
+  ASSERT_FALSE(o2 == o1);
+  ASSERT_TRUE(o2 == o2);
+  ASSERT_FALSE(o2 == o3);
 
-  ASSERT_FALSE(l3 == l1);
-  ASSERT_FALSE(l3 == l2);
-  ASSERT_TRUE(l3 == l3);
+  ASSERT_FALSE(o3 == o1);
+  ASSERT_FALSE(o3 == o2);
+  ASSERT_TRUE(o3 == o3);
 }
 
 TEST(Location, notEqualsOperator) {
-  osm2ttl::geometry::Location l1(10, 10);
-  osm2ttl::geometry::Location l2(10, 20);
-  osm2ttl::geometry::Location l3(20, 10);
+  osm2ttl::geometry::Location o1(10, 10);
+  osm2ttl::geometry::Location o2(10, 20);
+  osm2ttl::geometry::Location o3(20, 10);
 
-  ASSERT_FALSE(l1 != l1);
-  ASSERT_TRUE(l1 != l2);
-  ASSERT_TRUE(l1 != l3);
+  ASSERT_FALSE(o1 != o1);
+  ASSERT_TRUE(o1 != o2);
+  ASSERT_TRUE(o1 != o3);
 
-  ASSERT_TRUE(l2 != l1);
-  ASSERT_FALSE(l2 != l2);
-  ASSERT_TRUE(l2 != l3);
+  ASSERT_TRUE(o2 != o1);
+  ASSERT_FALSE(o2 != o2);
+  ASSERT_TRUE(o2 != o3);
 
-  ASSERT_TRUE(l3 != l1);
-  ASSERT_TRUE(l3 != l2);
-  ASSERT_FALSE(l3 != l3);
+  ASSERT_TRUE(o3 != o1);
+  ASSERT_TRUE(o3 != o2);
+  ASSERT_FALSE(o3 != o3);
 }
 
 TEST(Location, serializationBinary) {
