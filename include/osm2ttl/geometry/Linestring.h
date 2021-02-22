@@ -13,7 +13,8 @@ namespace osm2ttl::geometry {
 typedef boost::geometry::model::linestring<osm2ttl::geometry::Location>
     Linestring;
 
-bool operator==(const osm2ttl::geometry::Linestring& l1, const osm2ttl::geometry::Linestring& l2) {
+bool operator==(const osm2ttl::geometry::Linestring& l1,
+                const osm2ttl::geometry::Linestring& l2) {
   if (l1.size() != l2.size()) {
     return false;
   }
@@ -25,7 +26,8 @@ bool operator==(const osm2ttl::geometry::Linestring& l1, const osm2ttl::geometry
   return true;
 }
 
-bool operator!=(const osm2ttl::geometry::Linestring& l1, const osm2ttl::geometry::Linestring& l2) {
+bool operator!=(const osm2ttl::geometry::Linestring& l1,
+                const osm2ttl::geometry::Linestring& l2) {
   return !(l1 == l2);
 }
 }  // namespace osm2ttl::geometry
