@@ -13,8 +13,8 @@
 namespace osm2ttl::geometry {
 typedef boost::geometry::model::polygon<osm2ttl::geometry::Location> Polygon;
 
-bool operator==(const osm2ttl::geometry::Polygon& lhs,
-                const osm2ttl::geometry::Polygon& rhs) {
+inline bool operator==(const osm2ttl::geometry::Polygon& lhs,
+                       const osm2ttl::geometry::Polygon& rhs) {
   if (lhs.outer() != rhs.outer()) {
     return false;
   }
@@ -29,8 +29,8 @@ bool operator==(const osm2ttl::geometry::Polygon& lhs,
   return true;
 }
 
-bool operator!=(const osm2ttl::geometry::Polygon& lhs,
-                const osm2ttl::geometry::Polygon& rhs) {
+inline bool operator!=(const osm2ttl::geometry::Polygon& lhs,
+                       const osm2ttl::geometry::Polygon& rhs) {
   return !(lhs == rhs);
 }
 }  // namespace osm2ttl::geometry

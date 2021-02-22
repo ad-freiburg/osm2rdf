@@ -12,8 +12,8 @@
 namespace osm2ttl::geometry {
 typedef boost::geometry::model::ring<osm2ttl::geometry::Location> Ring;
 
-bool operator==(const osm2ttl::geometry::Ring& lhs,
-                const osm2ttl::geometry::Ring& rhs) {
+inline bool operator==(const osm2ttl::geometry::Ring& lhs,
+                       const osm2ttl::geometry::Ring& rhs) {
   if (lhs.size() != rhs.size()) {
     return false;
   }
@@ -25,8 +25,8 @@ bool operator==(const osm2ttl::geometry::Ring& lhs,
   return true;
 }
 
-bool operator!=(const osm2ttl::geometry::Ring& lhs,
-                const osm2ttl::geometry::Ring& rhs) {
+inline bool operator!=(const osm2ttl::geometry::Ring& lhs,
+                       const osm2ttl::geometry::Ring& rhs) {
   return !(lhs == rhs);
 }
 }  // namespace osm2ttl::geometry

@@ -13,8 +13,8 @@ namespace osm2ttl::geometry {
 typedef boost::geometry::model::multi_polygon<osm2ttl::geometry::Polygon>
     MultiPolygon;
 
-bool operator==(const osm2ttl::geometry::MultiPolygon& lhs,
-                const osm2ttl::geometry::MultiPolygon& rhs) {
+inline bool operator==(const osm2ttl::geometry::MultiPolygon& lhs,
+                       const osm2ttl::geometry::MultiPolygon& rhs) {
   if (lhs.size() != rhs.size()) {
     return false;
   }
@@ -26,8 +26,8 @@ bool operator==(const osm2ttl::geometry::MultiPolygon& lhs,
   return true;
 }
 
-bool operator!=(const osm2ttl::geometry::MultiPolygon& lhs,
-                const osm2ttl::geometry::MultiPolygon& rhs) {
+inline bool operator!=(const osm2ttl::geometry::MultiPolygon& lhs,
+                       const osm2ttl::geometry::MultiPolygon& rhs) {
   return !(lhs == rhs);
 }
 }  // namespace osm2ttl::geometry

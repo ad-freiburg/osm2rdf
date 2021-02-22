@@ -14,13 +14,13 @@ typedef boost::geometry::model::d2::point_xy<
     osm2ttl::geometry::location_coordinate_t>
     Location;
 
-bool operator==(const osm2ttl::geometry::Location& lhs,
-                const osm2ttl::geometry::Location& rhs) {
+inline bool operator==(const osm2ttl::geometry::Location& lhs,
+                       const osm2ttl::geometry::Location& rhs) {
   return lhs.x() == rhs.x() && lhs.y() == rhs.y();
 }
 
-bool operator!=(const osm2ttl::geometry::Location& lhs,
-                const osm2ttl::geometry::Location& rhs) {
+inline bool operator!=(const osm2ttl::geometry::Location& lhs,
+                       const osm2ttl::geometry::Location& rhs) {
   return !(lhs == rhs);
 }
 
