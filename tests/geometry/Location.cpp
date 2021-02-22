@@ -38,6 +38,24 @@ TEST(Location, equalsOperator) {
   ASSERT_TRUE(l3 == l3);
 }
 
+TEST(Location, notEqualsOperator) {
+  osm2ttl::geometry::Location l1(10, 10);
+  osm2ttl::geometry::Location l2(10, 20);
+  osm2ttl::geometry::Location l3(20, 10);
+
+  ASSERT_FALSE(l1 != l1);
+  ASSERT_TRUE(l1 != l2);
+  ASSERT_TRUE(l1 != l3);
+
+  ASSERT_TRUE(l2 != l1);
+  ASSERT_FALSE(l2 != l2);
+  ASSERT_TRUE(l2 != l3);
+
+  ASSERT_TRUE(l3 != l1);
+  ASSERT_TRUE(l3 != l2);
+  ASSERT_FALSE(l3 != l3);
+}
+
 TEST(Location, serializationBinary) {
   std::stringstream buffer;
 

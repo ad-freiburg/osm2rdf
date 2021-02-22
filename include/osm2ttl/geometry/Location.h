@@ -19,6 +19,11 @@ bool operator==(const osm2ttl::geometry::Location& l1,
   return l1.x() == l2.x() && l1.y() == l2.y();
 }
 
+bool operator!=(const osm2ttl::geometry::Location& l1,
+                const osm2ttl::geometry::Location& l2) {
+  return !(l1 == l2);
+}
+
 }  // namespace osm2ttl::geometry
 
 namespace boost::serialization {
