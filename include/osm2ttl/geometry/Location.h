@@ -14,17 +14,17 @@ typedef boost::geometry::model::d2::point_xy<
     osm2ttl::geometry::location_coordinate_t>
     Location;
 
+}  // namespace osm2ttl::geometry
+
 inline bool operator==(const osm2ttl::geometry::Location& lhs,
-                       const osm2ttl::geometry::Location& rhs) {
+                       const osm2ttl::geometry::Location& rhs) noexcept {
   return lhs.x() == rhs.x() && lhs.y() == rhs.y();
 }
 
 inline bool operator!=(const osm2ttl::geometry::Location& lhs,
-                       const osm2ttl::geometry::Location& rhs) {
+                       const osm2ttl::geometry::Location& rhs) noexcept {
   return !(lhs == rhs);
 }
-
-}  // namespace osm2ttl::geometry
 
 namespace boost::serialization {
 template <class Archive>

@@ -11,17 +11,17 @@
 
 namespace osm2ttl::geometry {
 typedef boost::geometry::model::box<osm2ttl::geometry::Location> Box;
+}  // namespace osm2ttl::geometry
 
 inline bool operator==(const osm2ttl::geometry::Box& lhs,
-                       const osm2ttl::geometry::Box& rhs) {
+                       const osm2ttl::geometry::Box& rhs) noexcept {
   return lhs.min_corner() == rhs.min_corner() &&
          lhs.max_corner() == rhs.max_corner();
 }
 inline bool operator!=(const osm2ttl::geometry::Box& lhs,
-                       const osm2ttl::geometry::Box& rhs) {
+                       const osm2ttl::geometry::Box& rhs) noexcept {
   return !(lhs == rhs);
 }
-}  // namespace osm2ttl::geometry
 
 namespace boost::serialization {
 template <class Archive>

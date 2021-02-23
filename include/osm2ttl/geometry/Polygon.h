@@ -12,9 +12,10 @@
 
 namespace osm2ttl::geometry {
 typedef boost::geometry::model::polygon<osm2ttl::geometry::Location> Polygon;
+}  // namespace osm2ttl::geometry
 
 inline bool operator==(const osm2ttl::geometry::Polygon& lhs,
-                       const osm2ttl::geometry::Polygon& rhs) {
+                       const osm2ttl::geometry::Polygon& rhs) noexcept {
   if (lhs.outer() != rhs.outer()) {
     return false;
   }
@@ -30,10 +31,9 @@ inline bool operator==(const osm2ttl::geometry::Polygon& lhs,
 }
 
 inline bool operator!=(const osm2ttl::geometry::Polygon& lhs,
-                       const osm2ttl::geometry::Polygon& rhs) {
+                       const osm2ttl::geometry::Polygon& rhs) noexcept {
   return !(lhs == rhs);
 }
-}  // namespace osm2ttl::geometry
 
 namespace boost::serialization {
 template <class Archive>
