@@ -37,7 +37,7 @@ osm2ttl::geometry::MultiPolygon getFilledObject() {
   return obj;
 }
 
-TEST(MultiPolygon, equalsOperator) {
+TEST(GEOMETRY_MultiPolygon, equalsOperator) {
   osm2ttl::geometry::MultiPolygon o1;
   o1.resize(2);
   o1[0].outer().reserve(3);
@@ -104,7 +104,7 @@ TEST(MultiPolygon, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(MultiPolygon, notEqualsOperator) {
+TEST(GEOMETRY_MultiPolygon, notEqualsOperator) {
   osm2ttl::geometry::MultiPolygon o1;
   o1.resize(2);
   o1[0].outer().reserve(3);
@@ -171,7 +171,7 @@ TEST(MultiPolygon, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(MultiPolygon, serializationBinary) {
+TEST(GEOMETRY_MultiPolygon, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::MultiPolygon origDefaultObject = getDefaultObject();
@@ -193,7 +193,7 @@ TEST(MultiPolygon, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(MultiPolygon, serializationText) {
+TEST(GEOMETRY_MultiPolygon, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::MultiPolygon origDefaultObject = getDefaultObject();

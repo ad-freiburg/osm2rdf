@@ -54,3 +54,16 @@ osm2ttl::geometry::Location osm2ttl::osm::Node::geom() const noexcept {
 osm2ttl::osm::TagList osm2ttl::osm::Node::tags() const noexcept {
   return _tags;
 }
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Node::operator==(
+    const osm2ttl::osm::Node& other) const noexcept {
+  return _id == other._id && _geom == other._geom &&
+         _envelope == other._envelope && _tags == other._tags;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Node::operator!=(
+    const osm2ttl::osm::Node& other) const noexcept {
+  return !(*this == other);
+}

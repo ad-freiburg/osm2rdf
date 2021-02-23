@@ -7,7 +7,7 @@ namespace osm2ttl {
 // Misc tests to ensure (external) library functions work as expected
 
 // std::set_difference
-TEST(std, set_difference) {
+TEST(Baseline, set_difference) {
   {
     std::vector<int> i1{1, 2, 3, 4, 3, 2, 1, 1, 1};
     std::vector<int> i2{1, 3};

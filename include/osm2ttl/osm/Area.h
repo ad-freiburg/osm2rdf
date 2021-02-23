@@ -34,8 +34,9 @@ struct Area {
   [[nodiscard]] bool fromWay() const noexcept;
   [[nodiscard]] bool hasName() const noexcept;
 
-  bool operator==(const osm2ttl::osm::Area& other) const;
-  bool operator<(const osm2ttl::osm::Area& other) const;
+  bool operator==(const osm2ttl::osm::Area& other) const noexcept;
+  bool operator!=(const osm2ttl::osm::Area& other) const noexcept;
+  bool operator<(const osm2ttl::osm::Area& other) const noexcept;
 
  protected:
   id_t _id;

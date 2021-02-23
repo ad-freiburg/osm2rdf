@@ -9,7 +9,7 @@
 namespace osm2ttl::ttl {
 
 // ____________________________________________________________________________
-TEST(WriterNT, resolvePrefix) {
+TEST(TTL_WriterNT, resolvePrefix) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -24,7 +24,7 @@ TEST(WriterNT, resolvePrefix) {
   }
 }
 
-TEST(WriterTTL, resolvePrefix) {
+TEST(TTL_WriterTTL, resolvePrefix) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -39,7 +39,7 @@ TEST(WriterTTL, resolvePrefix) {
   }
 }
 
-TEST(WriterQLEVER, resolvePrefix) {
+TEST(TTL_WriterQLEVER, resolvePrefix) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -55,7 +55,7 @@ TEST(WriterQLEVER, resolvePrefix) {
 }
 
 // ____________________________________________________________________________
-TEST(WriterNT, addPrefix) {
+TEST(TTL_WriterNT, addPrefix) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -69,7 +69,7 @@ TEST(WriterNT, addPrefix) {
   }
 }
 
-TEST(WriterTTL, addPrefix) {
+TEST(TTL_WriterTTL, addPrefix) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -83,7 +83,7 @@ TEST(WriterTTL, addPrefix) {
   }
 }
 
-TEST(WriterQLEVER, addPrefix) {
+TEST(TTL_WriterQLEVER, addPrefix) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -98,7 +98,7 @@ TEST(WriterQLEVER, addPrefix) {
 }
 
 // ____________________________________________________________________________
-TEST(WriterNT, generateBlankNode) {
+TEST(TTL_WriterNT, generateBlankNode) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -115,7 +115,7 @@ TEST(WriterNT, generateBlankNode) {
   }
 }
 
-TEST(WriterTTL, generateBlankNode) {
+TEST(TTL_WriterTTL, generateBlankNode) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   {
@@ -132,7 +132,7 @@ TEST(WriterTTL, generateBlankNode) {
   }
 }
 
-TEST(WriterQLEVER, generateBlankNode) {
+TEST(TTL_WriterQLEVER, generateBlankNode) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   {
@@ -150,7 +150,7 @@ TEST(WriterQLEVER, generateBlankNode) {
 }
 
 // ____________________________________________________________________________
-TEST(WriterNT, generateIRI_ID) {
+TEST(TTL_WriterNT, generateIRI_ID) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -182,7 +182,7 @@ TEST(WriterNT, generateIRI_ID) {
   }
 }
 
-TEST(WriterTTL, generateIRI_ID) {
+TEST(TTL_WriterTTL, generateIRI_ID) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   {
@@ -209,7 +209,7 @@ TEST(WriterTTL, generateIRI_ID) {
   }
 }
 
-TEST(WriterQLEVER, generateIRI_ID) {
+TEST(TTL_WriterQLEVER, generateIRI_ID) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   {
@@ -237,7 +237,7 @@ TEST(WriterQLEVER, generateIRI_ID) {
 }
 
 // ____________________________________________________________________________
-TEST(WriterNT, generateIRI_String) {
+TEST(TTL_WriterNT, generateIRI_String) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -267,7 +267,7 @@ TEST(WriterNT, generateIRI_String) {
   }
 }
 
-TEST(WriterTTL, generateIRI_String) {
+TEST(TTL_WriterTTL, generateIRI_String) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, nullptr};
   {
@@ -292,7 +292,7 @@ TEST(WriterTTL, generateIRI_String) {
   }
 }
 
-TEST(WriterQLEVER, generateIRI_String) {
+TEST(TTL_WriterQLEVER, generateIRI_String) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
   {
@@ -318,7 +318,7 @@ TEST(WriterQLEVER, generateIRI_String) {
 }
 
 // ____________________________________________________________________________
-TEST(WriterNT, generateLangTag) {
+TEST(TTL_WriterNT, generateLangTag) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -355,7 +355,7 @@ TEST(WriterNT, generateLangTag) {
   }
 }
 
-TEST(WriterTTL, generateLangTag) {
+TEST(TTL_WriterTTL, generateLangTag) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -392,7 +392,7 @@ TEST(WriterTTL, generateLangTag) {
   }
 }
 
-TEST(WriterQLEVER, generateLangTag) {
+TEST(TTL_WriterQLEVER, generateLangTag) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -430,7 +430,7 @@ TEST(WriterQLEVER, generateLangTag) {
 }
 
 // ____________________________________________________________________________
-TEST(WriterNT, generateLiteral) {
+TEST(TTL_WriterNT, generateLiteral) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -459,7 +459,7 @@ TEST(WriterNT, generateLiteral) {
   }
 }
 
-TEST(WriterTTL, generateLiteral) {
+TEST(TTL_WriterTTL, generateLiteral) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {
@@ -488,7 +488,7 @@ TEST(WriterTTL, generateLiteral) {
   }
 }
 
-TEST(WriterQLEVER, generateLiteral) {
+TEST(TTL_WriterQLEVER, generateLiteral) {
   osm2ttl::config::Config config;
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, nullptr};
   {

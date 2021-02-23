@@ -21,7 +21,7 @@ osm2ttl::geometry::Box getFilledObject() {
   return obj;
 }
 
-TEST(Box, equalsOperator) {
+TEST(GEOMETRY_Box, equalsOperator) {
   osm2ttl::geometry::Box o1;
   o1.min_corner() = Location{50, 50};
   o1.max_corner() = Location{200, 200};
@@ -47,7 +47,7 @@ TEST(Box, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(Box, notEqualsOperator) {
+TEST(GEOMETRY_Box, notEqualsOperator) {
   osm2ttl::geometry::Box o1;
   o1.min_corner() = Location{50, 50};
   o1.max_corner() = Location{200, 200};
@@ -73,7 +73,7 @@ TEST(Box, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(Box, serializationBinary) {
+TEST(GEOMETRY_Box, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Box origDefaultObject = getDefaultObject();
@@ -95,7 +95,7 @@ TEST(Box, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(Box, serializationText) {
+TEST(GEOMETRY_Box, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Box origDefaultObject = getDefaultObject();

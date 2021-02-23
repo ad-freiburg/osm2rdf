@@ -21,6 +21,9 @@ class Relation {
       const noexcept;
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
 
+  bool operator==(const osm2ttl::osm::Relation& other) const noexcept;
+  bool operator!=(const osm2ttl::osm::Relation& other) const noexcept;
+
  protected:
   id_t _id;
   std::vector<osm2ttl::osm::RelationMember> _members;

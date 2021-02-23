@@ -8,7 +8,7 @@
 
 namespace osm2ttl::util {
 
-TEST(DirectedAcyclicGraph, empty) {
+TEST(UTIL_DirectedAcyclicGraph, empty) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   ASSERT_EQ(0, src.getNumVertices());
   ASSERT_EQ(0, src.getNumEdges());
@@ -42,7 +42,7 @@ osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample1ExpectedResult() {
   return src;
 }
 
-TEST(DirectedAcyclicGraph, WhiteboardExample1AllInAll) {
+TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1AllInAll) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 3);
@@ -81,7 +81,7 @@ TEST(DirectedAcyclicGraph, WhiteboardExample1AllInAll) {
   }
 }
 
-TEST(DirectedAcyclicGraph, WhiteboardExample1SingleThreaded) {
+TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1SingleThreaded) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 3);
@@ -115,7 +115,7 @@ TEST(DirectedAcyclicGraph, WhiteboardExample1SingleThreaded) {
   }
 }
 
-TEST(DirectedAcyclicGraph, WhiteboardExample1MultiThreaded) {
+TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1MultiThreaded) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 3);
@@ -178,7 +178,7 @@ osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample2ExpectedResult() {
   return src;
 }
 
-TEST(DirectedAcyclicGraph, WhiteboardExample2AllConnections) {
+TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2AllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);
   src.addEdge(1, 0);
@@ -220,7 +220,7 @@ TEST(DirectedAcyclicGraph, WhiteboardExample2AllConnections) {
   }
 }
 
-TEST(DirectedAcyclicGraph, WhiteboardExample2MinimalConnections) {
+TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2MinimalConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);
   src.addEdge(1, 2);
@@ -255,7 +255,7 @@ TEST(DirectedAcyclicGraph, WhiteboardExample2MinimalConnections) {
   }
 }
 
-TEST(DirectedAcyclicGraph, WhiteboardExample2) {
+TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);
   src.addEdge(1, 0);
@@ -308,7 +308,7 @@ osm2ttl::util::DirectedGraph<uint8_t> createLineExample1ExpectedResult() {
   return src;
 }
 
-TEST(DirectedAcyclicGraph, LineExample1AllConnections) {
+TEST(UTIL_DirectedAcyclicGraph, LineExample1AllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 2);
@@ -379,7 +379,7 @@ TEST(DirectedAcyclicGraph, LineExample1AllConnections) {
   }
 }
 
-TEST(DirectedAcyclicGraph, LineExample1EvenIdAllConnections) {
+TEST(UTIL_DirectedAcyclicGraph, LineExample1EvenIdAllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 2);
@@ -421,7 +421,7 @@ TEST(DirectedAcyclicGraph, LineExample1EvenIdAllConnections) {
   }
 }
 
-TEST(DirectedAcyclicGraph, LineExample1OddIdAllConnections) {
+TEST(UTIL_DirectedAcyclicGraph, LineExample1OddIdAllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(1, 2);
@@ -460,7 +460,7 @@ TEST(DirectedAcyclicGraph, LineExample1OddIdAllConnections) {
   }
 }
 
-TEST(DirectedAcyclicGraph, LineExample1IdZeroAllConnections) {
+TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroAllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 2);
@@ -498,7 +498,7 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroAllConnections) {
   }
 }
 
-TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
+TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 3);
@@ -557,7 +557,7 @@ TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
   }
 }
 
-TEST(DirectedAcyclicGraph, LineExample1IdZeroOnlyOneAdditionalConnections) {
+TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroOnlyOneAdditionalConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 4);

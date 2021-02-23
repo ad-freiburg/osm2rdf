@@ -34,3 +34,14 @@ std::vector<osm2ttl::osm::RelationMember> osm2ttl::osm::Relation::members()
     const noexcept {
   return _members;
 }
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Relation::operator==(const Relation& other) const noexcept {
+  return _id == other._id && _members == other._members && _tags == other._tags;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Relation::operator!=(
+    const osm2ttl::osm::Relation& other) const noexcept {
+  return !(*this == other);
+}

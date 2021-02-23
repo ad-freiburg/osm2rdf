@@ -13,6 +13,9 @@ class Box {
   explicit Box(const osm2ttl::geometry::Box& box);
   [[nodiscard]] osm2ttl::geometry::Box geom() const;
 
+  bool operator==(const osm2ttl::osm::Box& other) const noexcept;
+  bool operator!=(const osm2ttl::osm::Box& other) const noexcept;
+
  protected:
   osm2ttl::geometry::Box _geom{};
 };

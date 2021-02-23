@@ -25,7 +25,7 @@ osm2ttl::geometry::Linestring getFilledObject() {
   return obj;
 }
 
-TEST(Linestring, equalsOperator) {
+TEST(GEOMETRY_Linestring, equalsOperator) {
   osm2ttl::geometry::Linestring o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
@@ -53,7 +53,7 @@ TEST(Linestring, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(Linestring, notEqualsOperator) {
+TEST(GEOMETRY_Linestring, notEqualsOperator) {
   osm2ttl::geometry::Linestring o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
@@ -81,7 +81,7 @@ TEST(Linestring, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(Linestring, serializationBinary) {
+TEST(GEOMETRY_Linestring, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Linestring origDefaultObject = getDefaultObject();
@@ -103,7 +103,7 @@ TEST(Linestring, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(Linestring, serializationText) {
+TEST(GEOMETRY_Linestring, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Linestring origDefaultObject = getDefaultObject();

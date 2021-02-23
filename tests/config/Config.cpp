@@ -46,14 +46,14 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 }
 
 // ____________________________________________________________________________
-TEST(Config, getTempPath) {
+TEST(CONFIG_Config, getTempPath) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
   ASSERT_EQ("/tmp/prefix-suffix", config.getTempPath("prefix", "suffix"));
 }
 
 // ____________________________________________________________________________
-TEST(Config, fromArgsHelpShort) {
+TEST(CONFIG_Config, fromArgsHelpShort) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -65,7 +65,7 @@ TEST(Config, fromArgsHelpShort) {
               "^Allowed options:");
 }
 
-TEST(Config, fromArgsHelpLong) {
+TEST(CONFIG_Config, fromArgsHelpLong) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -77,7 +77,7 @@ TEST(Config, fromArgsHelpLong) {
               "^Allowed options:");
 }
 
-TEST(Config, fromArgsHelpAdvanced) {
+TEST(CONFIG_Config, fromArgsHelpAdvanced) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -90,7 +90,7 @@ TEST(Config, fromArgsHelpAdvanced) {
               "--add-inverse-relation-direction");
 }
 
-TEST(Config, fromArgsHelpExpert) {
+TEST(CONFIG_Config, fromArgsHelpExpert) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -104,7 +104,7 @@ TEST(Config, fromArgsHelpExpert) {
 }
 
 // ____________________________________________________________________________
-TEST(Config, fromArgsOutputCompressAddExtension) {
+TEST(CONFIG_Config, fromArgsOutputCompressAddExtension) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
   osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
@@ -118,7 +118,7 @@ TEST(Config, fromArgsOutputCompressAddExtension) {
 }
 
 // ____________________________________________________________________________
-TEST(Config, fromArgsOutputCompressKeepExtension) {
+TEST(CONFIG_Config, fromArgsOutputCompressKeepExtension) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
   osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
@@ -132,7 +132,7 @@ TEST(Config, fromArgsOutputCompressKeepExtension) {
 }
 
 // ____________________________________________________________________________
-TEST(Config, fromArgsOutputCompressIgnoreExtensionOnStdout) {
+TEST(CONFIG_Config, fromArgsOutputCompressIgnoreExtensionOnStdout) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
   osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
@@ -145,7 +145,7 @@ TEST(Config, fromArgsOutputCompressIgnoreExtensionOnStdout) {
 }
 
 // ____________________________________________________________________________
-TEST(Config, fromArgsCacheNotFoundShort) {
+TEST(CONFIG_Config, fromArgsCacheNotFoundShort) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -158,7 +158,7 @@ TEST(Config, fromArgsCacheNotFoundShort) {
       ::testing::ExitedWithCode(osm2ttl::config::ExitCode::CACHE_NOT_EXISTS),
       "^Cache location does not exist: \".+\"");
 }
-TEST(Config, fromArgsCacheNotFoundLong) {
+TEST(CONFIG_Config, fromArgsCacheNotFoundLong) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -172,7 +172,7 @@ TEST(Config, fromArgsCacheNotFoundLong) {
       "^Cache location does not exist: \".+\"");
 }
 
-TEST(Config, fromArgsCacheIsNotDirectory) {
+TEST(CONFIG_Config, fromArgsCacheIsNotDirectory) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -187,7 +187,7 @@ TEST(Config, fromArgsCacheIsNotDirectory) {
 }
 
 // ____________________________________________________________________________
-TEST(Config, fromArgsEmpty) {
+TEST(CONFIG_Config, fromArgsEmpty) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -200,7 +200,7 @@ TEST(Config, fromArgsEmpty) {
       "^No input specified!");
 }
 
-TEST(Config, fromArgsInputNotFound) {
+TEST(CONFIG_Config, fromArgsInputNotFound) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
@@ -214,7 +214,7 @@ TEST(Config, fromArgsInputNotFound) {
       "^Input does not exist: \".+\"");
 }
 
-TEST(Config, fromArgsInputIsDirectory) {
+TEST(CONFIG_Config, fromArgsInputIsDirectory) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 

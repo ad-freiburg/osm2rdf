@@ -10,3 +10,15 @@ osm2ttl::osm::Box::Box(const osm2ttl::geometry::Box& box) : _geom(box) {}
 
 // ____________________________________________________________________________
 osm2ttl::geometry::Box osm2ttl::osm::Box::geom() const { return _geom; }
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Box::operator==(
+    const osm2ttl::osm::Box& other) const noexcept {
+  return _geom == other._geom;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Box::operator!=(
+    const osm2ttl::osm::Box& other) const noexcept {
+  return !(*this == other);
+}

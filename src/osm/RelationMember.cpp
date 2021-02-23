@@ -47,3 +47,15 @@ osm2ttl::osm::RelationMemberType osm2ttl::osm::RelationMember::type()
     const noexcept {
   return _type;
 }
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::RelationMember::operator==(
+    const RelationMember& other) const noexcept {
+  return _id == other._id && _type == other._type && _role == other._role;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::RelationMember::operator!=(
+    const osm2ttl::osm::RelationMember& other) const noexcept {
+  return !(*this == other);
+}

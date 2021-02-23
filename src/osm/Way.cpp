@@ -55,3 +55,16 @@ osm2ttl::geometry::Box osm2ttl::osm::Way::envelope() const noexcept {
 bool osm2ttl::osm::Way::closed() const noexcept {
   return boost::geometry::equals(_nodes.front().geom(), _nodes.back().geom());
 }
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Way::operator==(
+    const osm2ttl::osm::Way& other) const noexcept {
+  return _id == other._id && _envelope == other._envelope &&
+         _nodes == other._nodes && _geom == other._geom && _tags == other._tags;
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Way::operator!=(
+    const osm2ttl::osm::Way& other) const noexcept {
+  return !(*this == other);
+}

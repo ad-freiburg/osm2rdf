@@ -31,7 +31,7 @@ osm2ttl::geometry::Polygon getFilledObject() {
   return obj;
 }
 
-TEST(Polygon, equalsOperator) {
+TEST(GEOMETRY_Polygon, equalsOperator) {
   osm2ttl::geometry::Polygon o1;
   o1.outer().reserve(4);
   o1.outer().push_back(Location{10, 10});
@@ -80,7 +80,7 @@ TEST(Polygon, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(Polygon, notEqualsOperator) {
+TEST(GEOMETRY_Polygon, notEqualsOperator) {
   osm2ttl::geometry::Polygon o1;
   o1.outer().reserve(4);
   o1.outer().push_back(Location{10, 10});
@@ -129,7 +129,7 @@ TEST(Polygon, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(Polygon, serializationBinary) {
+TEST(GEOMETRY_Polygon, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Polygon origDefaultObject = getDefaultObject();
@@ -151,7 +151,7 @@ TEST(Polygon, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(Polygon, serializationText) {
+TEST(GEOMETRY_Polygon, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Polygon origDefaultObject = getDefaultObject();

@@ -35,7 +35,7 @@ osm2ttl::geometry::Area getFilledObject() {
   return obj;
 }
 
-TEST(Area, equalsOperator) {
+TEST(GEOMETRY_Area, equalsOperator) {
   osm2ttl::geometry::Area o1;
   o1.resize(2);
   o1[0].outer().reserve(3);
@@ -102,7 +102,7 @@ TEST(Area, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(Area, notEqualsOperator) {
+TEST(GEOMETRY_Area, notEqualsOperator) {
   osm2ttl::geometry::Area o1;
   o1.resize(2);
   o1[0].outer().reserve(3);
@@ -169,7 +169,7 @@ TEST(Area, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(Area, serializationBinary) {
+TEST(GEOMETRY_Area, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Area origDefaultObject = getDefaultObject();
@@ -191,7 +191,7 @@ TEST(Area, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(Area, serializationText) {
+TEST(GEOMETRY_Area, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Area origDefaultObject = getDefaultObject();

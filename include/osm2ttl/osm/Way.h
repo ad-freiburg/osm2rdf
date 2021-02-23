@@ -27,6 +27,9 @@ class Way {
   [[nodiscard]] std::vector<osm2ttl::osm::Node> nodes() const noexcept;
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
 
+  bool operator==(const osm2ttl::osm::Way& other) const noexcept;
+  bool operator!=(const osm2ttl::osm::Way& other) const noexcept;
+
  protected:
   id_t _id;
   std::vector<osm2ttl::osm::Node> _nodes;

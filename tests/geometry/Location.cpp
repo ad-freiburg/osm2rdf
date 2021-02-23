@@ -20,7 +20,7 @@ osm2ttl::geometry::Location getFilledObject() {
   return osm2ttl::geometry::Location(10, 20);
 }
 
-TEST(Location, equalsOperator) {
+TEST(GEOMETRY_Location, equalsOperator) {
   osm2ttl::geometry::Location o1(10, 10);
   osm2ttl::geometry::Location o2(10, 20);
   osm2ttl::geometry::Location o3(20, 10);
@@ -38,7 +38,7 @@ TEST(Location, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(Location, notEqualsOperator) {
+TEST(GEOMETRY_Location, notEqualsOperator) {
   osm2ttl::geometry::Location o1(10, 10);
   osm2ttl::geometry::Location o2(10, 20);
   osm2ttl::geometry::Location o3(20, 10);
@@ -56,7 +56,7 @@ TEST(Location, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(Location, serializationBinary) {
+TEST(GEOMETRY_Location, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Location origDefaultObject = getDefaultObject();
@@ -78,7 +78,7 @@ TEST(Location, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(Location, serializationText) {
+TEST(GEOMETRY_Location, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Location origDefaultObject = getDefaultObject();

@@ -109,12 +109,24 @@ char osm2ttl::osm::Area::tagAdministrationLevel() const noexcept {
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::Area::operator==(const osm2ttl::osm::Area& other) const {
-  return _id == other._id;
+bool osm2ttl::osm::Area::operator==(
+    const osm2ttl::osm::Area& other) const noexcept {
+  return _id == other._id && _objId == other._objId &&
+         _tagAdministrationLevel == other._tagAdministrationLevel &&
+         _hasName == other._hasName && _geomArea == other._geomArea &&
+         _envelopeArea == other._envelopeArea && _envelope == other._envelope &&
+         _geom == other._geom;
 }
 
 // ____________________________________________________________________________
-bool osm2ttl::osm::Area::operator<(const osm2ttl::osm::Area& other) const {
+bool osm2ttl::osm::Area::operator!=(
+    const osm2ttl::osm::Area& other) const noexcept {
+  return !(*this == other);
+}
+
+// ____________________________________________________________________________
+bool osm2ttl::osm::Area::operator<(
+    const osm2ttl::osm::Area& other) const noexcept {
   // If administration level is different, higher first
   if (_tagAdministrationLevel != other._tagAdministrationLevel) {
     return _tagAdministrationLevel > other._tagAdministrationLevel;

@@ -20,6 +20,9 @@ class RelationMember {
   [[nodiscard]] std::string role() const noexcept;
   [[nodiscard]] osm2ttl::osm::RelationMemberType type() const noexcept;
 
+  bool operator==(const osm2ttl::osm::RelationMember& other) const noexcept;
+  bool operator!=(const osm2ttl::osm::RelationMember& other) const noexcept;
+
  protected:
   id_t _id;
   std::string _role;

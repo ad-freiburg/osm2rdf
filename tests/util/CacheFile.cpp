@@ -7,7 +7,7 @@
 
 namespace osm2ttl::util {
 
-TEST(CacheFile, constructorAndAutoRemove) {
+TEST(UTIL_CacheFile, constructorAndAutoRemove) {
   std::filesystem::path location{"/tmp/dummy"};
 
   ASSERT_FALSE(std::filesystem::exists(location));

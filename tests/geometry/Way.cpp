@@ -23,7 +23,7 @@ osm2ttl::geometry::Way getFilledObject() {
   return obj;
 }
 
-TEST(Way, equalsOperator) {
+TEST(GEOMETRY_Way, equalsOperator) {
   osm2ttl::geometry::Way o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
@@ -51,7 +51,7 @@ TEST(Way, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(Way, notEqualsOperator) {
+TEST(GEOMETRY_Way, notEqualsOperator) {
   osm2ttl::geometry::Way o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
@@ -79,7 +79,7 @@ TEST(Way, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(Way, serializationBinary) {
+TEST(GEOMETRY_Way, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Way origDefaultObject = getDefaultObject();
@@ -101,7 +101,7 @@ TEST(Way, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(Way, serializationText) {
+TEST(GEOMETRY_Way, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Way origDefaultObject = getDefaultObject();

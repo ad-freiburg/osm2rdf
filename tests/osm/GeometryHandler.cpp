@@ -9,7 +9,7 @@
 
 namespace osm2ttl::osm {
 
-TEST(GeometryHandler, constructor) {
+TEST(OSM_GeometryHandler, constructor) {
   osm2ttl::config::Config config;
   config.output =
       config.getTempPath("test-GeometryHandler", "constructor-output");
@@ -27,7 +27,7 @@ TEST(GeometryHandler, constructor) {
   std::filesystem::remove_all(config.output);
 }
 
-TEST(GeometryHandler, addNamedAreaFromRelation) {
+TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("test-GeometryHandler", "addNode-output");
   config.cache = config.getTempPath("test-GeometryHandler", "addNode-cache");
@@ -69,7 +69,7 @@ TEST(GeometryHandler, addNamedAreaFromRelation) {
   std::filesystem::remove_all(config.output);
 }
 
-TEST(GeometryHandler, addNamedAreaFromWay) {
+TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("test-GeometryHandler", "addNode-output");
   config.cache = config.getTempPath("test-GeometryHandler", "addNode-cache");
@@ -111,7 +111,7 @@ TEST(GeometryHandler, addNamedAreaFromWay) {
   std::filesystem::remove_all(config.output);
 }
 
-TEST(GeometryHandler, addUnnamedAreaFromRelation) {
+TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("test-GeometryHandler", "addNode-output");
   config.cache = config.getTempPath("test-GeometryHandler", "addNode-cache");
@@ -148,7 +148,7 @@ TEST(GeometryHandler, addUnnamedAreaFromRelation) {
   std::filesystem::remove_all(config.output);
 }
 
-TEST(GeometryHandler, addUnnamedAreaFromWay) {
+TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("test-GeometryHandler", "addNode-output");
   config.cache = config.getTempPath("test-GeometryHandler", "addNode-cache");
@@ -185,7 +185,7 @@ TEST(GeometryHandler, addUnnamedAreaFromWay) {
   std::filesystem::remove_all(config.output);
 }
 
-TEST(GeometryHandler, addNode) {
+TEST(OSM_GeometryHandler, addNode) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("test-GeometryHandler", "addNode-output");
   config.cache = config.getTempPath("test-GeometryHandler", "addNode-cache");
@@ -216,7 +216,7 @@ TEST(GeometryHandler, addNode) {
   std::filesystem::remove_all(config.output);
 }
 
-TEST(GeometryHandler, addWay) {
+TEST(OSM_GeometryHandler, addWay) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("test-GeometryHandler", "addNode-output");
   config.cache = config.getTempPath("test-GeometryHandler", "addNode-cache");

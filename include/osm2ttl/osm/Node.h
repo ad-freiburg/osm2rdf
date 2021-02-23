@@ -22,6 +22,9 @@ class Node {
   [[nodiscard]] osm2ttl::geometry::Location geom() const noexcept;
   [[nodiscard]] osm2ttl::osm::TagList tags() const noexcept;
 
+  bool operator==(const osm2ttl::osm::Node& other) const noexcept;
+  bool operator!=(const osm2ttl::osm::Node& other) const noexcept;
+
  protected:
   id_t _id;
   osm2ttl::geometry::Location _geom;

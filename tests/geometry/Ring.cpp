@@ -23,7 +23,7 @@ osm2ttl::geometry::Ring getFilledObject() {
   return obj;
 }
 
-TEST(Ring, equalsOperator) {
+TEST(GEOMETRY_Ring, equalsOperator) {
   osm2ttl::geometry::Ring o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
@@ -51,7 +51,7 @@ TEST(Ring, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(Ring, notEqualsOperator) {
+TEST(GEOMETRY_Ring, notEqualsOperator) {
   osm2ttl::geometry::Ring o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
@@ -79,7 +79,7 @@ TEST(Ring, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(Ring, serializationBinary) {
+TEST(GEOMETRY_Ring, serializationBinary) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Ring origDefaultObject = getDefaultObject();
@@ -101,7 +101,7 @@ TEST(Ring, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-TEST(Ring, serializationText) {
+TEST(GEOMETRY_Ring, serializationText) {
   std::stringstream buffer;
 
   osm2ttl::geometry::Ring origDefaultObject = getDefaultObject();
