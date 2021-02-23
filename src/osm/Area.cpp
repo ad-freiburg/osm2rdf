@@ -59,9 +59,8 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   // Correct possibly invalid geometry...
   boost::geometry::correct(_geom);
   boost::geometry::envelope(_geom, _envelope);
-  _geomArea = boost::geometry::area(_geom, osm2ttl::geometry::area_strategy());
-  _envelopeArea =
-      boost::geometry::area(_envelope, osm2ttl::geometry::area_strategy());
+  _geomArea = boost::geometry::area(_geom);
+  _envelopeArea = boost::geometry::area(_envelope);
   assert(_geomArea > 0);
   assert(_envelopeArea > 0);
 }
