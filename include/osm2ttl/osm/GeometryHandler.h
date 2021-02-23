@@ -103,22 +103,22 @@ class GeometryHandler : public osmium::handler::Handler {
   SpatialAreaVector _spatialStorageArea;
   std::unordered_map<osm2ttl::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
-  FRIEND_TEST(GeometryHandler, addNamedAreaFromRelation);
-  FRIEND_TEST(GeometryHandler, addNamedAreaFromWay);
+  FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelation);
+  FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromWay);
 
   size_t _numUnnamedAreas = 0;
-  FRIEND_TEST(GeometryHandler, addUnnamedAreaFromRelation);
-  FRIEND_TEST(GeometryHandler, addUnnamedAreaFromWay);
+  FRIEND_TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation);
+  FRIEND_TEST(OSM_GeometryHandler, addUnnamedAreaFromWay);
   std::ofstream _ofsUnnamedAreas;
   boost::archive::binary_oarchive _oaUnnamedAreas;
 
   size_t _numNodes = 0;
-  FRIEND_TEST(GeometryHandler, addNode);
+  FRIEND_TEST(OSM_GeometryHandler, addNode);
   std::ofstream _ofsNodes;
   boost::archive::binary_oarchive _oaNodes;
 
   size_t _numWays = 0;
-  FRIEND_TEST(GeometryHandler, addWay);
+  FRIEND_TEST(OSM_GeometryHandler, addWay);
   std::ofstream _ofsWays;
   boost::archive::binary_oarchive _oaWays;
 };
