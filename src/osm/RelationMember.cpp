@@ -9,6 +9,11 @@
 #include "osmium/osm/relation.hpp"
 
 // ____________________________________________________________________________
+osm2ttl::osm::RelationMember::RelationMember() {
+  _id = std::numeric_limits<osm2ttl::osm::RelationMember::id_t>::max();
+  _type = RelationMemberType::UNKNOWN;
+}
+// ____________________________________________________________________________
 osm2ttl::osm::RelationMember::RelationMember(
     const osmium::RelationMember& relationMember) {
   _id = relationMember.positive_ref();

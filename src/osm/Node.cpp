@@ -11,6 +11,11 @@
 #include "osmium/osm/node_ref.hpp"
 
 // ____________________________________________________________________________
+osm2ttl::osm::Node::Node() {
+  _id = std::numeric_limits<osm2ttl::osm::Node::id_t>::max();
+}
+
+// ____________________________________________________________________________
 osm2ttl::osm::Node::Node(const osmium::Node& node) {
   _id = node.positive_id();
   const auto& loc = node.location();

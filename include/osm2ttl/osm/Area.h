@@ -9,6 +9,7 @@ static const int Base10Base = 10;
 #include <vector>
 
 #include "boost/geometry/geometries/geometries.hpp"
+#include "boost/serialization/nvp.hpp"
 #include "osm2ttl/geometry/Area.h"
 #include "osm2ttl/geometry/Global.h"
 #include "osm2ttl/osm/Box.h"
@@ -47,6 +48,20 @@ struct Area {
   osm2ttl::geometry::area_result_t _envelopeArea;
   osm2ttl::geometry::Area _geom;
   osm2ttl::geometry::Box _envelope;
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
+    ar& boost::serialization::make_nvp("_id", _id);
+    ar& boost::serialization::make_nvp("_objId", _objId);
+    ar& boost::serialization::make_nvp("_tagAdministrationLevel",
+                                       _tagAdministrationLevel);
+    ar& boost::serialization::make_nvp("_hasName", _hasName);
+    ar& boost::serialization::make_nvp("_geomArea", _geomArea);
+    ar& boost::serialization::make_nvp("_envelopeArea", _envelopeArea);
+    ar& boost::serialization::make_nvp("_geom", _geom);
+    ar& boost::serialization::make_nvp("_envelope", _envelope);
+  }
 };
 
 }  // namespace osm2ttl::osm

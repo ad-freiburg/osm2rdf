@@ -10,6 +10,11 @@
 #include "osmium/osm/relation.hpp"
 
 // ____________________________________________________________________________
+osm2ttl::osm::Relation::Relation() {
+  _id = std::numeric_limits<osm2ttl::osm::Relation::id_t>::max();
+}
+
+// ____________________________________________________________________________
 osm2ttl::osm::Relation::Relation(const osmium::Relation& relation) {
   _id = relation.positive_id();
   _tags = osm2ttl::osm::convertTagList(relation.tags());

@@ -6,6 +6,9 @@
 
 #include <vector>
 
+#include "boost/serialization/nvp.hpp"
+#include "boost/serialization/unordered_map.hpp"
+#include "boost/serialization/vector.hpp"
 #include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/geometry/Way.h"
 #include "osm2ttl/osm/Box.h"
@@ -36,6 +39,16 @@ class Way {
   osm2ttl::geometry::Way _geom;
   osm2ttl::geometry::Box _envelope;
   osm2ttl::osm::TagList _tags;
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
+    ar& boost::serialization::make_nvp("_id", _id);
+    ar& boost::serialization::make_nvp("_nodes", _nodes);
+    ar& boost::serialization::make_nvp("_geom", _geom);
+    ar& boost::serialization::make_nvp("_envelope", _envelope);
+    ar& boost::serialization::make_nvp("_tags", _tags);
+  }
 };
 
 }  // namespace osm2ttl::osm

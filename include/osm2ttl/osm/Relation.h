@@ -6,6 +6,9 @@
 
 #include <vector>
 
+#include "boost/serialization/nvp.hpp"
+#include "boost/serialization/unordered_map.hpp"
+#include "boost/serialization/vector.hpp"
 #include "osm2ttl/osm/RelationMember.h"
 #include "osm2ttl/osm/TagList.h"
 #include "osmium/osm/relation.hpp"
@@ -15,6 +18,7 @@ namespace osm2ttl::osm {
 class Relation {
  public:
   typedef uint32_t id_t;
+  Relation();
   explicit Relation(const osmium::Relation& relation);
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] std::vector<osm2ttl::osm::RelationMember> members()
@@ -28,6 +32,14 @@ class Relation {
   id_t _id;
   std::vector<osm2ttl::osm::RelationMember> _members;
   osm2ttl::osm::TagList _tags;
+
+  friend class boost::serialization::access;
+  template <class Archive>
+  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
+    ar& boost::serialization::make_nvp("_id", _id);
+    ar& boost::serialization::make_nvp("_members", _members);
+    ar& boost::serialization::make_nvp("_tags", _tags);
+  }
 };
 
 }  // namespace osm2ttl::osm
