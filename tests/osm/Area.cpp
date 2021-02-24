@@ -18,7 +18,7 @@ TEST(OSM_Area, FromAreaVirtualWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                osmium::memory::Buffer::auto_grow::yes};
+                                      osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
                             osmium::builder::attr::_outer_ring({
                                 {1, {48.0, 7.51}},
@@ -32,6 +32,7 @@ TEST(OSM_Area, FromAreaVirtualWay) {
   const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
   ASSERT_EQ(42, a.id());
   ASSERT_EQ(21, a.objId());
+  ASSERT_EQ(0, a.tagAdministrationLevel());
   ASSERT_TRUE(a.fromWay());
   ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
 }
@@ -40,7 +41,7 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                osmium::memory::Buffer::auto_grow::yes};
+                                      osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(43),
                             osmium::builder::attr::_outer_ring({
                                 {1, {48.0, 7.51}},
@@ -54,6 +55,33 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
   const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
+  ASSERT_EQ(0, a.tagAdministrationLevel());
+  ASSERT_FALSE(a.fromWay());
+  ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
+}
+
+TEST(OSM_Area, BoundaryWithAdminLevel) {
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_area(
+      osmiumBuffer, osmium::builder::attr::_id(43),
+      osmium::builder::attr::_outer_ring({
+          {1, {48.0, 7.51}},
+          {2, {48.0, 7.61}},
+          {3, {48.1, 7.61}},
+          {4, {48.1, 7.51}},
+          {1, {48.0, 7.51}},
+      }),
+      osmium::builder::attr::_tag("boundary", "administrative"),
+      osmium::builder::attr::_tag("admin_level", "4"));
+
+  // Create osm2ttl object from osmium object
+  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  ASSERT_EQ(43, a.id());
+  ASSERT_EQ(21, a.objId());
+  ASSERT_EQ(4, a.tagAdministrationLevel());
   ASSERT_FALSE(a.fromWay());
   ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
 }

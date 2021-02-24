@@ -239,6 +239,8 @@ TEST(OSM_DumpHandler, relation) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
       osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
+      osmium::builder::attr::_member(osmium::item_type::relation, 1, "foo"),
+      osmium::builder::attr::_member(osmium::item_type::undefined, 1, "bar"),
       osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2ttl object from osmium object
@@ -253,7 +255,13 @@ TEST(OSM_DumpHandler, relation) {
       "osmrel:42 osmt:city \"Freiburg\" .\n"
       "osmrel:42 osmrel:member _:0 .\n"
       "_:0 osm:id osmnode:1 .\n"
-      "_:0 osm:role \"osmnode\" .\n",
+      "_:0 osm:role \"osmnode\" .\n"
+      "osmrel:42 osmrel:member _:1 .\n"
+      "_:1 osm:id osmrel:1 .\n"
+      "_:1 osm:role \"osmrel\" .\n"
+      "osmrel:42 osmrel:member _:2 .\n"
+      "_:2 osm:id osm:1 .\n"
+      "_:2 osm:role \"osm\" .\n",
       buffer.str());
 
   // Cleanup
@@ -330,9 +338,9 @@ TEST(OSM_DumpHandler, wayAddWayEnvelope) {
                                       osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
                            osmium::builder::attr::_nodes({
-                                                             {1, {48.0, 7.51}},
-                                                             {2, {48.1, 7.61}},
-                                                         }),
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2ttl object from osmium object
@@ -345,8 +353,10 @@ TEST(OSM_DumpHandler, wayAddWayEnvelope) {
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
       "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 7.6)\"^^geo:wktLiteral .\n"
-      "osmway:42 osm:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
+      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "7.6)\"^^geo:wktLiteral .\n"
+      "osmway:42 osm:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
+      "7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -430,9 +440,9 @@ TEST(OSM_DumpHandler, wayAddWayMetaData) {
                                       osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
                            osmium::builder::attr::_nodes({
-                                                             {1, {48.0, 7.51}},
-                                                             {2, {48.1, 7.61}},
-                                                         }),
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2ttl object from osmium object
@@ -445,7 +455,8 @@ TEST(OSM_DumpHandler, wayAddWayMetaData) {
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
       "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 7.6)\"^^geo:wktLiteral .\n"
+      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osmway:is_closed \"no\" .\n"
       "osmway:42 osmway:nodeCount \"2\"^^xsd:integer .\n"
       "osmway:42 osmway:uniqueNodeCount \"2\"^^xsd:integer .\n",
