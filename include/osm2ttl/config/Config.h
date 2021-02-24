@@ -26,14 +26,13 @@ struct Config {
   bool noWayDump = false;
 
   // Select amount to dump
-  bool addAreaSources = false;
-  bool addEnvelope = false;
-  bool addMemberNodes = false;
-  bool adminRelationsOnly = false;
-  bool expandedData = false;
-  bool metaData = false;
-  bool skipWikiLinks = false;
+  bool addAreaEnvelope = false;
   bool addInverseRelationDirection = false;
+  bool addWayEnvelope = false;
+  bool addWayMetaData = false;
+  bool addWayNodeOrder = false;
+  bool adminRelationsOnly = false;
+  bool skipWikiLinks = false;
 
   // Default settings for data
   std::string osm2ttlPrefix = "osmadd";

@@ -31,7 +31,7 @@ void osm2ttl::osm::DumpHandler<W>::area(const osm2ttl::osm::Area& area) {
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
                      area.geom());
 
-  if (_config.addEnvelope) {
+  if (_config.addAreaEnvelope) {
     writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, area.envelope());
   }
 }
@@ -72,14 +72,22 @@ void osm2ttl::osm::DumpHandler<W>::relation(
           _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
                                "member"),
           node);
-      std::string type = osm2ttl::ttl::constants::NAMESPACE__OSM;
-      if (member.type() == osm2ttl::osm::RelationMemberType::NODE) {
-        type = osm2ttl::ttl::constants::NAMESPACE__OSM_NODE;
-      } else if (member.type() == osm2ttl::osm::RelationMemberType::RELATION) {
-        type = osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION;
-      } else if (member.type() == osm2ttl::osm::RelationMemberType::WAY) {
-        type = osm2ttl::ttl::constants::NAMESPACE__OSM_WAY;
+
+      std::string type;
+      switch (member.type()) {
+        case osm2ttl::osm::RelationMemberType::NODE:
+          type = osm2ttl::ttl::constants::NAMESPACE__OSM_NODE;
+          break;
+        case osm2ttl::osm::RelationMemberType::RELATION:
+          type = osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION;
+          break;
+        case osm2ttl::osm::RelationMemberType::WAY:
+          type = osm2ttl::ttl::constants::NAMESPACE__OSM_WAY;
+          break;
+        default:
+          type = osm2ttl::ttl::constants::NAMESPACE__OSM;
       }
+
       _writer->writeTriple(
           node,
           _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "id"),
@@ -103,7 +111,7 @@ void osm2ttl::osm::DumpHandler<W>::way(const osm2ttl::osm::Way& way) {
 
   writeTagList(s, way.tags());
 
-  if (_config.expandedData) {
+  if (_config.addWayNodeOrder) {
     size_t i = 0;
     for (const auto& node : way.nodes()) {
       std::string blankNode = _writer->generateBlankNode();
@@ -128,20 +136,23 @@ void osm2ttl::osm::DumpHandler<W>::way(const osm2ttl::osm::Way& way) {
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
                      locations);
 
-  if (_config.metaData) {
+  if (_config.addWayEnvelope) {
+    writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
+  }
+
+  if (_config.addWayMetaData) {
     _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_ISCLOSED,
                          way.closed() ? osm2ttl::ttl::constants::LITERAL__YES
                                       : osm2ttl::ttl::constants::LITERAL__NO);
-    _writer->writeTriple(
-        s, osm2ttl::ttl::constants::IRI__OSMWAY_NODECOUNT,
-        _writer->generateLiteral(std::to_string(way.nodes().size()), ""));
-    _writer->writeTriple(
-        s, osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUENODECOUNT,
-        _writer->generateLiteral(std::to_string(numUniquePoints), ""));
-  }
-
-  if (_config.addEnvelope) {
-    writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
+    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODECOUNT,
+                         _writer->generateLiteral(
+                             std::to_string(way.nodes().size()),
+                             "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+    _writer->writeTriple(s,
+                         osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUENODECOUNT,
+                         _writer->generateLiteral(
+                             std::to_string(numUniquePoints),
+                             "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
   }
 }
 

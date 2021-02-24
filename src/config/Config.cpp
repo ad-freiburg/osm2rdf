@@ -104,14 +104,20 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto noAreaDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "no-area-dump", "Skip areas while dumping data");
 
-  auto addAreaSourcesOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "add-area-sources", "Add area sources (ways and relations).");
-  auto addEnvelopeOp =
-      op.add<popl::Switch>("", "add-envelope", "Add envelope to entries.");
-  auto addMemberNodesOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "add-member-nodes",
-      "Add nodes triples for members of ways and"
-      "relations. This does not add information to the ways or relations.");
+  auto addAreaEnvelopeOp =
+      op.add<popl::Switch>("", "add-area-envelope", "Add envelope to areas.");
+  auto addInverseRelationDirectionOp =
+      op.add<popl::Switch, popl::Attribute::advanced>(
+          "", "add-inverse-relation-direction",
+          "Adds relations in the opposite direction");
+  auto addWayEnvelopeOp =
+      op.add<popl::Switch>("", "add-way-envelope", "Add envelope to ways.");
+  auto addWayMetaDataOp =
+      op.add<popl::Switch>("", "add-way-meta-data",
+                           "Add information about the way structure.");
+  auto addWayNodeOrderOp =
+      op.add<popl::Switch>("", "add-way-node-order",
+                           "Add information about the node members in ways.");
   auto adminRelationsOnlyOp =
       op.add<popl::Switch>("", "admin-relations-only",
                            "Only dump nodes and relations with admin-level");
@@ -120,8 +126,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto storeConfigOp =
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
           "", "store-config", "Path to store calculated config.");
-  auto expandedDataOp =
-      op.add<popl::Switch>("x", "expanded-data", "Add expanded data");
 
   auto osm2ttlPrefixOp =
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
@@ -131,10 +135,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       "s", "wkt-simplify",
       "Simplify WKT-Geometries over this number of nodes, 0 to disable",
       wktSimplify);
-  auto addInverseRelationDirectionOp =
-      op.add<popl::Switch, popl::Attribute::advanced>(
-          "", "add-inverse-relation-direction",
-          "Adds relations in the opposite direction");
 
   auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "write-dot-files", "Writes .dot files for DAGs");
@@ -184,14 +184,14 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     noAreaDump = noAreaDumpOp->is_set();
 
     // Select amount to dump
-    addAreaSources = addAreaSourcesOp->is_set();
-    addEnvelope = addEnvelopeOp->is_set();
-    addMemberNodes = addMemberNodesOp->is_set();
+    addAreaEnvelope = addAreaEnvelopeOp->is_set();
+    addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
+    addWayEnvelope = addWayEnvelopeOp->is_set();
+    addWayMetaData = addWayMetaDataOp->is_set();
+    addWayNodeOrder = addWayNodeOrderOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
-    expandedData = expandedDataOp->is_set();
     wktSimplify = wktSimplifyOp->value();
-    addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
 
@@ -232,8 +232,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     // Handle input
     if (op.non_option_args().size() != 1) {
-      std::cerr << "No input specified!\n"
-                << op.help() << "\n";
+      std::cerr << "No input specified!\n" << op.help() << "\n";
       exit(osm2ttl::config::ExitCode::INPUT_MISSING);
     }
     input = op.non_option_args()[0];
