@@ -6,6 +6,7 @@
 
 #include <ostream>
 
+#include "gtest/gtest_prod.h"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osmium/handler.hpp"
@@ -30,11 +31,17 @@ class DumpHandler : public osmium::handler::Handler {
   template <typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
                           const G& g);
-
+  FRIEND_TEST(OSM_DumpHandler, writeBoostGeometry);
   void writeBox(const std::string& s, const std::string& p,
                 const osm2ttl::geometry::Box& box);
+  FRIEND_TEST(OSM_DumpHandler, writeBoxPrecision1);
+  FRIEND_TEST(OSM_DumpHandler, writeBoxPrecision2);
   void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
+  FRIEND_TEST(OSM_DumpHandler, writeTag_AdminLevel);
+  FRIEND_TEST(OSM_DumpHandler, writeTag_KeyIRI);
+  FRIEND_TEST(OSM_DumpHandler, writeTag_KeyNotIRI);
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
+  FRIEND_TEST(OSM_DumpHandler, writeTagList);
 
   const osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
