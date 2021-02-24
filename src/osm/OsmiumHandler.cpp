@@ -260,7 +260,7 @@ size_t osm2ttl::osm::OsmiumHandler<W>::waysDumped() const {
 // ____________________________________________________________________________
 template <typename W>
 size_t osm2ttl::osm::OsmiumHandler<W>::wayGeometriesHandled() const {
-  return _nodeGeometriesHandled;
+  return _wayGeometriesHandled;
 }
 
 // ____________________________________________________________________________
