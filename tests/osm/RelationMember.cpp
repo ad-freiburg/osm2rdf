@@ -40,7 +40,7 @@ TEST(OSM_RelationMember, FromRelationWithMembers) {
   ASSERT_EQ("outer", r.members().at(1).role());
 }
 
-TEST(OSM_Relation, equalsOperator) {
+TEST(OSM_RelationMember, equalsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
@@ -74,7 +74,7 @@ TEST(OSM_Relation, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
-TEST(OSM_Relation, notEqualsOperator) {
+TEST(OSM_RelationMember, notEqualsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
@@ -108,7 +108,7 @@ TEST(OSM_Relation, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
-TEST(OSM_Relation, serializationBinary) {
+TEST(OSM_RelationMember, serializationBinary) {
   std::stringstream boostBuffer;
 
   // Create osmium object
@@ -151,7 +151,7 @@ TEST(OSM_Relation, serializationBinary) {
   ASSERT_TRUE(s3 == d3);
 }
 
-TEST(OSM_Relation, serializationText) {
+TEST(OSM_RelationMember, serializationText) {
   std::stringstream boostBuffer;
 
   // Create osmium object
