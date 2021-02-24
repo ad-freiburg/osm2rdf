@@ -6,6 +6,7 @@
 
 #include <string>
 #include <unordered_map>
+#include "boost/serialization/unordered_map.hpp"
 
 #include "osmium/tags/taglist.hpp"
 

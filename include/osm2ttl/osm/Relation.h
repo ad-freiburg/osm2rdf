@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "boost/serialization/nvp.hpp"
-#include "boost/serialization/unordered_map.hpp"
 #include "boost/serialization/vector.hpp"
 #include "osm2ttl/osm/RelationMember.h"
 #include "osm2ttl/osm/TagList.h"

@@ -5,7 +5,6 @@
 #define OSM2TTL_OSM_NODE_H_
 
 #include "boost/serialization/nvp.hpp"
-#include "boost/serialization/unordered_map.hpp"
 #include "osm2ttl/geometry/Box.h"
 #include "osm2ttl/geometry/Location.h"
 #include "osm2ttl/osm/TagList.h"
