@@ -192,6 +192,78 @@ void osm2ttl::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
 }
 
 // ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::areasSeen() const {
+  return _areasSeen;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::areasDumped() const {
+  return _areasDumped;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::areaGeometriesHandled() const {
+  return _areaGeometriesHandled;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::nodesSeen() const {
+  return _nodesSeen;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::nodesDumped() const {
+  return _nodesDumped;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::nodeGeometriesHandled() const {
+  return _nodeGeometriesHandled;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::relationsSeen() const {
+  return _relationsSeen;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::relationsDumped() const {
+  return _relationsDumped;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::relationGeometriesHandled() const {
+  return _relationGeometriesHandled;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::waysSeen() const {
+  return _waysSeen;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::waysDumped() const {
+  return _waysDumped;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+size_t osm2ttl::osm::OsmiumHandler<W>::wayGeometriesHandled() const {
+  return _nodeGeometriesHandled;
+}
+
+// ____________________________________________________________________________
 template class osm2ttl::osm::OsmiumHandler<osm2ttl::ttl::format::NT>;
 template class osm2ttl::osm::OsmiumHandler<osm2ttl::ttl::format::TTL>;
 template class osm2ttl::osm::OsmiumHandler<osm2ttl::ttl::format::QLEVER>;

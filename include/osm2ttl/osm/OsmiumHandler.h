@@ -27,6 +27,19 @@ class OsmiumHandler : public osmium::handler::Handler {
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
 
+  [[nodiscard]] size_t areasSeen() const;
+  [[nodiscard]] size_t areasDumped() const;
+  [[nodiscard]] size_t areaGeometriesHandled() const;
+  [[nodiscard]] size_t nodesSeen() const;
+  [[nodiscard]] size_t nodesDumped() const;
+  [[nodiscard]] size_t nodeGeometriesHandled() const;
+  [[nodiscard]] size_t relationsSeen() const;
+  [[nodiscard]] size_t relationsDumped() const;
+  [[nodiscard]] size_t relationGeometriesHandled() const;
+  [[nodiscard]] size_t waysSeen() const;
+  [[nodiscard]] size_t waysDumped() const;
+  [[nodiscard]] size_t wayGeometriesHandled() const;
+
  protected:
   osm2ttl::config::Config _config;
   osm2ttl::osm::DumpHandler<W> _dumpHandler;
