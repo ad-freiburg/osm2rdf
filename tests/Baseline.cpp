@@ -82,4 +82,17 @@ TEST(Baseline, set_difference) {
   }
 }
 
+TEST(Baseline, stdoutRedirectionCOUT) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  std::cout << "Lorem ipsum";
+  ASSERT_EQ("Lorem ipsum", buffer.str());
+
+  // Restore std::cout
+  std::cout.rdbuf(sbuf);
+}
+
 }

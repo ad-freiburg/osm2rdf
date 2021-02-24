@@ -17,9 +17,9 @@ namespace osm2ttl::osm {
 TEST(OSM_Area, FromAreaVirtualWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size,
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
                                 osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(buffer, osmium::builder::attr::_id(42),
+  osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
                             osmium::builder::attr::_outer_ring({
                                 {1, {48.0, 7.51}},
                                 {2, {48.0, 7.61}},
@@ -29,7 +29,7 @@ TEST(OSM_Area, FromAreaVirtualWay) {
                             }));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
+  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
   ASSERT_EQ(42, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_TRUE(a.fromWay());
@@ -39,9 +39,9 @@ TEST(OSM_Area, FromAreaVirtualWay) {
 TEST(OSM_Area, FromAreaVirtualRelation) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer{initial_buffer_size,
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
                                 osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(buffer, osmium::builder::attr::_id(43),
+  osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(43),
                             osmium::builder::attr::_outer_ring({
                                 {1, {48.0, 7.51}},
                                 {2, {48.0, 7.61}},
@@ -51,7 +51,7 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
                             }));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
+  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_FALSE(a.fromWay());

@@ -4,11 +4,14 @@
 #include "osm2ttl/util/CacheFile.h"
 
 #include "gtest/gtest.h"
+#include "osm2ttl/config/Config.h"
 
 namespace osm2ttl::util {
 
 TEST(UTIL_CacheFile, constructorAndAutoRemove) {
-  std::filesystem::path location{"/tmp/dummy"};
+  osm2ttl::config::Config config;
+  std::filesystem::path location{config.getTempPath(
+      "UTIL_CacheFile_constructorAndAutoRemove", "constructor-output")};
 
   ASSERT_FALSE(std::filesystem::exists(location));
   {
