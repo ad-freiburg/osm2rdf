@@ -206,6 +206,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     outputCompress = !outputNoCompressOp->is_set();
     if (output.empty()) {
       outputCompress = false;
+      mergeOutput = util::OutputMergeMode::NONE;
     }
     statisticsPath = std::filesystem::path(output);
     statisticsPath += ".stats";

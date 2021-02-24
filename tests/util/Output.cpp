@@ -16,6 +16,8 @@ size_t countFilesInPath(const std::filesystem::path path) {
 
 TEST(UTIL_Output, partFilenameSingleDigit) {
   osm2ttl::config::Config config;
+  config.output =
+      config.getTempPath("TEST_UTIL_Output", "partFilenameSingleDigit");
   osm2ttl::util::Output o{config, "test", 4};
   // Normal parts
   ASSERT_EQ("test.part_1", o.partFilename(0));
@@ -30,6 +32,8 @@ TEST(UTIL_Output, partFilenameSingleDigit) {
 
 TEST(UTIL_Output, partFilenameMultipleDigits) {
   osm2ttl::config::Config config;
+  config.output =
+      config.getTempPath("TEST_UTIL_Output", "partFilenameMultipleDigits");
   osm2ttl::util::Output o{config, "test", 16};
   // Normal parts
   ASSERT_EQ("test.part_01", o.partFilename(0));
@@ -54,9 +58,10 @@ TEST(UTIL_Output, partFilenameMultipleDigits) {
   ASSERT_EQ("test.part_17", o.partFilename(-2));
 }
 
-TEST(UTIL_Output, WriteIntoCurrentPart) {
+TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("Output", "WriteIntoCurrentPart");
+  config.output =
+      config.getTempPath("TEST_UTIL_Output", "WriteIntoCurrentPartFile");
   config.mergeOutput = OutputMergeMode::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
@@ -87,9 +92,36 @@ TEST(UTIL_Output, WriteIntoCurrentPart) {
   ASSERT_FALSE(std::filesystem::exists(config.output));
 }
 
+TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = OutputMergeMode::NONE;
+
+  size_t parts = 4;
+  osm2ttl::util::Output o{config, "", parts};
+  o.open();
+  o.write("a");
+  o.write("b");
+  o.write("c");
+  o.write("d");
+  o.flush();
+  o.close();
+
+  ASSERT_EQ("abcd", buffer.str());
+
+  // Restore std::cout
+  std::cout.rdbuf(sbuf);
+}
+
 TEST(UTIL_OutputMergeMode, NONE) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("OutputMergeMode", "NONE");
+  config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "NONE");
   config.mergeOutput = OutputMergeMode::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
@@ -117,7 +149,8 @@ TEST(UTIL_OutputMergeMode, NONE) {
 
 TEST(UTIL_OutputMergeMode, CONCATENATE) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("OutputMergeMode", "CONCATENATE");
+  config.output =
+      config.getTempPath("TEST_UTIL_OutputMergeMode", "CONCATENATE");
   config.mergeOutput = OutputMergeMode::CONCATENATE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
@@ -145,7 +178,7 @@ TEST(UTIL_OutputMergeMode, CONCATENATE) {
 
 TEST(UTIL_OutputMergeMode, MERGE) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("OutputMergeMode", "MERGE");
+  config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "MERGE");
   config.mergeOutput = OutputMergeMode::MERGE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);

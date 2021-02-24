@@ -45,11 +45,15 @@ bool osm2ttl::util::Output::open() {
     if (_config.outputCompress) {
       _out[i].push(boost::iostreams::bzip2_compressor{});
     }
-    _outFile[i].open(partFilename(i));
-    if (!_outFile[i].is_open()) {
-      return false;
+    if (_config.output.empty()) {
+      _out[i].push(std::cout);
+    } else {
+      _outFile[i].open(partFilename(i));
+      if (!_outFile[i].is_open()) {
+        return false;
+      }
+      _out[i].push(_outFile[i]);
     }
-    _out[i].push(_outFile[i]);
   }
   _open = true;
   return true;
