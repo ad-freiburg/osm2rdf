@@ -3,6 +3,7 @@
 
 #include "osm2ttl/ttl/Writer.h"
 
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2ttl/config/Config.h"
 
@@ -95,6 +96,83 @@ TEST(TTL_WriterQLEVER, addPrefix) {
     const std::string res = w.resolvePrefix("test");
     ASSERT_STREQ("prefix", res.c_str());
   }
+}
+
+// ____________________________________________________________________________
+TEST(TTL_WriterNT, writeHeader) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = util::OutputMergeMode::NONE;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> w{config, &output};
+
+  w.writeHeader();
+
+  output.close();
+
+  ASSERT_EQ("", buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(TTL_WriterTTL, writeHeader) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = util::OutputMergeMode::NONE;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> w{config, &output};
+
+  w.writeHeader();
+
+  output.close();
+
+  ASSERT_THAT(buffer.str(),
+              ::testing::HasSubstr(
+                  "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(TTL_WriterQLEVER, writeHeader) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = util::OutputMergeMode::NONE;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, &output};
+
+  w.writeHeader();
+
+  output.close();
+
+  ASSERT_THAT(buffer.str(),
+              ::testing::HasSubstr(
+                  "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
 }
 
 // ____________________________________________________________________________

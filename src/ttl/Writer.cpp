@@ -386,7 +386,7 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s) {
       // 110xxxxx 10xxxxxx
       //    11111   111111 = 1F 3F
       return (((s[0] & k0x1F) << UTF8_CODEPOINT_OFFSET_BYTE2) | (s[1] & k0x3F));
-    case k1Byte:
+    default:
       // 0xxxxxxx
       //  1111111 = 7F
       return (s[0] & k0x7F);
