@@ -95,7 +95,7 @@ void osm2ttl::osm::DumpHandler<W>::relation(
       _writer->writeTriple(
           node,
           _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "role"),
-          _writer->generateLiteral(type, ""));
+          _writer->generateLiteral(role, ""));
     }
   }
 }

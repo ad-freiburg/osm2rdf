@@ -255,13 +255,13 @@ TEST(OSM_DumpHandler, relation) {
       "osmrel:42 osmt:city \"Freiburg\" .\n"
       "osmrel:42 osmrel:member _:0 .\n"
       "_:0 osm:id osmnode:1 .\n"
-      "_:0 osm:role \"osmnode\" .\n"
+      "_:0 osm:role \"label\" .\n"
       "osmrel:42 osmrel:member _:1 .\n"
       "_:1 osm:id osmrel:1 .\n"
-      "_:1 osm:role \"osmrel\" .\n"
+      "_:1 osm:role \"foo\" .\n"
       "osmrel:42 osmrel:member _:2 .\n"
       "_:2 osm:id osm:1 .\n"
-      "_:2 osm:role \"osm\" .\n",
+      "_:2 osm:role \"bar\" .\n",
       buffer.str());
 
   // Cleanup

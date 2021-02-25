@@ -11,7 +11,7 @@
 // ____________________________________________________________________________
 osm2ttl::osm::RelationMember::RelationMember() {
   _id = std::numeric_limits<osm2ttl::osm::RelationMember::id_t>::max();
-  _type = RelationMemberType::UNKNOWN;
+  _type = osm2ttl::osm::RelationMemberType::UNKNOWN;
 }
 // ____________________________________________________________________________
 osm2ttl::osm::RelationMember::RelationMember(
