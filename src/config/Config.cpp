@@ -35,6 +35,10 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   } else {
     if (noAreaDump) {
       oss << "\n" << prefix << "Ignoring areas in dump";
+    } else {
+      if (addAreaEnvelope) {
+        oss << "\n" << prefix << "Adding area envelopes";
+      }
     }
     if (noNodeDump) {
       oss << "\n" << prefix << "Ignoring nodes in dump";
@@ -44,6 +48,16 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     }
     if (noWayDump) {
       oss << "\n" << prefix << "Ignoring ways in dump";
+    } else {
+      if (addWayEnvelope) {
+        oss << "\n" << prefix << "Adding way envelopes";
+      }
+      if (addWayMetaData) {
+        oss << "\n" << prefix << "Adding way metadata";
+      }
+      if (addWayNodeOrder) {
+        oss << "\n" << prefix << "Adding way node order";
+      }
     }
   }
   oss << "\n" << prefix << "--- Contains ---";
@@ -75,7 +89,8 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
 #if defined(_OPENMP)
   oss << "\n" << prefix << "Max Threads: " << omp_get_max_threads();
 #else
-  oss << "\n" << "Not available";
+  oss << "\n"
+      << "Not available";
 #endif
   return oss.str();
 }
@@ -112,9 +127,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
           "Adds relations in the opposite direction");
   auto addWayEnvelopeOp =
       op.add<popl::Switch>("", "add-way-envelope", "Add envelope to ways.");
-  auto addWayMetaDataOp =
-      op.add<popl::Switch>("", "add-way-meta-data",
-                           "Add information about the way structure.");
+  auto addWayMetaDataOp = op.add<popl::Switch>(
+      "", "add-way-meta-data", "Add information about the way structure.");
   auto addWayNodeOrderOp =
       op.add<popl::Switch>("", "add-way-node-order",
                            "Add information about the node members in ways.");
