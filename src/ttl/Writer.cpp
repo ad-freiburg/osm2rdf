@@ -341,7 +341,7 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(
 // ____________________________________________________________________________
 template <typename T>
 uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
-  uint8_t cp = static_cast<uint8_t>(c);
+  auto cp = static_cast<uint8_t>(c);
   if ((cp & k0x80) == 0) {
     return k1Byte;
   }
@@ -390,9 +390,6 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s) {
       // 0xxxxxxx
       //  1111111 = 7F
       return (s[0] & k0x7F);
-    default:
-      throw std::domain_error("Invalid UTF-8 Sequence: '" + std::string{s} +
-                              "'");
   }
 }
 

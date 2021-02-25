@@ -416,6 +416,12 @@ TEST(TTL_WriterGrammar, UTF8_LENGTH_UTF8) {
   ASSERT_EQ(3, w.utf8Length("\u0800"));
   ASSERT_EQ(3, w.utf8Length("\uFFFF"));
   ASSERT_EQ(4, w.utf8Length("\U00010000"));
+
+  // Test invalid utf-8 sequence start.
+  char input[2];
+  input[0] = -8; // F8
+  input[1] = 0;
+  ASSERT_THROW(w.utf8Length(input), std::domain_error);
 }
 
 // ____________________________________________________________________________
@@ -446,6 +452,12 @@ TEST(TTL_WriterGrammar, UTF8_CODEPOINT_UTF8) {
   ASSERT_EQ(0x0800U, w.utf8Codepoint("\u0800"));
   ASSERT_EQ(0xFFFFU, w.utf8Codepoint("\uffff"));
   ASSERT_EQ(0x10000U, w.utf8Codepoint("\U00010000"));
+
+  // Test invalid utf-8 sequence start.
+  char input[2];
+  input[0] = -8; // F8
+  input[1] = 0;
+  ASSERT_THROW(w.utf8Codepoint(input), std::domain_error);
 }
 
 }  // namespace osm2ttl::ttl
