@@ -463,7 +463,7 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(
   tmp.reserve(s.size() * 2);
   for (size_t pos = 0; pos < s.size(); ++pos) {
     uint8_t length = utf8Length(s[pos]);
-    // Force non-allowed chars to UCHAR
+    // Force non-allowed chars to PERCENT
     if (length == k1Byte) {
       if ((s[pos] >= 0 && s[pos] <= ' ') || s[pos] == '<' || s[pos] == '>' ||
           s[pos] == '{' || s[pos] == '}' || s[pos] == '\"' || s[pos] == '|' ||

@@ -258,6 +258,8 @@ TEST(TTL_WriterGrammarTTL, RULE_167s_PN_PREFIX) {
   ASSERT_EQ("a0c", w.encodePN_PREFIX("a0c"));
   ASSERT_THROW(w.encodePN_PREFIX("9bc"), std::domain_error);
   ASSERT_EQ("a9c", w.encodePN_PREFIX("a9c"));
+  // UTF-8
+  ASSERT_EQ("\ufafa\U0002ffff", w.encodePN_PREFIX("\ufafa\U0002ffff"));
 }
 
 // ____________________________________________________________________________
@@ -371,7 +373,21 @@ TEST(TTL_WriterGrammarTTL, RULE_170s_PERCENT_UTF8) {
 // ____________________________________________________________________________
 // ____________________________________________________________________________
 // ____________________________________________________________________________
+TEST(TTL_WriterGrammarQLEVER, RULE_18_IRIREF_CONVERT) {
+  // TTL: [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  osm2ttl::config::Config config;
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> w{config, nullptr};
 
+  ASSERT_EQ("", w.encodeIRIREF(""));
+  ASSERT_EQ("allöwed", w.encodeIRIREF("allöwed"));
+  ASSERT_EQ("%3c%3e%22%7b%7d%7c%5e%60%5c", w.encodeIRIREF("<>\"{}|^`\\"));
+  using namespace std::literals::string_literals;
+  ASSERT_EQ("%00%01%19%20", w.encodeIRIREF("\u0000\u0001\u0019\u0020"s));
+}
+
+// ____________________________________________________________________________
+// ____________________________________________________________________________
 // ____________________________________________________________________________
 TEST(TTL_WriterGrammar, UTF8_LENGTH_ASCII) {
   osm2ttl::config::Config config;
