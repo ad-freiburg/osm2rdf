@@ -29,4 +29,4 @@ TEST(UTIL_Time, formattedTimeSpacer) {
   }
 }
 
-}
+}  // namespace osm2ttl::util
