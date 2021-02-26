@@ -174,7 +174,7 @@ void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
             boost::geometry::get<boost::geometry::max_corner, 0>(box) -
                 boost::geometry::get<boost::geometry::min_corner, 0>(box),
             boost::geometry::get<boost::geometry::max_corner, 1>(box) -
-                boost::geometry::get<boost::geometry::min_corner, 1>(box)) /
+                boost::geometry::get<boost::geometry::min_corner, 1>(box)) *
             (onePercent * _config.wktDeviation));
     // If empty geometry -> use original
     if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
