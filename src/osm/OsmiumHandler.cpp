@@ -104,19 +104,16 @@ void osm2ttl::osm::OsmiumHandler<W>::handle() {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
-  if (_config.noAreas) {
-    return;
-  }
   _areasSeen++;
   if (_config.adminRelationsOnly && area.tags()["admin_level"] == nullptr) {
     return;
   }
   const auto& a = osm2ttl::osm::Area(area);
-  if (!_config.noFacts) {
+  if (!_config.noFacts && !_config.noAreaFacts) {
     _areasDumped++;
     _dumpHandler.area(a);
   }
-  if (!_config.noGeometricRelations) {
+  if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
     _areaGeometriesHandled++;
     _geometryHandler.area(a);
   }
@@ -125,9 +122,6 @@ void osm2ttl::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
-  if (_config.noNodes) {
-    return;
-  }
   _nodesSeen++;
   if (_config.adminRelationsOnly) {
     return;
@@ -136,11 +130,11 @@ void osm2ttl::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   if (node.tags().empty()) {
     return;
   }
-  if (!_config.noFacts) {
+  if (!_config.noFacts && !_config.noNodeFacts) {
     _nodesDumped++;
     _dumpHandler.node(n);
   }
-  if (!_config.noGeometricRelations) {
+  if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
     _nodeGeometriesHandled++;
     _geometryHandler.node(n);
   }
@@ -150,9 +144,6 @@ void osm2ttl::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
 template <typename W>
 void osm2ttl::osm::OsmiumHandler<W>::relation(
     const osmium::Relation& relation) {
-  if (_config.noRelations) {
-    return;
-  }
   _relationsSeen++;
   if (relation.tags().empty()) {
     return;
@@ -161,7 +152,7 @@ void osm2ttl::osm::OsmiumHandler<W>::relation(
     return;
   }
   const auto& r = osm2ttl::osm::Relation(relation);
-  if (!_config.noFacts) {
+  if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
     _dumpHandler.relation(r);
   }
@@ -170,9 +161,6 @@ void osm2ttl::osm::OsmiumHandler<W>::relation(
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
-  if (_config.noWays) {
-    return;
-  }
   _waysSeen++;
   if (way.tags().empty()) {
     return;
@@ -181,11 +169,11 @@ void osm2ttl::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
     return;
   }
   const auto& w = osm2ttl::osm::Way(way);
-  if (!_config.noFacts) {
+  if (!_config.noFacts && !_config.noWayFacts) {
     _waysDumped++;
     _dumpHandler.way(w);
   }
-  if (!_config.noGeometricRelations) {
+  if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
     _wayGeometriesHandled++;
     _geometryHandler.way(w);
   }

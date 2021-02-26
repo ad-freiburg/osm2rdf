@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "osm2ttl/config/Constants.h"
 #include "osm2ttl/ttl/Format.h"
 #include "osm2ttl/util/OutputMergeMode.h"
 
@@ -15,15 +16,18 @@ namespace osm2ttl::config {
 
 struct Config {
   // Select what to do
-  bool noFacts = false;
-  bool noGeometricRelations = false;
   bool storeLocationsOnDisk = false;
 
-  // Select types to dump
-  bool noAreas = false;
-  bool noNodes = false;
-  bool noRelations = false;
-  bool noWays = false;
+  bool noFacts = false;
+  bool noAreaFacts = false;
+  bool noNodeFacts = false;
+  bool noRelationFacts = false;
+  bool noWayFacts = false;
+
+  bool noGeometricRelations = false;
+  bool noAreaGeometricRelations = false;
+  bool noNodeGeometricRelations = false;
+  bool noWayGeometricRelations = false;
 
   // Select amount to dump
   bool addAreaEnvelope = false;
@@ -38,10 +42,10 @@ struct Config {
   std::string osm2ttlPrefix = "osmadd";
 
   // Dot
-  bool writeDotFiles = false;
+  bool writeDAGDotFiles = false;
 
   // Statistics
-  bool writeStatistics = false;
+  bool writeGeometricRelationStatistics = false;
   std::filesystem::path statisticsPath;
 
   // Output modifiers

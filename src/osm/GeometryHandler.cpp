@@ -134,7 +134,7 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osm2ttl::osm::Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
-  if (_config.writeStatistics) {
+  if (_config.writeGeometricRelationStatistics) {
     _statistics.open();
   }
   prepareRTree();
@@ -144,7 +144,7 @@ void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
   const auto& nodeData = dumpNodeRelations();
   dumpWayRelations(nodeData);
 
-  if (_config.writeStatistics) {
+  if (_config.writeGeometricRelationStatistics) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Closing statistics files..." << std::endl;
@@ -231,7 +231,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
         auto start = std::chrono::steady_clock::now();
         bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
         auto end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "DAG", "isCoveredBy", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), isCoveredBy));
@@ -243,7 +243,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
         start = std::chrono::steady_clock::now();
         bool isEqual = boost::geometry::equals(entryGeom, areaGeom);
         end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "DAG", "isEqual", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), isEqual));
@@ -274,7 +274,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     std::cerr << osm2ttl::util::formattedTimeSpacer << " contains: " << contains
               << " yes: " << containsOk << std::endl;
   }
-  if (_config.writeDotFiles) {
+  if (_config.writeDAGDotFiles) {
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Dumping non-reduced DAG as " << _config.output
               << ".non-reduced.dot ..." << std::endl;
@@ -302,7 +302,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
               << directedAreaGraph.getNumEdges() << " edges and "
               << directedAreaGraph.getNumVertices() << " vertices" << std::endl;
   }
-  if (_config.writeDotFiles) {
+  if (_config.writeDAGDotFiles) {
     std::cerr << osm2ttl::util::currentTimeFormatted() << " Dumping DAG as "
               << _config.output << ".dot ..." << std::endl;
     std::filesystem::path p{_config.output};
@@ -396,7 +396,7 @@ osm2ttl::osm::NodesContainedInAreasData
 osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
   // Store for each node all relevant areas
   NodesContainedInAreasData nodeData;
-  if (!_config.noNodes) {
+  if (!_config.noNodeGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numNodes << " nodes in "
@@ -462,7 +462,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
         auto start = std::chrono::steady_clock::now();
         bool isCoveredBy = boost::geometry::covered_by(nodeGeom, areaGeom);
         auto end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Node", "isCoveredBy", areaId, "area", nodeId, "node",
               std::chrono::nanoseconds(end - start), isCoveredBy));
@@ -515,7 +515,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2ttl::osm::NodesContainedInAreasData& nodeData) {
-  if (!_config.noWays) {
+  if (!_config.noWayGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numWays << " ways in "
@@ -601,7 +601,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
           bool isCoveredByEnvelope =
               boost::geometry::covered_by(wayEnvelope, areaEnvelope);
           auto end = std::chrono::steady_clock::now();
-          if (_config.writeStatistics) {
+          if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredByEnvelope", areaId, "area", wayId,
                 "way", std::chrono::nanoseconds(end - start),
@@ -618,7 +618,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
           start = std::chrono::steady_clock::now();
           bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
           end = std::chrono::steady_clock::now();
-          if (_config.writeStatistics) {
+          if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredBy1", areaId, "area", wayId, "way",
                 std::chrono::nanoseconds(end - start), isCoveredBy));
@@ -665,7 +665,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
         auto start = std::chrono::steady_clock::now();
         bool doesIntersect = boost::geometry::intersects(wayGeom, areaGeom);
         auto end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "doesIntersect", areaId, "area", wayId, "way",
               std::chrono::nanoseconds(end - start), doesIntersect));
@@ -695,7 +695,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
         bool isCoveredByEnvelope =
             boost::geometry::covered_by(wayEnvelope, areaEnvelope);
         end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "isCoveredByEnvelope", areaId, "area", wayId,
               "way", std::chrono::nanoseconds(end - start),
@@ -708,7 +708,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
         start = std::chrono::steady_clock::now();
         bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
         end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "isCoveredBy2", areaId, "area", wayId, "way",
               std::chrono::nanoseconds(end - start), isCoveredBy));
@@ -750,7 +750,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
-  if (!_config.noAreas) {
+  if (!_config.noAreaGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numUnnamedAreas
@@ -830,7 +830,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         auto start = std::chrono::steady_clock::now();
         bool doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
         auto end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "doesIntersect", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), doesIntersect));
@@ -860,7 +860,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         bool isCoveredByEnvelope =
             boost::geometry::covered_by(entryEnvelope, areaEnvelope);
         end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "isCoveredByEnvelope", areaId, "area", entryId,
               "area", std::chrono::nanoseconds(end - start),
@@ -873,7 +873,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         start = std::chrono::steady_clock::now();
         bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
         end = std::chrono::steady_clock::now();
-        if (_config.writeStatistics) {
+        if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "isCoveredBy2", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), isCoveredBy));

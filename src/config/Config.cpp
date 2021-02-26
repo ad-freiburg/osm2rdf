@@ -4,14 +4,12 @@
 #include "osm2ttl/config/Config.h"
 
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <string>
 
 #include "omp.h"
 #include "osm2ttl/config/Constants.h"
 #include "osm2ttl/config/ExitCode.h"
-#include "osm2ttl/ttl/Format.h"
 #include "popl.hpp"
 
 // ____________________________________________________________________________
@@ -24,66 +22,90 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   oss << "\n" << prefix << "Output format: " << outputFormat;
   oss << "\n" << prefix << "Cache:         " << cache;
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_FACTS;
-  oss << "\n" << prefix << "Prefix for own IRIs: " << osm2ttlPrefix;
+  oss << "\n"
+      << prefix << osm2ttl::config::constants::OSM2TTL_PREFIX_INFO << ": "
+      << osm2ttlPrefix;
   if (noFacts) {
-    oss << "\n" << prefix << osm2ttl::config::constants::NO_FACTS;
+    oss << "\n" << prefix << osm2ttl::config::constants::NO_FACTS_INFO;
   } else {
-    if (noAreas) {
-      oss << "\n" << prefix << osm2ttl::config::constants::NO_AREA_FACTS;
+    if (adminRelationsOnly) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO;
+    }
+    if (noAreaFacts) {
+      oss << "\n" << prefix << osm2ttl::config::constants::NO_AREA_FACTS_INFO;
     } else {
       if (addAreaEnvelope) {
-        oss << "\n" << prefix << osm2ttl::config::constants::ADD_AREA_ENVELOPE;
+        oss << "\n"
+            << prefix << osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO;
       }
     }
-    if (noNodes) {
-      oss << "\n" << prefix << osm2ttl::config::constants::NO_NODE_FACTS;
+    if (noNodeFacts) {
+      oss << "\n" << prefix << osm2ttl::config::constants::NO_NODE_FACTS_INFO;
     }
-    if (noRelations) {
-      oss << "\n" << prefix << osm2ttl::config::constants::NO_RELATION_FACTS;
+    if (noRelationFacts) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::NO_RELATION_FACTS_INFO;
     }
-    if (noWays) {
-      oss << "\n" << prefix << osm2ttl::config::constants::NO_WAY_FACTS;
+    if (noWayFacts) {
+      oss << "\n" << prefix << osm2ttl::config::constants::NO_WAY_FACTS_INFO;
     } else {
       if (addWayEnvelope) {
-        oss << "\n" << prefix << osm2ttl::config::constants::ADD_WAY_ENVELOPE;
+        oss << "\n"
+            << prefix << osm2ttl::config::constants::ADD_WAY_ENVELOPE_INFO;
       }
       if (addWayMetadata) {
-        oss << "\n" << prefix << osm2ttl::config::constants::ADD_WAY_METADATA;
+        oss << "\n"
+            << prefix << osm2ttl::config::constants::ADD_WAY_METADATA_INFO;
       }
       if (addWayNodeOrder) {
-        oss << "\n" << prefix << osm2ttl::config::constants::ADD_WAY_NODE_ORDER;
+        oss << "\n"
+            << prefix << osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO;
       }
+    }
+    if (skipWikiLinks) {
+      oss << "\n" << prefix << osm2ttl::config::constants::SKIP_WIKI_LINKS_INFO;
     }
   }
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_CONTAINS;
   if (noGeometricRelations) {
-    oss << "\n" << prefix << osm2ttl::config::constants::NO_GEOM_RELATIONS;
+    oss << "\n" << prefix << osm2ttl::config::constants::NO_GEOM_RELATIONS_INFO;
   } else {
-    if (noAreas) {
+    if (adminRelationsOnly) {
       oss << "\n"
-          << prefix << osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS;
+          << prefix << osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO;
     }
-    if (noNodes) {
+    if (noAreaGeometricRelations) {
       oss << "\n"
-          << prefix << osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS;
+          << prefix << osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
     }
-    if (noWays) {
+    if (noNodeGeometricRelations) {
       oss << "\n"
-          << prefix << osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS;
+          << prefix << osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS_INFO;
+    }
+    if (noWayGeometricRelations) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_INFO;
     }
     if (addInverseRelationDirection) {
       oss << "\n"
           << prefix
-          << osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION;
+          << osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_INFO;
     }
   }
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_MISCELLANEOUS;
-  if (storeLocationsOnDisk) {
-    oss << "\n" << prefix << "Storing locations osmium locations on disk!";
-  }
-  if (writeStatistics) {
+  if (writeDAGDotFiles) {
     oss << "\n"
-        << prefix << "Storing statistics about geometry calculations - SLOW!";
+        << prefix << osm2ttl::config::constants::WRITE_DAG_DOT_FILES_INFO;
+  }
+  if (storeLocationsOnDisk) {
+    oss << "\n"
+        << prefix << osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_INFO;
+  }
+  if (writeGeometricRelationStatistics) {
+    oss << "\n"
+        << prefix
+        << osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO;
   }
 #if defined(_OPENMP)
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_OPENMP;
@@ -98,60 +120,120 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
   auto helpOp = op.add<popl::Switch>("h", "help", "Lorem ipsum");
 
-  auto noFactsOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-facts", "Do not dump facts");
-  auto noGeometricRelationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-geometric-relations", "Do not calculate geometric relations");
   auto storeLocationsOnDiskOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "store-locations-on-disk", "Store locations in RAM");
+      osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
+      osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_LONG,
+      osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_HELP);
 
   auto noAreasOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-areas", "Ignore areas");
+      osm2ttl::config::constants::NO_AREA_OPTION_SHORT,
+      osm2ttl::config::constants::NO_AREA_OPTION_LONG,
+      osm2ttl::config::constants::NO_AREA_OPTION_HELP);
   auto noNodesOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-nodes", "Ignore nodes");
+      osm2ttl::config::constants::NO_NODE_OPTION_SHORT,
+      osm2ttl::config::constants::NO_NODE_OPTION_LONG,
+      osm2ttl::config::constants::NO_NODE_OPTION_HELP);
   auto noRelationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-relations", "Ignore relations");
+      osm2ttl::config::constants::NO_RELATION_OPTION_SHORT,
+      osm2ttl::config::constants::NO_RELATION_OPTION_LONG,
+      osm2ttl::config::constants::NO_RELATION_OPTION_HELP);
   auto noWaysOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-ways", "Ignore ways");
+      osm2ttl::config::constants::NO_WAY_OPTION_SHORT,
+      osm2ttl::config::constants::NO_WAY_OPTION_LONG,
+      osm2ttl::config::constants::NO_WAY_OPTION_HELP);
 
-  auto addAreaEnvelopeOp =
-      op.add<popl::Switch>("", "add-area-envelope", "Add envelope to areas.");
-  auto addWayEnvelopeOp =
-      op.add<popl::Switch>("", "add-way-envelope", "Add envelope to ways.");
+  auto noFactsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      osm2ttl::config::constants::NO_FACTS_OPTION_SHORT,
+      osm2ttl::config::constants::NO_FACTS_OPTION_LONG,
+      osm2ttl::config::constants::NO_FACTS_OPTION_HELP);
+  auto noAreaFactsOp = op.add<popl::Switch, popl::Attribute::expert>(
+      osm2ttl::config::constants::NO_AREA_FACTS_OPTION_SHORT,
+      osm2ttl::config::constants::NO_AREA_FACTS_OPTION_LONG,
+      osm2ttl::config::constants::NO_AREA_FACTS_OPTION_HELP);
+  auto noNodeFactsOp = op.add<popl::Switch, popl::Attribute::expert>(
+      osm2ttl::config::constants::NO_NODE_FACTS_OPTION_SHORT,
+      osm2ttl::config::constants::NO_NODE_FACTS_OPTION_LONG,
+      osm2ttl::config::constants::NO_NODE_FACTS_OPTION_HELP);
+  auto noRelationFactsOp = op.add<popl::Switch, popl::Attribute::expert>(
+      osm2ttl::config::constants::NO_RELATION_FACTS_OPTION_SHORT,
+      osm2ttl::config::constants::NO_RELATION_FACTS_OPTION_LONG,
+      osm2ttl::config::constants::NO_RELATION_FACTS_OPTION_HELP);
+  auto noWayFactsOp = op.add<popl::Switch, popl::Attribute::expert>(
+      osm2ttl::config::constants::NO_WAY_FACTS_OPTION_SHORT,
+      osm2ttl::config::constants::NO_WAY_FACTS_OPTION_LONG,
+      osm2ttl::config::constants::NO_WAY_FACTS_OPTION_HELP);
+
+  auto noGeometricRelationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_SHORT,
+      osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_LONG,
+      osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
+  auto noAreaGeometricRelationsOp =
+      op.add<popl::Switch, popl::Attribute::expert>(
+          osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_SHORT,
+          osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
+          osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_HELP);
+  auto noNodeGeometricRelationsOp =
+      op.add<popl::Switch, popl::Attribute::expert>(
+          osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_SHORT,
+          osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
+          osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_HELP);
+  auto noWayGeometricRelationsOp =
+      op.add<popl::Switch, popl::Attribute::expert>(
+          osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_SHORT,
+          osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
+          osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_HELP);
+
+  auto addAreaEnvelopeOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG,
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_OPTION_HELP);
+  auto addWayEnvelopeOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG,
+      osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_HELP);
   auto addWayMetaDataOp = op.add<popl::Switch>(
-      "", "add-way-meta-data", "Add information about the way structure.");
-  auto addWayNodeOrderOp =
-      op.add<popl::Switch>("", "add-way-node-order",
-                           "Add information about the node members in ways.");
-
+      osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_LONG,
+      osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_HELP);
+  auto addWayNodeOrderOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG,
+      osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_HELP);
   auto addInverseRelationDirectionOp =
       op.add<popl::Switch, popl::Attribute::advanced>(
-          "", "add-inverse-relation-direction",
-          "Adds relations in the opposite direction");
-
-  auto adminRelationsOnlyOp =
-      op.add<popl::Switch>("", "admin-relations-only",
-                           "Only dump nodes and relations with admin-level");
+          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_SHORT,
+          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_LONG,
+          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_HELP);
+  auto adminRelationsOnlyOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_SHORT,
+      osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG,
+      osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_HELP);
   auto skipWikiLinksOp = op.add<popl::Switch>(
-      "w", "skip-wiki-links", "Skip addition of links to wikipedia/wikidata.");
-  auto storeConfigOp =
-      op.add<popl::Value<std::string>, popl::Attribute::advanced>(
-          "", "store-config", "Path to store calculated config.");
+      osm2ttl::config::constants::SKIP_WIKI_LINKS_OPTION_SHORT,
+      osm2ttl::config::constants::SKIP_WIKI_LINKS_OPTION_LONG,
+      osm2ttl::config::constants::SKIP_WIKI_LINKS_OPTION_HELP);
 
   auto osm2ttlPrefixOp =
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
-          "", "oms2ttl-prefix", "Prefix for own IRIs", osm2ttlPrefix);
+          osm2ttl::config::constants::OSM2TTL_PREFIX_OPTION_SHORT,
+          osm2ttl::config::constants::OSM2TTL_PREFIX_OPTION_LONG,
+          osm2ttl::config::constants::OSM2TTL_PREFIX_OPTION_HELP,
+          osm2ttlPrefix);
 
   auto wktSimplifyOp = op.add<popl::Value<uint16_t>>(
       "s", "wkt-simplify",
       "Simplify WKT-Geometries over this number of nodes, 0 to disable",
       wktSimplify);
 
-  auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "write-dot-files", "Writes .dot files for DAGs");
+  auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::expert>(
+      osm2ttl::config::constants::WRITE_DAG_DOT_FILES_OPTION_SHORT,
+      osm2ttl::config::constants::WRITE_DAG_DOT_FILES_OPTION_LONG,
+      osm2ttl::config::constants::WRITE_DAG_DOT_FILES_OPTION_HELP);
 
-  auto writeStatisticsOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "write-statistics", "Writes statistic files");
+  auto writeStatisticsOp = op.add<popl::Switch, popl::Attribute::expert>(
+      osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_SHORT,
+      osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG,
+      osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP);
 
   auto outputOp =
       op.add<popl::Value<std::string>>("o", "output", "Output file", "");
@@ -184,10 +266,22 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     storeLocationsOnDisk = storeLocationsOnDiskOp->is_set();
 
     // Select types to dump
-    noNodes = noNodesOp->is_set();
-    noRelations = noRelationsOp->is_set();
-    noWays = noWaysOp->is_set();
-    noAreas = noAreasOp->is_set();
+    noAreaFacts = noAreaFactsOp->is_set();
+    noNodeFacts = noNodeFactsOp->is_set();
+    noRelationFacts = noRelationFactsOp->is_set();
+    noWayFacts = noWayFactsOp->is_set();
+
+    noAreaGeometricRelations = noAreaGeometricRelationsOp->is_set();
+    noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
+    noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
+
+    noAreaFacts |= noAreasOp->is_set();
+    noAreaGeometricRelations |= noAreasOp->is_set();
+    noNodeFacts |= noNodesOp->is_set();
+    noNodeGeometricRelations |= noNodesOp->is_set();
+    noRelationFacts |= noRelationsOp->is_set();
+    noWayFacts |= noWaysOp->is_set();
+    noWayGeometricRelations |= noWaysOp->is_set();
 
     // Select amount to dump
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
@@ -202,9 +296,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     osm2ttlPrefix = osm2ttlPrefixOp->value();
 
     // Dot
-    writeDotFiles = writeDotFilesOp->is_set();
+    writeDAGDotFiles = writeDotFilesOp->is_set();
 
-    writeStatistics = writeStatisticsOp->is_set();
+    writeGeometricRelationStatistics = writeStatisticsOp->is_set();
 
     // Output
     output = outputOp->value();
@@ -215,10 +309,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       mergeOutput = util::OutputMergeMode::NONE;
     }
     statisticsPath = std::filesystem::path(output);
-    statisticsPath += ".stats";
-    if (outputCompress && !output.empty() && output.extension() != ".bz2") {
-      output += ".bz2";
-      statisticsPath += ".bz2";
+    statisticsPath += osm2ttl::config::constants::STATS_EXTENSION;
+    if (outputCompress && !output.empty() &&
+        output.extension() != osm2ttl::config::constants::BZIP2_EXTENSION) {
+      output += osm2ttl::config::constants::BZIP2_EXTENSION;
+      statisticsPath += osm2ttl::config::constants::BZIP2_EXTENSION;
     }
 
     // osmium location cache

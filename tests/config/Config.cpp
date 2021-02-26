@@ -17,10 +17,13 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
   ASSERT_FALSE(config.noGeometricRelations);
   ASSERT_FALSE(config.storeLocationsOnDisk);
 
-  ASSERT_FALSE(config.noAreas);
-  ASSERT_FALSE(config.noNodes);
-  ASSERT_FALSE(config.noRelations);
-  ASSERT_FALSE(config.noWays);
+  ASSERT_FALSE(config.noAreaFacts);
+  ASSERT_FALSE(config.noNodeFacts);
+  ASSERT_FALSE(config.noRelationFacts);
+  ASSERT_FALSE(config.noWayFacts);
+  ASSERT_FALSE(config.noAreaGeometricRelations);
+  ASSERT_FALSE(config.noNodeGeometricRelations);
+  ASSERT_FALSE(config.noWayGeometricRelations);
 
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addInverseRelationDirection);
@@ -32,9 +35,9 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 
   ASSERT_EQ("osmadd", config.osm2ttlPrefix);
 
-  ASSERT_FALSE(config.writeDotFiles);
+  ASSERT_FALSE(config.writeDAGDotFiles);
 
-  ASSERT_FALSE(config.writeStatistics);
+  ASSERT_FALSE(config.writeGeometricRelationStatistics);
 
   ASSERT_EQ(250, config.wktSimplify);
   ASSERT_EQ(5, config.wktDeviation);
@@ -274,51 +277,52 @@ TEST(CONFIG_Config, getInfoNoFacts) {
   config.noFacts = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(osm2ttl::config::constants::NO_FACTS));
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(osm2ttl::config::constants::NO_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoAreaDump) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
-  config.noAreas = true;
+  config.noAreaFacts = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res,
-              ::testing::HasSubstr(osm2ttl::config::constants::NO_AREA_FACTS));
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::NO_AREA_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoNodeDump) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
-  config.noNodes = true;
+  config.noNodeFacts = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res,
-              ::testing::HasSubstr(osm2ttl::config::constants::NO_NODE_FACTS));
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::NO_NODE_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoRelationDump) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
-  config.noRelations = true;
+  config.noRelationFacts = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::NO_RELATION_FACTS));
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::NO_RELATION_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoWayDump) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
-  config.noWays = true;
+  config.noWayFacts = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res,
-              ::testing::HasSubstr(osm2ttl::config::constants::NO_WAY_FACTS));
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(osm2ttl::config::constants::NO_WAY_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
@@ -328,8 +332,8 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelope) {
   config.addAreaEnvelope = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::ADD_AREA_ENVELOPE));
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO));
 }
 
 // ____________________________________________________________________________
@@ -339,8 +343,8 @@ TEST(CONFIG_Config, getInfoAddWayEnvelope) {
   config.addWayEnvelope = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::ADD_WAY_ENVELOPE));
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::ADD_WAY_ENVELOPE_INFO));
 }
 
 // ____________________________________________________________________________
@@ -350,8 +354,8 @@ TEST(CONFIG_Config, getInfoAddWayMetadata) {
   config.addWayMetadata = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::ADD_WAY_METADATA));
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::ADD_WAY_METADATA_INFO));
 }
 
 // ____________________________________________________________________________
@@ -362,7 +366,7 @@ TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_WAY_NODE_ORDER));
+                       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO));
 }
 
 // ____________________________________________________________________________
@@ -372,41 +376,43 @@ TEST(CONFIG_Config, getInfoNoGeometricRelations) {
   config.noGeometricRelations = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::NO_GEOM_RELATIONS));
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::NO_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoAreaGeomRelations) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
-  config.noAreas = true;
+  config.noAreaGeometricRelations = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS));
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoNodeGeomRelations) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
-  config.noNodes = true;
+  config.noNodeGeometricRelations = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS));
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoWayGeomRelations) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
-  config.noWays = true;
+  config.noWayGeometricRelations = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS));
+                       osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
@@ -416,9 +422,45 @@ TEST(CONFIG_Config, getInfoAddInverseRelationDirection) {
   config.addInverseRelationDirection = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res,
-              ::testing::HasSubstr(
-                  osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION));
+  ASSERT_THAT(
+      res,
+      ::testing::HasSubstr(
+          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAdminRelationsOnly) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.adminRelationsOnly = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoWriteDAGDotFiles) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.writeDAGDotFiles = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::WRITE_DAG_DOT_FILES_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoWriteGeometricRelationStatistics) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.writeGeometricRelationStatistics = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(
+      res,
+      ::testing::HasSubstr(
+          osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO));
 }
 
 }  // namespace osm2ttl::config

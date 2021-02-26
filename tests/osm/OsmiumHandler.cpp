@@ -235,7 +235,7 @@ TEST(OSM_OsmiumHandler, adminRelationsOnly) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_OsmiumHandler, noAreaDump) {
+TEST(OSM_OsmiumHandler, noAreaFacts) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -245,7 +245,7 @@ TEST(OSM_OsmiumHandler, noAreaDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noAreas = true;
+  config.noAreaFacts = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -253,8 +253,152 @@ TEST(OSM_OsmiumHandler, noAreaDump) {
 
   addOsmiumItems(&oh);
 
-  ASSERT_EQ(0, oh.areasSeen());
+  ASSERT_EQ(2, oh.areasSeen());
   ASSERT_EQ(0, oh.areasDumped());
+  ASSERT_EQ(2, oh.areaGeometriesHandled());
+  ASSERT_EQ(2, oh.nodesSeen());
+  ASSERT_EQ(1, oh.nodesDumped());
+  ASSERT_EQ(1, oh.nodeGeometriesHandled());
+  ASSERT_EQ(3, oh.relationsSeen());
+  ASSERT_EQ(2, oh.relationsDumped());
+  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.waysSeen());
+  ASSERT_EQ(1, oh.waysDumped());
+  ASSERT_EQ(1, oh.wayGeometriesHandled());
+
+  // Cleanup
+  output.close();
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_OsmiumHandler, noNodeFacts) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.noNodeFacts = true;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+
+  addOsmiumItems(&oh);
+
+  ASSERT_EQ(2, oh.areasSeen());
+  ASSERT_EQ(2, oh.areasDumped());
+  ASSERT_EQ(2, oh.areaGeometriesHandled());
+  ASSERT_EQ(2, oh.nodesSeen());
+  ASSERT_EQ(0, oh.nodesDumped());
+  ASSERT_EQ(1, oh.nodeGeometriesHandled());
+  ASSERT_EQ(3, oh.relationsSeen());
+  ASSERT_EQ(2, oh.relationsDumped());
+  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.waysSeen());
+  ASSERT_EQ(1, oh.waysDumped());
+  ASSERT_EQ(1, oh.wayGeometriesHandled());
+
+  // Cleanup
+  output.close();
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_OsmiumHandler, noRelationFacts) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.noRelationFacts = true;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+
+  addOsmiumItems(&oh);
+
+  ASSERT_EQ(2, oh.areasSeen());
+  ASSERT_EQ(2, oh.areasDumped());
+  ASSERT_EQ(2, oh.areaGeometriesHandled());
+  ASSERT_EQ(2, oh.nodesSeen());
+  ASSERT_EQ(1, oh.nodesDumped());
+  ASSERT_EQ(1, oh.nodeGeometriesHandled());
+  ASSERT_EQ(3, oh.relationsSeen());
+  ASSERT_EQ(0, oh.relationsDumped());
+  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.waysSeen());
+  ASSERT_EQ(1, oh.waysDumped());
+  ASSERT_EQ(1, oh.wayGeometriesHandled());
+
+  // Cleanup
+  output.close();
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_OsmiumHandler, noWayFacts) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.noWayFacts = true;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+
+  addOsmiumItems(&oh);
+
+  ASSERT_EQ(2, oh.areasSeen());
+  ASSERT_EQ(2, oh.areasDumped());
+  ASSERT_EQ(2, oh.areaGeometriesHandled());
+  ASSERT_EQ(2, oh.nodesSeen());
+  ASSERT_EQ(1, oh.nodesDumped());
+  ASSERT_EQ(1, oh.nodeGeometriesHandled());
+  ASSERT_EQ(3, oh.relationsSeen());
+  ASSERT_EQ(2, oh.relationsDumped());
+  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.waysSeen());
+  ASSERT_EQ(0, oh.waysDumped());
+  ASSERT_EQ(1, oh.wayGeometriesHandled());
+
+  // Cleanup
+  output.close();
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.noAreaGeometricRelations = true;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+
+  addOsmiumItems(&oh);
+
+  ASSERT_EQ(2, oh.areasSeen());
+  ASSERT_EQ(2, oh.areasDumped());
   ASSERT_EQ(0, oh.areaGeometriesHandled());
   ASSERT_EQ(2, oh.nodesSeen());
   ASSERT_EQ(1, oh.nodesDumped());
@@ -271,7 +415,7 @@ TEST(OSM_OsmiumHandler, noAreaDump) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_OsmiumHandler, noNodeDump) {
+TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -281,7 +425,7 @@ TEST(OSM_OsmiumHandler, noNodeDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noNodes = true;
+  config.noNodeGeometricRelations = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -292,8 +436,8 @@ TEST(OSM_OsmiumHandler, noNodeDump) {
   ASSERT_EQ(2, oh.areasSeen());
   ASSERT_EQ(2, oh.areasDumped());
   ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(0, oh.nodesSeen());
-  ASSERT_EQ(0, oh.nodesDumped());
+  ASSERT_EQ(2, oh.nodesSeen());
+  ASSERT_EQ(1, oh.nodesDumped());
   ASSERT_EQ(0, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
@@ -307,7 +451,7 @@ TEST(OSM_OsmiumHandler, noNodeDump) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_OsmiumHandler, noRelationDump) {
+TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -317,43 +461,7 @@ TEST(OSM_OsmiumHandler, noRelationDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noRelations = true;
-  osm2ttl::util::Output output{config, config.output};
-  output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
-
-  addOsmiumItems(&oh);
-
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(0, oh.relationsSeen());
-  ASSERT_EQ(0, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
-
-  // Cleanup
-  output.close();
-  std::cout.rdbuf(sbuf);
-}
-
-TEST(OSM_OsmiumHandler, noWayDump) {
-  // Capture std::cout
-  std::stringstream buffer;
-  std::streambuf* sbuf = std::cout.rdbuf();
-  std::cout.rdbuf(buffer.rdbuf());
-
-  osm2ttl::config::Config config;
-  config.output = "";
-  config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noWays = true;
+  config.noWayGeometricRelations = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -370,8 +478,8 @@ TEST(OSM_OsmiumHandler, noWayDump) {
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(0, oh.waysSeen());
-  ASSERT_EQ(0, oh.waysDumped());
+  ASSERT_EQ(2, oh.waysSeen());
+  ASSERT_EQ(1, oh.waysDumped());
   ASSERT_EQ(0, oh.wayGeometriesHandled());
 
   // Cleanup
