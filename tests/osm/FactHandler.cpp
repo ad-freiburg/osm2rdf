@@ -1,22 +1,21 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2ttl/osm/DumpHandler.h"
-
 #include "gtest/gtest.h"
+#include "osm2ttl/osm/FactHandler.h"
 #include "osm2ttl/osm/Node.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
 namespace osm2ttl::osm {
 
-TEST(OSM_DumpHandler, constructor) {
+TEST(OSM_FactHandler, constructor) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_OSM_DumpHandler", "constructor");
   std::filesystem::create_directories(config.output);
   osm2ttl::util::Output output{config, config.output};
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Assure that no file is written during construction.
   ASSERT_EQ(0, std::distance(std::filesystem::directory_iterator(config.output),
@@ -27,7 +26,7 @@ TEST(OSM_DumpHandler, constructor) {
   std::filesystem::remove_all(config.output);
 }
 
-TEST(OSM_DumpHandler, areaFromWay) {
+TEST(OSM_FactHandler, areaFromWay) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -42,7 +41,7 @@ TEST(OSM_DumpHandler, areaFromWay) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -74,7 +73,7 @@ TEST(OSM_DumpHandler, areaFromWay) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, areaFromRelation) {
+TEST(OSM_FactHandler, areaFromRelation) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -89,7 +88,7 @@ TEST(OSM_DumpHandler, areaFromRelation) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -121,7 +120,7 @@ TEST(OSM_DumpHandler, areaFromRelation) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, areaAddEnvelope) {
+TEST(OSM_FactHandler, areaAddEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -137,7 +136,7 @@ TEST(OSM_DumpHandler, areaAddEnvelope) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -171,7 +170,7 @@ TEST(OSM_DumpHandler, areaAddEnvelope) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, node) {
+TEST(OSM_FactHandler, node) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -186,7 +185,7 @@ TEST(OSM_DumpHandler, node) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -214,7 +213,7 @@ TEST(OSM_DumpHandler, node) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, relation) {
+TEST(OSM_FactHandler, relation) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -229,7 +228,7 @@ TEST(OSM_DumpHandler, relation) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -268,7 +267,7 @@ TEST(OSM_DumpHandler, relation) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, way) {
+TEST(OSM_FactHandler, way) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -283,7 +282,7 @@ TEST(OSM_DumpHandler, way) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -314,7 +313,7 @@ TEST(OSM_DumpHandler, way) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, wayAddWayEnvelope) {
+TEST(OSM_FactHandler, wayAddWayEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -330,7 +329,7 @@ TEST(OSM_DumpHandler, wayAddWayEnvelope) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -363,7 +362,7 @@ TEST(OSM_DumpHandler, wayAddWayEnvelope) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, wayAddWayNodeOrder) {
+TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -379,7 +378,7 @@ TEST(OSM_DumpHandler, wayAddWayNodeOrder) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -416,7 +415,7 @@ TEST(OSM_DumpHandler, wayAddWayNodeOrder) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, wayAddWayMetaData) {
+TEST(OSM_FactHandler, wayAddWayMetaData) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -432,7 +431,7 @@ TEST(OSM_DumpHandler, wayAddWayMetaData) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -466,7 +465,7 @@ TEST(OSM_DumpHandler, wayAddWayMetaData) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, writeBoxPrecision1) {
+TEST(OSM_FactHandler, writeBoxPrecision1) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -481,7 +480,7 @@ TEST(OSM_DumpHandler, writeBoxPrecision1) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
@@ -504,7 +503,7 @@ TEST(OSM_DumpHandler, writeBoxPrecision1) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, writeBoxPrecision2) {
+TEST(OSM_FactHandler, writeBoxPrecision2) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -519,7 +518,7 @@ TEST(OSM_DumpHandler, writeBoxPrecision2) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
@@ -542,7 +541,7 @@ TEST(OSM_DumpHandler, writeBoxPrecision2) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, writeTag_AdminLevel) {
+TEST(OSM_FactHandler, writeTag_AdminLevel) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -556,7 +555,7 @@ TEST(OSM_DumpHandler, writeTag_AdminLevel) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "admin_level";
   const std::string tagValue = "42";
@@ -578,7 +577,7 @@ TEST(OSM_DumpHandler, writeTag_AdminLevel) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, writeTag_KeyIRI) {
+TEST(OSM_FactHandler, writeTag_KeyIRI) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -592,7 +591,7 @@ TEST(OSM_DumpHandler, writeTag_KeyIRI) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "iri";
   const std::string tagValue = "value";
@@ -613,7 +612,7 @@ TEST(OSM_DumpHandler, writeTag_KeyIRI) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, writeTag_KeyNotIRI) {
+TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -627,7 +626,7 @@ TEST(OSM_DumpHandler, writeTag_KeyNotIRI) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "not:Aß%I.R.I\u2000";
   const std::string tagValue = "value";
@@ -650,7 +649,7 @@ TEST(OSM_DumpHandler, writeTag_KeyNotIRI) {
   std::cout.rdbuf(sbuf);
 }
 
-TEST(OSM_DumpHandler, writeTagList) {
+TEST(OSM_FactHandler, writeTagList) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -664,7 +663,7 @@ TEST(OSM_DumpHandler, writeTagList) {
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::DumpHandler dh{config, &writer};
+  osm2ttl::osm::FactHandler dh{config, &writer};
 
   const std::string tag1Key = "admin_level";
   const std::string tag1Value = "42";

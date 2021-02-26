@@ -1,8 +1,8 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#ifndef OSM2TTL_OSM_DUMPHANDLER_H_
-#define OSM2TTL_OSM_DUMPHANDLER_H_
+#ifndef OSM2TTL_OSM_FACTHANDLER_H_
+#define OSM2TTL_OSM_FACTHANDLER_H_
 
 #include <ostream>
 
@@ -18,9 +18,9 @@
 namespace osm2ttl::osm {
 
 template <typename W>
-class DumpHandler : public osmium::handler::Handler {
+class FactHandler : public osmium::handler::Handler {
  public:
-  DumpHandler(const osm2ttl::config::Config& config,
+  FactHandler(const osm2ttl::config::Config& config,
               osm2ttl::ttl::Writer<W>* writer);
   void area(const osm2ttl::osm::Area& area);
   void node(const osm2ttl::osm::Node& node);
@@ -31,17 +31,17 @@ class DumpHandler : public osmium::handler::Handler {
   template <typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
                           const G& g);
-  FRIEND_TEST(OSM_DumpHandler, writeBoostGeometry);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometry);
   void writeBox(const std::string& s, const std::string& p,
                 const osm2ttl::geometry::Box& box);
-  FRIEND_TEST(OSM_DumpHandler, writeBoxPrecision1);
-  FRIEND_TEST(OSM_DumpHandler, writeBoxPrecision2);
+  FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
+  FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
   void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
-  FRIEND_TEST(OSM_DumpHandler, writeTag_AdminLevel);
-  FRIEND_TEST(OSM_DumpHandler, writeTag_KeyIRI);
-  FRIEND_TEST(OSM_DumpHandler, writeTag_KeyNotIRI);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
+  FRIEND_TEST(OSM_FactHandler, writeTag_KeyIRI);
+  FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
-  FRIEND_TEST(OSM_DumpHandler, writeTagList);
+  FRIEND_TEST(OSM_FactHandler, writeTagList);
 
   const osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
@@ -49,4 +49,4 @@ class DumpHandler : public osmium::handler::Handler {
 
 }  // namespace osm2ttl::osm
 
-#endif  // OSM2TTL_OSM_DUMPHANDLER_H_
+#endif  // OSM2TTL_OSM_FACTHANDLER_H_

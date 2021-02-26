@@ -1,7 +1,7 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "osm2ttl/osm/DumpHandler.h"
+#include "osm2ttl/osm/FactHandler.h"
 
 #include <iomanip>
 #include <iostream>
@@ -16,13 +16,13 @@
 
 // ____________________________________________________________________________
 template <typename W>
-osm2ttl::osm::DumpHandler<W>::DumpHandler(const osm2ttl::config::Config& config,
+osm2ttl::osm::FactHandler<W>::FactHandler(const osm2ttl::config::Config& config,
                                           osm2ttl::ttl::Writer<W>* writer)
     : _config(config), _writer(writer) {}
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::DumpHandler<W>::area(const osm2ttl::osm::Area& area) {
+void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
   std::string s = _writer->generateIRI(
       area.fromWay() ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                      : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
@@ -38,7 +38,7 @@ void osm2ttl::osm::DumpHandler<W>::area(const osm2ttl::osm::Area& area) {
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::DumpHandler<W>::node(const osm2ttl::osm::Node& node) {
+void osm2ttl::osm::FactHandler<W>::node(const osm2ttl::osm::Node& node) {
   std::string s = _writer->generateIRI(
       osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, node.id());
 
@@ -53,7 +53,7 @@ void osm2ttl::osm::DumpHandler<W>::node(const osm2ttl::osm::Node& node) {
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::DumpHandler<W>::relation(
+void osm2ttl::osm::FactHandler<W>::relation(
     const osm2ttl::osm::Relation& relation) {
   std::string s = _writer->generateIRI(
       osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, relation.id());
@@ -102,7 +102,7 @@ void osm2ttl::osm::DumpHandler<W>::relation(
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::DumpHandler<W>::way(const osm2ttl::osm::Way& way) {
+void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
   std::string s = _writer->generateIRI(
       osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, way.id());
 
@@ -159,7 +159,7 @@ void osm2ttl::osm::DumpHandler<W>::way(const osm2ttl::osm::Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 template <typename G>
-void osm2ttl::osm::DumpHandler<W>::writeBoostGeometry(const std::string& s,
+void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
   const double onePercent = 0.01;
@@ -192,7 +192,7 @@ void osm2ttl::osm::DumpHandler<W>::writeBoostGeometry(const std::string& s,
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::DumpHandler<W>::writeBox(const std::string& s,
+void osm2ttl::osm::FactHandler<W>::writeBox(const std::string& s,
                                             const std::string& p,
                                             const osm2ttl::geometry::Box& box) {
   // Box can not be simplified -> output directly.
@@ -207,7 +207,7 @@ void osm2ttl::osm::DumpHandler<W>::writeBox(const std::string& s,
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::DumpHandler<W>::writeTag(const std::string& s,
+void osm2ttl::osm::FactHandler<W>::writeTag(const std::string& s,
                                             const osm2ttl::osm::Tag& tag) {
   const std::string& key = tag.first;
   const std::string& value = tag.second;
@@ -243,7 +243,7 @@ void osm2ttl::osm::DumpHandler<W>::writeTag(const std::string& s,
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::DumpHandler<W>::writeTagList(
+void osm2ttl::osm::FactHandler<W>::writeTagList(
     const std::string& s, const osm2ttl::osm::TagList& tags) {
   for (const auto& tag : tags) {
     writeTag(s, tag);
@@ -288,6 +288,6 @@ void osm2ttl::osm::DumpHandler<W>::writeTagList(
 }
 
 // ____________________________________________________________________________
-template class osm2ttl::osm::DumpHandler<osm2ttl::ttl::format::NT>;
-template class osm2ttl::osm::DumpHandler<osm2ttl::ttl::format::TTL>;
-template class osm2ttl::osm::DumpHandler<osm2ttl::ttl::format::QLEVER>;
+template class osm2ttl::osm::FactHandler<osm2ttl::ttl::format::NT>;
+template class osm2ttl::osm::FactHandler<osm2ttl::ttl::format::TTL>;
+template class osm2ttl::osm::FactHandler<osm2ttl::ttl::format::QLEVER>;

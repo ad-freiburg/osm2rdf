@@ -5,7 +5,7 @@
 #define OSM2TTL_OSM_OSMIUMHANDLER_H
 
 #include "osm2ttl/config/Config.h"
-#include "osm2ttl/osm/DumpHandler.h"
+#include "osm2ttl/osm/FactHandler.h"
 #include "osm2ttl/osm/GeometryHandler.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osmium/handler.hpp"
@@ -42,7 +42,7 @@ class OsmiumHandler : public osmium::handler::Handler {
 
  protected:
   osm2ttl::config::Config _config;
-  osm2ttl::osm::DumpHandler<W> _dumpHandler;
+  osm2ttl::osm::FactHandler<W> _dumpHandler;
   osm2ttl::osm::GeometryHandler<W> _geometryHandler;
   size_t _areasSeen = 0;
   size_t _areasDumped = 0;

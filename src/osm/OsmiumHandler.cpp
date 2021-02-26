@@ -3,7 +3,7 @@
 
 #include "osm2ttl/osm/OsmiumHandler.h"
 
-#include "osm2ttl/osm/DumpHandler.h"
+#include "osm2ttl/osm/FactHandler.h"
 #include "osm2ttl/osm/GeometryHandler.h"
 #include "osm2ttl/osm/LocationHandler.h"
 #include "osm2ttl/util/Time.h"
@@ -18,7 +18,7 @@ template <typename W>
 osm2ttl::osm::OsmiumHandler<W>::OsmiumHandler(
     const osm2ttl::config::Config& config, osm2ttl::ttl::Writer<W>* writer)
     : _config(config),
-      _dumpHandler(osm2ttl::osm::DumpHandler<W>(config, writer)),
+      _dumpHandler(osm2ttl::osm::FactHandler<W>(config, writer)),
       _geometryHandler(osm2ttl::osm::GeometryHandler<W>(config, writer)) {}
 
 // ____________________________________________________________________________
