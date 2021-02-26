@@ -15,12 +15,6 @@
 #include "popl.hpp"
 
 // ____________________________________________________________________________
-void osm2ttl::config::Config::load(const std::string& filename) {}
-
-// ____________________________________________________________________________
-void osm2ttl::config::Config::save(const std::string& filename) {}
-
-// ____________________________________________________________________________
 std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   std::ostringstream oss;
   oss << prefix << osm2ttl::config::constants::HEADER;
@@ -103,8 +97,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   popl::OptionParser op("Allowed options");
 
   auto helpOp = op.add<popl::Switch>("h", "help", "Lorem ipsum");
-  auto configOp =
-      op.add<popl::Value<std::string>>("c", "config", "Config file");
 
   auto noFactsOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "no-facts", "Do not dump facts");
@@ -184,11 +176,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
         std::cerr << op.help(popl::Attribute::expert) << "\n";
       }
       exit(osm2ttl::config::ExitCode::SUCCESS);
-    }
-
-    // Handle config
-    if (configOp->is_set()) {
-      load(configOp->value());
     }
 
     // Skip passes

@@ -62,8 +62,6 @@ struct Config {
   // Input file
   std::filesystem::path input;
 
-  void load(const std::string& filename);
-  void save(const std::string& filename);
   void fromArgs(int argc, char** argv);
   [[nodiscard]] std::string getInfo(std::string_view prefix) const;
   [[nodiscard]] std::filesystem::path getTempPath(const std::string& p,
