@@ -457,10 +457,17 @@ TEST(CONFIG_Config, getInfoWriteGeometricRelationStatistics) {
   config.writeGeometricRelationStatistics = true;
 
   const std::string res = config.getInfo("");
+
+#ifdef ENABLE_GEOMETRY_STATISTIC
   ASSERT_THAT(
       res,
       ::testing::HasSubstr(
           osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO));
+#else
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::
+                           WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED));
+#endif
 }
 
 }  // namespace osm2ttl::config

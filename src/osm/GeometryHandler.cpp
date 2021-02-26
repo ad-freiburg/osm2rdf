@@ -228,26 +228,34 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
         }
 
         contains++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
+#endif
         bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "DAG", "isCoveredBy", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), isCoveredBy));
         }
+#endif
         if (!isCoveredBy) {
           continue;
         }
         containsOk++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
+#endif
         bool isEqual = boost::geometry::equals(entryGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "DAG", "isEqual", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), isEqual));
         }
+#endif
         if (isEqual) {
           continue;
         }
@@ -459,14 +467,18 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
           continue;
         }
         contains++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
+#endif
         bool isCoveredBy = boost::geometry::covered_by(nodeGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Node", "isCoveredBy", areaId, "area", nodeId, "node",
               std::chrono::nanoseconds(end - start), isCoveredBy));
         }
+#endif
         if (!isCoveredBy) {
           continue;
         }
@@ -597,9 +609,12 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
                 areaIRI);
           }
           contains++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
+#endif
           bool isCoveredByEnvelope =
               boost::geometry::covered_by(wayEnvelope, areaEnvelope);
+#ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
@@ -607,6 +622,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
                 "way", std::chrono::nanoseconds(end - start),
                 isCoveredByEnvelope));
           }
+#endif
           for (const auto& newSkip :
                directedAreaGraph.findSuccessorsFast(areaId)) {
             skip.insert(newSkip);
@@ -615,14 +631,18 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
             continue;
           }
           containsOkEnvelope++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
           start = std::chrono::steady_clock::now();
+#endif
           bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
           end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredBy1", areaId, "area", wayId, "way",
                 std::chrono::nanoseconds(end - start), isCoveredBy));
           }
+#endif
           if (!isCoveredBy) {
             continue;
           }
@@ -662,14 +682,18 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
         }
 
         intersects++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
+#endif
         bool doesIntersect = boost::geometry::intersects(wayGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "doesIntersect", areaId, "area", wayId, "way",
               std::chrono::nanoseconds(end - start), doesIntersect));
         }
+#endif
         if (!doesIntersect) {
           continue;
         }
@@ -691,9 +715,12 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
                                areaIRI);
         }
         contains++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
+#endif
         bool isCoveredByEnvelope =
             boost::geometry::covered_by(wayEnvelope, areaEnvelope);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
@@ -701,18 +728,23 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
               "way", std::chrono::nanoseconds(end - start),
               isCoveredByEnvelope));
         }
+#endif
         if (!isCoveredByEnvelope) {
           continue;
         }
         containsOkEnvelope++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
+#endif
         bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "isCoveredBy2", areaId, "area", wayId, "way",
               std::chrono::nanoseconds(end - start), isCoveredBy));
         }
+#endif
         if (!isCoveredBy) {
           continue;
         }
@@ -827,14 +859,18 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         }
 
         intersects++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
+#endif
         bool doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "doesIntersect", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), doesIntersect));
         }
+#endif
         if (!doesIntersect) {
           continue;
         }
@@ -856,9 +892,12 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
                                areaIRI);
         }
         contains++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
+#endif
         bool isCoveredByEnvelope =
             boost::geometry::covered_by(entryEnvelope, areaEnvelope);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
@@ -866,18 +905,23 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
               "area", std::chrono::nanoseconds(end - start),
               isCoveredByEnvelope));
         }
+#endif
         if (!isCoveredByEnvelope) {
           continue;
         }
         containsOkEnvelope++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
+#endif
         bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
           _statistics.write(statisticLine(
               __func__, "Way", "isCoveredBy2", areaId, "area", entryId, "area",
               std::chrono::nanoseconds(end - start), isCoveredBy));
         }
+#endif
         if (!isCoveredBy) {
           continue;
         }

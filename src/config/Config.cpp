@@ -103,9 +103,16 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
         << prefix << osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_INFO;
   }
   if (writeGeometricRelationStatistics) {
+#ifdef ENABLE_GEOMETRY_STATISTIC
     oss << "\n"
         << prefix
         << osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO;
+#else
+    oss << "\n"
+        << prefix
+        << osm2ttl::config::constants::
+               WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED;
+#endif
   }
 #if defined(_OPENMP)
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_OPENMP;

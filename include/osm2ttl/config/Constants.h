@@ -174,6 +174,9 @@ const static inline std::string WRITE_DAG_DOT_FILES_OPTION_HELP =
 
 const static inline std::string WRITE_GEOM_RELATION_STATISTICS_INFO =
     "Storing statistics about geometry calculations - SLOW!";
+const static inline std::string WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED =
+    "Storing statistics not available - recompile with "
+    "-DENABLE_GEOMETRY_STATISTIC";
 const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_SHORT =
     "";
 const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG =
