@@ -557,7 +557,8 @@ TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
   }
 }
 
-TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroOnlyOneAdditionalConnections) {
+TEST(UTIL_DirectedAcyclicGraph,
+     LineExample1IdZeroOnlyOneAdditionalConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
   src.addEdge(0, 4);

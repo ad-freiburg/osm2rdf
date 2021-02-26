@@ -95,4 +95,4 @@ TEST(Baseline, stdoutRedirectionCOUT) {
   std::cout.rdbuf(sbuf);
 }
 
-}
+}  // namespace osm2ttl

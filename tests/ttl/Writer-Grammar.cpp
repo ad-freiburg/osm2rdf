@@ -419,7 +419,7 @@ TEST(TTL_WriterGrammar, UTF8_LENGTH_UTF8) {
 
   // Test invalid utf-8 sequence start.
   char input[2];
-  input[0] = -8; // F8
+  input[0] = -8;  // F8
   input[1] = 0;
   ASSERT_THROW(w.utf8Length(input), std::domain_error);
 }
@@ -455,7 +455,7 @@ TEST(TTL_WriterGrammar, UTF8_CODEPOINT_UTF8) {
 
   // Test invalid utf-8 sequence start.
   char input[2];
-  input[0] = -8; // F8
+  input[0] = -8;  // F8
   input[1] = 0;
   ASSERT_THROW(w.utf8Codepoint(input), std::domain_error);
 }

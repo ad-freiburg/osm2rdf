@@ -1,8 +1,9 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-#include "gtest/gtest.h"
 #include "osm2ttl/osm/FactHandler.h"
+
+#include "gtest/gtest.h"
 #include "osm2ttl/osm/Node.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"

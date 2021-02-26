@@ -29,8 +29,10 @@ TEST(OSM_GeometryHandler, constructor) {
 
 TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
+  config.cache =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -71,8 +73,10 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
 
 TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
+  config.cache =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -113,8 +117,10 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
 
 TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
+  config.cache =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -150,8 +156,10 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
 
 TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
+  config.cache =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -187,8 +195,10 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
 
 TEST(OSM_GeometryHandler, addNode) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
+  config.cache =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -218,8 +228,10 @@ TEST(OSM_GeometryHandler, addNode) {
 
 TEST(OSM_GeometryHandler, addWay) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
+  config.cache =
+      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};

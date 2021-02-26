@@ -20,10 +20,7 @@ int64_t available() {
 }
 
 // ____________________________________________________________________________
-int64_t physPages() {
-  return sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
-}
-
+int64_t physPages() { return sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE); }
 
 }  // namespace osm2ttl::util::ram
 
