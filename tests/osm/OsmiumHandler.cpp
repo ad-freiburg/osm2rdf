@@ -137,7 +137,7 @@ TEST(OSM_OsmiumHandler, noDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noDump = true;
+  config.noFacts = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -173,7 +173,7 @@ TEST(OSM_OsmiumHandler, noContains) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noContains = true;
+  config.noGeometricRelations = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -245,7 +245,7 @@ TEST(OSM_OsmiumHandler, noAreaDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noAreaDump = true;
+  config.noAreas = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -281,7 +281,7 @@ TEST(OSM_OsmiumHandler, noNodeDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noNodeDump = true;
+  config.noNodes = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -317,7 +317,7 @@ TEST(OSM_OsmiumHandler, noRelationDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noRelationDump = true;
+  config.noRelations = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
@@ -353,7 +353,7 @@ TEST(OSM_OsmiumHandler, noWayDump) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  config.noWayDump = true;
+  config.noWays = true;
   osm2ttl::util::Output output{config, config.output};
   output.open();
   osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};

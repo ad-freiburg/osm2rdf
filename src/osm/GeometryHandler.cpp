@@ -396,7 +396,7 @@ osm2ttl::osm::NodesContainedInAreasData
 osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
   // Store for each node all relevant areas
   NodesContainedInAreasData nodeData;
-  if (!_config.noNodeDump) {
+  if (!_config.noNodes) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numNodes << " nodes in "
@@ -515,7 +515,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2ttl::osm::NodesContainedInAreasData& nodeData) {
-  if (!_config.noWayDump) {
+  if (!_config.noWays) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numWays << " ways in "
@@ -750,7 +750,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
-  if (!_config.noAreaDump) {
+  if (!_config.noAreas) {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numUnnamedAreas

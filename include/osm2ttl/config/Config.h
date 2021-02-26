@@ -15,21 +15,21 @@ namespace osm2ttl::config {
 
 struct Config {
   // Select what to do
-  bool noDump = false;
-  bool noContains = false;
+  bool noFacts = false;
+  bool noGeometricRelations = false;
   bool storeLocationsOnDisk = false;
 
   // Select types to dump
-  bool noAreaDump = false;
-  bool noNodeDump = false;
-  bool noRelationDump = false;
-  bool noWayDump = false;
+  bool noAreas = false;
+  bool noNodes = false;
+  bool noRelations = false;
+  bool noWays = false;
 
   // Select amount to dump
   bool addAreaEnvelope = false;
   bool addInverseRelationDirection = false;
   bool addWayEnvelope = false;
-  bool addWayMetaData = false;
+  bool addWayMetadata = false;
   bool addWayNodeOrder = false;
   bool adminRelationsOnly = false;
   bool skipWikiLinks = false;

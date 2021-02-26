@@ -427,7 +427,7 @@ TEST(OSM_DumpHandler, wayAddWayMetaData) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
-  config.addWayMetaData = true;
+  config.addWayMetadata = true;
 
   osm2ttl::util::Output output{config, config.output};
   output.open();

@@ -140,7 +140,7 @@ void osm2ttl::osm::DumpHandler<W>::way(const osm2ttl::osm::Way& way) {
     writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
   }
 
-  if (_config.addWayMetaData) {
+  if (_config.addWayMetadata) {
     _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_ISCLOSED,
                          way.closed() ? osm2ttl::ttl::constants::LITERAL__YES
                                       : osm2ttl::ttl::constants::LITERAL__NO);

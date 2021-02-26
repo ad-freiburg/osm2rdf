@@ -9,6 +9,7 @@
 #include <string>
 
 #include "omp.h"
+#include "osm2ttl/config/Constants.h"
 #include "osm2ttl/config/ExitCode.h"
 #include "osm2ttl/ttl/Format.h"
 #include "popl.hpp"
@@ -22,62 +23,67 @@ void osm2ttl::config::Config::save(const std::string& filename) {}
 // ____________________________________________________________________________
 std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   std::ostringstream oss;
-  oss << prefix << "Config";
-  oss << "\n" << prefix << "--- I/O ---";
+  oss << prefix << osm2ttl::config::constants::HEADER;
+  oss << "\n" << prefix << osm2ttl::config::constants::SECTION_IO;
   oss << "\n" << prefix << "Input:         " << input;
   oss << "\n" << prefix << "Output:        " << output;
   oss << "\n" << prefix << "Output format: " << outputFormat;
   oss << "\n" << prefix << "Cache:         " << cache;
-  oss << "\n" << prefix << "--- Dump ---";
+  oss << "\n" << prefix << osm2ttl::config::constants::SECTION_FACTS;
   oss << "\n" << prefix << "Prefix for own IRIs: " << osm2ttlPrefix;
-  if (noDump) {
-    oss << "\n" << prefix << "Not dumping facts";
+  if (noFacts) {
+    oss << "\n" << prefix << osm2ttl::config::constants::NO_FACTS;
   } else {
-    if (noAreaDump) {
-      oss << "\n" << prefix << "Ignoring areas in dump";
+    if (noAreas) {
+      oss << "\n" << prefix << osm2ttl::config::constants::NO_AREA_FACTS;
     } else {
       if (addAreaEnvelope) {
-        oss << "\n" << prefix << "Adding area envelopes";
+        oss << "\n" << prefix << osm2ttl::config::constants::ADD_AREA_ENVELOPE;
       }
     }
-    if (noNodeDump) {
-      oss << "\n" << prefix << "Ignoring nodes in dump";
+    if (noNodes) {
+      oss << "\n" << prefix << osm2ttl::config::constants::NO_NODE_FACTS;
     }
-    if (noRelationDump) {
-      oss << "\n" << prefix << "Ignoring relations in dump";
+    if (noRelations) {
+      oss << "\n" << prefix << osm2ttl::config::constants::NO_RELATION_FACTS;
     }
-    if (noWayDump) {
-      oss << "\n" << prefix << "Ignoring ways in dump";
+    if (noWays) {
+      oss << "\n" << prefix << osm2ttl::config::constants::NO_WAY_FACTS;
     } else {
       if (addWayEnvelope) {
-        oss << "\n" << prefix << "Adding way envelopes";
+        oss << "\n" << prefix << osm2ttl::config::constants::ADD_WAY_ENVELOPE;
       }
-      if (addWayMetaData) {
-        oss << "\n" << prefix << "Adding way metadata";
+      if (addWayMetadata) {
+        oss << "\n" << prefix << osm2ttl::config::constants::ADD_WAY_METADATA;
       }
       if (addWayNodeOrder) {
-        oss << "\n" << prefix << "Adding way node order";
+        oss << "\n" << prefix << osm2ttl::config::constants::ADD_WAY_NODE_ORDER;
       }
     }
   }
-  oss << "\n" << prefix << "--- Contains ---";
-  if (noContains) {
-    oss << "\n" << prefix << "Not dumping any geometric relations";
+  oss << "\n" << prefix << osm2ttl::config::constants::SECTION_CONTAINS;
+  if (noGeometricRelations) {
+    oss << "\n" << prefix << osm2ttl::config::constants::NO_GEOM_RELATIONS;
   } else {
-    if (noAreaDump) {
-      oss << "\n" << prefix << "Ignoring areas in geometric relations";
+    if (noAreas) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS;
     }
-    if (noNodeDump) {
-      oss << "\n" << prefix << "Ignoring nodes in geometric relations";
+    if (noNodes) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS;
     }
-    if (noWayDump) {
-      oss << "\n" << prefix << "Ignoring ways in geometric relations";
+    if (noWays) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS;
     }
     if (addInverseRelationDirection) {
-      oss << "\n" << prefix << "Adding ogc:contained_by and ogc:intersected_by";
+      oss << "\n"
+          << prefix
+          << osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION;
     }
   }
-  oss << "\n" << prefix << "--- Misc ---";
+  oss << "\n" << prefix << osm2ttl::config::constants::SECTION_MISCELLANEOUS;
   if (storeLocationsOnDisk) {
     oss << "\n" << prefix << "Storing locations osmium locations on disk!";
   }
@@ -86,7 +92,7 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
         << prefix << "Storing statistics about geometry calculations - SLOW!";
   }
 #if defined(_OPENMP)
-  oss << "\n" << prefix << "--- OpenMP ---";
+  oss << "\n" << prefix << osm2ttl::config::constants::SECTION_OPENMP;
   oss << "\n" << prefix << "Max Threads: " << omp_get_max_threads();
 #endif
   return oss.str();
@@ -100,28 +106,24 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto configOp =
       op.add<popl::Value<std::string>>("c", "config", "Config file");
 
-  auto noDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-dump", "Do not dump normal data");
-  auto noContainsOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-contains", "Do not calculate contains relation");
+  auto noFactsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-facts", "Do not dump facts");
+  auto noGeometricRelationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-geometric-relations", "Do not calculate geometric relations");
   auto storeLocationsOnDiskOp = op.add<popl::Switch, popl::Attribute::advanced>(
       "", "store-locations-on-disk", "Store locations in RAM");
 
-  auto noNodeDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-node-dump", "Skip nodes while dumping data");
-  auto noRelationDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-relation-dump", "Skip relations while dumping data");
-  auto noWayDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-way-dump", "Skip ways while dumping data");
-  auto noAreaDumpOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "no-area-dump", "Skip areas while dumping data");
+  auto noAreasOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-areas", "Ignore areas");
+  auto noNodesOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-nodes", "Ignore nodes");
+  auto noRelationsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-relations", "Ignore relations");
+  auto noWaysOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      "", "no-ways", "Ignore ways");
 
   auto addAreaEnvelopeOp =
       op.add<popl::Switch>("", "add-area-envelope", "Add envelope to areas.");
-  auto addInverseRelationDirectionOp =
-      op.add<popl::Switch, popl::Attribute::advanced>(
-          "", "add-inverse-relation-direction",
-          "Adds relations in the opposite direction");
   auto addWayEnvelopeOp =
       op.add<popl::Switch>("", "add-way-envelope", "Add envelope to ways.");
   auto addWayMetaDataOp = op.add<popl::Switch>(
@@ -129,6 +131,12 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   auto addWayNodeOrderOp =
       op.add<popl::Switch>("", "add-way-node-order",
                            "Add information about the node members in ways.");
+
+  auto addInverseRelationDirectionOp =
+      op.add<popl::Switch, popl::Attribute::advanced>(
+          "", "add-inverse-relation-direction",
+          "Adds relations in the opposite direction");
+
   auto adminRelationsOnlyOp =
       op.add<popl::Switch>("", "admin-relations-only",
                            "Only dump nodes and relations with admin-level");
@@ -184,21 +192,21 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     }
 
     // Skip passes
-    noDump = noDumpOp->is_set();
-    noContains = noContainsOp->is_set();
+    noFacts = noFactsOp->is_set();
+    noGeometricRelations = noGeometricRelationsOp->is_set();
     storeLocationsOnDisk = storeLocationsOnDiskOp->is_set();
 
     // Select types to dump
-    noNodeDump = noNodeDumpOp->is_set();
-    noRelationDump = noRelationDumpOp->is_set();
-    noWayDump = noWayDumpOp->is_set();
-    noAreaDump = noAreaDumpOp->is_set();
+    noNodes = noNodesOp->is_set();
+    noRelations = noRelationsOp->is_set();
+    noWays = noWaysOp->is_set();
+    noAreas = noAreasOp->is_set();
 
     // Select amount to dump
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
-    addWayMetaData = addWayMetaDataOp->is_set();
+    addWayMetadata = addWayMetaDataOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
