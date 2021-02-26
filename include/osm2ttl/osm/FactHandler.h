@@ -9,16 +9,11 @@
 #include "gtest/gtest_prod.h"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/ttl/Writer.h"
-#include "osmium/handler.hpp"
-#include "osmium/osm/area.hpp"
-#include "osmium/osm/node.hpp"
-#include "osmium/osm/relation.hpp"
-#include "osmium/osm/way.hpp"
 
 namespace osm2ttl::osm {
 
 template <typename W>
-class FactHandler : public osmium::handler::Handler {
+class FactHandler {
  public:
   FactHandler(const osm2ttl::config::Config& config,
               osm2ttl::ttl::Writer<W>* writer);

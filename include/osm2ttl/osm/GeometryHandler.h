@@ -21,13 +21,6 @@
 #include "osm2ttl/util/CacheFile.h"
 #include "osm2ttl/util/DirectedGraph.h"
 #include "osm2ttl/util/Output.h"
-#include "osmium/handler.hpp"
-#include "osmium/handler/node_locations_for_ways.hpp"
-#include "osmium/index/map/sparse_file_array.hpp"
-#include "osmium/osm/area.hpp"
-#include "osmium/osm/node.hpp"
-#include "osmium/osm/relation.hpp"
-#include "osmium/osm/way.hpp"
 
 namespace osm2ttl::osm {
 
@@ -58,7 +51,7 @@ typedef std::unordered_map<osm2ttl::osm::Node::id_t,
     NodesContainedInAreasData;
 
 template <typename W>
-class GeometryHandler : public osmium::handler::Handler {
+class GeometryHandler {
  public:
   GeometryHandler(const osm2ttl::config::Config& config,
                   osm2ttl::ttl::Writer<W>* writer);
