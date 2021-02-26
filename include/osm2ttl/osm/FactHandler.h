@@ -37,6 +37,11 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
   FRIEND_TEST(OSM_FactHandler, writeTagList);
+  FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
+  FRIEND_TEST(OSM_FactHandler, writeTagListWikidataMultiple);
+  FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithLang);
+  FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang);
+  FRIEND_TEST(OSM_FactHandler, writeTagListSkipWikiLinks);
 
   const osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;

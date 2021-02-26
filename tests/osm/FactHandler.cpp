@@ -3,6 +3,7 @@
 
 #include "osm2ttl/osm/FactHandler.h"
 
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2ttl/osm/Node.h"
 #include "osmium/builder/attr.hpp"
@@ -689,14 +690,241 @@ TEST(OSM_FactHandler, writeTagList) {
   output.close();
 
   const std::string printedData = buffer.str();
-  bool order1Found =
-      printedData == (subject + " " + predicate1 + " " + object1 + " .\n" +
-                      subject + " " + predicate2 + " " + object2 + " .\n");
-  bool order2Found =
-      printedData == (subject + " " + predicate2 + " " + object2 + " .\n" +
-                      subject + " " + predicate1 + " " + object1 + " .\n");
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
 
-  ASSERT_TRUE(order1Found | order2Found);
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeTagListWikidata) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "wikidata";
+  const std::string tagValue = "  Q42  ";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateIRI(
+      osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
+
+  osm2ttl::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "wikidata";
+  const std::string tagValue = "Q42;Q1337";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateIRI(
+      osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
+
+  osm2ttl::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string value = "Freiburg_im_Breisgau";
+  const std::string tagKey = "wikipedia";
+  const std::string tagValue = "de:" + value;
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = "<https://de.wikipedia.org/wiki/" + value + ">";
+
+  osm2ttl::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "wikipedia";
+  const std::string tagValue = "Freiburg_im_Breisgau";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 =
+      "<https://www.wikipedia.org/wiki/" + tagValue + ">";
+
+  osm2ttl::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.skipWikiLinks = true;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string tag1Key = "wikidata";
+  const std::string tag1Value = "  Q42  ";
+  const std::string tag2Key = "wikipedia";
+  const std::string tag2Value = "de:Freiburg_im_Breisgau";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tag1Key);
+  const std::string object1 = writer.generateLiteral(tag1Value, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tag2Key);
+  const std::string object2 = writer.generateLiteral(tag2Value, "");
+  const std::string predicate3 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tag1Key);
+
+  osm2ttl::osm::TagList tagList;
+  tagList[tag1Key] = tag1Value;
+  tagList[tag2Key] = tag2Value;
+
+  dh.writeTagList("subject", tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::Not(::testing::HasSubstr(predicate3)));
 
   // Cleanup
   std::cout.rdbuf(sbuf);
