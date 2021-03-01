@@ -26,7 +26,10 @@ class FactHandler {
   template <typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
                           const G& g);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometry);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWay);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
   void writeBox(const std::string& s, const std::string& p,
                 const osm2ttl::geometry::Box& box);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);

@@ -467,6 +467,172 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   std::cout.rdbuf(sbuf);
 }
 
+TEST(OSM_FactHandler, writeBoostGeometryWay) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string subject = "subject";
+  const std::string predicate = "predicate";
+  osm2ttl::geometry::Way way;
+  way.push_back(osm2ttl::geometry::Location{0, 0});
+  way.push_back(osm2ttl::geometry::Location{0, 80});
+  way.push_back(osm2ttl::geometry::Location{0, 1000});
+
+  dh.writeBoostGeometry(subject, predicate, way);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(subject + " " + predicate + " " +
+      "\"LINESTRING(0.0 0.0,0.0 80.0,0.0 1000.0)\"" +
+      "^^" + osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
+      " .\n",
+            buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.wktSimplify = 2;
+  // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
+  config.wktDeviation = 5;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string subject = "subject";
+  const std::string predicate = "predicate";
+  osm2ttl::geometry::Way way;
+  way.push_back(osm2ttl::geometry::Location{0, 0});
+  // Small side is 0 -> remove all nodes except ends.
+  way.push_back(osm2ttl::geometry::Location{0, 80});
+  way.push_back(osm2ttl::geometry::Location{0, 160});
+  way.push_back(osm2ttl::geometry::Location{0, 240});
+  way.push_back(osm2ttl::geometry::Location{0, 500});
+  way.push_back(osm2ttl::geometry::Location{0, 1000});
+
+  dh.writeBoostGeometry(subject, predicate, way);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(subject + " " + predicate + " " +
+      "\"LINESTRING(0.0 0.0,0.0 1000.0)\"" +
+      "^^" + osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
+      " .\n",
+            buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.wktSimplify = 2;
+  // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
+  config.wktDeviation = 5;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string subject = "subject";
+  const std::string predicate = "predicate";
+  osm2ttl::geometry::Way way;
+  way.push_back(osm2ttl::geometry::Location{0, 0});
+  way.push_back(osm2ttl::geometry::Location{0, 80});
+  way.push_back(osm2ttl::geometry::Location{100, 1000});
+
+  dh.writeBoostGeometry(subject, predicate, way);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(subject + " " + predicate + " " +
+      "\"LINESTRING(0.0 0.0,0.0 80.0,100.0 1000.0)\"" +
+      "^^" + osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
+      " .\n",
+            buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.wktSimplify = 2;
+  // Simplify all nodes with distance <= 80% of small side (100 * 0.8 = 80)
+  config.wktDeviation = 80;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string subject = "subject";
+  const std::string predicate = "predicate";
+  osm2ttl::geometry::Way way;
+  way.push_back(osm2ttl::geometry::Location{0, 0});
+  // The node 0,80 will be removed...
+  way.push_back(osm2ttl::geometry::Location{0, 80});
+  way.push_back(osm2ttl::geometry::Location{100, 1000});
+
+  dh.writeBoostGeometry(subject, predicate, way);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(subject + " " + predicate + " " +
+      "\"LINESTRING(0.0 0.0,100.0 1000.0)\"" +
+      "^^" + osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
+      " .\n",
+            buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
 TEST(OSM_FactHandler, writeBoxPrecision1) {
   // Capture std::cout
   std::stringstream buffer;
