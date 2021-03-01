@@ -128,14 +128,13 @@ bool osm2ttl::osm::Area::operator!=(
 bool osm2ttl::osm::Area::operator<(
     const osm2ttl::osm::Area& other) const noexcept {
   // If administration level is different, higher first
+  // (higher = lower in hierarchy)
   if (_tagAdministrationLevel != other._tagAdministrationLevel) {
     return _tagAdministrationLevel > other._tagAdministrationLevel;
   }
   // Sort by area, smaller first
-  auto ownArea = boost::geometry::area(envelope());
-  auto otherArea = boost::geometry::area(other.envelope());
-  if (ownArea != otherArea) {
-    return ownArea < otherArea;
+  if (_envelopeArea != other._envelopeArea) {
+    return _envelopeArea < other._envelopeArea;
   }
   // No better metric -> sort by id, smaller first
   return _id < other._id;
