@@ -207,53 +207,57 @@ TEST(OSM_Area, lessThanOperator) {
                                        osmium::memory::Buffer::auto_grow::yes};
   osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
                                        osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(osmiumBuffer1, osmium::builder::attr::_id(42),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.61}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }),
-                            osmium::builder::attr::_inner_ring({
-                                {11, {48.0005, 7.51005}},
-                                {12, {48.0005, 7.60005}},
-                                {13, {48.0009, 7.60005}},
-                                {14, {48.0009, 7.51005}},
-                                {11, {48.0005, 7.51005}},
-                            }),
-                            osmium::builder::attr::_tag("boundary", "administrative"),
-                            osmium::builder::attr::_tag("admin_level", "4"));
-  osmium::builder::add_area(osmiumBuffer2, osmium::builder::attr::_id(42),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.62}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }),
-                            osmium::builder::attr::_tag("boundary", "administrative"),
-                            osmium::builder::attr::_tag("admin_level", "4"));
-  osmium::builder::add_area(osmiumBuffer3, osmium::builder::attr::_id(42),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.62}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }),
-                            osmium::builder::attr::_tag("boundary", "administrative"),
-                            osmium::builder::attr::_tag("admin_level", "3"));
-  osmium::builder::add_area(osmiumBuffer4, osmium::builder::attr::_id(84),
-                            osmium::builder::attr::_outer_ring({
-                                                                   {1, {48.0, 7.51}},
-                                                                   {2, {48.0, 7.61}},
-                                                                   {3, {48.1, 7.62}},
-                                                                   {4, {48.1, 7.51}},
-                                                                   {1, {48.0, 7.51}},
-                                                               }),
-                            osmium::builder::attr::_tag("boundary", "administrative"),
-                            osmium::builder::attr::_tag("admin_level", "3"));
+  osmium::builder::add_area(
+      osmiumBuffer1, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_outer_ring({
+          {1, {48.0, 7.51}},
+          {2, {48.0, 7.61}},
+          {3, {48.1, 7.61}},
+          {4, {48.1, 7.51}},
+          {1, {48.0, 7.51}},
+      }),
+      osmium::builder::attr::_inner_ring({
+          {11, {48.0005, 7.51005}},
+          {12, {48.0005, 7.60005}},
+          {13, {48.0009, 7.60005}},
+          {14, {48.0009, 7.51005}},
+          {11, {48.0005, 7.51005}},
+      }),
+      osmium::builder::attr::_tag("boundary", "administrative"),
+      osmium::builder::attr::_tag("admin_level", "4"));
+  osmium::builder::add_area(
+      osmiumBuffer2, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_outer_ring({
+          {1, {48.0, 7.51}},
+          {2, {48.0, 7.61}},
+          {3, {48.1, 7.62}},
+          {4, {48.1, 7.51}},
+          {1, {48.0, 7.51}},
+      }),
+      osmium::builder::attr::_tag("boundary", "administrative"),
+      osmium::builder::attr::_tag("admin_level", "4"));
+  osmium::builder::add_area(
+      osmiumBuffer3, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_outer_ring({
+          {1, {48.0, 7.51}},
+          {2, {48.0, 7.61}},
+          {3, {48.1, 7.62}},
+          {4, {48.1, 7.51}},
+          {1, {48.0, 7.51}},
+      }),
+      osmium::builder::attr::_tag("boundary", "administrative"),
+      osmium::builder::attr::_tag("admin_level", "3"));
+  osmium::builder::add_area(
+      osmiumBuffer4, osmium::builder::attr::_id(84),
+      osmium::builder::attr::_outer_ring({
+          {1, {48.0, 7.51}},
+          {2, {48.0, 7.61}},
+          {3, {48.1, 7.62}},
+          {4, {48.1, 7.51}},
+          {1, {48.0, 7.51}},
+      }),
+      osmium::builder::attr::_tag("boundary", "administrative"),
+      osmium::builder::attr::_tag("admin_level", "3"));
   const osm2ttl::osm::Area o1{osmiumBuffer1.get<osmium::Area>(0)};
   const osm2ttl::osm::Area o2{osmiumBuffer2.get<osmium::Area>(0)};
   const osm2ttl::osm::Area o3{osmiumBuffer3.get<osmium::Area>(0)};
