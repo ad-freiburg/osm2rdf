@@ -33,6 +33,26 @@ TEST(OSM_TagList, convertTagList) {
   ASSERT_EQ("Freiburg", tl["city"]);
 }
 
+TEST(OSM_TagList, convertTagListWithSpaceInKey) {
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city name", "Freiburg"),
+      osmium::builder::attr::_tag("name of city", "Freiburg"));
+
+  // Create osm2ttl object from osmium object
+  osm2ttl::osm::TagList tl =
+      osm2ttl::osm::convertTagList(osmiumBuffer.get<osmium::Node>(0).tags());
+
+  ASSERT_EQ(2, tl.size());
+  ASSERT_EQ("Freiburg", tl["city_name"]);
+  ASSERT_EQ("Freiburg", tl["name_of_city"]);
+}
+
 TEST(OSM_TagList, serializationBinary) {
   std::stringstream boostBuffer;
 
