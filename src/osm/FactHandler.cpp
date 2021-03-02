@@ -162,20 +162,23 @@ template <typename G>
 void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
-  const double onePercent = 0.01;
   G geom{g};
   if (_config.wktSimplify > 0 &&
       boost::geometry::num_points(g) > _config.wktSimplify) {
     osm2ttl::geometry::Box box;
     boost::geometry::envelope(geom, box);
-    boost::geometry::simplify(
-        g, geom,
-        std::min(
-            boost::geometry::get<boost::geometry::max_corner, 0>(box) -
-                boost::geometry::get<boost::geometry::min_corner, 0>(box),
-            boost::geometry::get<boost::geometry::max_corner, 1>(box) -
-                boost::geometry::get<boost::geometry::min_corner, 1>(box)) *
-            (onePercent * _config.wktDeviation));
+    double xLength = boost::geometry::get<boost::geometry::max_corner, 0>(box) -
+                     boost::geometry::get<boost::geometry::min_corner, 0>(box);
+    double yLength = boost::geometry::get<boost::geometry::max_corner, 1>(box) -
+                     boost::geometry::get<boost::geometry::min_corner, 1>(box);
+    double maxDistance = 0;
+    if (xLength == 0 || yLength == 0) {
+      maxDistance = std::max(xLength, yLength) + 1;
+    } else {
+      maxDistance =
+          std::min(xLength, yLength) * (ONE_PERCENT * _config.wktDeviation);
+    }
+    boost::geometry::simplify(g, geom, maxDistance);
     // If empty geometry -> use original
     if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
       geom = g;
