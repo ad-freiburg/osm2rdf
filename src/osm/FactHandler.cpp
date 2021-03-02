@@ -29,7 +29,7 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
       area.objId());
 
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                     area.geom(), area.envelope());
+                     area.geom());
 
   if (_config.addAreaEnvelope) {
     writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, area.envelope());
@@ -46,7 +46,7 @@ void osm2ttl::osm::FactHandler<W>::node(const osm2ttl::osm::Node& node) {
                        osm2ttl::ttl::constants::IRI__OSM_NODE);
 
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                     node.geom(), node.envelope());
+                     node.geom());
 
   writeTagList(s, node.tags());
 }
@@ -134,7 +134,7 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
   osm2ttl::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                     locations, way.envelope());
+                     locations);
 
   if (_config.addWayEnvelope) {
     writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
@@ -159,34 +159,25 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 template <typename G>
-void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(
-    const std::string& s, const std::string& p, const G& g,
-    const osm2ttl::geometry::Box& envelope) {
-  G geom{g};
+void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
+                                                      const std::string& p,
+                                                      const G& g) {
+  std::ostringstream tmp;
   if (_config.wktSimplify > 0 &&
       boost::geometry::num_points(g) > _config.wktSimplify) {
-    double xLength =
-        boost::geometry::get<boost::geometry::max_corner, 0>(envelope) -
-        boost::geometry::get<boost::geometry::min_corner, 0>(envelope);
-    double yLength =
-        boost::geometry::get<boost::geometry::max_corner, 1>(envelope) -
-        boost::geometry::get<boost::geometry::min_corner, 1>(envelope);
-    double maxDistance = 0;
-    if (xLength == 0 || yLength == 0) {
-      maxDistance = std::max(xLength, yLength) + 1;
-    } else {
-      maxDistance =
-          std::min(xLength, yLength) * (ONE_PERCENT * _config.wktDeviation);
-    }
-    boost::geometry::simplify(g, geom, maxDistance);
-    // If empty geometry -> use original
-    if (!boost::geometry::is_valid(geom) || boost::geometry::is_empty(geom)) {
-      geom = g;
-    }
+    G geom;
+    auto perimeter_or_length =
+        std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
+    boost::geometry::simplify(
+        g, geom, 0.001 * perimeter_or_length * _config.wktDeviation);
+    assert(boost::geometry::is_valid(geom));
+    assert(!boost::geometry::is_empty(geom));
+    tmp << std::fixed << std::setprecision(_config.wktPrecision)
+        << boost::geometry::wkt(geom);
+  } else {
+    tmp << std::fixed << std::setprecision(_config.wktPrecision)
+        << boost::geometry::wkt(g);
   }
-  std::ostringstream tmp;
-  tmp << std::fixed << std::setprecision(_config.wktPrecision)
-      << boost::geometry::wkt(geom);
   _writer->writeTriple(
       s, p,
       "\"" + tmp.str() + "\"^^" +

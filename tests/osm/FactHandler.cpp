@@ -3,7 +3,6 @@
 
 #include "osm2ttl/osm/FactHandler.h"
 
-#include "boost/geometry/algorithms/envelope.hpp"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2ttl/osm/Node.h"
@@ -492,9 +491,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
   way.push_back(osm2ttl::geometry::Location{0, 80});
   way.push_back(osm2ttl::geometry::Location{0, 1000});
 
-  osm2ttl::geometry::Box envelope;
-  boost::geometry::envelope(way, envelope);
-  dh.writeBoostGeometry(subject, predicate, way, envelope);
+  dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -538,9 +535,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
   way.push_back(osm2ttl::geometry::Location{0, 500});
   way.push_back(osm2ttl::geometry::Location{0, 1000});
 
-  osm2ttl::geometry::Box envelope;
-  boost::geometry::envelope(way, envelope);
-  dh.writeBoostGeometry(subject, predicate, way, envelope);
+  dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -580,9 +575,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
   way.push_back(osm2ttl::geometry::Location{0, 80});
   way.push_back(osm2ttl::geometry::Location{100, 1000});
 
-  osm2ttl::geometry::Box envelope;
-  boost::geometry::envelope(way, envelope);
-  dh.writeBoostGeometry(subject, predicate, way, envelope);
+  dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -623,9 +616,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
   way.push_back(osm2ttl::geometry::Location{0, 80});
   way.push_back(osm2ttl::geometry::Location{100, 1000});
 
-  osm2ttl::geometry::Box envelope;
-  boost::geometry::envelope(way, envelope);
-  dh.writeBoostGeometry(subject, predicate, way, envelope);
+  dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
