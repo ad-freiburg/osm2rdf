@@ -6,7 +6,7 @@
 #include "osm2ttl/geometry/Box.h"
 
 // ____________________________________________________________________________
-osm2ttl::osm::Box::Box() {}
+osm2ttl::osm::Box::Box() = default;
 
 // ____________________________________________________________________________
 osm2ttl::osm::Box::Box(const osm2ttl::geometry::Box& box) : _geom(box) {}

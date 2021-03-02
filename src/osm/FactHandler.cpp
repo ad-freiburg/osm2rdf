@@ -29,7 +29,7 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
       area.objId());
 
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                     area.geom());
+                     area.geom(), area.envelope());
 
   if (_config.addAreaEnvelope) {
     writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, area.envelope());
@@ -46,7 +46,7 @@ void osm2ttl::osm::FactHandler<W>::node(const osm2ttl::osm::Node& node) {
                        osm2ttl::ttl::constants::IRI__OSM_NODE);
 
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                     node.geom());
+                     node.geom(), node.envelope());
 
   writeTagList(s, node.tags());
 }
@@ -134,7 +134,7 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
   osm2ttl::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
   writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                     locations);
+                     locations, way.envelope());
 
   if (_config.addWayEnvelope) {
     writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
@@ -159,18 +159,18 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 template <typename G>
-void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
-                                                      const std::string& p,
-                                                      const G& g) {
+void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(
+    const std::string& s, const std::string& p, const G& g,
+    const osm2ttl::geometry::Box& envelope) {
   G geom{g};
   if (_config.wktSimplify > 0 &&
       boost::geometry::num_points(g) > _config.wktSimplify) {
-    osm2ttl::geometry::Box box;
-    boost::geometry::envelope(geom, box);
-    double xLength = boost::geometry::get<boost::geometry::max_corner, 0>(box) -
-                     boost::geometry::get<boost::geometry::min_corner, 0>(box);
-    double yLength = boost::geometry::get<boost::geometry::max_corner, 1>(box) -
-                     boost::geometry::get<boost::geometry::min_corner, 1>(box);
+    double xLength =
+        boost::geometry::get<boost::geometry::max_corner, 0>(envelope) -
+        boost::geometry::get<boost::geometry::min_corner, 0>(envelope);
+    double yLength =
+        boost::geometry::get<boost::geometry::max_corner, 1>(envelope) -
+        boost::geometry::get<boost::geometry::min_corner, 1>(envelope);
     double maxDistance = 0;
     if (xLength == 0 || yLength == 0) {
       maxDistance = std::max(xLength, yLength) + 1;
