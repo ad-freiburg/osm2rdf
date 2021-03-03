@@ -12,10 +12,12 @@
 
 namespace osm2ttl::geometry {
 
+// ____________________________________________________________________________
 osm2ttl::geometry::MultiPolygon getDefaultObject() {
   return osm2ttl::geometry::MultiPolygon();
 }
 
+// ____________________________________________________________________________
 osm2ttl::geometry::MultiPolygon getFilledObject() {
   osm2ttl::geometry::MultiPolygon obj;
   obj.resize(2);
@@ -37,6 +39,7 @@ osm2ttl::geometry::MultiPolygon getFilledObject() {
   return obj;
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_MultiPolygon, equalsOperator) {
   osm2ttl::geometry::MultiPolygon o1;
   o1.resize(2);
@@ -104,6 +107,7 @@ TEST(GEOMETRY_MultiPolygon, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_MultiPolygon, notEqualsOperator) {
   osm2ttl::geometry::MultiPolygon o1;
   o1.resize(2);
@@ -171,6 +175,7 @@ TEST(GEOMETRY_MultiPolygon, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_MultiPolygon, serializationBinary) {
   std::stringstream buffer;
 
@@ -193,6 +198,7 @@ TEST(GEOMETRY_MultiPolygon, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_MultiPolygon, serializationText) {
   std::stringstream buffer;
 

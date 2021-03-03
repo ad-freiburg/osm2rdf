@@ -14,6 +14,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_Way, FromWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -48,6 +49,7 @@ TEST(OSM_Way, FromWay) {
   ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Way, FromWayWithTags) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -86,6 +88,7 @@ TEST(OSM_Way, FromWayWithTags) {
   ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Way, FromClosedWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -124,6 +127,7 @@ TEST(OSM_Way, FromClosedWay) {
   ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Way, FromClosedWayWithDuplicateNodes) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -166,6 +170,7 @@ TEST(OSM_Way, FromClosedWayWithDuplicateNodes) {
   ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Way, equalsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -211,6 +216,7 @@ TEST(OSM_Way, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Way, notEqualsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -256,6 +262,7 @@ TEST(OSM_Way, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Way, serializationBinary) {
   std::stringstream boostBuffer;
 
@@ -286,6 +293,7 @@ TEST(OSM_Way, serializationBinary) {
   ASSERT_TRUE(src == dst);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Way, serializationText) {
   std::stringstream boostBuffer;
 

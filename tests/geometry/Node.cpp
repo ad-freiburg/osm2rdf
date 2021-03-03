@@ -12,12 +12,15 @@
 
 namespace osm2ttl::geometry {
 
+// ____________________________________________________________________________
 osm2ttl::geometry::Node getDefaultObject() { return osm2ttl::geometry::Node(); }
 
+// ____________________________________________________________________________
 osm2ttl::geometry::Node getFilledObject() {
   return osm2ttl::geometry::Node(10, 20);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Node, equalsOperator) {
   osm2ttl::geometry::Node o1(10, 10);
   osm2ttl::geometry::Node o2(10, 20);
@@ -36,6 +39,7 @@ TEST(GEOMETRY_Node, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Node, notEqualsOperator) {
   osm2ttl::geometry::Node o1(10, 10);
   osm2ttl::geometry::Node o2(10, 20);
@@ -54,6 +58,7 @@ TEST(GEOMETRY_Node, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Node, serializationBinary) {
   std::stringstream buffer;
 
@@ -76,6 +81,7 @@ TEST(GEOMETRY_Node, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Node, serializationText) {
   std::stringstream buffer;
 

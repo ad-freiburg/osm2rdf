@@ -9,6 +9,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 template <typename W>
 void addOsmiumItems(osm2ttl::osm::OsmiumHandler<W>* oh) {
   const size_t initial_buffer_size = 10000;
@@ -94,6 +95,7 @@ void addOsmiumItems(osm2ttl::osm::OsmiumHandler<W>* oh) {
   oh->way(osmiumBuffer.get<osmium::Way>(0));
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, constructor) {
   // Capture std::cout
   std::stringstream buffer;
@@ -127,6 +129,7 @@ TEST(OSM_OsmiumHandler, constructor) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noDump) {
   // Capture std::cout
   std::stringstream buffer;
@@ -163,6 +166,7 @@ TEST(OSM_OsmiumHandler, noDump) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noContains) {
   // Capture std::cout
   std::stringstream buffer;
@@ -199,6 +203,7 @@ TEST(OSM_OsmiumHandler, noContains) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, adminRelationsOnly) {
   // Capture std::cout
   std::stringstream buffer;
@@ -235,6 +240,7 @@ TEST(OSM_OsmiumHandler, adminRelationsOnly) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noAreaFacts) {
   // Capture std::cout
   std::stringstream buffer;
@@ -271,6 +277,7 @@ TEST(OSM_OsmiumHandler, noAreaFacts) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noNodeFacts) {
   // Capture std::cout
   std::stringstream buffer;
@@ -307,6 +314,7 @@ TEST(OSM_OsmiumHandler, noNodeFacts) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noRelationFacts) {
   // Capture std::cout
   std::stringstream buffer;
@@ -343,6 +351,7 @@ TEST(OSM_OsmiumHandler, noRelationFacts) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noWayFacts) {
   // Capture std::cout
   std::stringstream buffer;
@@ -379,6 +388,7 @@ TEST(OSM_OsmiumHandler, noWayFacts) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
   // Capture std::cout
   std::stringstream buffer;
@@ -415,6 +425,7 @@ TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
   // Capture std::cout
   std::stringstream buffer;
@@ -451,6 +462,7 @@ TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
   // Capture std::cout
   std::stringstream buffer;

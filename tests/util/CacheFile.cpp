@@ -8,6 +8,7 @@
 
 namespace osm2ttl::util {
 
+// ____________________________________________________________________________
 TEST(UTIL_CacheFile, constructorAndAutoRemove) {
   osm2ttl::config::Config config;
   std::filesystem::path location{config.getTempPath(

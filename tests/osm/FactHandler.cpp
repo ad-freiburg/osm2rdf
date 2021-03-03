@@ -11,6 +11,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, constructor) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_OSM_DumpHandler", "constructor");
@@ -28,6 +29,7 @@ TEST(OSM_FactHandler, constructor) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, areaFromWay) {
   // Capture std::cout
   std::stringstream buffer;
@@ -75,6 +77,7 @@ TEST(OSM_FactHandler, areaFromWay) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, areaFromRelation) {
   // Capture std::cout
   std::stringstream buffer;
@@ -122,6 +125,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, areaAddEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
@@ -172,6 +176,7 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, node) {
   // Capture std::cout
   std::stringstream buffer;
@@ -215,6 +220,7 @@ TEST(OSM_FactHandler, node) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, relation) {
   // Capture std::cout
   std::stringstream buffer;
@@ -269,6 +275,7 @@ TEST(OSM_FactHandler, relation) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, way) {
   // Capture std::cout
   std::stringstream buffer;
@@ -315,6 +322,7 @@ TEST(OSM_FactHandler, way) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, wayAddWayEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
@@ -364,6 +372,7 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   // Capture std::cout
   std::stringstream buffer;
@@ -417,6 +426,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, wayAddWayMetaData) {
   // Capture std::cout
   std::stringstream buffer;
@@ -467,6 +477,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeBoostGeometryWay) {
   // Capture std::cout
   std::stringstream buffer;
@@ -504,6 +515,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
   // Capture std::cout
   std::stringstream buffer;
@@ -548,6 +560,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
   // Capture std::cout
   std::stringstream buffer;
@@ -588,6 +601,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
   // Capture std::cout
   std::stringstream buffer;
@@ -629,6 +643,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeBoxPrecision1) {
   // Capture std::cout
   std::stringstream buffer;
@@ -667,6 +682,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeBoxPrecision2) {
   // Capture std::cout
   std::stringstream buffer;
@@ -705,6 +721,7 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTag_AdminLevel) {
   // Capture std::cout
   std::stringstream buffer;
@@ -741,6 +758,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTag_KeyIRI) {
   // Capture std::cout
   std::stringstream buffer;
@@ -776,6 +794,7 @@ TEST(OSM_FactHandler, writeTag_KeyIRI) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   // Capture std::cout
   std::stringstream buffer;
@@ -813,6 +832,7 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagList) {
   // Capture std::cout
   std::stringstream buffer;
@@ -861,6 +881,7 @@ TEST(OSM_FactHandler, writeTagList) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagListWikidata) {
   // Capture std::cout
   std::stringstream buffer;
@@ -906,6 +927,7 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
   // Capture std::cout
   std::stringstream buffer;
@@ -951,6 +973,7 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   // Capture std::cout
   std::stringstream buffer;
@@ -996,6 +1019,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
   // Capture std::cout
   std::stringstream buffer;
@@ -1041,6 +1065,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
   // Capture std::cout
   std::stringstream buffer;

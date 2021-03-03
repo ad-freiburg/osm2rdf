@@ -14,6 +14,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_Node, FromNode) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -33,6 +34,7 @@ TEST(OSM_Node, FromNode) {
   ASSERT_EQ(0, n.tags().size());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Node, FromNodeWithTags) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -56,6 +58,7 @@ TEST(OSM_Node, FromNodeWithTags) {
   ASSERT_STREQ("Freiburg", n.tags().at("city").c_str());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Node, equalsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -97,6 +100,7 @@ TEST(OSM_Node, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Node, notEqualsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -138,6 +142,7 @@ TEST(OSM_Node, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Node, serializationBinary) {
   std::stringstream boostBuffer;
 
@@ -166,6 +171,7 @@ TEST(OSM_Node, serializationBinary) {
   ASSERT_TRUE(src == dst);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Node, serializationText) {
   std::stringstream boostBuffer;
 

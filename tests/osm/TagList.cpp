@@ -14,6 +14,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_TagList, convertTagList) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -33,6 +34,7 @@ TEST(OSM_TagList, convertTagList) {
   ASSERT_EQ("Freiburg", tl["city"]);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_TagList, convertTagListWithSpaceInKey) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -53,6 +55,7 @@ TEST(OSM_TagList, convertTagListWithSpaceInKey) {
   ASSERT_EQ("Freiburg", tl["name_of_city"]);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_TagList, serializationBinary) {
   std::stringstream boostBuffer;
 
@@ -73,6 +76,7 @@ TEST(OSM_TagList, serializationBinary) {
   ASSERT_TRUE(src == dst);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_TagList, serializationText) {
   std::stringstream boostBuffer;
 

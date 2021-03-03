@@ -16,6 +16,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_Box, FromGeometryBox) {
   osm2ttl::geometry::Box b;
   b.min_corner() = osm2ttl::geometry::Location{50, 50};
@@ -26,6 +27,7 @@ TEST(OSM_Box, FromGeometryBox) {
   ASSERT_TRUE(o.geom().max_corner() == b.max_corner());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Box, equalsOperator) {
   osm2ttl::geometry::Box b1;
   b1.min_corner() = osm2ttl::geometry::Location{50, 50};
@@ -55,6 +57,7 @@ TEST(OSM_Box, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Box, notEqualsOperator) {
   osm2ttl::geometry::Box b1;
   b1.min_corner() = osm2ttl::geometry::Location{50, 50};
@@ -84,6 +87,7 @@ TEST(OSM_Box, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Box, serializationBinary) {
   std::stringstream boostBuffer;
 
@@ -105,6 +109,7 @@ TEST(OSM_Box, serializationBinary) {
   ASSERT_TRUE(src == dst);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Box, serializationText) {
   std::stringstream boostBuffer;
 

@@ -15,6 +15,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_RelationMember, FromRelationWithMembers) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -40,6 +41,7 @@ TEST(OSM_RelationMember, FromRelationWithMembers) {
   ASSERT_EQ("outer", r.members().at(1).role());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_RelationMember, equalsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -74,6 +76,7 @@ TEST(OSM_RelationMember, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_RelationMember, notEqualsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -108,6 +111,7 @@ TEST(OSM_RelationMember, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_RelationMember, serializationBinary) {
   std::stringstream boostBuffer;
 
@@ -151,6 +155,7 @@ TEST(OSM_RelationMember, serializationBinary) {
   ASSERT_TRUE(s3 == d3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_RelationMember, serializationText) {
   std::stringstream boostBuffer;
 

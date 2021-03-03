@@ -12,10 +12,12 @@
 
 namespace osm2ttl::geometry {
 
+// ____________________________________________________________________________
 osm2ttl::geometry::Linestring getDefaultObject() {
   return osm2ttl::geometry::Linestring();
 }
 
+// ____________________________________________________________________________
 osm2ttl::geometry::Linestring getFilledObject() {
   osm2ttl::geometry::Linestring obj;
   obj.push_back(Location{0, 0});
@@ -25,6 +27,7 @@ osm2ttl::geometry::Linestring getFilledObject() {
   return obj;
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Linestring, equalsOperator) {
   osm2ttl::geometry::Linestring o1;
   o1.push_back(Location{0, 0});
@@ -53,6 +56,7 @@ TEST(GEOMETRY_Linestring, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Linestring, notEqualsOperator) {
   osm2ttl::geometry::Linestring o1;
   o1.push_back(Location{0, 0});
@@ -81,6 +85,7 @@ TEST(GEOMETRY_Linestring, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Linestring, serializationBinary) {
   std::stringstream buffer;
 
@@ -103,6 +108,7 @@ TEST(GEOMETRY_Linestring, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Linestring, serializationText) {
   std::stringstream buffer;
 

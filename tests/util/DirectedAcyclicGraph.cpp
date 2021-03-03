@@ -8,6 +8,7 @@
 
 namespace osm2ttl::util {
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, empty) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   ASSERT_EQ(0, src.getNumVertices());
@@ -30,6 +31,7 @@ Graph used for WhiteboardExample1
    \ /
     5
 */
+// ____________________________________________________________________________
 osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample1ExpectedResult() {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -42,6 +44,7 @@ osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample1ExpectedResult() {
   return src;
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1AllInAll) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -81,6 +84,7 @@ TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1AllInAll) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1SingleThreaded) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -115,6 +119,7 @@ TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1SingleThreaded) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample1MultiThreaded) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -165,6 +170,7 @@ Graph used for WhiteboardExample2
  / \ /
 1   5
 */
+// ____________________________________________________________________________
 osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample2ExpectedResult() {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);
@@ -178,6 +184,7 @@ osm2ttl::util::DirectedGraph<uint8_t> createWhiteboardExample2ExpectedResult() {
   return src;
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2AllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);
@@ -220,6 +227,7 @@ TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2AllConnections) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2MinimalConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);
@@ -255,6 +263,7 @@ TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2MinimalConnections) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 6);
@@ -297,6 +306,7 @@ TEST(UTIL_DirectedAcyclicGraph, WhiteboardExample2) {
 }
 
 // LineExample1
+// ____________________________________________________________________________
 osm2ttl::util::DirectedGraph<uint8_t> createLineExample1ExpectedResult() {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -308,6 +318,7 @@ osm2ttl::util::DirectedGraph<uint8_t> createLineExample1ExpectedResult() {
   return src;
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, LineExample1AllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -379,6 +390,7 @@ TEST(UTIL_DirectedAcyclicGraph, LineExample1AllConnections) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, LineExample1EvenIdAllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -421,6 +433,7 @@ TEST(UTIL_DirectedAcyclicGraph, LineExample1EvenIdAllConnections) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, LineExample1OddIdAllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -460,6 +473,7 @@ TEST(UTIL_DirectedAcyclicGraph, LineExample1OddIdAllConnections) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroAllConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -498,6 +512,7 @@ TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroAllConnections) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};
   src.addEdge(0, 1);
@@ -557,6 +572,7 @@ TEST(UTIL_DirectedAcyclicGraph, LineExample1IdZeroOnlyOddConnections) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedAcyclicGraph,
      LineExample1IdZeroOnlyOneAdditionalConnections) {
   osm2ttl::util::DirectedGraph<uint8_t> src{};

@@ -14,6 +14,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, FromRelation) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -30,6 +31,7 @@ TEST(OSM_Relation, FromRelation) {
   ASSERT_EQ(0, r.members().size());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, FromRelationWithTags) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -51,6 +53,7 @@ TEST(OSM_Relation, FromRelationWithTags) {
   ASSERT_EQ(0, r.members().size());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, FromRelationWithMembers) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -76,6 +79,7 @@ TEST(OSM_Relation, FromRelationWithMembers) {
   ASSERT_EQ("outer", r.members().at(1).role());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, FromRelationWithMembersAndTags) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -105,6 +109,7 @@ TEST(OSM_Relation, FromRelationWithMembersAndTags) {
   ASSERT_EQ("outer", r.members().at(1).role());
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, equalsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -148,6 +153,7 @@ TEST(OSM_Relation, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, notEqualsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -191,6 +197,7 @@ TEST(OSM_Relation, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, serializationBinary) {
   std::stringstream boostBuffer;
 
@@ -220,6 +227,7 @@ TEST(OSM_Relation, serializationBinary) {
   ASSERT_TRUE(src == dst);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Relation, serializationText) {
   std::stringstream boostBuffer;
 

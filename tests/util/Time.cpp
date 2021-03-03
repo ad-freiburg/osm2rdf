@@ -7,6 +7,7 @@
 
 namespace osm2ttl::util {
 
+// ____________________________________________________________________________
 TEST(UTIL_Time, currentTimeFormattedStructure) {
   const std::string time = osm2ttl::util::currentTimeFormatted();
   ASSERT_EQ(26, time.size());
@@ -21,6 +22,7 @@ TEST(UTIL_Time, currentTimeFormattedStructure) {
   ASSERT_EQ(' ', time[25]);
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_Time, formattedTimeSpacer) {
   const std::string time = osm2ttl::util::formattedTimeSpacer;
   ASSERT_EQ(26, time.size());

@@ -7,12 +7,14 @@
 
 namespace osm2ttl::util {
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, Constructor) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
   ASSERT_EQ(0, g.getNumEdges());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, CopyConstructor) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
@@ -30,6 +32,7 @@ TEST(UTIL_DirectedGraph, CopyConstructor) {
   ASSERT_EQ(4, g2.getNumEdges());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, addEdge) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
@@ -47,6 +50,7 @@ TEST(UTIL_DirectedGraph, addEdge) {
   ASSERT_EQ(3, g.getNumEdges());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, findSuccessors) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   {
@@ -75,6 +79,7 @@ TEST(UTIL_DirectedGraph, findSuccessors) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, findSuccessorsFast) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
@@ -94,6 +99,7 @@ TEST(UTIL_DirectedGraph, findSuccessorsFast) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, sort) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   {
@@ -110,6 +116,7 @@ TEST(UTIL_DirectedGraph, sort) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, prepareFindSuccessorsFast) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
@@ -125,6 +132,7 @@ TEST(UTIL_DirectedGraph, prepareFindSuccessorsFast) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getNumEdges) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumEdges());
@@ -139,6 +147,7 @@ TEST(UTIL_DirectedGraph, getNumEdges) {
   ASSERT_EQ(4, g.getNumEdges());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getNumVertices) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
@@ -154,6 +163,7 @@ TEST(UTIL_DirectedGraph, getNumVertices) {
   ASSERT_EQ(4, g.getNumVertices());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getVertices) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   {
@@ -185,6 +195,7 @@ TEST(UTIL_DirectedGraph, getVertices) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getEdges) {
   osm2ttl::util::DirectedGraph<uint8_t> g{};
   {

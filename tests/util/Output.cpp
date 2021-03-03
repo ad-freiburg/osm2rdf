@@ -9,11 +9,13 @@
 
 namespace osm2ttl::util {
 
+// ____________________________________________________________________________
 size_t countFilesInPath(const std::filesystem::path path) {
   return std::distance(std::filesystem::directory_iterator(path),
                        std::filesystem::directory_iterator());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_Output, partFilenameSingleDigit) {
   osm2ttl::config::Config config;
   config.output =
@@ -30,6 +32,7 @@ TEST(UTIL_Output, partFilenameSingleDigit) {
   ASSERT_EQ("test.part_5", o.partFilename(-2));
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_Output, partFilenameMultipleDigits) {
   osm2ttl::config::Config config;
   config.output =
@@ -58,6 +61,7 @@ TEST(UTIL_Output, partFilenameMultipleDigits) {
   ASSERT_EQ("test.part_17", o.partFilename(-2));
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   osm2ttl::config::Config config;
   config.output =
@@ -92,6 +96,7 @@ TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   ASSERT_FALSE(std::filesystem::exists(config.output));
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
   // Capture std::cout
   std::stringstream buffer;
@@ -119,6 +124,7 @@ TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_OutputMergeMode, NONE) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "NONE");
@@ -147,6 +153,7 @@ TEST(UTIL_OutputMergeMode, NONE) {
   ASSERT_FALSE(std::filesystem::exists(config.output));
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_OutputMergeMode, CONCATENATE) {
   osm2ttl::config::Config config;
   config.output =
@@ -176,6 +183,7 @@ TEST(UTIL_OutputMergeMode, CONCATENATE) {
   ASSERT_FALSE(std::filesystem::exists(config.output));
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_OutputMergeMode, MERGE) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "MERGE");

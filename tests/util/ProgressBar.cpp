@@ -9,6 +9,7 @@
 
 namespace osm2ttl::util {
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, countWidth) {
   {
     osm2ttl::util::ProgressBar pg{0, false};
@@ -60,6 +61,7 @@ TEST(UTIL_ProgressBar, countWidth) {
   }
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, hidden) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
@@ -77,6 +79,7 @@ TEST(UTIL_ProgressBar, hidden) {
   ASSERT_EQ("", buffer.str());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, directlyDoneZero) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
@@ -92,6 +95,7 @@ TEST(UTIL_ProgressBar, directlyDoneZero) {
       buffer.str());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, directlyDoneOne) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
@@ -107,6 +111,7 @@ TEST(UTIL_ProgressBar, directlyDoneOne) {
       buffer.str());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, zeroSteps) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
@@ -123,6 +128,7 @@ TEST(UTIL_ProgressBar, zeroSteps) {
       buffer.str());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, twoSteps) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
@@ -141,6 +147,7 @@ TEST(UTIL_ProgressBar, twoSteps) {
       buffer.str());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, tenSteps) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
@@ -177,6 +184,7 @@ TEST(UTIL_ProgressBar, tenSteps) {
       buffer.str());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, oneHundredSteps) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();
@@ -240,6 +248,7 @@ TEST(UTIL_ProgressBar, oneHundredSteps) {
       buffer.str());
 }
 
+// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, multipleNoChangeSteps) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();

@@ -12,10 +12,12 @@
 
 namespace osm2ttl::geometry {
 
+// ____________________________________________________________________________
 osm2ttl::geometry::Polygon getDefaultObject() {
   return osm2ttl::geometry::Polygon();
 }
 
+// ____________________________________________________________________________
 osm2ttl::geometry::Polygon getFilledObject() {
   osm2ttl::geometry::Polygon obj;
   obj.outer().reserve(4);
@@ -31,6 +33,7 @@ osm2ttl::geometry::Polygon getFilledObject() {
   return obj;
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Polygon, equalsOperator) {
   osm2ttl::geometry::Polygon o1;
   o1.outer().reserve(4);
@@ -80,6 +83,7 @@ TEST(GEOMETRY_Polygon, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Polygon, notEqualsOperator) {
   osm2ttl::geometry::Polygon o1;
   o1.outer().reserve(4);
@@ -129,6 +133,7 @@ TEST(GEOMETRY_Polygon, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Polygon, serializationBinary) {
   std::stringstream buffer;
 
@@ -151,6 +156,7 @@ TEST(GEOMETRY_Polygon, serializationBinary) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
+// ____________________________________________________________________________
 TEST(GEOMETRY_Polygon, serializationText) {
   std::stringstream buffer;
 

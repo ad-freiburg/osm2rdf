@@ -10,6 +10,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, constructor) {
   osm2ttl::config::Config config;
   config.output =
@@ -28,6 +29,7 @@ TEST(OSM_GeometryHandler, constructor) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -78,6 +80,7 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -128,6 +131,7 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -182,6 +186,7 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
   osm2ttl::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -232,6 +237,7 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNode) {
   osm2ttl::config::Config config;
   config.output =
@@ -280,6 +286,7 @@ TEST(OSM_GeometryHandler, addNode) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addWay) {
   osm2ttl::config::Config config;
   config.output =

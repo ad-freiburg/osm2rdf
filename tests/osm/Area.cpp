@@ -14,6 +14,7 @@
 
 namespace osm2ttl::osm {
 
+// ____________________________________________________________________________
 TEST(OSM_Area, FromAreaVirtualWay) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -41,6 +42,7 @@ TEST(OSM_Area, FromAreaVirtualWay) {
   ASSERT_NEAR(7.61, a.envelope().max_corner().y(), 0.01);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Area, FromAreaVirtualRelation) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -68,6 +70,7 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
   ASSERT_NEAR(7.61, a.envelope().max_corner().y(), 0.01);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Area, BoundaryWithAdminLevel) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -98,6 +101,7 @@ TEST(OSM_Area, BoundaryWithAdminLevel) {
   ASSERT_NEAR(7.61, a.envelope().max_corner().y(), 0.01);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Area, equalsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -147,6 +151,7 @@ TEST(OSM_Area, equalsOperator) {
   ASSERT_TRUE(o3 == o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Area, notEqualsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -196,6 +201,7 @@ TEST(OSM_Area, notEqualsOperator) {
   ASSERT_FALSE(o3 != o3);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Area, lessThanOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -282,6 +288,7 @@ TEST(OSM_Area, lessThanOperator) {
   ASSERT_FALSE(o4 < o4);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Area, serializationBinary) {
   std::stringstream boostBuffer;
   // Create osmium object
@@ -313,6 +320,7 @@ TEST(OSM_Area, serializationBinary) {
   ASSERT_TRUE(src == dst);
 }
 
+// ____________________________________________________________________________
 TEST(OSM_Area, serializationText) {
   std::stringstream boostBuffer;
   // Create osmium object
