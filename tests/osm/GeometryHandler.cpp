@@ -3,6 +3,7 @@
 
 #include "osm2ttl/osm/GeometryHandler.h"
 
+#include "boost/archive/binary_iarchive.hpp"
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -29,10 +30,10 @@ TEST(OSM_GeometryHandler, constructor) {
 
 TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
   osm2ttl::config::Config config;
-  config.output =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
+                                     "addNamedAreaFromRelation-output");
+  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
+                                    "addNamedAreaFromRelation-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -55,15 +56,21 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
                             }));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
-  ASSERT_FALSE(a.fromWay());
+  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  ASSERT_FALSE(src.fromWay());
 
   ASSERT_EQ(0, gh._spatialStorageArea.size());
-  gh.area(a);
+  gh.area(src);
   ASSERT_EQ(1, gh._spatialStorageArea.size());
   ASSERT_NE(gh._spatialStorageAreaIndex.end(),
             gh._spatialStorageAreaIndex.find(areaId));
   ASSERT_EQ(0, gh._spatialStorageAreaIndex[areaId]);
+
+  // Compare stored area with original
+  const auto& dst = gh._spatialStorageArea[0];
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(src.id() == std::get<1>(dst));
+  ASSERT_TRUE(src.geom() == std::get<2>(dst));
 
   // Cleanup
   output.close();
@@ -73,10 +80,10 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
 
 TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
   osm2ttl::config::Config config;
-  config.output =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
+                                     "addNamedAreaFromWay-output");
+  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
+                                    "addNamedAreaFromWay-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -99,15 +106,21 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
                             }));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
-  ASSERT_TRUE(a.fromWay());
+  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  ASSERT_TRUE(src.fromWay());
 
   ASSERT_EQ(0, gh._spatialStorageArea.size());
-  gh.area(a);
+  gh.area(src);
   ASSERT_EQ(1, gh._spatialStorageArea.size());
   ASSERT_NE(gh._spatialStorageAreaIndex.end(),
             gh._spatialStorageAreaIndex.find(areaId));
   ASSERT_EQ(0, gh._spatialStorageAreaIndex[areaId]);
+
+  // Compare stored area with original
+  const auto& dst = gh._spatialStorageArea[0];
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(src.id() == std::get<1>(dst));
+  ASSERT_TRUE(src.geom() == std::get<2>(dst));
 
   // Cleanup
   output.close();
@@ -117,10 +130,10 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
 
 TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   osm2ttl::config::Config config;
-  config.output =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
+                                     "addUnnamedAreaFromRelation-output");
+  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
+                                    "addUnnamedAreaFromRelation-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -142,11 +155,26 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
                             }));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
+  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
 
   ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(a);
+  gh.area(src);
   ASSERT_EQ(1, gh._numUnnamedAreas);
+
+  // Read area from dump and compare
+  osm2ttl::osm::SpatialAreaValue dst;
+
+  gh.closeExternalStorage();
+  std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
+                    std::ios::binary);
+  boost::archive::binary_iarchive ia(ifs);
+  ia >> dst;
+  ifs.close();
+
+  // Compare stored area with original
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(src.id() == std::get<1>(dst));
+  ASSERT_TRUE(src.geom() == std::get<2>(dst));
 
   // Cleanup
   output.close();
@@ -156,10 +184,10 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
 
 TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
   osm2ttl::config::Config config;
-  config.output =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
-  config.cache =
-      config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
+  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
+                                     "addUnnamedAreaFromWay-output");
+  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
+                                    "addUnnamedAreaFromWay-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2ttl::util::Output output{config, config.output};
@@ -181,11 +209,22 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
                             }));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{buffer.get<osmium::Area>(0)};
+  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
 
   ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(a);
+  gh.area(src);
   ASSERT_EQ(0, gh._numUnnamedAreas);
+
+  // Read area from dump and compare
+  osm2ttl::osm::SpatialAreaValue dst;
+
+  gh.closeExternalStorage();
+  std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
+                    std::ios::binary);
+  boost::archive::binary_iarchive ia(ifs);
+  // No area is stored -> expect an exception on loading
+  ASSERT_THROW(ia >> dst, boost::archive::archive_exception);
+  ifs.close();
 
   // Cleanup
   output.close();
@@ -214,11 +253,26 @@ TEST(OSM_GeometryHandler, addNode) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Node n{buffer.get<osmium::Node>(0)};
+  const osm2ttl::osm::Node src{buffer.get<osmium::Node>(0)};
 
   ASSERT_EQ(0, gh._numNodes);
-  gh.node(n);
+  gh.node(src);
   ASSERT_EQ(1, gh._numNodes);
+
+  // Read area from dump and compare
+  osm2ttl::osm::SpatialNodeValue dst;
+
+  gh.closeExternalStorage();
+  std::ifstream ifs(config.getTempPath("spatial", "nodes"),
+                    std::ios::binary);
+  boost::archive::binary_iarchive ia(ifs);
+  ia >> dst;
+  ifs.close();
+
+  // Compare stored area with original
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(src.id() == std::get<1>(dst));
+  ASSERT_TRUE(src.geom() == std::get<2>(dst));
 
   // Cleanup
   output.close();
@@ -249,11 +303,26 @@ TEST(OSM_GeometryHandler, addWay) {
                            }));
 
   // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
+  const osm2ttl::osm::Way src{buffer.get<osmium::Way>(0)};
 
   ASSERT_EQ(0, gh._numWays);
-  gh.way(w);
+  gh.way(src);
   ASSERT_EQ(1, gh._numWays);
+
+  // Read area from dump and compare
+  osm2ttl::osm::SpatialWayValue dst;
+
+  gh.closeExternalStorage();
+  std::ifstream ifs(config.getTempPath("spatial", "ways"),
+                    std::ios::binary);
+  boost::archive::binary_iarchive ia(ifs);
+  ia >> dst;
+  ifs.close();
+
+  // Compare stored area with original
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(src.id() == std::get<1>(dst));
+  ASSERT_TRUE(src.geom() == std::get<2>(dst));
 
   // Cleanup
   output.close();

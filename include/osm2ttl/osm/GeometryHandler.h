@@ -61,6 +61,8 @@ class GeometryHandler {
   void area(const osm2ttl::osm::Area& area);
   void node(const osm2ttl::osm::Node& node);
   void way(const osm2ttl::osm::Way& way);
+  // close external storage files
+  void closeExternalStorage();
   // Calculate data
   void calculateRelations();
 

@@ -39,9 +39,9 @@ osm2ttl::osm::GeometryHandler<W>::GeometryHandler(
       _oaNodes(_ofsNodes),
       _ofsWays(config.getTempPath("spatial", "ways"), std::ios::binary),
       _oaWays(_ofsWays) {
-  _ofsUnnamedAreas << std::scientific;
-  _ofsWays << std::scientific;
-  _ofsNodes << std::scientific;
+  _ofsUnnamedAreas << std::fixed << std::setprecision(_config.wktPrecision);
+  _ofsWays << std::fixed << std::setprecision(_config.wktPrecision);
+  _ofsNodes << std::fixed << std::setprecision(_config.wktPrecision);
 }
 
 // ___________________________________________________________________________
@@ -133,7 +133,23 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osm2ttl::osm::Way& way) {
 
 // ____________________________________________________________________________
 template <typename W>
+void osm2ttl::osm::GeometryHandler<W>::closeExternalStorage() {
+  if (_ofsNodes.is_open()) {
+    _ofsNodes.close();
+  }
+  if (_ofsUnnamedAreas.is_open()) {
+    _ofsUnnamedAreas.close();
+  }
+  if (_ofsWays.is_open()) {
+    _ofsWays.close();
+  }
+}
+
+// ____________________________________________________________________________
+template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::calculateRelations() {
+  // Ensure functions can open external storage for reading.
+  closeExternalStorage();
   if (_config.writeGeometricRelationStatistics) {
     _statistics.open();
   }
@@ -410,9 +426,6 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
               << "Contains relations for " << _numNodes << " nodes in "
               << spatialIndex.size() << " areas ..." << std::endl;
 
-    if (_ofsNodes.is_open()) {
-      _ofsNodes.close();
-    }
     std::ifstream ifs(_config.getTempPath("spatial", "nodes"),
                       std::ios::binary);
     boost::archive::binary_iarchive ia(ifs);
@@ -533,9 +546,6 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
               << "Contains relations for " << _numWays << " ways in "
               << spatialIndex.size() << " areas ..." << std::endl;
 
-    if (_ofsWays.is_open()) {
-      _ofsWays.close();
-    }
     std::ifstream ifs(_config.getTempPath("spatial", "ways"), std::ios::binary);
     boost::archive::binary_iarchive ia(ifs);
 
@@ -789,9 +799,6 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << " unnamed areas in " << spatialIndex.size() << " areas ..."
               << std::endl;
 
-    if (_ofsUnnamedAreas.is_open()) {
-      _ofsUnnamedAreas.close();
-    }
     std::ifstream ifs(_config.getTempPath("spatial", "areas_unnamed"),
                       std::ios::binary);
     boost::archive::binary_iarchive ia(ifs);
