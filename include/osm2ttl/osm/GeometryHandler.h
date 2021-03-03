@@ -70,6 +70,7 @@ class GeometryHandler {
   // Stores named areas in r-tree, used for all other calculations.
   void prepareRTree();
   FRIEND_TEST(OSM_GeometryHandler, prepareEmptyRTree);
+  FRIEND_TEST(OSM_GeometryHandler, prepareSimpleRTree);
   // Generate DAG for areas using prepared r-tree.
   void prepareDAG();
   // Calculate relations for each area, this dumps the generated DAG.
