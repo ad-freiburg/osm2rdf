@@ -69,6 +69,7 @@ class GeometryHandler {
  protected:
   // Stores named areas in r-tree, used for all other calculations.
   void prepareRTree();
+  FRIEND_TEST(OSM_GeometryHandler, prepareEmptyRTree);
   // Generate DAG for areas using prepared r-tree.
   void prepareDAG();
   // Calculate relations for each area, this dumps the generated DAG.
@@ -91,9 +92,9 @@ class GeometryHandler {
   // Statistics
   osm2ttl::util::Output _statistics;
   // Store areas as r-tree
-  SpatialIndex spatialIndex;
+  SpatialIndex _spatialIndex;
   // Store dag
-  osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t> directedAreaGraph;
+  osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t> _directedAreaGraph;
   // Spatial Data
   SpatialAreaVector _spatialStorageArea;
   std::unordered_map<osm2ttl::osm::Area::id_t, uint64_t>

@@ -176,7 +176,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareRTree() {
   std::cerr << osm2ttl::util::currentTimeFormatted()
             << " Packing area r-tree with " << _spatialStorageArea.size()
             << " entries ... " << std::endl;
-  spatialIndex =
+  _spatialIndex =
       SpatialIndex(_spatialStorageArea.begin(), _spatialStorageArea.end());
   std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
             << std::endl;
@@ -210,7 +210,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     size_t skippedByDAG = 0;
     size_t skippedBySize = 0;
     progressBar.update(entryCount);
-#pragma omp parallel for shared(spatialIndex, tmpDirectedAreaGraph,           \
+#pragma omp parallel for shared(_spatialIndex, tmpDirectedAreaGraph,           \
     entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
     contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
@@ -222,7 +222,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
       std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
           skip;
       std::vector<SpatialAreaValue> queryResult;
-      spatialIndex.query(boost::geometry::index::covers(entryEnvelope),
+      _spatialIndex.query(boost::geometry::index::covers(entryEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
@@ -319,26 +319,26 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... fast lookup prepared ... " << std::endl;
 
-    directedAreaGraph = osm2ttl::util::reduceDAG(tmpDirectedAreaGraph, true);
+    _directedAreaGraph = osm2ttl::util::reduceDAG(tmpDirectedAreaGraph, true);
 
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " ... done, resulting in DAG with "
-              << directedAreaGraph.getNumEdges() << " edges and "
-              << directedAreaGraph.getNumVertices() << " vertices" << std::endl;
+              << _directedAreaGraph.getNumEdges() << " edges and "
+              << _directedAreaGraph.getNumVertices() << " vertices" << std::endl;
   }
   if (_config.writeDAGDotFiles) {
     std::cerr << osm2ttl::util::currentTimeFormatted() << " Dumping DAG as "
               << _config.output << ".dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".dot";
-    directedAreaGraph.dump(p);
+    _directedAreaGraph.dump(p);
     std::cerr << osm2ttl::util::currentTimeFormatted() << " done" << std::endl;
   }
   {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted()
               << " Preparing fast above lookup in DAG ..." << std::endl;
-    directedAreaGraph.prepareFindSuccessorsFast();
+    _directedAreaGraph.prepareFindSuccessorsFast();
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
@@ -350,19 +350,19 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
   std::cerr << std::endl;
   std::cerr << osm2ttl::util::currentTimeFormatted()
             << " Dumping relations from DAG with "
-            << directedAreaGraph.getNumEdges() << " edges and "
-            << directedAreaGraph.getNumVertices() << " vertices ... "
+            << _directedAreaGraph.getNumEdges() << " edges and "
+            << _directedAreaGraph.getNumVertices() << " vertices ... "
             << std::endl;
 
-  osm2ttl::util::ProgressBar progressBar{directedAreaGraph.getNumVertices(),
+  osm2ttl::util::ProgressBar progressBar{_directedAreaGraph.getNumVertices(),
                                          true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
   std::vector<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
-      vertices = directedAreaGraph.getVertices();
+      vertices = _directedAreaGraph.getVertices();
 #pragma omp parallel for shared(                                         \
     vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,               \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, directedAreaGraph, \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, _directedAreaGraph, \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                          \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                      \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA,                     \
@@ -381,7 +381,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
         entryFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                      : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
         entryObjId);
-    for (const auto& dst : directedAreaGraph.getEdges(id)) {
+    for (const auto& dst : _directedAreaGraph.getEdges(id)) {
       assert(_spatialStorageAreaIndex[dst] < _spatialStorageArea.size());
       const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
       const auto& areaObjId = std::get<3>(area);
@@ -424,7 +424,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numNodes << " nodes in "
-              << spatialIndex.size() << " areas ..." << std::endl;
+              << _spatialIndex.size() << " areas ..." << std::endl;
 
     std::ifstream ifs(_config.getTempPath("spatial", "nodes"),
                       std::ios::binary);
@@ -438,14 +438,14 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                            \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, spatialIndex,             \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, _spatialIndex,             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                            \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                       \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                             \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                         \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
-    directedAreaGraph, progressBar, entryCount, ia) reduction(+:checks,         \
+    _directedAreaGraph, progressBar, entryCount, ia) reduction(+:checks,         \
     skippedByDAG, contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _numNodes; i++) {
       SpatialNodeValue node;
@@ -461,7 +461,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
       std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
           skip;
       std::vector<SpatialAreaValue> queryResult;
-      spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
+      _spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
@@ -498,7 +498,7 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
         containsOk++;
         skip.insert(areaId);
         for (const auto& newSkip :
-             directedAreaGraph.findSuccessorsFast(areaId)) {
+             _directedAreaGraph.findSuccessorsFast(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
@@ -544,7 +544,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numWays << " ways in "
-              << spatialIndex.size() << " areas ..." << std::endl;
+              << _spatialIndex.size() << " areas ..." << std::endl;
 
     std::ifstream ifs(_config.getTempPath("spatial", "ways"), std::ios::binary);
     boost::archive::binary_iarchive ia(ifs);
@@ -566,8 +566,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                            \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
-    spatialIndex,  progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, _directedAreaGraph,       \
+    _spatialIndex,  progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
     intersectsByNodeInfo, intersects, intersectsOk, contains, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
     for (size_t i = 0; i < _numWays; i++) {
@@ -634,7 +634,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
           }
 #endif
           for (const auto& newSkip :
-               directedAreaGraph.findSuccessorsFast(areaId)) {
+               _directedAreaGraph.findSuccessorsFast(areaId)) {
             skip.insert(newSkip);
           }
           if (!isCoveredByEnvelope) {
@@ -668,7 +668,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
       }
 
       std::vector<SpatialAreaValue> queryResult;
-      spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
+      _spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
@@ -710,7 +710,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
         intersectsOk++;
 
         for (const auto& newSkip :
-             directedAreaGraph.findSuccessorsFast(areaId)) {
+             _directedAreaGraph.findSuccessorsFast(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
@@ -796,7 +796,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numUnnamedAreas
-              << " unnamed areas in " << spatialIndex.size() << " areas ..."
+              << " unnamed areas in " << _spatialIndex.size() << " areas ..."
               << std::endl;
 
     std::ifstream ifs(_config.getTempPath("spatial", "areas_unnamed"),
@@ -819,8 +819,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                            \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, directedAreaGraph,       \
-    spatialIndex,  progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, _directedAreaGraph,       \
+    _spatialIndex,  progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
     intersects, intersectsOk, contains, containsOk, containsOkEnvelope)      \
     default(none) schedule(dynamic)
     for (size_t i = 0; i < _numUnnamedAreas; i++) {
@@ -842,7 +842,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
           skip;
 
       std::vector<SpatialAreaValue> queryResult;
-      spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),
+      _spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),
                          std::back_inserter(queryResult));
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
@@ -884,7 +884,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         intersectsOk++;
 
         for (const auto& newSkip :
-             directedAreaGraph.findSuccessorsFast(areaId)) {
+             _directedAreaGraph.findSuccessorsFast(areaId)) {
           skip.insert(newSkip);
         }
         std::string areaIRI = _writer->generateIRI(
