@@ -69,10 +69,11 @@ class GeometryHandler {
  protected:
   // Stores named areas in r-tree, used for all other calculations.
   void prepareRTree();
-  FRIEND_TEST(OSM_GeometryHandler, prepareEmptyRTree);
-  FRIEND_TEST(OSM_GeometryHandler, prepareSimpleRTree);
+  FRIEND_TEST(OSM_GeometryHandler, prepareRTreeEmpty);
+  FRIEND_TEST(OSM_GeometryHandler, prepareRTreeSimple);
   // Generate DAG for areas using prepared r-tree.
   void prepareDAG();
+  FRIEND_TEST(OSM_GeometryHandler, prepareDAGSimple);
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpNamedAreaRelations();
   // Calculate relations for each node.
