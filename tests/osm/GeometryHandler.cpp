@@ -487,6 +487,41 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_GeometryHandler, prepareDAGEmpty) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::GeometryHandler gh{config, &writer};
+
+  gh.prepareRTree();
+
+  ASSERT_EQ(0, gh._directedAreaGraph.getNumVertices());
+  ASSERT_EQ(0, gh._directedAreaGraph.getNumEdges());
+  gh.prepareDAG();
+  ASSERT_EQ(0, gh._directedAreaGraph.getNumVertices());
+  ASSERT_EQ(0, gh._directedAreaGraph.getNumEdges());
+
+  output.flush();
+  output.close();
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, prepareDAGSimple) {
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;
