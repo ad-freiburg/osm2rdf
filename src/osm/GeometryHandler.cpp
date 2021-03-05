@@ -92,7 +92,6 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
-      _spatialStorageAreaIndex[area.id()] = _spatialStorageArea.size();
       _spatialStorageArea.push_back(
           SpatialAreaValue(area.envelope(), area.id(), area.geom(),
                            area.objId(), area.geomArea(), area.fromWay()));
@@ -195,6 +194,12 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
               [](const auto& a, const auto& b) {
                 return std::get<4>(a) < std::get<4>(b);
               });
+    // Prepare id based lookup table for later usage...
+    _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
+    for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
+      const auto& area = _spatialStorageArea[i];
+      _spatialStorageAreaIndex[std::get<1>(area)] = i;
+    }
     std::cerr << osm2ttl::util::currentTimeFormatted() << " ... done "
               << std::endl;
 
@@ -210,7 +215,7 @@ void osm2ttl::osm::GeometryHandler<W>::prepareDAG() {
     size_t skippedByDAG = 0;
     size_t skippedBySize = 0;
     progressBar.update(entryCount);
-#pragma omp parallel for shared(_spatialIndex, tmpDirectedAreaGraph,           \
+#pragma omp parallel for shared(tmpDirectedAreaGraph,           \
     entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
     contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
@@ -362,7 +367,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
       vertices = _directedAreaGraph.getVertices();
 #pragma omp parallel for shared(                                         \
     vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,               \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, _directedAreaGraph, \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                          \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                      \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA,                     \
@@ -438,14 +443,14 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                            \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, _spatialIndex,             \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                            \
     osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                       \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                             \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                         \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
-    _directedAreaGraph, progressBar, entryCount, ia) reduction(+:checks,         \
+    progressBar, entryCount, ia) reduction(+:checks,         \
     skippedByDAG, contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _numNodes; i++) {
       SpatialNodeValue node;
@@ -566,8 +571,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                            \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, _directedAreaGraph,       \
-    _spatialIndex,  progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, \
+    progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
     intersectsByNodeInfo, intersects, intersectsOk, contains, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
     for (size_t i = 0; i < _numWays; i++) {
@@ -819,8 +824,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                            \
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, _directedAreaGraph,       \
-    _spatialIndex,  progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, \
+    progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
     intersects, intersectsOk, contains, containsOk, containsOkEnvelope)      \
     default(none) schedule(dynamic)
     for (size_t i = 0; i < _numUnnamedAreas; i++) {
