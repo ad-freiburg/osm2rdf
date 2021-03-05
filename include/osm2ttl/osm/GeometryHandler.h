@@ -80,13 +80,15 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsEmpty);
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple);
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP);
+  // Calculate relations for each area, this dumps the generated DAG.
+  void dumpUnnamedAreaRelations();
+  FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty1);
+  FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2);
   // Calculate relations for each node.
   NodesContainedInAreasData dumpNodeRelations();
   // Calculate relations for each way.
   void dumpWayRelations(
       const osm2ttl::osm::NodesContainedInAreasData& nodeData);
-  // Calculate relations for each area, this dumps the generated DAG.
-  void dumpUnnamedAreaRelations();
   std::string statisticLine(std::string_view function, std::string_view part,
                             std::string_view check, uint64_t outerId,
                             std::string_view outerType, uint64_t innerId,
