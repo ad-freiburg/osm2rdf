@@ -978,6 +978,44 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
 #endif
 
 // ____________________________________________________________________________
+TEST(OSM_GeometryHandler, noAreaGeometricRelations) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.noAreaGeometricRelations = true;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::GeometryHandler gh{config, &writer};
+
+  gh.prepareRTree();
+  gh.prepareDAG();
+
+  gh.dumpUnnamedAreaRelations();
+
+  output.flush();
+  output.close();
+
+  ASSERT_THAT(
+      cerrBuffer.str(),
+      ::testing::HasSubstr(
+          "Skipping contains relation for unnamed areas ... disabled"));
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty1) {
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;

@@ -82,6 +82,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP);
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpUnnamedAreaRelations();
+  FRIEND_TEST(OSM_GeometryHandler, noAreaGeometricRelations);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty1);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2);
   // Calculate relations for each node.
