@@ -435,7 +435,7 @@ std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(std::string_view s) {
   for (size_t pos = 0; pos < s.size(); ++pos) {
     // Force non-allowed chars to UCHAR
     auto c = s[pos];
-    if ((c >= 0x00 && c <= 0x20) || c == '<' || c == '>' || c == '{' ||
+    if ((c >= 0x00 && c <= ' ') || c == '<' || c == '>' || c == '{' ||
         c == '}' || c == '\"' || c == '|' || c == '^' || c == '`' ||
         c == '\\') {
       tmp += UCHAR(c);
@@ -462,7 +462,7 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(
     uint8_t length = utf8Length(s[pos]);
     // Force non-allowed chars to PERCENT
     if (length == k1Byte) {
-      if ((s[pos] >= 0 && s[pos] <= ' ') || s[pos] == '<' || s[pos] == '>' ||
+      if ((s[pos] >= 0x00 && s[pos] <= ' ') || s[pos] == '<' || s[pos] == '>' ||
           s[pos] == '{' || s[pos] == '}' || s[pos] == '\"' || s[pos] == '|' ||
           s[pos] == '^' || s[pos] == '`' || s[pos] == '\\') {
         tmp += encodePERCENT(s.substr(pos, 1));
