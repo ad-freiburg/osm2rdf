@@ -446,12 +446,13 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 
     osm2ttl::util::ProgressBar progressBar{_numUnnamedAreas, true};
     size_t entryCount = 0;
-    size_t checks = 0;
-    size_t intersects = 0;
+    size_t areas = 0;
+    size_t intersectsChecks = 0;
     size_t intersectsOk = 0;
-    size_t contains = 0;
+    size_t containsChecks = 0;
     size_t containsOk = 0;
-    size_t skippedByDAG = 0;
+    size_t intersectsSkippedByDAG = 0;
+    size_t containsSkippedByDAG = 0;
     size_t containsOkEnvelope = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                             \
@@ -461,8 +462,9 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, \
-    progressBar, entryCount, ia) reduction(+:checks,skippedByDAG, \
-    intersects, intersectsOk, contains, containsOk, containsOkEnvelope)      \
+    progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, \
+    containsSkippedByDAG, intersectsChecks, intersectsOk, containsChecks, containsOk, \
+    containsOkEnvelope)      \
     default(none) schedule(dynamic)
     for (size_t i = 0; i < _numUnnamedAreas; i++) {
       SpatialAreaValue entry;
@@ -480,7 +482,9 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 
       // Set containing all areas we are inside of
       std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
-          skip;
+          skipIntersects;
+      std::set<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
+          skipContains;
 
       std::vector<SpatialAreaValue> queryResult;
       _spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),
@@ -499,87 +503,102 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         if (areaId == entryId) {
           continue;
         }
-        checks++;
+        areas++;
 
-        if (skip.find(areaId) != skip.end()) {
-          skippedByDAG++;
-          continue;
-        }
-
-        intersects++;
-#ifdef ENABLE_GEOMETRY_STATISTIC
-        auto start = std::chrono::steady_clock::now();
-#endif
-        bool doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
-#ifdef ENABLE_GEOMETRY_STATISTIC
-        auto end = std::chrono::steady_clock::now();
-        if (_config.writeGeometricRelationStatistics) {
-          _statistics.write(statisticLine(
-              __func__, "Way", "doesIntersect", areaId, "area", entryId, "area",
-              std::chrono::nanoseconds(end - start), doesIntersect));
-        }
-#endif
-        if (!doesIntersect) {
-          continue;
-        }
-        intersectsOk++;
-
-        for (const auto& newSkip :
-             _directedAreaGraph.findSuccessorsFast(areaId)) {
-          skip.insert(newSkip);
-        }
+        bool doesIntersect = false;
         std::string areaIRI = _writer->generateIRI(
             areaFromWay ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
                         : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
             areaObjId);
-        _writer->writeTriple(
-            areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
-        if (_config.addInverseRelationDirection) {
-          _writer->writeTriple(entryIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                               areaIRI);
-        }
-        contains++;
+
+        if (skipIntersects.find(areaId) != skipIntersects.end()) {
+          intersectsSkippedByDAG++;
+          doesIntersect = true;
+        } else {
+          intersectsChecks++;
 #ifdef ENABLE_GEOMETRY_STATISTIC
-        start = std::chrono::steady_clock::now();
+          auto start = std::chrono::steady_clock::now();
 #endif
-        bool isCoveredByEnvelope =
-            boost::geometry::covered_by(entryEnvelope, areaEnvelope);
+          bool doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
 #ifdef ENABLE_GEOMETRY_STATISTIC
-        end = std::chrono::steady_clock::now();
-        if (_config.writeGeometricRelationStatistics) {
-          _statistics.write(statisticLine(
-              __func__, "Way", "isCoveredByEnvelope", areaId, "area", entryId,
-              "area", std::chrono::nanoseconds(end - start),
-              isCoveredByEnvelope));
-        }
+          auto end = std::chrono::steady_clock::now();
+          if (_config.writeGeometricRelationStatistics) {
+            _statistics.write(statisticLine(
+                __func__, "Way", "doesIntersect", areaId, "area", entryId,
+                "area", std::chrono::nanoseconds(end - start), doesIntersect));
+          }
 #endif
-        if (!isCoveredByEnvelope) {
+          if (!doesIntersect) {
+            continue;
+          }
+          intersectsOk++;
+
+          for (const auto& newSkip :
+               _directedAreaGraph.findSuccessorsFast(areaId)) {
+            skipIntersects.insert(newSkip);
+          }
+          _writer->writeTriple(
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
+          if (_config.addInverseRelationDirection) {
+            _writer->writeTriple(
+                entryIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
+                areaIRI);
+          }
+        }
+
+        if (!doesIntersect) {
           continue;
         }
-        containsOkEnvelope++;
+        if (skipContains.find(areaId) != skipContains.end()) {
+          containsSkippedByDAG++;
+        } else {
+          containsChecks++;
 #ifdef ENABLE_GEOMETRY_STATISTIC
-        start = std::chrono::steady_clock::now();
+          start = std::chrono::steady_clock::now();
 #endif
-        bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+          bool isCoveredByEnvelope =
+              boost::geometry::covered_by(entryEnvelope, areaEnvelope);
 #ifdef ENABLE_GEOMETRY_STATISTIC
-        end = std::chrono::steady_clock::now();
-        if (_config.writeGeometricRelationStatistics) {
-          _statistics.write(statisticLine(
-              __func__, "Way", "isCoveredBy2", areaId, "area", entryId, "area",
-              std::chrono::nanoseconds(end - start), isCoveredBy));
-        }
+          end = std::chrono::steady_clock::now();
+          if (_config.writeGeometricRelationStatistics) {
+            _statistics.write(statisticLine(
+                __func__, "Way", "isCoveredByEnvelope", areaId, "area", entryId,
+                "area", std::chrono::nanoseconds(end - start),
+                isCoveredByEnvelope));
+          }
 #endif
-        if (!isCoveredBy) {
-          continue;
-        }
-        containsOk++;
-        _writer->writeTriple(
-            areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
-        if (_config.addInverseRelationDirection) {
-          _writer->writeTriple(entryIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                               areaIRI);
+          if (!isCoveredByEnvelope) {
+            continue;
+          }
+          containsOkEnvelope++;
+#ifdef ENABLE_GEOMETRY_STATISTIC
+          start = std::chrono::steady_clock::now();
+#endif
+          bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+#ifdef ENABLE_GEOMETRY_STATISTIC
+          end = std::chrono::steady_clock::now();
+          if (_config.writeGeometricRelationStatistics) {
+            _statistics.write(statisticLine(
+                __func__, "Way", "isCoveredBy2", areaId, "area", entryId,
+                "area", std::chrono::nanoseconds(end - start), isCoveredBy));
+          }
+#endif
+          if (!isCoveredBy) {
+            continue;
+          }
+          containsOk++;
+
+          for (const auto& newSkip :
+               _directedAreaGraph.findSuccessorsFast(areaId)) {
+            skipContains.insert(newSkip);
+          }
+          _writer->writeTriple(
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
+          if (_config.addInverseRelationDirection) {
+            _writer->writeTriple(entryIRI,
+                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
+                                 areaIRI);
+          }
         }
       }
 #pragma omp critical(progress)
@@ -588,15 +607,18 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     progressBar.done();
 
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
-              << "... done with " << checks << " checks, " << skippedByDAG
+              << "... done with looking at " << areas << " areas" << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " " << intersectsChecks
+              << " intersection checks performed, " << intersectsSkippedByDAG
               << " skipped by DAG" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
-              << (checks - skippedByDAG) << " checks performed" << std::endl;
-    std::cerr << osm2ttl::util::formattedTimeSpacer << " "
-              << "intersect: " << intersects << " yes: " << intersectsOk
+              << "intersect: " << intersectsChecks << " yes: " << intersectsOk
               << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " " << containsChecks
+              << " contains checks performed, " << containsSkippedByDAG
+              << " skipped by DAG" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
-              << "contains: " << contains
+              << "contains: " << containsChecks
               << " contains envelope: " << containsOkEnvelope
               << " yes: " << containsOk << std::endl;
   }
