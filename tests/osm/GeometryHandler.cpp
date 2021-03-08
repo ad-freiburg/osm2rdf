@@ -1260,15 +1260,143 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
                            "                           2 intersection checks "
                            "performed, 2 skipped by DAG\n"
                            "                           intersect: 2 yes: 2\n"
-                           "                           1 contains checks "
+                           "                           3 contains checks "
                            "performed, 1 skipped by DAG\n"
-                           "                           contains: 1 contains "
+                           "                           contains: 3 contains "
                            "envelope: 1 yes: 1\n"));
 
   ASSERT_EQ(
       "osmway:11 ogc:intersects osmrel:15 .\n"
       "osmway:13 ogc:intersects osmrel:15 .\n"
       "osmway:12 ogc:contains osmrel:15 .\n",
+      printedData);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::GeometryHandler gh{config, &writer};
+
+  // Create osmium objects
+  /*
+           28 (14)
+             |
+           24 (12)
+            /  \
+     22 (11)    26 (13)
+   */
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_area(osmiumBuffer1, osmium::builder::attr::_id(22),
+                            osmium::builder::attr::_tag("name", "22"),
+                            osmium::builder::attr::_outer_ring({
+                                                                   {1, {48.0, 7.51}},
+                                                                   {2, {48.0, 7.61}},
+                                                                   {3, {48.1, 7.61}},
+                                                                   {4, {48.1, 7.51}},
+                                                                   {1, {48.0, 7.51}},
+                                                               }));
+  osmium::builder::add_area(osmiumBuffer2, osmium::builder::attr::_id(24),
+                            osmium::builder::attr::_tag("name", "24"),
+                            osmium::builder::attr::_outer_ring({
+                                                                   {1, {40.0, 7.00}},
+                                                                   {2, {40.0, 8.00}},
+                                                                   {3, {50.0, 8.00}},
+                                                                   {4, {50.0, 7.00}},
+                                                                   {1, {40.0, 7.00}},
+                                                               }));
+  osmium::builder::add_area(osmiumBuffer3, osmium::builder::attr::_id(26),
+                            osmium::builder::attr::_tag("name", "26"),
+                            osmium::builder::attr::_outer_ring({
+                                                                   {1, {40.0, 7.51}},
+                                                                   {2, {40.0, 7.61}},
+                                                                   {3, {40.1, 7.61}},
+                                                                   {4, {40.1, 7.51}},
+                                                                   {1, {40.0, 7.51}},
+                                                               }));
+  osmium::builder::add_area(osmiumBuffer4, osmium::builder::attr::_id(28),
+                            osmium::builder::attr::_tag("name", "28"),
+                            osmium::builder::attr::_outer_ring({
+                                                                   {1, {20.0, 0.51}},
+                                                                   {2, {20.0, 10.61}},
+                                                                   {3, {50.1, 10.61}},
+                                                                   {4, {50.1, 0.51}},
+                                                                   {1, {20.0, 0.51}},
+                                                               }));
+  // Unnamed area not from any way.
+  osmium::builder::add_area(osmiumBuffer5, osmium::builder::attr::_id(31),
+                            osmium::builder::attr::_outer_ring({
+                                                                   {1, {48.0, 7.51}},
+                                                                   {2, {48.0, 7.61}},
+                                                                   {3, {48.1, 7.61}},
+                                                                   {4, {48.1, 7.51}},
+                                                                   {1, {48.0, 7.51}},
+                                                               }));
+
+  // Create osm2ttl object from osmium object
+  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  ASSERT_EQ(0, gh._numUnnamedAreas);
+  gh.area(osm2ttl::osm::Area(osmiumBuffer5.get<osmium::Area>(0)));
+  ASSERT_EQ(1, gh._numUnnamedAreas);
+  gh.closeExternalStorage();
+  gh.prepareRTree();
+  gh.prepareDAG();
+
+  gh.dumpUnnamedAreaRelations();
+
+  output.flush();
+  output.close();
+
+  const std::string printedData = coutBuffer.str();
+
+  ASSERT_EQ(
+      "osmway:11 ogc:intersects osmrel:15 .\n"
+      "osmway:11 ogc:contains osmrel:15 .\n",
+      printedData);
+  ASSERT_THAT(
+      cerrBuffer.str(),
+      ::testing::HasSubstr("... done with looking at 3 areas\n"
+                           "                           1 intersection checks "
+                           "performed, 2 skipped by DAG\n"
+                           "                           intersect: 1 yes: 1\n"
+                           "                           1 contains checks "
+                           "performed, 2 skipped by DAG\n"
+                           "                           contains: 1 contains "
+                           "envelope: 1 yes: 1\n"));
+
+  ASSERT_EQ(
+      "osmway:11 ogc:intersects osmrel:15 .\n"
+      "osmway:11 ogc:contains osmrel:15 .\n",
       printedData);
 
   // Reset std::cerr and std::cout

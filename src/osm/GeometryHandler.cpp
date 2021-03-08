@@ -519,7 +519,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
 #endif
-          bool doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
+          doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {

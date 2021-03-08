@@ -86,7 +86,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty1);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects);
-  FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContains);
+  FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly);
   // Calculate relations for each node.
   // Calculate relations for each node.
   NodesContainedInAreasData dumpNodeRelations();
