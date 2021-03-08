@@ -2328,15 +2328,16 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
                   "skipped by DAG\n"
                   "                           contains: 3 contains envelope: 1 "
                   "yes: 1\n"));
-  ASSERT_EQ(
-      "osmway:13 ogc:intersects osmnode:1 .\n"
-      "osmway:13 ogc:contains osmnode:1 .\n"
-      "osmway:11 ogc:intersects osmnode:2 .\n"
-      "osmway:11 ogc:contains osmnode:2 .\n"
-      "osmway:11 ogc:intersects osmway:42 .\n"
-      "osmway:13 ogc:intersects osmway:42 .\n"
-      "osmway:12 ogc:contains osmway:42 .\n",
-      printedData);
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:13 ogc:intersects osmnode:1 .\n"
+                                   "osmway:13 ogc:contains osmnode:1 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:11 ogc:intersects osmnode:2 .\n"
+                                   "osmway:11 ogc:contains osmnode:2 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:11 ogc:intersects osmway:42 .\n"
+                                  "osmway:13 ogc:intersects osmway:42 .\n"
+                                  "osmway:12 ogc:contains osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -2454,7 +2455,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   const std::string printedData = coutBuffer.str();
   ASSERT_THAT(cerrBuffer.str(),
               ::testing::HasSubstr(
-                  ".. done with looking at 3 areas\n"
+                  "... done with looking at 3 areas\n"
                   "                           0 intersection checks performed, "
                   "2 skipped by DAG, 1 skipped by NodeInfo\n"
                   "                           intersect: 0 yes: 0\n"
@@ -2462,12 +2463,12 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
                   "skipped by DAG\n"
                   "                           contains: 1 contains envelope: 1 "
                   "yes: 1\n"));
-  ASSERT_EQ(
-      "osmway:11 ogc:intersects osmnode:2 .\n"
-      "osmway:11 ogc:contains osmnode:2 .\n"
-      "osmway:11 ogc:intersects osmway:42 .\n"
-      "osmway:11 ogc:contains osmway:42 .\n",
-      printedData);
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:11 ogc:intersects osmnode:2 .\n"
+                                   "osmway:11 ogc:contains osmnode:2 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:11 ogc:intersects osmway:42 .\n"
+                                   "osmway:11 ogc:contains osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
