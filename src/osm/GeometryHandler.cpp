@@ -760,7 +760,17 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2ttl::osm::NodesContainedInAreasData& nodeData) {
-  if (!_config.noWayGeometricRelations) {
+  if (_config.noWayGeometricRelations) {
+    std::cerr << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "Skipping contains relation for ways ... disabled"
+              << std::endl;
+  } else if (_numWays == 0) {
+    std::cerr << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "Skipping contains relation for ways ... no ways"
+              << std::endl;
+  } else {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numWays << " ways in "

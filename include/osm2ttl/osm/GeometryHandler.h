@@ -97,6 +97,11 @@ class GeometryHandler {
   // Calculate relations for each way.
   void dumpWayRelations(
       const osm2ttl::osm::NodesContainedInAreasData& nodeData);
+  FRIEND_TEST(OSM_GeometryHandler, noWayGeometricRelations);
+  FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsEmpty1);
+  FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsEmpty2);
+  FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects);
+  FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains);
   std::string statisticLine(std::string_view function, std::string_view part,
                             std::string_view check, uint64_t outerId,
                             std::string_view outerType, uint64_t innerId,
