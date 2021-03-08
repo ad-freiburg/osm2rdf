@@ -630,7 +630,17 @@ osm2ttl::osm::NodesContainedInAreasData
 osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
   // Store for each node all relevant areas
   NodesContainedInAreasData nodeData;
-  if (!_config.noNodeGeometricRelations) {
+  if (_config.noNodeGeometricRelations) {
+    std::cerr << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "Skipping contains relation for nodes ... disabled"
+              << std::endl;
+  } else if (_numNodes == 0) {
+    std::cerr << std::endl;
+    std::cerr << osm2ttl::util::currentTimeFormatted() << " "
+              << "Skipping contains relation for nodes ... no nodes"
+              << std::endl;
+  } else {
     std::cerr << std::endl;
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
               << "Contains relations for " << _numNodes << " nodes in "
@@ -716,15 +726,15 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
                         : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
             areaObjId);
         _writer->writeTriple(
-            areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, nodeIRI);
-        _writer->writeTriple(
             areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, nodeIRI);
+        _writer->writeTriple(
+            areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, nodeIRI);
         if (_config.addInverseRelationDirection) {
-          _writer->writeTriple(
-              nodeIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
           _writer->writeTriple(nodeIRI,
                                osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
                                areaIRI);
+          _writer->writeTriple(
+              nodeIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
         }
       }
 #pragma omp critical(nodeDataChange)
@@ -735,10 +745,10 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     progressBar.done();
 
     std::cerr << osm2ttl::util::currentTimeFormatted() << " "
-              << "... done with " << checks << " checks, " << skippedByDAG
-              << " skipped by DAG" << std::endl;
+              << "... done with looking at " << checks << " areas, "
+              << skippedByDAG << " skipped by DAG" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
-              << (checks - skippedByDAG) << " checks performed" << std::endl;
+              << contains << " checks performed" << std::endl;
     std::cerr << osm2ttl::util::formattedTimeSpacer << " "
               << "contains: " << contains << " yes: " << containsOk
               << std::endl;
