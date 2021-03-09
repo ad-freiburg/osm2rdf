@@ -6,6 +6,10 @@
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
+#include "osmium/io/bzip2_compression.hpp"
+#include "osmium/io/detail/o5m_input_format.hpp"
+#include "osmium/io/detail/pbf_input_format.hpp"
+#include "osmium/io/detail/xml_input_format.hpp"
 
 namespace osm2ttl::osm {
 
@@ -497,6 +501,223 @@ TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
   // Cleanup
   output.close();
   std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleEmptyPBF) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "empty.pbf");
+  std::ofstream inputFile(config.input);
+
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  ASSERT_THROW(osmiumHandler.handle(), osmium::pbf_error);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleEmptyOSM) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "empty.osm");
+  std::ofstream inputFile(config.input);
+
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  ASSERT_THROW(osmiumHandler.handle(), osmium::xml_error);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleEmptyBzip2OSM) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "empty.osm.bz2");
+  std::ofstream inputFile(config.input);
+
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleEmptyOPL) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "empty.opl");
+  std::ofstream inputFile(config.input);
+
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osmiumHandler.handle();
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleEmptyBzip2OPL) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "empty.opl.bz2");
+  std::ofstream inputFile(config.input);
+
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleEmptyO5M) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "empty.o5m");
+  std::ofstream inputFile(config.input);
+
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  ASSERT_THROW(osmiumHandler.handle(), osmium::o5m_error);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleEmptyBzip2O5M) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "empty.o5m.bz2");
+  std::ofstream inputFile(config.input);
+
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
 }
 
 }  // namespace osm2ttl::osm
