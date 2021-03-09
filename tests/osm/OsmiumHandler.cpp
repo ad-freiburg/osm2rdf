@@ -3,6 +3,7 @@
 
 #include "osm2ttl/osm/OsmiumHandler.h"
 
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -713,6 +714,155 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2O5M) {
 
   osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
   ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleSingleNode) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "singleNode.osm");
+  std::ofstream inputFile(config.input);
+  // Copied from
+  // https://wiki.openstreetmap.org/w/index.php?title=OSM_XML&oldid=2081001
+  inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n"
+            << "<node id=\"298884269\" lat=\"54.0901746\" lon=\"12.2482632\" "
+               "user=\"SvenHRO\" uid=\"46882\" visible=\"true\" version=\"1\" "
+               "changeset=\"676636\" timestamp=\"2008-09-21T21:37:45Z\"/>"
+            << "</osm>" << std::endl;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osmiumHandler.handle();
+
+  output.flush();
+  output.close();
+
+  const auto printedState = cerrBuffer.str();
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("nodes seen:1 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("ways seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_EQ("", coutBuffer.str());
+  ASSERT_EQ("", coutBuffer.str());
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("OSM_OsmiumHandler", "singleNode.osm");
+  std::ofstream inputFile(config.input);
+  // Based on
+  // https://wiki.openstreetmap.org/w/index.php?title=OSM_XML&oldid=2081001
+  inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+  inputFile << " <node id=\"298884269\" lat=\"54.0901746\" lon=\"12.2482632\" "
+               "visible=\"true\" version=\"1\"/>\n";
+  inputFile << " <node id=\"261728686\" lat=\"54.0906309\" lon=\"12.2441924\" "
+               "visible=\"true\" version=\"1\"/>\n";
+  inputFile << " <node id=\"1831881213\" version=\"1\" lat=\"54.0900666\" "
+               "lon=\"12.2539381\" visible=\"true\">\n"
+               "  <tag k=\"name\" v=\"Neu Broderstorf\"/>\n"
+               "  <tag k=\"traffic_sign\" v=\"city_limit\"/>\n"
+               " </node>\n";
+  inputFile << " <node id=\"298884272\" lat=\"54.0901447\" lon=\"12.2516513\" "
+               "visible=\"true\" version=\"1\"/>\n";
+  inputFile << " <way id=\"26659127\" visible=\"true\" version=\"5\">\n"
+               "  <nd ref=\"298884269\"/>\n"
+               "  <nd ref=\"261728686\"/>\n"
+               "  <nd ref=\"298884272\"/>\n"
+               "  <tag k=\"highway\" v=\"unclassified\"/>\n"
+               "  <tag k=\"name\" v=\"Pastower Straße\"/>\n"
+               " </way>\n";
+  inputFile << " <relation id=\"56688\" visible=\"true\" version=\"28\">\n"
+               "  <member type=\"node\" ref=\"298884269\" role=\"\"/>\n"
+               "  <member type=\"node\" ref=\"261728686\" role=\"\"/>\n"
+               "  <member type=\"way\" ref=\"26659127\" role=\"\"/>\n"
+               "  <member type=\"node\" ref=\"1831881213\" role=\"\"/>\n"
+               "  <tag k=\"name\" v=\"Küstenbus Linie 123\"/>\n"
+               "  <tag k=\"network\" v=\"VVW\"/>\n"
+               "  <tag k=\"operator\" v=\"Regionalverkehr Küste\"/>\n"
+               "  <tag k=\"ref\" v=\"123\"/>\n"
+               "  <tag k=\"route\" v=\"bus\"/>\n"
+               "  <tag k=\"type\" v=\"route\"/>\n"
+               " </relation>";
+  inputFile << "</osm>" << std::endl;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osmiumHandler.handle();
+
+  output.flush();
+  output.close();
+
+  const auto printedState = cerrBuffer.str();
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("nodes seen:4 dumped: 1 geometry: 1\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
+  const auto printedData = coutBuffer.str();
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmnode:1831881213 osmt:traffic_sign \"city_limit\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:26659127 osmt:name \"Pastower Straße\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:26659127 geo:hasGeometry \"LINESTRING("));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmrel:56688 rdf:type osm:relation .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("_:2 osm:id osmway:26659127 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
