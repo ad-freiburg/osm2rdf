@@ -1,0 +1,32 @@
+<way id="98284318" visible="true" version="10" changeset="79537195" timestamp="2020-01-14T00:19:44Z" user="skyper" uid="152744">
+  <nd ref="1137213233"/>
+  <nd ref="1137213227"/>
+  <nd ref="2110601105"/>
+  <nd ref="1137213243"/>
+  <nd ref="1137213234"/>
+  <nd ref="1137213246"/>
+  <nd ref="1137213244"/>
+  <nd ref="1137213249"/>
+  <nd ref="5190342871"/>
+  <nd ref="1137213247"/>
+  <nd ref="1137213228"/>
+  <nd ref="1137213226"/>
+  <nd ref="1137213242"/>
+  <nd ref="2110601134"/>
+  <nd ref="1137213231"/>
+  <nd ref="1137213251"/>
+  <nd ref="1137213236"/>
+  <nd ref="1137724108"/>
+  <nd ref="1137724103"/>
+  <nd ref="1137213233"/>
+  <tag k="addr:city" v="Freiburg im Breisgau"/>
+  <tag k="addr:housenumber" v="51"/>
+  <tag k="addr:postcode" v="79110"/>
+  <tag k="addr:street" v="Georges-Köhler-Allee"/>
+  <tag k="building" v="university"/>
+  <tag k="building:levels" v="4"/>
+  <tag k="name" v="Gebäude 51"/>
+  <tag k="roof:levels" v="1"/>
+  <tag k="roof:shape" v="hipped"/>
+  <tag k="source:outline" v="maps4bw (LGL, www.lgl-bw.de)"/>
+</way>

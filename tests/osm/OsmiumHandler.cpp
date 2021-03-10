@@ -767,8 +767,6 @@ TEST(OSM_OsmiumHandler, handleSingleNode) {
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:0 dumped: 0 geometry: 0\n"));
-  ASSERT_EQ("", coutBuffer.str());
-  ASSERT_EQ("", coutBuffer.str());
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -792,7 +790,7 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
 
   // Create empty input file
-  config.input = config.getTempPath("OSM_OsmiumHandler", "singleNode.osm");
+  config.input = config.getTempPath("OSM_OsmiumHandler", "osmWikiExample.osm");
   std::ofstream inputFile(config.input);
   // Based on
   // https://wiki.openstreetmap.org/w/index.php?title=OSM_XML&oldid=2081001
@@ -849,20 +847,6 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
-  const auto printedData = coutBuffer.str();
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmnode:1831881213 osmt:traffic_sign \"city_limit\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:26659127 osmt:name \"Pastower Straße\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:26659127 geo:hasGeometry \"LINESTRING("));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmrel:56688 rdf:type osm:relation .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("_:2 osm:id osmway:26659127 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
