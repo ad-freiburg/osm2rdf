@@ -406,9 +406,10 @@ TEST(E2E, building51) {
       getFilesWithPrefixFromPath("../../tests/e2e/building_51", "n");
   std::vector<std::filesystem::path> ways =
       getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
-  std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) -> bool {
-    return a.filename().string() < b.filename().string();
-  });
+  std::sort(nodes.begin(), nodes.end(),
+            [](const auto& a, const auto& b) -> bool {
+              return a.filename().string() < b.filename().string();
+            });
   std::sort(ways.begin(), ways.end(), [](const auto& a, const auto& b) -> bool {
     return a.filename().string() < b.filename().string();
   });
@@ -538,9 +539,10 @@ TEST(E2E, tf) {
       getFilesWithPrefixFromPath("../../tests/e2e/tf", "n");
   std::vector<std::filesystem::path> ways =
       getFilesWithPrefixFromPath("../../tests/e2e/tf", "w");
-  std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) -> bool {
-    return a.filename().string() < b.filename().string();
-  });
+  std::sort(nodes.begin(), nodes.end(),
+            [](const auto& a, const auto& b) -> bool {
+              return a.filename().string() < b.filename().string();
+            });
   std::sort(ways.begin(), ways.end(), [](const auto& a, const auto& b) -> bool {
     return a.filename().string() < b.filename().string();
   });
@@ -636,9 +638,10 @@ TEST(E2E, building51inTF) {
       getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
   const auto& tempWays = getFilesWithPrefixFromPath("../../tests/e2e/tf", "w");
   ways.insert(ways.end(), tempWays.begin(), tempWays.end());
-  std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) -> bool {
-    return a.filename().string() < b.filename().string();
-  });
+  std::sort(nodes.begin(), nodes.end(),
+            [](const auto& a, const auto& b) -> bool {
+              return a.filename().string() < b.filename().string();
+            });
   std::sort(ways.begin(), ways.end(), [](const auto& a, const auto& b) -> bool {
     return a.filename().string() < b.filename().string();
   });
@@ -684,16 +687,18 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(
       printedState,
       ::testing::HasSubstr("Contains relations for 2 ways in 2 areas ...\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr(
-                  "... done with looking at 2 areas\n"
-                  "                           1 intersection checks performed, "
-                  "0 skipped by DAG, 1 skipped by NodeInfo\n"
-                  "                           intersect: 1 yes: 0\n"
-                  "                           1 contains checks performed, 0 "
-                  "skipped by DAG\n"
-                  "                           contains: 1 contains envelope: 1 "
-                  "yes: 1\n"));
+  ASSERT_THAT(
+      printedState,
+      ::testing::HasSubstr(
+          "... done with looking at 1 areas\n"
+          "                           1 intersection checks performed, 0 "
+          "skipped by DAG, 0 skipped by NodeInfo\n"
+          "                           intersect: 1 yes: 0\n"
+          "                           0 contains checks performed, 0 skipped "
+          "by DAG\n"
+          "                           contains: 0 contains envelope: 0 yes: 0\n"
+          "                           1 ways are areas in the DAG -> skipped "
+          "calculations for them\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));

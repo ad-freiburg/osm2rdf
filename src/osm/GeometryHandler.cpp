@@ -789,6 +789,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     size_t containsOk = 0;
     size_t containsOkEnvelope = 0;
     size_t containsSkippedByDAG = 0;
+    size_t skippedInDAG = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                             \
     osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData,                   \
@@ -797,7 +798,7 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
     osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, \
-    progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, \
+    progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, skippedInDAG, \
     intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
     for (size_t i = 0; i < _numWays; i++) {
@@ -808,6 +809,14 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
       const auto& wayId = std::get<1>(way);
       const auto& wayGeom = std::get<2>(way);
       const auto& wayNodeIds = std::get<3>(way);
+
+      // Check if our "area" has successors in the DAG, if yes we are part of
+      // the DAG and don't need to calculate any relation again.
+      if (!_directedAreaGraph.findSuccessorsFast(wayId * 2).empty()) {
+        skippedInDAG++;
+        continue;
+      }
+
       std::string wayIRI = _writer->generateIRI(
           osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, wayId);
 
@@ -979,6 +988,9 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
               << "contains: " << containsChecks
               << " contains envelope: " << containsOkEnvelope
               << " yes: " << containsOk << std::endl;
+    std::cerr << osm2ttl::util::formattedTimeSpacer << " " << skippedInDAG
+              << " ways are areas in the DAG -> skipped calculations for them"
+              << std::endl;
   }
 }
 
