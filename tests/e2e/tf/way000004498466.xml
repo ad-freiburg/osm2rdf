@@ -1,0 +1,52 @@
+<way id="4498466" visible="true" version="33" changeset="93619617" timestamp="2020-11-05T18:44:17Z" user="q_un_go" uid="11374">
+  <nd ref="27589975"/>
+  <nd ref="8085761358"/>
+  <nd ref="6818253794"/>
+  <nd ref="6219181287"/>
+  <nd ref="6219181286"/>
+  <nd ref="2110601128"/>
+  <nd ref="6818253796"/>
+  <nd ref="2110601099"/>
+  <nd ref="8085761353"/>
+  <nd ref="8085761351"/>
+  <nd ref="3584334890"/>
+  <nd ref="2110601090"/>
+  <nd ref="27589962"/>
+  <nd ref="7141819605"/>
+  <nd ref="1375363516"/>
+  <nd ref="7141819604"/>
+  <nd ref="7535538869"/>
+  <nd ref="3584334881"/>
+  <nd ref="3584334882"/>
+  <nd ref="3584334883"/>
+  <nd ref="3584334885"/>
+  <nd ref="3584336195"/>
+  <nd ref="3584336194"/>
+  <nd ref="3584336196"/>
+  <nd ref="3584336197"/>
+  <nd ref="3584336198"/>
+  <nd ref="3584336200"/>
+  <nd ref="1375363542"/>
+  <nd ref="3584328855"/>
+  <nd ref="2504361866"/>
+  <nd ref="27589963"/>
+  <nd ref="27589964"/>
+  <nd ref="3584328875"/>
+  <nd ref="27589965"/>
+  <nd ref="27589966"/>
+  <nd ref="7900221721"/>
+  <nd ref="7900221725"/>
+  <nd ref="4515157612"/>
+  <nd ref="5582041562"/>
+  <nd ref="6818253814"/>
+  <nd ref="6818253815"/>
+  <nd ref="8085761357"/>
+  <nd ref="8085761356"/>
+  <nd ref="8085761355"/>
+  <nd ref="8085761354"/>
+  <nd ref="27589975"/>
+  <tag k="int_name" v="Faculty of Engineering"/>
+  <tag k="name" v="Technische Fakultät"/>
+  <tag k="operator" v="Albert-Ludwigs-Universität Freiburg"/>
+  <tag k="wheelchair" v="yes"/>
+</way>

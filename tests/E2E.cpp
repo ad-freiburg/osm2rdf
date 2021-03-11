@@ -1,6 +1,10 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
+#include <filesystem>
+#include <string>
+#include <vector>
+
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2ttl/config/Config.h"
@@ -8,6 +12,22 @@
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/Output.h"
 
+std::vector<std::filesystem::path> getFilesWithPrefixFromPath(
+    std::filesystem::path path, std::string_view prefix) {
+  std::vector<std::filesystem::path> result;
+  for (auto& e : std::filesystem::directory_iterator(path)) {
+    if (!e.is_regular_file()) {
+      continue;
+    }
+    if (e.path().filename().string().find(prefix, 0) != 0) {
+      continue;
+    }
+    result.push_back(e.path());
+  }
+  return result;
+}
+
+// ____________________________________________________________________________
 TEST(E2E, singleNode) {
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;
@@ -55,12 +75,16 @@ TEST(E2E, singleNode) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:0 dumped: 0 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"));
+              ::testing::HasSubstr(
+                  "@prefix wd: <http://www.wikidata.org/entity/> .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("@prefix wd: <http://www.wikidata.org/entity/> .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n"));
+              ::testing::HasSubstr(
+                  "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -68,6 +92,7 @@ TEST(E2E, singleNode) {
   std::filesystem::remove(config.input);
 }
 
+// ____________________________________________________________________________
 TEST(E2E, singleNodeWithTags) {
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;
@@ -124,23 +149,36 @@ TEST(E2E, singleNodeWithTags) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmnode:240092010 rdf:type osm:node .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 geo:hasGeometry \"POINT(7.849400500000 47.996090100000)\"^^geo:wktLiteral .\n"));
+              ::testing::HasSubstr(
+                  "osmnode:240092010 geo:hasGeometry \"POINT(7.849400500000 "
+                  "47.996090100000)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osmt:alt_name \"Freiburg i. Br.\" .\n"));
+              ::testing::HasSubstr(
+                  "osmnode:240092010 osmt:alt_name \"Freiburg i. Br.\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osmt:name \"Freiburg im Breisgau\" .\n"));
+              ::testing::HasSubstr(
+                  "osmnode:240092010 osmt:name \"Freiburg im Breisgau\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osmt:name:ja \"\xE3\x83\x95\xE3\x83\xA9\xE3\x82\xA4\xE3\x83\x96\xE3\x83\xAB\xE3\x82\xAF\" .\n"));
+              ::testing::HasSubstr("osmnode:240092010 osmt:name:ja "
+                                   "\"\xE3\x83\x95\xE3\x83\xA9\xE3\x82\xA4\xE3"
+                                   "\x83\x96\xE3\x83\xAB\xE3\x82\xAF\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osmt:short_name \"Freiburg\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osmt:wikidata \"Q2833\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osm:wikidata wd:Q2833 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osmt:wikipedia \"de:Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osm:wikipedia <https://de.wikipedia.org/wiki/Freiburg%20im%20Breisgau> .\n"));
+              ::testing::HasSubstr(
+                  "osmnode:240092010 osmt:short_name \"Freiburg\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmnode:240092010 osmt:wikidata \"Q2833\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmnode:240092010 osm:wikidata wd:Q2833 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmnode:240092010 osmt:wikipedia \"de:Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmnode:240092010 osm:wikipedia "
+          "<https://de.wikipedia.org/wiki/Freiburg%20im%20Breisgau> .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -148,6 +186,7 @@ TEST(E2E, singleNodeWithTags) {
   std::filesystem::remove(config.input);
 }
 
+// ____________________________________________________________________________
 TEST(E2E, singleWayWithTagsAndNodes) {
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;
@@ -170,18 +209,19 @@ TEST(E2E, singleWayWithTagsAndNodes) {
             << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
   // ... https://www.openstreetmap.org/node/1137213233 see e2e/w98284318.xml
   // for full file
-  inputFile << "<way id=\"98284318\" visible=\"true\" version=\"10\">"
-               "  <tag k=\"addr:city\" v=\"Freiburg im Breisgau\"/>\n"
-               "  <tag k=\"addr:housenumber\" v=\"51\"/>\n"
-               "  <tag k=\"addr:postcode\" v=\"79110\"/>\n"
-               "  <tag k=\"addr:street\" v=\"Georges-Köhler-Allee\"/>\n"
-               "  <tag k=\"building\" v=\"university\"/>\n"
-               "  <tag k=\"building:levels\" v=\"4\"/>\n"
-               "  <tag k=\"name\" v=\"Gebäude 51\"/>\n"
-               "  <tag k=\"roof:levels\" v=\"1\"/>\n"
-               "  <tag k=\"roof:shape\" v=\"hipped\"/>\n"
-               "  <tag k=\"source:outline\" v=\"maps4bw (LGL, www.lgl-bw.de)\"/>\n"
-               "</way>\n";
+  inputFile
+      << "<way id=\"98284318\" visible=\"true\" version=\"10\">"
+         "  <tag k=\"addr:city\" v=\"Freiburg im Breisgau\"/>\n"
+         "  <tag k=\"addr:housenumber\" v=\"51\"/>\n"
+         "  <tag k=\"addr:postcode\" v=\"79110\"/>\n"
+         "  <tag k=\"addr:street\" v=\"Georges-Köhler-Allee\"/>\n"
+         "  <tag k=\"building\" v=\"university\"/>\n"
+         "  <tag k=\"building:levels\" v=\"4\"/>\n"
+         "  <tag k=\"name\" v=\"Gebäude 51\"/>\n"
+         "  <tag k=\"roof:levels\" v=\"1\"/>\n"
+         "  <tag k=\"roof:shape\" v=\"hipped\"/>\n"
+         "  <tag k=\"source:outline\" v=\"maps4bw (LGL, www.lgl-bw.de)\"/>\n"
+         "</way>\n";
   inputFile << "</osm>" << std::endl;
 
   osm2ttl::util::Output output{config, config.output};
@@ -207,29 +247,40 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:roof:levels \"1\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:source:outline \"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
+              ::testing::HasSubstr("osmway:98284318 osmt:source:outline "
+                                   "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   // No nodes -> no real geometry
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING()\"^^geo:wktLiteral .\n"));
+              ::testing::HasSubstr("osmway:98284318 geo:hasGeometry "
+                                   "\"LINESTRING()\"^^geo:wktLiteral .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -237,6 +288,7 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   std::filesystem::remove(config.input);
 }
 
+// ____________________________________________________________________________
 TEST(E2E, osmWikiExample) {
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;
@@ -331,7 +383,7 @@ TEST(E2E, osmWikiExample) {
   std::filesystem::remove(config.input);
 }
 
-
+// ____________________________________________________________________________
 TEST(E2E, building51) {
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;
@@ -349,30 +401,26 @@ TEST(E2E, building51) {
   // Create empty input file
   config.input = config.getTempPath("E2E", "building51.osm");
   std::ofstream inputFile(config.input);
+
+  std::vector<std::filesystem::path> nodes =
+      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "n");
+  std::vector<std::filesystem::path> ways =
+      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
+  std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) -> bool {
+    return a.filename().string() < b.filename().string();
+  });
+  std::sort(ways.begin(), ways.end(), [](const auto& a, const auto& b) -> bool {
+    return a.filename().string() < b.filename().string();
+  });
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
-  // ... https://www.openstreetmap.org/node/1137213233
-  inputFile << std::ifstream("../../tests/e2e/n1137213226.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213227.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213228.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213231.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213233.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213234.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213236.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213242.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213243.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213244.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213246.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213247.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213249.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137213251.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137724103.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n1137724108.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n2110601105.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n2110601134.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/n5190342871.xml").rdbuf();
-  inputFile << std::ifstream("../../tests/e2e/w98284318.xml").rdbuf();
+  for (const auto& f : nodes) {
+    inputFile << std::ifstream(f).rdbuf();
+  }
+  for (const auto& f : ways) {
+    inputFile << std::ifstream(f).rdbuf();
+  }
   inputFile << "</osm>" << std::endl;
 
   osm2ttl::util::Output output{config, config.output};
@@ -395,51 +443,340 @@ TEST(E2E, building51) {
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
+  ASSERT_THAT(
+      printedState,
+      ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr(".. done with looking at 3 areas, 0 skipped by DAG\n"
-                                   "                           3 checks performed\n"
-                                   "                           contains: 3 yes: 3\n"));
+              ::testing::HasSubstr(
+                  "... done with looking at 3 areas, 0 skipped by DAG\n"
+                  "                           3 checks performed\n"
+                  "                           contains: 3 yes: 3\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
+              ::testing::HasSubstr("osmway:98284318 osmt:source:outline "
+                                   "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
+              ::testing::HasSubstr(
+                  "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:contains osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:intersects osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:contains osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:intersects osmnode:5190342871 .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:roof:levels \"1\" .\n"));
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:contains osmnode:5190342871 .\n"));
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(E2E, tf) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("E2E", "tf.osm");
+  std::ofstream inputFile(config.input);
+
+  std::vector<std::filesystem::path> nodes =
+      getFilesWithPrefixFromPath("../../tests/e2e/tf", "n");
+  std::vector<std::filesystem::path> ways =
+      getFilesWithPrefixFromPath("../../tests/e2e/tf", "w");
+  std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) -> bool {
+    return a.filename().string() < b.filename().string();
+  });
+  std::sort(ways.begin(), ways.end(), [](const auto& a, const auto& b) -> bool {
+    return a.filename().string() < b.filename().string();
+  });
+  // Copied from ...
+  inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+  for (const auto& f : nodes) {
+    inputFile << std::ifstream(f).rdbuf();
+  }
+  for (const auto& f : ways) {
+    inputFile << std::ifstream(f).rdbuf();
+  }
+  inputFile << "</osm>" << std::endl;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  writer.writeHeader();
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osmiumHandler.handle();
+
+  output.flush();
+  output.close();
+
+  const auto printedState = cerrBuffer.str();
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("nodes seen:45 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr(
+                  "Skipping contains relation for nodes ... no nodes\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("0 intersection checks performed, 0 skipped "
+                                   "by DAG, 0 skipped by NodeInfo\n"));
+  const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
+              ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:source:outline \"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
+              ::testing::HasSubstr(
+                  "osmway:4498466 osmt:name \"Technische Fakultät\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:4498466 osmt:int_name \"Faculty of Engineering\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:4498466 osmt:operator "
+                               "\"Albert-Ludwigs-Universität Freiburg\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:4498466 osmt:wheelchair \"yes\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:4498466 geo:hasGeometry \"LINESTRING(7"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING("));
+              ::testing::HasSubstr(
+                  "osmway:4498466 geo:hasGeometry \"MULTIPOLYGON(((7"));
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+  std::filesystem::remove(config.input);
+}
+
+// ____________________________________________________________________________
+TEST(E2E, building51inTF) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  // Create empty input file
+  config.input = config.getTempPath("E2E", "building51.osm");
+  std::ofstream inputFile(config.input);
+
+  std::vector<std::filesystem::path> nodes =
+      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "n");
+  const auto& tempNodes = getFilesWithPrefixFromPath("../../tests/e2e/tf", "n");
+  nodes.insert(nodes.end(), tempNodes.begin(), tempNodes.end());
+  std::vector<std::filesystem::path> ways =
+      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
+  const auto& tempWays = getFilesWithPrefixFromPath("../../tests/e2e/tf", "w");
+  ways.insert(ways.end(), tempWays.begin(), tempWays.end());
+  std::sort(nodes.begin(), nodes.end(), [](const auto& a, const auto& b) -> bool {
+    return a.filename().string() < b.filename().string();
+  });
+  std::sort(ways.begin(), ways.end(), [](const auto& a, const auto& b) -> bool {
+    return a.filename().string() < b.filename().string();
+  });
+  // Copied from ...
+  inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+  for (const auto& f : nodes) {
+    inputFile << std::ifstream(f).rdbuf();
+  }
+  for (const auto& f : ways) {
+    inputFile << std::ifstream(f).rdbuf();
+  }
+  inputFile << "</osm>" << std::endl;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  writer.writeHeader();
+
+  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osmiumHandler.handle();
+
+  output.flush();
+  output.close();
+
+  const auto printedState = cerrBuffer.str();
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("areas seen:2 dumped: 2 geometry: 2\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("nodes seen:64 dumped: 3 geometry: 3\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("ways seen:2 dumped: 2 geometry: 2\n"));
+  ASSERT_THAT(
+      printedState,
+      ::testing::HasSubstr("Contains relations for 3 nodes in 2 areas ...\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr(
+                  "... done with looking at 6 areas, 3 skipped by DAG\n"
+                  "                           3 checks performed\n"
+                  "                           contains: 3 yes: 3\n"));
+  ASSERT_THAT(
+      printedState,
+      ::testing::HasSubstr("Contains relations for 2 ways in 2 areas ...\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr(
+                  "... done with looking at 2 areas\n"
+                  "                           1 intersection checks performed, "
+                  "0 skipped by DAG, 1 skipped by NodeInfo\n"
+                  "                           intersect: 1 yes: 0\n"
+                  "                           1 contains checks performed, 0 "
+                  "skipped by DAG\n"
+                  "                           contains: 1 contains envelope: 1 "
+                  "yes: 1\n"));
+  const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("smway:98284318 geo:hasGeometry \"MULTIPOLYGON((("));
+              ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
+              ::testing::HasSubstr("osmway:98284318 osmt:source:outline "
+                                   "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 ogc:contains osmnode:2110601105 .\n"));
+              ::testing::HasSubstr(
+                  "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 ogc:intersects osmnode:2110601134 .\n"));
+              ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 ogc:contains osmnode:2110601134 .\n"));
+              ::testing::HasSubstr(
+                  "osmway:4498466 osmt:name \"Technische Fakultät\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:4498466 osmt:int_name \"Faculty of Engineering\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:4498466 osmt:operator "
+                               "\"Albert-Ludwigs-Universität Freiburg\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:4498466 osmt:wheelchair \"yes\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:4498466 geo:hasGeometry \"LINESTRING(7"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 ogc:intersects osmnode:5190342871 .\n"));
+              ::testing::HasSubstr(
+                  "osmway:4498466 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 ogc:contains osmnode:5190342871 .\n"));
+              ::testing::HasSubstr(
+                  "osmway:4498466 ogc:contains_area osmway:98284318 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:4498466 ogc:intersects_area osmway:98284318 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:contains osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:intersects osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:contains osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:intersects osmnode:5190342871 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:contains osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

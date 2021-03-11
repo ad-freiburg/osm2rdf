@@ -1,5 +1,5 @@
 .idea
-*build*
+*build*/
 input/
 output/
 scratch/
