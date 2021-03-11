@@ -109,6 +109,7 @@ class GeometryHandler {
                             std::string_view outerType, uint64_t innerId,
                             std::string_view innerType,
                             std::chrono::nanoseconds durationNS, bool result);
+  FRIEND_TEST(OSM_GeometryHandler, statisticLine);
   // Global config
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;

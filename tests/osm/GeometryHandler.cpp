@@ -2336,8 +2336,8 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
                                    "osmway:11 ogc:contains osmnode:2 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:11 ogc:intersects osmway:42 .\n"
-                                  "osmway:13 ogc:intersects osmway:42 .\n"
-                                  "osmway:12 ogc:contains osmway:42 .\n"));
+                                   "osmway:13 ogc:intersects osmway:42 .\n"
+                                   "osmway:12 ogc:contains osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -2473,6 +2473,43 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
   std::cout.rdbuf(coutBufferOrig);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_GeometryHandler, statisticLine) {
+  osm2ttl::config::Config config;
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, nullptr};
+  osm2ttl::osm::GeometryHandler gh{config, &writer};
+
+  ASSERT_EQ(
+      "{"
+      "\"function\":\"\","
+      "\"part\":\"\","
+      "\"check\":\"\","
+      "\"outer_id\":0,"
+      "\"outer_type\":\"\","
+      "\"inner_id\":0,"
+      "\"inner_type\":\"\","
+      "\"duration_ns\":0,"
+      "\"result\":false"
+      "},\n",
+      gh.statisticLine("", "", "", 0, "", 0, "",
+                       std::chrono::nanoseconds::zero(), false));
+
+  ASSERT_EQ(
+      "{"
+      "\"function\":\"f\","
+      "\"part\":\"p\","
+      "\"check\":\"c\","
+      "\"outer_id\":1,"
+      "\"outer_type\":\"to\","
+      "\"inner_id\":2,"
+      "\"inner_type\":\"ti\","
+      "\"duration_ns\":0,"
+      "\"result\":true"
+      "},\n",
+      gh.statisticLine("f", "p", "c", 1, "to", 2, "ti",
+                       std::chrono::nanoseconds::zero(), true));
 }
 
 }  // namespace osm2ttl::osm
