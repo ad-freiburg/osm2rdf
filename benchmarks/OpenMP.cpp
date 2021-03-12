@@ -26,7 +26,7 @@ void run(size_t n, omp_sched_t st, int ss) {
   {
     auto innerStart = std::chrono::steady_clock::now();
 #pragma omp for schedule(runtime)
-    for (int i = 0; i < input.size(); i++) {
+    for (size_t i = 0; i < input.size(); i++) {
       iterations[omp_get_thread_num()]++;
       result[omp_get_thread_num()].push_back(input[i]);
       // Higher values sleep longer -> simulate different execution times...
@@ -64,7 +64,7 @@ void run(size_t n, omp_sched_t st, int ss) {
   std::cout << std::setw(50) << std::left << stringStream.str() << std::setw(12)
             << std::right << "" << std::setw(14) << std::fixed
             << std::setprecision(3) << dur.count() << " ms" << std::endl;
-  for (size_t i = 0; i < omp_get_max_threads(); ++i) {
+  for (int i = 0; i < omp_get_max_threads(); ++i) {
     std::ostringstream stringStream2;
     stringStream2 << "Thread"
                   << " " << i;
@@ -96,19 +96,19 @@ int main() {
             << std::endl;
   for (const auto n : runs) {
     run(n, omp_sched_static, 0);
-    for (size_t i = 1; i < (n / omp_get_max_threads()); i *= 2) {
+    for (int i = 1; i < (n / omp_get_max_threads()); i *= 2) {
       run(n, omp_sched_static, i);
     }
   }
   for (const auto n : runs) {
     run(n, omp_sched_dynamic, 0);
-    for (size_t i = 1; i < (n / omp_get_max_threads()); i *= 2) {
+    for (int i = 1; i < (n / omp_get_max_threads()); i *= 2) {
       run(n, omp_sched_dynamic, i);
     }
   }
   for (const auto n : runs) {
     run(n, omp_sched_guided, 0);
-    for (size_t i = 1; i < (n / omp_get_max_threads()); i *= 2) {
+    for (int i = 1; i < (n / omp_get_max_threads()); i *= 2) {
       run(n, omp_sched_guided, i);
     }
   }
