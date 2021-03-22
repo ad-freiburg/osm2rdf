@@ -59,7 +59,7 @@ docker-fr: docker-dirs input/freiburg-regbez-latest.osm.pbf
 	wharfer build -t osm2ttl .
 	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
-docker-bw: docker-dirs input/baden-wuerttemberg.osm.pbf
+docker-bw: docker-dirs input/baden-wuerttemberg-latest.osm.pbf
 	wharfer build -t osm2ttl .
 	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
