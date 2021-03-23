@@ -453,67 +453,102 @@ TEST(E2E, building51NT) {
                   "                           3 checks performed\n"
                   "                           contains: 3 yes: 3\n"));
   const auto printedData = coutBuffer.str();
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.openstreetmap.org/way> .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> "
+                           "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> "
+                           "<https://www.openstreetmap.org/way> .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "<https://www.openstreetmap.org/way/98284318> "
+                               "<https://www.openstreetmap.org/wiki/"
+                               "Key:addr:city> \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "<https://www.openstreetmap.org/way/98284318> "
+                               "<https://www.openstreetmap.org/wiki/"
+                               "Key:addr:housenumber> \"51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "<https://www.openstreetmap.org/way/98284318> "
+                               "<https://www.openstreetmap.org/wiki/"
+                               "Key:addr:postcode> \"79110\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> "
+                           "<https://www.openstreetmap.org/wiki/"
+                           "Key:addr:street> \"Georges-Köhler-Allee\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "<https://www.openstreetmap.org/way/98284318> "
+                               "<https://www.openstreetmap.org/wiki/"
+                               "Key:building> \"university\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "<https://www.openstreetmap.org/way/98284318> "
+                               "<https://www.openstreetmap.org/wiki/"
+                               "Key:building:levels> \"4\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:addr:city> \"Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:addr:housenumber> \"51\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:addr:postcode> \"79110\" .\n"));
+          "<https://www.openstreetmap.org/way/98284318> "
+          "<https://www.openstreetmap.org/wiki/Key:name> \"Gebäude 51\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:addr:street> \"Georges-Köhler-Allee\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:building> \"university\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:building:levels> \"4\" .\n"));
+          "<https://www.openstreetmap.org/way/98284318> "
+          "<https://www.openstreetmap.org/wiki/Key:roof:levels> \"1\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-      "<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:name> \"Gebäude 51\" .\n"));
+                               "<https://www.openstreetmap.org/way/98284318> "
+                               "<https://www.openstreetmap.org/wiki/"
+                               "Key:roof:shape> \"hipped\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "<https://www.openstreetmap.org/way/98284318> "
+                  "<https://www.openstreetmap.org/wiki/Key:source:outline> "
+                  "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "<https://www.openstreetmap.org/way/98284318> "
+          "<http://www.opengis.net/ont/geosparql#hasGeometry> \"LINESTRING(7"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "0)\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-      "<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:roof:levels> \"1\" .\n"));
+                               "<https://www.openstreetmap.org/way/98284318> "
+                               "<http://www.opengis.net/ont/"
+                               "geosparql#hasGeometry> \"MULTIPOLYGON(((7"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:roof:shape> \"hipped\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <https://www.openstreetmap.org/wiki/Key:source:outline> \"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/ont/geosparql#hasGeometry> \"LINESTRING(7"));
+      ::testing::HasSubstr(
+          "0)))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "0)\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
+                  "<https://www.openstreetmap.org/way/98284318> "
+                  "<http://www.opengis.net/rdf#intersects> "
+                  "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/ont/geosparql#hasGeometry> \"MULTIPOLYGON(((7"));
+                  "<https://www.openstreetmap.org/way/98284318> "
+                  "<http://www.opengis.net/rdf#contains> "
+                  "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "0)))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
+                  "<https://www.openstreetmap.org/way/98284318> "
+                  "<http://www.opengis.net/rdf#intersects> "
+                  "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/rdf#intersects> <https://www.openstreetmap.org/node/2110601105> .\n"));
+                  "<https://www.openstreetmap.org/way/98284318> "
+                  "<http://www.opengis.net/rdf#contains> "
+                  "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/rdf#contains> <https://www.openstreetmap.org/node/2110601105> .\n"));
+                  "<https://www.openstreetmap.org/way/98284318> "
+                  "<http://www.opengis.net/rdf#intersects> "
+                  "<https://www.openstreetmap.org/node/5190342871> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/rdf#intersects> <https://www.openstreetmap.org/node/2110601134> .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/rdf#contains> <https://www.openstreetmap.org/node/2110601134> .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/rdf#intersects> <https://www.openstreetmap.org/node/5190342871> .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "<https://www.openstreetmap.org/way/98284318> <http://www.opengis.net/rdf#contains> <https://www.openstreetmap.org/node/5190342871> .\n"));
+                  "<https://www.openstreetmap.org/way/98284318> "
+                  "<http://www.opengis.net/rdf#contains> "
+                  "<https://www.openstreetmap.org/node/5190342871> .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -614,9 +649,9 @@ TEST(E2E, building51TTL) {
       printedData,
       ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-      "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
+                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-      "osmway:98284318 osmt:roof:levels \"1\" .\n"));
+                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
@@ -626,15 +661,11 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "0)\"^^geo:wktLiteral .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("0)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "0)))\"^^geo:wktLiteral .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
@@ -765,15 +796,11 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "0)\"^^geo:wktLiteral .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("0)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "0)))\"^^geo:wktLiteral .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
