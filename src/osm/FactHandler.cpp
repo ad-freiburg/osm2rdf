@@ -239,8 +239,10 @@ void osm2ttl::osm::FactHandler<W>::writeTag(const std::string& s,
 template <typename W>
 void osm2ttl::osm::FactHandler<W>::writeTagList(
     const std::string& s, const osm2ttl::osm::TagList& tags) {
+  size_t tagTripleCount = 0;
   for (const auto& tag : tags) {
     writeTag(s, tag);
+    tagTripleCount++;
     const std::string& key = tag.first;
     std::string value = tag.second;
     if (!_config.skipWikiLinks) {
@@ -261,6 +263,7 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
             _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, key),
             _writer->generateIRI(
                 osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, value));
+        tagTripleCount++;
       }
       if (key == "wikipedia") {
         auto pos = value.find(':');
@@ -271,14 +274,23 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
               s, osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA,
               _writer->generateIRI("https://" + lang + ".wikipedia.org/wiki/",
                                    entry));
+          tagTripleCount++;
         } else {
           _writer->writeTriple(
               s, osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA,
               _writer->generateIRI("https://www.wikipedia.org/wiki/", value));
+          tagTripleCount++;
         }
       }
     }
   }
+  _writer->writeTriple(
+      s,
+      _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+                           "facts"),
+      _writer->generateLiteral(
+          std::to_string(tagTripleCount),
+          "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
 }
 
 // ____________________________________________________________________________

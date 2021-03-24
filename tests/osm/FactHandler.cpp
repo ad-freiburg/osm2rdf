@@ -213,7 +213,8 @@ TEST(OSM_FactHandler, node) {
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
       "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
-      "osmnode:42 osmt:city \"Freiburg\" .\n",
+      "osmnode:42 osmt:city \"Freiburg\" .\n"
+      "osmnode:42 osmm:facts \"1\"^^xsd:integer .\n",
       buffer.str());
 
   // Cleanup
@@ -260,6 +261,7 @@ TEST(OSM_FactHandler, relation) {
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
       "osmrel:42 osmt:city \"Freiburg\" .\n"
+      "osmrel:42 osmm:facts \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0 .\n"
       "_:0 osm:id osmnode:1 .\n"
       "_:0 osm:role \"label\" .\n"
@@ -314,6 +316,7 @@ TEST(OSM_FactHandler, way) {
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
       "osmway:42 osmt:city \"Freiburg\" .\n"
+      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n",
       buffer.str());
@@ -362,6 +365,7 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
       "osmway:42 osmt:city \"Freiburg\" .\n"
+      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
@@ -412,6 +416,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
       "osmway:42 osmt:city \"Freiburg\" .\n"
+      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0 .\n"
       "_:0 osmway:node osmnode:1 .\n"
       "_:0 osmm:pos \"1\"^^xsd:integer .\n"
@@ -466,6 +471,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
       "osmway:42 osmt:city \"Freiburg\" .\n"
+      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osmway:is_closed \"no\" .\n"
