@@ -150,8 +150,8 @@ TEST(E2E, singleNodeWithTags) {
               ::testing::HasSubstr("osmnode:240092010 rdf:type osm:node .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmnode:240092010 geo:hasGeometry \"POINT(7.849400500000 "
-                  "47.996090100000)\"^^geo:wktLiteral .\n"));
+                  "osmnode:240092010 geo:hasGeometry \"POINT(7.84940050 "
+                  "47.99609010)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmnode:240092010 osmt:alt_name \"Freiburg i. Br.\" .\n"));
