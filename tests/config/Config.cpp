@@ -27,6 +27,7 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addInverseRelationDirection);
+  ASSERT_TRUE(config.addSortMetadata);
   ASSERT_FALSE(config.addWayEnvelope);
   ASSERT_FALSE(config.addWayNodeOrder);
   ASSERT_FALSE(config.addWayMetadata);
