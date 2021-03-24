@@ -24,6 +24,7 @@ const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 // Generated constants (depending on output format)
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
+
 inline std::string IRI__OGC_CONTAINS;
 inline std::string IRI__OGC_CONTAINED_BY;
 inline std::string IRI__OGC_CONTAINS_AREA;
@@ -32,6 +33,7 @@ inline std::string IRI__OGC_INTERSECTS;
 inline std::string IRI__OGC_INTERSECTED_BY;
 inline std::string IRI__OGC_INTERSECTS_AREA;
 inline std::string IRI__OGC_INTERSECTED_BY_AREA;
+
 inline std::string IRI__OSM_META__POS;
 inline std::string IRI__OSMWAY_ISCLOSED;
 inline std::string IRI__OSMWAY_NODE;
@@ -43,7 +45,12 @@ inline std::string IRI__OSM_RELATION;
 inline std::string IRI__OSM_TAG;
 inline std::string IRI__OSM_WAY;
 inline std::string IRI__OSM_WIKIPEDIA;
+
 inline std::string IRI__RDF_TYPE;
+
+inline std::string IRI__XSD_DECIMAL;
+inline std::string IRI__XSD_DOUBLE;
+inline std::string IRI__XSD_FLOAT;
 inline std::string IRI__XSD_INTEGER;
 
 inline std::string LITERAL__NO;

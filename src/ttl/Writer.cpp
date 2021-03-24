@@ -93,6 +93,13 @@ osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config,
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "wikipedia");
   osm2ttl::ttl::constants::IRI__RDF_TYPE =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__RDF, "type");
+
+  osm2ttl::ttl::constants::IRI__XSD_DECIMAL =
+      generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "decimal");
+  osm2ttl::ttl::constants::IRI__XSD_DOUBLE =
+      generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "double");
+  osm2ttl::ttl::constants::IRI__XSD_FLOAT =
+      generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
   osm2ttl::ttl::constants::IRI__XSD_INTEGER =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
 
