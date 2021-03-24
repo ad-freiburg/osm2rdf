@@ -41,6 +41,7 @@ TEST(OSM_FactHandler, areaFromWay) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addSortMetadata = false;
 
   osm2ttl::util::Output output{config, config.output};
   output.open();
@@ -89,6 +90,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addSortMetadata = false;
 
   osm2ttl::util::Output output{config, config.output};
   output.open();
@@ -138,6 +140,7 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addAreaEnvelope = true;
+  config.addSortMetadata = false;
 
   osm2ttl::util::Output output{config, config.output};
   output.open();

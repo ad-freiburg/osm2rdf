@@ -34,6 +34,16 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
   if (_config.addAreaEnvelope) {
     writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, area.envelope());
   }
+
+  if (_config.addSortMetadata) {
+    _writer->writeTriple(
+        s,
+        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+                             "area"),
+        _writer->generateLiteral(
+            std::to_string(area.geomArea()),
+            "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
+  }
 }
 
 // ____________________________________________________________________________
