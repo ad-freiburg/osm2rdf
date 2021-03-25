@@ -3,26 +3,26 @@
 
 #include "benchmark/benchmark.h"
 
-static void UINT32T_TO_STRING(benchmark::State& state) {
+static void UINT32T_TO_STRING_std_to_string(benchmark::State& state) {
   uint32_t x = state.range(0);
   for (auto _ : state) {
     std::string dummy = std::to_string(x);
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(UINT32T_TO_STRING)
+BENCHMARK(UINT32T_TO_STRING_std_to_string)
     ->RangeMultiplier(2)
     ->Range(1U << 0U, 1U << 30U)
     ->Complexity();
 
-static void UINT64T_TO_STRING(benchmark::State& state) {
+static void UINT64T_TO_STRING_std_to_string(benchmark::State& state) {
   uint64_t x = state.range(0);
   for (auto _ : state) {
     std::string dummy = std::to_string(x);
   }
   state.SetComplexityN(state.range(0));
 }
-BENCHMARK(UINT64T_TO_STRING)
+BENCHMARK(UINT64T_TO_STRING_std_to_string)
     ->RangeMultiplier(2)
     ->Range(1U << 0U, 1U << 30U)
     ->Complexity();
