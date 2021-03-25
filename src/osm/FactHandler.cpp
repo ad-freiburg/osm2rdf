@@ -36,13 +36,16 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
   }
 
   if (_config.addSortMetadata) {
+    std::ostringstream tmp;
+    // Increase default precision as areas in regbez freiburg have a 0 area
+    // otherwise.
+    tmp << std::fixed << std::setprecision(12) << area.geomArea();
     _writer->writeTriple(
         s,
         _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
                              "area"),
         _writer->generateLiteral(
-            std::to_string(area.geomArea()),
-            "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
+            tmp.str(), "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
   }
 }
 
