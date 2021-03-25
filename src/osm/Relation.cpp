@@ -18,8 +18,8 @@ osm2ttl::osm::Relation::Relation() {
 osm2ttl::osm::Relation::Relation(const osmium::Relation& relation) {
   _id = relation.positive_id();
   _tags = osm2ttl::osm::convertTagList(relation.tags());
-  _members.reserve(relation.members().size());
-  for (const auto& member : relation.members()) {
+  _members.reserve(relation.cmembers().size());
+  for (const auto& member : relation.cmembers()) {
     _members.emplace_back(member);
   }
 }
