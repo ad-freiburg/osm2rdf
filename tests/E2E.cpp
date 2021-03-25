@@ -150,8 +150,8 @@ TEST(E2E, singleNodeWithTags) {
               ::testing::HasSubstr("osmnode:240092010 rdf:type osm:node .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmnode:240092010 geo:hasGeometry \"POINT(7.84940050 "
-                  "47.99609010)\"^^geo:wktLiteral .\n"));
+                  "osmnode:240092010 geo:hasGeometry \"POINT(7.8494005 "
+                  "47.9960901)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmnode:240092010 osmt:alt_name \"Freiburg i. Br.\" .\n"));
@@ -510,7 +510,7 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "0)\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
+          "7)\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
                                "<https://www.openstreetmap.org/way/98284318> "
                                "<http://www.opengis.net/ont/"
@@ -661,7 +661,7 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr("0)\"^^geo:wktLiteral .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("7)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
@@ -796,7 +796,7 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr("0)\"^^geo:wktLiteral .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("7)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));

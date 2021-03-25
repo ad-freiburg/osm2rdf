@@ -222,7 +222,7 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osmm:area \"0.010000\"^^xsd:double .\n",
+      "osmway:21 osmm:area \"0.010000000000\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup

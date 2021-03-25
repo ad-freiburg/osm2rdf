@@ -42,7 +42,7 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 
   ASSERT_EQ(250, config.wktSimplify);
   ASSERT_EQ(5, config.wktDeviation);
-  ASSERT_EQ(8, config.wktPrecision);
+  ASSERT_EQ(7, config.wktPrecision);
 
   ASSERT_EQ(osm2ttl::util::OutputMergeMode::CONCATENATE, config.mergeOutput);
   ASSERT_TRUE(config.outputCompress);
