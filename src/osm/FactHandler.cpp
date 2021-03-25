@@ -164,6 +164,16 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
                              std::to_string(numUniquePoints),
                              "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
   }
+
+  if (_config.addSortMetadata) {
+    _writer->writeTriple(
+        s,
+        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+                             "length"),
+        _writer->generateLiteral(
+            std::to_string(boost::geometry::length(way.geom())),
+            "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
+  }
 }
 
 // ____________________________________________________________________________

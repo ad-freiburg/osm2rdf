@@ -204,12 +204,12 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
                                       osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
                             osmium::builder::attr::_outer_ring({
-                                                                   {1, {48.0, 7.51}},
-                                                                   {2, {48.0, 7.61}},
-                                                                   {3, {48.1, 7.61}},
-                                                                   {4, {48.1, 7.51}},
-                                                                   {1, {48.0, 7.51}},
-                                                               }),
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }),
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2ttl object from osmium object
@@ -342,6 +342,7 @@ TEST(OSM_FactHandler, way) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addSortMetadata = false;
 
   osm2ttl::util::Output output{config, config.output};
   output.open();
@@ -379,6 +380,57 @@ TEST(OSM_FactHandler, way) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, wayAddSortMetadata) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addSortMetadata = true;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2ttl object from osmium object
+  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+
+  dh.way(w);
+  output.flush();
+  output.close();
+
+  // osmm:length should be a multiple of sqrt(2)
+  ASSERT_EQ(
+      "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmt:city \"Freiburg\" .\n"
+      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "7.6)\"^^geo:wktLiteral .\n"
+      "osmway:42 osmm:length \"0.141421\"^^xsd:double .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, wayAddWayEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
@@ -390,6 +442,7 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addSortMetadata = false;
   config.addWayEnvelope = true;
 
   osm2ttl::util::Output output{config, config.output};
@@ -441,6 +494,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addSortMetadata = false;
   config.addWayNodeOrder = true;
 
   osm2ttl::util::Output output{config, config.output};
@@ -496,6 +550,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addSortMetadata = false;
   config.addWayMetadata = true;
 
   osm2ttl::util::Output output{config, config.output};
