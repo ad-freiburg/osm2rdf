@@ -135,7 +135,7 @@ TEST(OSM_OsmiumHandler, constructor) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_OsmiumHandler, noDump) {
+TEST(OSM_OsmiumHandler, noFacts) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -172,7 +172,7 @@ TEST(OSM_OsmiumHandler, noDump) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_OsmiumHandler, noContains) {
+TEST(OSM_OsmiumHandler, noGeometricRelations) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
