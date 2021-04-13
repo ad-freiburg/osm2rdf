@@ -128,6 +128,14 @@ const static inline std::string ADD_AREA_ENVELOPE_OPTION_LONG =
 const static inline std::string ADD_AREA_ENVELOPE_OPTION_HELP =
     "Add envelope to areas.";
 
+const static inline std::string ADD_AREA_ENVELOPE_RATIO_INFO =
+    "Adding area/envelope ratios";
+const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT = "";
+const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_LONG =
+    "add-area-envelope-ratio";
+const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_HELP =
+    "Add area/envelope ratio to areas.";
+
 const static inline std::string ADD_WAY_ENVELOPE_INFO = "Adding way envelopes";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_LONG =
@@ -165,6 +173,15 @@ const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_LONG =
     "admin-relations-only";
 const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_HELP =
     "Only handle nodes and relations with \"admin-level\" tag.";
+
+const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_INFO =
+    "Minimal area/envelope ratio: ";
+const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT = "";
+const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG =
+    "minimal-area-envelope-ratio";
+const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP =
+    "Minimal ratio of area to envelope to include a named area in the DAG."
+    " Value <=0 includes every area.";
 
 const static inline std::string SKIP_WIKI_LINKS_INFO =
     "Not adding wikipedia and wikidata links.";

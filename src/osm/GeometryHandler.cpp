@@ -107,9 +107,19 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
-      _spatialStorageArea.push_back(
-          SpatialAreaValue(area.envelope(), area.id(), area.geom(),
-                           area.objId(), area.geomArea(), area.fromWay()));
+      if (_config.minimalAreaEnvelopeRatio <= 0.0 ||
+          area.geomArea() / area.envelopeArea() >
+              _config.minimalAreaEnvelopeRatio) {
+        _spatialStorageArea.push_back(
+            SpatialAreaValue(area.envelope(), area.id(), area.geom(),
+                             area.objId(), area.geomArea(), area.fromWay()));
+      } else {
+        // we have bad area envelope proportions -> treat as unnamed area
+        _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(),
+                                            area.geom(), area.objId(),
+                                            area.geomArea(), area.fromWay());
+        _numUnnamedAreas++;
+      }
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
       _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(),

@@ -41,6 +41,7 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
   ASSERT_FALSE(config.noWayGeometricRelations);
 
   ASSERT_FALSE(config.addAreaEnvelope);
+  ASSERT_FALSE(config.addAreaEnvelopeRatio);
   ASSERT_FALSE(config.addInverseRelationDirection);
   ASSERT_TRUE(config.addSortMetadata);
   ASSERT_FALSE(config.addWayEnvelope);
@@ -349,7 +350,18 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelope) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO));
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddAreaEnvelopeRatio) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.addAreaEnvelopeRatio = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_INFO));
 }
 
 // ____________________________________________________________________________
@@ -452,7 +464,22 @@ TEST(CONFIG_Config, getInfoAdminRelationsOnly) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO));
+      osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoMinimalAreaEnvelopeRatio) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+
+  const std::string res1 = config.getInfo("");
+  ASSERT_THAT(res1, ::testing::Not(::testing::HasSubstr(
+      osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO)));
+
+  config.minimalAreaEnvelopeRatio = 0.5;
+  const std::string res2 = config.getInfo("");
+  ASSERT_THAT(res2, ::testing::HasSubstr(
+      osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO));
 }
 
 // ____________________________________________________________________________

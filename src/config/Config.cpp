@@ -54,6 +54,17 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
         oss << "\n"
             << prefix << osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO;
       }
+      if (addAreaEnvelopeRatio) {
+        oss << "\n"
+            << prefix
+            << osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_INFO;
+      }
+      if (minimalAreaEnvelopeRatio > 0) {
+        oss << "\n"
+            << prefix
+            << osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO
+            << std::to_string(minimalAreaEnvelopeRatio);
+      }
     }
     if (noNodeFacts) {
       oss << "\n" << prefix << osm2ttl::config::constants::NO_NODE_FACTS_INFO;
@@ -209,6 +220,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
       osm2ttl::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG,
       osm2ttl::config::constants::ADD_AREA_ENVELOPE_OPTION_HELP);
+  auto addAreaEnvelopeRatioOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_LONG,
+      osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_HELP);
   auto addWayEnvelopeOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG,
@@ -246,6 +261,12 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       "s", "wkt-simplify",
       "Simplify WKT-Geometries over this number of nodes, 0 to disable",
       wktSimplify);
+  auto minimalAreaEnvelopeRatioOp =
+      op.add<popl::Value<double>, popl::Attribute::advanced>(
+          osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT,
+          osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG,
+          osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP,
+          minimalAreaEnvelopeRatio);
 
   auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::expert>(
       osm2ttl::config::constants::WRITE_DAG_DOT_FILES_OPTION_SHORT,
@@ -307,6 +328,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     // Select amount to dump
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
+    addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
     addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
     addWayMetadata = addWayMetaDataOp->is_set();
@@ -314,6 +336,8 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     wktSimplify = wktSimplifyOp->value();
+
+    minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
 

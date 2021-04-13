@@ -54,6 +54,10 @@ struct Config {
   bool adminRelationsOnly = false;
   bool skipWikiLinks = false;
 
+  // Addition filters / data
+  bool addAreaEnvelopeRatio = false;
+  double minimalAreaEnvelopeRatio = -1.0;
+
   // Default settings for data
   std::string osm2ttlPrefix = "osmadd";
 

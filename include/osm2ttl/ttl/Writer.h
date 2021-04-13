@@ -72,6 +72,8 @@ static const int NUM_BITS_IN_BYTE = 8;
 static const int NUM_BITS_IN_NIBBLE = 4;
 static const int MASK_BITS_OF_ONE_BYTE = k0xFF;
 
+static const int UTF8_BYTES_LONG = 8;
+static const int UTF8_BYTES_SHORT = 4;
 #include <string>
 
 #include "gtest/gtest_prod.h"

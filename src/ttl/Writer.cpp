@@ -437,9 +437,9 @@ std::string osm2ttl::ttl::Writer<T>::UCHAR(uint32_t codepoint) {
   std::ostringstream tmp;
   tmp << std::setfill('0');
   if (codepoint > k0xFFFFU) {
-    tmp << "\\U" << std::setw(8);
+    tmp << "\\U" << std::setw(UTF8_BYTES_LONG);
   } else {
-    tmp << "\\u" << std::setw(4);
+    tmp << "\\u" << std::setw(UTF8_BYTES_SHORT);
   }
   tmp << std::hex << codepoint;
   return tmp.str();

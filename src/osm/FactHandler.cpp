@@ -62,6 +62,17 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
         _writer->generateLiteral(
             tmp.str(), "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
   }
+
+  if (_config.addAreaEnvelopeRatio) {
+    std::ostringstream tmp;
+    tmp << std::fixed << (area.geomArea() / area.envelopeArea());
+    _writer->writeTriple(
+        s,
+        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+                             "area_envelope_ratio"),
+        _writer->generateLiteral(
+            tmp.str(), "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
+  }
 }
 
 // ____________________________________________________________________________
