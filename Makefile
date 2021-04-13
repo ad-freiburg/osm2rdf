@@ -1,3 +1,23 @@
+# Copyright 2020, University of Freiburg
+# Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+
+# This file is part of osm2ttl.
+#
+# osm2ttl is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# osm2ttl is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+
+DOCKER:=$(shell type -p wharfer || echo docker)
+
 all: compile checkstyle test benchmark
 
 clean:
@@ -50,27 +70,29 @@ input/planet-latest.osm.pbf: input
 	wget -O ./input/planet-latest.osm.pbf https://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
 
 docker-dirs:
+	mkdir input || true
+	chmod 777 input
 	mkdir output || true
 	chmod 777 output
 	mkdir scratch || true
 	chmod 777 scratch
 
 docker-fr: docker-dirs input/freiburg-regbez-latest.osm.pbf
-	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${DOCKER} build -t osm2ttl .
+	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
 docker-bw: docker-dirs input/baden-wuerttemberg-latest.osm.pbf
-	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${docker} build -t osm2ttl .
+	${docker} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
 docker-de: docker-dirs input/germany-latest.osm.pbf
-	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${docker} build -t osm2ttl .
+	${docker} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
 docker-eu: docker-dirs input/europe-latest.osm.pbf
-	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${docker} build -t osm2ttl .
+	${docker} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
 
 docker-pl: docker-dirs input/planet-latest.osm.pbf
-	wharfer build -t osm2ttl .
-	wharfer run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/planet-latest.osm.pbf -o /output/planet-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${docker} build -t osm2ttl .
+	${docker} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/planet-latest.osm.pbf -o /output/planet-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
