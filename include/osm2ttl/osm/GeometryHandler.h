@@ -140,6 +140,8 @@ class GeometryHandler {
       _spatialStorageAreaIndex;
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelation);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromWay);
+  FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios);
+  FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios);
 
   size_t _numUnnamedAreas = 0;
   FRIEND_TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation);
