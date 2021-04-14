@@ -59,12 +59,6 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
             << prefix
             << osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_INFO;
       }
-      if (minimalAreaEnvelopeRatio > 0) {
-        oss << "\n"
-            << prefix
-            << osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO
-            << std::to_string(minimalAreaEnvelopeRatio);
-      }
     }
     if (noNodeFacts) {
       oss << "\n" << prefix << osm2ttl::config::constants::NO_NODE_FACTS_INFO;
@@ -120,6 +114,12 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_MISCELLANEOUS;
+  if (minimalAreaEnvelopeRatio > 0) {
+    oss << "\n"
+        << prefix
+        << osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO
+        << std::to_string(minimalAreaEnvelopeRatio);
+  }
   if (writeDAGDotFiles) {
     oss << "\n"
         << prefix << osm2ttl::config::constants::WRITE_DAG_DOT_FILES_INFO;
