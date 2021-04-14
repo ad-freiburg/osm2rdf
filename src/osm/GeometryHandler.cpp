@@ -108,7 +108,7 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
   {
     if (area.hasName()) {
       if (_config.minimalAreaEnvelopeRatio <= 0.0 ||
-          area.geomArea() / area.envelopeArea() >
+          area.geomArea() / area.envelopeArea() >=
               _config.minimalAreaEnvelopeRatio) {
         _spatialStorageArea.push_back(
             SpatialAreaValue(area.envelope(), area.id(), area.geom(),
