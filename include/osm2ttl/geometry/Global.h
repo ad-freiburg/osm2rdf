@@ -20,7 +20,10 @@
 #define OSM2TTL_GEOMETRY_GLOBAL_H
 
 namespace osm2ttl::geometry {
+// Location type used by all geometry classes.
 typedef double location_coordinate_t;
+
+// Area type used to represent the area of areas.
 typedef double area_result_t;
 }  // namespace osm2ttl::geometry
 

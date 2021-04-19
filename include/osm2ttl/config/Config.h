@@ -86,8 +86,13 @@ struct Config {
   // Input file
   std::filesystem::path input;
 
+  // Parse provided commandline arguments into config object.
   void fromArgs(int argc, char** argv);
+
+  // Generate the information string containing the current settings.
   [[nodiscard]] std::string getInfo(std::string_view prefix) const;
+
+  // Generate a path inside the cache directory.
   [[nodiscard]] std::filesystem::path getTempPath(const std::string& p,
                                                   const std::string& s) const;
 };

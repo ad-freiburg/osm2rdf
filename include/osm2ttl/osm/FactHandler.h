@@ -34,6 +34,7 @@ class FactHandler {
  public:
   FactHandler(const osm2ttl::config::Config& config,
               osm2ttl::ttl::Writer<W>* writer);
+  // Add data
   void area(const osm2ttl::osm::Area& area);
   void node(const osm2ttl::osm::Node& node);
   void relation(const osm2ttl::osm::Relation& relation);
@@ -47,14 +48,17 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1);
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2);
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
+
   void writeBox(const std::string& s, const std::string& p,
                 const osm2ttl::geometry::Box& box);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
+
   void writeTag(const std::string& s, const osm2ttl::osm::Tag& tag);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyIRI);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
+
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
   FRIEND_TEST(OSM_FactHandler, writeTagList);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);

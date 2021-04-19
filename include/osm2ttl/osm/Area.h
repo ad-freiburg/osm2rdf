@@ -39,15 +39,24 @@ struct Area {
 
   Area();
   explicit Area(const osmium::Area& area);
+  // Osmium id.
   [[nodiscard]] id_t id() const noexcept;
+  // OSM id.
   [[nodiscard]] id_t objId() const noexcept;
 
+  // Return the geometry.
   [[nodiscard]] osm2ttl::geometry::Area geom() const noexcept;
+  // Return area of the geometry.
   [[nodiscard]] osm2ttl::geometry::area_result_t geomArea() const noexcept;
+  // Return the envelope.
   [[nodiscard]] osm2ttl::geometry::Box envelope() const noexcept;
+  // Return the are of the envelope.
   [[nodiscard]] osm2ttl::geometry::area_result_t envelopeArea() const noexcept;
+  // Return the administration level, 0 otherwise.
   [[nodiscard]] char tagAdministrationLevel() const noexcept;
+  // Return if this area is created from a way.
   [[nodiscard]] bool fromWay() const noexcept;
+  // Return if this area has a name.
   [[nodiscard]] bool hasName() const noexcept;
 
   bool operator==(const osm2ttl::osm::Area& other) const noexcept;
@@ -55,7 +64,9 @@ struct Area {
   bool operator<(const osm2ttl::osm::Area& other) const noexcept;
 
  protected:
+  // The osmium id
   id_t _id;
+  // The OSM id
   id_t _objId;
   char _tagAdministrationLevel;
   bool _hasName;

@@ -39,6 +39,7 @@
 
 namespace osm2ttl::osm {
 
+// Area: envelope, id, geometry, osm id, area, fromWay
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Area::id_t,
                    osm2ttl::geometry::Area, osm2ttl::osm::Area::id_t,
                    osm2ttl::geometry::area_result_t, bool>
@@ -46,12 +47,15 @@ typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Area::id_t,
 
 typedef std::vector<SpatialAreaValue> SpatialAreaVector;
 
+// Node: envelope, osm  id, geometry
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Node::id_t,
                    osm2ttl::geometry::Node>
     SpatialNodeValue;
 typedef std::vector<SpatialNodeValue> SpatialNodeVector;
 
 typedef std::vector<osm2ttl::osm::Node::id_t> WayNodeList;
+
+// Way: envelope, osm id, geometry, node list
 typedef std::tuple<osm2ttl::geometry::Box, osm2ttl::osm::Way::id_t,
                    osm2ttl::geometry::Way, WayNodeList>
     SpatialWayValue;
@@ -61,6 +65,7 @@ typedef boost::geometry::index::rtree<SpatialAreaValue,
                                       boost::geometry::index::quadratic<16>>
     SpatialIndex;
 
+// node osm id -> area ids (not osm id)
 typedef std::unordered_map<osm2ttl::osm::Node::id_t,
                            std::vector<osm2ttl::osm::Area::id_t>>
     NodesContainedInAreasData;
@@ -72,7 +77,7 @@ class GeometryHandler {
                   osm2ttl::ttl::Writer<W>* writer);
   ~GeometryHandler();
 
-  // Store data
+  // Add data
   void area(const osm2ttl::osm::Area& area);
   void node(const osm2ttl::osm::Node& node);
   void way(const osm2ttl::osm::Way& way);
@@ -86,15 +91,18 @@ class GeometryHandler {
   void prepareRTree();
   FRIEND_TEST(OSM_GeometryHandler, prepareRTreeEmpty);
   FRIEND_TEST(OSM_GeometryHandler, prepareRTreeSimple);
+
   // Generate DAG for areas using prepared r-tree.
   void prepareDAG();
   FRIEND_TEST(OSM_GeometryHandler, prepareDAGEmpty);
   FRIEND_TEST(OSM_GeometryHandler, prepareDAGSimple);
+
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpNamedAreaRelations();
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsEmpty);
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple);
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP);
+
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpUnnamedAreaRelations();
   FRIEND_TEST(OSM_GeometryHandler, noAreaGeometricRelations);
@@ -102,6 +110,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly);
+
   // Calculate relations for each node.
   NodesContainedInAreasData dumpNodeRelations();
   FRIEND_TEST(OSM_GeometryHandler, noNodeGeometricRelations);
@@ -109,6 +118,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpNodeRelationsEmpty2);
   FRIEND_TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects);
   FRIEND_TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains);
+
   // Calculate relations for each way.
   void dumpWayRelations(
       const osm2ttl::osm::NodesContainedInAreasData& nodeData);
@@ -119,12 +129,15 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo);
-  std::string statisticLine(std::string_view function, std::string_view part,
+
+  // Write a statistic line for a given spatial check
+  [[nodiscard]] std::string statisticLine(std::string_view function, std::string_view part,
                             std::string_view check, uint64_t outerId,
                             std::string_view outerType, uint64_t innerId,
                             std::string_view innerType,
                             std::chrono::nanoseconds durationNS, bool result);
   FRIEND_TEST(OSM_GeometryHandler, statisticLine);
+
   // Global config
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;
