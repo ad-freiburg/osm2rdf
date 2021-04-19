@@ -151,7 +151,9 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
 void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   popl::OptionParser op("Allowed options");
 
-  auto helpOp = op.add<popl::Switch>("h", "help", "Lorem ipsum");
+  auto helpOp = op.add<popl::Switch>(
+      "h", "help",
+      "Display help information, use multiple times to display more.");
 
   auto storeLocationsOnDiskOp = op.add<popl::Switch, popl::Attribute::advanced>(
       osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
