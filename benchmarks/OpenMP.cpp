@@ -28,6 +28,7 @@
 
 typedef std::chrono::duration<double, std::milli> timingInfo;
 
+// ____________________________________________________________________________
 void run(size_t n, omp_sched_t st, int ss) {
   omp_set_schedule(st, ss);
   std::vector<int> iterations(omp_get_max_threads(), 0);
@@ -97,6 +98,7 @@ void run(size_t n, omp_sched_t st, int ss) {
   }
 }
 
+// ____________________________________________________________________________
 int main() {
   std::vector<int> runs{117,    265,    567,    934,    1 << 4,
                         1 << 6, 1 << 8, 1 << 9, 1 << 10};

@@ -28,19 +28,31 @@ namespace osm2ttl::util {
 
 class ProgressBar {
  public:
+  // Initializes a ProgressBar with given maxValue. If show equals false nothing
+  // will be printed to std::cerr when update is called.
   ProgressBar(std::size_t maxValue, bool show);
+  // Updates the progress bar.
   void update(std::size_t count);
+  // Marks progress bar as done (calling update with _maxValue).
   void done();
 
+  // Returns number of digits required to print _maxValue.
   std::size_t countWidth() const;
 
  protected:
+  // Maximal value for this progress bar.
   std::size_t _maxValue;
+  // Current absolute value.
   std::size_t _oldValue;
+  // Number of digits required for _maxValue.
   std::size_t _countWidth;
+  // Width of whole progress bar.
   std::size_t _width;
+  // Current percent value.
   std::size_t _percent;
+  // Time of last update.
   std::time_t _last;
+  // Print to std::cerr or not.
   bool _show;
 };
 

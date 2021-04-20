@@ -56,24 +56,30 @@ void osm2ttl::util::ProgressBar::update(std::size_t count) {
     return;
   }
 
+  // Store new values.
   _percent = percent;
   _oldValue = count;
+  // Open progress bar part with [ ...
   std::cerr << '[';
+  // ... add = to indicate done parts ...
   for (size_t i = 0; i < num; ++i) {
     std::cerr << '=';
   }
+  // ... not at the end -> add > to indicate an arrow ...
   if (num < _width) {
     std::cerr << '>';
   }
+  // ... fill blank spaces ...
   for (size_t i = num + 1; i < _width; ++i) {
     std::cerr << ' ';
   }
+  // ... add closing ]
   std::cerr << ']';
 
-  // %
+  // Add percentage display %
   std::cerr << ' ' << std::setw(3) << std::right << percent << "%";
 
-  // [x/y]
+  // Add absolute progress [x/y]
   std::cerr << " [" << std::setw(_countWidth) << std::right << count << "/"
             << _maxValue << "]\r";
 

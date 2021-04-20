@@ -25,11 +25,17 @@ namespace osm2ttl::util {
 
 class CacheFile {
  public:
+  // Creates CacheFile at given path.
   explicit CacheFile(const std::filesystem::path& path);
+  // Closes and removes files.
   ~CacheFile();
+  // Opens file.
   void reopen();
+  // Closes file if open.
   void close();
+  // Removes file.
   bool remove();
+  // Returns file descriptor for use in libosmium.
   [[nodiscard]] int fileDescriptor() const;
 
  protected:

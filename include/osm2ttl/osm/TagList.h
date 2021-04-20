@@ -29,6 +29,7 @@ namespace osm2ttl::osm {
 
 typedef std::unordered_map<std::string, std::string> TagList;
 
+// Convert an osmium::TagList into a osm2ttl::osm::TagList
 osm2ttl::osm::TagList convertTagList(const osmium::TagList& tagList);
 
 }  // namespace osm2ttl::osm

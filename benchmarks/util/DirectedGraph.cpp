@@ -22,6 +22,7 @@
 
 #include "benchmark/benchmark.h"
 
+// ____________________________________________________________________________
 static void DirectedGraph_findSuccessors_First(benchmark::State& state) {
   osm2ttl::util::DirectedGraph<uint16_t> dg;
   std::vector<uint64_t> vertices(state.range(0));
@@ -40,6 +41,7 @@ BENCHMARK(DirectedGraph_findSuccessors_First)
     ->Range(1U << 1U, 1U << 10U)
     ->Complexity();
 
+// ____________________________________________________________________________
 static void DirectedGraph_findSuccessors_Last(benchmark::State& state) {
   osm2ttl::util::DirectedGraph<uint16_t> dg;
   std::vector<uint64_t> vertices(state.range(0));
@@ -58,6 +60,7 @@ BENCHMARK(DirectedGraph_findSuccessors_Last)
     ->Range(1U << 1U, 1U << 10U)
     ->Complexity();
 
+// ____________________________________________________________________________
 static void DirectedGraph_findSuccessorsFast_First(benchmark::State& state) {
   osm2ttl::util::DirectedGraph<uint16_t> dg;
   std::vector<uint64_t> vertices(state.range(0));

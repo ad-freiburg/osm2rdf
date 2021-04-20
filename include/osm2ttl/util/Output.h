@@ -32,34 +32,40 @@ class Output {
   Output(const osm2ttl::config::Config& config, const std::string& prefix,
          size_t partCount);
   ~Output();
-  // open all output streams.
+  // Create and open all output streams.
   bool open();
-  // close all output streams.
+  // Close all output streams.
   void close();
   void close(std::string_view prefix, std::string_view suffix);
-  // write the given line into the correct part for the current (openmp) thread.
+  // Write the given line into the correct part for the current (openmp) thread.
   void write(std::string_view line);
-  // write the given line into the specified part.
+  // Write the given line into the specified part.
   void write(std::string_view line, size_t part);
-  // flush all part.
+  // Flush all part.
   void flush();
-  // flush the given part.
+  // Flush the given part.
   void flush(size_t part);
-  // filename for given part. Special handling for -1 and -2.
+  // Filename for given part. Special handling for -1 (prefix) and -2 (suffix).
   std::string partFilename(int part);
 
  protected:
-  // merge closes and merges all parts, prepend given prefix and append given
-  // suffix.
+  // Closes and merges all parts, prepend given prefix and append given suffix.
   void merge(std::string_view prefix, std::string_view suffix);
+  // Closes and concatenates all parts without decompressing and recompressing
+  // streams.
   void concatenate(std::string_view prefix, std::string_view suffix);
+  // Write prefix and suffix into own files.
   void none(std::string_view prefix, std::string_view suffix);
+  // Config instance.
   const osm2ttl::config::Config _config;
+  // Prefix for all filenames.
   const std::string _prefix;
+  // Number of parts.
   std::size_t _numOuts;
+  // Number of digits required for _numOuts.
   std::size_t _numOutsDigits;
   bool _open = false;
-  // Output
+  // Output streams
   boost::iostreams::filtering_ostream* _out;
   std::ofstream* _outFile;
 };

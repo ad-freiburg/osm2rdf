@@ -29,6 +29,7 @@
 #include "osm2ttl/util/Ram.h"
 #include "osm2ttl/util/Time.h"
 
+// ____________________________________________________________________________
 template <typename T>
 void run(const osm2ttl::config::Config& config) {
   // Setup

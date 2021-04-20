@@ -24,6 +24,7 @@
 #include "benchmark/benchmark.h"
 #include "osm2ttl/util/DirectedGraph.h"
 
+// ____________________________________________________________________________
 static void DirectedAcyclicGraph_reduceDAG_Line_MinimalConnections(
     benchmark::State& state) {
   osm2ttl::util::DirectedGraph<u_int16_t> dg{};
@@ -44,6 +45,7 @@ BENCHMARK(DirectedAcyclicGraph_reduceDAG_Line_MinimalConnections)
     ->Range(1U << 1U, 1U << 8U)
     ->Complexity();
 
+// ____________________________________________________________________________
 static void DirectedAcyclicGraph_reduceDAG_Line_MaximalConnections(
     benchmark::State& state) {
   osm2ttl::util::DirectedGraph<u_int16_t> dg{};

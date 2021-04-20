@@ -18,6 +18,7 @@
 
 #include "benchmark/benchmark.h"
 
+// ____________________________________________________________________________
 static void UINT32T_TO_STRING_std_to_string(benchmark::State& state) {
   uint32_t x = state.range(0);
   for (auto _ : state) {
@@ -30,6 +31,7 @@ BENCHMARK(UINT32T_TO_STRING_std_to_string)
     ->Range(1U << 0U, 1U << 30U)
     ->Complexity();
 
+// ____________________________________________________________________________
 static void UINT64T_TO_STRING_std_to_string(benchmark::State& state) {
   uint64_t x = state.range(0);
   for (auto _ : state) {
@@ -42,6 +44,7 @@ BENCHMARK(UINT64T_TO_STRING_std_to_string)
     ->Range(1U << 0U, 1U << 30U)
     ->Complexity();
 
+// ____________________________________________________________________________
 static void DUMMY(benchmark::State& state) {
   for (auto _ : state) {
     size_t s = 0;
