@@ -104,6 +104,10 @@ std::string osm2ttl::osm::GeometryHandler<W>::statisticLine(
 // ____________________________________________________________________________
 template <typename W>
 void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
+  auto geom = area.geom();
+  if (_config.simplifyGeometries > 0) {
+    geom = simplifyGeometry(geom);
+  }
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
@@ -111,20 +115,20 @@ void osm2ttl::osm::GeometryHandler<W>::area(const osm2ttl::osm::Area& area) {
           area.geomArea() / area.envelopeArea() >=
               _config.minimalAreaEnvelopeRatio) {
         _spatialStorageArea.push_back(
-            SpatialAreaValue(area.envelope(), area.id(), area.geom(),
-                             area.objId(), area.geomArea(), area.fromWay()));
+            SpatialAreaValue(area.envelope(), area.id(), geom, area.objId(),
+                             area.geomArea(), area.fromWay()));
       } else {
         // we have bad area envelope proportions -> treat as unnamed area
-        _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(),
-                                            area.geom(), area.objId(),
-                                            area.geomArea(), area.fromWay());
+        _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(), geom,
+                                            area.objId(), area.geomArea(),
+                                            area.fromWay());
         _numUnnamedAreas++;
       }
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
-      _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(),
-                                          area.geom(), area.objId(),
-                                          area.geomArea(), area.fromWay());
+      _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(), geom,
+                                          area.objId(), area.geomArea(),
+                                          area.fromWay());
       _numUnnamedAreas++;
     }
   }
@@ -148,11 +152,33 @@ void osm2ttl::osm::GeometryHandler<W>::way(const osm2ttl::osm::Way& way) {
   for (const auto& nodeRef : way.nodes()) {
     nodeIds.push_back(nodeRef.id());
   }
+  auto geom = way.geom();
+  if (_config.simplifyGeometries > 0) {
+    geom = simplifyGeometry(geom);
+  }
 #pragma omp critical(wayDataInsert)
   {
-    _oaWays << SpatialWayValue(way.envelope(), way.id(), way.geom(), nodeIds);
+    _oaWays << SpatialWayValue(way.envelope(), way.id(), geom, nodeIds);
     _numWays++;
   }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+template <typename G>
+G osm2ttl::osm::GeometryHandler<W>::simplifyGeometry(const G& g) {
+  G geom;
+  auto perimeter_or_length =
+      std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
+  boost::geometry::simplify(
+      g, geom, 0.001 * perimeter_or_length * _config.simplifyGeometries);
+  if (!boost::geometry::is_valid(geom)) {
+    return g;
+  }
+  if (boost::geometry::is_empty(geom)) {
+    return g;
+  }
+  return geom;
 }
 
 // ____________________________________________________________________________

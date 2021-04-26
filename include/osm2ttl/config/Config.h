@@ -43,6 +43,7 @@ struct Config {
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
   bool noWayGeometricRelations = false;
+  uint16_t simplifyGeometries = 0;
 
   // Select amount to dump
   bool addAreaEnvelope = false;
@@ -69,7 +70,7 @@ struct Config {
   std::filesystem::path statisticsPath;
 
   // Output modifiers
-  uint16_t wktSimplify = 250;
+  uint16_t simplifyWKT = 250;
   uint8_t wktDeviation = 5;
   uint8_t wktPrecision = 7;
 

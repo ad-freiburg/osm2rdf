@@ -227,8 +227,8 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
   osm2ttl::config::Config config;
-  config.output = config.getTempPath(
-      "TEST_OSM_GeometryHandler", "addNamedAreaFromWayWithRatios-output");
+  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
+                                     "addNamedAreaFromWayWithRatios-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
                                     "addNamedAreaFromWayWithRatios-cache");
   config.minimalAreaEnvelopeRatio = 0.75;
@@ -248,22 +248,22 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
   osmium::builder::add_area(buffer1, osmium::builder::attr::_id(areaId),
                             osmium::builder::attr::_tag("name", "Name"),
                             osmium::builder::attr::_outer_ring({
-                                                                   {1, {48.0, 7.51}},
-                                                                   {2, {48.0, 7.61}},
-                                                                   {3, {48.1, 7.61}},
-                                                                   {4, {48.1, 7.51}},
-                                                                   {1, {48.0, 7.51}},
-                                                               }));
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }));
   // Rombus in square -> ratio ~0.5
   osmium::builder::add_area(buffer2, osmium::builder::attr::_id(areaId + 2),
                             osmium::builder::attr::_tag("name", "Name2"),
                             osmium::builder::attr::_outer_ring({
-                                                                   {1, {0.0, 5.0}},
-                                                                   {2, {5.0, 10.0}},
-                                                                   {3, {10.0, 5.0}},
-                                                                   {4, {5.0, 0.0}},
-                                                                   {1, {0.0, 5.0}},
-                                                               }));
+                                {1, {0.0, 5.0}},
+                                {2, {5.0, 10.0}},
+                                {3, {10.0, 5.0}},
+                                {4, {5.0, 0.0}},
+                                {1, {0.0, 5.0}},
+                            }));
 
   // Create osm2ttl object from osmium object
   const osm2ttl::osm::Area src1{buffer1.get<osmium::Area>(0)};
@@ -2685,6 +2685,122 @@ TEST(OSM_GeometryHandler, statisticLine) {
       "},\n",
       gh.statisticLine("f", "p", "c", 1, "to", 2, "ti",
                        std::chrono::nanoseconds::zero(), true));
+}
+
+// ____________________________________________________________________________
+TEST(OSM_GeometryHandler, simplifyGeometryArea) {
+  osm2ttl::config::Config config;
+  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
+                                     "simplifyGeometryArea-output");
+  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
+                                    "simplifyGeometryArea-cache");
+  config.simplifyGeometries = 1;
+  std::filesystem::create_directories(config.output);
+  std::filesystem::create_directories(config.cache);
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::GeometryHandler gh{config, &writer};
+
+  const int areaId = 42;
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_area(buffer, osmium::builder::attr::_id(areaId),
+                            osmium::builder::attr::_tag("name", "Name"),
+                            osmium::builder::attr::_outer_ring({
+                                {1, {48.0, 7.51}},
+                                {5, {48.0, 7.56}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }));
+
+  // Create osm2ttl object from osmium object
+  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  ASSERT_TRUE(src.fromWay());
+
+  ASSERT_EQ(0, gh._spatialStorageArea.size());
+  gh.area(src);
+  ASSERT_EQ(1, gh._spatialStorageArea.size());
+
+  // Compare stored area with original
+  const auto& dst = gh._spatialStorageArea[0];
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(src.id() == std::get<1>(dst));
+  ASSERT_TRUE(src.geom() != std::get<2>(dst));
+  // Access rings
+  const auto srcRings = src.geom();
+  const auto dstRings = std::get<2>(dst);
+  ASSERT_EQ(1, srcRings.size());
+  ASSERT_EQ(1, dstRings.size());
+  const auto srcRing = srcRings[0];
+  const auto dstRing = dstRings[0];
+  ASSERT_EQ(6, srcRing.outer().size());
+  ASSERT_EQ(5, dstRing.outer().size());
+
+  // Cleanup
+  output.close();
+  std::filesystem::remove_all(config.cache);
+  std::filesystem::remove_all(config.output);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_GeometryHandler, simplifyGeometryWay) {
+  osm2ttl::config::Config config;
+  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
+                                     "simplifyGeometryWay-output");
+  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
+                                    "simplifyGeometryWay-cache");
+  config.simplifyGeometries = 100;
+  std::filesystem::create_directories(config.output);
+  std::filesystem::create_directories(config.cache);
+  osm2ttl::util::Output output{config, config.output};
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2ttl::osm::GeometryHandler gh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {3, {48.0, 7.52}},
+                               {2, {48.1, 7.61}},
+                           }));
+
+  // Create osm2ttl object from osmium object
+  const osm2ttl::osm::Way src{buffer.get<osmium::Way>(0)};
+
+  ASSERT_EQ(0, gh._numWays);
+  gh.way(src);
+  ASSERT_EQ(1, gh._numWays);
+
+  // Read area from dump and compare
+  osm2ttl::osm::SpatialWayValue dst;
+
+  gh.closeExternalStorage();
+  std::ifstream ifs(config.getTempPath("spatial", "ways"), std::ios::binary);
+  boost::archive::binary_iarchive ia(ifs);
+  ia >> dst;
+  ifs.close();
+
+  // Compare stored area with original
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(src.id() == std::get<1>(dst));
+  ASSERT_TRUE(src.geom() != std::get<2>(dst));
+  // Access rings
+  const auto srcWay = src.geom();
+  const auto dstWay = std::get<2>(dst);
+  ASSERT_EQ(3, srcWay.size());
+  ASSERT_EQ(2, dstWay.size());
+
+  // Cleanup
+  output.close();
+  std::filesystem::remove_all(config.cache);
+  std::filesystem::remove_all(config.output);
 }
 
 }  // namespace osm2ttl::osm

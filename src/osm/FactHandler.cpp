@@ -212,8 +212,8 @@ void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
   std::ostringstream tmp;
-  if (_config.wktSimplify > 0 &&
-      boost::geometry::num_points(g) > _config.wktSimplify) {
+  if (_config.simplifyWKT > 0 &&
+      boost::geometry::num_points(g) > _config.simplifyWKT) {
     G geom;
     auto perimeter_or_length =
         std::max(boost::geometry::perimeter(g), boost::geometry::length(g));

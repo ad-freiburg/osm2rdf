@@ -138,6 +138,11 @@ class GeometryHandler {
                             std::chrono::nanoseconds durationNS, bool result);
   FRIEND_TEST(OSM_GeometryHandler, statisticLine);
 
+  template <typename G>
+  [[nodiscard]] G simplifyGeometry(const G& g);
+  FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
+  FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryWay);
+
   // Global config
   osm2ttl::config::Config _config;
   osm2ttl::ttl::Writer<W>* _writer;

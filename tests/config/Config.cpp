@@ -56,7 +56,8 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 
   ASSERT_FALSE(config.writeGeometricRelationStatistics);
 
-  ASSERT_EQ(250, config.wktSimplify);
+  ASSERT_EQ(0, config.simplifyGeometries);
+  ASSERT_EQ(250, config.simplifyWKT);
   ASSERT_EQ(5, config.wktDeviation);
   ASSERT_EQ(7, config.wktPrecision);
 
@@ -394,7 +395,40 @@ TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO));
+      osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoSimplifyGeometries) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.simplifyGeometries = 250;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+      osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoSimplifyWKT) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.simplifyWKT = 250;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+      osm2ttl::config::constants::SIMPLIFY_WKT_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoSkipWikiLinks) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.skipWikiLinks = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+      osm2ttl::config::constants::SKIP_WIKI_LINKS_INFO));
 }
 
 // ____________________________________________________________________________

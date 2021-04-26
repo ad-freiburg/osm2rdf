@@ -83,6 +83,9 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
             << prefix << osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO;
       }
     }
+    if (simplifyWKT > 0) {
+      oss << "\n" << prefix << osm2ttl::config::constants::SIMPLIFY_WKT_INFO;
+    }
     if (skipWikiLinks) {
       oss << "\n" << prefix << osm2ttl::config::constants::SKIP_WIKI_LINKS_INFO;
     }
@@ -111,6 +114,10 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n"
           << prefix
           << osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_INFO;
+    }
+    if (simplifyGeometries > 0) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_INFO;
     }
   }
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_MISCELLANEOUS;
@@ -259,10 +266,16 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
           osm2ttl::config::constants::OSM2TTL_PREFIX_OPTION_HELP,
           osm2ttlPrefix);
 
-  auto wktSimplifyOp = op.add<popl::Value<uint16_t>>(
-      "s", "wkt-simplify",
-      "Simplify WKT-Geometries over this number of nodes, 0 to disable",
-      wktSimplify);
+  auto simplifyGeometriesOp =
+      op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
+          osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_OPTION_SHORT,
+          osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
+          osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_OPTION_HELP,
+          simplifyGeometries);
+  auto simplifyWKTOp = op.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
+      osm2ttl::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
+      osm2ttl::config::constants::SIMPLIFY_WKT_OPTION_LONG,
+      osm2ttl::config::constants::SIMPLIFY_WKT_OPTION_HELP, simplifyWKT);
   auto minimalAreaEnvelopeRatioOp =
       op.add<popl::Value<double>, popl::Attribute::advanced>(
           osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT,
@@ -337,7 +350,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
-    wktSimplify = wktSimplifyOp->value();
+    simplifyWKT = simplifyWKTOp->value();
 
     minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
 

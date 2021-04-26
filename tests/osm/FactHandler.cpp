@@ -656,7 +656,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
-  config.wktSimplify = 2;
+  config.simplifyWKT = 2;
   // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
   config.wktDeviation = 5;
 
@@ -701,7 +701,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
-  config.wktSimplify = 2;
+  config.simplifyWKT = 2;
   // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
   config.wktDeviation = 5;
 
@@ -742,7 +742,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
-  config.wktSimplify = 2;
+  config.simplifyWKT = 2;
   // Simplify all nodes with distance <= 80% of small side (100 * 0.8 = 80)
   config.wktDeviation = 80;
 

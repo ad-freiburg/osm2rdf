@@ -183,6 +183,21 @@ const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP =
     "Minimal ratio of area to envelope to include a named area in the DAG."
     " Value <=0 includes every area.";
 
+const static inline std::string SIMPLIFY_GEOMETRIES_INFO =
+    "Simplifying relationship geometries";
+const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_SHORT = "";
+const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_LONG =
+    "simplify-geometries";
+const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_HELP =
+    "Factor for geometry simplifaction, 0 to disable. This only affects "
+    "relationship calculations and not the geometry dump.";
+
+const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
+const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
+const static inline std::string SIMPLIFY_WKT_OPTION_LONG = "simplify-wkt";
+const static inline std::string SIMPLIFY_WKT_OPTION_HELP =
+    "Simplify WKT-Geometries over this number of nodes, 0 to disable.";
+
 const static inline std::string SKIP_WIKI_LINKS_INFO =
     "Not adding wikipedia and wikidata links.";
 const static inline std::string SKIP_WIKI_LINKS_OPTION_SHORT = "";
