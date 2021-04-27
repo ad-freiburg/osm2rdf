@@ -24,6 +24,7 @@
 #include "boost/geometry.hpp"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/Constants.h"
 #include "osm2ttl/osm/Node.h"
 #include "osm2ttl/osm/Relation.h"
 #include "osm2ttl/osm/Way.h"
@@ -54,7 +55,9 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
     std::ostringstream tmp;
     // Increase default precision as areas in regbez freiburg have a 0 area
     // otherwise.
-    tmp << std::fixed << std::setprecision(12) << area.geomArea();
+    tmp << std::fixed
+        << std::setprecision(osm2ttl::osm::constants::AREA_PRECISION)
+        << area.geomArea();
     _writer->writeTriple(
         s,
         _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
@@ -218,7 +221,9 @@ void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
     auto perimeter_or_length =
         std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
     boost::geometry::simplify(
-        g, geom, 0.001 * perimeter_or_length * _config.wktDeviation);
+        g, geom,
+        osm2ttl::osm::constants::BASE_SIMPLIFICATION_FACTOR *
+            perimeter_or_length * _config.wktDeviation);
     assert(boost::geometry::is_valid(geom));
     assert(!boost::geometry::is_empty(geom));
     tmp << std::fixed << std::setprecision(_config.wktPrecision)

@@ -25,6 +25,7 @@
 #include "osm2ttl/geometry/Area.h"
 #include "osm2ttl/geometry/Box.h"
 #include "osm2ttl/geometry/Global.h"
+#include "osm2ttl/osm/Constants.h"
 #include "osm2ttl/osm/Node.h"
 #include "osmium/osm/area.hpp"
 
@@ -41,8 +42,9 @@ osm2ttl::osm::Area::Area(const osmium::Area& area) : Area() {
   _objId = static_cast<osm2ttl::osm::Area::id_t>(area.orig_id());
   if (area.tags()["boundary"] != nullptr &&
       area.tags()["admin_level"] != nullptr) {
-    _tagAdministrationLevel = static_cast<char>(
-        strtol(area.tags()["admin_level"], nullptr, Base10Base));
+    _tagAdministrationLevel =
+        static_cast<char>(strtol(area.tags()["admin_level"], nullptr,
+                                 osm2ttl::osm::constants::BASE10_BASE));
   }
   _hasName = (area.tags()["name"] != nullptr);
 

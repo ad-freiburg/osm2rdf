@@ -19,7 +19,6 @@
 #ifndef OSM2TTL_OSM_AREA_H_
 #define OSM2TTL_OSM_AREA_H_
 
-static const int Base10Base = 10;
 #include <utility>
 #include <vector>
 

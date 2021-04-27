@@ -85,10 +85,16 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     }
     if (simplifyWKT > 0) {
       oss << "\n" << prefix << osm2ttl::config::constants::SIMPLIFY_WKT_INFO;
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::SIMPLIFY_WKT_DEVIATION_INFO
+          << wktDeviation;
     }
     if (skipWikiLinks) {
       oss << "\n" << prefix << osm2ttl::config::constants::SKIP_WIKI_LINKS_INFO;
     }
+    oss << "\n"
+        << prefix << osm2ttl::config::constants::WKT_PRECISION_INFO
+        << wktPrecision;
   }
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_CONTAINS;
   if (noGeometricRelations) {
@@ -117,7 +123,8 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     }
     if (simplifyGeometries > 0) {
       oss << "\n"
-          << prefix << osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_INFO;
+          << prefix << osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_INFO
+          << simplifyGeometries;
     }
   }
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_MISCELLANEOUS;
@@ -276,6 +283,15 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
       osm2ttl::config::constants::SIMPLIFY_WKT_OPTION_LONG,
       osm2ttl::config::constants::SIMPLIFY_WKT_OPTION_HELP, simplifyWKT);
+  auto wktDeviationOp = op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
+      osm2ttl::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_SHORT,
+      osm2ttl::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
+      osm2ttl::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_HELP,
+      wktDeviation);
+  auto wktPrecisionOp = op.add<popl::Value<uint8_t>, popl::Attribute::advanced>(
+      osm2ttl::config::constants::WKT_PRECISION_OPTION_SHORT,
+      osm2ttl::config::constants::WKT_PRECISION_OPTION_LONG,
+      osm2ttl::config::constants::WKT_PRECISION_OPTION_HELP, wktPrecision);
   auto minimalAreaEnvelopeRatioOp =
       op.add<popl::Value<double>, popl::Attribute::advanced>(
           osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT,
@@ -351,10 +367,13 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyWKT = simplifyWKTOp->value();
+    wktDeviation = wktDeviationOp->value();
 
     minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
+
+    wktPrecision = wktPrecisionOp->value();
 
     // Dot
     writeDAGDotFiles = writeDotFilesOp->is_set();

@@ -27,8 +27,6 @@
 
 namespace osm2ttl::osm {
 
-const double ONE_PERCENT = 0.01;
-
 template <typename W>
 class FactHandler {
  public:

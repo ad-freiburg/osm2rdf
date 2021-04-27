@@ -30,6 +30,7 @@
 #include "boost/thread.hpp"
 #include "osm2ttl/config/Config.h"
 #include "osm2ttl/osm/Area.h"
+#include "osm2ttl/osm/Constants.h"
 #include "osm2ttl/ttl/Constants.h"
 #include "osm2ttl/ttl/Writer.h"
 #include "osm2ttl/util/DirectedAcyclicGraph.h"
@@ -170,8 +171,9 @@ G osm2ttl::osm::GeometryHandler<W>::simplifyGeometry(const G& g) {
   G geom;
   auto perimeter_or_length =
       std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
-  boost::geometry::simplify(
-      g, geom, 0.001 * perimeter_or_length * _config.simplifyGeometries);
+  boost::geometry::simplify(g, geom,
+                            osm2ttl::osm::constants::BASE_SIMPLIFICATION_FACTOR * perimeter_or_length *
+                                _config.simplifyGeometries);
   if (!boost::geometry::is_valid(geom)) {
     return g;
   }

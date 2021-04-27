@@ -184,7 +184,7 @@ const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP =
     " Value <=0 includes every area.";
 
 const static inline std::string SIMPLIFY_GEOMETRIES_INFO =
-    "Simplifying relationship geometries";
+    "Simplifying relationship geometries with factor: ";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_SHORT = "";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_LONG =
     "simplify-geometries";
@@ -198,6 +198,15 @@ const static inline std::string SIMPLIFY_WKT_OPTION_LONG = "simplify-wkt";
 const static inline std::string SIMPLIFY_WKT_OPTION_HELP =
     "Simplify WKT-Geometries over this number of nodes, 0 to disable.";
 
+const static inline std::string SIMPLIFY_WKT_DEVIATION_INFO =
+    "Simplifying wkt geometries with factor: ";
+const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_SHORT = "";
+const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_LONG =
+    "simplify-wkt-deviation";
+const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_HELP =
+    "Same effect as simplify-geometries but for the simplification of dumped "
+    "geometries.";
+
 const static inline std::string SKIP_WIKI_LINKS_INFO =
     "Not adding wikipedia and wikidata links.";
 const static inline std::string SKIP_WIKI_LINKS_OPTION_SHORT = "";
@@ -209,7 +218,14 @@ const static inline std::string OSM2TTL_PREFIX_INFO = "Prefix for osm2ttl-iris";
 const static inline std::string OSM2TTL_PREFIX_OPTION_SHORT = "";
 const static inline std::string OSM2TTL_PREFIX_OPTION_LONG = "oms2ttl-prefix";
 const static inline std::string OSM2TTL_PREFIX_OPTION_HELP =
-    "Prefix for own IRIs";
+    "Prefix for own IRIs.";
+
+const static inline std::string WKT_PRECISION_INFO =
+    "Dumping WKT with precision: ";
+const static inline std::string WKT_PRECISION_OPTION_SHORT = "";
+const static inline std::string WKT_PRECISION_OPTION_LONG = "wkt-precision";
+const static inline std::string WKT_PRECISION_OPTION_HELP =
+    "Precision (number of decimal digits) for WKT coordinates.";
 
 const static inline std::string WRITE_DAG_DOT_FILES_INFO =
     "Storing DAG states as .dot files";
@@ -217,7 +233,7 @@ const static inline std::string WRITE_DAG_DOT_FILES_OPTION_SHORT = "";
 const static inline std::string WRITE_DAG_DOT_FILES_OPTION_LONG =
     "write-dag-dot-files";
 const static inline std::string WRITE_DAG_DOT_FILES_OPTION_HELP =
-    "Writes .dot files for DAG states";
+    "Writes .dot files for DAG states.";
 
 const static inline std::string WRITE_GEOM_RELATION_STATISTICS_INFO =
     "Storing statistics about geometry calculations - SLOW!";
