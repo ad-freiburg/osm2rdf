@@ -1011,6 +1011,91 @@ TEST(OSM_FactHandler, writeTagList) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListRefSingle) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "ref";
+  const std::string tagValue = "B 3";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+
+  osm2ttl::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+      " " + object1 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListRefMultiple) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "ref";
+  const std::string tagValue = "B 3;B 294";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral("B 3", "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object2 = writer.generateLiteral("B 294", "");
+
+  osm2ttl::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+      " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+      " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagListWikidata) {
   // Capture std::cout
   std::stringstream buffer;

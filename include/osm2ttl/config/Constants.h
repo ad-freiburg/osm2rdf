@@ -40,6 +40,34 @@ const static inline std::string SECTION_MISCELLANEOUS =
 const static inline std::string SECTION_OPENMP =
     SECTION_MARKER + " OpenMP " + SECTION_MARKER;
 
+const static inline std::string HELP_OPTION_SHORT = "h";
+const static inline std::string HELP_OPTION_LONG = "help";
+const static inline std::string HELP_OPTION_HELP = "Display help information, use multiple times to display more.";
+
+const static inline std::string CACHE_INFO = "Cache:";
+const static inline std::string CACHE_OPTION_SHORT = "t";
+const static inline std::string CACHE_OPTION_LONG = "cache";
+const static inline std::string CACHE_OPTION_HELP = "Path to cache directory";
+
+const static inline std::string INPUT_INFO = "Input:";
+
+const static inline std::string OUTPUT_INFO = "Output:";
+const static inline std::string OUTPUT_OPTION_SHORT = "o";
+const static inline std::string OUTPUT_OPTION_LONG = "output";
+const static inline std::string OUTPUT_OPTION_HELP = "Output file";
+
+const static inline std::string OUTPUT_FORMAT_INFO = "Output format:";
+const static inline std::string OUTPUT_FORMAT_OPTION_SHORT = "";
+const static inline std::string OUTPUT_FORMAT_OPTION_LONG = "output-format";
+const static inline std::string OUTPUT_FORMAT_OPTION_HELP =
+    "Output format, valid values: nt, ttl, qlever";
+
+const static inline std::string OUTPUT_NO_COMPRESS_OPTION_SHORT = "";
+const static inline std::string OUTPUT_NO_COMPRESS_OPTION_LONG =
+    "output-no-compress";
+const static inline std::string OUTPUT_NO_COMPRESS_OPTION_HELP =
+    "Do not compress output";
+
 const static inline std::string STORE_LOCATIONS_ON_DISK_INFO =
     "Storing locations osmium locations on disk";
 const static inline std::string STORE_LOCATIONS_ON_DISK_SHORT = "";
@@ -213,6 +241,13 @@ const static inline std::string SKIP_WIKI_LINKS_OPTION_SHORT = "";
 const static inline std::string SKIP_WIKI_LINKS_OPTION_LONG = "skip-wiki-links";
 const static inline std::string SKIP_WIKI_LINKS_OPTION_HELP =
     "Do not add wikipedia and wikidata links.";
+
+const static inline std::string SEMICOLON_TAG_KEYS_INFO =
+    "Tag-Keys split by semicolon: ";
+const static inline std::string SEMICOLON_TAG_KEYS_OPTION_SHORT = "";
+const static inline std::string SEMICOLON_TAG_KEYS_OPTION_LONG =
+    "semicolon-tag-key";
+const static inline std::string SEMICOLON_TAG_KEYS_OPTION_HELP = "";
 
 const static inline std::string OSM2TTL_PREFIX_INFO = "Prefix for osm2ttl-iris";
 const static inline std::string OSM2TTL_PREFIX_OPTION_SHORT = "";

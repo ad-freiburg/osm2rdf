@@ -32,10 +32,18 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
   std::ostringstream oss;
   oss << prefix << osm2ttl::config::constants::HEADER;
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_IO;
-  oss << "\n" << prefix << "Input:         " << input;
-  oss << "\n" << prefix << "Output:        " << output;
-  oss << "\n" << prefix << "Output format: " << outputFormat;
-  oss << "\n" << prefix << "Cache:         " << cache;
+  oss << "\n"
+      << prefix << osm2ttl::config::constants::INPUT_INFO << "         "
+      << input;
+  oss << "\n"
+      << prefix << osm2ttl::config::constants::OUTPUT_INFO << "        "
+      << output;
+  oss << "\n"
+      << prefix << osm2ttl::config::constants::OUTPUT_FORMAT_INFO << " "
+      << outputFormat;
+  oss << "\n"
+      << prefix << osm2ttl::config::constants::CACHE_INFO << "         "
+      << cache;
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_FACTS;
   oss << "\n"
       << prefix << osm2ttl::config::constants::OSM2TTL_PREFIX_INFO << ": "
@@ -95,6 +103,19 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     oss << "\n"
         << prefix << osm2ttl::config::constants::WKT_PRECISION_INFO
         << std::to_string(wktPrecision);
+    if (!semicolonTagKeys.empty()) {
+      oss << "\n"
+          << prefix << osm2ttl::config::constants::SEMICOLON_TAG_KEYS_INFO;
+      std::vector<std::string> keys;
+      keys.reserve(semicolonTagKeys.size());
+      for (auto key : semicolonTagKeys) {
+        keys.push_back(key);
+      }
+      std::sort(keys.begin(), keys.end());
+      for (auto key : keys) {
+        oss << "\n" << prefix << prefix << key;
+      }
+    }
   }
   oss << "\n" << prefix << osm2ttl::config::constants::SECTION_CONTAINS;
   if (noGeometricRelations) {
@@ -165,9 +186,10 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
 void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
   popl::OptionParser op("Allowed options");
 
-  auto helpOp = op.add<popl::Switch>(
-      "h", "help",
-      "Display help information, use multiple times to display more.");
+  auto helpOp =
+      op.add<popl::Switch>(osm2ttl::config::constants::HELP_OPTION_SHORT,
+                           osm2ttl::config::constants::HELP_OPTION_LONG,
+                           osm2ttl::config::constants::HELP_OPTION_HELP);
 
   auto storeLocationsOnDiskOp = op.add<popl::Switch, popl::Attribute::advanced>(
       osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
@@ -266,6 +288,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::SKIP_WIKI_LINKS_OPTION_LONG,
       osm2ttl::config::constants::SKIP_WIKI_LINKS_OPTION_HELP);
 
+  auto semicolonTagKeysOp =
+      op.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2ttl::config::constants::SEMICOLON_TAG_KEYS_OPTION_SHORT,
+          osm2ttl::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG,
+          osm2ttl::config::constants::SEMICOLON_TAG_KEYS_OPTION_HELP);
   auto osm2ttlPrefixOp =
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
           osm2ttl::config::constants::OSM2TTL_PREFIX_OPTION_SHORT,
@@ -310,16 +337,23 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG,
       osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP);
 
-  auto outputOp =
-      op.add<popl::Value<std::string>>("o", "output", "Output file", "");
+  auto outputOp = op.add<popl::Value<std::string>>(
+      osm2ttl::config::constants::OUTPUT_OPTION_SHORT,
+      osm2ttl::config::constants::OUTPUT_OPTION_LONG,
+      osm2ttl::config::constants::OUTPUT_OPTION_HELP, "");
   auto outputFormatOp =
       op.add<popl::Value<std::string>, popl::Attribute::advanced>(
-          "", "output-format", "Output format, valid values: nt, ttl, qlever",
-          "qlever");
+          osm2ttl::config::constants::OUTPUT_FORMAT_OPTION_SHORT,
+          osm2ttl::config::constants::OUTPUT_FORMAT_OPTION_LONG,
+          osm2ttl::config::constants::OUTPUT_FORMAT_OPTION_HELP, outputFormat);
   auto outputNoCompressOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      "", "output-no-compress", "Do not compress output");
+      osm2ttl::config::constants::OUTPUT_NO_COMPRESS_OPTION_SHORT,
+      osm2ttl::config::constants::OUTPUT_NO_COMPRESS_OPTION_LONG,
+      osm2ttl::config::constants::OUTPUT_NO_COMPRESS_OPTION_HELP);
   auto cacheOp = op.add<popl::Value<std::string>>(
-      "t", "cache", "Path to cache directory", cache);
+      osm2ttl::config::constants::CACHE_OPTION_SHORT,
+      osm2ttl::config::constants::CACHE_OPTION_LONG,
+      osm2ttl::config::constants::CACHE_OPTION_HELP, cache);
 
   try {
     op.parse(argc, argv);
@@ -373,6 +407,11 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
+    if (semicolonTagKeysOp->is_set()) {
+      for (size_t i = 0; i < semicolonTagKeysOp->count(); ++i) {
+        semicolonTagKeys.insert(semicolonTagKeysOp->value(i));
+      }
+    }
 
     wktPrecision = wktPrecisionOp->value();
 

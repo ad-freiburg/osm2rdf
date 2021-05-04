@@ -60,6 +60,8 @@ class FactHandler {
   void writeTagList(const std::string& s, const osm2ttl::osm::TagList& tags);
   FRIEND_TEST(OSM_FactHandler, writeTagList);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
+  FRIEND_TEST(OSM_FactHandler, writeTagListRefSingle);
+  FRIEND_TEST(OSM_FactHandler, writeTagListRefMultiple);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidataMultiple);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithLang);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang);

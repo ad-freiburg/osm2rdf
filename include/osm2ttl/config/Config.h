@@ -21,7 +21,7 @@
 
 #include <filesystem>
 #include <string>
-#include <unordered_map>
+#include <unordered_set>
 
 #include "osm2ttl/config/Constants.h"
 #include "osm2ttl/ttl/Format.h"
@@ -61,6 +61,7 @@ struct Config {
 
   // Default settings for data
   std::string osm2ttlPrefix = "osmadd";
+  std::unordered_set<std::string> semicolonTagKeys;
 
   // Dot
   bool writeDAGDotFiles = false;
@@ -76,7 +77,7 @@ struct Config {
 
   // Output, empty for stdout
   std::filesystem::path output;
-  std::string outputFormat;
+  std::string outputFormat = "qlever";
   osm2ttl::util::OutputMergeMode mergeOutput =
       osm2ttl::util::OutputMergeMode::CONCATENATE;
   bool outputCompress = true;

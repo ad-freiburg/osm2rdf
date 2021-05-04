@@ -299,6 +299,22 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
     tagTripleCount++;
     const std::string& key = tag.first;
     std::string value = tag.second;
+    // Special handling for ref tag splitting. Maybe generalize this...
+    if (_config.semicolonTagKeys.find(key) != _config.semicolonTagKeys.end() &&
+        value.find(';') != std::string::npos) {
+      size_t end;
+      size_t start = 0;
+      while ((end = value.find(';', start)) != std::string::npos) {
+        std::string partialValue = value.substr(start, end);
+        writeTag(s, osm2ttl::osm::Tag(key, partialValue));
+        tagTripleCount++;
+        start = end + 1;
+      };
+      std::string partialValue = value.substr(start, value.size());
+      writeTag(s, osm2ttl::osm::Tag(key, partialValue));
+      tagTripleCount++;
+    }
+    // Handling for wiki tags
     if (!_config.skipWikiLinks) {
       if (key == "wikidata") {
         // Only take first wikidata entry if ; is found

@@ -50,6 +50,7 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
   ASSERT_FALSE(config.adminRelationsOnly);
   ASSERT_FALSE(config.skipWikiLinks);
 
+  ASSERT_EQ(0, config.semicolonTagKeys.size());
   ASSERT_EQ("osmadd", config.osm2ttlPrefix);
 
   ASSERT_FALSE(config.writeDAGDotFiles);
@@ -79,8 +80,10 @@ TEST(CONFIG_Config, fromArgsHelpShort) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
+  auto helpArg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT;
   const int argc = 2;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-h")};
+  char* argv[argc] = {const_cast<char*>(""),
+                      const_cast<char*>(helpArg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
               ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
@@ -92,8 +95,10 @@ TEST(CONFIG_Config, fromArgsHelpLong) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
+  auto helpArg = "--" + osm2ttl::config::constants::HELP_OPTION_LONG;
   const int argc = 2;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("--help")};
+  char* argv[argc] = {const_cast<char*>(""),
+                      const_cast<char*>(helpArg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
               ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
@@ -105,9 +110,10 @@ TEST(CONFIG_Config, fromArgsHelpAdvanced) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
+  auto helpArg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT;
   const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-h"),
-                      const_cast<char*>("-h")};
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(helpArg.c_str()),
+                      const_cast<char*>(helpArg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
               ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
@@ -119,9 +125,11 @@ TEST(CONFIG_Config, fromArgsHelpExpert) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
+  auto helpArg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT;
   const int argc = 4;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-h"),
-                      const_cast<char*>("-h"), const_cast<char*>("-h")};
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(helpArg.c_str()),
+                      const_cast<char*>(helpArg.c_str()),
+                      const_cast<char*>(helpArg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
               ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
@@ -134,10 +142,11 @@ TEST(CONFIG_Config, fromArgsOutputCompressAddExtension) {
   assertDefaultConfig(config);
   osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
 
+  auto outputArg = "-" + osm2ttl::config::constants::OUTPUT_OPTION_SHORT;
   const int argc = 4;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-o"),
-                      const_cast<char*>("/tmp/output"),
-                      const_cast<char*>("/tmp/dummyInput")};
+  char* argv[argc] = {
+      const_cast<char*>(""), const_cast<char*>(outputArg.c_str()),
+      const_cast<char*>("/tmp/output"), const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("/tmp/output.bz2", config.output.string());
 }
@@ -148,8 +157,10 @@ TEST(CONFIG_Config, fromArgsOutputCompressKeepExtension) {
   assertDefaultConfig(config);
   osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
 
+  auto outputArg = "-" + osm2ttl::config::constants::OUTPUT_OPTION_SHORT;
   const int argc = 4;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-o"),
+  char* argv[argc] = {const_cast<char*>(""),
+                      const_cast<char*>(outputArg.c_str()),
                       const_cast<char*>("/tmp/output.bz2"),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
@@ -174,8 +185,10 @@ TEST(CONFIG_Config, fromArgsCacheNotFoundShort) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
+  auto cacheArg = "-" + osm2ttl::config::constants::CACHE_OPTION_SHORT;
   const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("-t"),
+  char* argv[argc] = {const_cast<char*>(""),
+                      const_cast<char*>(cacheArg.c_str()),
                       const_cast<char*>("/i/do/not/exist")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
@@ -189,8 +202,10 @@ TEST(CONFIG_Config, fromArgsCacheNotFoundLong) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
 
+  auto cacheArg = "--" + osm2ttl::config::constants::CACHE_OPTION_LONG;
   const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("--cache"),
+  char* argv[argc] = {const_cast<char*>(""),
+                      const_cast<char*>(cacheArg.c_str()),
                       const_cast<char*>("/i/do/not/exist")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
@@ -205,8 +220,10 @@ TEST(CONFIG_Config, fromArgsCacheIsNotDirectory) {
   assertDefaultConfig(config);
 
   osm2ttl::util::CacheFile cf("/tmp/dummy");
+  auto cacheArg = "--" + osm2ttl::config::constants::CACHE_OPTION_LONG;
   const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>("--cache"),
+  char* argv[argc] = {const_cast<char*>(""),
+                      const_cast<char*>(cacheArg.c_str()),
                       const_cast<char*>("/tmp/dummy")};
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
@@ -256,6 +273,45 @@ TEST(CONFIG_Config, fromArgsInputIsDirectory) {
       config.fromArgs(argc, argv),
       ::testing::ExitedWithCode(osm2ttl::config::ExitCode::INPUT_IS_DIRECTORY),
       "^Input is a directory: \".+\"");
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsSemicolonTagKeysSingleLong) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+
+  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  auto semicolonArg =
+      "--" + osm2ttl::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
+  const int argc = 4;
+  char* argv[argc] = {
+      const_cast<char*>(""),     const_cast<char*>(semicolonArg.c_str()),
+      const_cast<char*>("ref"),  const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ(1, config.semicolonTagKeys.size());
+  ASSERT_EQ(1, config.semicolonTagKeys.count("ref"));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsSemicolonTagKeysMultipleLong) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+
+  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  auto semicolonArg =
+      "--" + osm2ttl::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
+  const int argc = 8;
+  char* argv[argc] = {
+      const_cast<char*>(""),     const_cast<char*>(semicolonArg.c_str()),
+      const_cast<char*>("ref"),  const_cast<char*>(semicolonArg.c_str()),
+      const_cast<char*>("ref2"), const_cast<char*>(semicolonArg.c_str()),
+      const_cast<char*>("ref"),  const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ(2, config.semicolonTagKeys.size());
+  ASSERT_EQ(1, config.semicolonTagKeys.count("ref"));
+  ASSERT_EQ(1, config.semicolonTagKeys.count("ref2"));
 }
 
 // ____________________________________________________________________________
@@ -351,7 +407,7 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelope) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-      osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO));
+                       osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO));
 }
 
 // ____________________________________________________________________________
@@ -361,8 +417,9 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelopeRatio) {
   config.addAreaEnvelopeRatio = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-      osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_INFO));
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_INFO));
 }
 
 // ____________________________________________________________________________
@@ -395,7 +452,18 @@ TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-      osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO));
+                       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoSemicolonTagKeys) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.semicolonTagKeys.insert("ref");
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::SEMICOLON_TAG_KEYS_INFO));
 }
 
 // ____________________________________________________________________________
@@ -406,7 +474,7 @@ TEST(CONFIG_Config, getInfoSimplifyGeometries) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-      osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_INFO));
+                       osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_INFO));
 }
 
 // ____________________________________________________________________________
@@ -416,8 +484,8 @@ TEST(CONFIG_Config, getInfoSimplifyWKT) {
   config.simplifyWKT = 250;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-      osm2ttl::config::constants::SIMPLIFY_WKT_INFO));
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(osm2ttl::config::constants::SIMPLIFY_WKT_INFO));
 }
 
 // ____________________________________________________________________________
@@ -428,7 +496,7 @@ TEST(CONFIG_Config, getInfoSkipWikiLinks) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-      osm2ttl::config::constants::SKIP_WIKI_LINKS_INFO));
+                       osm2ttl::config::constants::SKIP_WIKI_LINKS_INFO));
 }
 
 // ____________________________________________________________________________
@@ -498,7 +566,7 @@ TEST(CONFIG_Config, getInfoAdminRelationsOnly) {
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-      osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO));
+                       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO));
 }
 
 // ____________________________________________________________________________
@@ -507,13 +575,15 @@ TEST(CONFIG_Config, getInfoMinimalAreaEnvelopeRatio) {
   assertDefaultConfig(config);
 
   const std::string res1 = config.getInfo("");
-  ASSERT_THAT(res1, ::testing::Not(::testing::HasSubstr(
-      osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO)));
+  ASSERT_THAT(
+      res1, ::testing::Not(::testing::HasSubstr(
+                osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO)));
 
   config.minimalAreaEnvelopeRatio = 0.5;
   const std::string res2 = config.getInfo("");
-  ASSERT_THAT(res2, ::testing::HasSubstr(
-      osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO));
+  ASSERT_THAT(
+      res2, ::testing::HasSubstr(
+                osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO));
 }
 
 // ____________________________________________________________________________
