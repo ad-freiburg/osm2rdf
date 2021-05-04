@@ -295,8 +295,6 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
     const std::string& s, const osm2ttl::osm::TagList& tags) {
   size_t tagTripleCount = 0;
   for (const auto& tag : tags) {
-    writeTag(s, tag);
-    tagTripleCount++;
     const std::string& key = tag.first;
     std::string value = tag.second;
     // Special handling for ref tag splitting. Maybe generalize this...
@@ -312,6 +310,9 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
       };
       std::string partialValue = value.substr(start, value.size());
       writeTag(s, osm2ttl::osm::Tag(key, partialValue));
+      tagTripleCount++;
+    } else {
+      writeTag(s, tag);
       tagTripleCount++;
     }
     // Handling for wiki tags

@@ -1061,6 +1061,7 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.semicolonTagKeys.insert("ref");
 
   osm2ttl::util::Output output{config, config.output};
   output.open();
