@@ -431,20 +431,17 @@ TEST(TTL_WriterNT, generateLangTag) {
     ASSERT_STREQ("@one", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("2");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("2"), std::domain_error);
   }
   {
-    const std::string res = w.generateLangTag("-Three");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error);
   }
   {
     const std::string res = w.generateLangTag("Four-four");
     ASSERT_STREQ("@Four-four", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("Five5");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error);
   }
   {
     const std::string res = w.generateLangTag("SIX-6");
@@ -455,8 +452,7 @@ TEST(TTL_WriterNT, generateLangTag) {
     ASSERT_STREQ("@Seven-7-seven", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("Eight§");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error);
   }
 }
 
@@ -469,20 +465,17 @@ TEST(TTL_WriterTTL, generateLangTag) {
     ASSERT_STREQ("@one", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("2");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("2"), std::domain_error);
   }
   {
-    const std::string res = w.generateLangTag("-Three");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error);
   }
   {
     const std::string res = w.generateLangTag("Four-four");
     ASSERT_STREQ("@Four-four", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("Five5");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error);
   }
   {
     const std::string res = w.generateLangTag("SIX-6");
@@ -493,8 +486,7 @@ TEST(TTL_WriterTTL, generateLangTag) {
     ASSERT_STREQ("@Seven-7-seven", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("Eight§");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error);
   }
 }
 
@@ -507,20 +499,17 @@ TEST(TTL_WriterQLEVER, generateLangTag) {
     ASSERT_STREQ("@one", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("2");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("2"), std::domain_error);
   }
   {
-    const std::string res = w.generateLangTag("-Three");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error);
   }
   {
     const std::string res = w.generateLangTag("Four-four");
     ASSERT_STREQ("@Four-four", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("Five5");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error);
   }
   {
     const std::string res = w.generateLangTag("SIX-6");
@@ -531,8 +520,7 @@ TEST(TTL_WriterQLEVER, generateLangTag) {
     ASSERT_STREQ("@Seven-7-seven", res.c_str());
   }
   {
-    const std::string res = w.generateLangTag("Eight§");
-    ASSERT_STREQ("@", res.c_str());
+    ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error);
   }
 }
 

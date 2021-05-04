@@ -206,11 +206,12 @@ std::string osm2ttl::ttl::Writer<T>::generateLangTag(std::string_view s) {
       break;
     }
   }
+  if (!ok) {
+    throw std::domain_error("Invalid LangTag s: '" + std::string{s});
+  }
   std::string tmp = "@";
   tmp.reserve(s.size() + 1);
-  if (ok) {
-    tmp += s;
-  }
+  tmp += s;
   return tmp;
 }
 
