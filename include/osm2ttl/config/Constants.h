@@ -246,7 +246,7 @@ const static inline std::string SEMICOLON_TAG_KEYS_INFO =
     "Tag-Keys split by semicolon: ";
 const static inline std::string SEMICOLON_TAG_KEYS_OPTION_SHORT = "";
 const static inline std::string SEMICOLON_TAG_KEYS_OPTION_LONG =
-    "semicolon-tag-key";
+    "split-tag-key-by-semicolon";
 const static inline std::string SEMICOLON_TAG_KEYS_OPTION_HELP = "";
 
 const static inline std::string OSM2TTL_PREFIX_INFO = "Prefix for osm2ttl-iris";
