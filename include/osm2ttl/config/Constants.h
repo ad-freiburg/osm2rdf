@@ -42,7 +42,8 @@ const static inline std::string SECTION_OPENMP =
 
 const static inline std::string HELP_OPTION_SHORT = "h";
 const static inline std::string HELP_OPTION_LONG = "help";
-const static inline std::string HELP_OPTION_HELP = "Display help information, use multiple times to display more.";
+const static inline std::string HELP_OPTION_HELP =
+    "Display help information, use multiple times to display more";
 
 const static inline std::string CACHE_INFO = "Cache:";
 const static inline std::string CACHE_OPTION_SHORT = "t";
@@ -74,7 +75,7 @@ const static inline std::string STORE_LOCATIONS_ON_DISK_SHORT = "";
 const static inline std::string STORE_LOCATIONS_ON_DISK_LONG =
     "store-locations-on-disk";
 const static inline std::string STORE_LOCATIONS_ON_DISK_HELP =
-    "Store locations on disk - slower but reduced ram usage.";
+    "Store locations on disk - slower but reduced ram usage";
 
 const static inline std::string NO_FACTS_INFO = "Not dumping facts";
 const static inline std::string NO_FACTS_OPTION_SHORT = "";
@@ -154,7 +155,7 @@ const static inline std::string ADD_AREA_ENVELOPE_OPTION_SHORT = "";
 const static inline std::string ADD_AREA_ENVELOPE_OPTION_LONG =
     "add-area-envelope";
 const static inline std::string ADD_AREA_ENVELOPE_OPTION_HELP =
-    "Add envelope to areas.";
+    "Add envelope to areas";
 
 const static inline std::string ADD_AREA_ENVELOPE_RATIO_INFO =
     "Adding area/envelope ratios";
@@ -162,21 +163,21 @@ const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT = "";
 const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_LONG =
     "add-area-envelope-ratio";
 const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_HELP =
-    "Add area/envelope ratio to areas.";
+    "Add area/envelope ratio to areas";
 
 const static inline std::string ADD_WAY_ENVELOPE_INFO = "Adding way envelopes";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_LONG =
     "add-way-envelope";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_HELP =
-    "Add envelope to ways.";
+    "Add envelope to ways";
 
 const static inline std::string ADD_WAY_METADATA_INFO = "Adding way metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_METADATA_OPTION_LONG =
     "add-way-metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_HELP =
-    "Add information about the way structure.";
+    "Add information about the way structure";
 
 const static inline std::string ADD_WAY_NODE_ORDER_INFO =
     "Adding way node order";
@@ -184,7 +185,7 @@ const static inline std::string ADD_WAY_NODE_ORDER_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_NODE_ORDER_OPTION_LONG =
     "add-way-node-order";
 const static inline std::string ADD_WAY_NODE_ORDER_OPTION_HELP =
-    "Add information about the node members in ways.";
+    "Add information about the node members in ways";
 
 const static inline std::string ADD_INVERSE_RELATION_DIRECTION_INFO =
     "Adding ogc:contained_by and ogc:intersected_by";
@@ -192,7 +193,7 @@ const static inline std::string ADD_INVERSE_RELATION_DIRECTION_SHORT = "";
 const static inline std::string ADD_INVERSE_RELATION_DIRECTION_LONG =
     "add-inverse-relation-direction";
 const static inline std::string ADD_INVERSE_RELATION_DIRECTION_HELP =
-    "Store locations on disk - slower but reduced ram usage.";
+    "Store locations on disk - slower but reduced ram usage";
 
 const static inline std::string ADMIN_RELATIONS_ONLY_INFO =
     "Only handling nodes and relations with \"admin-level\" tag";
@@ -200,7 +201,7 @@ const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_SHORT = "";
 const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_LONG =
     "admin-relations-only";
 const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_HELP =
-    "Only handle nodes and relations with \"admin-level\" tag.";
+    "Only handle nodes and relations with \"admin-level\" tag";
 
 const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_INFO =
     "Minimal area/envelope ratio: ";
@@ -208,8 +209,8 @@ const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT = "";
 const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG =
     "minimal-area-envelope-ratio";
 const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP =
-    "Minimal ratio of area to envelope to include a named area in the DAG."
-    " Value <=0 includes every area.";
+    "Minimal ratio of area to envelope to include a named area in the DAG;"
+    " Value <=0 includes every area";
 
 const static inline std::string SIMPLIFY_GEOMETRIES_INFO =
     "Simplifying relationship geometries with factor: ";
@@ -217,14 +218,14 @@ const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_SHORT = "";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_LONG =
     "simplify-geometries";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_HELP =
-    "Factor for geometry simplifaction, 0 to disable. This only affects "
-    "relationship calculations and not the geometry dump.";
+    "Factor for geometry simplifaction, 0 to disable; This only affects "
+    "relationship calculations and not the geometry dump";
 
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
 const static inline std::string SIMPLIFY_WKT_OPTION_LONG = "simplify-wkt";
 const static inline std::string SIMPLIFY_WKT_OPTION_HELP =
-    "Simplify WKT-Geometries over this number of nodes, 0 to disable.";
+    "Simplify WKT-Geometries over this number of nodes, 0 to disable";
 
 const static inline std::string SIMPLIFY_WKT_DEVIATION_INFO =
     "Simplifying wkt geometries with factor: ";
@@ -233,14 +234,14 @@ const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_LONG =
     "simplify-wkt-deviation";
 const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_HELP =
     "Same effect as simplify-geometries but for the simplification of dumped "
-    "geometries.";
+    "geometries";
 
 const static inline std::string SKIP_WIKI_LINKS_INFO =
     "Not adding wikipedia and wikidata links.";
 const static inline std::string SKIP_WIKI_LINKS_OPTION_SHORT = "";
 const static inline std::string SKIP_WIKI_LINKS_OPTION_LONG = "skip-wiki-links";
 const static inline std::string SKIP_WIKI_LINKS_OPTION_HELP =
-    "Do not add wikipedia and wikidata links.";
+    "Do not add wikipedia and wikidata links";
 
 const static inline std::string SEMICOLON_TAG_KEYS_INFO =
     "Tag-Keys split by semicolon: ";
@@ -253,14 +254,14 @@ const static inline std::string OSM2TTL_PREFIX_INFO = "Prefix for osm2ttl-iris";
 const static inline std::string OSM2TTL_PREFIX_OPTION_SHORT = "";
 const static inline std::string OSM2TTL_PREFIX_OPTION_LONG = "oms2ttl-prefix";
 const static inline std::string OSM2TTL_PREFIX_OPTION_HELP =
-    "Prefix for own IRIs.";
+    "Prefix for own IRIs";
 
 const static inline std::string WKT_PRECISION_INFO =
     "Dumping WKT with precision: ";
 const static inline std::string WKT_PRECISION_OPTION_SHORT = "";
 const static inline std::string WKT_PRECISION_OPTION_LONG = "wkt-precision";
 const static inline std::string WKT_PRECISION_OPTION_HELP =
-    "Precision (number of decimal digits) for WKT coordinates.";
+    "Precision (number of decimal digits) for WKT coordinates";
 
 const static inline std::string WRITE_DAG_DOT_FILES_INFO =
     "Storing DAG states as .dot files";
@@ -268,7 +269,7 @@ const static inline std::string WRITE_DAG_DOT_FILES_OPTION_SHORT = "";
 const static inline std::string WRITE_DAG_DOT_FILES_OPTION_LONG =
     "write-dag-dot-files";
 const static inline std::string WRITE_DAG_DOT_FILES_OPTION_HELP =
-    "Writes .dot files for DAG states.";
+    "Writes .dot files for DAG states";
 
 const static inline std::string WRITE_GEOM_RELATION_STATISTICS_INFO =
     "Storing statistics about geometry calculations - SLOW!";
