@@ -400,11 +400,12 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addWayMetadata = addWayMetaDataOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
+    minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
     skipWikiLinks = skipWikiLinksOp->is_set();
+    simplifyGeometries = simplifyGeometriesOp->value();
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
-
-    minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
+    wktPrecision = wktPrecisionOp->value();
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
     if (semicolonTagKeysOp->is_set()) {
@@ -412,8 +413,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
         semicolonTagKeys.insert(semicolonTagKeysOp->value(i));
       }
     }
-
-    wktPrecision = wktPrecisionOp->value();
 
     // Dot
     writeDAGDotFiles = writeDotFilesOp->is_set();
