@@ -68,16 +68,24 @@ void osm2ttl::osm::OsmiumHandler<W>::handle() {
                                                osmium::osm_entity_bits::object};
       osm2ttl::osm::LocationHandler* locationHandler =
           osm2ttl::osm::LocationHandler::create(_config);
-      while (true) {
-        osmium::memory::Buffer buf = reader.read();
-        if (!buf) {
-          break;
+
+#pragma omp parallel
+      {
+#pragma omp single
+        {
+          while (true) {
+            osmium::memory::Buffer buf = reader.read();
+            if (!buf) {
+              break;
+            }
+            osmium::apply(
+                buf, *locationHandler,
+                mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
+                  osmium::apply(buffer, *this);
+                }),
+                *this);
+          }
         }
-        osmium::apply(buf, *locationHandler,
-                      mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
-                        osmium::apply(buffer, *this);
-                      }),
-                      *this);
       }
       reader.close();
       delete locationHandler;
@@ -126,6 +134,7 @@ void osm2ttl::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   const auto& a = osm2ttl::osm::Area(area);
   if (!_config.noFacts && !_config.noAreaFacts) {
     _areasDumped++;
+#pragma omp task
     _dumpHandler.area(a);
   }
   if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
@@ -147,6 +156,7 @@ void osm2ttl::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   }
   if (!_config.noFacts && !_config.noNodeFacts) {
     _nodesDumped++;
+#pragma omp task
     _dumpHandler.node(n);
   }
   if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
@@ -169,6 +179,7 @@ void osm2ttl::osm::OsmiumHandler<W>::relation(
   const auto& r = osm2ttl::osm::Relation(relation);
   if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
+#pragma omp task
     _dumpHandler.relation(r);
   }
 }
@@ -186,6 +197,7 @@ void osm2ttl::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   const auto& w = osm2ttl::osm::Way(way);
   if (!_config.noFacts && !_config.noWayFacts) {
     _waysDumped++;
+#pragma omp task
     _dumpHandler.way(w);
   }
   if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
