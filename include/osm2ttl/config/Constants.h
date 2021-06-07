@@ -165,6 +165,14 @@ const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_LONG =
 const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_HELP =
     "Add area/envelope ratio to areas";
 
+const static inline std::string ADD_NODE_ENVELOPE_INFO =
+    "Adding node envelopes";
+const static inline std::string ADD_NODE_ENVELOPE_OPTION_SHORT = "";
+const static inline std::string ADD_NODE_ENVELOPE_OPTION_LONG =
+    "add-node-envelope";
+const static inline std::string ADD_NODE_ENVELOPE_OPTION_HELP =
+    "Add envelope to nodes";
+
 const static inline std::string ADD_WAY_ENVELOPE_INFO = "Adding way envelopes";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_LONG =

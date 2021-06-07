@@ -872,6 +872,17 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelopeRatio) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddNodeEnvelope) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.addNodeEnvelope = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::ADD_NODE_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayEnvelope) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);

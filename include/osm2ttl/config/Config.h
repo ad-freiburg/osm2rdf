@@ -47,6 +47,7 @@ struct Config {
 
   // Select amount to dump
   bool addAreaEnvelope = false;
+  bool addNodeEnvelope = false;
   bool addSortMetadata = true;
   bool addWayEnvelope = false;
   bool addWayMetadata = false;

@@ -91,6 +91,10 @@ void osm2ttl::osm::FactHandler<W>::node(const osm2ttl::osm::Node& node) {
                      node.geom());
 
   writeTagList(s, node.tags());
+
+  if (_config.addNodeEnvelope) {
+    writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, node.envelope());
+  }
 }
 
 // ____________________________________________________________________________
