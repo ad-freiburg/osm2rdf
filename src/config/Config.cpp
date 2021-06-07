@@ -70,6 +70,11 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     }
     if (noNodeFacts) {
       oss << "\n" << prefix << osm2ttl::config::constants::NO_NODE_FACTS_INFO;
+    } else {
+      if (addNodeEnvelope) {
+        oss << "\n"
+            << prefix << osm2ttl::config::constants::ADD_NODE_ENVELOPE_INFO;
+      }
     }
     if (noRelationFacts) {
       oss << "\n"
@@ -257,6 +262,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT,
       osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_LONG,
       osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_HELP);
+  auto addNodeEnvelopeOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_NODE_ENVELOPE_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG,
+      osm2ttl::config::constants::ADD_NODE_ENVELOPE_OPTION_HELP);
   auto addWayEnvelopeOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG,
@@ -394,6 +403,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     // Select amount to dump
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
+    addNodeEnvelope = addNodeEnvelopeOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
     addWayMetadata = addWayMetaDataOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();

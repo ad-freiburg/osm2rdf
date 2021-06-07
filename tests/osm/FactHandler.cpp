@@ -290,6 +290,54 @@ TEST(OSM_FactHandler, node) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, nodeAddEnvelope) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addNodeEnvelope = true;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2ttl object from osmium object
+  const osm2ttl::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
+
+  dh.node(n);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmnode:42 rdf:type osm:node .\n"
+      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 osmt:city \"Freiburg\" .\n"
+      "osmnode:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmnode:42 osm:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
+      "48.0,7.5 48.0))\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, relation) {
   // Capture std::cout
   std::stringstream buffer;
@@ -1044,7 +1092,7 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
 
   const std::string printedData = buffer.str();
   ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
-      " " + object1 + " .\n"));
+                                                " " + object1 + " .\n"));
 
   // Cleanup
   std::cout.rdbuf(sbuf);
@@ -1088,9 +1136,9 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
 
   const std::string printedData = buffer.str();
   ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
-      " " + object1 + " .\n"));
+                                                " " + object1 + " .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
-      " " + object2 + " .\n"));
+                                                " " + object2 + " .\n"));
 
   // Cleanup
   std::cout.rdbuf(sbuf);
