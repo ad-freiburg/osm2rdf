@@ -246,6 +246,25 @@ TEST(CONFIG_Config, fromArgsEmpty) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsUnkonwOption) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
+
+  auto outputArg = "-" + osm2ttl::config::constants::OUTPUT_OPTION_SHORT;
+  const int argc = 5;
+  char* argv[argc] = {
+      const_cast<char*>(""), const_cast<char*>(outputArg.c_str()),
+      const_cast<char*>("/tmp/output"), const_cast<char*>("--unknown-arg"),
+      const_cast<char*>("/tmp/dummyInput")};
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::UNKNOWN_ARGUMENT),
+      "^Unknown argument(s) specified:");
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsInputNotFound) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
