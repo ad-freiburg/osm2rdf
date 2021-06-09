@@ -42,6 +42,7 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addAreaEnvelopeRatio);
+  ASSERT_FALSE(config.addNodeEnvelope);
   ASSERT_TRUE(config.addSortMetadata);
   ASSERT_FALSE(config.addWayEnvelope);
   ASSERT_FALSE(config.addWayNodeOrder);
@@ -544,6 +545,22 @@ TEST(CONFIG_Config, fromArgsAddAreaEnvelopeRatioLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.addAreaEnvelopeRatio);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+
+  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  auto arg =
+      "--" + osm2ttl::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addNodeEnvelope);
 }
 
 // ____________________________________________________________________________
