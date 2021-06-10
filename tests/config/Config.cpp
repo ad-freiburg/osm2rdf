@@ -261,7 +261,7 @@ TEST(CONFIG_Config, fromArgsUnkonwOption) {
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
       ::testing::ExitedWithCode(osm2ttl::config::ExitCode::UNKNOWN_ARGUMENT),
-      "^Unknown argument(s) specified:");
+      "^Unknown argument");
 }
 
 // ____________________________________________________________________________
