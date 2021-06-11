@@ -187,14 +187,6 @@ const static inline std::string ADD_WAY_NODE_ORDER_OPTION_LONG =
 const static inline std::string ADD_WAY_NODE_ORDER_OPTION_HELP =
     "Add information about the node members in ways";
 
-const static inline std::string ADD_INVERSE_RELATION_DIRECTION_INFO =
-    "Adding ogc:contained_by and ogc:intersected_by";
-const static inline std::string ADD_INVERSE_RELATION_DIRECTION_SHORT = "";
-const static inline std::string ADD_INVERSE_RELATION_DIRECTION_LONG =
-    "add-inverse-relation-direction";
-const static inline std::string ADD_INVERSE_RELATION_DIRECTION_HELP =
-    "Store locations on disk - slower but reduced ram usage";
-
 const static inline std::string ADMIN_RELATIONS_ONLY_INFO =
     "Only handling nodes and relations with \"admin-level\" tag";
 const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_SHORT = "";

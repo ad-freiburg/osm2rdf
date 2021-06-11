@@ -79,28 +79,28 @@ docker-dirs:
 
 docker-fr: docker-dirs input/freiburg-regbez-latest.osm.pbf
 	${DOCKER} build -t osm2ttl .
-	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/
 
 docker-bw: docker-dirs input/baden-wuerttemberg-latest.osm.pbf
 	${DOCKER} build -t osm2ttl .
-	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.osm.ttl -t /scratch/
 
 docker-de: docker-dirs input/germany-latest.osm.pbf
 	${DOCKER} build -t osm2ttl .
-	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/germany-latest.osm.pbf -o /output/germany-latest.osm.ttl -t /scratch/
 
 docker-eu: docker-dirs input/europe-latest.osm.pbf
 	${DOCKER} build -t osm2ttl .
-	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/europe-latest.osm.pbf -o /output/europe-latest.osm.ttl -t /scratch/
 
 docker-pl: docker-dirs input/planet-latest.osm.pbf
 	${DOCKER} build -t osm2ttl .
-	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/planet-latest.osm.pbf -o /output/planet-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction
+	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/planet-latest.osm.pbf -o /output/planet-latest.osm.ttl -t /scratch/
 
 docker-fr-ratios: docker-dirs input/freiburg-regbez-latest.osm.pbf
 	${DOCKER} build -t osm2ttl .
-	for R in "-1" "0.001" "0.01" "0.1" "0.2" "0.25" "0.5" "0.75" "0.9" "1.0"; do ${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --add-inverse-relation-direction --minimal-area-envelope-ratio $$R --no-node-geometric-relations --no-way-geometric-relations; done
+	for R in "-1" "0.001" "0.01" "0.1" "0.2" "0.25" "0.5" "0.75" "0.9" "1.0"; do ${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --minimal-area-envelope-ratio $$R --no-node-geometric-relations --no-way-geometric-relations; done
 
 docker-bw-ratios: docker-dirs input/baden-wuerttemberg-latest.osm.pbf
 	${DOCKER} build -t osm2ttl .
-	for R in "-1" "0.001" "0.01" "0.1" "0.2" "0.25" "0.5" "0.75" "0.9" "1.0"; do ${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.ttl -t /scratch/ --add-inverse-relation-direction --minimal-area-envelope-ratio $$R --no-node-geometric-relations --no-way-geometric-relations; done
+	for R in "-1" "0.001" "0.01" "0.1" "0.2" "0.25" "0.5" "0.75" "0.9" "1.0"; do ${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2ttl /input/baden-wuerttemberg-latest.osm.pbf -o /output/baden-wuerttemberg-latest.ttl -t /scratch/ --minimal-area-envelope-ratio $$R --no-node-geometric-relations --no-way-geometric-relations; done
