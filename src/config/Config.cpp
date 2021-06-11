@@ -108,11 +108,11 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
           << prefix << osm2ttl::config::constants::SEMICOLON_TAG_KEYS_INFO;
       std::vector<std::string> keys;
       keys.reserve(semicolonTagKeys.size());
-      for (auto key : semicolonTagKeys) {
+      for (const auto &key : semicolonTagKeys) {
         keys.push_back(key);
       }
       std::sort(keys.begin(), keys.end());
-      for (auto key : keys) {
+      for (const auto &key : keys) {
         oss << "\n" << prefix << prefix << key;
       }
     }
@@ -136,11 +136,6 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
     if (noWayGeometricRelations) {
       oss << "\n"
           << prefix << osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_INFO;
-    }
-    if (addInverseRelationDirection) {
-      oss << "\n"
-          << prefix
-          << osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_INFO;
     }
     if (simplifyGeometries > 0) {
       oss << "\n"
@@ -274,11 +269,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG,
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_HELP);
-  auto addInverseRelationDirectionOp =
-      op.add<popl::Switch, popl::Attribute::advanced>(
-          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_SHORT,
-          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_LONG,
-          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_HELP);
   auto adminRelationsOnlyOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_SHORT,
       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG,
@@ -395,7 +385,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     // Select amount to dump
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
-    addInverseRelationDirection = addInverseRelationDirectionOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
     addWayMetadata = addWayMetaDataOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();

@@ -42,7 +42,6 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addAreaEnvelopeRatio);
-  ASSERT_FALSE(config.addInverseRelationDirection);
   ASSERT_TRUE(config.addSortMetadata);
   ASSERT_FALSE(config.addWayEnvelope);
   ASSERT_FALSE(config.addWayNodeOrder);
@@ -117,7 +116,7 @@ TEST(CONFIG_Config, fromArgsHelpAdvanced) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
               ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
-              "--add-inverse-relation-direction");
+              osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
 }
 
 // ____________________________________________________________________________
@@ -526,22 +525,6 @@ TEST(CONFIG_Config, fromArgsAddAreaEnvelopeRatioLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.addAreaEnvelopeRatio);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsAddInverseRelationDirectionLong) {
-  osm2ttl::config::Config config;
-  assertDefaultConfig(config);
-
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
-  auto arg =
-      "--" + osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.addInverseRelationDirection);
 }
 
 // ____________________________________________________________________________
@@ -990,19 +973,6 @@ TEST(CONFIG_Config, getInfoWayGeomRelations) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_INFO));
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoAddInverseRelationDirection) {
-  osm2ttl::config::Config config;
-  assertDefaultConfig(config);
-  config.addInverseRelationDirection = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(
-      res,
-      ::testing::HasSubstr(
-          osm2ttl::config::constants::ADD_INVERSE_RELATION_DIRECTION_INFO));
 }
 
 // ____________________________________________________________________________

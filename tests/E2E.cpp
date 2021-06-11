@@ -537,32 +537,32 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#intersects> "
+                  "<http://www.opengis.net/rdf#intersects_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#contains> "
+                  "<http://www.opengis.net/rdf#contains_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#intersects> "
+                  "<http://www.opengis.net/rdf#intersects_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#contains> "
+                  "<http://www.opengis.net/rdf#contains_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#intersects> "
+                  "<http://www.opengis.net/rdf#intersects_nonarea> "
                   "<https://www.openstreetmap.org/node/5190342871> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#contains> "
+                  "<http://www.opengis.net/rdf#contains_nonarea> "
                   "<https://www.openstreetmap.org/node/5190342871> .\n"));
 
   // Reset std::cerr and std::cout
@@ -681,24 +681,30 @@ TEST(E2E, building51TTL) {
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:2110601105 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:2110601134 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:2110601134 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:5190342871 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:5190342871 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601105 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:2110601105 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601134 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:2110601134 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:5190342871 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -816,24 +822,30 @@ TEST(E2E, building51QLEVER) {
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:2110601105 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:2110601134 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:2110601134 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:5190342871 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:5190342871 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601105 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:2110601105 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601134 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:2110601134 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:5190342871 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1089,24 +1101,30 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:4498466 ogc:intersects_area osmway:98284318 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:2110601105 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:2110601105 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:2110601134 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:2110601134 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:intersects osmnode:5190342871 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:98284318 ogc:contains osmnode:5190342871 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601105 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:2110601105 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601134 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:2110601134 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:intersects_nonarea osmnode:5190342871 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 ogc:contains_nonarea osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

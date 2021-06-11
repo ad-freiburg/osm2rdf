@@ -1440,9 +1440,9 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
                            "                           contains: 3 contains "
                            "envelope: 1 yes: 1\n"));
   ASSERT_EQ(
-      "osmway:11 ogc:intersects osmrel:15 .\n"
-      "osmway:13 ogc:intersects osmrel:15 .\n"
-      "osmway:12 ogc:contains osmrel:15 .\n",
+      "osmway:11 ogc:intersects_nonarea osmrel:15 .\n"
+      "osmway:13 ogc:intersects_nonarea osmrel:15 .\n"
+      "osmway:12 ogc:contains_nonarea osmrel:15 .\n",
       printedData);
 
   // Reset std::cerr and std::cout
@@ -1563,8 +1563,8 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
                            "                           contains: 1 contains "
                            "envelope: 1 yes: 1\n"));
   ASSERT_EQ(
-      "osmway:11 ogc:intersects osmrel:15 .\n"
-      "osmway:11 ogc:contains osmrel:15 .\n",
+      "osmway:11 ogc:intersects_nonarea osmrel:15 .\n"
+      "osmway:11 ogc:contains_nonarea osmrel:15 .\n",
       printedData);
 
   // Reset std::cerr and std::cout
@@ -1846,8 +1846,8 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
                   "                           1 checks performed\n"
                   "                           contains: 1 yes: 1\n"));
   ASSERT_EQ(
-      "osmway:13 ogc:intersects osmnode:42 .\n"
-      "osmway:13 ogc:contains osmnode:42 .\n",
+      "osmway:13 ogc:intersects_nonarea osmnode:42 .\n"
+      "osmway:13 ogc:contains_nonarea osmnode:42 .\n",
       printedData);
 
   // Reset std::cerr and std::cout
@@ -1960,8 +1960,8 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
                   "                           1 checks performed\n"
                   "                           contains: 1 yes: 1\n"));
   ASSERT_EQ(
-      "osmway:11 ogc:intersects osmnode:42 .\n"
-      "osmway:11 ogc:contains osmnode:42 .\n",
+      "osmway:11 ogc:intersects_nonarea osmnode:42 .\n"
+      "osmway:11 ogc:contains_nonarea osmnode:42 .\n",
       printedData);
 
   // Reset std::cerr and std::cout
@@ -2249,9 +2249,9 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
                   "                           contains: 3 contains envelope: 1 "
                   "yes: 1\n"));
   ASSERT_EQ(
-      "osmway:11 ogc:intersects osmway:42 .\n"
-      "osmway:13 ogc:intersects osmway:42 .\n"
-      "osmway:12 ogc:contains osmway:42 .\n",
+      "osmway:11 ogc:intersects_nonarea osmway:42 .\n"
+      "osmway:13 ogc:intersects_nonarea osmway:42 .\n"
+      "osmway:12 ogc:contains_nonarea osmway:42 .\n",
       printedData);
 
   // Reset std::cerr and std::cout
@@ -2370,8 +2370,8 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
                   "                           contains: 1 contains envelope: 1 "
                   "yes: 1\n"));
   ASSERT_EQ(
-      "osmway:11 ogc:intersects osmway:42 .\n"
-      "osmway:11 ogc:contains osmway:42 .\n",
+      "osmway:11 ogc:intersects_nonarea osmway:42 .\n"
+      "osmway:11 ogc:contains_nonarea osmway:42 .\n",
       printedData);
 
   // Reset std::cerr and std::cout
@@ -2503,16 +2503,16 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
                   "skipped by DAG\n"
                   "                           contains: 3 contains envelope: 1 "
                   "yes: 1\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:13 ogc:intersects osmnode:1 .\n"
-                                   "osmway:13 ogc:contains osmnode:1 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:11 ogc:intersects osmnode:2 .\n"
-                                   "osmway:11 ogc:contains osmnode:2 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:11 ogc:intersects osmway:42 .\n"
-                                   "osmway:13 ogc:intersects osmway:42 .\n"
-                                   "osmway:12 ogc:contains osmway:42 .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:13 ogc:intersects_nonarea osmnode:1 .\n"
+                               "osmway:13 ogc:contains_nonarea osmnode:1 .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:11 ogc:intersects_nonarea osmnode:2 .\n"
+                               "osmway:11 ogc:contains_nonarea osmnode:2 .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:11 ogc:intersects_nonarea osmway:42 .\n"
+                               "osmway:13 ogc:intersects_nonarea osmway:42 .\n"
+                               "osmway:12 ogc:contains_nonarea osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -2638,12 +2638,12 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
                   "skipped by DAG\n"
                   "                           contains: 1 contains envelope: 1 "
                   "yes: 1\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:11 ogc:intersects osmnode:2 .\n"
-                                   "osmway:11 ogc:contains osmnode:2 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:11 ogc:intersects osmway:42 .\n"
-                                   "osmway:11 ogc:contains osmway:42 .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:11 ogc:intersects_nonarea osmnode:2 .\n"
+                               "osmway:11 ogc:contains_nonarea osmnode:2 .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:11 ogc:intersects_nonarea osmway:42 .\n"
+                               "osmway:11 ogc:contains_nonarea osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

@@ -171,9 +171,10 @@ G osm2ttl::osm::GeometryHandler<W>::simplifyGeometry(const G& g) {
   G geom;
   auto perimeter_or_length =
       std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
-  boost::geometry::simplify(g, geom,
-                            osm2ttl::osm::constants::BASE_SIMPLIFICATION_FACTOR * perimeter_or_length *
-                                _config.simplifyGeometries);
+  boost::geometry::simplify(
+      g, geom,
+      osm2ttl::osm::constants::BASE_SIMPLIFICATION_FACTOR *
+          perimeter_or_length * _config.simplifyGeometries);
   if (!boost::geometry::is_valid(geom)) {
     return g;
   }
@@ -419,17 +420,13 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
   progressBar.update(entryCount);
   std::vector<osm2ttl::util::DirectedGraph<osm2ttl::osm::Area::id_t>::entry_t>
       vertices = _directedAreaGraph.getVertices();
-#pragma omp parallel for shared(                                        \
-    vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,              \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                   \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                         \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                     \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA,                    \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY_AREA,                \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                       \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                   \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA,                  \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY_AREA, progressBar, \
+#pragma omp parallel for shared(                                       \
+    vertices, osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,             \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                  \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA,                   \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA,                \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA,                 \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA, progressBar, \
     entryCount) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
@@ -454,14 +451,6 @@ void osm2ttl::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
           areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA, entryIRI);
       _writer->writeTriple(
           areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA, entryIRI);
-      if (_config.addInverseRelationDirection) {
-        _writer->writeTriple(
-            entryIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY_AREA,
-            areaIRI);
-        _writer->writeTriple(
-            entryIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY_AREA,
-            areaIRI);
-      }
     }
 #pragma omp critical(progress)
     progressBar.update(entryCount++);
@@ -508,16 +497,14 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
     size_t containsSkippedByDAG = 0;
     size_t containsOkEnvelope = 0;
     progressBar.update(entryCount);
-#pragma omp parallel for shared(                                             \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                             \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                        \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                            \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, \
+#pragma omp parallel for shared( \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA, \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA, \
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, \
-    containsSkippedByDAG, intersectsChecks, intersectsOk, containsChecks, containsOk, \
-    containsOkEnvelope)      \
+    containsSkippedByDAG, intersectsChecks, intersectsOk, containsChecks, \
+    containsOk, containsOkEnvelope)      \
     default(none) schedule(dynamic)
     for (size_t i = 0; i < _numUnnamedAreas; i++) {
       SpatialAreaValue entry;
@@ -591,12 +578,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, entryIRI);
-          if (_config.addInverseRelationDirection) {
-            _writer->writeTriple(
-                entryIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                areaIRI);
-          }
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA,
+              entryIRI);
         }
 
         if (!doesIntersect) {
@@ -646,12 +629,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
             skipContains.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, entryIRI);
-          if (_config.addInverseRelationDirection) {
-            _writer->writeTriple(entryIRI,
-                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                                 areaIRI);
-          }
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA,
+              entryIRI);
         }
       }
 #pragma omp critical(progress)
@@ -710,15 +689,13 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
     size_t containsOk = 0;
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
-#pragma omp parallel for shared(                                            \
+#pragma omp parallel for shared( \
     osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,                            \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                       \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                             \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,                         \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                           \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY, nodeData,             \
-    progressBar, entryCount, ia) reduction(+:checks,         \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,\
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA, \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA, nodeData, \
+    progressBar, entryCount, ia) reduction(+:checks, \
     skippedByDAG, contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _numNodes; i++) {
       SpatialNodeValue node;
@@ -779,16 +756,11 @@ osm2ttl::osm::GeometryHandler<W>::dumpNodeRelations() {
                         : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
             areaObjId);
         _writer->writeTriple(
-            areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, nodeIRI);
-        _writer->writeTriple(
-            areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, nodeIRI);
-        if (_config.addInverseRelationDirection) {
-          _writer->writeTriple(nodeIRI,
-                               osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                               areaIRI);
-          _writer->writeTriple(
-              nodeIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, areaIRI);
-        }
+            areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA,
+            nodeIRI);
+        _writer->writeTriple(areaIRI,
+                             osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA,
+                             nodeIRI);
       }
 #pragma omp critical(nodeDataChange)
       std::copy(skip.begin(), skip.end(), std::back_inserter(nodeData[nodeId]));
@@ -844,13 +816,11 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
     size_t containsSkippedByDAG = 0;
     size_t skippedInDAG = 0;
     progressBar.update(entryCount);
-#pragma omp parallel for shared(                                             \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData,                   \
-    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,                        \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS,                            \
-    osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,                        \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINS,                              \
-    osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY, \
+#pragma omp parallel for shared(                           \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, nodeData, \
+    osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,      \
+    osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA,     \
+    osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA, \
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, skippedInDAG, \
     intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
@@ -928,12 +898,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
-          if (_config.addInverseRelationDirection) {
-            _writer->writeTriple(
-                wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                areaIRI);
-          }
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA,
+              wayIRI);
         } else {
           intersectsChecks++;
 #ifdef ENABLE_GEOMETRY_STATISTIC
@@ -958,12 +924,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS, wayIRI);
-          if (_config.addInverseRelationDirection) {
-            _writer->writeTriple(
-                wayIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTED_BY,
-                areaIRI);
-          }
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA,
+              wayIRI);
         }
         if (!doesIntersect) {
           continue;
@@ -1012,12 +974,8 @@ void osm2ttl::osm::GeometryHandler<W>::dumpWayRelations(
             skipContains.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS, wayIRI);
-          if (_config.addInverseRelationDirection) {
-            _writer->writeTriple(wayIRI,
-                                 osm2ttl::ttl::constants::IRI__OGC_CONTAINED_BY,
-                                 areaIRI);
-          }
+              areaIRI, osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA,
+              wayIRI);
         }
       }
 #pragma omp critical(progress)
