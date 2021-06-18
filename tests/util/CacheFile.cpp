@@ -38,4 +38,41 @@ TEST(UTIL_CacheFile, constructorAndAutoRemove) {
   ASSERT_FALSE(std::filesystem::exists(location));
 }
 
+// ____________________________________________________________________________
+TEST(UTIL_CacheFile, close) {
+  osm2ttl::config::Config config;
+  std::filesystem::path location{
+      config.getTempPath("UTIL_CacheFile_close", "constructor-output")};
+
+  ASSERT_FALSE(std::filesystem::exists(location));
+  {
+    osm2ttl::util::CacheFile cf(location);
+    ASSERT_NE(-1, cf.fileDescriptor());
+    ASSERT_TRUE(std::filesystem::exists(location));
+    cf.close();
+    ASSERT_EQ(-1, cf.fileDescriptor());
+    cf.close();
+    ASSERT_EQ(-1, cf.fileDescriptor());
+  }
+  ASSERT_FALSE(std::filesystem::exists(location));
+}
+
+// ____________________________________________________________________________
+TEST(UTIL_CacheFile, remove) {
+  osm2ttl::config::Config config;
+  std::filesystem::path location{
+      config.getTempPath("UTIL_CacheFile_remove", "constructor-output")};
+
+  ASSERT_FALSE(std::filesystem::exists(location));
+  {
+    osm2ttl::util::CacheFile cf(location);
+    ASSERT_NE(-1, cf.fileDescriptor());
+    ASSERT_TRUE(std::filesystem::exists(location));
+    cf.close();
+    cf.remove();
+    ASSERT_FALSE(std::filesystem::exists(location));
+  }
+  ASSERT_FALSE(std::filesystem::exists(location));
+}
+
 }  // namespace osm2ttl::util
