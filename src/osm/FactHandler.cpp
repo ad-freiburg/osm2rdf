@@ -184,8 +184,9 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
         _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
                              osm2ttl::ttl::constants::IRI__OSM_NODE);
 
-        writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                           node.geom());
+        writeBoostGeometry(
+            s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+            node.geom());
       }
 
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
@@ -193,12 +194,24 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
             lastBlankNode, osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE,
             _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
                                  node.id()));
+        double distanceLat = (node.geom().y() - lastNode.geom().y()) *
+                             osm2ttl::osm::constants::DEGREE;
+        double distanceLon = (node.geom().x() - lastNode.geom().x()) *
+                             osm2ttl::osm::constants::DEGREE;
+        double latitude1 =
+            lastNode.geom().y() * osm2ttl::osm::constants::DEGREE;
+        double latitude2 = node.geom().y() * osm2ttl::osm::constants::DEGREE;
+        double a = (sin(distanceLat / 2) * sin(distanceLat / 2)) +
+                   (sin(distanceLon / 2) * sin(distanceLon / 2) *
+                    cos(latitude1) * cos(latitude2));
         _writer->writeTriple(
             lastBlankNode,
             osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE,
             _writer->generateLiteral(
-                std::to_string(
-                    boost::geometry::distance(lastNode.geom(), node.geom())),
+
+                std::to_string(osm2ttl::osm::constants::EARTH_RADIUS_KM *
+                               osm2ttl::osm::constants::METERS_IN_KM * 2 *
+                               asin(sqrt(a))),
                 osm2ttl::ttl::constants::IRI__XSD_DECIMAL));
       }
       lastBlankNode = blankNode;
