@@ -51,6 +51,7 @@ struct Config {
   bool addSortMetadata = true;
   bool addWayEnvelope = false;
   bool addWayMetadata = false;
+  bool addWayNodeGeometry = false;
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
   bool adminRelationsOnly = false;

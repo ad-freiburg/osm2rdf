@@ -177,6 +177,17 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
               std::to_string(++i),
               "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
 
+      if (_config.addWayNodeGeometry) {
+        std::string s = _writer->generateIRI(
+            osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, node.id());
+
+        _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
+                             osm2ttl::ttl::constants::IRI__OSM_NODE);
+
+        writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+                           node.geom());
+      }
+
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
         _writer->writeTriple(
             lastBlankNode, osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE,

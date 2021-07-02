@@ -91,13 +91,18 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
         oss << "\n"
             << prefix << osm2ttl::config::constants::ADD_WAY_METADATA_INFO;
       }
+      if (addWayNodeGeometry) {
+        oss << "\n"
+            << prefix << osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_INFO;
+      }
       if (addWayNodeOrder) {
         oss << "\n"
             << prefix << osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO;
       }
       if (addWayNodeSpatialMetadata) {
         oss << "\n"
-            << prefix << osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO;
+            << prefix
+            << osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO;
       }
     }
     if (simplifyWKT > 0) {
@@ -282,6 +287,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG,
       osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_HELP);
+  auto addWayNodeGeometryOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG,
+      osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_HELP);
   auto addWayNodeOrderOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG,
@@ -414,6 +423,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addNodeEnvelope = addNodeEnvelopeOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
+    addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeMetadataOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
@@ -424,6 +434,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
 
+    addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
