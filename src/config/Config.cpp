@@ -283,10 +283,6 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_LONG,
       osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_HELP);
-  auto addWayNodeMetadataOp = op.add<popl::Switch>(
-      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_SHORT,
-      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG,
-      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_HELP);
   auto addWayNodeGeometryOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG,
@@ -295,6 +291,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG,
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_HELP);
+  auto addWayNodeSpatialMetadataOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG,
+      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_HELP);
   auto adminRelationsOnlyOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_SHORT,
       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG,
@@ -425,7 +425,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addWayMetadata = addWayMetadataOp->is_set();
     addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
-    addWayNodeSpatialMetadata = addWayNodeMetadataOp->is_set();
+    addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
     skipWikiLinks = skipWikiLinksOp->is_set();
