@@ -45,7 +45,9 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
   ASSERT_FALSE(config.addNodeEnvelope);
   ASSERT_TRUE(config.addSortMetadata);
   ASSERT_FALSE(config.addWayEnvelope);
+  ASSERT_FALSE(config.addWayNodeGeometry);
   ASSERT_FALSE(config.addWayNodeOrder);
+  ASSERT_FALSE(config.addWayNodeSpatialMetadata);
   ASSERT_FALSE(config.addWayMetadata);
   ASSERT_FALSE(config.adminRelationsOnly);
   ASSERT_FALSE(config.skipWikiLinks);
@@ -553,8 +555,7 @@ TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
   assertDefaultConfig(config);
 
   osm2ttl::util::CacheFile cf("/tmp/dummyInput");
-  auto arg =
-      "--" + osm2ttl::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG;
+  auto arg = "--" + osm2ttl::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -594,6 +595,22 @@ TEST(CONFIG_Config, fromArgsAddWayMetadataLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddWayNodeGeomentryLong) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+
+  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  auto arg =
+      "--" + osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addWayNodeGeometry);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayNodeOrderLong) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
@@ -605,6 +622,24 @@ TEST(CONFIG_Config, fromArgsAddWayNodeOrderLong) {
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addWayNodeOrder);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddWayNodeSpatialMetadataLong) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+
+  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  auto arg =
+      "--" +
+      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addWayNodeSpatialMetadata);
   ASSERT_TRUE(config.addWayNodeOrder);
 }
 
@@ -922,6 +957,17 @@ TEST(CONFIG_Config, getInfoAddWayMetadata) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddWayNodeGeometry) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.addWayNodeGeometry = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_INFO));
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
   osm2ttl::config::Config config;
   assertDefaultConfig(config);
@@ -930,6 +976,18 @@ TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddWayNodeSpatialMetadata) {
+  osm2ttl::config::Config config;
+  assertDefaultConfig(config);
+  config.addWayNodeSpatialMetadata = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(
+               osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO));
 }
 
 // ____________________________________________________________________________

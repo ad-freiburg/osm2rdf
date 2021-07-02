@@ -40,16 +40,18 @@ const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
 
-inline std::string IRI__OGC_CONTAINS_NONAREA;
+inline std::string IRI__OGC_CONTAINS_NON_AREA;
 inline std::string IRI__OGC_CONTAINS_AREA;
-inline std::string IRI__OGC_INTERSECTS_NONAREA;
+inline std::string IRI__OGC_INTERSECTS_NON_AREA;
 inline std::string IRI__OGC_INTERSECTS_AREA;
 
 inline std::string IRI__OSM_META__POS;
-inline std::string IRI__OSMWAY_ISCLOSED;
+inline std::string IRI__OSMWAY_IS_CLOSED;
+inline std::string IRI__OSMWAY_NEXT_NODE;
+inline std::string IRI__OSMWAY_NEXT_NODE_DISTANCE;
 inline std::string IRI__OSMWAY_NODE;
-inline std::string IRI__OSMWAY_NODECOUNT;
-inline std::string IRI__OSMWAY_UNIQUENODECOUNT;
+inline std::string IRI__OSMWAY_NODE_COUNT;
+inline std::string IRI__OSMWAY_UNIQUE_NODE_COUNT;
 inline std::string IRI__OSM_ENVELOPE;
 inline std::string IRI__OSM_NODE;
 inline std::string IRI__OSM_RELATION;

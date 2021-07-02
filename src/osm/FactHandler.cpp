@@ -159,6 +159,8 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
 
   if (_config.addWayNodeOrder) {
     size_t i = 0;
+    std::string lastBlankNode;
+    auto& lastNode = way.nodes().front();
     for (const auto& node : way.nodes()) {
       std::string blankNode = _writer->generateBlankNode();
       _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODE,
@@ -174,6 +176,46 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
           _writer->generateLiteral(
               std::to_string(++i),
               "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+
+      if (_config.addWayNodeGeometry) {
+        std::string s = _writer->generateIRI(
+            osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, node.id());
+
+        _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
+                             osm2ttl::ttl::constants::IRI__OSM_NODE);
+
+        writeBoostGeometry(
+            s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+            node.geom());
+      }
+
+      if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
+        _writer->writeTriple(
+            lastBlankNode, osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE,
+            _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+                                 node.id()));
+        // Haversine distance
+        const double distanceLat = (node.geom().y() - lastNode.geom().y()) *
+                                   osm2ttl::osm::constants::DEGREE;
+        const double distanceLon = (node.geom().x() - lastNode.geom().x()) *
+                                   osm2ttl::osm::constants::DEGREE;
+        const double haversine =
+            (sin(distanceLat / 2) * sin(distanceLat / 2)) +
+            (sin(distanceLon / 2) * sin(distanceLon / 2) *
+             cos(lastNode.geom().y() * osm2ttl::osm::constants::DEGREE) *
+             cos(node.geom().y() * osm2ttl::osm::constants::DEGREE));
+        const double distance = osm2ttl::osm::constants::EARTH_RADIUS_KM *
+                                osm2ttl::osm::constants::METERS_IN_KM * 2 *
+                                asin(sqrt(haversine));
+        _writer->writeTriple(
+            lastBlankNode,
+            osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE,
+            _writer->generateLiteral(
+                std::to_string(distance),
+                osm2ttl::ttl::constants::IRI__XSD_DECIMAL));
+      }
+      lastBlankNode = blankNode;
+      lastNode = node;
     }
   }
 
@@ -187,15 +229,15 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
   }
 
   if (_config.addWayMetadata) {
-    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_ISCLOSED,
+    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_IS_CLOSED,
                          way.closed() ? osm2ttl::ttl::constants::LITERAL__YES
                                       : osm2ttl::ttl::constants::LITERAL__NO);
-    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODECOUNT,
+    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODE_COUNT,
                          _writer->generateLiteral(
                              std::to_string(way.nodes().size()),
                              "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
     _writer->writeTriple(s,
-                         osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUENODECOUNT,
+                         osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT,
                          _writer->generateLiteral(
                              std::to_string(numUniquePoints),
                              "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));

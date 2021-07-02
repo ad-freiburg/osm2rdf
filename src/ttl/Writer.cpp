@@ -70,21 +70,25 @@ osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config,
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
   osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contains_area");
-  osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NONAREA = generateIRI(
+  osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NON_AREA = generateIRI(
       osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contains_nonarea");
   osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA = generateIRI(
       osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersects_area");
-  osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NONAREA = generateIRI(
+  osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA = generateIRI(
       osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersects_nonarea");
   osm2ttl::ttl::constants::IRI__OSM_META__POS =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META, "pos");
-  osm2ttl::ttl::constants::IRI__OSMWAY_ISCLOSED =
+  osm2ttl::ttl::constants::IRI__OSMWAY_IS_CLOSED =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
+  osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE =
+      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "next_node");
+  osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE = generateIRI(
+      osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "next_node_distance");
   osm2ttl::ttl::constants::IRI__OSMWAY_NODE =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "node");
-  osm2ttl::ttl::constants::IRI__OSMWAY_NODECOUNT =
+  osm2ttl::ttl::constants::IRI__OSMWAY_NODE_COUNT =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "nodeCount");
-  osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUENODECOUNT = generateIRI(
+  osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT = generateIRI(
       osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "uniqueNodeCount");
   osm2ttl::ttl::constants::IRI__OSM_ENVELOPE =
       generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "envelope");
