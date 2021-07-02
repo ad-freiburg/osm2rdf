@@ -159,6 +159,8 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
 
   if (_config.addWayNodeOrder) {
     size_t i = 0;
+    std::string lastBlankNode;
+    auto& lastNode = way.nodes().front();
     for (const auto& node : way.nodes()) {
       std::string blankNode = _writer->generateBlankNode();
       _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODE,
@@ -174,6 +176,22 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
           _writer->generateLiteral(
               std::to_string(++i),
               "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+
+      if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
+        _writer->writeTriple(
+            lastBlankNode, osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE,
+            _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+                                 node.id()));
+        _writer->writeTriple(
+            lastBlankNode,
+            osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE,
+            _writer->generateLiteral(
+                std::to_string(
+                    boost::geometry::distance(lastNode.geom(), node.geom())),
+                osm2ttl::ttl::constants::IRI__XSD_DECIMAL));
+      }
+      lastBlankNode = blankNode;
+      lastNode = node;
     }
   }
 
@@ -187,15 +205,15 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
   }
 
   if (_config.addWayMetadata) {
-    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_ISCLOSED,
+    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_IS_CLOSED,
                          way.closed() ? osm2ttl::ttl::constants::LITERAL__YES
                                       : osm2ttl::ttl::constants::LITERAL__NO);
-    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODECOUNT,
+    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODE_COUNT,
                          _writer->generateLiteral(
                              std::to_string(way.nodes().size()),
                              "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
     _writer->writeTriple(s,
-                         osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUENODECOUNT,
+                         osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT,
                          _writer->generateLiteral(
                              std::to_string(numUniquePoints),
                              "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));

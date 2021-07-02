@@ -704,6 +704,135 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addSortMetadata = false;
+  config.addWayNodeOrder = true;
+  config.addWayNodeSpatialMetadata = true;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                                                             {1, {48.0, 7.51}},
+                                                             {2, {48.1, 7.61}},
+                                                         }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2ttl object from osmium object
+  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+
+  dh.way(w);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmt:city \"Freiburg\" .\n"
+      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmway:node _:0 .\n"
+      "_:0 osmway:node osmnode:1 .\n"
+      "_:0 osmm:pos \"1\"^^xsd:integer .\n"
+      "osmway:42 osmway:node _:1 .\n"
+      "_:1 osmway:node osmnode:2 .\n"
+      "_:1 osmm:pos \"2\"^^xsd:integer .\n"
+      "_:0 osmway:next_node osmnode:2 .\n"
+      "_:0 osmway:next_node_distance \"0.141421\"xsd:decimal .\n"
+      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "7.6)\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2ttl::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addSortMetadata = false;
+  config.addWayNodeOrder = true;
+  config.addWayNodeSpatialMetadata = true;
+
+  osm2ttl::util::Output output{config, config.output};
+  output.open();
+  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2ttl::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                                                             {1, {48.0, 7.51}},
+                                                             {2, {48.1, 7.61}},
+                                                             {4, {48.1, 7.51}},
+                                                             {3, {48.0, 7.51}},
+                                                         }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2ttl object from osmium object
+  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+
+  dh.way(w);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmt:city \"Freiburg\" .\n"
+      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmway:node _:0 .\n"
+      "_:0 osmway:node osmnode:1 .\n"
+      "_:0 osmm:pos \"1\"^^xsd:integer .\n"
+      "osmway:42 osmway:node _:1 .\n"
+      "_:1 osmway:node osmnode:2 .\n"
+      "_:1 osmm:pos \"2\"^^xsd:integer .\n"
+      "_:0 osmway:next_node osmnode:2 .\n"
+      "_:0 osmway:next_node_distance \"0.141421\"xsd:decimal .\n"
+      "osmway:42 osmway:node _:2 .\n"
+      "_:2 osmway:node osmnode:4 .\n"
+      "_:2 osmm:pos \"3\"^^xsd:integer .\n"
+      "_:1 osmway:next_node osmnode:4 .\n"
+      "_:1 osmway:next_node_distance \"0.100000\"xsd:decimal .\n"
+      "osmway:42 osmway:node _:3 .\n"
+      "_:3 osmway:node osmnode:3 .\n"
+      "_:3 osmm:pos \"4\"^^xsd:integer .\n"
+      "_:2 osmway:next_node osmnode:3 .\n"
+      "_:2 osmway:next_node_distance \"0.100000\"xsd:decimal .\n"
+      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 7.6,48.1 7.5,48.0 7.5)\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, wayAddWayMetaData) {
   // Capture std::cout
   std::stringstream buffer;

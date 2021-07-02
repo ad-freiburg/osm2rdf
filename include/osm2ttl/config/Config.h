@@ -52,6 +52,7 @@ struct Config {
   bool addWayEnvelope = false;
   bool addWayMetadata = false;
   bool addWayNodeOrder = false;
+  bool addWayNodeSpatialMetadata = false;
   bool adminRelationsOnly = false;
   bool skipWikiLinks = false;
 

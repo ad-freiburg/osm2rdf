@@ -187,6 +187,13 @@ const static inline std::string ADD_WAY_METADATA_OPTION_LONG =
 const static inline std::string ADD_WAY_METADATA_OPTION_HELP =
     "Add information about the way structure";
 
+const static inline std::string ADD_WAY_NODE_SPATIAL_METADATA_INFO = "Adding way metadata";
+const static inline std::string ADD_WAY_NODE_SPATIAL_METADATA_OPTION_SHORT = "";
+const static inline std::string ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG =
+    "add-way-node-spatial-metadata";
+const static inline std::string ADD_WAY_NODE_SPATIAL_METADATA_OPTION_HELP =
+    "Add spatial information about the relations of member nodes in ways";
+
 const static inline std::string ADD_WAY_NODE_ORDER_INFO =
     "Adding way node order";
 const static inline std::string ADD_WAY_NODE_ORDER_OPTION_SHORT = "";
