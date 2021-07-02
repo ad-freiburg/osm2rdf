@@ -160,7 +160,7 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
   if (_config.addWayNodeOrder) {
     size_t i = 0;
     std::string lastBlankNode;
-    auto& lastNode = way.nodes().front();
+    auto lastNode = way.nodes().front();
     for (const auto& node : way.nodes()) {
       std::string blankNode = _writer->generateBlankNode();
       _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODE,
