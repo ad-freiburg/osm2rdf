@@ -370,7 +370,7 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
 
     if (!op.unknown_options().empty()) {
       std::cerr << "Unknown argument(s) specified:\n";
-      for (const auto o : op.unknown_options()) {
+      for (const auto& o : op.unknown_options()) {
         std::cerr << o << "\n";
       }
       std::cerr << "\n" << op.help() << "\n";
