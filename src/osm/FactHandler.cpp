@@ -194,24 +194,24 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
             lastBlankNode, osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE,
             _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
                                  node.id()));
-        double distanceLat = (node.geom().y() - lastNode.geom().y()) *
-                             osm2ttl::osm::constants::DEGREE;
-        double distanceLon = (node.geom().x() - lastNode.geom().x()) *
-                             osm2ttl::osm::constants::DEGREE;
-        double latitude1 =
-            lastNode.geom().y() * osm2ttl::osm::constants::DEGREE;
-        double latitude2 = node.geom().y() * osm2ttl::osm::constants::DEGREE;
-        double a = (sin(distanceLat / 2) * sin(distanceLat / 2)) +
-                   (sin(distanceLon / 2) * sin(distanceLon / 2) *
-                    cos(latitude1) * cos(latitude2));
+        // Haversine distance
+        const double distanceLat = (node.geom().y() - lastNode.geom().y()) *
+                                   osm2ttl::osm::constants::DEGREE;
+        const double distanceLon = (node.geom().x() - lastNode.geom().x()) *
+                                   osm2ttl::osm::constants::DEGREE;
+        const double haversine =
+            (sin(distanceLat / 2) * sin(distanceLat / 2)) +
+            (sin(distanceLon / 2) * sin(distanceLon / 2) *
+             cos(lastNode.geom().y() * osm2ttl::osm::constants::DEGREE) *
+             cos(node.geom().y() * osm2ttl::osm::constants::DEGREE));
+        const double distance = osm2ttl::osm::constants::EARTH_RADIUS_KM *
+                                osm2ttl::osm::constants::METERS_IN_KM * 2 *
+                                asin(sqrt(haversine));
         _writer->writeTriple(
             lastBlankNode,
             osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE,
             _writer->generateLiteral(
-
-                std::to_string(osm2ttl::osm::constants::EARTH_RADIUS_KM *
-                               osm2ttl::osm::constants::METERS_IN_KM * 2 *
-                               asin(sqrt(a))),
+                std::to_string(distance),
                 osm2ttl::ttl::constants::IRI__XSD_DECIMAL));
       }
       lastBlankNode = blankNode;
