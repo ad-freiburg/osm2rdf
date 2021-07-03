@@ -814,7 +814,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
       "_:1 osmway:node osmnode:2 .\n"
       "_:1 osmm:pos \"2\"^^xsd:integer .\n"
       "_:0 osmway:next_node osmnode:2 .\n"
-      "_:0 osmway:next_node_distance \"15657.137001\"xsd:decimal .\n"
+      "_:0 osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n",
       buffer.str());
@@ -875,17 +875,17 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
       "_:1 osmway:node osmnode:2 .\n"
       "_:1 osmm:pos \"2\"^^xsd:integer .\n"
       "_:0 osmway:next_node osmnode:2 .\n"
-      "_:0 osmway:next_node_distance \"15657.137001\"xsd:decimal .\n"
+      "_:0 osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\n"
       "osmway:42 osmway:node _:2 .\n"
       "_:2 osmway:node osmnode:4 .\n"
       "_:2 osmm:pos \"3\"^^xsd:integer .\n"
       "_:1 osmway:next_node osmnode:4 .\n"
-      "_:1 osmway:next_node_distance \"11119.490351\"xsd:decimal .\n"
+      "_:1 osmway:next_node_distance \"11119.490351\"^^xsd:decimal .\n"
       "osmway:42 osmway:node _:3 .\n"
       "_:3 osmway:node osmnode:3 .\n"
       "_:3 osmm:pos \"4\"^^xsd:integer .\n"
       "_:2 osmway:next_node osmnode:3 .\n"
-      "_:2 osmway:next_node_distance \"11024.108103\"xsd:decimal .\n"
+      "_:2 osmway:next_node_distance \"11024.108103\"^^xsd:decimal .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 7.6,48.1 7.5,48.0 "
       "7.5)\"^^geo:wktLiteral .\n",
       buffer.str());

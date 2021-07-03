@@ -212,7 +212,7 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
             osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE,
             _writer->generateLiteral(
                 std::to_string(distance),
-                osm2ttl::ttl::constants::IRI__XSD_DECIMAL));
+                "^^" + osm2ttl::ttl::constants::IRI__XSD_DECIMAL));
       }
       lastBlankNode = blankNode;
       lastNode = node;
