@@ -676,7 +676,7 @@ TEST(CONFIG_Config, fromArgsAddWayNodeGeomentryLong) {
   assertDefaultConfig(config);
 
   osm2ttl::util::CacheFile cf("/tmp/dummyInput");
-  auto arg =
+  const auto arg =
       "--" + osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
@@ -707,7 +707,7 @@ TEST(CONFIG_Config, fromArgsAddWayNodeSpatialMetadataLong) {
   assertDefaultConfig(config);
 
   osm2ttl::util::CacheFile cf("/tmp/dummyInput");
-  auto arg =
+  const auto arg =
       "--" +
       osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG;
   const int argc = 3;
