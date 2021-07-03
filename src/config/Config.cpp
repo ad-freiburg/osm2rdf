@@ -91,9 +91,18 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
         oss << "\n"
             << prefix << osm2ttl::config::constants::ADD_WAY_METADATA_INFO;
       }
+      if (addWayNodeGeometry) {
+        oss << "\n"
+            << prefix << osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_INFO;
+      }
       if (addWayNodeOrder) {
         oss << "\n"
             << prefix << osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO;
+      }
+      if (addWayNodeSpatialMetadata) {
+        oss << "\n"
+            << prefix
+            << osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO;
       }
     }
     if (simplifyWKT > 0) {
@@ -113,11 +122,11 @@ std::string osm2ttl::config::Config::getInfo(std::string_view prefix) const {
           << prefix << osm2ttl::config::constants::SEMICOLON_TAG_KEYS_INFO;
       std::vector<std::string> keys;
       keys.reserve(semicolonTagKeys.size());
-      for (const auto &key : semicolonTagKeys) {
+      for (const auto& key : semicolonTagKeys) {
         keys.push_back(key);
       }
       std::sort(keys.begin(), keys.end());
-      for (const auto &key : keys) {
+      for (const auto& key : keys) {
         oss << "\n" << prefix << prefix << key;
       }
     }
@@ -270,14 +279,22 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
       osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG,
       osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_HELP);
-  auto addWayMetaDataOp = op.add<popl::Switch>(
+  auto addWayMetadataOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_LONG,
       osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_HELP);
+  auto addWayNodeGeometryOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG,
+      osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_HELP);
   auto addWayNodeOrderOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_SHORT,
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG,
       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_HELP);
+  auto addWayNodeSpatialMetadataOp = op.add<popl::Switch>(
+      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_SHORT,
+      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG,
+      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_HELP);
   auto adminRelationsOnlyOp = op.add<popl::Switch>(
       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_SHORT,
       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG,
@@ -405,8 +422,10 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
     addNodeEnvelope = addNodeEnvelopeOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
-    addWayMetadata = addWayMetaDataOp->is_set();
+    addWayMetadata = addWayMetadataOp->is_set();
+    addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
+    addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
     skipWikiLinks = skipWikiLinksOp->is_set();
@@ -414,6 +433,9 @@ void osm2ttl::config::Config::fromArgs(int argc, char** argv) {
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
+
+    addWayNodeOrder |= addWayNodeGeometry;
+    addWayNodeOrder |= addWayNodeSpatialMetadata;
 
     osm2ttlPrefix = osm2ttlPrefixOp->value();
     if (semicolonTagKeysOp->is_set()) {
