@@ -160,7 +160,10 @@ void osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>::writeHeader() {}
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2ttl::ttl::Writer<T>::generateBlankNode() {
-  return "_:" + std::to_string(_blankNodeCounter++);
+  uint64_t blankNodeId;
+#pragma omp critical(generateBlankNode)
+  blankNodeId = _blankNodeCounter++;
+  return "_:" + std::to_string(blankNodeId);
 }
 
 // ____________________________________________________________________________
