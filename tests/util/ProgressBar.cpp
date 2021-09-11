@@ -1,77 +1,77 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/util/ProgressBar.h"
+#include "osm2rdf/util/ProgressBar.h"
 
 #include <iostream>
 
 #include "gtest/gtest.h"
 
-namespace osm2ttl::util {
+namespace osm2rdf::util {
 
 // ____________________________________________________________________________
 TEST(UTIL_ProgressBar, countWidth) {
   {
-    osm2ttl::util::ProgressBar pg{0, false};
+    osm2rdf::util::ProgressBar pg{0, false};
     ASSERT_EQ(1, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{1, false};
+    osm2rdf::util::ProgressBar pg{1, false};
     ASSERT_EQ(1, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{9, false};
+    osm2rdf::util::ProgressBar pg{9, false};
     ASSERT_EQ(1, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{10, false};
+    osm2rdf::util::ProgressBar pg{10, false};
     ASSERT_EQ(2, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{99, false};
+    osm2rdf::util::ProgressBar pg{99, false};
     ASSERT_EQ(2, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{100, false};
+    osm2rdf::util::ProgressBar pg{100, false};
     ASSERT_EQ(3, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{999, false};
+    osm2rdf::util::ProgressBar pg{999, false};
     ASSERT_EQ(3, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{1000, false};
+    osm2rdf::util::ProgressBar pg{1000, false};
     ASSERT_EQ(4, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{10000, false};
+    osm2rdf::util::ProgressBar pg{10000, false};
     ASSERT_EQ(5, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{100000, false};
+    osm2rdf::util::ProgressBar pg{100000, false};
     ASSERT_EQ(6, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{1000000, false};
+    osm2rdf::util::ProgressBar pg{1000000, false};
     ASSERT_EQ(7, pg.countWidth());
   }
   {
-    osm2ttl::util::ProgressBar pg{10000000, false};
+    osm2rdf::util::ProgressBar pg{10000000, false};
     ASSERT_EQ(8, pg.countWidth());
   }
 }
@@ -82,7 +82,7 @@ TEST(UTIL_ProgressBar, hidden) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{10, false};
+  osm2rdf::util::ProgressBar pg{10, false};
   pg.update(2);
   pg.update(4);
   pg.update(6);
@@ -100,7 +100,7 @@ TEST(UTIL_ProgressBar, directlyDoneZero) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{0, true};
+  osm2rdf::util::ProgressBar pg{0, true};
   pg.done();
 
   std::cerr.rdbuf(sbuf);
@@ -116,7 +116,7 @@ TEST(UTIL_ProgressBar, directlyDoneOne) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{1, true};
+  osm2rdf::util::ProgressBar pg{1, true};
   pg.done();
 
   std::cerr.rdbuf(sbuf);
@@ -132,7 +132,7 @@ TEST(UTIL_ProgressBar, zeroSteps) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{0, true};
+  osm2rdf::util::ProgressBar pg{0, true};
   pg.update(0);
   pg.done();
 
@@ -149,7 +149,7 @@ TEST(UTIL_ProgressBar, twoSteps) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{2, true};
+  osm2rdf::util::ProgressBar pg{2, true};
   pg.update(1);
   pg.done();
 
@@ -168,7 +168,7 @@ TEST(UTIL_ProgressBar, tenSteps) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{10, true};
+  osm2rdf::util::ProgressBar pg{10, true};
   pg.update(1);
   pg.update(2);
   pg.update(3);
@@ -205,7 +205,7 @@ TEST(UTIL_ProgressBar, oneHundredSteps) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{100, true};
+  osm2rdf::util::ProgressBar pg{100, true};
   pg.update(0);
   pg.update(4);
   pg.update(9);
@@ -269,7 +269,7 @@ TEST(UTIL_ProgressBar, multipleNoChangeSteps) {
   std::streambuf* sbuf = std::cerr.rdbuf();
   std::cerr.rdbuf(buffer.rdbuf());
 
-  osm2ttl::util::ProgressBar pg{10, true};
+  osm2rdf::util::ProgressBar pg{10, true};
   for (size_t i = 0; i <= 10; ++i) {
     for (size_t j = 0; j < 3; ++j) {
       pg.update(i);
@@ -304,4 +304,4 @@ TEST(UTIL_ProgressBar, multipleNoChangeSteps) {
       buffer.str());
 }
 
-}  // namespace osm2ttl::util
+}  // namespace osm2rdf::util

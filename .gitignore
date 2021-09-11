@@ -4,4 +4,4 @@ input/
 output/
 scratch/
 perf.data*
-/include/osm2ttl/Version.h
+/include/osm2rdf/Version.h

@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/osm/RelationMember.h"
+#include "osm2rdf/osm/RelationMember.h"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -24,11 +24,11 @@
 #include <boost/archive/text_oarchive.hpp>
 
 #include "gtest/gtest.h"
-#include "osm2ttl/osm/Relation.h"
+#include "osm2rdf/osm/Relation.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
-namespace osm2ttl::osm {
+namespace osm2rdf::osm {
 
 // ____________________________________________________________________________
 TEST(OSM_RelationMember, FromRelationWithMembers) {
@@ -41,17 +41,17 @@ TEST(OSM_RelationMember, FromRelationWithMembers) {
       osmium::builder::attr::_member(osmium::item_type::node, 1, ""),
       osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Relation r{buffer.get<osmium::Relation>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{buffer.get<osmium::Relation>(0)};
   ASSERT_EQ(42, r.id());
 
   ASSERT_EQ(0, r.tags().size());
 
   ASSERT_EQ(2, r.members().size());
-  ASSERT_EQ(osm2ttl::osm::RelationMemberType::NODE, r.members().at(0).type());
+  ASSERT_EQ(osm2rdf::osm::RelationMemberType::NODE, r.members().at(0).type());
   ASSERT_EQ(1, r.members().at(0).id());
   ASSERT_EQ("member", r.members().at(0).role());
-  ASSERT_EQ(osm2ttl::osm::RelationMemberType::WAY, r.members().at(1).type());
+  ASSERT_EQ(osm2rdf::osm::RelationMemberType::WAY, r.members().at(1).type());
   ASSERT_EQ(1, r.members().at(1).id());
   ASSERT_EQ("outer", r.members().at(1).role());
 }
@@ -72,11 +72,11 @@ TEST(OSM_RelationMember, equalsOperator) {
       osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
       osmium::builder::attr::_member(osmium::item_type::changeset, 1, "foo"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
-  const osm2ttl::osm::RelationMember o1 = r.members().at(0);
-  const osm2ttl::osm::RelationMember o2 = r.members().at(1);
-  const osm2ttl::osm::RelationMember o3 = r.members().at(2);
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
+  const osm2rdf::osm::RelationMember o1 = r.members().at(0);
+  const osm2rdf::osm::RelationMember o2 = r.members().at(1);
+  const osm2rdf::osm::RelationMember o3 = r.members().at(2);
 
   ASSERT_TRUE(o1 == o1);
   ASSERT_FALSE(o1 == o2);
@@ -107,11 +107,11 @@ TEST(OSM_RelationMember, notEqualsOperator) {
       osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
       osmium::builder::attr::_member(osmium::item_type::changeset, 1, "foo"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
-  const osm2ttl::osm::RelationMember o1 = r.members().at(0);
-  const osm2ttl::osm::RelationMember o2 = r.members().at(1);
-  const osm2ttl::osm::RelationMember o3 = r.members().at(2);
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
+  const osm2rdf::osm::RelationMember o1 = r.members().at(0);
+  const osm2rdf::osm::RelationMember o2 = r.members().at(1);
+  const osm2rdf::osm::RelationMember o3 = r.members().at(2);
 
   ASSERT_FALSE(o1 != o1);
   ASSERT_TRUE(o1 != o2);
@@ -144,14 +144,14 @@ TEST(OSM_RelationMember, serializationBinary) {
       osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
       osmium::builder::attr::_member(osmium::item_type::changeset, 1, "foo"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
-  const osm2ttl::osm::RelationMember s1 = r.members().at(0);
-  const osm2ttl::osm::RelationMember s2 = r.members().at(1);
-  const osm2ttl::osm::RelationMember s3 = r.members().at(2);
-  osm2ttl::osm::RelationMember d1;
-  osm2ttl::osm::RelationMember d2;
-  osm2ttl::osm::RelationMember d3;
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
+  const osm2rdf::osm::RelationMember s1 = r.members().at(0);
+  const osm2rdf::osm::RelationMember s2 = r.members().at(1);
+  const osm2rdf::osm::RelationMember s3 = r.members().at(2);
+  osm2rdf::osm::RelationMember d1;
+  osm2rdf::osm::RelationMember d2;
+  osm2rdf::osm::RelationMember d3;
 
   // Store and load
   boost::archive::binary_oarchive oa(boostBuffer);
@@ -188,14 +188,14 @@ TEST(OSM_RelationMember, serializationText) {
       osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
       osmium::builder::attr::_member(osmium::item_type::changeset, 1, "foo"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
-  const osm2ttl::osm::RelationMember s1 = r.members().at(0);
-  const osm2ttl::osm::RelationMember s2 = r.members().at(1);
-  const osm2ttl::osm::RelationMember s3 = r.members().at(2);
-  osm2ttl::osm::RelationMember d1;
-  osm2ttl::osm::RelationMember d2;
-  osm2ttl::osm::RelationMember d3;
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
+  const osm2rdf::osm::RelationMember s1 = r.members().at(0);
+  const osm2rdf::osm::RelationMember s2 = r.members().at(1);
+  const osm2rdf::osm::RelationMember s3 = r.members().at(2);
+  osm2rdf::osm::RelationMember d1;
+  osm2rdf::osm::RelationMember d2;
+  osm2rdf::osm::RelationMember d3;
 
   // Store and load
   boost::archive::text_oarchive oa(boostBuffer);
@@ -214,4 +214,4 @@ TEST(OSM_RelationMember, serializationText) {
   ASSERT_TRUE(s3 == d3);
 }
 
-}  // namespace osm2ttl::osm
+}  // namespace osm2rdf::osm

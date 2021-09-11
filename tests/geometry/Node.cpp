@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/geometry/Node.h"
+#include "osm2rdf/geometry/Node.h"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -25,21 +25,21 @@
 
 #include "gtest/gtest.h"
 
-namespace osm2ttl::geometry {
+namespace osm2rdf::geometry {
 
 // ____________________________________________________________________________
-osm2ttl::geometry::Node getDefaultObject() { return osm2ttl::geometry::Node(); }
+osm2rdf::geometry::Node getDefaultObject() { return osm2rdf::geometry::Node(); }
 
 // ____________________________________________________________________________
-osm2ttl::geometry::Node getFilledObject() {
-  return osm2ttl::geometry::Node(10, 20);
+osm2rdf::geometry::Node getFilledObject() {
+  return osm2rdf::geometry::Node(10, 20);
 }
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Node, equalsOperator) {
-  osm2ttl::geometry::Node o1(10, 10);
-  osm2ttl::geometry::Node o2(10, 20);
-  osm2ttl::geometry::Node o3(20, 10);
+  osm2rdf::geometry::Node o1(10, 10);
+  osm2rdf::geometry::Node o2(10, 20);
+  osm2rdf::geometry::Node o3(20, 10);
 
   ASSERT_TRUE(o1 == o1);
   ASSERT_FALSE(o1 == o2);
@@ -56,9 +56,9 @@ TEST(GEOMETRY_Node, equalsOperator) {
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Node, notEqualsOperator) {
-  osm2ttl::geometry::Node o1(10, 10);
-  osm2ttl::geometry::Node o2(10, 20);
-  osm2ttl::geometry::Node o3(20, 10);
+  osm2rdf::geometry::Node o1(10, 10);
+  osm2rdf::geometry::Node o2(10, 20);
+  osm2rdf::geometry::Node o3(20, 10);
 
   ASSERT_FALSE(o1 != o1);
   ASSERT_TRUE(o1 != o2);
@@ -77,10 +77,10 @@ TEST(GEOMETRY_Node, notEqualsOperator) {
 TEST(GEOMETRY_Node, serializationBinary) {
   std::stringstream buffer;
 
-  osm2ttl::geometry::Node origDefaultObject = getDefaultObject();
-  osm2ttl::geometry::Node origFilledObject = getFilledObject();
-  osm2ttl::geometry::Node loadedDefaultObject;
-  osm2ttl::geometry::Node loadedFilledObject;
+  osm2rdf::geometry::Node origDefaultObject = getDefaultObject();
+  osm2rdf::geometry::Node origFilledObject = getFilledObject();
+  osm2rdf::geometry::Node loadedDefaultObject;
+  osm2rdf::geometry::Node loadedFilledObject;
 
   // Store and load
   boost::archive::binary_oarchive oa(buffer);
@@ -100,10 +100,10 @@ TEST(GEOMETRY_Node, serializationBinary) {
 TEST(GEOMETRY_Node, serializationText) {
   std::stringstream buffer;
 
-  osm2ttl::geometry::Node origDefaultObject = getDefaultObject();
-  osm2ttl::geometry::Node origFilledObject = getFilledObject();
-  osm2ttl::geometry::Node loadedDefaultObject;
-  osm2ttl::geometry::Node loadedFilledObject;
+  osm2rdf::geometry::Node origDefaultObject = getDefaultObject();
+  osm2rdf::geometry::Node origFilledObject = getFilledObject();
+  osm2rdf::geometry::Node loadedDefaultObject;
+  osm2rdf::geometry::Node loadedFilledObject;
 
   // Store and load
   boost::archive::text_oarchive oa(buffer);
@@ -119,4 +119,4 @@ TEST(GEOMETRY_Node, serializationText) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-}  // namespace osm2ttl::geometry
+}  // namespace osm2rdf::geometry

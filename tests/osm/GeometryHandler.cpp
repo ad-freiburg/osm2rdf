@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/osm/GeometryHandler.h"
+#include "osm2rdf/osm/GeometryHandler.h"
 
 #include <omp.h>
 
@@ -27,20 +27,20 @@
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
-namespace osm2ttl::osm {
+namespace osm2rdf::osm {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, constructor) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_OSM_GeometryHandler", "constructor-output");
   config.cache =
       config.getTempPath("TEST_OSM_GeometryHandler", "constructor-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Cleanup
   output.close();
@@ -50,16 +50,16 @@ TEST(OSM_GeometryHandler, constructor) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
                                      "addNamedAreaFromRelation-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
                                     "addNamedAreaFromRelation-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   const int areaId = 43;
   // Create osmium object
@@ -76,8 +76,8 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src{buffer.get<osmium::Area>(0)};
   ASSERT_FALSE(src.fromWay());
 
   ASSERT_EQ(0, gh._spatialStorageArea.size());
@@ -98,16 +98,16 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
                                      "addNamedAreaFromWay-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
                                     "addNamedAreaFromWay-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   const int areaId = 42;
   // Create osmium object
@@ -124,8 +124,8 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src{buffer.get<osmium::Area>(0)};
   ASSERT_TRUE(src.fromWay());
 
   ASSERT_EQ(0, gh._spatialStorageArea.size());
@@ -146,7 +146,7 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath(
       "TEST_OSM_GeometryHandler", "addNamedAreaFromRelationWithRatios-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -154,9 +154,9 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
   config.minimalAreaEnvelopeRatio = 0.75;
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   const int areaId = 43;
   // Create osmium object
@@ -185,9 +185,9 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
                                 {1, {0.0, 5.0}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src1{buffer1.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area src2{buffer2.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src1{buffer1.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area src2{buffer2.get<osmium::Area>(0)};
   ASSERT_FALSE(src1.fromWay());
 
   ASSERT_EQ(0, gh._spatialStorageArea.size());
@@ -204,7 +204,7 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
   ASSERT_TRUE(src1.geom() == std::get<2>(dst1));
 
   // Read area from dump and compare
-  osm2ttl::osm::SpatialAreaValue dst2;
+  osm2rdf::osm::SpatialAreaValue dst2;
 
   gh.closeExternalStorage();
   std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
@@ -226,7 +226,7 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
                                      "addNamedAreaFromWayWithRatios-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -234,9 +234,9 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
   config.minimalAreaEnvelopeRatio = 0.75;
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   const int areaId = 42;
   // Create osmium object
@@ -265,9 +265,9 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
                                 {1, {0.0, 5.0}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src1{buffer1.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area src2{buffer2.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src1{buffer1.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area src2{buffer2.get<osmium::Area>(0)};
   ASSERT_TRUE(src1.fromWay());
 
   ASSERT_EQ(0, gh._spatialStorageArea.size());
@@ -284,7 +284,7 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
   ASSERT_TRUE(src1.geom() == std::get<2>(dst1));
 
   // Read area from dump and compare
-  osm2ttl::osm::SpatialAreaValue dst2;
+  osm2rdf::osm::SpatialAreaValue dst2;
 
   gh.closeExternalStorage();
   std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
@@ -306,16 +306,16 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
                                      "addUnnamedAreaFromRelation-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
                                     "addUnnamedAreaFromRelation-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   const int areaId = 43;
   // Create osmium object
@@ -331,15 +331,15 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src{buffer.get<osmium::Area>(0)};
 
   ASSERT_EQ(0, gh._numUnnamedAreas);
   gh.area(src);
   ASSERT_EQ(1, gh._numUnnamedAreas);
 
   // Read area from dump and compare
-  osm2ttl::osm::SpatialAreaValue dst;
+  osm2rdf::osm::SpatialAreaValue dst;
 
   gh.closeExternalStorage();
   std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
@@ -361,16 +361,16 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
                                      "addUnnamedAreaFromWay-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
                                     "addUnnamedAreaFromWay-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   const int areaId = 42;
   // Create osmium object
@@ -386,15 +386,15 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src{buffer.get<osmium::Area>(0)};
 
   ASSERT_EQ(0, gh._numUnnamedAreas);
   gh.area(src);
   ASSERT_EQ(0, gh._numUnnamedAreas);
 
   // Read area from dump and compare
-  osm2ttl::osm::SpatialAreaValue dst;
+  osm2rdf::osm::SpatialAreaValue dst;
 
   gh.closeExternalStorage();
   std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
@@ -412,16 +412,16 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addNode) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
   config.cache =
       config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -431,15 +431,15 @@ TEST(OSM_GeometryHandler, addNode) {
       buffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Node src{buffer.get<osmium::Node>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Node src{buffer.get<osmium::Node>(0)};
 
   ASSERT_EQ(0, gh._numNodes);
   gh.node(src);
   ASSERT_EQ(1, gh._numNodes);
 
   // Read area from dump and compare
-  osm2ttl::osm::SpatialNodeValue dst;
+  osm2rdf::osm::SpatialNodeValue dst;
 
   gh.closeExternalStorage();
   std::ifstream ifs(config.getTempPath("spatial", "nodes"), std::ios::binary);
@@ -460,16 +460,16 @@ TEST(OSM_GeometryHandler, addNode) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, addWay) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_OSM_GeometryHandler", "addNode-output");
   config.cache =
       config.getTempPath("TEST_OSM_GeometryHandler", "addNode-cache");
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -481,15 +481,15 @@ TEST(OSM_GeometryHandler, addWay) {
                                {2, {48.1, 7.61}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way src{buffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way src{buffer.get<osmium::Way>(0)};
 
   ASSERT_EQ(0, gh._numWays);
   gh.way(src);
   ASSERT_EQ(1, gh._numWays);
 
   // Read area from dump and compare
-  osm2ttl::osm::SpatialWayValue dst;
+  osm2rdf::osm::SpatialWayValue dst;
 
   gh.closeExternalStorage();
   std::ifstream ifs(config.getTempPath("spatial", "ways"), std::ios::binary);
@@ -518,14 +518,14 @@ TEST(OSM_GeometryHandler, prepareRTreeEmpty) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   ASSERT_EQ(0, gh._spatialIndex.size());
   gh.prepareRTree();
@@ -549,14 +549,14 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -605,11 +605,11 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
                                 {1, {20.0, 0.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   gh.closeExternalStorage();
 
   ASSERT_EQ(0, gh._spatialIndex.size());
@@ -617,18 +617,18 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
   ASSERT_EQ(gh._spatialStorageArea.size(), gh._spatialIndex.size());
 
   std::vector<SpatialAreaValue> queryResult;
-  osm2ttl::geometry::Box nodeEnvelope;
+  osm2rdf::geometry::Box nodeEnvelope;
 
   queryResult.clear();
-  nodeEnvelope.min_corner() = osm2ttl::geometry::Location(148.05, 7.56);
-  nodeEnvelope.max_corner() = osm2ttl::geometry::Location(148.05, 7.56);
+  nodeEnvelope.min_corner() = osm2rdf::geometry::Location(148.05, 7.56);
+  nodeEnvelope.max_corner() = osm2rdf::geometry::Location(148.05, 7.56);
   gh._spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
   ASSERT_EQ(0, queryResult.size());
 
   queryResult.clear();
-  nodeEnvelope.min_corner() = osm2ttl::geometry::Location(45.00, 8.00);
-  nodeEnvelope.max_corner() = osm2ttl::geometry::Location(45.00, 8.00);
+  nodeEnvelope.min_corner() = osm2rdf::geometry::Location(45.00, 8.00);
+  nodeEnvelope.max_corner() = osm2rdf::geometry::Location(45.00, 8.00);
   gh._spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
 
@@ -636,16 +636,16 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
   ASSERT_EQ(2, queryResult.size());
 
   queryResult.clear();
-  nodeEnvelope.min_corner() = osm2ttl::geometry::Location(48.05, 7.56);
-  nodeEnvelope.max_corner() = osm2ttl::geometry::Location(48.05, 7.56);
+  nodeEnvelope.min_corner() = osm2rdf::geometry::Location(48.05, 7.56);
+  nodeEnvelope.max_corner() = osm2rdf::geometry::Location(48.05, 7.56);
   gh._spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
   // 22, 24, 28
   ASSERT_EQ(3, queryResult.size());
 
   queryResult.clear();
-  nodeEnvelope.min_corner() = osm2ttl::geometry::Location(40.05, 7.56);
-  nodeEnvelope.max_corner() = osm2ttl::geometry::Location(40.05, 7.56);
+  nodeEnvelope.min_corner() = osm2rdf::geometry::Location(40.05, 7.56);
+  nodeEnvelope.max_corner() = osm2rdf::geometry::Location(40.05, 7.56);
   gh._spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                          std::back_inserter(queryResult));
   // 24, 26, 28
@@ -669,14 +669,14 @@ TEST(OSM_GeometryHandler, prepareDAGEmpty) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
 
@@ -704,14 +704,14 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -767,11 +767,11 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
                                 {1, {20.0, 0.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
 
@@ -781,11 +781,11 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
   ASSERT_EQ(4, gh._directedAreaGraph.getNumVertices());
   ASSERT_EQ(3, gh._directedAreaGraph.getNumEdges());
 
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{24},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
             gh._directedAreaGraph.getEdges(22));
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{24},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
             gh._directedAreaGraph.getEdges(26));
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{28},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
             gh._directedAreaGraph.getEdges(24));
 
   output.flush();
@@ -806,14 +806,14 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsEmpty) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
   gh.prepareDAG();
@@ -845,14 +845,14 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -908,20 +908,20 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
                                 {1, {20.0, 0.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{24},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
             gh._directedAreaGraph.getEdges(22));
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{24},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
             gh._directedAreaGraph.getEdges(26));
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{28},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
             gh._directedAreaGraph.getEdges(24));
 
   ASSERT_EQ(2, gh._directedAreaGraph.getEdgesFast(22).size());
@@ -938,57 +938,57 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 14) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "contains_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 14) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "intersects_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "contains_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 13)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "intersects_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 13)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "contains_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 11)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "intersects_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 11)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1009,14 +1009,14 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -1072,20 +1072,20 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
                                 {1, {20.0, 0.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{24},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
             gh._directedAreaGraph.getEdges(22));
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{24},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
             gh._directedAreaGraph.getEdges(26));
-  ASSERT_EQ(std::vector<osm2ttl::osm::Area::id_t>{28},
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
             gh._directedAreaGraph.getEdges(24));
 
   gh.dumpNamedAreaRelations();
@@ -1097,57 +1097,57 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 14) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "contains_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 14) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "intersects_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "contains_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 13)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "intersects_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 13)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "contains_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 11)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 12) +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
                              "intersects_area") +
           " " +
-          writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, 11)));
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1166,15 +1166,15 @@ TEST(OSM_GeometryHandler, noAreaGeometricRelations) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noAreaGeometricRelations = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1203,14 +1203,14 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty1) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1240,14 +1240,14 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -1303,11 +1303,11 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2) {
                                 {1, {20.0, 0.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1337,14 +1337,14 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -1411,13 +1411,13 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
                                 {1, {40.1, 7.56}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(osm2ttl::osm::Area(osmiumBuffer5.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer5.get<osmium::Area>(0)));
   ASSERT_EQ(1, gh._numUnnamedAreas);
   gh.closeExternalStorage();
   gh.prepareRTree();
@@ -1460,14 +1460,14 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -1534,13 +1534,13 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(osm2ttl::osm::Area(osmiumBuffer5.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer5.get<osmium::Area>(0)));
   ASSERT_EQ(1, gh._numUnnamedAreas);
   gh.closeExternalStorage();
   gh.prepareRTree();
@@ -1582,15 +1582,15 @@ TEST(OSM_GeometryHandler, noNodeGeometricRelations) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noNodeGeometricRelations = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1619,14 +1619,14 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsEmpty1) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1655,14 +1655,14 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsEmpty2) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -1718,11 +1718,11 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsEmpty2) {
                                 {1, {20.0, 0.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1751,14 +1751,14 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -1821,13 +1821,13 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
       osmium::builder::attr::_location(osmium::Location(40.0, 7.55)),
       osmium::builder::attr::_tag("foo", "bar"));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   ASSERT_EQ(0, gh._numNodes);
-  gh.node(osm2ttl::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
+  gh.node(osm2rdf::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
   ASSERT_EQ(1, gh._numNodes);
   gh.closeExternalStorage();
   gh.prepareRTree();
@@ -1865,14 +1865,14 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -1935,13 +1935,13 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
       osmium::builder::attr::_location(osmium::Location(48.05, 7.56)),
       osmium::builder::attr::_tag("foo", "bar"));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   ASSERT_EQ(0, gh._numNodes);
-  gh.node(osm2ttl::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
+  gh.node(osm2rdf::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
   ASSERT_EQ(1, gh._numNodes);
   gh.closeExternalStorage();
   gh.prepareRTree();
@@ -1979,20 +1979,20 @@ TEST(OSM_GeometryHandler, noWayGeometricRelations) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noWayGeometricRelations = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2ttl::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
 
   output.flush();
   output.close();
@@ -2016,19 +2016,19 @@ TEST(OSM_GeometryHandler, dumpWayRelationsEmpty1) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2ttl::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
 
   output.flush();
   output.close();
@@ -2052,14 +2052,14 @@ TEST(OSM_GeometryHandler, dumpWayRelationsEmpty2) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -2115,16 +2115,16 @@ TEST(OSM_GeometryHandler, dumpWayRelationsEmpty2) {
                                 {1, {20.0, 0.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2ttl::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
 
   output.flush();
   output.close();
@@ -2148,14 +2148,14 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -2220,19 +2220,19 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
                                {4, {48.2, 7.71}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   ASSERT_EQ(0, gh._numWays);
-  gh.way(osm2ttl::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
+  gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2ttl::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
 
   output.flush();
   output.close();
@@ -2269,14 +2269,14 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -2341,19 +2341,19 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
                                {4, {48.08, 7.55}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   ASSERT_EQ(0, gh._numWays);
-  gh.way(osm2ttl::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
+  gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2ttl::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
 
   output.flush();
   output.close();
@@ -2389,14 +2389,14 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -2473,14 +2473,14 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
       osmium::builder::attr::_location(osmium::Location(48.1, 7.61)),
       osmium::builder::attr::_tag("foo", "bar"));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
-  gh.way(osm2ttl::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
-  gh.node(osm2ttl::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
-  gh.node(osm2ttl::osm::Node(osmiumBuffer7.get<osmium::Node>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
+  gh.node(osm2rdf::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
+  gh.node(osm2rdf::osm::Node(osmiumBuffer7.get<osmium::Node>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
@@ -2529,14 +2529,14 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium objects
   /*
@@ -2607,15 +2607,15 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
       osmium::builder::attr::_location(osmium::Location(48.04, 7.53)),
       osmium::builder::attr::_tag("foo", "bar"));
 
-  // Create osm2ttl object from osmium object
-  gh.area(osm2ttl::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2ttl::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
+  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
   ASSERT_EQ(0, gh._numWays);
-  gh.way(osm2ttl::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
+  gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
-  gh.node(osm2ttl::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
+  gh.node(osm2rdf::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
@@ -2652,9 +2652,9 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, statisticLine) {
-  osm2ttl::config::Config config;
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, nullptr};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::config::Config config;
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, nullptr};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   ASSERT_EQ(
       "{"
@@ -2689,7 +2689,7 @@ TEST(OSM_GeometryHandler, statisticLine) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, simplifyGeometryArea) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
                                      "simplifyGeometryArea-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -2697,9 +2697,9 @@ TEST(OSM_GeometryHandler, simplifyGeometryArea) {
   config.simplifyGeometries = 1;
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   const int areaId = 42;
   // Create osmium object
@@ -2717,8 +2717,8 @@ TEST(OSM_GeometryHandler, simplifyGeometryArea) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src{buffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src{buffer.get<osmium::Area>(0)};
   ASSERT_TRUE(src.fromWay());
 
   ASSERT_EQ(0, gh._spatialStorageArea.size());
@@ -2748,7 +2748,7 @@ TEST(OSM_GeometryHandler, simplifyGeometryArea) {
 
 // ____________________________________________________________________________
 TEST(OSM_GeometryHandler, simplifyGeometryWay) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",
                                      "simplifyGeometryWay-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
@@ -2756,9 +2756,9 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   config.simplifyGeometries = 100;
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::GeometryHandler gh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -2771,15 +2771,15 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
                                {2, {48.1, 7.61}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way src{buffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way src{buffer.get<osmium::Way>(0)};
 
   ASSERT_EQ(0, gh._numWays);
   gh.way(src);
   ASSERT_EQ(1, gh._numWays);
 
   // Read area from dump and compare
-  osm2ttl::osm::SpatialWayValue dst;
+  osm2rdf::osm::SpatialWayValue dst;
 
   gh.closeExternalStorage();
   std::ifstream ifs(config.getTempPath("spatial", "ways"), std::ios::binary);
@@ -2803,4 +2803,4 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   std::filesystem::remove_all(config.output);
 }
 
-}  // namespace osm2ttl::osm
+}  // namespace osm2rdf::osm

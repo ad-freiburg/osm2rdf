@@ -1,43 +1,43 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/util/DirectedGraph.h"
+#include "osm2rdf/util/DirectedGraph.h"
 
 #include "gtest/gtest.h"
 
-namespace osm2ttl::util {
+namespace osm2rdf::util {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, Constructor) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
   ASSERT_EQ(0, g.getNumEdges());
 }
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, CopyConstructor) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
   g.addEdge(1, 2);
   g.addEdge(2, 1);
   ASSERT_EQ(2, g.getNumVertices());
   ASSERT_EQ(3, g.getNumEdges());
-  osm2ttl::util::DirectedGraph g2{g};
+  osm2rdf::util::DirectedGraph g2{g};
   ASSERT_EQ(2, g2.getNumVertices());
   ASSERT_EQ(3, g2.getNumEdges());
   g2.addEdge(2, 3);
@@ -49,7 +49,7 @@ TEST(UTIL_DirectedGraph, CopyConstructor) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, addEdge) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
   ASSERT_EQ(0, g.getNumEdges());
   // Allows multiple edges between vertices
@@ -67,7 +67,7 @@ TEST(UTIL_DirectedGraph, addEdge) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, findSuccessors) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   {
     auto res = g.findSuccessors(1);
     ASSERT_EQ(0, res.size());
@@ -96,7 +96,7 @@ TEST(UTIL_DirectedGraph, findSuccessors) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, findSuccessorsFast) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
   g.addEdge(1, 0);
   g.addEdge(1, 2);
@@ -116,7 +116,7 @@ TEST(UTIL_DirectedGraph, findSuccessorsFast) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, sort) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   {
     g.addEdge(1, 2);
     g.addEdge(1, 0);
@@ -133,7 +133,7 @@ TEST(UTIL_DirectedGraph, sort) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, prepareFindSuccessorsFast) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   g.addEdge(1, 2);
   g.addEdge(1, 0);
   g.addEdge(1, 2);
@@ -149,7 +149,7 @@ TEST(UTIL_DirectedGraph, prepareFindSuccessorsFast) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getNumEdges) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumEdges());
   // Count each edge, allows multiple edges between the same vertices.
   g.addEdge(1, 2);
@@ -164,7 +164,7 @@ TEST(UTIL_DirectedGraph, getNumEdges) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getNumVertices) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumVertices());
   // Counts each vertex only once...
   g.addEdge(1, 1);
@@ -180,7 +180,7 @@ TEST(UTIL_DirectedGraph, getNumVertices) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getVertices) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   {
     auto res = g.getVertices();
     ASSERT_EQ(0, res.size());
@@ -212,7 +212,7 @@ TEST(UTIL_DirectedGraph, getVertices) {
 
 // ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getEdges) {
-  osm2ttl::util::DirectedGraph<uint8_t> g{};
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
   {
     g.addEdge(1, 1);
     const auto res = g.getEdges(1);
@@ -242,4 +242,4 @@ TEST(UTIL_DirectedGraph, getEdges) {
   }
 }
 
-}  // namespace osm2ttl::util
+}  // namespace osm2rdf::util

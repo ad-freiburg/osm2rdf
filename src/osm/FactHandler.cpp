@@ -1,54 +1,54 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/osm/FactHandler.h"
+#include "osm2rdf/osm/FactHandler.h"
 
 #include <iomanip>
 #include <iostream>
 
 #include "boost/geometry.hpp"
-#include "osm2ttl/config/Config.h"
-#include "osm2ttl/osm/Area.h"
-#include "osm2ttl/osm/Constants.h"
-#include "osm2ttl/osm/Node.h"
-#include "osm2ttl/osm/Relation.h"
-#include "osm2ttl/osm/Way.h"
-#include "osm2ttl/ttl/Writer.h"
+#include "osm2rdf/config/Config.h"
+#include "osm2rdf/osm/Area.h"
+#include "osm2rdf/osm/Constants.h"
+#include "osm2rdf/osm/Node.h"
+#include "osm2rdf/osm/Relation.h"
+#include "osm2rdf/osm/Way.h"
+#include "osm2rdf/ttl/Writer.h"
 
 // ____________________________________________________________________________
 template <typename W>
-osm2ttl::osm::FactHandler<W>::FactHandler(const osm2ttl::config::Config& config,
-                                          osm2ttl::ttl::Writer<W>* writer)
+osm2rdf::osm::FactHandler<W>::FactHandler(const osm2rdf::config::Config& config,
+                                          osm2rdf::ttl::Writer<W>* writer)
     : _config(config), _writer(writer) {}
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
+void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   std::string s = _writer->generateIRI(
-      area.fromWay() ? osm2ttl::ttl::constants::NAMESPACE__OSM_WAY
-                     : osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+      area.fromWay() ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
+                     : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
       area.objId());
 
-  writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+  writeBoostGeometry(s, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
                      area.geom());
 
   if (_config.addAreaEnvelope) {
-    writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, area.envelope());
+    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_ENVELOPE, area.envelope());
   }
 
   if (_config.addSortMetadata) {
@@ -56,14 +56,14 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
     // Increase default precision as areas in regbez freiburg have a 0 area
     // otherwise.
     tmp << std::fixed
-        << std::setprecision(osm2ttl::osm::constants::AREA_PRECISION)
+        << std::setprecision(osm2rdf::osm::constants::AREA_PRECISION)
         << area.geomArea();
     _writer->writeTriple(
         s,
-        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META,
                              "area"),
         _writer->generateLiteral(
-            tmp.str(), "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
+            tmp.str(), "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE));
   }
 
   if (_config.addAreaEnvelopeRatio) {
@@ -71,41 +71,41 @@ void osm2ttl::osm::FactHandler<W>::area(const osm2ttl::osm::Area& area) {
     tmp << std::fixed << (area.geomArea() / area.envelopeArea());
     _writer->writeTriple(
         s,
-        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META,
                              "area_envelope_ratio"),
         _writer->generateLiteral(
-            tmp.str(), "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
+            tmp.str(), "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE));
   }
 }
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::FactHandler<W>::node(const osm2ttl::osm::Node& node) {
+void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   std::string s = _writer->generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, node.id());
+      osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, node.id());
 
-  _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
-                       osm2ttl::ttl::constants::IRI__OSM_NODE);
+  _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__RDF_TYPE,
+                       osm2rdf::ttl::constants::IRI__OSM_NODE);
 
-  writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+  writeBoostGeometry(s, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
                      node.geom());
 
   writeTagList(s, node.tags());
 
   if (_config.addNodeEnvelope) {
-    writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, node.envelope());
+    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_ENVELOPE, node.envelope());
   }
 }
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::FactHandler<W>::relation(
-    const osm2ttl::osm::Relation& relation) {
+void osm2rdf::osm::FactHandler<W>::relation(
+    const osm2rdf::osm::Relation& relation) {
   std::string s = _writer->generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION, relation.id());
+      osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, relation.id());
 
-  _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
-                       osm2ttl::ttl::constants::IRI__OSM_RELATION);
+  _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__RDF_TYPE,
+                       osm2rdf::ttl::constants::IRI__OSM_RELATION);
 
   writeTagList(s, relation.tags());
 
@@ -115,32 +115,32 @@ void osm2ttl::osm::FactHandler<W>::relation(
       std::string node = _writer->generateBlankNode();
       _writer->writeTriple(
           s,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
                                "member"),
           node);
 
       std::string type;
       switch (member.type()) {
-        case osm2ttl::osm::RelationMemberType::NODE:
-          type = osm2ttl::ttl::constants::NAMESPACE__OSM_NODE;
+        case osm2rdf::osm::RelationMemberType::NODE:
+          type = osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
           break;
-        case osm2ttl::osm::RelationMemberType::RELATION:
-          type = osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION;
+        case osm2rdf::osm::RelationMemberType::RELATION:
+          type = osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
           break;
-        case osm2ttl::osm::RelationMemberType::WAY:
-          type = osm2ttl::ttl::constants::NAMESPACE__OSM_WAY;
+        case osm2rdf::osm::RelationMemberType::WAY:
+          type = osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
           break;
         default:
-          type = osm2ttl::ttl::constants::NAMESPACE__OSM;
+          type = osm2rdf::ttl::constants::NAMESPACE__OSM;
       }
 
       _writer->writeTriple(
           node,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "id"),
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "id"),
           _writer->generateIRI(type, member.id()));
       _writer->writeTriple(
           node,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "role"),
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "role"),
           _writer->generateLiteral(role, ""));
     }
   }
@@ -148,12 +148,12 @@ void osm2ttl::osm::FactHandler<W>::relation(
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
+void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   std::string s = _writer->generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, way.id());
+      osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, way.id());
 
-  _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
-                       osm2ttl::ttl::constants::IRI__OSM_WAY);
+  _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__RDF_TYPE,
+                       osm2rdf::ttl::constants::IRI__OSM_WAY);
 
   writeTagList(s, way.tags());
 
@@ -163,101 +163,101 @@ void osm2ttl::osm::FactHandler<W>::way(const osm2ttl::osm::Way& way) {
     auto lastNode = way.nodes().front();
     for (const auto& node : way.nodes()) {
       std::string blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODE,
+      _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__OSMWAY_NODE,
                            blankNode);
 
       _writer->writeTriple(
-          blankNode, osm2ttl::ttl::constants::IRI__OSMWAY_NODE,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY_NODE,
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
                                node.id()));
 
       _writer->writeTriple(
-          blankNode, osm2ttl::ttl::constants::IRI__OSM_META__POS,
+          blankNode, osm2rdf::ttl::constants::IRI__OSM_META__POS,
           _writer->generateLiteral(
               std::to_string(++i),
-              "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+              "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
 
       if (_config.addWayNodeGeometry) {
         std::string s = _writer->generateIRI(
-            osm2ttl::ttl::constants::NAMESPACE__OSM_NODE, node.id());
+            osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, node.id());
 
-        _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__RDF_TYPE,
-                             osm2ttl::ttl::constants::IRI__OSM_NODE);
+        _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__RDF_TYPE,
+                             osm2rdf::ttl::constants::IRI__OSM_NODE);
 
         writeBoostGeometry(
-            s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+            s, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
             node.geom());
       }
 
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
         _writer->writeTriple(
-            lastBlankNode, osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE,
-            _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+            lastBlankNode, osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE,
+            _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
                                  node.id()));
         // Haversine distance
         const double distanceLat = (node.geom().y() - lastNode.geom().y()) *
-                                   osm2ttl::osm::constants::DEGREE;
+                                   osm2rdf::osm::constants::DEGREE;
         const double distanceLon = (node.geom().x() - lastNode.geom().x()) *
-                                   osm2ttl::osm::constants::DEGREE;
+                                   osm2rdf::osm::constants::DEGREE;
         const double haversine =
             (sin(distanceLat / 2) * sin(distanceLat / 2)) +
             (sin(distanceLon / 2) * sin(distanceLon / 2) *
-             cos(lastNode.geom().y() * osm2ttl::osm::constants::DEGREE) *
-             cos(node.geom().y() * osm2ttl::osm::constants::DEGREE));
-        const double distance = osm2ttl::osm::constants::EARTH_RADIUS_KM *
-                                osm2ttl::osm::constants::METERS_IN_KM * 2 *
+             cos(lastNode.geom().y() * osm2rdf::osm::constants::DEGREE) *
+             cos(node.geom().y() * osm2rdf::osm::constants::DEGREE));
+        const double distance = osm2rdf::osm::constants::EARTH_RADIUS_KM *
+                                osm2rdf::osm::constants::METERS_IN_KM * 2 *
                                 asin(sqrt(haversine));
         _writer->writeTriple(
             lastBlankNode,
-            osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE,
+            osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE,
             _writer->generateLiteral(
                 std::to_string(distance),
-                "^^" + osm2ttl::ttl::constants::IRI__XSD_DECIMAL));
+                "^^" + osm2rdf::ttl::constants::IRI__XSD_DECIMAL));
       }
       lastBlankNode = blankNode;
       lastNode = node;
     }
   }
 
-  osm2ttl::geometry::Linestring locations{way.geom()};
+  osm2rdf::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
-  writeBoostGeometry(s, osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+  writeBoostGeometry(s, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
                      locations);
 
   if (_config.addWayEnvelope) {
-    writeBox(s, osm2ttl::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
+    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
   }
 
   if (_config.addWayMetadata) {
-    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_IS_CLOSED,
-                         way.closed() ? osm2ttl::ttl::constants::LITERAL__YES
-                                      : osm2ttl::ttl::constants::LITERAL__NO);
-    _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSMWAY_NODE_COUNT,
+    _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED,
+                         way.closed() ? osm2rdf::ttl::constants::LITERAL__YES
+                                      : osm2rdf::ttl::constants::LITERAL__NO);
+    _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__OSMWAY_NODE_COUNT,
                          _writer->generateLiteral(
                              std::to_string(way.nodes().size()),
-                             "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+                             "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
     _writer->writeTriple(s,
-                         osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT,
+                         osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT,
                          _writer->generateLiteral(
                              std::to_string(numUniquePoints),
-                             "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+                             "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
   }
 
   if (_config.addSortMetadata) {
     _writer->writeTriple(
         s,
-        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META,
                              "length"),
         _writer->generateLiteral(
             std::to_string(boost::geometry::length(way.geom())),
-            "^^" + osm2ttl::ttl::constants::IRI__XSD_DOUBLE));
+            "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE));
   }
 }
 
 // ____________________________________________________________________________
 template <typename W>
 template <typename G>
-void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
+void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
   std::ostringstream tmp;
@@ -268,7 +268,7 @@ void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
         std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
     boost::geometry::simplify(
         g, geom,
-        osm2ttl::osm::constants::BASE_SIMPLIFICATION_FACTOR *
+        osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR *
             perimeter_or_length * _config.wktDeviation);
     assert(boost::geometry::is_valid(geom));
     assert(!boost::geometry::is_empty(geom));
@@ -281,14 +281,14 @@ void osm2ttl::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
   _writer->writeTriple(
       s, p,
       "\"" + tmp.str() + "\"^^" +
-          osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL);
+          osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL);
 }
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::FactHandler<W>::writeBox(const std::string& s,
+void osm2rdf::osm::FactHandler<W>::writeBox(const std::string& s,
                                             const std::string& p,
-                                            const osm2ttl::geometry::Box& box) {
+                                            const osm2rdf::geometry::Box& box) {
   // Box can not be simplified -> output directly.
   std::ostringstream tmp;
   tmp << std::fixed << std::setprecision(_config.wktPrecision)
@@ -296,39 +296,39 @@ void osm2ttl::osm::FactHandler<W>::writeBox(const std::string& s,
   _writer->writeTriple(
       s, p,
       "\"" + tmp.str() + "\"^^" +
-          osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL);
+          osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL);
 }
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::FactHandler<W>::writeTag(const std::string& s,
-                                            const osm2ttl::osm::Tag& tag) {
+void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& s,
+                                            const osm2rdf::osm::Tag& tag) {
   const std::string& key = tag.first;
   const std::string& value = tag.second;
   if (key == "admin_level") {
     _writer->writeTriple(
         s,
-        _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, key),
+        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, key),
         _writer->generateLiteral(
-            value, "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+            value, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
   } else {
     try {
       _writer->writeTriple(
           s,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
                                key),
           _writer->generateLiteral(value, ""));
     } catch (const std::domain_error&) {
       std::string blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(s, osm2ttl::ttl::constants::IRI__OSM_TAG, blankNode);
+      _writer->writeTriple(s, osm2rdf::ttl::constants::IRI__OSM_TAG, blankNode);
       _writer->writeTriple(
           blankNode,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
                                "key"),
           _writer->generateLiteral(key, ""));
       _writer->writeTriple(
           blankNode,
-          _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
                                "value"),
           _writer->generateLiteral(value, ""));
     }
@@ -337,8 +337,8 @@ void osm2ttl::osm::FactHandler<W>::writeTag(const std::string& s,
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2ttl::osm::FactHandler<W>::writeTagList(
-    const std::string& s, const osm2ttl::osm::TagList& tags) {
+void osm2rdf::osm::FactHandler<W>::writeTagList(
+    const std::string& s, const osm2rdf::osm::TagList& tags) {
   size_t tagTripleCount = 0;
   for (const auto& tag : tags) {
     const std::string& key = tag.first;
@@ -350,12 +350,12 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
       size_t start = 0;
       while ((end = value.find(';', start)) != std::string::npos) {
         std::string partialValue = value.substr(start, end);
-        writeTag(s, osm2ttl::osm::Tag(key, partialValue));
+        writeTag(s, osm2rdf::osm::Tag(key, partialValue));
         tagTripleCount++;
         start = end + 1;
       };
       std::string partialValue = value.substr(start, value.size());
-      writeTag(s, osm2ttl::osm::Tag(key, partialValue));
+      writeTag(s, osm2rdf::osm::Tag(key, partialValue));
       tagTripleCount++;
     } else {
       writeTag(s, tag);
@@ -377,9 +377,9 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
 
         _writer->writeTriple(
             s,
-            _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, key),
+            _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, key),
             _writer->generateIRI(
-                osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, value));
+                osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, value));
         tagTripleCount++;
       }
       if (key == "wikipedia") {
@@ -388,13 +388,13 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
           std::string lang = value.substr(0, pos);
           std::string entry = value.substr(pos + 1);
           _writer->writeTriple(
-              s, osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA,
+              s, osm2rdf::ttl::constants::IRI__OSM_WIKIPEDIA,
               _writer->generateIRI("https://" + lang + ".wikipedia.org/wiki/",
                                    entry));
           tagTripleCount++;
         } else {
           _writer->writeTriple(
-              s, osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA,
+              s, osm2rdf::ttl::constants::IRI__OSM_WIKIPEDIA,
               _writer->generateIRI("https://www.wikipedia.org/wiki/", value));
           tagTripleCount++;
         }
@@ -403,14 +403,14 @@ void osm2ttl::osm::FactHandler<W>::writeTagList(
   }
   _writer->writeTriple(
       s,
-      _writer->generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+      _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META,
                            "facts"),
       _writer->generateLiteral(
           std::to_string(tagTripleCount),
-          "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER));
+          "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
 }
 
 // ____________________________________________________________________________
-template class osm2ttl::osm::FactHandler<osm2ttl::ttl::format::NT>;
-template class osm2ttl::osm::FactHandler<osm2ttl::ttl::format::TTL>;
-template class osm2ttl::osm::FactHandler<osm2ttl::ttl::format::QLEVER>;
+template class osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT>;
+template class osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL>;
+template class osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER>;
