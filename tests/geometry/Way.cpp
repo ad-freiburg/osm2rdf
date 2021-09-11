@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/geometry/Way.h"
+#include "osm2rdf/geometry/Way.h"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -25,14 +25,14 @@
 
 #include "gtest/gtest.h"
 
-namespace osm2ttl::geometry {
+namespace osm2rdf::geometry {
 
 // ____________________________________________________________________________
-osm2ttl::geometry::Way getDefaultObject() { return osm2ttl::geometry::Way(); }
+osm2rdf::geometry::Way getDefaultObject() { return osm2rdf::geometry::Way(); }
 
 // ____________________________________________________________________________
-osm2ttl::geometry::Way getFilledObject() {
-  osm2ttl::geometry::Way obj;
+osm2rdf::geometry::Way getFilledObject() {
+  osm2rdf::geometry::Way obj;
   obj.push_back(Location{0, 0});
   obj.push_back(Location{5, 0});
   obj.push_back(Location{0, 5});
@@ -42,17 +42,17 @@ osm2ttl::geometry::Way getFilledObject() {
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Way, equalsOperator) {
-  osm2ttl::geometry::Way o1;
+  osm2rdf::geometry::Way o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
   o1.push_back(Location{0, 5});
 
-  osm2ttl::geometry::Way o2;
+  osm2rdf::geometry::Way o2;
   o2.push_back(Location{0, 0});
   o2.push_back(Location{0, 5});
   o2.push_back(Location{5, 0});
 
-  osm2ttl::geometry::Way o3;
+  osm2rdf::geometry::Way o3;
   o3.push_back(Location{0, 0});
   o3.push_back(Location{0, 5});
 
@@ -71,17 +71,17 @@ TEST(GEOMETRY_Way, equalsOperator) {
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Way, notEqualsOperator) {
-  osm2ttl::geometry::Way o1;
+  osm2rdf::geometry::Way o1;
   o1.push_back(Location{0, 0});
   o1.push_back(Location{5, 0});
   o1.push_back(Location{0, 5});
 
-  osm2ttl::geometry::Way o2;
+  osm2rdf::geometry::Way o2;
   o2.push_back(Location{0, 0});
   o2.push_back(Location{0, 5});
   o2.push_back(Location{5, 0});
 
-  osm2ttl::geometry::Way o3;
+  osm2rdf::geometry::Way o3;
   o3.push_back(Location{0, 0});
   o3.push_back(Location{0, 5});
 
@@ -102,10 +102,10 @@ TEST(GEOMETRY_Way, notEqualsOperator) {
 TEST(GEOMETRY_Way, serializationBinary) {
   std::stringstream buffer;
 
-  osm2ttl::geometry::Way origDefaultObject = getDefaultObject();
-  osm2ttl::geometry::Way origFilledObject = getFilledObject();
-  osm2ttl::geometry::Way loadedDefaultObject;
-  osm2ttl::geometry::Way loadedFilledObject;
+  osm2rdf::geometry::Way origDefaultObject = getDefaultObject();
+  osm2rdf::geometry::Way origFilledObject = getFilledObject();
+  osm2rdf::geometry::Way loadedDefaultObject;
+  osm2rdf::geometry::Way loadedFilledObject;
 
   // Store and load
   boost::archive::binary_oarchive oa(buffer);
@@ -125,10 +125,10 @@ TEST(GEOMETRY_Way, serializationBinary) {
 TEST(GEOMETRY_Way, serializationText) {
   std::stringstream buffer;
 
-  osm2ttl::geometry::Way origDefaultObject = getDefaultObject();
-  osm2ttl::geometry::Way origFilledObject = getFilledObject();
-  osm2ttl::geometry::Way loadedDefaultObject;
-  osm2ttl::geometry::Way loadedFilledObject;
+  osm2rdf::geometry::Way origDefaultObject = getDefaultObject();
+  osm2rdf::geometry::Way origFilledObject = getFilledObject();
+  osm2rdf::geometry::Way loadedDefaultObject;
+  osm2rdf::geometry::Way loadedFilledObject;
 
   // Store and load
   boost::archive::text_oarchive oa(buffer);
@@ -144,4 +144,4 @@ TEST(GEOMETRY_Way, serializationText) {
   ASSERT_TRUE(origFilledObject == loadedFilledObject);
 }
 
-}  // namespace osm2ttl::geometry
+}  // namespace osm2rdf::geometry

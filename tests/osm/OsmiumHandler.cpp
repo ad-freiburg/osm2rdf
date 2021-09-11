@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/osm/OsmiumHandler.h"
+#include "osm2rdf/osm/OsmiumHandler.h"
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
@@ -27,11 +27,11 @@
 #include "osmium/io/detail/pbf_input_format.hpp"
 #include "osmium/io/detail/xml_input_format.hpp"
 
-namespace osm2ttl::osm {
+namespace osm2rdf::osm {
 
 // ____________________________________________________________________________
 template <typename W>
-void addOsmiumItems(osm2ttl::osm::OsmiumHandler<W>* oh) {
+void addOsmiumItems(osm2rdf::osm::OsmiumHandler<W>* oh) {
   const size_t initial_buffer_size = 10000;
   osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
                                       osmium::memory::Buffer::auto_grow::yes};
@@ -122,14 +122,14 @@ TEST(OSM_OsmiumHandler, constructor) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
-  osm2ttl::util::Output output{config, config.output};
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   ASSERT_EQ(0, oh.areasSeen());
   ASSERT_EQ(0, oh.areasDumped());
@@ -156,15 +156,15 @@ TEST(OSM_OsmiumHandler, noFacts) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noFacts = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -193,15 +193,15 @@ TEST(OSM_OsmiumHandler, noGeometricRelations) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noGeometricRelations = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -230,15 +230,15 @@ TEST(OSM_OsmiumHandler, adminRelationsOnly) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.adminRelationsOnly = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -267,15 +267,15 @@ TEST(OSM_OsmiumHandler, noAreaFacts) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noAreaFacts = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -304,15 +304,15 @@ TEST(OSM_OsmiumHandler, noNodeFacts) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noNodeFacts = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -341,15 +341,15 @@ TEST(OSM_OsmiumHandler, noRelationFacts) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noRelationFacts = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -378,15 +378,15 @@ TEST(OSM_OsmiumHandler, noWayFacts) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noWayFacts = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -415,15 +415,15 @@ TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noAreaGeometricRelations = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -452,15 +452,15 @@ TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noNodeGeometricRelations = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -489,15 +489,15 @@ TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noWayGeometricRelations = true;
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::OsmiumHandler oh{config, &writer};
 
   addOsmiumItems(&oh);
 
@@ -529,19 +529,19 @@ TEST(OSM_OsmiumHandler, handleEmptyPBF) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "empty.pbf");
   std::ofstream inputFile(config.input);
 
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   ASSERT_THROW(osmiumHandler.handle(), osmium::pbf_error);
 
   // Reset std::cerr and std::cout
@@ -560,19 +560,19 @@ TEST(OSM_OsmiumHandler, handleEmptyOSM) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "empty.osm");
   std::ofstream inputFile(config.input);
 
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   ASSERT_THROW(osmiumHandler.handle(), osmium::xml_error);
 
   // Reset std::cerr and std::cout
@@ -591,19 +591,19 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2OSM) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "empty.osm.bz2");
   std::ofstream inputFile(config.input);
 
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
 
   // Reset std::cerr and std::cout
@@ -622,19 +622,19 @@ TEST(OSM_OsmiumHandler, handleEmptyOPL) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "empty.opl");
   std::ofstream inputFile(config.input);
 
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   // Reset std::cerr and std::cout
@@ -653,19 +653,19 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2OPL) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "empty.opl.bz2");
   std::ofstream inputFile(config.input);
 
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
 
   // Reset std::cerr and std::cout
@@ -684,19 +684,19 @@ TEST(OSM_OsmiumHandler, handleEmptyO5M) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "empty.o5m");
   std::ofstream inputFile(config.input);
 
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   ASSERT_THROW(osmiumHandler.handle(), osmium::o5m_error);
 
   // Reset std::cerr and std::cout
@@ -715,19 +715,19 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2O5M) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "empty.o5m.bz2");
   std::ofstream inputFile(config.input);
 
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
 
   // Reset std::cerr and std::cout
@@ -746,10 +746,10 @@ TEST(OSM_OsmiumHandler, handleSingleNode) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "singleNode.osm");
@@ -763,11 +763,11 @@ TEST(OSM_OsmiumHandler, handleSingleNode) {
                "changeset=\"676636\" timestamp=\"2008-09-21T21:37:45Z\"/>"
             << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -799,10 +799,10 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("OSM_OsmiumHandler", "osmWikiExample.osm");
@@ -843,11 +843,11 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
                " </relation>";
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -869,4 +869,4 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
   std::filesystem::remove(config.input);
 }
 
-}  // namespace osm2ttl::osm
+}  // namespace osm2rdf::osm

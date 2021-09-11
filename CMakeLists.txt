@@ -1,27 +1,27 @@
 # Copyright 2020, University of Freiburg
 # Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-# This file is part of osm2ttl.
+# This file is part of osm2rdf.
 #
-# osm2ttl is free software: you can redistribute it and/or modify
+# osm2rdf is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# osm2ttl is distributed in the hope that it will be useful,
+# osm2rdf is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+# along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 cmake_minimum_required(VERSION 3.16...3.18)
 # ----------------------------------------------------------------------------
 # Project
 # ----------------------------------------------------------------------------
 project(
-        osm2ttl
+        osm2rdf
         VERSION 0.5
         DESCRIPTION "Convert osm to ttl"
         LANGUAGES CXX)
@@ -198,8 +198,8 @@ endif ()
 
 # Configure project
 configure_file(
-        "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h.in"
-        "${PROJECT_SOURCE_DIR}/include/osm2ttl/Version.h"
+        "${PROJECT_SOURCE_DIR}/include/osm2rdf/Version.h.in"
+        "${PROJECT_SOURCE_DIR}/include/osm2rdf/Version.h"
 )
 
 if (CLANG_TIDY_EXE)

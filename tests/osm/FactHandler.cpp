@@ -1,39 +1,39 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/osm/FactHandler.h"
+#include "osm2rdf/osm/FactHandler.h"
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "osm2ttl/osm/Node.h"
+#include "osm2rdf/osm/Node.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
-namespace osm2ttl::osm {
+namespace osm2rdf::osm {
 
 // ____________________________________________________________________________
 TEST(OSM_FactHandler, constructor) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_DumpHandler", "constructor");
   std::filesystem::create_directories(config.output);
-  osm2ttl::util::Output output{config, config.output};
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Assure that no file is written during construction.
   ASSERT_EQ(0, std::distance(std::filesystem::directory_iterator(config.output),
@@ -51,17 +51,17 @@ TEST(OSM_FactHandler, areaFromWay) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -77,8 +77,8 @@ TEST(OSM_FactHandler, areaFromWay) {
                             }),
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
 
   dh.area(a);
   output.flush();
@@ -100,17 +100,17 @@ TEST(OSM_FactHandler, areaFromRelation) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -126,8 +126,8 @@ TEST(OSM_FactHandler, areaFromRelation) {
                             }),
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
 
   dh.area(a);
   output.flush();
@@ -149,18 +149,18 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addAreaEnvelope = true;
   config.addSortMetadata = false;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -176,8 +176,8 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
                             }),
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
 
   dh.area(a);
   output.flush();
@@ -201,17 +201,17 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -227,8 +227,8 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
                             }),
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
 
   dh.area(a);
   output.flush();
@@ -251,17 +251,17 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioRectangle) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addAreaEnvelopeRatio = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -277,8 +277,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioRectangle) {
                             }),
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
 
   dh.area(a);
   output.flush();
@@ -302,17 +302,17 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addAreaEnvelopeRatio = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -328,8 +328,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
                             }),
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
 
   dh.area(a);
   output.flush();
@@ -353,16 +353,16 @@ TEST(OSM_FactHandler, node) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -373,8 +373,8 @@ TEST(OSM_FactHandler, node) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
 
   dh.node(n);
   output.flush();
@@ -398,17 +398,17 @@ TEST(OSM_FactHandler, nodeAddEnvelope) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addNodeEnvelope = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -419,8 +419,8 @@ TEST(OSM_FactHandler, nodeAddEnvelope) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
 
   dh.node(n);
   output.flush();
@@ -446,16 +446,16 @@ TEST(OSM_FactHandler, relation) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -469,8 +469,8 @@ TEST(OSM_FactHandler, relation) {
       osmium::builder::attr::_member(osmium::item_type::undefined, 1, "bar"),
       osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Relation r{osmiumBuffer.get<osmium::Relation>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer.get<osmium::Relation>(0)};
 
   dh.relation(r);
   output.flush();
@@ -502,17 +502,17 @@ TEST(OSM_FactHandler, way) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -525,8 +525,8 @@ TEST(OSM_FactHandler, way) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -551,17 +551,17 @@ TEST(OSM_FactHandler, wayAddSortMetadata) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -574,8 +574,8 @@ TEST(OSM_FactHandler, wayAddSortMetadata) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -602,18 +602,18 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
   config.addWayEnvelope = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -626,8 +626,8 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -654,19 +654,19 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeGeometry = true;
   config.addWayNodeOrder = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -679,8 +679,8 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -715,18 +715,18 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeOrder = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -739,8 +739,8 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -771,19 +771,19 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeOrder = true;
   config.addWayNodeSpatialMetadata = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -796,8 +796,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -830,19 +830,19 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeOrder = true;
   config.addWayNodeSpatialMetadata = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -857,8 +857,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -901,18 +901,18 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addSortMetadata = false;
   config.addWayMetadata = true;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   // Create osmium object
   const size_t initial_buffer_size = 10000;
@@ -925,8 +925,8 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
 
   dh.way(w);
   output.flush();
@@ -954,23 +954,23 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2ttl::geometry::Way way;
-  way.push_back(osm2ttl::geometry::Location{0, 0});
-  way.push_back(osm2ttl::geometry::Location{0, 80});
-  way.push_back(osm2ttl::geometry::Location{0, 1000});
+  osm2rdf::geometry::Way way;
+  way.push_back(osm2rdf::geometry::Location{0, 0});
+  way.push_back(osm2rdf::geometry::Location{0, 80});
+  way.push_back(osm2rdf::geometry::Location{0, 1000});
 
   dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
@@ -978,7 +978,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
 
   ASSERT_EQ(subject + " " + predicate + " " +
                 "\"LINESTRING(0.0 0.0,0.0 80.0,0.0 1000.0)\"" + "^^" +
-                osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
+                osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
             buffer.str());
 
   // Cleanup
@@ -992,30 +992,30 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.simplifyWKT = 2;
   // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
   config.wktDeviation = 5;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2ttl::geometry::Way way;
-  way.push_back(osm2ttl::geometry::Location{0, 0});
+  osm2rdf::geometry::Way way;
+  way.push_back(osm2rdf::geometry::Location{0, 0});
   // Small side is 0 -> remove all nodes except ends.
-  way.push_back(osm2ttl::geometry::Location{0, 80});
-  way.push_back(osm2ttl::geometry::Location{0, 160});
-  way.push_back(osm2ttl::geometry::Location{0, 240});
-  way.push_back(osm2ttl::geometry::Location{0, 500});
-  way.push_back(osm2ttl::geometry::Location{0, 1000});
+  way.push_back(osm2rdf::geometry::Location{0, 80});
+  way.push_back(osm2rdf::geometry::Location{0, 160});
+  way.push_back(osm2rdf::geometry::Location{0, 240});
+  way.push_back(osm2rdf::geometry::Location{0, 500});
+  way.push_back(osm2rdf::geometry::Location{0, 1000});
 
   dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
@@ -1023,7 +1023,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
 
   ASSERT_EQ(subject + " " + predicate + " " +
                 "\"LINESTRING(0.0 0.0,0.0 1000.0)\"" + "^^" +
-                osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
+                osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
             buffer.str());
 
   // Cleanup
@@ -1037,26 +1037,26 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.simplifyWKT = 2;
   // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
   config.wktDeviation = 5;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2ttl::geometry::Way way;
-  way.push_back(osm2ttl::geometry::Location{0, 0});
-  way.push_back(osm2ttl::geometry::Location{0, 80});
-  way.push_back(osm2ttl::geometry::Location{100, 1000});
+  osm2rdf::geometry::Way way;
+  way.push_back(osm2rdf::geometry::Location{0, 0});
+  way.push_back(osm2rdf::geometry::Location{0, 80});
+  way.push_back(osm2rdf::geometry::Location{100, 1000});
 
   dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
@@ -1064,7 +1064,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
 
   ASSERT_EQ(subject + " " + predicate + " " +
                 "\"LINESTRING(0.0 0.0,0.0 80.0,100.0 1000.0)\"" + "^^" +
-                osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
+                osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
             buffer.str());
 
   // Cleanup
@@ -1078,27 +1078,27 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.simplifyWKT = 2;
   // Simplify all nodes with distance <= 80% of small side (100 * 0.8 = 80)
   config.wktDeviation = 80;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2ttl::geometry::Way way;
-  way.push_back(osm2ttl::geometry::Location{0, 0});
+  osm2rdf::geometry::Way way;
+  way.push_back(osm2rdf::geometry::Location{0, 0});
   // The node 0,80 will be removed...
-  way.push_back(osm2ttl::geometry::Location{0, 80});
-  way.push_back(osm2ttl::geometry::Location{100, 1000});
+  way.push_back(osm2rdf::geometry::Location{0, 80});
+  way.push_back(osm2rdf::geometry::Location{100, 1000});
 
   dh.writeBoostGeometry(subject, predicate, way);
   output.flush();
@@ -1106,7 +1106,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
 
   ASSERT_EQ(subject + " " + predicate + " " +
                 "\"LINESTRING(0.0 0.0,100.0 1000.0)\"" + "^^" +
-                osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
+                osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL + " .\n",
             buffer.str());
 
   // Cleanup
@@ -1120,22 +1120,22 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2ttl::geometry::Box box;
-  box.min_corner() = osm2ttl::geometry::Location{50, 50};
-  box.max_corner() = osm2ttl::geometry::Location{200, 200};
+  osm2rdf::geometry::Box box;
+  box.min_corner() = osm2rdf::geometry::Location{50, 50};
+  box.max_corner() = osm2rdf::geometry::Location{200, 200};
 
   dh.writeBox(subject, predicate, box);
   output.flush();
@@ -1144,7 +1144,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
   ASSERT_EQ(subject + " " + predicate + " " +
                 "\"POLYGON((50.0 50.0,50.0 200.0,200.0 200.0,200.0 50.0,50.0 "
                 "50.0))\"" +
-                "^^" + osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
+                "^^" + osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
                 " .\n",
             buffer.str());
 
@@ -1159,22 +1159,22 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 2;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2ttl::geometry::Box box;
-  box.min_corner() = osm2ttl::geometry::Location{50, 50};
-  box.max_corner() = osm2ttl::geometry::Location{200, 200};
+  osm2rdf::geometry::Box box;
+  box.min_corner() = osm2rdf::geometry::Location{50, 50};
+  box.max_corner() = osm2rdf::geometry::Location{200, 200};
 
   dh.writeBox(subject, predicate, box);
   output.flush();
@@ -1183,7 +1183,7 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
   ASSERT_EQ(subject + " " + predicate + " " +
                 "\"POLYGON((50.00 50.00,50.00 200.00,200.00 200.00,200.00 "
                 "50.00,50.00 50.00))\"" +
-                "^^" + osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
+                "^^" + osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL +
                 " .\n",
             buffer.str());
 
@@ -1198,25 +1198,25 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "admin_level";
   const std::string tagValue = "42";
 
   const std::string subject = "subject";
   const std::string predicate =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      tagValue, "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER);
-  dh.writeTag(subject, osm2ttl::osm::Tag{tagKey, tagValue});
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1235,24 +1235,24 @@ TEST(OSM_FactHandler, writeTag_KeyIRI) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "iri";
   const std::string tagValue = "value";
 
   const std::string subject = "subject";
   const std::string predicate =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(tagValue, "");
-  dh.writeTag(subject, osm2ttl::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1271,21 +1271,21 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "not:Aß%I.R.I\u2000";
   const std::string tagValue = "value";
 
   const std::string subject = "subject";
-  dh.writeTag(subject, osm2ttl::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected = subject +
                                " osm:tag _:0 .\n"
                                "_:0 osmt:key \"" +
@@ -1309,15 +1309,15 @@ TEST(OSM_FactHandler, writeTagList) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tag1Key = "admin_level";
   const std::string tag1Value = "42";
@@ -1326,14 +1326,14 @@ TEST(OSM_FactHandler, writeTagList) {
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tag1Key);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tag1Key);
   const std::string object1 = writer.generateLiteral(
-      tag1Value, "^^" + osm2ttl::ttl::constants::IRI__XSD_INTEGER);
+      tag1Value, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
   const std::string predicate2 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tag2Key);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tag2Key);
   const std::string object2 = writer.generateLiteral(tag2Value, "");
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tag1Key] = tag1Value;
   tagList[tag2Key] = tag2Value;
 
@@ -1358,25 +1358,25 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "ref";
   const std::string tagValue = "B 3";
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tagKey] = tagValue;
 
   dh.writeTagList(subject, tagList);
@@ -1398,29 +1398,29 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "ref";
   const std::string tagValue = "B 3;B 294";
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral("B 3", "");
   const std::string predicate2 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object2 = writer.generateLiteral("B 294", "");
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tagKey] = tagValue;
 
   dh.writeTagList(subject, tagList);
@@ -1444,29 +1444,29 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "wikidata";
   const std::string tagValue = "  Q42  ";
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
   const std::string predicate2 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
   const std::string object2 = writer.generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
+      osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tagKey] = tagValue;
 
   dh.writeTagList(subject, tagList);
@@ -1490,29 +1490,29 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "wikidata";
   const std::string tagValue = "Q42;Q1337";
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
   const std::string predicate2 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
   const std::string object2 = writer.generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
+      osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tagKey] = tagValue;
 
   dh.writeTagList(subject, tagList);
@@ -1536,15 +1536,15 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string value = "Freiburg_im_Breisgau";
   const std::string tagKey = "wikipedia";
@@ -1552,13 +1552,13 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
   const std::string predicate2 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
   const std::string object2 = "<https://de.wikipedia.org/wiki/" + value + ">";
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tagKey] = tagValue;
 
   dh.writeTagList(subject, tagList);
@@ -1582,29 +1582,29 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tagKey = "wikipedia";
   const std::string tagValue = "Freiburg_im_Breisgau";
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
   const std::string predicate2 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tagKey);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
   const std::string object2 =
       "<https://www.wikipedia.org/wiki/" + tagValue + ">";
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tagKey] = tagValue;
 
   dh.writeTagList(subject, tagList);
@@ -1628,16 +1628,16 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
   config.skipWikiLinks = true;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
-  osm2ttl::osm::FactHandler dh{config, &writer};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
 
   const std::string tag1Key = "wikidata";
   const std::string tag1Value = "  Q42  ";
@@ -1646,15 +1646,15 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
 
   const std::string subject = "subject";
   const std::string predicate1 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tag1Key);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tag1Key);
   const std::string object1 = writer.generateLiteral(tag1Value, "");
   const std::string predicate2 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_TAG, tag2Key);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tag2Key);
   const std::string object2 = writer.generateLiteral(tag2Value, "");
   const std::string predicate3 =
-      writer.generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, tag1Key);
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tag1Key);
 
-  osm2ttl::osm::TagList tagList;
+  osm2rdf::osm::TagList tagList;
   tagList[tag1Key] = tag1Value;
   tagList[tag2Key] = tag2Value;
 
@@ -1672,4 +1672,4 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
   // Cleanup
   std::cout.rdbuf(sbuf);
 }
-}  // namespace osm2ttl::osm
+}  // namespace osm2rdf::osm

@@ -1,33 +1,33 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/config/Config.h"
+#include "osm2rdf/config/Config.h"
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "osm2ttl/config/Constants.h"
-#include "osm2ttl/config/ExitCode.h"
-#include "osm2ttl/util/CacheFile.h"
+#include "osm2rdf/config/Constants.h"
+#include "osm2rdf/config/ExitCode.h"
+#include "osm2rdf/util/CacheFile.h"
 
-namespace osm2ttl::config {
+namespace osm2rdf::config {
 
 // ____________________________________________________________________________
-void assertDefaultConfig(const osm2ttl::config::Config& config) {
+void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noFacts);
   ASSERT_FALSE(config.noGeometricRelations);
   ASSERT_FALSE(config.storeLocationsOnDisk);
@@ -53,7 +53,7 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
   ASSERT_FALSE(config.skipWikiLinks);
 
   ASSERT_EQ(0, config.semicolonTagKeys.size());
-  ASSERT_EQ("osmadd", config.osm2ttlPrefix);
+  ASSERT_EQ("osmadd", config.osm2rdfPrefix);
 
   ASSERT_FALSE(config.writeDAGDotFiles);
 
@@ -64,7 +64,7 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
   ASSERT_EQ(5, config.wktDeviation);
   ASSERT_EQ(7, config.wktPrecision);
 
-  ASSERT_EQ(osm2ttl::util::OutputMergeMode::CONCATENATE, config.mergeOutput);
+  ASSERT_EQ(osm2rdf::util::OutputMergeMode::CONCATENATE, config.mergeOutput);
   ASSERT_TRUE(config.outputCompress);
 
   ASSERT_EQ(std::filesystem::temp_directory_path(), config.cache);
@@ -72,139 +72,139 @@ void assertDefaultConfig(const osm2ttl::config::Config& config) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getTempPath) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   ASSERT_EQ("/tmp/prefix-suffix", config.getTempPath("prefix", "suffix"));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpShort) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::HELP_OPTION_SHORT;
   const int argc = 2;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "--" + osm2ttl::config::constants::HELP_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::HELP_OPTION_LONG;
   const int argc = 2;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpAdvancedShortMultiple) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::HELP_OPTION_SHORT;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
-              osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
+              osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpAdvancedShortCombined) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT +
-                   osm2ttl::config::constants::HELP_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::HELP_OPTION_SHORT +
+                   osm2rdf::config::constants::HELP_OPTION_SHORT;
   const int argc = 2;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
-              osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
+              osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpAdvancedLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "--" + osm2ttl::config::constants::HELP_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::HELP_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
-              osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
+              osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpExpertShortMultiple) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::HELP_OPTION_SHORT;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>(arg.c_str()),
                       const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpExpertShortCombined) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "-" + osm2ttl::config::constants::HELP_OPTION_SHORT +
-                   osm2ttl::config::constants::HELP_OPTION_SHORT +
-                   osm2ttl::config::constants::HELP_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::HELP_OPTION_SHORT +
+                   osm2rdf::config::constants::HELP_OPTION_SHORT +
+                   osm2rdf::config::constants::HELP_OPTION_SHORT;
   const int argc = 2;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsHelpExpertLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "--" + osm2ttl::config::constants::HELP_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::HELP_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>(arg.c_str()),
                       const_cast<char*>(arg.c_str())};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::SUCCESS),
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
               "^Allowed options:");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsOutputCompressAddExtension) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
+  osm2rdf::util::CacheFile dummyInput("/tmp/dummyInput");
 
-  const auto arg = "-" + osm2ttl::config::constants::OUTPUT_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::OUTPUT_OPTION_SHORT;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/output"),
@@ -215,11 +215,11 @@ TEST(CONFIG_Config, fromArgsOutputCompressAddExtension) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsOutputCompressKeepExtension) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
+  osm2rdf::util::CacheFile dummyInput("/tmp/dummyInput");
 
-  const auto arg = "-" + osm2ttl::config::constants::OUTPUT_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::OUTPUT_OPTION_SHORT;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/output.bz2"),
@@ -230,9 +230,9 @@ TEST(CONFIG_Config, fromArgsOutputCompressKeepExtension) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsOutputCompressIgnoreExtensionOnStdout) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
+  osm2rdf::util::CacheFile dummyInput("/tmp/dummyInput");
 
   const int argc = 2;
   char* argv[argc] = {const_cast<char*>(""),
@@ -243,55 +243,55 @@ TEST(CONFIG_Config, fromArgsOutputCompressIgnoreExtensionOnStdout) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsCacheNotFoundShort) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "-" + osm2ttl::config::constants::CACHE_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::CACHE_OPTION_SHORT;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/i/do/not/exist")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
-      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::CACHE_NOT_EXISTS),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::CACHE_NOT_EXISTS),
       "^Cache location does not exist: \".+\"");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsCacheNotFoundLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  const auto arg = "--" + osm2ttl::config::constants::CACHE_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::CACHE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/i/do/not/exist")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
-      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::CACHE_NOT_EXISTS),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::CACHE_NOT_EXISTS),
       "^Cache location does not exist: \".+\"");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsCacheIsNotDirectory) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummy");
+  osm2rdf::util::CacheFile cf("/tmp/dummy");
 
-  const auto arg = "--" + osm2ttl::config::constants::CACHE_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::CACHE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummy")};
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
-      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::CACHE_NOT_DIRECTORY),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::CACHE_NOT_DIRECTORY),
       "^Cache location not a directory: \".+\"");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsEmpty) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
   const int argc = 1;
@@ -299,17 +299,17 @@ TEST(CONFIG_Config, fromArgsEmpty) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
-      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::INPUT_MISSING),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::INPUT_MISSING),
       "^No input specified!");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsUnkonwOption) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
+  osm2rdf::util::CacheFile dummyInput("/tmp/dummyInput");
 
-  const auto arg = "-" + osm2ttl::config::constants::OUTPUT_OPTION_SHORT;
+  const auto arg = "-" + osm2rdf::config::constants::OUTPUT_OPTION_SHORT;
   const int argc = 5;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/output"),
@@ -318,31 +318,31 @@ TEST(CONFIG_Config, fromArgsUnkonwOption) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
-      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::UNKNOWN_ARGUMENT),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::UNKNOWN_ARGUMENT),
       "^Unknown argument");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsInvalidValue) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile dummyInput("/tmp/dummyInput");
+  osm2rdf::util::CacheFile dummyInput("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG;
+      "--" + osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/output"),
                       const_cast<char*>("/tmp/dummyInput")};
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2ttl::config::ExitCode::FAILURE),
+              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::FAILURE),
               "^Invalid Option");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsInputNotFound) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
   const int argc = 2;
@@ -351,13 +351,13 @@ TEST(CONFIG_Config, fromArgsInputNotFound) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
-      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::INPUT_NOT_EXISTS),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::INPUT_NOT_EXISTS),
       "^Input does not exist: \".+\"");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsInputIsDirectory) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
   const int argc = 2;
@@ -366,17 +366,17 @@ TEST(CONFIG_Config, fromArgsInputIsDirectory) {
   ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   ASSERT_EXIT(
       config.fromArgs(argc, argv),
-      ::testing::ExitedWithCode(osm2ttl::config::ExitCode::INPUT_IS_DIRECTORY),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::INPUT_IS_DIRECTORY),
       "^Input is a directory: \".+\"");
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoFactsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_FACTS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_FACTS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -387,12 +387,12 @@ TEST(CONFIG_Config, fromArgsNoFactsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoGeometricRelationsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::NO_GEOM_RELATIONS_OPTION_LONG;
+      "--" + osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -403,12 +403,12 @@ TEST(CONFIG_Config, fromArgsNoGeometricRelationsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::STORE_LOCATIONS_ON_DISK_LONG;
+      "--" + osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -419,11 +419,11 @@ TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoAreasLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_AREA_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_AREA_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -435,11 +435,11 @@ TEST(CONFIG_Config, fromArgsNoAreasLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoNodesLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_NODE_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_NODE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -451,11 +451,11 @@ TEST(CONFIG_Config, fromArgsNoNodesLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoRelationsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_RELATION_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_RELATION_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -466,11 +466,11 @@ TEST(CONFIG_Config, fromArgsNoRelationsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoWaysLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_WAY_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_WAY_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -482,11 +482,11 @@ TEST(CONFIG_Config, fromArgsNoWaysLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoAreaFactsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_AREA_FACTS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_AREA_FACTS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -498,11 +498,11 @@ TEST(CONFIG_Config, fromArgsNoAreaFactsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoNodeFactsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_NODE_FACTS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_NODE_FACTS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -514,11 +514,11 @@ TEST(CONFIG_Config, fromArgsNoNodeFactsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoRelationFactsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_RELATION_FACTS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_RELATION_FACTS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -529,11 +529,11 @@ TEST(CONFIG_Config, fromArgsNoRelationFactsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoWayFactsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::NO_WAY_FACTS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -545,12 +545,12 @@ TEST(CONFIG_Config, fromArgsNoWayFactsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoAreaGeometricRelationsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG;
+      "--" + osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -562,12 +562,12 @@ TEST(CONFIG_Config, fromArgsNoAreaGeometricRelationsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoNodeGeometricRelationsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG;
+      "--" + osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -579,12 +579,12 @@ TEST(CONFIG_Config, fromArgsNoNodeGeometricRelationsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsNoWayGeometricRelationsLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG;
+      "--" + osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -596,11 +596,11 @@ TEST(CONFIG_Config, fromArgsNoWayGeometricRelationsLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddAreaEnvelopeLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -611,12 +611,12 @@ TEST(CONFIG_Config, fromArgsAddAreaEnvelopeLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddAreaEnvelopeRatioLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_LONG;
+      "--" + osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -627,11 +627,11 @@ TEST(CONFIG_Config, fromArgsAddAreaEnvelopeRatioLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -642,11 +642,11 @@ TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayEnvelopeLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -657,11 +657,11 @@ TEST(CONFIG_Config, fromArgsAddWayEnvelopeLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayMetadataLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::ADD_WAY_METADATA_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -672,12 +672,12 @@ TEST(CONFIG_Config, fromArgsAddWayMetadataLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayNodeGeomentryLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
   const auto arg =
-      "--" + osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG;
+      "--" + osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -688,11 +688,11 @@ TEST(CONFIG_Config, fromArgsAddWayNodeGeomentryLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayNodeOrderLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -703,13 +703,13 @@ TEST(CONFIG_Config, fromArgsAddWayNodeOrderLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayNodeSpatialMetadataLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
   const auto arg =
       "--" +
-      osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG;
+      osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -721,12 +721,12 @@ TEST(CONFIG_Config, fromArgsAddWayNodeSpatialMetadataLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAdminRelationsOnlyLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG;
+      "--" + osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -737,13 +737,13 @@ TEST(CONFIG_Config, fromArgsAdminRelationsOnlyLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsMinimalAreaEnvelopeRatioLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
       "--" +
-      osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG;
+      osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("0.75"),
@@ -755,11 +755,11 @@ TEST(CONFIG_Config, fromArgsMinimalAreaEnvelopeRatioLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSkipWikiLinksLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::SKIP_WIKI_LINKS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -770,11 +770,11 @@ TEST(CONFIG_Config, fromArgsSkipWikiLinksLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSimplifyGeometriesLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("25"),
@@ -786,11 +786,11 @@ TEST(CONFIG_Config, fromArgsSimplifyGeometriesLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSimplifyWKTLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::SIMPLIFY_WKT_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("25"),
@@ -802,12 +802,12 @@ TEST(CONFIG_Config, fromArgsSimplifyWKTLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSimplifyWKTDeviationLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2ttl::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG;
+      "--" + osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("25"),
@@ -819,11 +819,11 @@ TEST(CONFIG_Config, fromArgsSimplifyWKTDeviationLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSimplifyWKTPrecisionLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::WKT_PRECISION_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("2"),
@@ -834,28 +834,28 @@ TEST(CONFIG_Config, fromArgsSimplifyWKTPrecisionLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsOsm2ttlPrefixLong) {
-  osm2ttl::config::Config config;
+TEST(CONFIG_Config, fromArgsosm2rdfPrefixLong) {
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::OSM2TTL_PREFIX_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::osm2rdf_PREFIX_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("foo"),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("foo", config.osm2ttlPrefix);
+  ASSERT_EQ("foo", config.osm2rdfPrefix);
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSemicolonTagKeysSingleLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("ref"),
@@ -868,11 +868,11 @@ TEST(CONFIG_Config, fromArgsSemicolonTagKeysSingleLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSemicolonTagKeysMultipleLong) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  osm2ttl::util::CacheFile cf("/tmp/dummyInput");
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2ttl::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
   const int argc = 8;
   char* argv[argc] = {
       const_cast<char*>(""),     const_cast<char*>(arg.c_str()),
@@ -888,24 +888,24 @@ TEST(CONFIG_Config, fromArgsSemicolonTagKeysMultipleLong) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoHasSections) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::StartsWith(osm2ttl::config::constants::HEADER));
+  ASSERT_THAT(res, ::testing::StartsWith(osm2rdf::config::constants::HEADER));
   ASSERT_THAT(res,
-              ::testing::HasSubstr(osm2ttl::config::constants::SECTION_IO));
+              ::testing::HasSubstr(osm2rdf::config::constants::SECTION_IO));
   ASSERT_THAT(res,
-              ::testing::HasSubstr(osm2ttl::config::constants::SECTION_FACTS));
+              ::testing::HasSubstr(osm2rdf::config::constants::SECTION_FACTS));
   ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::SECTION_CONTAINS));
+      res, ::testing::HasSubstr(osm2rdf::config::constants::SECTION_CONTAINS));
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::SECTION_MISCELLANEOUS));
+                       osm2rdf::config::constants::SECTION_MISCELLANEOUS));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoDumpPrefix) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
   const std::string prefix{"xxx"};
@@ -919,281 +919,281 @@ TEST(CONFIG_Config, getInfoNoDumpPrefix) {
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoFacts) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noFacts = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res,
-              ::testing::HasSubstr(osm2ttl::config::constants::NO_FACTS_INFO));
+              ::testing::HasSubstr(osm2rdf::config::constants::NO_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoAreaDump) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noAreaFacts = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_AREA_FACTS_INFO));
+                       osm2rdf::config::constants::NO_AREA_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoNodeDump) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noNodeFacts = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_NODE_FACTS_INFO));
+                       osm2rdf::config::constants::NO_NODE_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoRelationDump) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noRelationFacts = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_RELATION_FACTS_INFO));
+                       osm2rdf::config::constants::NO_RELATION_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoWayDump) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noWayFacts = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::NO_WAY_FACTS_INFO));
+      res, ::testing::HasSubstr(osm2rdf::config::constants::NO_WAY_FACTS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddAreaEnvelope) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addAreaEnvelope = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_AREA_ENVELOPE_INFO));
+                       osm2rdf::config::constants::ADD_AREA_ENVELOPE_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddAreaEnvelopeRatio) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addAreaEnvelopeRatio = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res,
               ::testing::HasSubstr(
-                  osm2ttl::config::constants::ADD_AREA_ENVELOPE_RATIO_INFO));
+                  osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddNodeEnvelope) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addNodeEnvelope = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_NODE_ENVELOPE_INFO));
+                       osm2rdf::config::constants::ADD_NODE_ENVELOPE_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayEnvelope) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addWayEnvelope = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_WAY_ENVELOPE_INFO));
+                       osm2rdf::config::constants::ADD_WAY_ENVELOPE_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayMetadata) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addWayMetadata = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_WAY_METADATA_INFO));
+                       osm2rdf::config::constants::ADD_WAY_METADATA_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayNodeGeometry) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addWayNodeGeometry = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_WAY_NODE_GEOMETRY_INFO));
+                       osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addWayNodeOrder = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADD_WAY_NODE_ORDER_INFO));
+                       osm2rdf::config::constants::ADD_WAY_NODE_ORDER_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayNodeSpatialMetadata) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.addWayNodeSpatialMetadata = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(
       res, ::testing::HasSubstr(
-               osm2ttl::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO));
+               osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoSemicolonTagKeys) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.semicolonTagKeys.insert("ref");
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::SEMICOLON_TAG_KEYS_INFO));
+                       osm2rdf::config::constants::SEMICOLON_TAG_KEYS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoSimplifyGeometries) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.simplifyGeometries = 250;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::SIMPLIFY_GEOMETRIES_INFO));
+                       osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoSimplifyWKT) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.simplifyWKT = 250;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2ttl::config::constants::SIMPLIFY_WKT_INFO));
+      res, ::testing::HasSubstr(osm2rdf::config::constants::SIMPLIFY_WKT_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoSkipWikiLinks) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.skipWikiLinks = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::SKIP_WIKI_LINKS_INFO));
+                       osm2rdf::config::constants::SKIP_WIKI_LINKS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoGeometricRelations) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noGeometricRelations = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_GEOM_RELATIONS_INFO));
+                       osm2rdf::config::constants::NO_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoAreaGeomRelations) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noAreaGeometricRelations = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res,
               ::testing::HasSubstr(
-                  osm2ttl::config::constants::NO_AREA_GEOM_RELATIONS_INFO));
+                  osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoNoNodeGeomRelations) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noNodeGeometricRelations = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res,
               ::testing::HasSubstr(
-                  osm2ttl::config::constants::NO_NODE_GEOM_RELATIONS_INFO));
+                  osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoWayGeomRelations) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.noWayGeometricRelations = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::NO_WAY_GEOM_RELATIONS_INFO));
+                       osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAdminRelationsOnly) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.adminRelationsOnly = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::ADMIN_RELATIONS_ONLY_INFO));
+                       osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoMinimalAreaEnvelopeRatio) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
 
   const std::string res1 = config.getInfo("");
   ASSERT_THAT(
       res1, ::testing::Not(::testing::HasSubstr(
-                osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO)));
+                osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO)));
 
   config.minimalAreaEnvelopeRatio = 0.5;
   const std::string res2 = config.getInfo("");
   ASSERT_THAT(
       res2, ::testing::HasSubstr(
-                osm2ttl::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO));
+                osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoWriteDAGDotFiles) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.writeDAGDotFiles = true;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::WRITE_DAG_DOT_FILES_INFO));
+                       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO));
 }
 
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoWriteGeometricRelationStatistics) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   assertDefaultConfig(config);
   config.writeGeometricRelationStatistics = true;
 
@@ -1203,12 +1203,12 @@ TEST(CONFIG_Config, getInfoWriteGeometricRelationStatistics) {
   ASSERT_THAT(
       res,
       ::testing::HasSubstr(
-          osm2ttl::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO));
+          osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO));
 #else
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2ttl::config::constants::
+                       osm2rdf::config::constants::
                            WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED));
 #endif
 }
 
-}  // namespace osm2ttl::config
+}  // namespace osm2rdf::config

@@ -1,24 +1,24 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/ttl/Writer.h"
+#include "osm2rdf/ttl/Writer.h"
 
-#include <osm2ttl/ttl/Constants.h>
+#include <osm2rdf/ttl/Constants.h>
 
 #include <algorithm>
 #include <iomanip>
@@ -27,104 +27,104 @@
 #include <vector>
 
 #include "boost/iostreams/filter/bzip2.hpp"
-#include "osm2ttl/config/Config.h"
+#include "osm2rdf/config/Config.h"
 #include "osmium/osm/item_type.hpp"
 
 // ____________________________________________________________________________
 template <typename T>
-osm2ttl::ttl::Writer<T>::Writer(const osm2ttl::config::Config& config,
-                                osm2ttl::util::Output* output)
+osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
+                                osm2rdf::util::Output* output)
     : _config(config), _out(output) {
   _prefixes = {
       // well-known prefixes
-      {osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL,
+      {osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL,
        "http://www.opengis.net/ont/geosparql#"},
-      {osm2ttl::ttl::constants::NAMESPACE__WIKIDATA_ENTITY,
+      {osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY,
        "http://www.wikidata.org/entity/"},
-      {osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA,
+      {osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA,
        "http://www.w3.org/2001/XMLSchema#"},
-      {osm2ttl::ttl::constants::NAMESPACE__RDF,
+      {osm2rdf::ttl::constants::NAMESPACE__RDF,
        "http://www.w3.org/1999/02/22-rdf-syntax-ns#"},
-      {osm2ttl::ttl::constants::NAMESPACE__OPENGIS,
+      {osm2rdf::ttl::constants::NAMESPACE__OPENGIS,
        "http://www.opengis.net/rdf#"},
       // osm prefixes
-      {osm2ttl::ttl::constants::NAMESPACE__OSM,
+      {osm2rdf::ttl::constants::NAMESPACE__OSM,
        "https://www.openstreetmap.org/"},
       // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
       // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_NODE,
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
        "https://www.openstreetmap.org/node/"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_RELATION,
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
        "https://www.openstreetmap.org/relation/"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_TAG,
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
        "https://www.openstreetmap.org/wiki/Key:"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_WAY,
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
        "https://www.openstreetmap.org/way/"},
-      {osm2ttl::ttl::constants::NAMESPACE__OSM_META,
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_META,
        "https://www.openstreetmap.org/meta/"}};
 
   // Generate constants
-  osm2ttl::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
-  osm2ttl::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
-  osm2ttl::ttl::constants::IRI__OGC_CONTAINS_AREA =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contains_area");
-  osm2ttl::ttl::constants::IRI__OGC_CONTAINS_NON_AREA = generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "contains_nonarea");
-  osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_AREA = generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersects_area");
-  osm2ttl::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA = generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OPENGIS, "intersects_nonarea");
-  osm2ttl::ttl::constants::IRI__OSM_META__POS =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_META, "pos");
-  osm2ttl::ttl::constants::IRI__OSMWAY_IS_CLOSED =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
-  osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "next_node");
-  osm2ttl::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE = generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "next_node_distance");
-  osm2ttl::ttl::constants::IRI__OSMWAY_NODE =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "node");
-  osm2ttl::ttl::constants::IRI__OSMWAY_NODE_COUNT =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "nodeCount");
-  osm2ttl::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT = generateIRI(
-      osm2ttl::ttl::constants::NAMESPACE__OSM_WAY, "uniqueNodeCount");
-  osm2ttl::ttl::constants::IRI__OSM_ENVELOPE =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "envelope");
-  osm2ttl::ttl::constants::IRI__OSM_NODE =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "node");
-  osm2ttl::ttl::constants::IRI__OSM_RELATION =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "relation");
-  osm2ttl::ttl::constants::IRI__OSM_TAG =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "tag");
-  osm2ttl::ttl::constants::IRI__OSM_WAY =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "way");
-  osm2ttl::ttl::constants::IRI__OSM_WIKIPEDIA =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__OSM, "wikipedia");
-  osm2ttl::ttl::constants::IRI__RDF_TYPE =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__RDF, "type");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
+  osm2rdf::ttl::constants::IRI__OGC_CONTAINS_AREA =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "contains_area");
+  osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "contains_nonarea");
+  osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_AREA = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "intersects_area");
+  osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "intersects_nonarea");
+  osm2rdf::ttl::constants::IRI__OSM_META__POS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "pos");
+  osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
+  osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "next_node");
+  osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "next_node_distance");
+  osm2rdf::ttl::constants::IRI__OSMWAY_NODE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "node");
+  osm2rdf::ttl::constants::IRI__OSMWAY_NODE_COUNT =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "nodeCount");
+  osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "uniqueNodeCount");
+  osm2rdf::ttl::constants::IRI__OSM_ENVELOPE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "envelope");
+  osm2rdf::ttl::constants::IRI__OSM_NODE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "node");
+  osm2rdf::ttl::constants::IRI__OSM_RELATION =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "relation");
+  osm2rdf::ttl::constants::IRI__OSM_TAG =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "tag");
+  osm2rdf::ttl::constants::IRI__OSM_WAY =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "way");
+  osm2rdf::ttl::constants::IRI__OSM_WIKIPEDIA =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "wikipedia");
+  osm2rdf::ttl::constants::IRI__RDF_TYPE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__RDF, "type");
 
-  osm2ttl::ttl::constants::IRI__XSD_DECIMAL =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "decimal");
-  osm2ttl::ttl::constants::IRI__XSD_DOUBLE =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "double");
-  osm2ttl::ttl::constants::IRI__XSD_FLOAT =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
-  osm2ttl::ttl::constants::IRI__XSD_INTEGER =
-      generateIRI(osm2ttl::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
+  osm2rdf::ttl::constants::IRI__XSD_DECIMAL =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "decimal");
+  osm2rdf::ttl::constants::IRI__XSD_DOUBLE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "double");
+  osm2rdf::ttl::constants::IRI__XSD_FLOAT =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
+  osm2rdf::ttl::constants::IRI__XSD_INTEGER =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
 
-  osm2ttl::ttl::constants::LITERAL__NO = generateLiteral("no", "");
-  osm2ttl::ttl::constants::LITERAL__YES = generateLiteral("yes", "");
+  osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no", "");
+  osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes", "");
 }
 
 // ____________________________________________________________________________
 template <typename T>
-osm2ttl::ttl::Writer<T>::~Writer() {}
+osm2rdf::ttl::Writer<T>::~Writer() {}
 
 // ____________________________________________________________________________
 template <typename T>
-bool osm2ttl::ttl::Writer<T>::addPrefix(std::string_view p,
+bool osm2rdf::ttl::Writer<T>::addPrefix(std::string_view p,
                                         std::string_view v) {
   std::string key{p};
   auto prefix = _prefixes.find(key);
@@ -137,7 +137,7 @@ bool osm2ttl::ttl::Writer<T>::addPrefix(std::string_view p,
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::resolvePrefix(std::string_view p) {
+std::string osm2rdf::ttl::Writer<T>::resolvePrefix(std::string_view p) {
   auto prefix = _prefixes.find(std::string{p});
   if (prefix != _prefixes.end()) {
     return prefix->second;
@@ -147,7 +147,7 @@ std::string osm2ttl::ttl::Writer<T>::resolvePrefix(std::string_view p) {
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2ttl::ttl::Writer<T>::writeHeader() {
+void osm2rdf::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
     writeTriple("@prefix", prefix + ":", "<" + iriref + ">");
   }
@@ -155,11 +155,11 @@ void osm2ttl::ttl::Writer<T>::writeHeader() {
 
 // ____________________________________________________________________________
 template <>
-void osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>::writeHeader() {}
+void osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::writeHeader() {}
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::generateBlankNode() {
+std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
   uint64_t blankNodeId;
 #pragma omp critical(generateBlankNode)
   blankNodeId = _blankNodeCounter++;
@@ -168,14 +168,14 @@ std::string osm2ttl::ttl::Writer<T>::generateBlankNode() {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::generateIRI(std::string_view p,
+std::string osm2rdf::ttl::Writer<T>::generateIRI(std::string_view p,
                                                  uint64_t v) {
   return generateIRI(p, std::to_string(v));
 }
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::generateIRI(std::string_view p,
+std::string osm2rdf::ttl::Writer<T>::generateIRI(std::string_view p,
                                                  std::string_view v) {
   auto begin = std::find_if(v.begin(), v.end(),
                             [](int c) { return std::isspace(c) == 0; });
@@ -188,7 +188,7 @@ std::string osm2ttl::ttl::Writer<T>::generateIRI(std::string_view p,
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::generateLangTag(std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::generateLangTag(std::string_view s) {
   bool allowDigits = false;
   bool ok = true;
   for (size_t pos = 0; pos < s.length(); pos++) {
@@ -216,14 +216,14 @@ std::string osm2ttl::ttl::Writer<T>::generateLangTag(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::generateLiteral(std::string_view v,
+std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v,
                                                      std::string_view s) {
   return STRING_LITERAL_QUOTE(v) + std::string(s);
 }
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
+void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
   _out->write(s + " " + p + " " + o + " .\n");
@@ -231,7 +231,7 @@ void osm2ttl::ttl::Writer<T>::writeTriple(const std::string& s,
 
 // ____________________________________________________________________________
 template <>
-std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>::formatIRI(
+std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::formatIRI(
     std::string_view p, std::string_view v) {
   // NT:  [8]    IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
@@ -243,7 +243,7 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>::formatIRI(
 }
 // ____________________________________________________________________________
 template <>
-std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL>::formatIRI(
+std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::formatIRI(
     std::string_view p, std::string_view v) {
   // TTL: [135s] iri
   //      https://www.w3.org/TR/turtle/#grammar-production-iri
@@ -261,7 +261,7 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL>::formatIRI(
 
 // ____________________________________________________________________________
 template <>
-std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::formatIRI(
+std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::formatIRI(
     std::string_view p, std::string_view v) {
   // TTL: [135s] iri
   //      https://www.w3.org/TR/turtle/#grammar-production-iri
@@ -279,7 +279,7 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::formatIRI(
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::IRIREF(std::string_view p,
+std::string osm2rdf::ttl::Writer<T>::IRIREF(std::string_view p,
                                             std::string_view v) {
   // NT:  [8]    IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
@@ -290,7 +290,7 @@ std::string osm2ttl::ttl::Writer<T>::IRIREF(std::string_view p,
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::PrefixedName(std::string_view p,
+std::string osm2rdf::ttl::Writer<T>::PrefixedName(std::string_view p,
                                                   std::string_view v) {
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
@@ -299,7 +299,7 @@ std::string osm2ttl::ttl::Writer<T>::PrefixedName(std::string_view p,
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::STRING_LITERAL_QUOTE(std::string_view s) {
   // NT:  [9]   STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/n-triples/#grammar-production-STRING_LITERAL_QUOTE
   // TTL: [22]  STRING_LITERAL_QUOTE
@@ -331,7 +331,7 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_QUOTE(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(
+std::string osm2rdf::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(
     std::string_view s) {
   // TTL: [23]  STRING_LITERAL_QUOTE
   //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_SINGLE_QUOTE
@@ -362,7 +362,7 @@ std::string osm2ttl::ttl::Writer<T>::STRING_LITERAL_SINGLE_QUOTE(
 
 // ____________________________________________________________________________
 template <typename T>
-uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
+uint8_t osm2rdf::ttl::Writer<T>::utf8Length(char c) {
   auto cp = static_cast<uint8_t>(c);
   if ((cp & k0x80) == 0) {
     return k1Byte;
@@ -382,7 +382,7 @@ uint8_t osm2ttl::ttl::Writer<T>::utf8Length(char c) {
 
 // ____________________________________________________________________________
 template <typename T>
-uint8_t osm2ttl::ttl::Writer<T>::utf8Length(std::string_view s) {
+uint8_t osm2rdf::ttl::Writer<T>::utf8Length(std::string_view s) {
   if (s.empty()) {
     return 0;
   }
@@ -391,7 +391,7 @@ uint8_t osm2ttl::ttl::Writer<T>::utf8Length(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
-uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s) {
+uint32_t osm2rdf::ttl::Writer<T>::utf8Codepoint(std::string_view s) {
   switch (utf8Length(s)) {
     case k4Byte:
       // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
@@ -417,19 +417,19 @@ uint32_t osm2ttl::ttl::Writer<T>::utf8Codepoint(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::UCHAR(char c) {
+std::string osm2rdf::ttl::Writer<T>::UCHAR(char c) {
   return UCHAR(static_cast<uint32_t>(c));
 }
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::UCHAR(std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::UCHAR(std::string_view s) {
   return UCHAR(utf8Codepoint(s));
 }
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::UCHAR(uint32_t codepoint) {
+std::string osm2rdf::ttl::Writer<T>::UCHAR(uint32_t codepoint) {
   // NT:  [10]  UCHAR
   //      https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
   // TTL: [26]  UCHAR
@@ -447,7 +447,7 @@ std::string osm2ttl::ttl::Writer<T>::UCHAR(uint32_t codepoint) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::encodeIRIREF(std::string_view s) {
   // NT:  [8]   IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
   // TTL: [18]  IRIREF
@@ -472,7 +472,7 @@ std::string osm2ttl::ttl::Writer<T>::encodeIRIREF(std::string_view s) {
 
 // ____________________________________________________________________________
 template <>
-std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(
+std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::encodeIRIREF(
     std::string_view s) {
   // NT:  [8]   IRIREF
   //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
@@ -499,19 +499,19 @@ std::string osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>::encodeIRIREF(
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::encodePERCENT(char c) {
+std::string osm2rdf::ttl::Writer<T>::encodePERCENT(char c) {
   return encodePERCENT(static_cast<uint32_t>(c));
 }
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::encodePERCENT(std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::encodePERCENT(std::string_view s) {
   return encodePERCENT(utf8Codepoint(s));
 }
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::encodePERCENT(uint32_t codepoint) {
+std::string osm2rdf::ttl::Writer<T>::encodePERCENT(uint32_t codepoint) {
   // TTL: [170s] PERCENT
   //      https://www.w3.org/TR/turtle/#grammar-production-PERCENT
   std::vector<std::string> parts;
@@ -537,7 +537,7 @@ std::string osm2ttl::ttl::Writer<T>::encodePERCENT(uint32_t codepoint) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::encodePN_PREFIX(std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::encodePN_PREFIX(std::string_view s) {
   // TTL: [167s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_PREFIX
   std::string tmp;
@@ -602,7 +602,7 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_PREFIX(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
   // TTL: [168s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
   std::string tmp;
@@ -693,6 +693,6 @@ std::string osm2ttl::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
 }
 
 // ____________________________________________________________________________
-template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT>;
-template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL>;
-template class osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER>;
+template class osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>;
+template class osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>;
+template class osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>;

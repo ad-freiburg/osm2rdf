@@ -1,4 +1,4 @@
-module github.com/ad-freiburg/osm2ttl/stats
+module github.com/ad-freiburg/osm2rdf/stats
 
 go 1.14
 

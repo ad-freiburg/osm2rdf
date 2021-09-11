@@ -1,20 +1,20 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <filesystem>
 #include <string>
@@ -22,10 +22,10 @@
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "osm2ttl/config/Config.h"
-#include "osm2ttl/osm/OsmiumHandler.h"
-#include "osm2ttl/ttl/Writer.h"
-#include "osm2ttl/util/Output.h"
+#include "osm2rdf/config/Config.h"
+#include "osm2rdf/osm/OsmiumHandler.h"
+#include "osm2rdf/ttl/Writer.h"
+#include "osm2rdf/util/Output.h"
 
 std::vector<std::filesystem::path> getFilesWithPrefixFromPath(
     std::filesystem::path path, std::string_view prefix) {
@@ -52,10 +52,10 @@ TEST(E2E, singleNode) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "singleNode.osm");
@@ -69,12 +69,12 @@ TEST(E2E, singleNode) {
                "changeset=\"676636\" timestamp=\"2008-09-21T21:37:45Z\"/>"
             << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -117,10 +117,10 @@ TEST(E2E, singleNodeWithTags) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "singleNodeWithTags.osm");
@@ -140,12 +140,12 @@ TEST(E2E, singleNodeWithTags) {
                "</node>\n";
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -211,10 +211,10 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "singleWayWithTagsAndNodes.osm");
@@ -239,12 +239,12 @@ TEST(E2E, singleWayWithTagsAndNodes) {
          "</way>\n";
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -313,10 +313,10 @@ TEST(E2E, osmWikiExample) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "osmWikiExample.osm");
@@ -357,12 +357,12 @@ TEST(E2E, osmWikiExample) {
                " </relation>";
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -408,10 +408,10 @@ TEST(E2E, building51NT) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "building51NT.osm");
@@ -439,12 +439,12 @@ TEST(E2E, building51NT) {
   }
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::NT> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -581,10 +581,10 @@ TEST(E2E, building51TTL) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "building51TTL.osm");
@@ -612,12 +612,12 @@ TEST(E2E, building51TTL) {
   }
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::TTL> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -722,10 +722,10 @@ TEST(E2E, building51QLEVER) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "building51QLEVER.osm");
@@ -753,12 +753,12 @@ TEST(E2E, building51QLEVER) {
   }
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -863,10 +863,10 @@ TEST(E2E, tf) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "tf.osm");
@@ -894,12 +894,12 @@ TEST(E2E, tf) {
   }
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();
@@ -958,10 +958,10 @@ TEST(E2E, building51inTF) {
   std::cerr.rdbuf(cerrBuffer.rdbuf());
   std::cout.rdbuf(coutBuffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
-  config.mergeOutput = osm2ttl::util::OutputMergeMode::NONE;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "building51.osm");
@@ -993,12 +993,12 @@ TEST(E2E, building51inTF) {
   }
   inputFile << "</osm>" << std::endl;
 
-  osm2ttl::util::Output output{config, config.output};
+  osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2ttl::ttl::Writer<osm2ttl::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2ttl::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
 
   output.flush();

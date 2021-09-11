@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/util/Output.h"
+#include "osm2rdf/util/Output.h"
 
 #include <cmath>
 #include <cstdio>
@@ -25,10 +25,10 @@
 #include "boost/iostreams/filter/bzip2.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
 #include "omp.h"
-#include "osm2ttl/config/Config.h"
+#include "osm2rdf/config/Config.h"
 
 // ____________________________________________________________________________
-osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
+osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
                               const std::string& prefix)
     : Output(config, prefix,
 #if defined(_OPENMP)
@@ -40,7 +40,7 @@ osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
 }
 
 // ____________________________________________________________________________
-osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
+osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
                               const std::string& prefix, size_t partCount)
     : _config(config),
       _prefix(prefix),
@@ -48,10 +48,10 @@ osm2ttl::util::Output::Output(const osm2ttl::config::Config& config,
       _numOutsDigits(std::floor(std::log10(_numOuts)) + 1) {}
 
 // ____________________________________________________________________________
-osm2ttl::util::Output::~Output() { close(); }
+osm2rdf::util::Output::~Output() { close(); }
 
 // ____________________________________________________________________________
-bool osm2ttl::util::Output::open() {
+bool osm2rdf::util::Output::open() {
   assert(_numOuts > 0);
   _out = new boost::iostreams::filtering_ostream[_numOuts];
   _outFile = new std::ofstream[_numOuts];
@@ -75,10 +75,10 @@ bool osm2ttl::util::Output::open() {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::close() { close("", ""); }
+void osm2rdf::util::Output::close() { close("", ""); }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::close(std::string_view prefix,
+void osm2rdf::util::Output::close(std::string_view prefix,
                                   std::string_view suffix) {
   if (!_open) {
     return;
@@ -96,13 +96,13 @@ void osm2ttl::util::Output::close(std::string_view prefix,
 
   // Handle merging of files
   switch (_config.mergeOutput) {
-    case osm2ttl::util::OutputMergeMode::MERGE:
+    case osm2rdf::util::OutputMergeMode::MERGE:
       merge(prefix, suffix);
       return;
-    case osm2ttl::util::OutputMergeMode::CONCATENATE:
+    case osm2rdf::util::OutputMergeMode::CONCATENATE:
       concatenate(prefix, suffix);
       return;
-    case osm2ttl::util::OutputMergeMode::NONE:
+    case osm2rdf::util::OutputMergeMode::NONE:
     default:
       none(prefix, suffix);
       return;
@@ -110,7 +110,7 @@ void osm2ttl::util::Output::close(std::string_view prefix,
 }
 
 // ____________________________________________________________________________
-std::string osm2ttl::util::Output::partFilename(int part) {
+std::string osm2rdf::util::Output::partFilename(int part) {
   assert(part >= -2);
   assert(part < static_cast<int>(_numOuts));
   std::ostringstream oss;
@@ -123,7 +123,7 @@ std::string osm2ttl::util::Output::partFilename(int part) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::merge(std::string_view prefix,
+void osm2rdf::util::Output::merge(std::string_view prefix,
                                   std::string_view suffix) {
   // Concatenated output files
   boost::iostreams::filtering_ostream out;
@@ -154,7 +154,7 @@ void osm2ttl::util::Output::merge(std::string_view prefix,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::concatenate(std::string_view prefix,
+void osm2rdf::util::Output::concatenate(std::string_view prefix,
                                         std::string_view suffix) {
   // Concatenated output files
   std::ofstream outFile{_prefix, std::ios_base::binary};
@@ -172,7 +172,7 @@ void osm2ttl::util::Output::concatenate(std::string_view prefix,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::none(std::string_view prefix,
+void osm2rdf::util::Output::none(std::string_view prefix,
                                  std::string_view suffix) {
   // Concatenated output files
   {
@@ -188,7 +188,7 @@ void osm2ttl::util::Output::none(std::string_view prefix,
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::write(std::string_view line) {
+void osm2rdf::util::Output::write(std::string_view line) {
 #if defined(_OPENMP)
   write(line, omp_get_thread_num());
 #else
@@ -197,17 +197,17 @@ void osm2ttl::util::Output::write(std::string_view line) {
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::write(std::string_view line, size_t part) {
+void osm2rdf::util::Output::write(std::string_view line, size_t part) {
   assert(part < _numOuts);
   _out[part] << line;
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::flush() {
+void osm2rdf::util::Output::flush() {
   for (size_t i = 0; i < _numOuts; ++i) {
     flush(i);
   }
 }
 
 // ____________________________________________________________________________
-void osm2ttl::util::Output::flush(size_t part) { _out[part].flush(); }
+void osm2rdf::util::Output::flush(size_t part) { _out[part].flush(); }

@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/osm/Way.h"
+#include "osm2rdf/osm/Way.h"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -27,7 +27,7 @@
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
-namespace osm2ttl::osm {
+namespace osm2rdf::osm {
 
 // ____________________________________________________________________________
 TEST(OSM_Way, FromWay) {
@@ -41,8 +41,8 @@ TEST(OSM_Way, FromWay) {
                                {2, {48.1, 7.61}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_FALSE(w.closed());
 
@@ -77,8 +77,8 @@ TEST(OSM_Way, FromWayWithTags) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_FALSE(w.closed());
 
@@ -116,8 +116,8 @@ TEST(OSM_Way, FromClosedWay) {
                                {1, {48.0, 7.51}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_TRUE(w.closed());
 
@@ -157,8 +157,8 @@ TEST(OSM_Way, FromClosedWayWithDuplicateNodes) {
                                {1, {48.0, 7.51}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way w{buffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
   ASSERT_EQ(42, w.id());
   ASSERT_TRUE(w.closed());
 
@@ -213,10 +213,10 @@ TEST(OSM_Way, equalsOperator) {
                                {2, {48.1, 7.61}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way o1{osmiumBuffer1.get<osmium::Way>(0)};
-  const osm2ttl::osm::Way o2{osmiumBuffer2.get<osmium::Way>(0)};
-  const osm2ttl::osm::Way o3{osmiumBuffer3.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way o1{osmiumBuffer1.get<osmium::Way>(0)};
+  const osm2rdf::osm::Way o2{osmiumBuffer2.get<osmium::Way>(0)};
+  const osm2rdf::osm::Way o3{osmiumBuffer3.get<osmium::Way>(0)};
 
   ASSERT_TRUE(o1 == o1);
   ASSERT_FALSE(o1 == o2);
@@ -259,10 +259,10 @@ TEST(OSM_Way, notEqualsOperator) {
                                {2, {48.1, 7.61}},
                            }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way o1{osmiumBuffer1.get<osmium::Way>(0)};
-  const osm2ttl::osm::Way o2{osmiumBuffer2.get<osmium::Way>(0)};
-  const osm2ttl::osm::Way o3{osmiumBuffer3.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way o1{osmiumBuffer1.get<osmium::Way>(0)};
+  const osm2rdf::osm::Way o2{osmiumBuffer2.get<osmium::Way>(0)};
+  const osm2rdf::osm::Way o3{osmiumBuffer3.get<osmium::Way>(0)};
 
   ASSERT_FALSE(o1 != o1);
   ASSERT_TRUE(o1 != o2);
@@ -292,10 +292,10 @@ TEST(OSM_Way, serializationBinary) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};
 
-  osm2ttl::osm::Way dst;
+  osm2rdf::osm::Way dst;
 
   // Store and load
   boost::archive::binary_oarchive oa(boostBuffer);
@@ -323,10 +323,10 @@ TEST(OSM_Way, serializationText) {
                            }),
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};
 
-  osm2ttl::osm::Way dst;
+  osm2rdf::osm::Way dst;
 
   // Store and load
   boost::archive::text_oarchive oa(boostBuffer);
@@ -339,4 +339,4 @@ TEST(OSM_Way, serializationText) {
   ASSERT_TRUE(src == dst);
 }
 
-}  // namespace osm2ttl::osm
+}  // namespace osm2rdf::osm

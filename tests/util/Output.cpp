@@ -1,28 +1,28 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/util/Output.h"
+#include "osm2rdf/util/Output.h"
 
 #include <iostream>
 
 #include "gtest/gtest.h"
 
-namespace osm2ttl::util {
+namespace osm2rdf::util {
 
 // ____________________________________________________________________________
 size_t countFilesInPath(const std::filesystem::path path) {
@@ -32,10 +32,10 @@ size_t countFilesInPath(const std::filesystem::path path) {
 
 // ____________________________________________________________________________
 TEST(UTIL_Output, partFilenameSingleDigit) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_UTIL_Output", "partFilenameSingleDigit");
-  osm2ttl::util::Output o{config, "test", 4};
+  osm2rdf::util::Output o{config, "test", 4};
   // Normal parts
   ASSERT_EQ("test.part_1", o.partFilename(0));
   ASSERT_EQ("test.part_2", o.partFilename(1));
@@ -49,10 +49,10 @@ TEST(UTIL_Output, partFilenameSingleDigit) {
 
 // ____________________________________________________________________________
 TEST(UTIL_Output, partFilenameMultipleDigits) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_UTIL_Output", "partFilenameMultipleDigits");
-  osm2ttl::util::Output o{config, "test", 16};
+  osm2rdf::util::Output o{config, "test", 16};
   // Normal parts
   ASSERT_EQ("test.part_01", o.partFilename(0));
   ASSERT_EQ("test.part_02", o.partFilename(1));
@@ -78,7 +78,7 @@ TEST(UTIL_Output, partFilenameMultipleDigits) {
 
 // ____________________________________________________________________________
 TEST(UTIL_Output, WriteIntoCurrentPartFile) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_UTIL_Output", "WriteIntoCurrentPartFile");
   config.mergeOutput = OutputMergeMode::NONE;
@@ -90,7 +90,7 @@ TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   output /= "file";
 
   size_t parts = 4;
-  osm2ttl::util::Output o{config, output, parts};
+  osm2rdf::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
   ASSERT_EQ(parts, countFilesInPath(config.output));
@@ -118,13 +118,13 @@ TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
   std::streambuf* sbuf = std::cout.rdbuf();
   std::cout.rdbuf(buffer.rdbuf());
 
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = OutputMergeMode::NONE;
 
   size_t parts = 4;
-  osm2ttl::util::Output o{config, "", parts};
+  osm2rdf::util::Output o{config, "", parts};
   o.open();
   o.write("a");
   o.write("b");
@@ -141,7 +141,7 @@ TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
 
 // ____________________________________________________________________________
 TEST(UTIL_OutputMergeMode, NONE) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "NONE");
   config.mergeOutput = OutputMergeMode::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
@@ -152,7 +152,7 @@ TEST(UTIL_OutputMergeMode, NONE) {
   output /= "file";
 
   size_t parts = 4;
-  osm2ttl::util::Output o{config, output, parts};
+  osm2rdf::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
   ASSERT_EQ(parts, countFilesInPath(config.output));
@@ -170,7 +170,7 @@ TEST(UTIL_OutputMergeMode, NONE) {
 
 // ____________________________________________________________________________
 TEST(UTIL_OutputMergeMode, CONCATENATE) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_UTIL_OutputMergeMode", "CONCATENATE");
   config.mergeOutput = OutputMergeMode::CONCATENATE;
@@ -182,7 +182,7 @@ TEST(UTIL_OutputMergeMode, CONCATENATE) {
   output /= "file";
 
   size_t parts = 4;
-  osm2ttl::util::Output o{config, output, parts};
+  osm2rdf::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
   ASSERT_EQ(parts, countFilesInPath(config.output));
@@ -200,7 +200,7 @@ TEST(UTIL_OutputMergeMode, CONCATENATE) {
 
 // ____________________________________________________________________________
 TEST(UTIL_OutputMergeMode, MERGE) {
-  osm2ttl::config::Config config;
+  osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "MERGE");
   config.mergeOutput = OutputMergeMode::MERGE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
@@ -211,7 +211,7 @@ TEST(UTIL_OutputMergeMode, MERGE) {
   output /= "file";
 
   size_t parts = 4;
-  osm2ttl::util::Output o{config, output, parts};
+  osm2rdf::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
   ASSERT_EQ(parts, countFilesInPath(config.output));
@@ -227,4 +227,4 @@ TEST(UTIL_OutputMergeMode, MERGE) {
   ASSERT_FALSE(std::filesystem::exists(config.output));
 }
 
-}  // namespace osm2ttl::util
+}  // namespace osm2rdf::util

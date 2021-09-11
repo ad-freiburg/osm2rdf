@@ -1,20 +1,20 @@
 # Copyright 2020, University of Freiburg
 # Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-# This file is part of osm2ttl.
+# This file is part of osm2rdf.
 #
-# osm2ttl is free software: you can redistribute it and/or modify
+# osm2rdf is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# osm2ttl is distributed in the hope that it will be useful,
+# osm2rdf is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+# along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 set(INSTALL_GTEST OFF CACHE BOOL "Suppressing installation of googletest" FORCE)
 add_subdirectory("${PROJECT_SOURCE_DIR}/vendor/google/googletest" "vendor/google/googletest")
@@ -37,7 +37,7 @@ macro(package_add_test TESTNAME)
     # the test executable.  Remove g_test_main if writing your own main function.
     target_compile_features(${TESTNAME} PRIVATE cxx_std_17)
     target_link_libraries(${TESTNAME} gtest gmock gtest_main)
-    target_link_libraries(${TESTNAME} osm2ttl_library)
+    target_link_libraries(${TESTNAME} osm2rdf_library)
     # gtest_discover_tests replaces gtest_add_tests,
     # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it
     gtest_discover_tests(${TESTNAME}

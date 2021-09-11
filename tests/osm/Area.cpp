@@ -1,22 +1,22 @@
 // Copyright 2020, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
-// This file is part of osm2ttl.
+// This file is part of osm2rdf.
 //
-// osm2ttl is free software: you can redistribute it and/or modify
+// osm2rdf is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// osm2ttl is distributed in the hope that it will be useful,
+// osm2rdf is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with osm2ttl.  If not, see <https://www.gnu.org/licenses/>.
+// along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2ttl/osm/Area.h"
+#include "osm2rdf/osm/Area.h"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -27,7 +27,7 @@
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
-namespace osm2ttl::osm {
+namespace osm2rdf::osm {
 
 // ____________________________________________________________________________
 TEST(OSM_Area, FromAreaVirtualWay) {
@@ -44,8 +44,8 @@ TEST(OSM_Area, FromAreaVirtualWay) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
   ASSERT_EQ(42, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_EQ(0, a.tagAdministrationLevel());
@@ -72,8 +72,8 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_EQ(0, a.tagAdministrationLevel());
@@ -103,8 +103,8 @@ TEST(OSM_Area, BoundaryWithAdminLevel) {
       osmium::builder::attr::_tag("boundary", "administrative"),
       osmium::builder::attr::_tag("admin_level", "4"));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_EQ(4, a.tagAdministrationLevel());
@@ -149,9 +149,9 @@ TEST(OSM_Area, equalsOperator) {
                                 {4, {48.1, 7.51}},
                                 {1, {48.0, 7.51}},
                             }));
-  const osm2ttl::osm::Area o1{osmiumBuffer1.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area o2{osmiumBuffer2.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area o3{osmiumBuffer3.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o1{osmiumBuffer1.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o2{osmiumBuffer2.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o3{osmiumBuffer3.get<osmium::Area>(0)};
 
   ASSERT_TRUE(o1 == o1);
   ASSERT_FALSE(o1 == o2);
@@ -199,9 +199,9 @@ TEST(OSM_Area, notEqualsOperator) {
                                 {4, {48.1, 7.51}},
                                 {1, {48.0, 7.51}},
                             }));
-  const osm2ttl::osm::Area o1{osmiumBuffer1.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area o2{osmiumBuffer2.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area o3{osmiumBuffer3.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o1{osmiumBuffer1.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o2{osmiumBuffer2.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o3{osmiumBuffer3.get<osmium::Area>(0)};
 
   ASSERT_FALSE(o1 != o1);
   ASSERT_TRUE(o1 != o2);
@@ -279,10 +279,10 @@ TEST(OSM_Area, lessThanOperator) {
       }),
       osmium::builder::attr::_tag("boundary", "administrative"),
       osmium::builder::attr::_tag("admin_level", "3"));
-  const osm2ttl::osm::Area o1{osmiumBuffer1.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area o2{osmiumBuffer2.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area o3{osmiumBuffer3.get<osmium::Area>(0)};
-  const osm2ttl::osm::Area o4{osmiumBuffer4.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o1{osmiumBuffer1.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o2{osmiumBuffer2.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o3{osmiumBuffer3.get<osmium::Area>(0)};
+  const osm2rdf::osm::Area o4{osmiumBuffer4.get<osmium::Area>(0)};
 
   // o1 has less area than o2
   // o2 and o3 have same area but o3 is higher in the hierarchy
@@ -319,10 +319,10 @@ TEST(OSM_Area, serializationBinary) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src{osmiumBuffer.get<osmium::Area>(0)};
 
-  osm2ttl::osm::Area dst;
+  osm2rdf::osm::Area dst;
 
   // Store and load
   boost::archive::binary_oarchive oa(boostBuffer);
@@ -351,10 +351,10 @@ TEST(OSM_Area, serializationText) {
                                 {1, {48.0, 7.51}},
                             }));
 
-  // Create osm2ttl object from osmium object
-  const osm2ttl::osm::Area src{osmiumBuffer.get<osmium::Area>(0)};
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area src{osmiumBuffer.get<osmium::Area>(0)};
 
-  osm2ttl::osm::Area dst;
+  osm2rdf::osm::Area dst;
 
   // Store and load
   boost::archive::text_oarchive oa(boostBuffer);
@@ -367,4 +367,4 @@ TEST(OSM_Area, serializationText) {
   ASSERT_TRUE(src == dst);
 }
 
-}  // namespace osm2ttl::osm
+}  // namespace osm2rdf::osm
