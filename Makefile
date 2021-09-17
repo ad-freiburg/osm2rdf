@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-DOCKER:=$(shell which wharfer || which docker)
+DOCKER:=$(shell which podman || which wharfer || which docker)
 
 all: compile checkstyle test benchmark
 
