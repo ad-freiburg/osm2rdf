@@ -237,7 +237,7 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osmm:area \"0.010000000000\"^^xsd:double .\n",
+      "osmway:21 osmmeta:area \"0.010000000000\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -287,8 +287,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioRectangle) {
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osmm:area \"0.010000000000\"^^xsd:double .\n"
-      "osmway:21 osmm:area_envelope_ratio \"1.000000\"^^xsd:double .\n",
+      "osmway:21 osmmeta:area \"0.010000000000\"^^xsd:double .\n"
+      "osmway:21 osmmeta:area_envelope_ratio \"1.000000\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -338,8 +338,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((0.5 0.0,0.0 0.5,0.5 1.0,1.0 "
       "0.5,0.5 0.0)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osmm:area \"0.500000000000\"^^xsd:double .\n"
-      "osmway:21 osmm:area_envelope_ratio \"0.500000\"^^xsd:double .\n",
+      "osmway:21 osmmeta:area \"0.500000000000\"^^xsd:double .\n"
+      "osmway:21 osmmeta:area_envelope_ratio \"0.500000\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -383,8 +383,8 @@ TEST(OSM_FactHandler, node) {
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
       "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
-      "osmnode:42 osmt:city \"Freiburg\" .\n"
-      "osmnode:42 osmm:facts \"1\"^^xsd:integer .\n",
+      "osmnode:42 osmkey:city \"Freiburg\" .\n"
+      "osmnode:42 osmmeta:facts \"1\"^^xsd:integer .\n",
       buffer.str());
 
   // Cleanup
@@ -429,8 +429,8 @@ TEST(OSM_FactHandler, nodeAddEnvelope) {
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
       "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
-      "osmnode:42 osmt:city \"Freiburg\" .\n"
-      "osmnode:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmnode:42 osmkey:city \"Freiburg\" .\n"
+      "osmnode:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmnode:42 osm:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0))\"^^geo:wktLiteral .\n",
       buffer.str());
@@ -478,8 +478,8 @@ TEST(OSM_FactHandler, relation) {
 
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
-      "osmrel:42 osmt:city \"Freiburg\" .\n"
-      "osmrel:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmkey:city \"Freiburg\" .\n"
+      "osmrel:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0 .\n"
       "_:0 osm:id osmnode:1 .\n"
       "_:0 osm:role \"label\" .\n"
@@ -534,8 +534,8 @@ TEST(OSM_FactHandler, way) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n",
       buffer.str());
@@ -581,14 +581,14 @@ TEST(OSM_FactHandler, wayAddSortMetadata) {
   output.flush();
   output.close();
 
-  // osmm:length should be a multiple of sqrt(2)
+  // osmmeta:length should be a multiple of sqrt(2)
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
-      "osmway:42 osmm:length \"0.141421\"^^xsd:double .\n",
+      "osmway:42 osmmeta:length \"0.141421\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -635,8 +635,8 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
@@ -688,16 +688,16 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0 .\n"
       "_:0 osmway:node osmnode:1 .\n"
-      "_:0 osmm:pos \"1\"^^xsd:integer .\n"
+      "_:0 osmmeta:pos \"1\"^^xsd:integer .\n"
       "osmnode:1 rdf:type osm:node .\n"
       "osmnode:1 geo:hasGeometry \"POINT(48.0 7.5)\"^^geo:wktLiteral .\n"
       "osmway:42 osmway:node _:1 .\n"
       "_:1 osmway:node osmnode:2 .\n"
-      "_:1 osmm:pos \"2\"^^xsd:integer .\n"
+      "_:1 osmmeta:pos \"2\"^^xsd:integer .\n"
       "osmnode:2 rdf:type osm:node .\n"
       "osmnode:2 geo:hasGeometry \"POINT(48.1 7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
@@ -748,14 +748,14 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0 .\n"
       "_:0 osmway:node osmnode:1 .\n"
-      "_:0 osmm:pos \"1\"^^xsd:integer .\n"
+      "_:0 osmmeta:pos \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:1 .\n"
       "_:1 osmway:node osmnode:2 .\n"
-      "_:1 osmm:pos \"2\"^^xsd:integer .\n"
+      "_:1 osmmeta:pos \"2\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n",
       buffer.str());
@@ -805,14 +805,14 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0 .\n"
       "_:0 osmway:node osmnode:1 .\n"
-      "_:0 osmm:pos \"1\"^^xsd:integer .\n"
+      "_:0 osmmeta:pos \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:1 .\n"
       "_:1 osmway:node osmnode:2 .\n"
-      "_:1 osmm:pos \"2\"^^xsd:integer .\n"
+      "_:1 osmmeta:pos \"2\"^^xsd:integer .\n"
       "_:0 osmway:next_node osmnode:2 .\n"
       "_:0 osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
@@ -866,24 +866,24 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0 .\n"
       "_:0 osmway:node osmnode:1 .\n"
-      "_:0 osmm:pos \"1\"^^xsd:integer .\n"
+      "_:0 osmmeta:pos \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:1 .\n"
       "_:1 osmway:node osmnode:2 .\n"
-      "_:1 osmm:pos \"2\"^^xsd:integer .\n"
+      "_:1 osmmeta:pos \"2\"^^xsd:integer .\n"
       "_:0 osmway:next_node osmnode:2 .\n"
       "_:0 osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\n"
       "osmway:42 osmway:node _:2 .\n"
       "_:2 osmway:node osmnode:4 .\n"
-      "_:2 osmm:pos \"3\"^^xsd:integer .\n"
+      "_:2 osmmeta:pos \"3\"^^xsd:integer .\n"
       "_:1 osmway:next_node osmnode:4 .\n"
       "_:1 osmway:next_node_distance \"11119.490351\"^^xsd:decimal .\n"
       "osmway:42 osmway:node _:3 .\n"
       "_:3 osmway:node osmnode:3 .\n"
-      "_:3 osmm:pos \"4\"^^xsd:integer .\n"
+      "_:3 osmmeta:pos \"4\"^^xsd:integer .\n"
       "_:2 osmway:next_node osmnode:3 .\n"
       "_:2 osmway:next_node_distance \"11024.108103\"^^xsd:decimal .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 7.6,48.1 7.5,48.0 "
@@ -934,8 +934,8 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
-      "osmway:42 osmt:city \"Freiburg\" .\n"
-      "osmway:42 osmm:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osmway:is_closed \"no\" .\n"
@@ -1288,10 +1288,10 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected = subject +
                                " osm:tag _:0 .\n"
-                               "_:0 osmt:key \"" +
+                               "_:0 osmkey:key \"" +
                                tagKey +
                                "\" .\n"
-                               "_:0 osmt:value \"" +
+                               "_:0 osmkey:value \"" +
                                tagValue + "\" .\n";
   output.flush();
   output.close();

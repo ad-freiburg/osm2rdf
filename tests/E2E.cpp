@@ -169,26 +169,26 @@ TEST(E2E, singleNodeWithTags) {
                   "47.9960901)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmnode:240092010 osmt:alt_name \"Freiburg i. Br.\" .\n"));
+                  "osmnode:240092010 osmkey:alt_name \"Freiburg i. Br.\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmnode:240092010 osmkey:name \"Freiburg im Breisgau\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmnode:240092010 osmt:name \"Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:240092010 osmt:name:ja "
+              ::testing::HasSubstr("osmnode:240092010 osmkey:name:ja "
                                    "\"\xE3\x83\x95\xE3\x83\xA9\xE3\x82\xA4\xE3"
                                    "\x83\x96\xE3\x83\xAB\xE3\x82\xAF\" .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmnode:240092010 osmt:short_name \"Freiburg\" .\n"));
+                  "osmnode:240092010 osmkey:short_name \"Freiburg\" .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmnode:240092010 osmt:wikidata \"Q2833\" .\n"));
+      ::testing::HasSubstr("osmnode:240092010 osmkey:wikidata \"Q2833\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
                                "osmnode:240092010 osm:wikidata wd:Q2833 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmnode:240092010 osmt:wikipedia \"de:Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmnode:240092010 osmkey:wikipedia "
+                                   "\"de:Freiburg im Breisgau\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
@@ -265,32 +265,33 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+          "osmway:98284318 osmkey:addr:city \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:housenumber \"51\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:postcode \"79110\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
+          "osmway:98284318 osmkey:addr:street \"Georges-Köhler-Allee\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:source:outline "
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:building \"university\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:building:levels \"4\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:name \"Gebäude 51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmkey:roof:levels \"1\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:roof:shape \"hipped\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:98284318 osmkey:source:outline "
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   // No nodes -> no real geometry
   ASSERT_THAT(printedData,
@@ -380,10 +381,10 @@ TEST(E2E, osmWikiExample) {
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmnode:1831881213 osmt:traffic_sign \"city_limit\" .\n"));
+                  "osmnode:1831881213 osmkey:traffic_sign \"city_limit\" .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:26659127 osmt:name \"Pastower Straße\" .\n"));
+                  "osmway:26659127 osmkey:name \"Pastower Straße\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:26659127 geo:hasGeometry \"LINESTRING("));
@@ -537,32 +538,32 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#intersects_nonarea> "
+                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#intersects_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#contains_nonarea> "
+                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#contains_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#intersects_nonarea> "
+                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#intersects_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#contains_nonarea> "
+                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#contains_nonarea> "
                   "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#intersects_nonarea> "
+                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#intersects_nonarea> "
                   "<https://www.openstreetmap.org/node/5190342871> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#contains_nonarea> "
+                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#contains_nonarea> "
                   "<https://www.openstreetmap.org/node/5190342871> .\n"));
 
   // Reset std::cerr and std::cout
@@ -646,32 +647,33 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+          "osmway:98284318 osmkey:addr:city \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:housenumber \"51\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:postcode \"79110\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
+          "osmway:98284318 osmkey:addr:street \"Georges-Köhler-Allee\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:source:outline "
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:building \"university\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:building:levels \"4\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:name \"Gebäude 51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmkey:roof:levels \"1\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:roof:shape \"hipped\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:98284318 osmkey:source:outline "
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   ASSERT_THAT(
       printedData,
@@ -684,27 +686,27 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:5190342871 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -787,32 +789,33 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+          "osmway:98284318 osmkey:addr:city \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:housenumber \"51\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:postcode \"79110\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
+          "osmway:98284318 osmkey:addr:street \"Georges-Köhler-Allee\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:source:outline "
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:building \"university\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:building:levels \"4\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:name \"Gebäude 51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmkey:roof:levels \"1\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:roof:shape \"hipped\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:98284318 osmkey:source:outline "
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   ASSERT_THAT(
       printedData,
@@ -825,27 +828,27 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:5190342871 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -925,16 +928,16 @@ TEST(E2E, tf) {
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:4498466 osmt:name \"Technische Fakultät\" .\n"));
+                  "osmway:4498466 osmkey:name \"Technische Fakultät\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:4498466 osmt:int_name \"Faculty of Engineering\" .\n"));
+          "osmway:4498466 osmkey:int_name \"Faculty of Engineering\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:4498466 osmt:operator "
+                               "osmway:4498466 osmkey:operator "
                                "\"Albert-Ludwigs-Universität Freiburg\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:4498466 osmt:wheelchair \"yes\" .\n"));
+                               "osmway:4498466 osmkey:wheelchair \"yes\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:4498466 geo:hasGeometry \"LINESTRING(7"));
@@ -1042,32 +1045,33 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:city \"Freiburg im Breisgau\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:housenumber \"51\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:addr:postcode \"79110\" .\n"));
+          "osmway:98284318 osmkey:addr:city \"Freiburg im Breisgau\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:housenumber \"51\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:addr:postcode \"79110\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osmt:addr:street \"Georges-Köhler-Allee\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building \"university\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:building:levels \"4\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:name \"Gebäude 51\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:98284318 osmt:roof:levels \"1\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:98284318 osmt:roof:shape \"hipped\" .\n"));
+          "osmway:98284318 osmkey:addr:street \"Georges-Köhler-Allee\" .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 osmt:source:outline "
+              ::testing::HasSubstr(
+                  "osmway:98284318 osmkey:building \"university\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:building:levels \"4\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:name \"Gebäude 51\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmway:98284318 osmkey:roof:levels \"1\" .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:98284318 osmkey:roof:shape \"hipped\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmway:98284318 osmkey:source:outline "
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   ASSERT_THAT(
       printedData,
@@ -1079,16 +1083,16 @@ TEST(E2E, building51inTF) {
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:4498466 osmt:name \"Technische Fakultät\" .\n"));
+                  "osmway:4498466 osmkey:name \"Technische Fakultät\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:4498466 osmt:int_name \"Faculty of Engineering\" .\n"));
+          "osmway:4498466 osmkey:int_name \"Faculty of Engineering\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:4498466 osmt:operator "
+                               "osmway:4498466 osmkey:operator "
                                "\"Albert-Ludwigs-Universität Freiburg\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmway:4498466 osmt:wheelchair \"yes\" .\n"));
+                               "osmway:4498466 osmkey:wheelchair \"yes\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:4498466 geo:hasGeometry \"LINESTRING(7"));
@@ -1097,34 +1101,35 @@ TEST(E2E, building51inTF) {
                   "osmway:4498466 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:4498466 ogc:contains_area osmway:98284318 .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:4498466 ogc:intersects_area osmway:98284318 .\n"));
+                  "osmway:4498466 osm2rdf:contains_area osmway:98284318 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601105 .\n"));
+          "osmway:4498466 osm2rdf:intersects_area osmway:98284318 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:intersects_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 ogc:contains_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:5190342871 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmway:98284318 osm2rdf:contains_nonarea osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

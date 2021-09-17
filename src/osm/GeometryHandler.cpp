@@ -423,10 +423,10 @@ void osm2rdf::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
 #pragma omp parallel for shared( \
     vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
-    osm2rdf::ttl::constants::IRI__OGC_CONTAINS_AREA, \
-    osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_AREA, \
-    osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA, progressBar, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, progressBar, \
     entryCount) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
@@ -448,9 +448,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
           areaObjId);
 
       _writer->writeTriple(
-          areaIRI, osm2rdf::ttl::constants::IRI__OGC_CONTAINS_AREA, entryIRI);
+          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA, entryIRI);
       _writer->writeTriple(
-          areaIRI, osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_AREA, entryIRI);
+          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, entryIRI);
     }
 #pragma omp critical(progress)
     progressBar.update(entryCount++);
@@ -500,8 +500,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 #pragma omp parallel for shared( \
     osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
-    osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, \
     containsSkippedByDAG, intersectsChecks, intersectsOk, containsChecks, \
     containsOk, containsOkEnvelope)      \
@@ -578,7 +578,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA,
+              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               entryIRI);
         }
 
@@ -629,7 +629,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
             skipContains.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA,
+              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               entryIRI);
         }
       }
@@ -693,8 +693,8 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
     osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,\
-    osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA, nodeData, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, nodeData, \
     progressBar, entryCount, ia) reduction(+:checks, \
     skippedByDAG, contains, containsOk) default(none) schedule(dynamic)
     for (size_t i = 0; i < _numNodes; i++) {
@@ -756,10 +756,10 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
                         : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
             areaObjId);
         _writer->writeTriple(
-            areaIRI, osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA,
+            areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
             nodeIRI);
         _writer->writeTriple(areaIRI,
-                             osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA,
+                             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
                              nodeIRI);
       }
 #pragma omp critical(nodeDataChange)
@@ -819,8 +819,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 #pragma omp parallel for shared( \
     osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, nodeData, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
-    osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, skippedInDAG, \
     intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
@@ -898,7 +898,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA,
+              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
         } else {
           intersectsChecks++;
@@ -924,7 +924,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OGC_INTERSECTS_NON_AREA,
+              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
         }
         if (!doesIntersect) {
@@ -974,7 +974,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             skipContains.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OGC_CONTAINS_NON_AREA,
+              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               wayIRI);
         }
       }
