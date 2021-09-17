@@ -45,9 +45,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       << prefix << osm2rdf::config::constants::CACHE_INFO << "         "
       << cache;
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_FACTS;
-  oss << "\n"
-      << prefix << osm2rdf::config::constants::osm2rdf_PREFIX_INFO << ": "
-      << osm2rdfPrefix;
   if (noFacts) {
     oss << "\n" << prefix << osm2rdf::config::constants::NO_FACTS_INFO;
   } else {
@@ -309,12 +306,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_SHORT,
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG,
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_HELP);
-  auto osm2rdfPrefixOp =
-      op.add<popl::Value<std::string>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::osm2rdf_PREFIX_OPTION_SHORT,
-          osm2rdf::config::constants::osm2rdf_PREFIX_OPTION_LONG,
-          osm2rdf::config::constants::osm2rdf_PREFIX_OPTION_HELP,
-          osm2rdfPrefix);
 
   auto simplifyGeometriesOp =
       op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
@@ -437,7 +428,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;
 
-    osm2rdfPrefix = osm2rdfPrefixOp->value();
     if (semicolonTagKeysOp->is_set()) {
       for (size_t i = 0; i < semicolonTagKeysOp->count(); ++i) {
         semicolonTagKeys.insert(semicolonTagKeysOp->value(i));

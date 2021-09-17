@@ -53,7 +53,6 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.skipWikiLinks);
 
   ASSERT_EQ(0, config.semicolonTagKeys.size());
-  ASSERT_EQ("osmadd", config.osm2rdfPrefix);
 
   ASSERT_FALSE(config.writeDAGDotFiles);
 
@@ -831,22 +830,6 @@ TEST(CONFIG_Config, fromArgsSimplifyWKTPrecisionLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_EQ(2, config.wktPrecision);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsosm2rdfPrefixLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-
-  const auto arg = "--" + osm2rdf::config::constants::osm2rdf_PREFIX_OPTION_LONG;
-  const int argc = 4;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("foo"),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("foo", config.osm2rdfPrefix);
 }
 
 // ____________________________________________________________________________

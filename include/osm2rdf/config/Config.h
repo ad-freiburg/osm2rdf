@@ -62,7 +62,6 @@ struct Config {
   double minimalAreaEnvelopeRatio = -1.0;
 
   // Default settings for data
-  std::string osm2rdfPrefix = "osmadd";
   std::unordered_set<std::string> semicolonTagKeys;
 
   // Dot
