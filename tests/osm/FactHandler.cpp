@@ -186,7 +186,7 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osm:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
+      "osmway:21 osmmeta:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
       buffer.str());
 
@@ -431,7 +431,7 @@ TEST(OSM_FactHandler, nodeAddEnvelope) {
       "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
       "osmnode:42 osmkey:city \"Freiburg\" .\n"
       "osmnode:42 osmmeta:facts \"1\"^^xsd:integer .\n"
-      "osmnode:42 osm:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
+      "osmnode:42 osmmeta:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0))\"^^geo:wktLiteral .\n",
       buffer.str());
 
@@ -639,7 +639,7 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
       "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
-      "osmway:42 osm:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
+      "osmway:42 osmmeta:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
       buffer.str());
 

@@ -46,6 +46,7 @@ inline std::string IRI__OSM2RDF_CONTAINS_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_NON_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_AREA;
 
+inline std::string IRI__OSM_META__ENVELOPE;
 inline std::string IRI__OSM_META__POS;
 inline std::string IRI__OSMWAY_IS_CLOSED;
 inline std::string IRI__OSMWAY_NEXT_NODE;
@@ -53,7 +54,6 @@ inline std::string IRI__OSMWAY_NEXT_NODE_DISTANCE;
 inline std::string IRI__OSMWAY_NODE;
 inline std::string IRI__OSMWAY_NODE_COUNT;
 inline std::string IRI__OSMWAY_UNIQUE_NODE_COUNT;
-inline std::string IRI__OSM_ENVELOPE;
 inline std::string IRI__OSM_NODE;
 inline std::string IRI__OSM_RELATION;
 inline std::string IRI__OSM_TAG;

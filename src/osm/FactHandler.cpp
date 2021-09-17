@@ -48,7 +48,8 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
                      area.geom());
 
   if (_config.addAreaEnvelope) {
-    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_ENVELOPE, area.envelope());
+    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
+             area.envelope());
   }
 
   if (_config.addSortMetadata) {
@@ -93,7 +94,8 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   writeTagList(s, node.tags());
 
   if (_config.addNodeEnvelope) {
-    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_ENVELOPE, node.envelope());
+    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
+             node.envelope());
   }
 }
 
@@ -225,7 +227,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                      locations);
 
   if (_config.addWayEnvelope) {
-    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_ENVELOPE, way.envelope());
+    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
+             way.envelope());
   }
 
   if (_config.addWayMetadata) {
