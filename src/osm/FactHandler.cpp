@@ -111,15 +111,17 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
   writeTagList(s, relation.tags());
 
+  size_t i = 0;
   for (const auto& member : relation.members()) {
     const std::string& role = member.role();
-    if (role != "outer" && role != "inner") {
-      std::string node = _writer->generateBlankNode();
+    if (_config.addRelationBorderMembers ||
+        (role != "outer" && role != "inner")) {
+      std::string blankNode = _writer->generateBlankNode();
       _writer->writeTriple(
           s,
           _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
                                "member"),
-          node);
+          blankNode);
 
       std::string type;
       switch (member.type()) {
@@ -137,13 +139,18 @@ void osm2rdf::osm::FactHandler<W>::relation(
       }
 
       _writer->writeTriple(
-          node,
+          blankNode,
           _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "id"),
           _writer->generateIRI(type, member.id()));
       _writer->writeTriple(
-          node,
+          blankNode,
           _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "role"),
           _writer->generateLiteral(role, ""));
+      _writer->writeTriple(
+          blankNode, osm2rdf::ttl::constants::IRI__OSM_META__POS,
+          _writer->generateLiteral(
+              std::to_string(i++),
+              "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
     }
   }
 }
@@ -176,7 +183,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       _writer->writeTriple(
           blankNode, osm2rdf::ttl::constants::IRI__OSM_META__POS,
           _writer->generateLiteral(
-              std::to_string(++i),
+              std::to_string(i++),
               "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
 
       if (_config.addWayNodeGeometry) {

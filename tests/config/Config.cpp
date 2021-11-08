@@ -43,6 +43,7 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addAreaEnvelopeRatio);
   ASSERT_FALSE(config.addNodeEnvelope);
+  ASSERT_FALSE(config.addRelationBorderMembers);
   ASSERT_TRUE(config.addSortMetadata);
   ASSERT_FALSE(config.addWayEnvelope);
   ASSERT_FALSE(config.addWayNodeGeometry);
@@ -517,7 +518,8 @@ TEST(CONFIG_Config, fromArgsNoRelationFactsLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::NO_RELATION_FACTS_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::NO_RELATION_FACTS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -599,7 +601,8 @@ TEST(CONFIG_Config, fromArgsAddAreaEnvelopeLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -630,7 +633,8 @@ TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -640,12 +644,30 @@ TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddRelationBorderMemebersLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addRelationBorderMembers);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayEnvelopeLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -660,7 +682,8 @@ TEST(CONFIG_Config, fromArgsAddWayMetadataLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -691,7 +714,8 @@ TEST(CONFIG_Config, fromArgsAddWayNodeOrderLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -758,7 +782,8 @@ TEST(CONFIG_Config, fromArgsSkipWikiLinksLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -773,7 +798,8 @@ TEST(CONFIG_Config, fromArgsSimplifyGeometriesLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("25"),
@@ -838,7 +864,8 @@ TEST(CONFIG_Config, fromArgsSemicolonTagKeysSingleLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("ref"),
@@ -855,7 +882,8 @@ TEST(CONFIG_Config, fromArgsSemicolonTagKeysMultipleLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
+  const auto arg =
+      "--" + osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG;
   const int argc = 8;
   char* argv[argc] = {
       const_cast<char*>(""),     const_cast<char*>(arg.c_str()),
@@ -987,6 +1015,17 @@ TEST(CONFIG_Config, getInfoAddNodeEnvelope) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::ADD_NODE_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddRelationBorderMembers) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addRelationBorderMembers = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+               osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_INFO));
 }
 
 // ____________________________________________________________________________
