@@ -76,6 +76,12 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     if (noRelationFacts) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_RELATION_FACTS_INFO;
+    } else {
+      if (addRelationBorderMembers) {
+        oss << "\n"
+            << prefix
+            << osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_INFO;
+      }
     }
     if (noWayFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_WAY_FACTS_INFO;
@@ -268,6 +274,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT,
       osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_LONG,
       osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_HELP);
+  auto addRelationBorderMembersOp = op.add<popl::Switch>(
+      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
+      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_HELP);
   auto addNodeEnvelopeOp = op.add<popl::Switch>(
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG,
@@ -411,6 +421,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Select amount to dump
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
+    addRelationBorderMembers = addRelationBorderMembersOp->is_set();
     addNodeEnvelope = addNodeEnvelopeOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
