@@ -67,6 +67,8 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang);
   FRIEND_TEST(OSM_FactHandler, writeTagListSkipWikiLinks);
 
+  bool hasSuffix(const std::string& s, const std::string& suffix) const;
+
   const osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
 };

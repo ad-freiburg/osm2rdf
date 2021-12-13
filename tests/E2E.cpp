@@ -138,6 +138,11 @@ TEST(E2E, singleNodeWithTags) {
                "  <tag k=\"wikidata\" v=\"Q2833\"/>\n"
                "  <tag k=\"wikipedia\" v=\"de:Freiburg im Breisgau\"/>\n"
                "</node>\n";
+  inputFile << "<node id=\"925950614\" lat=\"47.9878947\" lon=\"7.8704212\" "
+               "visible=\"true\" version=\"1\">"
+               "  <tag k=\"brand:wikidata\" v=\"Q41171672\"/>\n"
+               "  <tag k=\"brand:wikipedia\" v=\"en:Aldi\"/>\n"
+               "</node>\n";
   inputFile << "</osm>" << std::endl;
 
   osm2rdf::util::Output output{config, config.output};
@@ -155,7 +160,7 @@ TEST(E2E, singleNodeWithTags) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1 dumped: 1 geometry: 1\n"));
+              ::testing::HasSubstr("nodes seen:2 dumped: 2 geometry: 2\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -163,6 +168,8 @@ TEST(E2E, singleNodeWithTags) {
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmnode:240092010 rdf:type osm:node .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmnode:925950614 rdf:type osm:node .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmnode:240092010 geo:hasGeometry \"POINT(7.8494005 "
@@ -194,6 +201,19 @@ TEST(E2E, singleNodeWithTags) {
       ::testing::HasSubstr(
           "osmnode:240092010 osm:wikipedia "
           "<https://de.wikipedia.org/wiki/Freiburg%20im%20Breisgau> .\n"));
+
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmnode:925950614 osmkey:brand:wikidata \"Q41171672\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmnode:925950614 osm:brand:wikidata wd:Q41171672 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmnode:925950614 osmkey:brand:wikipedia "
+                                   "\"en:Aldi\" .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr("osmnode:925950614 osm:brand:wikipedia "
+                                   "<https://en.wikipedia.org/wiki/Aldi> .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
