@@ -63,7 +63,7 @@ TEST(E2E, singleNode) {
   // Copied from
   // https://wiki.openstreetmap.org/w/index.php?title=OSM_XML&oldid=2081001
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n"
+            << "<osm version=\"0.6\">\n"
             << "<node id=\"298884269\" lat=\"54.0901746\" lon=\"12.2482632\" "
                "user=\"SvenHRO\" uid=\"46882\" visible=\"true\" version=\"1\" "
                "changeset=\"676636\" timestamp=\"2008-09-21T21:37:45Z\"/>"
@@ -127,7 +127,7 @@ TEST(E2E, singleNodeWithTags) {
   std::ofstream inputFile(config.input);
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   // ... https://www.openstreetmap.org/node/240092010
   inputFile << "<node id=\"240092010\" lat=\"47.9960901\" lon=\"7.8494005\" "
                "visible=\"true\" version=\"1\">"
@@ -221,7 +221,7 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   std::ofstream inputFile(config.input);
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   // ... https://www.openstreetmap.org/node/1137213233 see e2e/w98284318.xml
   // for full file
   inputFile
@@ -325,7 +325,7 @@ TEST(E2E, osmWikiExample) {
   // Based on
   // https://wiki.openstreetmap.org/w/index.php?title=OSM_XML&oldid=2081001
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   inputFile << " <node id=\"298884269\" lat=\"54.0901746\" lon=\"12.2482632\" "
                "visible=\"true\" version=\"1\"/>\n";
   inputFile << " <node id=\"261728686\" lat=\"54.0906309\" lon=\"12.2441924\" "
@@ -431,7 +431,7 @@ TEST(E2E, building51NT) {
   });
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   for (const auto& f : nodes) {
     inputFile << std::ifstream(f).rdbuf();
   }
@@ -604,7 +604,7 @@ TEST(E2E, building51TTL) {
   });
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   for (const auto& f : nodes) {
     inputFile << std::ifstream(f).rdbuf();
   }
@@ -746,7 +746,7 @@ TEST(E2E, building51QLEVER) {
   });
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   for (const auto& f : nodes) {
     inputFile << std::ifstream(f).rdbuf();
   }
@@ -888,7 +888,7 @@ TEST(E2E, tf) {
   });
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   for (const auto& f : nodes) {
     inputFile << std::ifstream(f).rdbuf();
   }
@@ -987,7 +987,7 @@ TEST(E2E, building51inTF) {
   });
   // Copied from ...
   inputFile << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-            << "<osm version=\"0.6\" generator=\"CGImap 0.0.2\">\n";
+            << "<osm version=\"0.6\">\n";
   for (const auto& f : nodes) {
     inputFile << std::ifstream(f).rdbuf();
   }

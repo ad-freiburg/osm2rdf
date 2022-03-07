@@ -36,10 +36,12 @@ class OsmHandler(xml.sax.handler.ContentHandler):
 
     def startElement(self, name, attributes):
         if self.cnt == 0:
-          self.obj = OsmObject(kind=name, identifier=attributes['id'])
+            self.obj = OsmObject(kind=name, identifier=attributes['id'])
         else:
-          if name == 'nd':
-            self.children.append(OsmObject(kind='node', identifier=attributes['ref']))
+            if name == 'nd':
+                self.children.append(OsmObject(kind='node', identifier=attributes['ref']))
+            elif name == 'member':
+                self.children.append(OsmObject(kind=attributes['type'], identifier=attributes['ref']))
         self.cnt += 1
 
 def get_objects_from_file(filename):
@@ -50,8 +52,8 @@ def get_objects_from_file(filename):
     return osm_handler.obj, osm_handler.children
 
 def get_filename_for_kind_and_identifiert(osm_object):
-  return '{kind}{identifier:0>12d}.xml'.format(kind=osm_object.kind,identifier=int(osm_object.identifier))
-  
+    return '{kind}{identifier:0>12d}.xml'.format(kind=osm_object.kind,identifier=int(osm_object.identifier))
+
 
 def download(osm_object, recursive=True):
     r = requests.get(url_template.format(kind=osm_object.kind,identifier=osm_object.identifier), allow_redirects=True)
@@ -61,7 +63,7 @@ def download(osm_object, recursive=True):
         _, children = get_objects_from_file(get_filename_for_kind_and_identifiert(osm_object))
         for child in children:
             download(child)
-  
+
 
 
 if __name__ == '__main__':
