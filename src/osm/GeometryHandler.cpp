@@ -20,7 +20,6 @@
 
 #include <iostream>
 #include <memory>
-#include <random>
 #include <utility>
 #include <vector>
 
@@ -171,10 +170,14 @@ G osm2rdf::osm::GeometryHandler<W>::simplifyGeometry(const G& g) {
   G geom;
   auto perimeter_or_length =
       std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
-  boost::geometry::simplify(
-      g, geom,
-      osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR *
-          perimeter_or_length * _config.simplifyGeometries);
+  do {
+    boost::geometry::simplify(
+        g, geom,
+        osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR *
+            perimeter_or_length * _config.simplifyGeometries);
+    perimeter_or_length /= 2;
+  } while ((boost::geometry::is_empty(geom) ||
+            !boost::geometry::is_valid(geom)) && perimeter_or_length >= 1);
   if (!boost::geometry::is_valid(geom)) {
     return g;
   }

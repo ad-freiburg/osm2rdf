@@ -276,12 +276,14 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
     G geom;
     auto perimeter_or_length =
         std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
-    boost::geometry::simplify(
-        g, geom,
-        osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR *
-            perimeter_or_length * _config.wktDeviation);
-    assert(boost::geometry::is_valid(geom));
-    assert(!boost::geometry::is_empty(geom));
+    do {
+      boost::geometry::simplify(
+          g, geom,
+          osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR *
+              perimeter_or_length * _config.wktDeviation);
+      perimeter_or_length /= 2;
+    } while ((boost::geometry::is_empty(geom) ||
+             !boost::geometry::is_valid(geom)) && perimeter_or_length >= 1);
     tmp << std::fixed << std::setprecision(_config.wktPrecision)
         << boost::geometry::wkt(geom);
   } else {
