@@ -1,4 +1,4 @@
-// Copyright 2020, University of Freiburg
+// Copyright 2022, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -69,9 +68,9 @@ TEST(Issue15, Relation_8291361_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmrel:8291361 geo:hasGeometry \"MULTIPOLYGON(((14"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmrel:8291361 geo:hasGeometry \"MULTIPOLYGON(((14"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -116,9 +115,107 @@ TEST(Issue15, Relation_8291361_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmrel:8291361 geo:hasGeometry \"MULTIPOLYGON(((14"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmrel:8291361 geo:hasGeometry \"MULTIPOLYGON(((14"));
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+}
+
+// ____________________________________________________________________________
+TEST(Issue15, Way_201387026_expected) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.noGeometricRelations = true;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
+  // Problem in FactHandler::writeBoostGeometry
+  // assert(!boost::geometry::is_empty(geom));
+  // Disabling simplifyWKT to ensure error does not trigger
+  config.simplifyWKT = 0;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  writer.writeHeader();
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osmiumHandler.handle();
+
+  output.flush();
+  output.close();
+
+  const auto printedState = cerrBuffer.str();
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("nodes seen:1498 dumped: 2 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 0\n"));
+  const auto printedData = coutBuffer.str();
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:201387026 geo:hasGeometry \"MULTIPOLYGON(((1"));
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
+}
+
+// ____________________________________________________________________________
+TEST(Issue15, Way_201387026_failed) {
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.noGeometricRelations = true;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  writer.writeHeader();
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osmiumHandler.handle();
+
+  output.flush();
+  output.close();
+
+  const auto printedState = cerrBuffer.str();
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("nodes seen:1498 dumped: 2 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
+  ASSERT_THAT(printedState,
+              ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 0\n"));
+  const auto printedData = coutBuffer.str();
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:201387026 geo:hasGeometry \"MULTIPOLYGON(((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
