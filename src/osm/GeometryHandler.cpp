@@ -176,8 +176,10 @@ G osm2rdf::osm::GeometryHandler<W>::simplifyGeometry(const G& g) {
         osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR *
             perimeter_or_length * _config.simplifyGeometries);
     perimeter_or_length /= 2;
-  } while ((boost::geometry::is_empty(geom) ||
-            !boost::geometry::is_valid(geom)) && perimeter_or_length >= 1);
+  } while (
+      (boost::geometry::is_empty(geom) || !boost::geometry::is_valid(geom)) &&
+      perimeter_or_length >=
+          osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR);
   if (!boost::geometry::is_valid(geom)) {
     return g;
   }
