@@ -46,7 +46,7 @@ osm2rdf::osm::GeometryHandler<W>::GeometryHandler(
     const osm2rdf::config::Config& config, osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
       _writer(writer),
-      _statistics(config, config.statisticsPath.string()),
+      _statistics(config, config.geomStatisticsPath.string()),
       _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed"),
                        std::ios::binary),
       _oaUnnamedAreas(_ofsUnnamedAreas),

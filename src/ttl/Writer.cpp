@@ -150,9 +150,24 @@ std::string osm2rdf::ttl::Writer<T>::resolvePrefix(std::string_view p) {
 
 // ____________________________________________________________________________
 template <typename T>
+void osm2rdf::ttl::Writer<T>::writeStatisticJson(const std::filesystem::path& output){
+    std::ofstream out{output};
+    out << "{" << std::endl;
+    out << "  \"blankNodes\": " << _blankNodeCounter << "," << std::endl;
+    out << "  \"header\": " << _headerLines  << ","<< std::endl;
+    out << "  \"lines\": " << _lineCount << "," << std::endl;
+    out << "  \"triples\": " << _lineCount - _headerLines << std::endl;
+    out << "}" << std::endl;
+    out.close();
+}
+
+// ____________________________________________________________________________
+template <typename T>
 void osm2rdf::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
     writeTriple("@prefix", prefix + ":", "<" + iriref + ">");
+#pragma omp critical(_headerLines)
+    _headerLines++;
   }
 }
 
@@ -230,6 +245,8 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
   _out->write(s + " " + p + " " + o + " .\n");
+#pragma omp critical(_lineCount)
+  _lineCount++;
 }
 
 // ____________________________________________________________________________

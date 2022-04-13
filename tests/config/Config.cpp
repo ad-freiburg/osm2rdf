@@ -58,6 +58,7 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.writeDAGDotFiles);
 
   ASSERT_FALSE(config.writeGeometricRelationStatistics);
+  ASSERT_FALSE(config.writeRDFStatistics);
 
   ASSERT_EQ(0, config.simplifyGeometries);
   ASSERT_EQ(250, config.simplifyWKT);
@@ -898,6 +899,39 @@ TEST(CONFIG_Config, fromArgsSemicolonTagKeysMultipleLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsWriteGeomRelationStatisticsLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.writeGeometricRelationStatistics);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsWriteRDFRelationStatisticsLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.writeRDFStatistics);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoHasSections) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1024,7 +1058,8 @@ TEST(CONFIG_Config, getInfoAddRelationBorderMembers) {
   config.addRelationBorderMembers = true;
 
   const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(
                osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_INFO));
 }
 
@@ -1231,6 +1266,18 @@ TEST(CONFIG_Config, getInfoWriteGeometricRelationStatistics) {
                        osm2rdf::config::constants::
                            WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED));
 #endif
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoWriteRDFStatistics) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.writeRDFStatistics = true;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2rdf::config::constants::WRITE_RDF_STATISTICS_INFO));
 }
 
 }  // namespace osm2rdf::config

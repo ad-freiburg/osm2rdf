@@ -97,6 +97,9 @@ class Writer {
   Writer(const osm2rdf::config::Config& config, osm2rdf::util::Output* output);
   ~Writer();
 
+  // Write statistic json into output.
+  void writeStatisticJson(const std::filesystem::path& output);
+
   // Write the header (does nothing for NT)
   void writeHeader();
 
@@ -181,7 +184,6 @@ class Writer {
 
  protected:
   // Config
-  uint64_t _blankNodeCounter = 0;
   const osm2rdf::config::Config _config;
 
   // Prefix
@@ -189,6 +191,11 @@ class Writer {
 
   // Output
   osm2rdf::util::Output* _out;
+
+  // Counter
+  uint64_t _blankNodeCounter = 0;
+  uint64_t _headerLines = 0;
+  uint64_t _lineCount = 0;
 };
 }  // namespace osm2rdf::ttl
 

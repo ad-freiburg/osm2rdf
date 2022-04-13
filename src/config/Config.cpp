@@ -187,6 +187,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
                WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED;
 #endif
   }
+  if (writeRDFStatistics) {
+    oss << "\n"
+        << prefix << osm2rdf::config::constants::WRITE_RDF_STATISTICS_INFO;
+  }
 #if defined(_OPENMP)
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_OPENMP;
   oss << "\n" << prefix << "Max Threads: " << omp_get_max_threads();
@@ -353,6 +357,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_SHORT,
       osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG,
       osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP);
+  auto writeRDFStatisticsOp = op.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_SHORT,
+      osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_LONG,
+      osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_HELP);
 
   auto outputOp = op.add<popl::Value<std::string>>(
       osm2rdf::config::constants::OUTPUT_OPTION_SHORT,
@@ -449,6 +457,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     writeDAGDotFiles = writeDotFilesOp->is_set();
 
     writeGeometricRelationStatistics = writeStatisticsOp->is_set();
+    writeRDFStatistics = writeRDFStatisticsOp->is_set();
 
     // Output
     output = outputOp->value();
@@ -458,12 +467,19 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       outputCompress = false;
       mergeOutput = util::OutputMergeMode::NONE;
     }
-    statisticsPath = std::filesystem::path(output);
-    statisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
+
+    // Paths for statistic files
+    rdfStatisticsPath = std::filesystem::path(output);
+    rdfStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
+    rdfStatisticsPath += osm2rdf::config::constants::JSON_EXTENSION;
+    geomStatisticsPath = std::filesystem::path(output);
+    geomStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
+
+    // Mark compressed output
     if (outputCompress && !output.empty() &&
         output.extension() != osm2rdf::config::constants::BZIP2_EXTENSION) {
       output += osm2rdf::config::constants::BZIP2_EXTENSION;
-      statisticsPath += osm2rdf::config::constants::BZIP2_EXTENSION;
+      geomStatisticsPath += osm2rdf::config::constants::BZIP2_EXTENSION;
     }
 
     // osmium location cache

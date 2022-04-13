@@ -70,7 +70,9 @@ struct Config {
 
   // Statistics
   bool writeGeometricRelationStatistics = false;
-  std::filesystem::path statisticsPath;
+  std::filesystem::path geomStatisticsPath;
+  bool writeRDFStatistics = false;
+  std::filesystem::path rdfStatisticsPath;
 
   // Output modifiers
   uint16_t simplifyWKT = 250;
