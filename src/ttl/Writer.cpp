@@ -18,8 +18,6 @@
 
 #include "osm2rdf/ttl/Writer.h"
 
-#include <osm2rdf/ttl/Constants.h>
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -27,7 +25,9 @@
 #include <vector>
 
 #include "boost/iostreams/filter/bzip2.hpp"
+#include "omp.h"
 #include "osm2rdf/config/Config.h"
+#include "osm2rdf/ttl/Constants.h"
 #include "osmium/osm/item_type.hpp"
 
 // ____________________________________________________________________________
@@ -119,11 +119,27 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 
   osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no", "");
   osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes", "");
+
+  // Prepare statistic variables
+#if defined(_OPENMP)
+  _numOuts = omp_get_max_threads();
+#else
+  _numOuts = 1;
+#endif
+  _headerLines = new uint64_t[_numOuts];
+  _lineCount = new uint64_t[_numOuts];
+  for (size_t i = 0; i < _numOuts; ++i) {
+    _headerLines[i] = 0;
+    _lineCount[i] = 0;
+  }
 }
 
 // ____________________________________________________________________________
 template <typename T>
-osm2rdf::ttl::Writer<T>::~Writer() {}
+osm2rdf::ttl::Writer<T>::~Writer() {
+  delete[] _headerLines;
+  delete[] _lineCount;
+}
 
 // ____________________________________________________________________________
 template <typename T>
@@ -150,15 +166,25 @@ std::string osm2rdf::ttl::Writer<T>::resolvePrefix(std::string_view p) {
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeStatisticJson(const std::filesystem::path& output){
-    std::ofstream out{output};
-    out << "{" << std::endl;
-    out << "  \"blankNodes\": " << _blankNodeCounter << "," << std::endl;
-    out << "  \"header\": " << _headerLines  << ","<< std::endl;
-    out << "  \"lines\": " << _lineCount << "," << std::endl;
-    out << "  \"triples\": " << _lineCount - _headerLines << std::endl;
-    out << "}" << std::endl;
-    out.close();
+void osm2rdf::ttl::Writer<T>::writeStatisticJson(
+    const std::filesystem::path& output) {
+  // Combine data from threads.
+  uint64_t headerLines = 0;
+  uint64_t lineCount = 0;
+  for (size_t i = 0; i < _numOuts; ++i) {
+    headerLines += _headerLines[i];
+    lineCount += _lineCount[i];
+  }
+
+  // Write json
+  std::ofstream out{output};
+  out << "{" << std::endl;
+  out << "  \"blankNodes\": " << _blankNodeCounter << "," << std::endl;
+  out << "  \"header\": " << headerLines << "," << std::endl;
+  out << "  \"lines\": " << lineCount << "," << std::endl;
+  out << "  \"triples\": " << lineCount - headerLines << std::endl;
+  out << "}" << std::endl;
+  out.close();
 }
 
 // ____________________________________________________________________________
@@ -166,8 +192,11 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
     writeTriple("@prefix", prefix + ":", "<" + iriref + ">");
-#pragma omp critical(_headerLines)
-    _headerLines++;
+#if defined(_OPENMP)
+    _headerLines[omp_get_thread_num()]++;
+#else
+    _headerLines[0]++;
+#endif
   }
 }
 
@@ -245,8 +274,11 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
   _out->write(s + " " + p + " " + o + " .\n");
-#pragma omp critical(_lineCount)
-  _lineCount++;
+#if defined(_OPENMP)
+  _lineCount[omp_get_thread_num()]++;
+#else
+  _lineCount[0]++;
+#endif
 }
 
 // ____________________________________________________________________________

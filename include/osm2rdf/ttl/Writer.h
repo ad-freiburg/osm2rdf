@@ -193,9 +193,12 @@ class Writer {
   osm2rdf::util::Output* _out;
 
   // Counter
+  uint64_t* _headerLines;
+  uint64_t* _lineCount;
   uint64_t _blankNodeCounter = 0;
-  uint64_t _headerLines = 0;
-  uint64_t _lineCount = 0;
+  // Number of parts.
+  std::size_t _numOuts;
+
 };
 }  // namespace osm2rdf::ttl
 
