@@ -430,19 +430,13 @@ TEST(TTL_WriterNT, generateLangTag) {
     const std::string res = w.generateLangTag("one");
     ASSERT_STREQ("@one", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("2"), std::domain_error);
-  }
-  {
-    ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("2"), std::domain_error); }
+  { ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error); }
   {
     const std::string res = w.generateLangTag("Four-four");
     ASSERT_STREQ("@Four-four", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error); }
   {
     const std::string res = w.generateLangTag("SIX-6");
     ASSERT_STREQ("@SIX-6", res.c_str());
@@ -451,9 +445,7 @@ TEST(TTL_WriterNT, generateLangTag) {
     const std::string res = w.generateLangTag("Seven-7-seven");
     ASSERT_STREQ("@Seven-7-seven", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error); }
 }
 
 // ____________________________________________________________________________
@@ -464,19 +456,13 @@ TEST(TTL_WriterTTL, generateLangTag) {
     const std::string res = w.generateLangTag("one");
     ASSERT_STREQ("@one", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("2"), std::domain_error);
-  }
-  {
-    ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("2"), std::domain_error); }
+  { ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error); }
   {
     const std::string res = w.generateLangTag("Four-four");
     ASSERT_STREQ("@Four-four", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error); }
   {
     const std::string res = w.generateLangTag("SIX-6");
     ASSERT_STREQ("@SIX-6", res.c_str());
@@ -485,9 +471,7 @@ TEST(TTL_WriterTTL, generateLangTag) {
     const std::string res = w.generateLangTag("Seven-7-seven");
     ASSERT_STREQ("@Seven-7-seven", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error); }
 }
 
 // ____________________________________________________________________________
@@ -498,19 +482,13 @@ TEST(TTL_WriterQLEVER, generateLangTag) {
     const std::string res = w.generateLangTag("one");
     ASSERT_STREQ("@one", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("2"), std::domain_error);
-  }
-  {
-    ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("2"), std::domain_error); }
+  { ASSERT_THROW(w.generateLangTag("-Three"), std::domain_error); }
   {
     const std::string res = w.generateLangTag("Four-four");
     ASSERT_STREQ("@Four-four", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("Five5"), std::domain_error); }
   {
     const std::string res = w.generateLangTag("SIX-6");
     ASSERT_STREQ("@SIX-6", res.c_str());
@@ -519,9 +497,7 @@ TEST(TTL_WriterQLEVER, generateLangTag) {
     const std::string res = w.generateLangTag("Seven-7-seven");
     ASSERT_STREQ("@Seven-7-seven", res.c_str());
   }
-  {
-    ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error);
-  }
+  { ASSERT_THROW(w.generateLangTag("Eight§"), std::domain_error); }
 }
 
 // ____________________________________________________________________________
@@ -612,6 +588,189 @@ TEST(TTL_WriterQLEVER, generateLiteral) {
     const std::string res = w.generateLiteral("SIX-6", "\ufafa");
     ASSERT_STREQ("\"SIX-6\"\ufafa", res.c_str());
   }
+}
+
+// ____________________________________________________________________________
+TEST(TTL_WriterNT, writeStatisticJson) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> w{config, &output};
+
+  // Setup temp dir and stats file
+  std::filesystem::path tmpDir =
+      config.getTempPath("TEST_TTL_WriterNT", "writeStatisticJson");
+  ASSERT_FALSE(std::filesystem::exists(tmpDir));
+  std::filesystem::create_directories(tmpDir);
+  ASSERT_TRUE(std::filesystem::exists(tmpDir));
+  ASSERT_TRUE(std::filesystem::is_directory(tmpDir));
+  std::filesystem::path statsFile{tmpDir};
+  statsFile /= "file";
+
+  // This is empty for NT
+  w.writeHeader();
+
+  // 3 blank nodes
+  w.generateBlankNode();
+  w.generateBlankNode();
+  w.generateBlankNode();
+
+  // Add 4 lines
+  w.writeTriple("s0", "p", "o");
+  w.writeTriple("s1", "p", "o");
+  w.writeTriple("s2", "p", "o");
+  w.writeTriple("s3", "p", "o");
+  w.writeTriple("s4", "p", "o");
+
+  w.writeStatisticJson(statsFile);
+
+  output.close();
+
+  // Read file
+  std::ifstream statsIFStream(statsFile);
+  std::stringstream statsBuffer;
+  statsBuffer << statsIFStream.rdbuf();
+
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 0"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 5"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
+
+  // Cleanup
+  statsIFStream.close();
+  std::cout.rdbuf(sbuf);
+  std::filesystem::remove_all(tmpDir);
+  ASSERT_FALSE(std::filesystem::exists(tmpDir));
+}
+
+// ____________________________________________________________________________
+TEST(TTL_WriterTTL, writeStatisticJson) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, &output};
+
+  // Setup temp dir and stats file
+  std::filesystem::path tmpDir =
+      config.getTempPath("TEST_TTL_WriterTTL", "writeStatisticJson");
+  ASSERT_FALSE(std::filesystem::exists(tmpDir));
+  std::filesystem::create_directories(tmpDir);
+  ASSERT_TRUE(std::filesystem::exists(tmpDir));
+  ASSERT_TRUE(std::filesystem::is_directory(tmpDir));
+  std::filesystem::path statsFile{tmpDir};
+  statsFile /= "file";
+
+  // This is empty for NT
+  w.writeHeader();
+
+  // 3 blank nodes
+  w.generateBlankNode();
+  w.generateBlankNode();
+  w.generateBlankNode();
+
+  // Add 4 lines
+  w.writeTriple("s0", "p", "o");
+  w.writeTriple("s1", "p", "o");
+  w.writeTriple("s2", "p", "o");
+  w.writeTriple("s3", "p", "o");
+  w.writeTriple("s4", "p", "o");
+
+  w.writeStatisticJson(statsFile);
+
+  output.close();
+
+  // Read file
+  std::ifstream statsIFStream(statsFile);
+  std::stringstream statsBuffer;
+  statsBuffer << statsIFStream.rdbuf();
+
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 12"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 17"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
+
+  // Cleanup
+  statsIFStream.close();
+  std::cout.rdbuf(sbuf);
+  std::filesystem::remove_all(tmpDir);
+  ASSERT_FALSE(std::filesystem::exists(tmpDir));
+}
+
+// ____________________________________________________________________________
+TEST(TTL_WriterQLEVER, writeStatisticJson) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = util::OutputMergeMode::NONE;
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, &output};
+
+  // Setup temp dir and stats file
+  std::filesystem::path tmpDir =
+      config.getTempPath("TEST_TTL_WriterQLEVER", "writeStatisticJson");
+  ASSERT_FALSE(std::filesystem::exists(tmpDir));
+  std::filesystem::create_directories(tmpDir);
+  ASSERT_TRUE(std::filesystem::exists(tmpDir));
+  ASSERT_TRUE(std::filesystem::is_directory(tmpDir));
+  std::filesystem::path statsFile{tmpDir};
+  statsFile /= "file";
+
+  // This is empty for NT
+  w.writeHeader();
+
+  // 3 blank nodes
+  w.generateBlankNode();
+  w.generateBlankNode();
+  w.generateBlankNode();
+
+  // Add 4 lines
+  w.writeTriple("s0", "p", "o");
+  w.writeTriple("s1", "p", "o");
+  w.writeTriple("s2", "p", "o");
+  w.writeTriple("s3", "p", "o");
+  w.writeTriple("s4", "p", "o");
+
+  w.writeStatisticJson(statsFile);
+
+  output.close();
+
+  // Read file
+  std::ifstream statsIFStream(statsFile);
+  std::stringstream statsBuffer;
+  statsBuffer << statsIFStream.rdbuf();
+
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 12"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 17"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
+
+  // Cleanup
+  statsIFStream.close();
+  std::cout.rdbuf(sbuf);
+  std::filesystem::remove_all(tmpDir);
+  ASSERT_FALSE(std::filesystem::exists(tmpDir));
 }
 
 }  // namespace osm2rdf::ttl
