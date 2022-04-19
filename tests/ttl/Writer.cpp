@@ -676,7 +676,7 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
   std::filesystem::path statsFile{tmpDir};
   statsFile /= "file";
 
-  // This is empty for NT
+  // This writes a line for each entry in w._prefixes
   w.writeHeader();
 
   // 3 blank nodes
@@ -737,7 +737,7 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   std::filesystem::path statsFile{tmpDir};
   statsFile /= "file";
 
-  // This is empty for NT
+  // This writes a line for each entry in w._prefixes
   w.writeHeader();
 
   // 3 blank nodes
