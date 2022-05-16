@@ -47,6 +47,11 @@ void run(const osm2rdf::config::Config& config) {
 
   // All work done, close output
   output.close();
+
+  // Write final RDF statistics if requested
+  if (config.writeRDFStatistics) {
+    writer.writeStatisticJson(config.rdfStatisticsPath);
+  }
 }
 
 // ____________________________________________________________________________

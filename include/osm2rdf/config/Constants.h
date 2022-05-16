@@ -25,6 +25,7 @@ namespace osm2rdf::config::constants {
 
 const static inline std::string BZIP2_EXTENSION = ".bz2";
 const static inline std::string STATS_EXTENSION = ".stats";
+const static inline std::string JSON_EXTENSION = ".json";
 
 const static inline std::string HEADER = "Config";
 
@@ -300,6 +301,15 @@ const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG =
     "write-geometric-relation-statistics";
 const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP =
     "Writes statistics about geometry calculations - slow!";
+
+const static inline std::string WRITE_RDF_STATISTICS_INFO =
+    "Storing RDF statistics as .stats.json";
+const static inline std::string WRITE_RDF_STATISTICS_OPTION_SHORT =
+    "";
+const static inline std::string WRITE_RDF_STATISTICS_OPTION_LONG =
+    "write-rdf-statistics";
+const static inline std::string WRITE_RDF_STATISTICS_OPTION_HELP =
+    "Storing RDF statistics as .stats.json";
 
 }  // namespace osm2rdf::config::constants
 
