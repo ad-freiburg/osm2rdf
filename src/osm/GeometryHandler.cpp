@@ -315,9 +315,9 @@ double osm2rdf::osm::GeometryHandler<W>::signedDistanceFromPointToLine(
   }
   // The actual computation, see this Wikipedia article for the formula:
   // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-  auto distAB = sqrt((A.get<0>() - B.get<0>()) * (A.get<0>() - B.get<0>()) +
+  double distAB = sqrt((A.get<0>() - B.get<0>()) * (A.get<0>() - B.get<0>()) +
                      (A.get<1>() - B.get<1>()) * (A.get<1>() - B.get<1>()));
-  auto areaTriangleTimesTwo =
+  double areaTriangleTimesTwo =
       (B.get<1>() - A.get<1>()) * (A.get<0>() - C.get<0>()) -
       (B.get<0>() - A.get<0>()) * (A.get<1>() - C.get<1>());
   return areaTriangleTimesTwo / distAB;
