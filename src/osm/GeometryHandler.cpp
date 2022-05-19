@@ -105,30 +105,43 @@ std::string osm2rdf::osm::GeometryHandler<W>::statisticLine(
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
   auto geom = area.geom();
+
+  // inner simplified geom, empty by default
+  auto innerGeom = osm2rdf::geometry::Area();
+
+  // outer simplified geom, empty by default
+  auto outerGeom = osm2rdf::geometry::Area();
+
   if (_config.simplifyGeometries > 0) {
     geom = simplifyGeometry(geom);
   }
+
+  if (!_config.dontUseInnerOuterGeoms && (area.hasName() || !area.fromWay())) {
+    innerGeom = innerSimplifiedGeom(geom);
+    outerGeom = outerSimplifiedGeom(geom);
+  }
+
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
       if (_config.minimalAreaEnvelopeRatio <= 0.0 ||
           area.geomArea() / area.envelopeArea() >=
               _config.minimalAreaEnvelopeRatio) {
-        _spatialStorageArea.push_back(
-            SpatialAreaValue(area.envelope(), area.id(), geom, area.objId(),
-                             area.geomArea(), area.fromWay()));
+        _spatialStorageArea.push_back(SpatialAreaValue(
+            area.envelope(), area.id(), geom, area.objId(), area.geomArea(),
+            area.fromWay(), innerGeom, outerGeom));
       } else {
         // we have bad area envelope proportions -> treat as unnamed area
-        _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(), geom,
-                                            area.objId(), area.geomArea(),
-                                            area.fromWay());
+        _oaUnnamedAreas << SpatialAreaValue(
+            area.envelope(), area.id(), geom, area.objId(), area.geomArea(),
+            area.fromWay(), innerGeom, outerGeom);
         _numUnnamedAreas++;
       }
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
       _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(), geom,
                                           area.objId(), area.geomArea(),
-                                          area.fromWay());
+                                          area.fromWay(), innerGeom, outerGeom);
       _numUnnamedAreas++;
     }
   }
@@ -187,6 +200,211 @@ G osm2rdf::osm::GeometryHandler<W>::simplifyGeometry(const G& g) {
     return g;
   }
   return geom;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+template <int MODE>
+bool osm2rdf::osm::GeometryHandler<W>::ioDouglasPeucker(
+    const boost::geometry::model::ring<osm2rdf::geometry::Location>&
+        inputPoints,
+    boost::geometry::model::ring<osm2rdf::geometry::Location>& outputPoints,
+    size_t l, size_t r, double eps) {
+  // this is basically a verbatim translation from Hannah's qlever map UI code
+
+  assert(r >= l);
+  assert(inputPoints.size());
+  assert(r < inputPoints.size());
+
+  if (l == r) {
+    outputPoints.push_back(inputPoints[l]);
+    return false;
+  }
+
+  if (l + 1 == r) {
+    outputPoints.push_back(inputPoints[l]);
+    outputPoints.push_back(inputPoints[r]);
+    return false;
+  }
+  // Compute the position of the point m between l and r that is furthest aways
+  // from the line segment connecting l and r. Note that l < m < r, that is, it
+  // cannot (and must not) happen that m == l or m == r.
+  //
+  // NOTE: If all points happen to lie directly on the line segment, max_dist ==
+  // 0 and we can simplify without loss, no matter which variant.
+
+  size_t m;
+  // double max_dist = -1;
+  auto m_left = l;
+  auto m_right = l;
+  double max_dist_left = 0;
+  double max_dist_right = 0;
+  auto L = inputPoints[l];
+  auto R = inputPoints[r];
+
+  // L and R should be different points.
+  if (L.get<0>() == R.get<0>() && L.get<1>() == R.get<1>()) {
+    std::cerr << "DOUGLAS PEUCKER FAIL!" << std::endl;
+    // TODO: handle
+    return false;
+  }
+  // Compute point furthest to the left (negative value for
+  // distanceFromPointToLine) and furthest to the right (positive value).
+  for (auto k = l + 1; k <= r - 1; k++) {
+    auto dist = signedDistanceFromPointToLine(L, R, inputPoints[k]);
+    // if (Math.abs(dist) > max_dist) { m = k; max_dist = Math.abs(dist); }
+    if (dist < 0 && -dist > max_dist_left) {
+      m_left = k;
+      max_dist_left = -dist;
+    }
+    if (dist > 0 && dist > max_dist_right) {
+      m_right = k;
+      max_dist_right = dist;
+    }
+  }
+
+  bool simplify = false;
+
+  // INNER Douglas-Peucker: Simplify iff there is no point to the *left* and the
+  // rightmost point has distance <= eps. Otherwise m is the leftmost point or,
+  // if there is no such point, the rightmost point.
+  if (MODE == 2) {
+    simplify = (max_dist_left == 0 && max_dist_right <= eps);
+    m = max_dist_left > 0 ? m_left : m_right;
+  }
+
+  // OUTER Douglas-Peucker: Simplify iff there is no point to the *right*
+  // *and* the leftmost point has distance <= eps. Otherwise m is the rightmost
+  // point or if there is no such point the leftmost point.
+  if (MODE == 3) {
+    simplify = (max_dist_right == 0 && max_dist_left <= eps);
+    m = max_dist_right > 0 ? m_right : m_left;
+  }
+
+  // Simplification case: If m is at most eps away from the line segment
+  // conecting l and r, we can simplify the part of the polygon from l to r by
+  // the line segment that connects l and r.
+  // assert(m > l);
+  // assert(m < r);
+  if (simplify) {
+    outputPoints.push_back(L);
+    outputPoints.push_back(R);
+    return true;
+  }
+
+  // Recursion case: If we come here, we have a point at position m, where l < m
+  // < r and that point is more than eps away from the line segment connecting l
+  // and r. Then we call the algorithm recursively on the part to the left of m
+  // and the part to the right of m. NOTE: It's a matter of taste whether we
+  // include m in the left recursion or the right recursion, but we should not
+  // include it in both.
+  bool a = ioDouglasPeucker<MODE>(inputPoints, outputPoints, l, m, eps);
+  bool b = ioDouglasPeucker<MODE>(inputPoints, outputPoints, m + 1, r, eps);
+
+  return a || b;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+double osm2rdf::osm::GeometryHandler<W>::signedDistanceFromPointToLine(
+    const osm2rdf::geometry::Location& A, const osm2rdf::geometry::Location& B,
+    const osm2rdf::geometry::Location& C) {
+  // Check that the input is OK and not A == B.
+  if (A.get<0>() == B.get<0>() && A.get<1>() == B.get<1>()) {
+    return 0;
+  }
+  // The actual computation, see this Wikipedia article for the formula:
+  // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+  auto distAB = sqrt((A.get<0>() - B.get<0>()) * (A.get<0>() - B.get<0>()) +
+                     (A.get<1>() - B.get<1>()) * (A.get<1>() - B.get<1>()));
+  auto areaTriangleTimesTwo =
+      (B.get<1>() - A.get<1>()) * (A.get<0>() - C.get<0>()) -
+      (B.get<0>() - A.get<0>()) * (A.get<1>() - C.get<1>());
+  return areaTriangleTimesTwo / distAB;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::innerSimplifiedGeom(
+    const osm2rdf::geometry::Area& g) {
+  // default value: empty area, means no inner geom
+  osm2rdf::geometry::Area ret;
+
+  // skip trivial / erroneous geoms
+  if (!boost::geometry::is_valid(g)) {
+    return ret;
+  }
+
+  if (boost::geometry::is_empty(g)) {
+    return ret;
+  }
+
+  auto eps = osm2rdf::osm::constants::INNER_OUTER_SIMPLIFICATION_FACTOR;
+
+  for (const auto& poly : g) {
+    osm2rdf::geometry::Polygon simplified;
+    for (const auto& origInner : poly.inners()) {
+      // simplify the inner geometries with outer simplification
+      boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
+      ioDouglasPeucker<3>(origInner, retDP, 0, origInner.size() - 2, eps);
+      retDP.push_back(retDP.front()); // ensure valid polyon
+      simplified.inners().push_back(retDP);
+    }
+
+    // simplify the outer geometry with inner simplification
+    boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
+    ioDouglasPeucker<2>(poly.outer(), retDP, 0, poly.outer().size() - 2, eps);
+    retDP.push_back(retDP.front()); // ensure valid polyon
+    simplified.outer() = retDP;
+
+    ret.push_back(simplified);
+  }
+
+  // TODO: check if simplified polygon differs, if not, just return empty!
+
+  return ret;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::outerSimplifiedGeom(
+    const osm2rdf::geometry::Area& g) {
+  // default value: empty area, means no inner geom
+  osm2rdf::geometry::Area ret;
+
+  // skip trivial / erroneous geoms
+  if (!boost::geometry::is_valid(g)) {
+    return ret;
+  }
+
+  if (boost::geometry::is_empty(g)) {
+    return ret;
+  }
+
+  auto eps = osm2rdf::osm::constants::INNER_OUTER_SIMPLIFICATION_FACTOR;
+
+  for (const auto& poly : g) {
+    osm2rdf::geometry::Polygon simplified;
+    for (const auto& origInner : poly.inners()) {
+      // simplify the inner geometries with inner simplification
+      boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
+      ioDouglasPeucker<2>(origInner, retDP, 0, origInner.size() - 2, eps);
+      retDP.push_back(retDP.front()); // ensure valid polyon
+      simplified.inners().push_back(retDP);
+    }
+
+    // simplifiy the outer geometry with outer simplification
+    boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
+    ioDouglasPeucker<3>(poly.outer(), retDP, 0, poly.outer().size() - 2, eps);
+    retDP.push_back(retDP.front()); // ensure valid polyon
+    simplified.outer() = retDP;
+
+    ret.push_back(simplified);
+  }
+
+  // TODO: check if simplified polygon differs, if not, just return empty!
+
+  return ret;
 }
 
 // ____________________________________________________________________________
@@ -297,6 +515,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
       for (const auto& area : queryResult) {
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
+
         if (areaId == entryId) {
           continue;
         }
@@ -311,7 +530,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
 #endif
-        bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+        bool isCoveredBy = areaInArea(entry, area);
+
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
@@ -425,12 +645,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
   progressBar.update(entryCount);
   std::vector<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
       vertices = _directedAreaGraph.getVertices();
-#pragma omp parallel for shared( \
-    vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, \
+#pragma omp parallel for shared(                                            \
+    vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                  \
+    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,                       \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,                    \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,                \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,                  \
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, progressBar, \
     entryCount) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
@@ -452,10 +672,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
                       : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
           areaObjId);
 
+      _writer->writeTriple(areaIRI,
+                           osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,
+                           entryIRI);
       _writer->writeTriple(
-          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA, entryIRI);
-      _writer->writeTriple(
-          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, entryIRI);
+          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,
+          entryIRI);
     }
 #pragma omp critical(progress)
     progressBar.update(entryCount++);
@@ -583,7 +805,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
+              areaIRI,
+              osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               entryIRI);
         }
 
@@ -615,7 +838,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
           start = std::chrono::steady_clock::now();
 #endif
-          bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+          bool isCoveredBy = areaInArea(entry, area);
+
 #ifdef ENABLE_GEOMETRY_STATISTIC
           end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
@@ -695,6 +919,7 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
     size_t skippedByDAG = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared( \
+    std::cout, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,\
@@ -708,7 +933,6 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
       ia >> node;
       const auto& nodeEnvelope = std::get<0>(node);
       const auto& nodeId = std::get<1>(node);
-      const auto& nodeGeom = std::get<2>(node);
       std::string nodeIRI = _writer->generateIRI(
           osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, nodeId);
 
@@ -725,7 +949,6 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
                 });
       for (const auto& area : queryResult) {
         const auto& areaId = std::get<1>(area);
-        const auto& areaGeom = std::get<2>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
         checks++;
@@ -738,7 +961,9 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
 #endif
-        bool isCoveredBy = boost::geometry::covered_by(nodeGeom, areaGeom);
+
+        bool isCoveredBy = nodeInArea(node, area);
+
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
@@ -763,9 +988,9 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
         _writer->writeTriple(
             areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
             nodeIRI);
-        _writer->writeTriple(areaIRI,
-                             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
-                             nodeIRI);
+        _writer->writeTriple(
+            areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
+            nodeIRI);
       }
 #pragma omp critical(nodeDataChange)
       std::copy(skip.begin(), skip.end(), std::back_inserter(nodeData[nodeId]));
@@ -822,6 +1047,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     size_t skippedInDAG = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared( \
+    std::cout, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, nodeData, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
@@ -881,6 +1107,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
         const auto& areaGeom = std::get<2>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
+
         if (areaFromWay && areaObjId == wayId) {
           continue;
         }
@@ -903,14 +1130,15 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
+              areaIRI,
+              osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
         } else {
           intersectsChecks++;
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
 #endif
-          doesIntersect = boost::geometry::intersects(wayGeom, areaGeom);
+          doesIntersect = wayIntersectsArea(way, area);
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
@@ -929,7 +1157,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
+              areaIRI,
+              osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
         }
         if (!doesIntersect) {
@@ -960,7 +1189,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 #ifdef ENABLE_GEOMETRY_STATISTIC
           start = std::chrono::steady_clock::now();
 #endif
-          bool isCoveredBy = boost::geometry::covered_by(wayGeom, areaGeom);
+
+          bool isCoveredBy = wayInArea(way, area);
+
 #ifdef ENABLE_GEOMETRY_STATISTIC
           end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
@@ -1008,6 +1239,146 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
               << " ways are areas in the DAG -> skipped calculations for them"
               << std::endl;
   }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+bool osm2rdf::osm::GeometryHandler<W>::nodeInArea(
+    const SpatialNodeValue& a, const SpatialAreaValue& b) const {
+  const auto& geomA = std::get<2>(a);
+
+  const auto& geomB = std::get<2>(b);
+  const auto& innerGeomB = std::get<6>(b);
+  const auto& outerGeomB = std::get<7>(b);
+
+  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+      boost::geometry::is_empty(outerGeomB)) {
+    return boost::geometry::covered_by(geomA, geomB);
+  }
+
+  if (boost::geometry::covered_by(geomA, innerGeomB)) {
+    // if covered by simplified inner, we are definitely contained
+    return true;
+  } else if (!boost::geometry::covered_by(geomA, outerGeomB)) {
+    // if NOT covered by simplified out, we are definitely not contained
+    return false;
+  } else if (boost::geometry::covered_by(geomA, geomB)) {
+    return true;
+  }
+
+  return false;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+bool osm2rdf::osm::GeometryHandler<W>::wayIntersectsArea(
+    const SpatialWayValue& a, const SpatialAreaValue& b) const {
+  const auto& geomA = std::get<2>(a);
+
+  const auto& geomB = std::get<2>(b);
+  const auto& envelopeB = std::get<0>(b);
+  const auto& innerGeomB = std::get<6>(b);
+  const auto& outerGeomB = std::get<7>(b);
+
+  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+      boost::geometry::is_empty(outerGeomB)) {
+    return boost::geometry::intersects(geomA, geomB);
+  }
+
+  if (!boost::geometry::intersects(geomA, envelopeB)) {
+    // if does not intersect with envelope, we definitely dont intersect
+    return false;
+  } else if (boost::geometry::intersects(geomA, innerGeomB)) {
+    // if intersects simplified inner, we definitely intersect
+    return true;
+  } else if (!boost::geometry::intersects(geomA, outerGeomB)) {
+    // if NOT intersecting simplified outer, we are definitely NOT
+    // intersecting
+    return false;
+    // } else if (boost::geometry::covered_by(wayEnvelope, areaGeom)) {
+    // isCoveredBy= true;
+  } else if (boost::geometry::intersects(geomA, geomB)) {
+    return true;
+  }
+
+  return false;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
+    const SpatialWayValue& a, const SpatialAreaValue& b) const {
+  const auto& geomA = std::get<2>(a);
+
+  const auto& geomB = std::get<2>(b);
+  const auto& innerGeomB = std::get<6>(b);
+  const auto& outerGeomB = std::get<7>(b);
+
+  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+      boost::geometry::is_empty(outerGeomB)) {
+    return boost::geometry::covered_by(geomA, geomB);
+  }
+
+  // if (boost::geometry::covered_by(wayEnvelope, areaInnerGeom)) {
+  // // if envelope covered by simplified inner, we are definitely
+  // contained isCoveredBy = true;
+  if (boost::geometry::covered_by(geomA, innerGeomB)) {
+    // if covered by simplified inner, we are definitely contained
+    return true;
+  } else if (!boost::geometry::covered_by(geomA, outerGeomB)) {
+    // if NOT covered by simplified outer, we are definitely NOT
+    // contained
+    return false;
+    // } else if (boost::geometry::covered_by(wayEnvelope, areaGeom)) {
+    // isCoveredBy= true;
+  } else if (boost::geometry::covered_by(geomA, geomB)) {
+    return true;
+  }
+
+  return false;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
+    const SpatialAreaValue& a, const SpatialAreaValue& b) const {
+  const auto& geomA = std::get<2>(a);
+  const auto& innerGeomA = std::get<6>(a);
+  const auto& outerGeomA = std::get<7>(a);
+
+  const auto& geomB = std::get<2>(b);
+  const auto& innerGeomB = std::get<6>(b);
+  const auto& outerGeomB = std::get<7>(b);
+
+  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+      boost::geometry::is_empty(outerGeomB) ||
+      boost::geometry::is_empty(outerGeomA) ||
+     boost::geometry::is_empty(innerGeomA)) {
+      return boost::geometry::covered_by(geomA, geomB);
+    }
+
+  if (boost::geometry::covered_by(outerGeomA, innerGeomB)) {
+    // if simplified outer is covered by simplified inner, we are
+    // definitely contained
+    // assert(boost::geometry::covered_by(geomA, geomB));
+    return true;
+  } else if (!boost::geometry::covered_by(innerGeomA, outerGeomB)) {
+    // if simplified inner is not covered by simplified outer, we are
+    // definitely not contained
+    // assert(!boost::geometry::covered_by(geomA, geomB));
+    return false;
+    // // } else if (boost::geometry::covered_by(entryGeom, areaInnerGeom)) {
+    // // // if covered by simplified inner, we are definitely contained
+    // // isCoveredBy = true;
+    // // } else if (!boost::geometry::covered_by(entryGeom, areaOuterGeom))
+    // // {
+    // // // if NOT covered by simplified out, we are definitely not
+    // // contained isCoveredBy = false;
+  } else if (boost::geometry::covered_by(geomA, geomB)) {
+    return true;
+  }
+
+  return false;
 }
 
 // ____________________________________________________________________________

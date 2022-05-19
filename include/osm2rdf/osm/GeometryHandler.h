@@ -42,7 +42,8 @@ namespace osm2rdf::osm {
 // Area: envelope, id, geometry, osm id, area, fromWay
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t,
                    osm2rdf::geometry::Area, osm2rdf::osm::Area::id_t,
-                   osm2rdf::geometry::area_result_t, bool>
+                   osm2rdf::geometry::area_result_t, bool,
+                   osm2rdf::geometry::Area, osm2rdf::geometry::Area>
     SpatialAreaValue;
 
 typedef std::vector<SpatialAreaValue> SpatialAreaVector;
@@ -127,21 +128,40 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsEmpty2);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains);
-  FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo);
+  FRIEND_TEST(OSM_GeometryHandler,
+              dumpWayRelationsSimpleIntersectsWithNodeInfo);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo);
 
   // Write a statistic line for a given spatial check
-  [[nodiscard]] std::string statisticLine(std::string_view function, std::string_view part,
-                            std::string_view check, uint64_t outerId,
-                            std::string_view outerType, uint64_t innerId,
-                            std::string_view innerType,
-                            std::chrono::nanoseconds durationNS, bool result);
+  [[nodiscard]] std::string statisticLine(
+      std::string_view function, std::string_view part, std::string_view check,
+      uint64_t outerId, std::string_view outerType, uint64_t innerId,
+      std::string_view innerType, std::chrono::nanoseconds durationNS,
+      bool result);
   FRIEND_TEST(OSM_GeometryHandler, statisticLine);
 
   template <typename G>
   [[nodiscard]] G simplifyGeometry(const G& g);
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryWay);
+
+  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&) const;
+  bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&) const;
+  bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&) const;
+  bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValue&) const;
+
+  double signedDistanceFromPointToLine(const osm2rdf::geometry::Location& A,
+                                       const osm2rdf::geometry::Location& B,
+                                       const osm2rdf::geometry::Location& C);
+
+  template <int MODE>
+  bool ioDouglasPeucker(
+      const boost::geometry::model::ring<osm2rdf::geometry::Location>& input,
+      boost::geometry::model::ring<osm2rdf::geometry::Location>& output,
+      size_t l, size_t r, double eps);
+
+  osm2rdf::geometry::Area innerSimplifiedGeom(const osm2rdf::geometry::Area& g);
+  osm2rdf::geometry::Area outerSimplifiedGeom(const osm2rdf::geometry::Area& g);
 
   // Global config
   osm2rdf::config::Config _config;

@@ -246,6 +246,14 @@ const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_HELP =
     "Factor for geometry simplifaction, 0 to disable; This only affects "
     "relationship calculations and not the geometry dump";
 
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_INFO =
+    "Don't use inner/outer simplified geometries of areas: ";
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT = "";
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG =
+    "no-inner-outer";
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
+    "Don't use inner/outer simplified geometries of areas for contains relation.";
+
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
 const static inline std::string SIMPLIFY_WKT_OPTION_LONG = "simplify-wkt";

@@ -44,6 +44,7 @@ struct Config {
   bool noNodeGeometricRelations = false;
   bool noWayGeometricRelations = false;
   uint16_t simplifyGeometries = 0;
+  bool dontUseInnerOuterGeoms = false;
 
   // Select amount to dump
   bool addAreaEnvelope = false;
