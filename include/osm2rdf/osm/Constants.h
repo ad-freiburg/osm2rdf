@@ -25,7 +25,7 @@ static const int AREA_PRECISION = 12;
 static const int BASE10_BASE = 10;
 static const double BASE_SIMPLIFICATION_FACTOR = 0.001;
 
-static const double INNER_OUTER_SIMPLIFICATION_FACTOR = 0.1;
+static const double INNER_OUTER_SIMPLIFICATION_FACTOR = 0.01;
 
 static const double DEGREE = 3.141592 / 180.0;
 static const double EARTH_RADIUS_KM = 6371.0;

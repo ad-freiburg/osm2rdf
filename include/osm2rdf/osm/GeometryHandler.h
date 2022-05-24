@@ -148,9 +148,10 @@ class GeometryHandler {
   bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&) const;
   bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&) const;
   bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&) const;
-  bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValue&) const;
+  bool wayIntersectsArea(const SpatialWayValue& a,
+                         const SpatialAreaValue&) const;
 
-  double signedDistanceFromPointToLine(const osm2rdf::geometry::Location& A,
+  static double signedDistanceFromPointToLine(const osm2rdf::geometry::Location& A,
                                        const osm2rdf::geometry::Location& B,
                                        const osm2rdf::geometry::Location& C);
 
@@ -158,10 +159,13 @@ class GeometryHandler {
   bool ioDouglasPeucker(
       const boost::geometry::model::ring<osm2rdf::geometry::Location>& input,
       boost::geometry::model::ring<osm2rdf::geometry::Location>& output,
-      size_t l, size_t r, double eps);
+      size_t l, size_t r, double eps) const;
 
-  osm2rdf::geometry::Area innerSimplifiedGeom(const osm2rdf::geometry::Area& g);
-  osm2rdf::geometry::Area outerSimplifiedGeom(const osm2rdf::geometry::Area& g);
+  static int polygonOrientation(
+      const boost::geometry::model::ring<osm2rdf::geometry::Location>&
+          inputPoints);
+
+  osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g, bool inner) const;
 
   // Global config
   osm2rdf::config::Config _config;

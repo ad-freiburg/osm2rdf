@@ -117,8 +117,8 @@ void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
   }
 
   if (!_config.dontUseInnerOuterGeoms && (area.hasName() || !area.fromWay())) {
-    innerGeom = innerSimplifiedGeom(geom);
-    outerGeom = outerSimplifiedGeom(geom);
+    innerGeom = simplifiedArea(geom, true);
+    outerGeom = simplifiedArea(geom, false);
   }
 
 #pragma omp critical(areaDataInsert)
@@ -209,7 +209,7 @@ bool osm2rdf::osm::GeometryHandler<W>::ioDouglasPeucker(
     const boost::geometry::model::ring<osm2rdf::geometry::Location>&
         inputPoints,
     boost::geometry::model::ring<osm2rdf::geometry::Location>& outputPoints,
-    size_t l, size_t r, double eps) {
+    size_t l, size_t r, double eps) const {
   // this is basically a verbatim translation from Hannah's qlever map UI code
 
   assert(r >= l);
@@ -252,7 +252,6 @@ bool osm2rdf::osm::GeometryHandler<W>::ioDouglasPeucker(
   // distanceFromPointToLine) and furthest to the right (positive value).
   for (auto k = l + 1; k <= r - 1; k++) {
     auto dist = signedDistanceFromPointToLine(L, R, inputPoints[k]);
-    // if (Math.abs(dist) > max_dist) { m = k; max_dist = Math.abs(dist); }
     if (dist < 0 && -dist > max_dist_left) {
       m_left = k;
       max_dist_left = -dist;
@@ -316,7 +315,7 @@ double osm2rdf::osm::GeometryHandler<W>::signedDistanceFromPointToLine(
   // The actual computation, see this Wikipedia article for the formula:
   // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
   double distAB = sqrt((A.get<0>() - B.get<0>()) * (A.get<0>() - B.get<0>()) +
-                     (A.get<1>() - B.get<1>()) * (A.get<1>() - B.get<1>()));
+                       (A.get<1>() - B.get<1>()) * (A.get<1>() - B.get<1>()));
   double areaTriangleTimesTwo =
       (B.get<1>() - A.get<1>()) * (A.get<0>() - C.get<0>()) -
       (B.get<0>() - A.get<0>()) * (A.get<1>() - C.get<1>());
@@ -325,8 +324,8 @@ double osm2rdf::osm::GeometryHandler<W>::signedDistanceFromPointToLine(
 
 // ____________________________________________________________________________
 template <typename W>
-osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::innerSimplifiedGeom(
-    const osm2rdf::geometry::Area& g) {
+osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
+    const osm2rdf::geometry::Area& g, bool inner) const {
   // default value: empty area, means no inner geom
   osm2rdf::geometry::Area ret;
 
@@ -341,68 +340,72 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::innerSimplifiedGeom(
 
   auto eps = osm2rdf::osm::constants::INNER_OUTER_SIMPLIFICATION_FACTOR;
 
+  size_t numPointsOld = 0;
+  size_t numPointsNew = 0;
+
   for (const auto& poly : g) {
     osm2rdf::geometry::Polygon simplified;
+    numPointsOld += poly.outer().size();
+
     for (const auto& origInner : poly.inners()) {
-      // simplify the inner geometries with outer simplification
+      numPointsOld += origInner.size();
+      if (origInner.size() < 4) {
+        numPointsNew += origInner.size();
+        simplified.inners().push_back(origInner);
+        continue;
+      }
+
+      // inner polygons are given in counter-clockswise order
+      // assert(polygonOrientation(origInner) != -1);
+
+      // simplify the inner geometries with outer simplification, because
+      // inner geometries are given counter-clockwise, it is not
+      // necessary to swap the simplification mode
       boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
-      ioDouglasPeucker<3>(origInner, retDP, 0, origInner.size() - 2, eps);
-      retDP.push_back(retDP.front()); // ensure valid polyon
+      size_t m = floor(origInner.size() / 2);
+      if (inner) {
+        ioDouglasPeucker<2>(origInner, retDP, 0, m, eps);
+        ioDouglasPeucker<2>(origInner, retDP, m + 1, origInner.size() - 1, eps);
+      } else {
+        ioDouglasPeucker<3>(origInner, retDP, 0, m, eps);
+        ioDouglasPeucker<3>(origInner, retDP, m + 1, origInner.size() - 1, eps);
+      }
+      retDP.push_back(retDP.front());  // ensure valid polyon
       simplified.inners().push_back(retDP);
+      numPointsNew += retDP.size();
     }
 
-    // simplify the outer geometry with inner simplification
-    boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
-    ioDouglasPeucker<2>(poly.outer(), retDP, 0, poly.outer().size() - 2, eps);
-    retDP.push_back(retDP.front()); // ensure valid polyon
-    simplified.outer() = retDP;
+    if (poly.outer().size() < 4) {
+      numPointsNew += poly.outer().size();
+      simplified.outer() = poly.outer();
+    } else {
+      // assert(polygonOrientation(poly.outer()) != 1);
+
+      // simplify the outer geometry with inner simplification
+      boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
+      size_t m = floor(poly.outer().size() / 2);
+      if (inner) {
+        ioDouglasPeucker<2>(poly.outer(), retDP, 0, m, eps);
+        ioDouglasPeucker<2>(poly.outer(), retDP, m + 1, poly.outer().size() - 1,
+                            eps);
+      } else {
+        ioDouglasPeucker<3>(poly.outer(), retDP, 0, m, eps);
+        ioDouglasPeucker<3>(poly.outer(), retDP, m + 1, poly.outer().size() - 1,
+                            eps);
+      }
+      retDP.push_back(retDP.front());  // ensure valid polyon
+      numPointsNew += retDP.size();
+      simplified.outer() = retDP;
+    }
 
     ret.push_back(simplified);
   }
 
-  // TODO: check if simplified polygon differs, if not, just return empty!
-
-  return ret;
-}
-
-// ____________________________________________________________________________
-template <typename W>
-osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::outerSimplifiedGeom(
-    const osm2rdf::geometry::Area& g) {
-  // default value: empty area, means no inner geom
-  osm2rdf::geometry::Area ret;
-
-  // skip trivial / erroneous geoms
-  if (!boost::geometry::is_valid(g)) {
-    return ret;
+  if (numPointsNew == numPointsOld) {
+    // nothing changed, return empty poly to avoid extra space and double
+    // checking later on
+    return osm2rdf::geometry::Area();
   }
-
-  if (boost::geometry::is_empty(g)) {
-    return ret;
-  }
-
-  auto eps = osm2rdf::osm::constants::INNER_OUTER_SIMPLIFICATION_FACTOR;
-
-  for (const auto& poly : g) {
-    osm2rdf::geometry::Polygon simplified;
-    for (const auto& origInner : poly.inners()) {
-      // simplify the inner geometries with inner simplification
-      boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
-      ioDouglasPeucker<2>(origInner, retDP, 0, origInner.size() - 2, eps);
-      retDP.push_back(retDP.front()); // ensure valid polyon
-      simplified.inners().push_back(retDP);
-    }
-
-    // simplifiy the outer geometry with outer simplification
-    boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
-    ioDouglasPeucker<3>(poly.outer(), retDP, 0, poly.outer().size() - 2, eps);
-    retDP.push_back(retDP.front()); // ensure valid polyon
-    simplified.outer() = retDP;
-
-    ret.push_back(simplified);
-  }
-
-  // TODO: check if simplified polygon differs, if not, just return empty!
 
   return ret;
 }
@@ -1061,7 +1064,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
       ia >> way;
       const auto& wayEnvelope = std::get<0>(way);
       const auto& wayId = std::get<1>(way);
-      const auto& wayGeom = std::get<2>(way);
       const auto& wayNodeIds = std::get<3>(way);
 
       // Check if our "area" has successors in the DAG, if yes we are part of
@@ -1104,7 +1106,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
       for (const auto& area : queryResult) {
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
-        const auto& areaGeom = std::get<2>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
 
@@ -1353,9 +1354,9 @@ bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB) ||
       boost::geometry::is_empty(outerGeomA) ||
-     boost::geometry::is_empty(innerGeomA)) {
-      return boost::geometry::covered_by(geomA, geomB);
-    }
+      boost::geometry::is_empty(innerGeomA)) {
+    return boost::geometry::covered_by(geomA, geomB);
+  }
 
   if (boost::geometry::covered_by(outerGeomA, innerGeomB)) {
     // if simplified outer is covered by simplified inner, we are
@@ -1367,18 +1368,33 @@ bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     // definitely not contained
     // assert(!boost::geometry::covered_by(geomA, geomB));
     return false;
-    // // } else if (boost::geometry::covered_by(entryGeom, areaInnerGeom)) {
-    // // // if covered by simplified inner, we are definitely contained
-    // // isCoveredBy = true;
-    // // } else if (!boost::geometry::covered_by(entryGeom, areaOuterGeom))
-    // // {
-    // // // if NOT covered by simplified out, we are definitely not
-    // // contained isCoveredBy = false;
+    // } else if (boost::geometry::covered_by(entryGeom, areaInnerGeom)) {
+    // // if covered by simplified inner, we are definitely contained
+    // isCoveredBy = true;
+    // } else if (!boost::geometry::covered_by(entryGeom, areaOuterGeom))
+    // {
+    // // if NOT covered by simplified out, we are definitely not
+    // contained isCoveredBy = false;
   } else if (boost::geometry::covered_by(geomA, geomB)) {
     return true;
   }
 
   return false;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+int osm2rdf::osm::GeometryHandler<W>::polygonOrientation(
+    const boost::geometry::model::ring<osm2rdf::geometry::Location>& polygon) {
+  // https://de.wikipedia.org/wiki/Gau%C3%9Fsche_Trapezformel
+  double sum = 0;
+  for (size_t i = 0; i + 1 < polygon.size(); i++) {
+    auto a = polygon[i];
+    auto b = polygon[i + 1];
+    sum += (a.get<0>() - b.get<0>()) * (a.get<1>() + b.get<1>());
+  }
+
+  return sum < 0 ? -1 : sum > 0 ? 1 : 0;
 }
 
 // ____________________________________________________________________________
