@@ -243,16 +243,31 @@ const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_SHORT = "";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_LONG =
     "simplify-geometries";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_HELP =
-    "Factor for geometry simplifaction, 0 to disable; This only affects "
+    "Factor for geometry simplifaction, 0 to disable; will be multiplied with "
+    "the geometry "
+    "perimeter or length. This only affects "
+    "relationship calculations and not the geometry dump";
+
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_INFO =
+    "Simplifying inner/outer geometries with factor: ";
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_SHORT =
+    "";
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG =
+    "simplify-inner-outer-geometries";
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP =
+    "Factor for geometry simplifaction of inner/outer geometries, will be "
+    "multiplied with the geometry perimter. This only affects "
     "relationship calculations and not the geometry dump";
 
 const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_INFO =
     "Don't use inner/outer simplified geometries of areas: ";
-const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT = "";
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT =
+    "";
 const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG =
     "no-inner-outer";
 const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
-    "Don't use inner/outer simplified geometries of areas for contains relation.";
+    "Don't use inner/outer simplified geometries of areas for contains "
+    "relation.";
 
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
@@ -312,8 +327,7 @@ const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP =
 
 const static inline std::string WRITE_RDF_STATISTICS_INFO =
     "Storing RDF statistics as .stats.json";
-const static inline std::string WRITE_RDF_STATISTICS_OPTION_SHORT =
-    "";
+const static inline std::string WRITE_RDF_STATISTICS_OPTION_SHORT = "";
 const static inline std::string WRITE_RDF_STATISTICS_OPTION_LONG =
     "write-rdf-statistics";
 const static inline std::string WRITE_RDF_STATISTICS_OPTION_HELP =

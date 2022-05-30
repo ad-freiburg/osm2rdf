@@ -338,7 +338,9 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
     return ret;
   }
 
-  auto eps = osm2rdf::osm::constants::INNER_OUTER_SIMPLIFICATION_FACTOR;
+  auto periOrLength =
+      std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
+  double eps = periOrLength * _config.simplifyGeometriesInnerOuter;
 
   size_t numPointsOld = 0;
   size_t numPointsNew = 0;
@@ -564,10 +566,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         }
 #pragma omp critical(addEdge)
         tmpDirectedAreaGraph.addEdge(entryId, areaId);
-        for (const auto& newSkip :
-             tmpDirectedAreaGraph.findSuccessors(entryId)) {
-          skip.insert(newSkip);
-        }
+        const auto& successors = tmpDirectedAreaGraph.findSuccessors(entryId);
+        skip.insert(successors.begin(), successors.end());
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
@@ -764,6 +764,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
+
       for (const auto& area : queryResult) {
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
@@ -803,10 +804,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
           }
           intersectsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipIntersects.insert(newSkip);
-          }
+          const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+          skipIntersects.insert(successors.begin(), successors.end());
+
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -856,10 +856,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
           }
           containsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipContains.insert(newSkip);
-          }
+          const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+          skipContains.insert(successors.begin(), successors.end());
+
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               entryIRI);
@@ -980,10 +979,10 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
         }
         containsOk++;
         skip.insert(areaId);
-        for (const auto& newSkip :
-             _directedAreaGraph.findSuccessorsFast(areaId)) {
-          skip.insert(newSkip);
-        }
+
+        const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+        skip.insert(successors.begin(), successors.end());
+
         std::string areaIRI = _writer->generateIRI(
             areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
                         : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
@@ -1058,6 +1057,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, skippedInDAG, \
     intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
+
     for (size_t i = 0; i < _numWays; i++) {
       SpatialWayValue way;
 #pragma omp critical(loadEntry)
@@ -1103,6 +1103,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
+
       for (const auto& area : queryResult) {
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
@@ -1115,10 +1116,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
         areas++;
 
         bool doesIntersect = false;
-        std::string areaIRI = _writer->generateIRI(
-            areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                        : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-            areaObjId);
         if (skipIntersects.find(areaId) != skipIntersects.end()) {
           intersectsSkippedByDAG++;
           doesIntersect = true;
@@ -1126,10 +1123,14 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           intersectsByNodeInfo++;
           doesIntersect = true;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipIntersects.insert(newSkip);
-          }
+          const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+          skipIntersects.insert(successors.begin(), successors.end());
+
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
+
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -1153,10 +1154,14 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           }
           intersectsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipIntersects.insert(newSkip);
-          }
+          const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+          skipIntersects.insert(successors.begin(), successors.end());
+
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
+
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -1206,10 +1211,14 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           }
           containsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipContains.insert(newSkip);
-          }
+          const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+          skipContains.insert(successors.begin(), successors.end());
+
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
+
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               wayIRI);
@@ -1310,6 +1319,7 @@ template <typename W>
 bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
     const SpatialWayValue& a, const SpatialAreaValue& b) const {
   const auto& geomA = std::get<2>(a);
+  const auto& envelopeA = std::get<0>(a);
 
   const auto& geomB = std::get<2>(b);
   const auto& innerGeomB = std::get<6>(b);
@@ -1320,18 +1330,26 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
     return boost::geometry::covered_by(geomA, geomB);
   }
 
-  // if (boost::geometry::covered_by(wayEnvelope, areaInnerGeom)) {
-  // // if envelope covered by simplified inner, we are definitely
-  // contained isCoveredBy = true;
-  if (boost::geometry::covered_by(geomA, innerGeomB)) {
+  boost::geometry::model::ring<osm2rdf::geometry::Location> ring;
+  ring.push_back(envelopeA.min_corner());
+  ring.push_back({envelopeA.min_corner().get<0>(), envelopeA.max_corner().get<1>()});
+  ring.push_back(envelopeA.max_corner());
+  ring.push_back({envelopeA.max_corner().get<0>(), envelopeA.min_corner().get<1>()});
+  ring.push_back(envelopeA.min_corner());
+  osm2rdf::geometry::Polygon bboxPoly;
+  bboxPoly.inners().push_back(ring);
+
+  if (boost::geometry::covered_by(bboxPoly, innerGeomB)) {
+    // if envelope covered by simplified inner, we are definitely
+    // contained
+    return true;
+  } else if (boost::geometry::covered_by(geomA, innerGeomB)) {
     // if covered by simplified inner, we are definitely contained
     return true;
   } else if (!boost::geometry::covered_by(geomA, outerGeomB)) {
     // if NOT covered by simplified outer, we are definitely NOT
     // contained
     return false;
-    // } else if (boost::geometry::covered_by(wayEnvelope, areaGeom)) {
-    // isCoveredBy= true;
   } else if (boost::geometry::covered_by(geomA, geomB)) {
     return true;
   }
