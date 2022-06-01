@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "boost/serialization/library_version_type.hpp"
 #include "boost/serialization/nvp.hpp"
 #include "boost/serialization/unordered_map.hpp"
 #include "boost/serialization/vector.hpp"

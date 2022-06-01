@@ -22,6 +22,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "boost/serialization/library_version_type.hpp"
 #include "boost/serialization/unordered_map.hpp"
 #include "osmium/tags/taglist.hpp"
 
