@@ -22,7 +22,9 @@
 #include <string>
 #include <unordered_map>
 
+#if BOOST_VERSION >= 107400 && BOOST_VERSION < 107500
 #include "boost/serialization/library_version_type.hpp"
+#endif
 #include "boost/serialization/unordered_map.hpp"
 #include "osmium/tags/taglist.hpp"
 
