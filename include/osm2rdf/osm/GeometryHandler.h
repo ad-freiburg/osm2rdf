@@ -151,9 +151,13 @@ class GeometryHandler {
   bool wayIntersectsArea(const SpatialWayValue& a,
                          const SpatialAreaValue&) const;
 
-  static double signedDistanceFromPointToLine(const osm2rdf::geometry::Location& A,
-                                       const osm2rdf::geometry::Location& B,
-                                       const osm2rdf::geometry::Location& C);
+  void printWayAreaStats(const SpatialWayValue& way,
+                         const SpatialAreaValue& area, double usec);
+
+  static double signedDistanceFromPointToLine(
+      const osm2rdf::geometry::Location& A,
+      const osm2rdf::geometry::Location& B,
+      const osm2rdf::geometry::Location& C);
 
   template <int MODE>
   bool ioDouglasPeucker(
@@ -165,13 +169,16 @@ class GeometryHandler {
       const boost::geometry::model::ring<osm2rdf::geometry::Location>&
           inputPoints);
 
-  osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g, bool inner) const;
+  osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g,
+                                         bool inner) const;
 
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
   // Statistics
   osm2rdf::util::Output _statistics;
+  // Detailed contains statistics
+  osm2rdf::util::Output _containsStatistics;
   // Store areas as r-tree
   SpatialIndex _spatialIndex;
   // Store dag

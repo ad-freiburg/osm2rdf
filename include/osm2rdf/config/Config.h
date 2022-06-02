@@ -73,6 +73,7 @@ struct Config {
   // Statistics
   bool writeGeometricRelationStatistics = false;
   std::filesystem::path geomStatisticsPath;
+  std::filesystem::path containsStatisticsPath;
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
