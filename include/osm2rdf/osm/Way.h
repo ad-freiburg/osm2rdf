@@ -21,6 +21,7 @@
 
 #include <vector>
 
+#include "boost/version.hpp"
 #if BOOST_VERSION >= 107400 && BOOST_VERSION < 107500
 #include "boost/serialization/library_version_type.hpp"
 #endif
