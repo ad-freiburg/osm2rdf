@@ -1089,6 +1089,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     size_t containsOkEnvelope = 0;
     size_t containsSkippedByDAG = 0;
     size_t skippedInDAG = 0;
+    size_t maxNumAreas = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared( \
     std::cout, \
@@ -1097,7 +1098,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
     osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, skippedInDAG, \
-      intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
+      maxNumAreas, intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
 
     for (size_t i = 0; i < _numWays; i++) {
@@ -1168,9 +1169,13 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
                          std::get<4>(_spatialStorageArea[b.second]);
                 });
 
+      if (queryResult.size() > maxNumAreas) {
+        std::cout << "new max num areas: " << maxNumAreas << std::endl;
+        maxNumAreas = queryResult.size();
+      }
+
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
-
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
@@ -1191,7 +1196,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
-
           skipIntersects.insert(successors.begin(), successors.end());
 
           std::string areaIRI = _writer->generateIRI(
@@ -1226,7 +1230,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
-
           skipIntersects.insert(successors.begin(), successors.end());
 
           std::string areaIRI = _writer->generateIRI(
@@ -1264,17 +1267,23 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             continue;
           }
           containsOkEnvelope++;
-
+#ifdef ENABLE_GEOMETRY_STATISTIC
+          start = std::chrono::steady_clock::now();
+#endif
           bool isCoveredBy = wayInArea(way, area);
+#ifdef ENABLE_GEOMETRY_STATISTIC
+          end = std::chrono::steady_clock::now();
+#endif
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
           if (_config.writeGeometricRelationStatistics) {
-            printWayAreaStats(
-                way, area,
-                std::chrono::nanoseconds(end - start).count() / 1000);
+            printWayAreaStats(way, area,
+                              std::chrono::nanoseconds(
+                                  end-start)
+                                  .count());
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredBy2", areaId, "area", wayId, "way",
-                std::chrono::nanoseconds(end - start), isCoveredBy));
+                std::chrono::nanoseconds(end - start) / 1000.0, isCoveredBy));
           }
 #endif
           if (!isCoveredBy) {
@@ -1284,7 +1293,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
-
           skipContains.insert(successors.begin(), successors.end());
 
           std::string areaIRI = _writer->generateIRI(
@@ -1324,6 +1332,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
               << (static_cast<double>(areas) / (_numWays - skippedInDAG))
               << " areas checked per geometry on average" << std::endl;
+    std::cerr << osm2rdf::util::formattedTimeSpacer << " " << maxNumAreas
+              << " was the maximum number of areas checked for a single way"
+              << std::endl;
   }
 }
 
