@@ -1052,7 +1052,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     size_t containsOkEnvelope = 0;
     size_t containsSkippedByDAG = 0;
     size_t skippedInDAG = 0;
-    size_t maxNumAreas = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared( \
     std::cout, \
@@ -1061,7 +1060,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
     osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, skippedInDAG, \
-      maxNumAreas, intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
+      intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
 
     for (size_t i = 0; i < _numWays; i++) {
@@ -1109,11 +1108,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
-
-      if (queryResult.size() > maxNumAreas) {
-        std::cout << "new max num areas: " << maxNumAreas << std::endl;
-        maxNumAreas = queryResult.size();
-      }
 
       for (const auto& area : queryResult) {
         const auto& areaEnvelope = std::get<0>(area);
@@ -1215,13 +1209,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
           if (_config.writeGeometricRelationStatistics) {
-            printWayAreaStats(way, area,
-                              std::chrono::nanoseconds(
-                                  end-start)
-                                  .count());
+            printWayAreaStats(
+                way, area,
+                std::chrono::nanoseconds(end - start).count() / 1000);
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredBy2", areaId, "area", wayId, "way",
-                std::chrono::nanoseconds(end - start) / 1000.0, isCoveredBy));
+                std::chrono::nanoseconds(end - start), isCoveredBy));
           }
 #endif
           if (!isCoveredBy) {
@@ -1270,9 +1263,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
               << (static_cast<double>(areas) / (_numWays - skippedInDAG))
               << " areas checked per geometry on average" << std::endl;
-    std::cerr << osm2rdf::util::formattedTimeSpacer << " " << maxNumAreas
-              << " was the maximum number of areas checked for a single way"
-              << std::endl;
   }
 }
 
