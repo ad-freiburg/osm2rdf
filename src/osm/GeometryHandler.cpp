@@ -1022,6 +1022,10 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2rdf::osm::NodesContainedInAreasData& nodeData) {
+
+  TimeStatsWayRels timeStats;
+  auto tStartTotal = std::chrono::steady_clock::now();
+
   if (_config.noWayGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << osm2rdf::util::currentTimeFormatted() << " "
@@ -1055,6 +1059,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     progressBar.update(entryCount);
 #pragma omp parallel for shared( \
     std::cout, \
+    timeStats, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, nodeData, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
@@ -1065,21 +1070,36 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 
     for (size_t i = 0; i < _numWays; i++) {
       SpatialWayValue way;
+      auto tStartSpatialValExtract = std::chrono::steady_clock::now();
+
 #pragma omp critical(loadEntry)
       ia >> way;
+
+#pragma omp critical(timeStats)
+      timeStats.spatialValExtract += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartSpatialValExtract).count();
+
       const auto& wayEnvelope = std::get<0>(way);
       const auto& wayId = std::get<1>(way);
       const auto& wayNodeIds = std::get<3>(way);
 
       // Check if our "area" has successors in the DAG, if yes we are part of
       // the DAG and don't need to calculate any relation again.
-      if (!_directedAreaGraph.findSuccessorsFast(wayId * 2).empty()) {
+
+      auto tStartFindSuccessorsFast = std::chrono::steady_clock::now();
+      const auto& successors = _directedAreaGraph.findSuccessorsFast(wayId * 2);
+#pragma omp critical(timeStats)
+      timeStats.findSuccessors += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartFindSuccessorsFast).count();
+
+      if (!successors.empty()) {
         skippedInDAG++;
         continue;
       }
 
+      auto tStartGenerateIRI = std::chrono::steady_clock::now();
       std::string wayIRI = _writer->generateIRI(
           osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, wayId);
+#pragma omp critical(timeStats)
+      timeStats.generateIRI += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartGenerateIRI).count();
 
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
@@ -1090,6 +1110,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           skipContains;
 
       // Store known areas in set.
+      auto tStartStoreKnowAreas = std::chrono::steady_clock::now();
       for (const auto& nodeId : wayNodeIds) {
         auto nodeDataIt = nodeData.find(nodeId);
         if (nodeDataIt == nodeData.end()) {
@@ -1099,7 +1120,10 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           skipNodeContained.insert(areaId);
         }
       }
+#pragma omp critical(timeStats)
+      timeStats.storeKnownAreas += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartStoreKnowAreas).count();
 
+      auto tStartRTreeQuery = std::chrono::steady_clock::now();
       std::vector<SpatialAreaValue> queryResult;
       _spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
                           std::back_inserter(queryResult));
@@ -1108,6 +1132,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
                 [](const auto& a, const auto& b) {
                   return std::get<4>(a) < std::get<4>(b);
                 });
+#pragma omp critical(timeStats)
+      timeStats.rTree += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartRTreeQuery).count();
 
       for (const auto& area : queryResult) {
         const auto& areaEnvelope = std::get<0>(area);
@@ -1128,27 +1154,40 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           intersectsByNodeInfo++;
           doesIntersect = true;
 
+          auto tStartFindSuccessorsFast = std::chrono::steady_clock::now();
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
-          skipIntersects.insert(successors.begin(), successors.end());
+#pragma omp critical(timeStats)
+          timeStats.findSuccessors += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartFindSuccessorsFast).count();
 
+          auto tStartSkipIntersects = std::chrono::steady_clock::now();
+          skipIntersects.insert(successors.begin(), successors.end());
+#pragma omp critical(timeStats)
+          timeStats.skipIntersectsInsert += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartSkipIntersects).count();
+
+      auto tStartGenerateIRI = std::chrono::steady_clock::now();
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
                           : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
               areaObjId);
+#pragma omp critical(timeStats)
+      timeStats.generateIRI += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartGenerateIRI).count();
 
+      auto tStartWriteTriple = std::chrono::steady_clock::now();
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
+#pragma omp critical(timeStats)
+      timeStats.writeTriple += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartWriteTriple).count();
         } else {
           intersectsChecks++;
-#ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
-#endif
           doesIntersect = wayIntersectsArea(way, area);
-#ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
+#pragma omp critical(timeStats)
+          timeStats.timeWayIntersectsArea += std::chrono::nanoseconds(end - start).count();
+#ifdef ENABLE_GEOMETRY_STATISTIC
           if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "doesIntersect", areaId, "area", wayId, "way",
@@ -1160,19 +1199,32 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           }
           intersectsOk++;
 
+          auto tStartFindSuccessorsFast = std::chrono::steady_clock::now();
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
-          skipIntersects.insert(successors.begin(), successors.end());
 
+#pragma omp critical(timeStats)
+          timeStats.findSuccessors += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartFindSuccessorsFast).count();
+          auto tStartSkipIntersects = std::chrono::steady_clock::now();
+          skipIntersects.insert(successors.begin(), successors.end());
+#pragma omp critical(timeStats)
+          timeStats.skipIntersectsInsert += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartSkipIntersects).count();
+
+      auto tStartGenerateIRI = std::chrono::steady_clock::now();
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
                           : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
               areaObjId);
+#pragma omp critical(timeStats)
+      timeStats.generateIRI += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartGenerateIRI).count();
 
+      auto tStartWriteTriple = std::chrono::steady_clock::now();
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
+#pragma omp critical(timeStats)
+      timeStats.writeTriple += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartWriteTriple).count();
         }
         if (!doesIntersect) {
           continue;
@@ -1199,13 +1251,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             continue;
           }
           containsOkEnvelope++;
-#ifdef ENABLE_GEOMETRY_STATISTIC
-          start = std::chrono::steady_clock::now();
-#endif
+
+          auto startCovered = std::chrono::steady_clock::now();
           bool isCoveredBy = wayInArea(way, area);
-#ifdef ENABLE_GEOMETRY_STATISTIC
-          end = std::chrono::steady_clock::now();
-#endif
+          auto endCovered = std::chrono::steady_clock::now();
+#pragma omp critical(timeStats)
+          timeStats.timeWayInArea += std::chrono::nanoseconds(endCovered - startCovered).count();
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
           if (_config.writeGeometricRelationStatistics) {
@@ -1222,24 +1273,40 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           }
           containsOk++;
 
+          auto tStartFindSuccessorsFast = std::chrono::steady_clock::now();
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
-          skipContains.insert(successors.begin(), successors.end());
+#pragma omp critical(timeStats)
+      timeStats.findSuccessors += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartFindSuccessorsFast).count();
 
+          auto tStartSkipContains = std::chrono::steady_clock::now();
+          skipContains.insert(successors.begin(), successors.end());
+#pragma omp critical(timeStats)
+          timeStats.skipContainsInsert += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartSkipContains).count();
+
+      auto tStartGenerateIRI = std::chrono::steady_clock::now();
           std::string areaIRI = _writer->generateIRI(
               areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
                           : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
               areaObjId);
+#pragma omp critical(timeStats)
+      timeStats.generateIRI += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartGenerateIRI).count();
 
+      auto tStartWriteTriple = std::chrono::steady_clock::now();
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               wayIRI);
+#pragma omp critical(timeStats)
+      timeStats.writeTriple += std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartWriteTriple).count();
         }
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
     }
     progressBar.done();
+
+#pragma omp critical(timeStats)
+    timeStats.timeTotal = std::chrono::nanoseconds(std::chrono::steady_clock::now() - tStartTotal).count();
 
     std::cerr << osm2rdf::util::currentTimeFormatted() << " "
               << "... done with looking at " << areas << " areas" << std::endl;
@@ -1263,6 +1330,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
               << (static_cast<double>(areas) / (_numWays - skippedInDAG))
               << " areas checked per geometry on average" << std::endl;
+
+    timeStats.print(_numWays);
   }
 }
 
