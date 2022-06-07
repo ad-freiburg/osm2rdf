@@ -493,7 +493,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     geomStatisticsPath = std::filesystem::path(output);
     geomStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
     containsStatisticsPath = std::filesystem::path(output);
-    containsStatisticsPath += ".contains" + osm2rdf::config::constants::STATS_EXTENSION;
+    containsStatisticsPath += ".contains-stats";
 
     // Mark compressed output
     if (outputCompress && !output.empty() &&
