@@ -1570,30 +1570,19 @@ void osm2rdf::osm::GeometryHandler<W>::printWayAreaStats(
 
   std::stringstream ss;
   std::stringstream m;
+  std::string area_prefix = std::get<5>(area) ? "osmway:" : "osmrel:";
   m << "osm2rdf:check_contains_" << wayOSMId << "_" << areaOSMId;
   ss << "osmway:" << wayOSMId << " osm2rdf:num_points "
                   << "\"" << numWayPoints << "\"^^xsd:int . \n"
-     << "osmrel:" << areaOSMId << " osm2rdf:num_points "
-                  << "\"" << numAreaPoints << "\"^^xsd:int . \n"
-     << "osmway:" << areaOSMId << " osm2rdf:num_points "
-                  << "\"" << numAreaPoints << "\"^^xsd:int . \n"
+     << area_prefix << areaOSMId << " osm2rdf:num_points "
      << "osmway:" << wayOSMId << " osm2rdf:check_contains_to "
                   << m.str() << " . \n"
      << m.str() << " osm2rdf:check_contains_from "
-                << "osmrel:" << areaOSMId << " . \n"
-     << m.str() << " osm2rdf:check_contains_from "
-                << "osmway:" << areaOSMId << " . \n"
+                << area_prefix << areaOSMId << " . \n"
      << m.str() << " osm2rdf:check_contains_usecs "
                 << "\"" << usec << "\"^^xsd:int . \n"
      << m.str() << " osm2rdf:check_contains_usecs_div_10 "
                 << "\"" << (int)(usec / 10) << "\"^^xsd:int . \n";
-  // ss << wayOSMId << "\t" << numWayPoints << "\t"
-  //    << areaOSMId << "\t" << numAreaPoints << "\t"
-  //    // << boost::geometry::wkt(wayGeom) << "\t"
-  //    // << boost::geometry::wkt(areaGeom) << "\t"
-  //    // << boost::geometry::wkt(areaGeomInner) << "\t"
-  //    // << boost::geometry::wkt(areaGeomOuter) << "\t"
-  //    << usec << "\n";
   _containsStatistics.write(ss.str());
 }
 
