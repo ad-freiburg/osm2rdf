@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
