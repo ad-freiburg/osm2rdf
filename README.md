@@ -28,7 +28,7 @@ $ docker run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scr
 
 On Ubuntu 20.04 the following packages are required to build osm2rdf:
 ```
-clang clang-tidy g++ libboost-dev libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
+clang clang-tidy g++ libboost-dev libboost-serialization-dev libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
 ```
 `clang` is optional, but without it `clang-tidy` has [unrelated error messages](https://stackoverflow.com/a/52728225).
 

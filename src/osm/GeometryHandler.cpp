@@ -47,6 +47,7 @@ osm2rdf::osm::GeometryHandler<W>::GeometryHandler(
     : _config(config),
       _writer(writer),
       _statistics(config, config.geomStatisticsPath.string()),
+      _containsStatistics(config, config.containsStatisticsPath.string()),
       _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed"),
                        std::ios::binary),
       _oaUnnamedAreas(_ofsUnnamedAreas),
@@ -169,9 +170,29 @@ void osm2rdf::osm::GeometryHandler<W>::way(const osm2rdf::osm::Way& way) {
   if (_config.simplifyGeometries > 0) {
     geom = simplifyGeometry(geom);
   }
+
+  std::vector<osm2rdf::geometry::Box> boxes;
+
+  size_t CHUNKSIZE = 25;
+
+  if (geom.size() >= 2 * CHUNKSIZE) {
+    size_t i = 0;
+    while (i < geom.size()) {
+      osm2rdf::geometry::Box box;
+
+      osm2rdf::geometry::Way tmp(geom.begin() + i, geom.begin() + std::min(i + CHUNKSIZE, geom.size()));
+
+      boost::geometry::envelope(tmp, box);
+      boxes.push_back(box);
+      i += CHUNKSIZE;
+    }
+  } else {
+    boxes.push_back(way.envelope());
+  }
+
 #pragma omp critical(wayDataInsert)
   {
-    _oaWays << SpatialWayValue(way.envelope(), way.id(), geom, nodeIds);
+    _oaWays << SpatialWayValue(way.envelope(), way.id(), geom, nodeIds, boxes);
     _numWays++;
   }
 }
@@ -338,7 +359,9 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
     return ret;
   }
 
-  auto eps = osm2rdf::osm::constants::INNER_OUTER_SIMPLIFICATION_FACTOR;
+  auto periOrLength =
+      std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
+  double eps = periOrLength * _config.simplifyGeometriesInnerOuter;
 
   size_t numPointsOld = 0;
   size_t numPointsNew = 0;
@@ -431,6 +454,7 @@ void osm2rdf::osm::GeometryHandler<W>::calculateRelations() {
   closeExternalStorage();
   if (_config.writeGeometricRelationStatistics) {
     _statistics.open();
+    _containsStatistics.open();
   }
   prepareRTree();
   prepareDAG();
@@ -444,6 +468,7 @@ void osm2rdf::osm::GeometryHandler<W>::calculateRelations() {
     std::cerr << osm2rdf::util::currentTimeFormatted()
               << " Closing statistics files..." << std::endl;
     _statistics.close("[\n", "{}\n]");
+    _containsStatistics.close();
     std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
               << std::endl;
   }
@@ -452,11 +477,24 @@ void osm2rdf::osm::GeometryHandler<W>::calculateRelations() {
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::prepareRTree() {
+  std::cerr << std::endl;
+  std::cerr << osm2rdf::util::currentTimeFormatted() << " Sorting "
+            << _spatialStorageArea.size() << " areas ... " << std::endl;
+  std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
+            [](const auto& a, const auto& b) {
+              return std::get<4>(a) > std::get<4>(b);
+            });
+  std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done "
+              << std::endl;
+
   std::cerr << osm2rdf::util::currentTimeFormatted()
             << " Packing area r-tree with " << _spatialStorageArea.size()
             << " entries ... " << std::endl;
-  _spatialIndex =
-      SpatialIndex(_spatialStorageArea.begin(), _spatialStorageArea.end());
+
+  for (size_t i = 0; i < _spatialStorageArea.size();i++) {
+    _spatialIndex.insert(SpatialAreaRefValue(std::get<0>(_spatialStorageArea[i]), i));
+  }
+
   std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
             << std::endl;
 }
@@ -467,21 +505,12 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
   // Store dag
   osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t> tmpDirectedAreaGraph;
   {
-    std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " Sorting "
-              << _spatialStorageArea.size() << " areas ... " << std::endl;
-    std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
-              [](const auto& a, const auto& b) {
-                return std::get<4>(a) < std::get<4>(b);
-              });
     // Prepare id based lookup table for later usage...
     _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
     for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
       const auto& area = _spatialStorageArea[i];
       _spatialStorageAreaIndex[std::get<1>(area)] = i;
     }
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done "
-              << std::endl;
 
     std::cerr << osm2rdf::util::currentTimeFormatted()
               << " Generating non-reduced DAG from "
@@ -496,26 +525,30 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
     size_t skippedBySize = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(tmpDirectedAreaGraph,           \
+    std::cout, \
     entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
     contains, containsOk) default(none) schedule(dynamic)
+
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
+
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skip;
-      std::vector<SpatialAreaValue> queryResult;
+      std::vector<SpatialAreaRefValue> queryResult;
       _spatialIndex.query(boost::geometry::index::covers(entryEnvelope),
                           std::back_inserter(queryResult));
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
-                [](const auto& a, const auto& b) {
-                  return std::get<4>(a) < std::get<4>(b);
+                [this](const auto& a, const auto& b) {
+                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
                 });
 
-      for (const auto& area : queryResult) {
+      for (const auto& areaRef : queryResult) {
+        const auto& area = _spatialStorageArea[areaRef.second];
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
 
@@ -564,10 +597,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         }
 #pragma omp critical(addEdge)
         tmpDirectedAreaGraph.addEdge(entryId, areaId);
-        for (const auto& newSkip :
-             tmpDirectedAreaGraph.findSuccessors(entryId)) {
-          skip.insert(newSkip);
-        }
+        const auto& successors = tmpDirectedAreaGraph.findSuccessors(entryId);
+        skip.insert(successors.begin(), successors.end());
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
@@ -742,7 +773,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
       ia >> entry;
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
-      const auto& entryGeom = std::get<2>(entry);
       const auto& entryObjId = std::get<3>(entry);
       const auto& entryFromWay = std::get<5>(entry);
       std::string entryIRI = _writer->generateIRI(
@@ -756,18 +786,20 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skipContains;
 
-      std::vector<SpatialAreaValue> queryResult;
+      std::vector<SpatialAreaRefValue> queryResult;
       _spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),
                           std::back_inserter(queryResult));
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
-                [](const auto& a, const auto& b) {
-                  return std::get<4>(a) < std::get<4>(b);
+                [this](const auto& a, const auto& b) {
+                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
                 });
-      for (const auto& area : queryResult) {
+
+
+      for (const auto& areaRef : queryResult) {
+        const auto& area = _spatialStorageArea[areaRef.second];
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
-        const auto& areaGeom = std::get<2>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
         if (areaId == entryId) {
@@ -789,7 +821,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
 #endif
-          doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
+          // doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
+          doesIntersect = areaIntersectsArea(entry, area);
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
@@ -803,10 +836,10 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
           }
           intersectsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipIntersects.insert(newSkip);
-          }
+          const auto& successors =
+              _directedAreaGraph.findSuccessorsFast(areaId);
+          skipIntersects.insert(successors.begin(), successors.end());
+
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -821,12 +854,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         } else {
           containsChecks++;
 #ifdef ENABLE_GEOMETRY_STATISTIC
-          start = std::chrono::steady_clock::now();
+          auto start = std::chrono::steady_clock::now();
 #endif
           bool isCoveredByEnvelope =
               boost::geometry::covered_by(entryEnvelope, areaEnvelope);
 #ifdef ENABLE_GEOMETRY_STATISTIC
-          end = std::chrono::steady_clock::now();
+          auto end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredByEnvelope", areaId, "area", entryId,
@@ -856,10 +889,10 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
           }
           containsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipContains.insert(newSkip);
-          }
+          const auto& successors =
+              _directedAreaGraph.findSuccessorsFast(areaId);
+          skipContains.insert(successors.begin(), successors.end());
+
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               entryIRI);
@@ -942,15 +975,17 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skip;
-      std::vector<SpatialAreaValue> queryResult;
+      std::vector<SpatialAreaRefValue> queryResult;
       _spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                           std::back_inserter(queryResult));
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
-                [](const auto& a, const auto& b) {
-                  return std::get<4>(a) < std::get<4>(b);
+                [this](const auto& a, const auto& b) {
+                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
                 });
-      for (const auto& area : queryResult) {
+
+      for (const auto& areaRef : queryResult) {
+        const auto& area = _spatialStorageArea[areaRef.second];
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
@@ -980,10 +1015,10 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
         }
         containsOk++;
         skip.insert(areaId);
-        for (const auto& newSkip :
-             _directedAreaGraph.findSuccessorsFast(areaId)) {
-          skip.insert(newSkip);
-        }
+
+        const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+        skip.insert(successors.begin(), successors.end());
+
         std::string areaIRI = _writer->generateIRI(
             areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
                         : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
@@ -1018,6 +1053,7 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2rdf::osm::NodesContainedInAreasData& nodeData) {
+
   if (_config.noWayGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << osm2rdf::util::currentTimeFormatted() << " "
@@ -1056,19 +1092,27 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
     osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
     progressBar, entryCount, ia) reduction(+:areas,intersectsSkippedByDAG, containsSkippedByDAG, skippedInDAG, \
-    intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
+      intersectsByNodeInfo, intersectsChecks, intersectsOk, containsChecks, containsOk, containsOkEnvelope)    \
     default(none) schedule(dynamic)
+
     for (size_t i = 0; i < _numWays; i++) {
       SpatialWayValue way;
+
 #pragma omp critical(loadEntry)
       ia >> way;
+
       const auto& wayEnvelope = std::get<0>(way);
+      const auto& wayEnvelopes = std::get<4>(way);
       const auto& wayId = std::get<1>(way);
+      const auto& wayGeom = std::get<2>(way);
       const auto& wayNodeIds = std::get<3>(way);
 
       // Check if our "area" has successors in the DAG, if yes we are part of
       // the DAG and don't need to calculate any relation again.
-      if (!_directedAreaGraph.findSuccessorsFast(wayId * 2).empty()) {
+
+      const auto& successors = _directedAreaGraph.findSuccessorsFast(wayId * 2);
+
+      if (!successors.empty()) {
         skippedInDAG++;
         continue;
       }
@@ -1094,16 +1138,35 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           skipNodeContained.insert(areaId);
         }
       }
+      std::vector<SpatialAreaRefValue> queryResult;
 
-      std::vector<SpatialAreaValue> queryResult;
-      _spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
-                          std::back_inserter(queryResult));
-      // small -> big
+      for (const auto& wayEnvelope : wayEnvelopes) {
+        _spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
+                            std::back_inserter(queryResult));
+      }
+
+      // remove duplicates
       std::sort(queryResult.begin(), queryResult.end(),
                 [](const auto& a, const auto& b) {
-                  return std::get<4>(a) < std::get<4>(b);
+                  return a.second < b.second;
                 });
-      for (const auto& area : queryResult) {
+      auto last = std::unique(queryResult.begin(), queryResult.end(),
+                [](const auto& a, const auto& b) {
+                  return a.second == b.second;
+                });
+
+      // duplicates were swapped to  the end of vector, beginning at last
+      queryResult.erase(last, queryResult.end());
+
+      // small -> big
+      std::sort(queryResult.begin(), queryResult.end(),
+                [this](const auto& a, const auto& b) {
+                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
+                });
+
+      for (const auto& areaRef : queryResult) {
+        const auto& area = _spatialStorageArea[areaRef.second];
+
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
@@ -1115,10 +1178,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
         areas++;
 
         bool doesIntersect = false;
-        std::string areaIRI = _writer->generateIRI(
-            areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                        : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-            areaObjId);
         if (skipIntersects.find(areaId) != skipIntersects.end()) {
           intersectsSkippedByDAG++;
           doesIntersect = true;
@@ -1126,10 +1185,16 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           intersectsByNodeInfo++;
           doesIntersect = true;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipIntersects.insert(newSkip);
-          }
+          const auto& successors =
+              _directedAreaGraph.findSuccessorsFast(areaId);
+
+          skipIntersects.insert(successors.begin(), successors.end());
+
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
+
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -1139,9 +1204,13 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
 #endif
+
           doesIntersect = wayIntersectsArea(way, area);
+
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
+#endif
+#ifdef ENABLE_GEOMETRY_STATISTIC
           if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "doesIntersect", areaId, "area", wayId, "way",
@@ -1153,10 +1222,16 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           }
           intersectsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipIntersects.insert(newSkip);
-          }
+          const auto& successors =
+              _directedAreaGraph.findSuccessorsFast(areaId);
+
+          skipIntersects.insert(successors.begin(), successors.end());
+
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
+
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -1170,12 +1245,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
         } else {
           containsChecks++;
 #ifdef ENABLE_GEOMETRY_STATISTIC
-          start = std::chrono::steady_clock::now();
+          auto start = std::chrono::steady_clock::now();
 #endif
           bool isCoveredByEnvelope =
               boost::geometry::covered_by(wayEnvelope, areaEnvelope);
 #ifdef ENABLE_GEOMETRY_STATISTIC
-          end = std::chrono::steady_clock::now();
+          auto end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredByEnvelope", areaId, "area", wayId,
@@ -1187,15 +1262,14 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             continue;
           }
           containsOkEnvelope++;
-#ifdef ENABLE_GEOMETRY_STATISTIC
-          start = std::chrono::steady_clock::now();
-#endif
 
           bool isCoveredBy = wayInArea(way, area);
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
-          end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
+            printWayAreaStats(
+                way, area,
+                std::chrono::nanoseconds(end - start).count() / 1000);
             _statistics.write(statisticLine(
                 __func__, "Way", "isCoveredBy2", areaId, "area", wayId, "way",
                 std::chrono::nanoseconds(end - start), isCoveredBy));
@@ -1206,10 +1280,16 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           }
           containsOk++;
 
-          for (const auto& newSkip :
-               _directedAreaGraph.findSuccessorsFast(areaId)) {
-            skipContains.insert(newSkip);
-          }
+          const auto& successors =
+              _directedAreaGraph.findSuccessorsFast(areaId);
+
+          skipContains.insert(successors.begin(), successors.end());
+
+          std::string areaIRI = _writer->generateIRI(
+              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
+                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
+              areaObjId);
+
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               wayIRI);
@@ -1239,6 +1319,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     std::cerr << osm2rdf::util::formattedTimeSpacer << " " << skippedInDAG
               << " ways are areas in the DAG -> skipped calculations for them"
               << std::endl;
+    std::cerr << osm2rdf::util::formattedTimeSpacer << " "
+              << (static_cast<double>(areas) / (_numWays - skippedInDAG))
+              << " areas checked per geometry on average" << std::endl;
   }
 }
 
@@ -1272,10 +1355,39 @@ bool osm2rdf::osm::GeometryHandler<W>::nodeInArea(
 
 // ____________________________________________________________________________
 template <typename W>
+bool osm2rdf::osm::GeometryHandler<W>::areaIntersectsArea(
+    const SpatialAreaValue& a, const SpatialAreaValue& b) const {
+  const auto& geomA = std::get<2>(a);
+  const auto& geomB = std::get<2>(b);
+  const auto& innerGeomA = std::get<6>(a);
+  const auto& outerGeomA = std::get<7>(a);
+  const auto& innerGeomB = std::get<6>(b);
+  const auto& outerGeomB = std::get<7>(b);
+
+  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+      boost::geometry::is_empty(outerGeomB)) {
+    return boost::geometry::intersects(geomA, geomB);
+  }
+
+  if (boost::geometry::intersects(innerGeomA, innerGeomB)) {
+    // if simplified inner intersect, we definitely intersect
+    return true;
+  } else if (!boost::geometry::intersects(outerGeomA, outerGeomB)) {
+    // if NOT intersecting simplified outer, we are definitely NOT
+    // intersecting
+    return false;
+  } else if (boost::geometry::intersects(geomA, geomB)) {
+    return true;
+  }
+
+  return false;
+}
+
+// ____________________________________________________________________________
+template <typename W>
 bool osm2rdf::osm::GeometryHandler<W>::wayIntersectsArea(
     const SpatialWayValue& a, const SpatialAreaValue& b) const {
   const auto& geomA = std::get<2>(a);
-
   const auto& geomB = std::get<2>(b);
   const auto& envelopeB = std::get<0>(b);
   const auto& innerGeomB = std::get<6>(b);
@@ -1283,6 +1395,10 @@ bool osm2rdf::osm::GeometryHandler<W>::wayIntersectsArea(
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
+    if (!boost::geometry::intersects(geomA, envelopeB))
+      // if does not intersect with envelope, we definitely dont intersect
+      return false;
+
     return boost::geometry::intersects(geomA, geomB);
   }
 
@@ -1310,6 +1426,7 @@ template <typename W>
 bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
     const SpatialWayValue& a, const SpatialAreaValue& b) const {
   const auto& geomA = std::get<2>(a);
+  const auto& envelopeA = std::get<0>(a);
 
   const auto& geomB = std::get<2>(b);
   const auto& innerGeomB = std::get<6>(b);
@@ -1320,18 +1437,28 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
     return boost::geometry::covered_by(geomA, geomB);
   }
 
-  // if (boost::geometry::covered_by(wayEnvelope, areaInnerGeom)) {
-  // // if envelope covered by simplified inner, we are definitely
-  // contained isCoveredBy = true;
-  if (boost::geometry::covered_by(geomA, innerGeomB)) {
+  boost::geometry::model::ring<osm2rdf::geometry::Location> ring;
+  ring.push_back(envelopeA.min_corner());
+  ring.push_back(
+      {envelopeA.min_corner().get<0>(), envelopeA.max_corner().get<1>()});
+  ring.push_back(envelopeA.max_corner());
+  ring.push_back(
+      {envelopeA.max_corner().get<0>(), envelopeA.min_corner().get<1>()});
+  ring.push_back(envelopeA.min_corner());
+  osm2rdf::geometry::Polygon bboxPoly;
+  bboxPoly.inners().push_back(ring);
+
+  if (boost::geometry::covered_by(bboxPoly, innerGeomB)) {
+    // if envelope covered by simplified inner, we are definitely
+    // contained
+    return true;
+  } else if (boost::geometry::covered_by(geomA, innerGeomB)) {
     // if covered by simplified inner, we are definitely contained
     return true;
   } else if (!boost::geometry::covered_by(geomA, outerGeomB)) {
     // if NOT covered by simplified outer, we are definitely NOT
     // contained
     return false;
-    // } else if (boost::geometry::covered_by(wayEnvelope, areaGeom)) {
-    // isCoveredBy= true;
   } else if (boost::geometry::covered_by(geomA, geomB)) {
     return true;
   }
@@ -1343,10 +1470,12 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
 template <typename W>
 bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     const SpatialAreaValue& a, const SpatialAreaValue& b) const {
+  const auto& envelopeA = std::get<0>(a);
   const auto& geomA = std::get<2>(a);
   const auto& innerGeomA = std::get<6>(a);
   const auto& outerGeomA = std::get<7>(a);
 
+  const auto& envelopeB = std::get<0>(b);
   const auto& geomB = std::get<2>(b);
   const auto& innerGeomB = std::get<6>(b);
   const auto& outerGeomB = std::get<7>(b);
@@ -1363,11 +1492,12 @@ bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     // definitely contained
     // assert(boost::geometry::covered_by(geomA, geomB));
     return true;
-  } else if (!boost::geometry::covered_by(innerGeomA, outerGeomB)) {
-    // if simplified inner is not covered by simplified outer, we are
-    // definitely not contained
-    // assert(!boost::geometry::covered_by(geomA, geomB));
-    return false;
+  }
+  // } else if (!boost::geometry::covered_by(innerGeomA, outerGeomB)) {
+    // // if simplified inner is not covered by simplified outer, we are
+    // // definitely not contained
+    // // assert(!boost::geometry::covered_by(geomA, geomB));
+    // return false;
     // } else if (boost::geometry::covered_by(entryGeom, areaInnerGeom)) {
     // // if covered by simplified inner, we are definitely contained
     // isCoveredBy = true;
@@ -1375,7 +1505,8 @@ bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     // {
     // // if NOT covered by simplified out, we are definitely not
     // contained isCoveredBy = false;
-  } else if (boost::geometry::covered_by(geomA, geomB)) {
+
+  if (boost::geometry::covered_by(geomA, geomB)) {
     return true;
   }
 
@@ -1395,6 +1526,40 @@ int osm2rdf::osm::GeometryHandler<W>::polygonOrientation(
   }
 
   return sum < 0 ? -1 : sum > 0 ? 1 : 0;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::GeometryHandler<W>::printWayAreaStats(
+    const SpatialWayValue& way, const SpatialAreaValue& area, double usec) {
+  const auto& areaGeom = std::get<2>(area);
+  const auto& areaGeomInner = std::get<6>(area);
+  const auto& areaGeomOuter = std::get<7>(area);
+
+  const auto& wayGeom = std::get<2>(way);
+
+  size_t numWayPoints = wayGeom.size();
+  size_t numAreaPoints = 0;
+
+  const auto& areaOSMId = std::get<3>(area);
+  const auto& wayOSMId = std::get<1>(way);
+
+  // take total number of points of all polygons in multipolygon, also counting
+  // inners
+  for (const auto& p : areaGeom) {
+    numAreaPoints += p.outer().size();
+    for (const auto& inner : p.inners()) {
+      numAreaPoints += inner.size();
+    }
+  }
+
+  std::stringstream ss;
+  ss << wayOSMId << "\t" << numWayPoints << "\t"
+     << boost::geometry::wkt(wayGeom) << "\t" << areaOSMId << "\t"
+     << "\t" << numAreaPoints << boost::geometry::wkt(areaGeom) << "\t"
+     << boost::geometry::wkt(areaGeomInner) << "\t"
+     << boost::geometry::wkt(areaGeomOuter) << "\t" << usec << "\n";
+  _containsStatistics.write(ss.str());
 }
 
 // ____________________________________________________________________________

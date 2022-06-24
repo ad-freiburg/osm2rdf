@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
@@ -38,13 +39,14 @@
 #include "osm2rdf/util/Output.h"
 
 namespace osm2rdf::osm {
-
 // Area: envelope, id, geometry, osm id, area, fromWay
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t,
                    osm2rdf::geometry::Area, osm2rdf::osm::Area::id_t,
                    osm2rdf::geometry::area_result_t, bool,
                    osm2rdf::geometry::Area, osm2rdf::geometry::Area>
     SpatialAreaValue;
+
+typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
 
 typedef std::vector<SpatialAreaValue> SpatialAreaVector;
 
@@ -58,12 +60,12 @@ typedef std::vector<osm2rdf::osm::Node::id_t> WayNodeList;
 
 // Way: envelope, osm id, geometry, node list
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
-                   osm2rdf::geometry::Way, WayNodeList>
+                   osm2rdf::geometry::Way, WayNodeList, std::vector<osm2rdf::geometry::Box>>
     SpatialWayValue;
 typedef std::vector<SpatialWayValue> SpatialWayVector;
 
-typedef boost::geometry::index::rtree<SpatialAreaValue,
-                                      boost::geometry::index::quadratic<16>>
+typedef boost::geometry::index::rtree<SpatialAreaRefValue,
+                                      boost::geometry::index::quadratic<32>>
     SpatialIndex;
 
 // node osm id -> area ids (not osm id)
@@ -151,9 +153,16 @@ class GeometryHandler {
   bool wayIntersectsArea(const SpatialWayValue& a,
                          const SpatialAreaValue&) const;
 
-  static double signedDistanceFromPointToLine(const osm2rdf::geometry::Location& A,
-                                       const osm2rdf::geometry::Location& B,
-                                       const osm2rdf::geometry::Location& C);
+  bool areaIntersectsArea(const SpatialAreaValue& a,
+                         const SpatialAreaValue&) const;
+
+  void printWayAreaStats(const SpatialWayValue& way,
+                         const SpatialAreaValue& area, double usec);
+
+  static double signedDistanceFromPointToLine(
+      const osm2rdf::geometry::Location& A,
+      const osm2rdf::geometry::Location& B,
+      const osm2rdf::geometry::Location& C);
 
   template <int MODE>
   bool ioDouglasPeucker(
@@ -165,13 +174,16 @@ class GeometryHandler {
       const boost::geometry::model::ring<osm2rdf::geometry::Location>&
           inputPoints);
 
-  osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g, bool inner) const;
+  osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g,
+                                         bool inner) const;
 
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
   // Statistics
   osm2rdf::util::Output _statistics;
+  // Detailed contains statistics
+  osm2rdf::util::Output _containsStatistics;
   // Store areas as r-tree
   SpatialIndex _spatialIndex;
   // Store dag
@@ -221,6 +233,7 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialWayValue& v,
   ar& boost::serialization::make_nvp("id", std::get<1>(v));
   ar& boost::serialization::make_nvp("geom", std::get<2>(v));
   ar& boost::serialization::make_nvp("nodeIds", std::get<3>(v));
+  ar& boost::serialization::make_nvp("boxes", std::get<4>(v));
 }
 
 template <class Archive>

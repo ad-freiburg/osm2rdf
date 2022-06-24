@@ -322,16 +322,22 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_HELP);
 
   auto simplifyGeometriesOp =
-      op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
+      op.add<popl::Value<double>, popl::Attribute::expert>(
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_SHORT,
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_HELP,
           simplifyGeometries);
-  auto dontUseInnerOuterGeomsOp =
-      op.add<popl::Switch>(
-          osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
-          osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
-          osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
+
+  auto simplifyGeometriesInnerOuterOp = op.add<popl::Value<double>,
+                                               popl::Attribute::expert>(
+      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_SHORT,
+      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG,
+      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP,
+      simplifyGeometriesInnerOuter);
+  auto dontUseInnerOuterGeomsOp = op.add<popl::Switch>(
+      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
+      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
+      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
   auto simplifyWKTOp = op.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
@@ -445,6 +451,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();
+    simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();
     dontUseInnerOuterGeoms = dontUseInnerOuterGeomsOp->value();
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
@@ -480,12 +487,15 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     rdfStatisticsPath += osm2rdf::config::constants::JSON_EXTENSION;
     geomStatisticsPath = std::filesystem::path(output);
     geomStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
+    containsStatisticsPath = std::filesystem::path(output);
+    containsStatisticsPath += ".contains" + osm2rdf::config::constants::STATS_EXTENSION;
 
     // Mark compressed output
     if (outputCompress && !output.empty() &&
         output.extension() != osm2rdf::config::constants::BZIP2_EXTENSION) {
       output += osm2rdf::config::constants::BZIP2_EXTENSION;
       geomStatisticsPath += osm2rdf::config::constants::BZIP2_EXTENSION;
+      containsStatisticsPath += osm2rdf::config::constants::BZIP2_EXTENSION;
     }
 
     // osmium location cache

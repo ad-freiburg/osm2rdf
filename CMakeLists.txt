@@ -36,11 +36,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ----------------------------------------------------------------------------
 # Global settings
 # ----------------------------------------------------------------------------
-# Enable geometry statistics
-#add_definitions(-DENABLE_GEOMETRY_STATISTIC)
+
+option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enable" 0)
+
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Enable verbose makefile
-#set(CMAKE_VERBOSE_MAKEFILE ON)
+if (ENABLE_GEOMETRY_STATISTIC)
+	# Enable geometry statistics
+	add_definitions(-DENABLE_GEOMETRY_STATISTIC)
+endif()
 
 add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)

@@ -43,7 +43,8 @@ struct Config {
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
   bool noWayGeometricRelations = false;
-  uint16_t simplifyGeometries = 0;
+  double simplifyGeometries = 0;
+  double simplifyGeometriesInnerOuter = 1/(3.14 * 20);
   bool dontUseInnerOuterGeoms = false;
 
   // Select amount to dump
@@ -72,6 +73,7 @@ struct Config {
   // Statistics
   bool writeGeometricRelationStatistics = false;
   std::filesystem::path geomStatisticsPath;
+  std::filesystem::path containsStatisticsPath;
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
