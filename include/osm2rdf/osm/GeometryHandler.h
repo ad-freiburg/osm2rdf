@@ -71,6 +71,8 @@ typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t,
                    osm2rdf::geometry::Area, osm2rdf::geometry::Area>
     SpatialAreaValue;
 
+typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
+
 typedef std::vector<SpatialAreaValue> SpatialAreaVector;
 
 // Node: envelope, osm  id, geometry
@@ -87,7 +89,7 @@ typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
     SpatialWayValue;
 typedef std::vector<SpatialWayValue> SpatialWayVector;
 
-typedef boost::geometry::index::rtree<SpatialAreaValue,
+typedef boost::geometry::index::rtree<SpatialAreaRefValue,
                                       boost::geometry::index::quadratic<16>>
     SpatialIndex;
 
