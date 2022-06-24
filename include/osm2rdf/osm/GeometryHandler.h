@@ -19,10 +19,10 @@
 #ifndef OSM2RDF_OSM_GEOMETRYHANDLER_H_
 #define OSM2RDF_OSM_GEOMETRYHANDLER_H_
 
+#include <iostream>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <iostream>
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
@@ -60,7 +60,8 @@ typedef std::vector<osm2rdf::osm::Node::id_t> WayNodeList;
 
 // Way: envelope, osm id, geometry, node list
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
-                   osm2rdf::geometry::Way, WayNodeList, std::vector<osm2rdf::geometry::Box>>
+                   osm2rdf::geometry::Way, WayNodeList,
+                   std::vector<osm2rdf::geometry::Box>>
     SpatialWayValue;
 typedef std::vector<SpatialWayValue> SpatialWayVector;
 
@@ -154,7 +155,7 @@ class GeometryHandler {
                          const SpatialAreaValue&) const;
 
   bool areaIntersectsArea(const SpatialAreaValue& a,
-                         const SpatialAreaValue&) const;
+                          const SpatialAreaValue&) const;
 
   void printWayAreaStats(const SpatialWayValue& way,
                          const SpatialAreaValue& area, double usec);

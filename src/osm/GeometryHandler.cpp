@@ -180,7 +180,9 @@ void osm2rdf::osm::GeometryHandler<W>::way(const osm2rdf::osm::Way& way) {
     while (i < geom.size()) {
       osm2rdf::geometry::Box box;
 
-      osm2rdf::geometry::Way tmp(geom.begin() + i, geom.begin() + std::min(i + CHUNKSIZE, geom.size()));
+      osm2rdf::geometry::Way tmp(
+          geom.begin() + i,
+          geom.begin() + std::min(i + CHUNKSIZE, geom.size()));
 
       boost::geometry::envelope(tmp, box);
       boxes.push_back(box);
@@ -485,14 +487,15 @@ void osm2rdf::osm::GeometryHandler<W>::prepareRTree() {
               return std::get<4>(a) > std::get<4>(b);
             });
   std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done "
-              << std::endl;
+            << std::endl;
 
   std::cerr << osm2rdf::util::currentTimeFormatted()
             << " Packing area r-tree with " << _spatialStorageArea.size()
             << " entries ... " << std::endl;
 
-  for (size_t i = 0; i < _spatialStorageArea.size();i++) {
-    _spatialIndex.insert(SpatialAreaRefValue(std::get<0>(_spatialStorageArea[i]), i));
+  for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
+    _spatialIndex.insert(
+        SpatialAreaRefValue(std::get<0>(_spatialStorageArea[i]), i));
   }
 
   std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
@@ -544,7 +547,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
                 [this](const auto& a, const auto& b) {
-                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
+                  return std::get<4>(_spatialStorageArea[a.second]) <
+                         std::get<4>(_spatialStorageArea[b.second]);
                 });
 
       for (const auto& areaRef : queryResult) {
@@ -792,9 +796,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
                 [this](const auto& a, const auto& b) {
-                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
+                  return std::get<4>(_spatialStorageArea[a.second]) <
+                         std::get<4>(_spatialStorageArea[b.second]);
                 });
-
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
@@ -981,7 +985,8 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
                 [this](const auto& a, const auto& b) {
-                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
+                  return std::get<4>(_spatialStorageArea[a.second]) <
+                         std::get<4>(_spatialStorageArea[b.second]);
                 });
 
       for (const auto& areaRef : queryResult) {
@@ -1053,7 +1058,6 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2rdf::osm::NodesContainedInAreasData& nodeData) {
-
   if (_config.noWayGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << osm2rdf::util::currentTimeFormatted() << " "
@@ -1146,14 +1150,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
       }
 
       // remove duplicates
-      std::sort(queryResult.begin(), queryResult.end(),
-                [](const auto& a, const auto& b) {
-                  return a.second < b.second;
-                });
-      auto last = std::unique(queryResult.begin(), queryResult.end(),
-                [](const auto& a, const auto& b) {
-                  return a.second == b.second;
-                });
+      std::sort(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second < b.second; });
+      auto last = std::unique(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second == b.second; });
 
       // duplicates were swapped to  the end of vector, beginning at last
       queryResult.erase(last, queryResult.end());
@@ -1161,7 +1163,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
                 [this](const auto& a, const auto& b) {
-                  return std::get<4>(_spatialStorageArea[a.second]) < std::get<4>(_spatialStorageArea[b.second]);
+                  return std::get<4>(_spatialStorageArea[a.second]) <
+                         std::get<4>(_spatialStorageArea[b.second]);
                 });
 
       for (const auto& areaRef : queryResult) {
@@ -1494,17 +1497,17 @@ bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     return true;
   }
   // } else if (!boost::geometry::covered_by(innerGeomA, outerGeomB)) {
-    // // if simplified inner is not covered by simplified outer, we are
-    // // definitely not contained
-    // // assert(!boost::geometry::covered_by(geomA, geomB));
-    // return false;
-    // } else if (boost::geometry::covered_by(entryGeom, areaInnerGeom)) {
-    // // if covered by simplified inner, we are definitely contained
-    // isCoveredBy = true;
-    // } else if (!boost::geometry::covered_by(entryGeom, areaOuterGeom))
-    // {
-    // // if NOT covered by simplified out, we are definitely not
-    // contained isCoveredBy = false;
+  // // if simplified inner is not covered by simplified outer, we are
+  // // definitely not contained
+  // // assert(!boost::geometry::covered_by(geomA, geomB));
+  // return false;
+  // } else if (boost::geometry::covered_by(entryGeom, areaInnerGeom)) {
+  // // if covered by simplified inner, we are definitely contained
+  // isCoveredBy = true;
+  // } else if (!boost::geometry::covered_by(entryGeom, areaOuterGeom))
+  // {
+  // // if NOT covered by simplified out, we are definitely not
+  // contained isCoveredBy = false;
 
   if (boost::geometry::covered_by(geomA, geomB)) {
     return true;
