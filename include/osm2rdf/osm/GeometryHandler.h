@@ -39,31 +39,6 @@
 #include "osm2rdf/util/Output.h"
 
 namespace osm2rdf::osm {
-
-struct TimeStatsWayRels {
-  double timeTotal = 0, timeWayInArea = 0, timeWayIntersectsArea = 0, spatialValExtract = 0, findSuccessors = 0, generateIRI = 0, storeKnownAreas = 0, rTree = 0, skipIntersectsInsert = 0, skipContainsInsert = 0, writeTriple = 0, skipIntersectsLookup = 0, skipContainsLookup = 0;
-
-  void print(double numWays) {
-    std::cerr << "COLLECTED TIME STATS FOR WAY IN AREA: \n";
-    std::cerr << std::fixed << " numWays: " << numWays << "\n";
-    std::cerr << " spatialValExtract: " << spatialValExtract / 1000000000.0 << " (" << (spatialValExtract / 1000000000.0)/numWays << ")" << "\n";
-    std::cerr << " storeKnownAreas: " << storeKnownAreas  / 1000000000.0<< " (" << (storeKnownAreas / 1000000000.0)/numWays << ")" << "\n";
-    std::cerr << " rTree: " << rTree  / 1000000000.0<< " (" << (rTree / 1000000000.0)/numWays << ")" << "\n";
-    std::cerr << " findSuccessors: " << findSuccessors  / 1000000000.0<< " (" << (findSuccessors / 1000000000.0)/numWays << ")" << "\n";
-    std::cerr << " generateIRI: " << generateIRI  / 1000000000.0<< " (" << (generateIRI / 1000000000.0)/numWays << ")" << "\n";
-;
-    std::cerr << " writeTriple: " << writeTriple  / 1000000000.0<< " (" << (writeTriple / 1000000000.0)/numWays << ")" << "\n";
-
-    std::cerr << " skipIntersectsInsert: " << skipIntersectsInsert  / 1000000000.0<< " (" << (skipIntersectsInsert / 1000000000.0)/numWays << ")" << "\n";
-    std::cerr << " skipContainsInsert: " << skipContainsInsert  / 1000000000.0<< " (" << (skipContainsInsert / 1000000000.0)/numWays << ")" << "\n";
-    std::cerr << " geo intersect: " << timeWayIntersectsArea  / 1000000000.0<< " (" << (timeWayIntersectsArea / 1000000000.0)/numWays << ")" << "\n";
-    std::cerr << " geo contains: " << timeWayInArea  / 1000000000.0<< " (" << (timeWayInArea / 1000000000.0)/numWays << ")" << "\n\n";
-    std::cerr << " TOTAL ABOVE: " << (spatialValExtract + storeKnownAreas + rTree + findSuccessors + generateIRI + writeTriple + skipIntersectsInsert + skipContainsInsert + timeWayIntersectsArea + timeWayInArea)  / 1000000000.0 << "\n";
-    std::cerr << " TOTAL MEASURED: " << timeTotal  / 1000000000.0 << "\n";
-
-  }
-};
-
 // Area: envelope, id, geometry, osm id, area, fromWay
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t,
                    osm2rdf::geometry::Area, osm2rdf::osm::Area::id_t,
