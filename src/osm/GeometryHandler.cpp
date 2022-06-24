@@ -482,7 +482,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareRTree() {
             << _spatialStorageArea.size() << " areas ... " << std::endl;
   std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
             [](const auto& a, const auto& b) {
-              return std::get<4>(a) < std::get<4>(b);
+              return std::get<4>(a) > std::get<4>(b);
             });
   std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done "
               << std::endl;
