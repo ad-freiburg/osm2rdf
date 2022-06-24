@@ -60,12 +60,12 @@ typedef std::vector<osm2rdf::osm::Node::id_t> WayNodeList;
 
 // Way: envelope, osm id, geometry, node list
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
-                   osm2rdf::geometry::Way, WayNodeList>
+                   osm2rdf::geometry::Way, WayNodeList, std::vector<osm2rdf::geometry::Box>>
     SpatialWayValue;
 typedef std::vector<SpatialWayValue> SpatialWayVector;
 
 typedef boost::geometry::index::rtree<SpatialAreaRefValue,
-                                      boost::geometry::index::quadratic<16>>
+                                      boost::geometry::index::quadratic<32>>
     SpatialIndex;
 
 // node osm id -> area ids (not osm id)
@@ -153,6 +153,9 @@ class GeometryHandler {
   bool wayIntersectsArea(const SpatialWayValue& a,
                          const SpatialAreaValue&) const;
 
+  bool areaIntersectsArea(const SpatialAreaValue& a,
+                         const SpatialAreaValue&) const;
+
   void printWayAreaStats(const SpatialWayValue& way,
                          const SpatialAreaValue& area, double usec);
 
@@ -230,6 +233,7 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialWayValue& v,
   ar& boost::serialization::make_nvp("id", std::get<1>(v));
   ar& boost::serialization::make_nvp("geom", std::get<2>(v));
   ar& boost::serialization::make_nvp("nodeIds", std::get<3>(v));
+  ar& boost::serialization::make_nvp("boxes", std::get<4>(v));
 }
 
 template <class Archive>

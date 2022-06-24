@@ -170,9 +170,29 @@ void osm2rdf::osm::GeometryHandler<W>::way(const osm2rdf::osm::Way& way) {
   if (_config.simplifyGeometries > 0) {
     geom = simplifyGeometry(geom);
   }
+
+  std::vector<osm2rdf::geometry::Box> boxes;
+
+  size_t CHUNKSIZE = 25;
+
+  if (geom.size() >= 2 * CHUNKSIZE) {
+    size_t i = 0;
+    while (i < geom.size()) {
+      osm2rdf::geometry::Box box;
+
+      osm2rdf::geometry::Way tmp(geom.begin() + i, geom.begin() + std::min(i + CHUNKSIZE, geom.size()));
+
+      boost::geometry::envelope(tmp, box);
+      boxes.push_back(box);
+      i += CHUNKSIZE;
+    }
+  } else {
+    boxes.push_back(way.envelope());
+  }
+
 #pragma omp critical(wayDataInsert)
   {
-    _oaWays << SpatialWayValue(way.envelope(), way.id(), geom, nodeIds);
+    _oaWays << SpatialWayValue(way.envelope(), way.id(), geom, nodeIds, boxes);
     _numWays++;
   }
 }
@@ -752,7 +772,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
       ia >> entry;
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
-      const auto& entryGeom = std::get<2>(entry);
       const auto& entryObjId = std::get<3>(entry);
       const auto& entryFromWay = std::get<5>(entry);
       std::string entryIRI = _writer->generateIRI(
@@ -780,7 +799,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         const auto& area = _spatialStorageArea[areaRef.second];
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
-        const auto& areaGeom = std::get<2>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromWay = std::get<5>(area);
         if (areaId == entryId) {
@@ -802,7 +820,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
 #endif
-          doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
+          // doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
+          doesIntersect = areaIntersectsArea(entry, area);
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
           if (_config.writeGeometricRelationStatistics) {
@@ -1082,7 +1101,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
       ia >> way;
 
       const auto& wayEnvelope = std::get<0>(way);
+      const auto& wayEnvelopes = std::get<4>(way);
       const auto& wayId = std::get<1>(way);
+      const auto& wayGeom = std::get<2>(way);
       const auto& wayNodeIds = std::get<3>(way);
 
       // Check if our "area" has successors in the DAG, if yes we are part of
@@ -1117,8 +1138,25 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
         }
       }
       std::vector<SpatialAreaRefValue> queryResult;
-      _spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
-                          std::back_inserter(queryResult));
+
+      for (const auto& wayEnvelope : wayEnvelopes) {
+        _spatialIndex.query(boost::geometry::index::intersects(wayEnvelope),
+                            std::back_inserter(queryResult));
+      }
+
+      // remove duplicates
+      std::sort(queryResult.begin(), queryResult.end(),
+                [](const auto& a, const auto& b) {
+                  return a.second < b.second;
+                });
+      auto last = std::unique(queryResult.begin(), queryResult.end(),
+                [](const auto& a, const auto& b) {
+                  return a.second == b.second;
+                });
+
+      // duplicates were swapped to  the end of vector, beginning at last
+      queryResult.erase(last, queryResult.end());
+
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
                 [this](const auto& a, const auto& b) {
@@ -1308,6 +1346,36 @@ bool osm2rdf::osm::GeometryHandler<W>::nodeInArea(
     // if NOT covered by simplified out, we are definitely not contained
     return false;
   } else if (boost::geometry::covered_by(geomA, geomB)) {
+    return true;
+  }
+
+  return false;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+bool osm2rdf::osm::GeometryHandler<W>::areaIntersectsArea(
+    const SpatialAreaValue& a, const SpatialAreaValue& b) const {
+  const auto& geomA = std::get<2>(a);
+  const auto& geomB = std::get<2>(b);
+  const auto& innerGeomA = std::get<6>(a);
+  const auto& outerGeomA = std::get<7>(a);
+  const auto& innerGeomB = std::get<6>(b);
+  const auto& outerGeomB = std::get<7>(b);
+
+  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+      boost::geometry::is_empty(outerGeomB)) {
+    return boost::geometry::intersects(geomA, geomB);
+  }
+
+  if (boost::geometry::intersects(innerGeomA, innerGeomB)) {
+    // if simplified inner intersect, we definitely intersect
+    return true;
+  } else if (!boost::geometry::intersects(outerGeomA, outerGeomB)) {
+    // if NOT intersecting simplified outer, we are definitely NOT
+    // intersecting
+    return false;
+  } else if (boost::geometry::intersects(geomA, geomB)) {
     return true;
   }
 
