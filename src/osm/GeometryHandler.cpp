@@ -525,6 +525,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
     size_t skippedBySize = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(tmpDirectedAreaGraph,           \
+    std::cout, \
     entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
     contains, containsOk) default(none) schedule(dynamic)
 
@@ -1469,10 +1470,12 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
 template <typename W>
 bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     const SpatialAreaValue& a, const SpatialAreaValue& b) const {
+  const auto& envelopeA = std::get<0>(a);
   const auto& geomA = std::get<2>(a);
   const auto& innerGeomA = std::get<6>(a);
   const auto& outerGeomA = std::get<7>(a);
 
+  const auto& envelopeB = std::get<0>(b);
   const auto& geomB = std::get<2>(b);
   const auto& innerGeomB = std::get<6>(b);
   const auto& outerGeomB = std::get<7>(b);
@@ -1489,11 +1492,12 @@ bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     // definitely contained
     // assert(boost::geometry::covered_by(geomA, geomB));
     return true;
-  } else if (!boost::geometry::covered_by(innerGeomA, outerGeomB)) {
-    // if simplified inner is not covered by simplified outer, we are
-    // definitely not contained
-    // assert(!boost::geometry::covered_by(geomA, geomB));
-    return false;
+  }
+  // } else if (!boost::geometry::covered_by(innerGeomA, outerGeomB)) {
+    // // if simplified inner is not covered by simplified outer, we are
+    // // definitely not contained
+    // // assert(!boost::geometry::covered_by(geomA, geomB));
+    // return false;
     // } else if (boost::geometry::covered_by(entryGeom, areaInnerGeom)) {
     // // if covered by simplified inner, we are definitely contained
     // isCoveredBy = true;
@@ -1501,7 +1505,8 @@ bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     // {
     // // if NOT covered by simplified out, we are definitely not
     // contained isCoveredBy = false;
-  } else if (boost::geometry::covered_by(geomA, geomB)) {
+
+  if (boost::geometry::covered_by(geomA, geomB)) {
     return true;
   }
 
