@@ -46,6 +46,7 @@ struct Config {
   double simplifyGeometries = 0;
   double simplifyGeometriesInnerOuter = 1/(3.14 * 20);
   bool dontUseInnerOuterGeoms = false;
+  bool approximateSpatialRels = false;
 
   // Select amount to dump
   bool addAreaEnvelope = false;
