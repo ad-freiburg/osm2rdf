@@ -1345,6 +1345,10 @@ bool osm2rdf::osm::GeometryHandler<W>::nodeInArea(
     return boost::geometry::covered_by(geomA, geomB);
   }
 
+  if (_config.approximateSpatialRels) {
+    return boost::geometry::covered_by(geomA, outerGeomB);
+  }
+
   if (boost::geometry::covered_by(geomA, innerGeomB)) {
     // if covered by simplified inner, we are definitely contained
     return true;
