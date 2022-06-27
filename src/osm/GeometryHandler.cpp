@@ -599,11 +599,12 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         if (isEqual) {
           continue;
         }
-#pragma omp critical(addEdge) {
+#pragma omp critical(addEdge)
+{
         tmpDirectedAreaGraph.addEdge(entryId, areaId);
         const auto& successors = tmpDirectedAreaGraph.findSuccessors(entryId);
-}
         skip.insert(successors.begin(), successors.end());
+}
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
