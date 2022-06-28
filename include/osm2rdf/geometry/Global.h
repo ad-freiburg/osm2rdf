@@ -21,7 +21,8 @@
 
 namespace osm2rdf::geometry {
 // Location type used by all geometry classes.
-typedef double location_coordinate_t;
+// typedef double location_coordinate_t;
+typedef int64_t location_coordinate_t;
 
 // Area type used to represent the area of areas.
 typedef double area_result_t;

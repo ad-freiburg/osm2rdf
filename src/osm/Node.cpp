@@ -38,7 +38,8 @@ osm2rdf::osm::Node::Node(const osmium::Node& node) {
                     osm2rdf::geometry::location_coordinate_t>::value) {
     _geom = osm2rdf::geometry::Location(loc.x(), loc.y());
   } else {
-    _geom = osm2rdf::geometry::Location(loc.lon(), loc.lat());
+    _geom = osm2rdf::geometry::Location(loc.x(), loc.y());
+    // _geom = osm2rdf::geometry::Location(loc.lon(), loc.lat());
   }
   boost::geometry::envelope(_geom, _envelope);
   _tags = osm2rdf::osm::convertTagList(node.tags());
@@ -52,7 +53,8 @@ osm2rdf::osm::Node::Node(const osmium::NodeRef& nodeRef) {
                     osm2rdf::geometry::location_coordinate_t>::value) {
     _geom = osm2rdf::geometry::Location(loc.x(), loc.y());
   } else {
-    _geom = osm2rdf::geometry::Location(loc.lon(), loc.lat());
+    _geom = osm2rdf::geometry::Location(loc.x(), loc.y());
+    // _geom = osm2rdf::geometry::Location(loc.lon(), loc.lat());
   }
   boost::geometry::envelope(_geom, _envelope);
 }

@@ -67,6 +67,15 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang);
   FRIEND_TEST(OSM_FactHandler, writeTagListSkipWikiLinks);
 
+  boost::geometry::model::d2::point_xy<double> xyToLatLng(
+      const osm2rdf::geometry::Location& l);
+  boost::geometry::model::linestring<
+      boost::geometry::model::d2::point_xy<double>>
+  xyToLatLng(const osm2rdf::geometry::Linestring& l);
+  boost::geometry::model::multi_polygon<boost::geometry::model::polygon<
+      boost::geometry::model::d2::point_xy<double>>>
+  xyToLatLng(const osm2rdf::geometry::Area& l);
+
   const osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
 };
