@@ -338,6 +338,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
       osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
       osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
+  auto approximateSpatialRelsOp = op.add<popl::Switch>(
+      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_SHORT,
+      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_LONG,
+      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_HELP);
   auto simplifyWKTOp = op.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
@@ -453,6 +457,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     simplifyGeometries = simplifyGeometriesOp->value();
     simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();
     dontUseInnerOuterGeoms = dontUseInnerOuterGeomsOp->value();
+    approximateSpatialRels = approximateSpatialRelsOp->value();
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();

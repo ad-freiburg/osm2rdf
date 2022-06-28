@@ -600,9 +600,11 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
           continue;
         }
 #pragma omp critical(addEdge)
+{
         tmpDirectedAreaGraph.addEdge(entryId, areaId);
         const auto& successors = tmpDirectedAreaGraph.findSuccessors(entryId);
         skip.insert(successors.begin(), successors.end());
+}
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
@@ -1343,6 +1345,10 @@ bool osm2rdf::osm::GeometryHandler<W>::nodeInArea(
     return boost::geometry::covered_by(geomA, geomB);
   }
 
+  if (_config.approximateSpatialRels) {
+    return boost::geometry::covered_by(geomA, outerGeomB);
+  }
+
   if (boost::geometry::covered_by(geomA, innerGeomB)) {
     // if covered by simplified inner, we are definitely contained
     return true;
@@ -1405,6 +1411,10 @@ bool osm2rdf::osm::GeometryHandler<W>::wayIntersectsArea(
     return boost::geometry::intersects(geomA, geomB);
   }
 
+  if (_config.approximateSpatialRels) {
+    return boost::geometry::intersects(geomA, outerGeomB);
+  }
+
   if (!boost::geometry::intersects(geomA, envelopeB)) {
     // if does not intersect with envelope, we definitely dont intersect
     return false;
@@ -1438,6 +1448,10 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     return boost::geometry::covered_by(geomA, geomB);
+  }
+
+  if (_config.approximateSpatialRels) {
+    return boost::geometry::covered_by(geomA, outerGeomB);
   }
 
   boost::geometry::model::ring<osm2rdf::geometry::Location> ring;
