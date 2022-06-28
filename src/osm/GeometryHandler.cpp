@@ -1214,8 +1214,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
-#endif
-#ifdef ENABLE_GEOMETRY_STATISTIC
           if (_config.writeGeometricRelationStatistics) {
             _statistics.write(statisticLine(
                 __func__, "Way", "doesIntersect", areaId, "area", wayId, "way",
@@ -1487,12 +1485,12 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
 template <typename W>
 bool osm2rdf::osm::GeometryHandler<W>::areaInArea(
     const SpatialAreaValue& a, const SpatialAreaValue& b) const {
-  const auto& envelopeA = std::get<0>(a);
+  // const auto& envelopeA = std::get<0>(a);
   const auto& geomA = std::get<2>(a);
   const auto& innerGeomA = std::get<6>(a);
   const auto& outerGeomA = std::get<7>(a);
 
-  const auto& envelopeB = std::get<0>(b);
+  // const auto& envelopeB = std::get<0>(b);
   const auto& geomB = std::get<2>(b);
   const auto& innerGeomB = std::get<6>(b);
   const auto& outerGeomB = std::get<7>(b);
