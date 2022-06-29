@@ -54,6 +54,7 @@ class FactHandler {
 
   void writeTag(const std::string& s, const osm2rdf::osm::Tag& tag);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyIRI);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
 

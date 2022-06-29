@@ -320,11 +320,16 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& s,
   const std::string& key = tag.first;
   const std::string& value = tag.second;
   if (key == "admin_level") {
+    auto objectValue = _writer->generateLiteral(value, "");
+    // Mark integer values
+    if (value.find_first_not_of("0123456789") == std::string::npos) {
+      objectValue = _writer->generateLiteral(
+          value, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+    }
     _writer->writeTriple(
         s,
         _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, key),
-        _writer->generateLiteral(
-            value, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
+        objectValue);
   } else {
     try {
       _writer->writeTriple(
