@@ -616,7 +616,7 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
   gh.prepareRTree();
   ASSERT_EQ(gh._spatialStorageArea.size(), gh._spatialIndex.size());
 
-  std::vector<SpatialAreaValue> queryResult;
+  std::vector<SpatialAreaRefValue> queryResult;
   osm2rdf::geometry::Box nodeEnvelope;
 
   queryResult.clear();

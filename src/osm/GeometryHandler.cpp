@@ -361,10 +361,6 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
     return ret;
   }
 
-  auto periOrLength =
-      std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
-  double eps = periOrLength * _config.simplifyGeometriesInnerOuter;
-
   size_t numPointsOld = 0;
   size_t numPointsNew = 0;
 
@@ -381,7 +377,9 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
       }
 
       // inner polygons are given in counter-clockswise order
-      // assert(polygonOrientation(origInner) != -1);
+
+      double eps = boost::geometry::perimeter(origInner) *
+          _config.simplifyGeometriesInnerOuter;
 
       // simplify the inner geometries with outer simplification, because
       // inner geometries are given counter-clockwise, it is not
@@ -404,7 +402,8 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
       numPointsNew += poly.outer().size();
       simplified.outer() = poly.outer();
     } else {
-      // assert(polygonOrientation(poly.outer()) != 1);
+      double eps = boost::geometry::perimeter(poly.outer()) *
+          _config.simplifyGeometriesInnerOuter;
 
       // simplify the outer geometry with inner simplification
       boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
@@ -600,11 +599,11 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
           continue;
         }
 #pragma omp critical(addEdge)
-{
-        tmpDirectedAreaGraph.addEdge(entryId, areaId);
-        const auto& successors = tmpDirectedAreaGraph.findSuccessors(entryId);
-        skip.insert(successors.begin(), successors.end());
-}
+        {
+          tmpDirectedAreaGraph.addEdge(entryId, areaId);
+          const auto& successors = tmpDirectedAreaGraph.findSuccessors(entryId);
+          skip.insert(successors.begin(), successors.end());
+        }
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
