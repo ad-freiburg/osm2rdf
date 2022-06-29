@@ -25,7 +25,6 @@
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
-#include "osm2rdf/geometry/Location.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/Way.h"
@@ -272,12 +271,11 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
   std::ostringstream tmp;
-
   if (_config.simplifyWKT > 0 &&
       boost::geometry::num_points(g) > _config.simplifyWKT) {
     G geom;
-    auto perimeter_or_length = std::max(boost::geometry::perimeter(g),
-                                        boost::geometry::length(g));
+    auto perimeter_or_length =
+        std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
     do {
       boost::geometry::simplify(
           g, geom,
@@ -288,16 +286,12 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
         (boost::geometry::is_empty(geom) || !boost::geometry::is_valid(geom)) &&
         perimeter_or_length >=
             osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR);
-
-    auto scaledOut = xyToLatLng(geom);
     tmp << std::fixed << std::setprecision(_config.wktPrecision)
-        << boost::geometry::wkt(scaledOut);
+        << boost::geometry::wkt(geom);
   } else {
-    auto scaledOut = xyToLatLng(g);
     tmp << std::fixed << std::setprecision(_config.wktPrecision)
-        << boost::geometry::wkt(scaledOut);
+        << boost::geometry::wkt(g);
   }
-
   _writer->writeTriple(
       s, p,
       "\"" + tmp.str() + "\"^^" +
@@ -310,16 +304,9 @@ void osm2rdf::osm::FactHandler<W>::writeBox(const std::string& s,
                                             const std::string& p,
                                             const osm2rdf::geometry::Box& box) {
   // Box can not be simplified -> output directly.
-  boost::geometry::model::box<boost::geometry::model::d2::point_xy<double>>
-      boxScaled;
-
-  boost::geometry::strategy::transform::scale_transformer<double, 2, 2> scale(
-      1.0 / 10000000.0);
-  boost::geometry::transform(box, boxScaled, scale);
-
   std::ostringstream tmp;
   tmp << std::fixed << std::setprecision(_config.wktPrecision)
-      << boost::geometry::wkt(boxScaled);
+      << boost::geometry::wkt(box);
   _writer->writeTriple(
       s, p,
       "\"" + tmp.str() + "\"^^" +
@@ -435,51 +422,6 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
       _writer->generateLiteral(
           std::to_string(tagTripleCount),
           "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
-}
-
-// ____________________________________________________________________________
-template <typename W>
-boost::geometry::model::d2::point_xy<double>
-osm2rdf::osm::FactHandler<W>::xyToLatLng(const osm2rdf::geometry::Location& l) {
-  boost::geometry::model::d2::point_xy<double> gScaled;
-
-  boost::geometry::strategy::transform::scale_transformer<double, 2, 2> scale(
-      1.0 / 10000000.0);
-  boost::geometry::transform(l, gScaled, scale);
-
-  return gScaled;
-}
-
-// ____________________________________________________________________________
-template <typename W>
-boost::geometry::model::linestring<boost::geometry::model::d2::point_xy<double>>
-osm2rdf::osm::FactHandler<W>::xyToLatLng(
-    const osm2rdf::geometry::Linestring& l) {
-  boost::geometry::model::linestring<
-      boost::geometry::model::d2::point_xy<double>>
-      gScaled;
-
-  boost::geometry::strategy::transform::scale_transformer<double, 2, 2> scale(
-      1.0 / 10000000.0);
-  boost::geometry::transform(l, gScaled, scale);
-
-  return gScaled;
-}
-
-// ____________________________________________________________________________
-template <typename W>
-boost::geometry::model::multi_polygon<
-    boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double>>>
-osm2rdf::osm::FactHandler<W>::xyToLatLng(const osm2rdf::geometry::Area& l) {
-  boost::geometry::model::multi_polygon<
-      boost::geometry::model::polygon<boost::geometry::model::d2::point_xy<double>>>
-      gScaled;
-
-  boost::geometry::strategy::transform::scale_transformer<double, 2, 2> scale(
-      1.0 / 10000000.0);
-  boost::geometry::transform(l, gScaled, scale);
-
-  return gScaled;
 }
 
 // ____________________________________________________________________________
