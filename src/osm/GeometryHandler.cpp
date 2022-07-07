@@ -569,7 +569,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
 #endif
-        bool isCoveredBy = areaInArea(entry, area);
+        bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
@@ -586,7 +586,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
 #endif
-        bool isEqual = boost::geometry::equals(entryGeom, areaGeom);
+        bool isEqual = isCoveredBy && boost::geometry::covered_by(areaGeom, entryGeom);
 #ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
