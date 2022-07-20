@@ -178,6 +178,9 @@ class GeometryHandler {
   osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g,
                                          bool inner) const;
 
+  bool coveredByApprox(const osm2rdf::geometry::Area& a,
+      const osm2rdf::geometry::Area& b, double threshold) const;
+
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;

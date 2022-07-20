@@ -569,7 +569,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto start = std::chrono::steady_clock::now();
 #endif
-        bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+        // bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
+        bool isCoveredBy = coveredByApprox(entryGeom, areaGeom, 0.05);
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
@@ -586,7 +587,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
 #endif
-        bool isEqual = isCoveredBy && boost::geometry::covered_by(areaGeom, entryGeom);
+        // bool isEqual = isCoveredBy && boost::geometry::covered_by(areaGeom, entryGeom);
+        bool isEqual = isCoveredBy && coveredByApprox(areaGeom, entryGeom, 0.05);
 #ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
@@ -1585,6 +1587,20 @@ void osm2rdf::osm::GeometryHandler<W>::printWayAreaStats(
      << m.str() << " osm2rdf:check_contains_usecs_div_10 "
                 << "\"" << (int)(usec / 10) << "\"^^xsd:int . \n";
   _containsStatistics.write(ss.str());
+}
+
+// ____________________________________________________________________________
+template <typename W>
+bool osm2rdf::osm::GeometryHandler<W>::coveredByApprox(
+    const osm2rdf::geometry::Area& a, const osm2rdf::geometry::Area& b,
+    double threshold) const {
+  double aArea = boost::geometry::area(a);
+  osm2rdf::geometry::Area intersect;
+  boost::geometry::intersection(a, b, intersect);
+
+  double intersectArea = boost::geometry::area(intersect);
+
+  return fabs(1 - aArea / intersectArea) < threshold;
 }
 
 // ____________________________________________________________________________
