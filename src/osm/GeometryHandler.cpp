@@ -1575,6 +1575,7 @@ void osm2rdf::osm::GeometryHandler<W>::printWayAreaStats(
   ss << "osmway:" << wayOSMId << " osm2rdf:num_points "
                   << "\"" << numWayPoints << "\"^^xsd:int . \n"
      << area_prefix << areaOSMId << " osm2rdf:num_points "
+                    << "\"" << numAreaPoints << "\"^^xsd:int . \n"
      << "osmway:" << wayOSMId << " osm2rdf:check_contains_to "
                   << m.str() << " . \n"
      << m.str() << " osm2rdf:check_contains_from "
