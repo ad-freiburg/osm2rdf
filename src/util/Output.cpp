@@ -44,32 +44,77 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
                               const std::string& prefix, size_t partCount)
     : _config(config),
       _prefix(prefix),
-      _numOuts(partCount),
-      _numOutsDigits(std::floor(std::log10(_numOuts)) + 1) {}
+      _partCount(partCount),
+      _numOuts(_partCount + 2),
+      _partCountDigits(std::floor(std::log10(_numOuts)) + 1) {}
 
 // ____________________________________________________________________________
 osm2rdf::util::Output::~Output() { close(); }
 
 // ____________________________________________________________________________
 bool osm2rdf::util::Output::open() {
-  assert(_numOuts > 0);
-  _out = new boost::iostreams::filtering_ostream[_numOuts];
-  _outFile = new std::ofstream[_numOuts];
+  assert(_partCount > 0);
+  assert(_numOuts == _partCount + 2);
+  _outs = new boost::iostreams::filtering_ostream[_numOuts];
+  _outFiles = new std::ofstream[_numOuts];
 
-  for (size_t i = 0; i < _numOuts; ++i) {
-    if (_config.outputCompress) {
-      _out[i].push(boost::iostreams::bzip2_compressor{});
-    }
-    if (_config.output.empty()) {
-      _out[i].push(std::cout);
-    } else {
-      _outFile[i].open(partFilename(i));
-      if (!_outFile[i].is_open()) {
-        return false;
-      }
-      _out[i].push(_outFile[i]);
+  // Prepare final output file
+  if (!_config.output.empty() && _config.mergeOutput != OutputMergeMode::NONE) {
+    _outFile.open(_prefix, std::ofstream::out | std::ofstream::trunc);
+    if (!_outFile.is_open()) {
+      std::cerr << "Can't open final output file: " << _prefix << std::endl;
+      return false;
     }
   }
+
+  // One part for each thread
+  for (size_t i = 0; i < _partCount; ++i) {
+    if (_config.outputCompress) {
+      _outs[i].push(boost::iostreams::bzip2_compressor{});
+    }
+    if (_config.output.empty()) {
+      _outs[i].push(std::cout);
+    } else {
+      _outFiles[i].open(partFilename(i),
+                        std::ofstream::out | std::ofstream::trunc);
+      if (!_outFiles[i].is_open()) {
+        std::cerr << "Can't open part file: " << partFilename(i) << std::endl;
+        return false;
+      }
+      _outs[i].push(_outFiles[i]);
+    }
+  }
+
+  // One for prefix
+  if (_config.outputCompress) {
+    _outs[_partCount].push(boost::iostreams::bzip2_compressor{});
+  }
+  if (_config.output.empty()) {
+    _outs[_partCount].push(std::cout);
+  } else {
+    _outFiles[_partCount].open(partFilename(-1));
+    if (!_outFiles[_partCount].is_open()) {
+      std::cerr << "Can't open prefix file: " << partFilename(-1) << std::endl;
+      return false;
+    }
+    _outs[_partCount].push(_outFiles[_partCount]);
+  }
+
+  // One for suffix
+  if (_config.outputCompress) {
+    _outs[_partCount + 1].push(boost::iostreams::bzip2_compressor{});
+  }
+  if (_config.output.empty()) {
+    _outs[_partCount + 1].push(std::cout);
+  } else {
+    _outFiles[_partCount + 1].open(partFilename(-2));
+    if (!_outFiles[_partCount + 1].is_open()) {
+      std::cerr << "Can't open suffix file: " << partFilename(-2) << std::endl;
+      return false;
+    }
+    _outs[_partCount + 1].push(_outFiles[_partCount + 1]);
+  }
+
   _open = true;
   return true;
 }
@@ -84,107 +129,159 @@ void osm2rdf::util::Output::close(std::string_view prefix,
     return;
   }
 
+  // Write prefix and suffix to file
+  write(prefix, _partCount);
+  write(suffix, _partCount + 1);
+
   for (size_t i = 0; i < _numOuts; ++i) {
-    _out[i].pop();
-    if (_outFile[i].is_open()) {
-      _outFile[i].close();
+    _outs[i].pop();
+    if (_outFiles[i].is_open()) {
+      _outFiles[i].close();
     }
   }
-  delete[] _outFile;
-  delete[] _out;
+  delete[] _outFiles;
+  delete[] _outs;
   _open = false;
 
   // Handle merging of files
   switch (_config.mergeOutput) {
     case osm2rdf::util::OutputMergeMode::MERGE:
-      merge(prefix, suffix);
-      return;
+      merge();
+      break;
     case osm2rdf::util::OutputMergeMode::CONCATENATE:
-      concatenate(prefix, suffix);
-      return;
+      concatenate();
+      break;
     case osm2rdf::util::OutputMergeMode::NONE:
     default:
-      none(prefix, suffix);
-      return;
+      break;
   }
+
+  // close final file
+  _outFile.flush();
+  _outFile.close();
 }
 
 // ____________________________________________________________________________
 std::string osm2rdf::util::Output::partFilename(int part) {
   assert(part >= -2);
-  assert(part < static_cast<int>(_numOuts));
+  assert(part < static_cast<int>(_partCount));
   std::ostringstream oss;
-  oss << _prefix << ".part_" << std::setfill('0') << std::setw(_numOutsDigits);
+  oss << _prefix << ".part_" << std::setfill('0')
+      << std::setw(_partCountDigits);
   if (part == -2) {
-    part = static_cast<int>(_numOuts);
+    part = static_cast<int>(_partCount);
   }
   oss << (part + 1);
   return oss.str();
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::merge(std::string_view prefix,
-                                  std::string_view suffix) {
-  // Concatenated output files
+void osm2rdf::util::Output::concatenate() {
+  // Reopen outfile as binary
+  _outFile.close();
+  _outFile.open(_prefix, std::ofstream::out | std::ofstream::binary);
+  if (!_outFile.is_open()) {
+    std::cerr << "Can't reopen file: " << _prefix << " keeping files!"
+              << std::endl;
+    return;
+  }
+
+  // Prefix
+  std::string filename = partFilename(-1);
+  std::ifstream inFilePrefix{filename, std::ifstream::in | std::ifstream::binary};
+  if (!inFilePrefix.is_open() || !inFilePrefix.good()) {
+    std::cerr << "Error opening file: " << filename << std::endl;
+  }
+  _outFile << inFilePrefix.rdbuf();
+  inFilePrefix.close();
+  if (!_config.outputKeepFiles) {
+    std::filesystem::remove(filename);
+  }
+
+  // Content
+  for (size_t i = 0; i < _partCount; ++i) {
+    filename = partFilename(i);
+    std::ifstream inFile{filename, std::ifstream::in | std::ifstream::binary};
+    if (!inFile.is_open() || !inFile.good()) {
+      std::cerr << "Error opening file: " << filename << std::endl;
+    }
+    _outFile << inFile.rdbuf();
+    inFile.close();
+    if (!_config.outputKeepFiles) {
+      std::filesystem::remove(filename);
+    }
+  }
+
+  // Suffix
+  filename = partFilename(-2);
+  std::ifstream inFileSuffix{filename, std::ifstream::in | std::ifstream::binary};
+  if (!inFileSuffix.is_open() || !inFileSuffix.good()) {
+    std::cerr << "Error opening file: " << filename << std::endl;
+  }
+  _outFile << inFileSuffix.rdbuf();
+  inFileSuffix.close();
+  if (!_config.outputKeepFiles) {
+    std::filesystem::remove(filename);
+  }
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::Output::merge() {
   boost::iostreams::filtering_ostream out;
-  std::ofstream outFile{_prefix};
   if (_config.outputCompress) {
     out.push(boost::iostreams::bzip2_compressor{});
   }
-  out.push(outFile);
-  out << prefix;
+  out.push(_outFile);
 
-  for (size_t i = 0; i < _numOuts; ++i) {
-    boost::iostreams::filtering_istream in;
-    std::string filename = partFilename(i);
-    std::ifstream inFile{filename};
-    if (_config.outputCompress) {
-      in.push(boost::iostreams::bzip2_decompressor{});
+  // Prefix
+  boost::iostreams::filtering_istream in;
+  std::string filename = partFilename(-1);
+  std::ifstream inFile{filename};
+  if (_config.outputCompress) {
+    in.push(boost::iostreams::bzip2_decompressor{});
+  }
+  if (!inFile.is_open() || !inFile.good()) {
+    std::cerr << "Error opening file: " << filename << std::endl;
+  }
+  in.push(inFile);
+  out << in.rdbuf();
+  in.pop();
+  inFile.close();
+  if (!_config.outputKeepFiles) {
+    std::filesystem::remove(filename);
+  }
+
+  // Content
+  for (size_t i = 0; i < _partCount; ++i) {
+    filename = partFilename(i);
+    inFile.open(filename);
+    if (!inFile.is_open() || !inFile.good()) {
+      std::cerr << "Error opening file: " << filename << std::endl;
     }
     in.push(inFile);
     out << in.rdbuf();
     in.pop();
     inFile.close();
-    std::remove(filename.c_str());
+    if (!_config.outputKeepFiles) {
+      std::filesystem::remove(filename);
+    }
+  }
+  // Suffix
+  filename = partFilename(-2);
+  inFile.open(filename);
+  if (!inFile.is_open() || !inFile.good()) {
+    std::cerr << "Error opening file: " << filename << std::endl;
+  }
+  in.push(inFile);
+  out << in.rdbuf();
+  in.pop();
+  inFile.close();
+  if (!_config.outputKeepFiles) {
+    std::filesystem::remove(filename);
   }
 
-  out << suffix;
+  out.flush();
   out.pop();
-  outFile.close();
-}
-
-// ____________________________________________________________________________
-void osm2rdf::util::Output::concatenate(std::string_view prefix,
-                                        std::string_view suffix) {
-  // Concatenated output files
-  std::ofstream outFile{_prefix, std::ios_base::binary};
-  outFile << prefix;
-
-  for (size_t i = 0; i < _numOuts; ++i) {
-    std::string filename = partFilename(i);
-    std::ifstream inFile{filename, std::ios_base::binary};
-    outFile << inFile.rdbuf();
-    std::remove(filename.c_str());
-  }
-
-  outFile << suffix;
-  outFile.close();
-}
-
-// ____________________________________________________________________________
-void osm2rdf::util::Output::none(std::string_view prefix,
-                                 std::string_view suffix) {
-  // Concatenated output files
-  {
-    std::ofstream outFile{partFilename(-1)};
-    outFile << prefix;
-    outFile.close();
-  }
-  {
-    std::ofstream outFile{partFilename(-2)};
-    outFile << suffix;
-    outFile.close();
-  }
 }
 
 // ____________________________________________________________________________
@@ -199,7 +296,7 @@ void osm2rdf::util::Output::write(std::string_view line) {
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(std::string_view line, size_t part) {
   assert(part < _numOuts);
-  _out[part] << line;
+  _outs[part] << line;
 }
 
 // ____________________________________________________________________________
@@ -210,4 +307,4 @@ void osm2rdf::util::Output::flush() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::flush(size_t part) { _out[part].flush(); }
+void osm2rdf::util::Output::flush(size_t part) { _outs[part].flush(); }

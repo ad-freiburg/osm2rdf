@@ -50,24 +50,26 @@ class Output {
 
  protected:
   // Closes and merges all parts, prepend given prefix and append given suffix.
-  void merge(std::string_view prefix, std::string_view suffix);
+  void merge();
   // Closes and concatenates all parts without decompressing and recompressing
   // streams.
-  void concatenate(std::string_view prefix, std::string_view suffix);
-  // Write prefix and suffix into own files.
-  void none(std::string_view prefix, std::string_view suffix);
+  void concatenate();
   // Config instance.
   const osm2rdf::config::Config _config;
   // Prefix for all filenames.
   const std::string _prefix;
   // Number of parts.
+  std::size_t _partCount;
+  // Number of temporary output streams.
   std::size_t _numOuts;
-  // Number of digits required for _numOuts.
-  std::size_t _numOutsDigits;
+  // Number of digits required for _partCount.
+  std::size_t _partCountDigits;
   bool _open = false;
   // Output streams
-  boost::iostreams::filtering_ostream* _out;
-  std::ofstream* _outFile;
+  boost::iostreams::filtering_ostream* _outs;
+  std::ofstream* _outFiles;
+  // Final output file
+  std::ofstream _outFile;
 };
 
 }  // namespace osm2rdf::util
