@@ -18,6 +18,7 @@
 
 #include <iostream>
 
+#include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2rdf/util/Output.h"
 
@@ -25,6 +26,11 @@ namespace osm2rdf::util {
 
 // ____________________________________________________________________________
 TEST(Issue28, OpenReadonlyOutputFile) {
+  // Capture std::cerr
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cerr.rdbuf();
+  std::cerr.rdbuf(buffer.rdbuf());
+
   osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_ISSUES_Issue28", "OpenReadonlyOutputFile");
@@ -46,9 +52,15 @@ TEST(Issue28, OpenReadonlyOutputFile) {
   size_t parts = 4;
   osm2rdf::util::Output o1{config, output, parts};
   ASSERT_FALSE(o1.open());
+  const std::string res = buffer.str();
+  ASSERT_THAT(res, ::testing::HasSubstr("Can't open final output file: " +
+                                        std::string(output)));
 
   std::filesystem::remove_all(config.output);
   ASSERT_FALSE(std::filesystem::exists(config.output));
+
+  // Restore std::err
+  std::cerr.rdbuf(sbuf);
 }
 
 // ____________________________________________________________________________
