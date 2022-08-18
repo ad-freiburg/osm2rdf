@@ -85,6 +85,7 @@ struct Config {
   osm2rdf::util::OutputMergeMode mergeOutput =
       osm2rdf::util::OutputMergeMode::CONCATENATE;
   bool outputCompress = true;
+  bool outputKeepFiles = false;
 
   // osmium location cache
   std::filesystem::path cache{std::filesystem::temp_directory_path()};

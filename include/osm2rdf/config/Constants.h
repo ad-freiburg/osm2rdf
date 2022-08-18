@@ -64,6 +64,14 @@ const static inline std::string OUTPUT_FORMAT_OPTION_LONG = "output-format";
 const static inline std::string OUTPUT_FORMAT_OPTION_HELP =
     "Output format, valid values: nt, ttl, qlever";
 
+const static inline std::string OUTPUT_KEEP_FILES_OPTION_SHORT = "";
+const static inline std::string OUTPUT_KEEP_FILES_OPTION_LONG =
+    "output-keep-files";
+const static inline std::string OUTPUT_KEEP_FILES_OPTION_HELP =
+    "Do not remove temporary output files";
+const static inline std::string OUTPUT_KEEP_FILES_OPTION_INFO =
+    "Keeping temporary output files";
+
 const static inline std::string OUTPUT_NO_COMPRESS_OPTION_SHORT = "";
 const static inline std::string OUTPUT_NO_COMPRESS_OPTION_LONG =
     "output-no-compress";
