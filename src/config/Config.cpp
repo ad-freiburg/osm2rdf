@@ -191,6 +191,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_RDF_STATISTICS_INFO;
   }
+  if (outputKeepFiles) {
+    oss << "\n"
+        << prefix << osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_INFO;
+  }
 #if defined(_OPENMP)
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_OPENMP;
   oss << "\n" << prefix << "Max Threads: " << omp_get_max_threads();
@@ -386,6 +390,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::OUTPUT_FORMAT_OPTION_SHORT,
           osm2rdf::config::constants::OUTPUT_FORMAT_OPTION_LONG,
           osm2rdf::config::constants::OUTPUT_FORMAT_OPTION_HELP, outputFormat);
+  auto outputKeepFilesOp = op.add<popl::Switch, popl::Attribute::expert>(
+      osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_SHORT,
+      osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_LONG,
+      osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_HELP);
   auto outputNoCompressOp = op.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_SHORT,
       osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_LONG,
@@ -481,6 +489,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
     outputCompress = !outputNoCompressOp->is_set();
+    outputKeepFiles = outputKeepFilesOp->is_set();
     if (output.empty()) {
       outputCompress = false;
       mergeOutput = util::OutputMergeMode::NONE;

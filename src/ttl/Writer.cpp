@@ -103,8 +103,6 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "tag");
   osm2rdf::ttl::constants::IRI__OSM_WAY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "way");
-  osm2rdf::ttl::constants::IRI__OSM_WIKIPEDIA =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "wikipedia");
   osm2rdf::ttl::constants::IRI__RDF_TYPE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__RDF, "type");
 

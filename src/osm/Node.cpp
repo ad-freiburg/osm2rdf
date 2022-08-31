@@ -18,6 +18,7 @@
 
 #include "osm2rdf/osm/Node.h"
 
+#include "boost/geometry.hpp"
 #include "boost/geometry/algorithms/envelope.hpp"
 #include "osm2rdf/geometry/Box.h"
 #include "osm2rdf/geometry/Global.h"

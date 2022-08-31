@@ -67,6 +67,7 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
 
   ASSERT_EQ(osm2rdf::util::OutputMergeMode::CONCATENATE, config.mergeOutput);
   ASSERT_TRUE(config.outputCompress);
+  ASSERT_FALSE(config.outputKeepFiles);
 
   ASSERT_EQ(std::filesystem::temp_directory_path(), config.cache);
 }
@@ -932,6 +933,22 @@ TEST(CONFIG_Config, fromArgsWriteRDFRelationStatisticsLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsOutputKeepFilesLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.outputKeepFiles);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoHasSections) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1278,6 +1295,18 @@ TEST(CONFIG_Config, getInfoWriteRDFStatistics) {
 
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::WRITE_RDF_STATISTICS_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoOutputKeepFiles) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.outputKeepFiles = true;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_INFO));
 }
 
 }  // namespace osm2rdf::config
