@@ -24,14 +24,20 @@
 #include "osmium/handler/node_locations_for_ways.hpp"
 #include "osmium/index/map/flex_mem.hpp"
 #include "osmium/index/map/sparse_file_array.hpp"
+#include "osmium/index/map/dense_file_array.hpp"
 
 // ____________________________________________________________________________
 osm2rdf::osm::LocationHandler* osm2rdf::osm::LocationHandler::create(
     const osm2rdf::config::Config& config) {
-  if (!config.storeLocationsOnDisk) {
-    return new osm2rdf::osm::LocationHandlerRAM(config);
+  if (config.storeLocationsOnDisk == "sparse") {
+    return new osm2rdf::osm::LocationHandlerFSSparse(config);
   }
-  return new osm2rdf::osm::LocationHandlerFS(config);
+
+  if (config.storeLocationsOnDisk == "dense") {
+    return new osm2rdf::osm::LocationHandlerFSDense(config);
+  }
+
+  return new osm2rdf::osm::LocationHandlerRAM(config);
 }
 
 // ____________________________________________________________________________
@@ -58,7 +64,7 @@ osm2rdf::osm::LocationHandlerImpl<T>::LocationHandlerImpl(
 osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type, osmium::Location>>::
     LocationHandlerImpl(const osm2rdf::config::Config& config)
-    : _cacheFile(config.getTempPath("osmium", "n2l.cache")),
+    : _cacheFile(config.getTempPath("osmium", "n2l.sparse.cache")),
       _index(_cacheFile.fileDescriptor()),
       _handler(_index) {
   _handler.ignore_errors();
@@ -73,6 +79,30 @@ void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
 
 // ____________________________________________________________________________
 void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
+    osmium::unsigned_object_id_type,
+    osmium::Location>>::way(osmium::Way& way) {  // NOLINT
+  _handler.way(way);
+}
+
+// ____________________________________________________________________________
+osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
+    osmium::unsigned_object_id_type, osmium::Location>>::
+    LocationHandlerImpl(const osm2rdf::config::Config& config)
+    : _cacheFile(config.getTempPath("osmium", "n2l.dense.cache")),
+      _index(_cacheFile.fileDescriptor()),
+      _handler(_index) {
+  _handler.ignore_errors();
+}
+
+// ____________________________________________________________________________
+void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
+    osmium::unsigned_object_id_type,
+    osmium::Location>>::node(const osmium::Node& node) {
+  _handler.node(node);
+}
+
+// ____________________________________________________________________________
+void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
     osmium::unsigned_object_id_type,
     osmium::Location>>::way(osmium::Way& way) {  // NOLINT
   _handler.way(way);

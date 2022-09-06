@@ -16,13 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/config/Config.h"
-
 #include <filesystem>
 #include <iostream>
 #include <string>
 
 #include "omp.h"
+#include "osm2rdf/config/Config.h"
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
 #include "popl.hpp"
@@ -171,10 +170,13 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
   }
-  if (storeLocationsOnDisk) {
+
+  if (storeLocationsOnDisk.size()) {
     oss << "\n"
-        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO;
+        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO
+        << " " << storeLocationsOnDisk;
   }
+
   if (writeGeometricRelationStatistics) {
 #ifdef ENABLE_GEOMETRY_STATISTIC
     oss << "\n"
@@ -211,10 +213,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
                            osm2rdf::config::constants::HELP_OPTION_LONG,
                            osm2rdf::config::constants::HELP_OPTION_HELP);
 
-  auto storeLocationsOnDiskOp = op.add<popl::Switch, popl::Attribute::advanced>(
-      osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
-      osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG,
-      osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_HELP);
+  auto storeLocationsOnDiskOp =
+      op.add<popl::Implicit<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
+          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG,
+          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_HELP, "sparse");
 
   auto noAreasOp = op.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::NO_AREA_OPTION_SHORT,
@@ -414,7 +417,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     noFacts = noFactsOp->is_set();
     noGeometricRelations = noGeometricRelationsOp->is_set();
-    storeLocationsOnDisk = storeLocationsOnDiskOp->is_set();
+
+    if (storeLocationsOnDiskOp->is_set()) {
+      storeLocationsOnDisk = storeLocationsOnDiskOp->value();
+    }
 
     // Select types to dump
     noAreaFacts = noAreaFactsOp->is_set();
