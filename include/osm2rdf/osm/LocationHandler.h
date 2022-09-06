@@ -25,6 +25,7 @@
 #include "osmium/handler/node_locations_for_ways.hpp"
 #include "osmium/index/map/flex_mem.hpp"
 #include "osmium/index/map/sparse_file_array.hpp"
+#include "osmium/index/map/dense_file_array.hpp"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/relation.hpp"
 #include "osmium/osm/types.hpp"
@@ -71,10 +72,31 @@ class LocationHandlerImpl<osmium::index::map::SparseFileArray<
       _handler;
 };
 
+template <>
+class LocationHandlerImpl<osmium::index::map::DenseFileArray<
+    osmium::unsigned_object_id_type, osmium::Location>>
+    : public LocationHandler {
+ public:
+  explicit LocationHandlerImpl(const osm2rdf::config::Config& config);
+  void node(const osmium::Node& node);
+  void way(osmium::Way& way);  // NOLINT
+ protected:
+  osm2rdf::util::CacheFile _cacheFile;
+  osmium::index::map::DenseFileArray<osmium::unsigned_object_id_type,
+                                      osmium::Location>
+      _index;
+  osmium::handler::NodeLocationsForWays<osmium::index::map::DenseFileArray<
+      osmium::unsigned_object_id_type, osmium::Location>>
+      _handler;
+};
+
 using LocationHandlerRAM = LocationHandlerImpl<osmium::index::map::FlexMem<
     osmium::unsigned_object_id_type, osmium::Location>>;
-using LocationHandlerFS =
+using LocationHandlerFSSparse =
     LocationHandlerImpl<osmium::index::map::SparseFileArray<
+        osmium::unsigned_object_id_type, osmium::Location>>;
+using LocationHandlerFSDense =
+    LocationHandlerImpl<osmium::index::map::DenseFileArray<
         osmium::unsigned_object_id_type, osmium::Location>>;
 
 }  // namespace osm2rdf::osm
