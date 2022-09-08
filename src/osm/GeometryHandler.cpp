@@ -536,6 +536,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
+      const auto& entryArea = std::get<4>(entry);
 
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
@@ -554,6 +555,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         const auto& area = _spatialStorageArea[areaRef.second];
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
+        const auto& areaArea = std::get<4>(area);
 
         if (areaId == entryId) {
           continue;
@@ -570,7 +572,13 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         auto start = std::chrono::steady_clock::now();
 #endif
         // bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
-        bool isCoveredBy = coveredByApprox(entryGeom, areaGeom, 0.05);
+
+        // Approximate coveredy_by
+        osm2rdf::geometry::Area intersect;
+        boost::geometry::intersection(entryGeom, areaGeom, intersect);
+
+        double intersectArea = boost::geometry::area(intersect);
+        bool isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
@@ -588,7 +596,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         start = std::chrono::steady_clock::now();
 #endif
         // bool isEqual = isCoveredBy && boost::geometry::covered_by(areaGeom, entryGeom);
-        bool isEqual = isCoveredBy && coveredByApprox(areaGeom, entryGeom, 0.05);
+        bool isEqual = isCoveredBy && fabs(1 - areaArea / intersectArea) < 0.05;
 #ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
@@ -1576,20 +1584,6 @@ void osm2rdf::osm::GeometryHandler<W>::printWayAreaStats(
      << boost::geometry::wkt(areaGeomInner) << "\t"
      << boost::geometry::wkt(areaGeomOuter) << "\t" << usec << "\n";
   _containsStatistics.write(ss.str());
-}
-
-// ____________________________________________________________________________
-template <typename W>
-bool osm2rdf::osm::GeometryHandler<W>::coveredByApprox(
-    const osm2rdf::geometry::Area& a, const osm2rdf::geometry::Area& b,
-    double threshold) const {
-  double aArea = boost::geometry::area(a);
-  osm2rdf::geometry::Area intersect;
-  boost::geometry::intersection(a, b, intersect);
-
-  double intersectArea = boost::geometry::area(intersect);
-
-  return fabs(1 - aArea / intersectArea) < threshold;
 }
 
 // ____________________________________________________________________________
