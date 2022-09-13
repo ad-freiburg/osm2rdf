@@ -350,6 +350,14 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_HELP, simplifyWKT);
+  auto dummyGridCellSizeOp = op.add<popl::Value<double>, popl::Attribute::advanced>(
+      osm2rdf::config::constants::DUMMY_GRIDSIZE_OPTION_SHORT,
+      osm2rdf::config::constants::DUMMY_GRIDSIZE_OPTION_LONG,
+      osm2rdf::config::constants::DUMMY_GRIDSIZE_OPTION_HELP, dummyGridCellSize);
+  auto minIntersectAreaOp = op.add<popl::Value<double>, popl::Attribute::advanced>(
+      osm2rdf::config::constants::DUMMY_MIN_INTERSECT_AREA_OPTION_SHORT,
+      osm2rdf::config::constants::DUMMY_MIN_INTERSECT_AREA_OPTION_LONG,
+      osm2rdf::config::constants::DUMMY_MIN_INTERSECT_AREA_OPTION_HELP, minIntersectArea);
   auto wktDeviationOp = op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
@@ -469,6 +477,9 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
+
+    dummyGridCellSize = dummyGridCellSizeOp->value();
+    minIntersectArea = minIntersectAreaOp->value();
 
     addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;

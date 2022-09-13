@@ -61,6 +61,11 @@ struct Config {
   bool adminRelationsOnly = false;
   bool skipWikiLinks = false;
 
+
+  // Dummy areas
+  double dummyGridCellSize = std::numeric_limits<double>::infinity();
+  double minIntersectArea = std::numeric_limits<double>::infinity();
+
   // Addition filters / data
   bool addAreaEnvelopeRatio = false;
   double minimalAreaEnvelopeRatio = -1.0;
