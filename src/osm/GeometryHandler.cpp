@@ -617,8 +617,6 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsGrid() {
       double boxH = entryEnvelope.max_corner().get<1>() -
                     entryEnvelope.min_corner().get<1>();
 
-      size_t i = 0;
-
       for (size_t x = 0; x < ceil(boxW / GRID_W); x++) {
         for (size_t y = 0; y < ceil(boxH / GRID_W); y++) {
           osm2rdf::geometry::Box box;
@@ -637,7 +635,6 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsGrid() {
 
           if (intersectArea > 0) {
             addDummyRegion(boxIntersect, intersectArea);
-            i++;
           }
         }
       }
