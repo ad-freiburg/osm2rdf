@@ -33,6 +33,7 @@ const static inline std::string NAMESPACE__OSM_TAG = "osmkey";
 const static inline std::string NAMESPACE__OSM_WAY = "osmway";
 const static inline std::string NAMESPACE__OSM = "osm";
 const static inline std::string NAMESPACE__OSM2RDF = "osm2rdf";
+const static inline std::string NAMESPACE__OSM2RDF_PARTITION = "dummyarea";
 const static inline std::string NAMESPACE__RDF = "rdf";
 const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
@@ -58,7 +59,6 @@ inline std::string IRI__OSM_NODE;
 inline std::string IRI__OSM_RELATION;
 inline std::string IRI__OSM_TAG;
 inline std::string IRI__OSM_WAY;
-inline std::string IRI__OSM_WIKIPEDIA;
 
 inline std::string IRI__RDF_TYPE;
 

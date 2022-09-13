@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/GeometryHandler.h"
-
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -30,6 +28,8 @@
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
+#include "osm2rdf/osm/FactHandler.h"
+#include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/DirectedAcyclicGraph.h"
@@ -130,19 +130,19 @@ void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
               _config.minimalAreaEnvelopeRatio) {
         _spatialStorageArea.push_back(SpatialAreaValue(
             area.envelope(), area.id(), geom, area.objId(), area.geomArea(),
-            area.fromWay(), innerGeom, outerGeom));
+            area.fromWay() ? 1 : 0, innerGeom, outerGeom));
       } else {
         // we have bad area envelope proportions -> treat as unnamed area
         _oaUnnamedAreas << SpatialAreaValue(
             area.envelope(), area.id(), geom, area.objId(), area.geomArea(),
-            area.fromWay(), innerGeom, outerGeom);
+            area.fromWay() ? 1 : 0, innerGeom, outerGeom);
         _numUnnamedAreas++;
       }
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
-      _oaUnnamedAreas << SpatialAreaValue(area.envelope(), area.id(), geom,
-                                          area.objId(), area.geomArea(),
-                                          area.fromWay(), innerGeom, outerGeom);
+      _oaUnnamedAreas << SpatialAreaValue(
+          area.envelope(), area.id(), geom, area.objId(), area.geomArea(),
+          area.fromWay() ? 1 : 0, innerGeom, outerGeom);
       _numUnnamedAreas++;
     }
   }
@@ -202,7 +202,7 @@ void osm2rdf::osm::GeometryHandler<W>::way(const osm2rdf::osm::Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 template <typename G>
-G osm2rdf::osm::GeometryHandler<W>::simplifyGeometry(const G& g) {
+G osm2rdf::osm::GeometryHandler<W>::simplifyGeometry(const G& g) const {
   G geom;
   auto perimeter_or_length =
       std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
@@ -379,7 +379,7 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
       // inner polygons are given in counter-clockswise order
 
       double eps = boost::geometry::perimeter(origInner) *
-          _config.simplifyGeometriesInnerOuter;
+                   _config.simplifyGeometriesInnerOuter;
 
       // simplify the inner geometries with outer simplification, because
       // inner geometries are given counter-clockwise, it is not
@@ -403,7 +403,7 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
       simplified.outer() = poly.outer();
     } else {
       double eps = boost::geometry::perimeter(poly.outer()) *
-          _config.simplifyGeometriesInnerOuter;
+                   _config.simplifyGeometriesInnerOuter;
 
       // simplify the outer geometry with inner simplification
       boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
@@ -457,6 +457,15 @@ void osm2rdf::osm::GeometryHandler<W>::calculateRelations() {
     _statistics.open();
     _containsStatistics.open();
   }
+  // prepareExplicitMPs();
+  if (_config.minIntersectArea < std::numeric_limits<double>::infinity()) {
+    prepareRTree();
+    prepareDummyRegionsIntersect();
+  }
+  if (_config.dummyGridCellSize < std::numeric_limits<double>::infinity()) {
+    prepareRTree();
+    prepareDummyRegionsGrid();
+  }
   prepareRTree();
   prepareDAG();
   dumpNamedAreaRelations();
@@ -478,6 +487,8 @@ void osm2rdf::osm::GeometryHandler<W>::calculateRelations() {
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::prepareRTree() {
+  // empty the rtree!
+  _spatialIndex.clear();
   std::cerr << std::endl;
   std::cerr << osm2rdf::util::currentTimeFormatted() << " Sorting "
             << _spatialStorageArea.size() << " areas ... " << std::endl;
@@ -499,6 +510,250 @@ void osm2rdf::osm::GeometryHandler<W>::prepareRTree() {
 
   std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
             << std::endl;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::GeometryHandler<W>::prepareExplicitMPs() {
+  {
+    // Prepare id based lookup table for later usage...
+    _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
+    for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
+      const auto& area = _spatialStorageArea[i];
+      _spatialStorageAreaIndex[std::get<1>(area)] = i;
+    }
+
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << " Generating explicit multipolygon regions from "
+              << _spatialStorageArea.size() << " areas ... " << std::endl;
+
+    osm2rdf::util::ProgressBar progressBar{_spatialStorageArea.size(), true};
+    size_t entryCount = 0;
+
+    size_t dummyAreaCountBef = _dummyAreaCount;
+
+    progressBar.update(entryCount);
+
+    // we only iterate over all original elements - dummy areas will be added
+    // to the end of _spatialStorageArea, and thus ignored for dummy area
+    // creation
+    size_t spatialStorageAreaSize = _spatialStorageArea.size();
+
+#pragma omp parallel for shared(                                       \
+    std::cout, std::cerr,                                              \
+    osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION,             \
+    osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
+    progressBar, spatialStorageAreaSize) default(none) schedule(dynamic)
+
+    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
+      const auto& entry = _spatialStorageArea[i];
+      const auto& entryGeom = std::get<2>(entry);
+
+      // if geom is a multigeometry, add all individual geometries as areas
+      if (entryGeom.size() > 1) {
+        for (const auto& poly : entryGeom) {
+          osm2rdf::geometry::Area singlePolyMP{poly};
+          double area = boost::geometry::area(singlePolyMP);
+          addDummyRegion(singlePolyMP, area);
+        }
+      }
+#pragma omp critical(progress)
+      progressBar.update(entryCount++);
+    }
+    progressBar.done();
+
+    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done, added "
+              << (_dummyAreaCount - dummyAreaCountBef) << " new areas"
+              << std::endl;
+  }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsGrid() {
+  {
+    // Prepare id based lookup table for later usage...
+    _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
+    for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
+      const auto& area = _spatialStorageArea[i];
+      _spatialStorageAreaIndex[std::get<1>(area)] = i;
+    }
+
+    size_t dummyAreaCountBef = _dummyAreaCount;
+
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << " Generating dummy grid-based regions from "
+              << _spatialStorageArea.size() << " areas ... " << std::endl;
+
+    osm2rdf::util::ProgressBar progressBar{_spatialStorageArea.size(), true};
+    size_t entryCount = 0;
+
+    progressBar.update(entryCount);
+
+    // we only iterate over all original elements - dummy areas will be added
+    // to the end of _spatialStorageArea, and thus ignored for dummy area
+    // creation
+    size_t spatialStorageAreaSize = _spatialStorageArea.size();
+
+    double GRID_W = _config.dummyGridCellSize;
+    double MAX_AREA = GRID_W * GRID_W;
+
+#pragma omp parallel for shared(                                       \
+    std::cout, std::cerr, MAX_AREA, GRID_W,                            \
+    osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION,             \
+    osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
+    progressBar, spatialStorageAreaSize) default(none) schedule(dynamic)
+
+    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
+      const auto& entry = _spatialStorageArea[i];
+      const auto& entryEnvelope = std::get<0>(entry);
+      const auto& entryGeom = std::get<2>(entry);
+      const auto& entryArea = std::get<4>(entry);
+
+      if (entryArea <= MAX_AREA) continue;
+
+      double boxW = entryEnvelope.max_corner().get<0>() -
+                    entryEnvelope.min_corner().get<0>();
+      double boxH = entryEnvelope.max_corner().get<1>() -
+                    entryEnvelope.min_corner().get<1>();
+
+      for (size_t x = 0; x < ceil(boxW / GRID_W); x++) {
+        for (size_t y = 0; y < ceil(boxH / GRID_W); y++) {
+          osm2rdf::geometry::Box box;
+          box.min_corner().set<0>(entryEnvelope.min_corner().get<0>() +
+                                  x * GRID_W);
+          box.min_corner().set<1>(entryEnvelope.min_corner().get<1>() +
+                                  y * GRID_W);
+          box.max_corner().set<0>(entryEnvelope.min_corner().get<0>() +
+                                  (x + 1) * GRID_W);
+          box.max_corner().set<1>(entryEnvelope.min_corner().get<1>() +
+                                  (y + 1) * GRID_W);
+
+          osm2rdf::geometry::Area boxIntersect;
+          boost::geometry::intersection(entryGeom, box, boxIntersect);
+          double intersectArea = boost::geometry::area(boxIntersect);
+
+          if (intersectArea > 0) {
+            addDummyRegion(boxIntersect, intersectArea);
+          }
+        }
+      }
+
+#pragma omp critical(progress)
+      progressBar.update(entryCount++);
+    }
+    progressBar.done();
+
+    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done, added "
+              << (_dummyAreaCount - dummyAreaCountBef) << " dummy areas"
+              << std::endl;
+  }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
+  {
+    // Prepare id based lookup table for later usage...
+    _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
+    for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
+      const auto& area = _spatialStorageArea[i];
+      _spatialStorageAreaIndex[std::get<1>(area)] = i;
+    }
+
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << " Generating dummy regions from " << _spatialStorageArea.size()
+              << " areas ... " << std::endl;
+
+    osm2rdf::util::ProgressBar progressBar{_spatialStorageArea.size(), true};
+    size_t entryCount = 0;
+
+    size_t dummyAreaCountBef = _dummyAreaCount;
+
+    progressBar.update(entryCount);
+
+    // we only iterate over all original elements - dummy areas will be added
+    // to the end of _spatialStorageArea, and thus ignored for dummy area
+    // creation
+    size_t spatialStorageAreaSize = _spatialStorageArea.size();
+
+    double MIN_AREA = _config.minIntersectArea;
+
+#pragma omp parallel for shared(                                       \
+    std::cout, std::cerr, MIN_AREA,                                    \
+    osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION,             \
+    osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
+    progressBar, spatialStorageAreaSize) default(none) schedule(dynamic)
+
+    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
+      const auto& entry = _spatialStorageArea[i];
+      const auto& entryEnvelope = std::get<0>(entry);
+      const auto& entryId = std::get<1>(entry);
+      const auto& entryGeom = std::get<2>(entry);
+      const auto& entryArea = std::get<4>(entry);
+
+      if (entryArea <= MIN_AREA) continue;
+
+      // Set containing all areas we already checked
+      std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
+          skip;
+      std::vector<SpatialAreaRefValue> queryResult;
+      _spatialIndex.query(boost::geometry::index::intersects(entryEnvelope),
+                          std::back_inserter(queryResult));
+
+      skip.insert(entryId);
+
+      for (const auto& areaRef : queryResult) {
+        const auto& area = _spatialStorageArea[areaRef.second];
+        const auto& areaId = std::get<1>(area);
+        const auto& areaGeom = std::get<2>(area);
+        const auto& areaArea = std::get<4>(area);
+
+        if (areaId == entryId) {
+          continue;
+        }
+
+        if (skip.find(areaId) != skip.end()) {
+          continue;
+        }
+
+        if (areaArea <= MIN_AREA) continue;
+
+        // intersection
+        osm2rdf::geometry::Area intersect;
+        boost::geometry::intersection(entryGeom, areaGeom, intersect);
+        double intersectArea = boost::geometry::area(intersect);
+        bool isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
+
+        if (!isCoveredBy && intersectArea > MIN_AREA) {
+          addDummyRegion(intersect, intersectArea);
+
+          // difference in entry
+          osm2rdf::geometry::Area diffEntry;
+          boost::geometry::difference(entryGeom, intersect, diffEntry);
+          double diffEntryArea = boost::geometry::area(diffEntry);
+          if (diffEntryArea > MIN_AREA) {
+            addDummyRegion(diffEntry, diffEntryArea);
+          }
+
+          // difference in area
+          osm2rdf::geometry::Area diffArea;
+          boost::geometry::difference(areaGeom, intersect, diffArea);
+          double areaArea = boost::geometry::area(diffArea);
+          if (areaArea > MIN_AREA) {
+            addDummyRegion(diffArea, areaArea);
+          }
+        }
+      }
+#pragma omp critical(progress)
+      progressBar.update(entryCount++);
+    }
+    progressBar.done();
+
+    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done, added "
+              << (_dummyAreaCount - dummyAreaCountBef) << " dummy areas"
+              << std::endl;
+  }
 }
 
 // ____________________________________________________________________________
@@ -525,17 +780,22 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
     size_t containsOk = 0;
     size_t skippedByDAG = 0;
     size_t skippedBySize = 0;
+
     progressBar.update(entryCount);
+
+    size_t spatialStorageAreaSize = _spatialStorageArea.size();
+
 #pragma omp parallel for shared(tmpDirectedAreaGraph,           \
-    std::cout, \
-    entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
+    std::cout, std::cerr,\
+                               osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,    entryCount, progressBar, spatialStorageAreaSize) reduction(+:checks, skippedBySize, skippedByDAG, \
     contains, containsOk) default(none) schedule(dynamic)
 
-    for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
+    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
+      const auto& entryArea = std::get<4>(entry);
 
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
@@ -554,6 +814,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         const auto& area = _spatialStorageArea[areaRef.second];
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
+        const auto& areaArea = std::get<4>(area);
 
         if (areaId == entryId) {
           continue;
@@ -570,7 +831,14 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         auto start = std::chrono::steady_clock::now();
 #endif
         // bool isCoveredBy = boost::geometry::covered_by(entryGeom, areaGeom);
-        bool isCoveredBy = coveredByApprox(entryGeom, areaGeom, 0.05);
+
+        // Approximate coveredy_by
+        osm2rdf::geometry::Area intersect;
+        boost::geometry::intersection(entryGeom, areaGeom, intersect);
+
+        double intersectArea = boost::geometry::area(intersect);
+
+        bool isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
@@ -587,8 +855,9 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
         start = std::chrono::steady_clock::now();
 #endif
-        // bool isEqual = isCoveredBy && boost::geometry::covered_by(areaGeom, entryGeom);
-        bool isEqual = isCoveredBy && coveredByApprox(areaGeom, entryGeom, 0.05);
+        // bool isEqual = isCoveredBy && boost::geometry::covered_by(areaGeom,
+        // entryGeom);
+        bool isEqual = isCoveredBy && fabs(1 - areaArea / intersectArea) < 0.05;
 #ifdef ENABLE_GEOMETRY_STATISTIC
         end = std::chrono::steady_clock::now();
         if (_config.writeGeometricRelationStatistics) {
@@ -698,20 +967,16 @@ void osm2rdf::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
     const auto id = vertices[i];
     const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
     const auto& entryObjId = std::get<3>(entry);
-    const auto& entryFromWay = std::get<5>(entry);
-    std::string entryIRI = _writer->generateIRI(
-        entryFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                     : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-        entryObjId);
+    const auto& entryFromType = std::get<5>(entry);
+    std::string entryIRI =
+        _writer->generateIRI(areaNamespace(entryFromType), entryObjId);
     for (const auto& dst : _directedAreaGraph.getEdges(id)) {
       assert(_spatialStorageAreaIndex[dst] < _spatialStorageArea.size());
       const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
       const auto& areaObjId = std::get<3>(area);
-      const auto& areaFromWay = std::get<5>(area);
-      std::string areaIRI = _writer->generateIRI(
-          areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                      : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-          areaObjId);
+      const auto& areaFromType = std::get<5>(area);
+      std::string areaIRI =
+          _writer->generateIRI(areaNamespace(areaFromType), areaObjId);
 
       _writer->writeTriple(areaIRI,
                            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,
@@ -781,11 +1046,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryObjId = std::get<3>(entry);
-      const auto& entryFromWay = std::get<5>(entry);
-      std::string entryIRI = _writer->generateIRI(
-          entryFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                       : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-          entryObjId);
+      const auto& entryFromType = std::get<5>(entry);
+      std::string entryIRI =
+          _writer->generateIRI(areaNamespace(entryFromType), entryObjId);
 
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
@@ -808,17 +1071,15 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
-        const auto& areaFromWay = std::get<5>(area);
+        const auto& areaFromType = std::get<5>(area);
         if (areaId == entryId) {
           continue;
         }
         areas++;
 
         bool doesIntersect = false;
-        std::string areaIRI = _writer->generateIRI(
-            areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                        : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-            areaObjId);
+        std::string areaIRI =
+            _writer->generateIRI(areaNamespace(areaFromType), areaObjId);
 
         if (skipIntersects.find(areaId) != skipIntersects.end()) {
           intersectsSkippedByDAG++;
@@ -996,7 +1257,7 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
         const auto& area = _spatialStorageArea[areaRef.second];
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
-        const auto& areaFromWay = std::get<5>(area);
+        const auto& areaFromType = std::get<5>(area);
         checks++;
 
         if (skip.find(areaId) != skip.end()) {
@@ -1027,10 +1288,8 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
         const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
         skip.insert(successors.begin(), successors.end());
 
-        std::string areaIRI = _writer->generateIRI(
-            areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                        : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-            areaObjId);
+        std::string areaIRI =
+            _writer->generateIRI(areaNamespace(areaFromType), areaObjId);
         _writer->writeTriple(
             areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
             nodeIRI);
@@ -1111,7 +1370,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
       const auto& wayEnvelope = std::get<0>(way);
       const auto& wayEnvelopes = std::get<4>(way);
       const auto& wayId = std::get<1>(way);
-      const auto& wayGeom = std::get<2>(way);
       const auto& wayNodeIds = std::get<3>(way);
 
       // Check if our "area" has successors in the DAG, if yes we are part of
@@ -1152,16 +1410,19 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
                             std::back_inserter(queryResult));
       }
 
-      // remove duplicates
-      std::sort(
-          queryResult.begin(), queryResult.end(),
-          [](const auto& a, const auto& b) { return a.second < b.second; });
-      auto last = std::unique(
-          queryResult.begin(), queryResult.end(),
-          [](const auto& a, const auto& b) { return a.second == b.second; });
+      if (wayEnvelopes.size() > 1) {
+        // remove duplicates, may occur since we used multiple envelope queries
+        // to build the result!
+        std::sort(
+            queryResult.begin(), queryResult.end(),
+            [](const auto& a, const auto& b) { return a.second < b.second; });
+        auto last = std::unique(
+            queryResult.begin(), queryResult.end(),
+            [](const auto& a, const auto& b) { return a.second == b.second; });
 
-      // duplicates were swapped to  the end of vector, beginning at last
-      queryResult.erase(last, queryResult.end());
+        // duplicates were swapped to  the end of vector, beginning at last
+        queryResult.erase(last, queryResult.end());
+      }
 
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
@@ -1175,9 +1436,9 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
         const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
-        const auto& areaFromWay = std::get<5>(area);
+        const auto& areaFromType = std::get<5>(area);
 
-        if (areaFromWay && areaObjId == wayId) {
+        if (areaFromType == 1 && areaObjId == wayId) {
           continue;
         }
         areas++;
@@ -1194,10 +1455,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
               _directedAreaGraph.findSuccessorsFast(areaId);
           skipIntersects.insert(successors.begin(), successors.end());
 
-          std::string areaIRI = _writer->generateIRI(
-              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaObjId);
+          std::string areaIRI =
+              _writer->generateIRI(areaNamespace(areaFromType), areaObjId);
 
           _writer->writeTriple(
               areaIRI,
@@ -1228,10 +1487,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
               _directedAreaGraph.findSuccessorsFast(areaId);
           skipIntersects.insert(successors.begin(), successors.end());
 
-          std::string areaIRI = _writer->generateIRI(
-              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaObjId);
+          std::string areaIRI =
+              _writer->generateIRI(areaNamespace(areaFromType), areaObjId);
 
           _writer->writeTriple(
               areaIRI,
@@ -1290,10 +1547,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
               _directedAreaGraph.findSuccessorsFast(areaId);
           skipContains.insert(successors.begin(), successors.end());
 
-          std::string areaIRI = _writer->generateIRI(
-              areaFromWay ? osm2rdf::ttl::constants::NAMESPACE__OSM_WAY
-                          : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-              areaObjId);
+          std::string areaIRI =
+              _writer->generateIRI(areaNamespace(areaFromType), areaObjId);
 
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
@@ -1591,16 +1846,57 @@ void osm2rdf::osm::GeometryHandler<W>::printWayAreaStats(
 
 // ____________________________________________________________________________
 template <typename W>
-bool osm2rdf::osm::GeometryHandler<W>::coveredByApprox(
-    const osm2rdf::geometry::Area& a, const osm2rdf::geometry::Area& b,
-    double threshold) const {
-  double aArea = boost::geometry::area(a);
-  osm2rdf::geometry::Area intersect;
-  boost::geometry::intersection(a, b, intersect);
+void osm2rdf::osm::GeometryHandler<W>::addDummyRegion(
+    osm2rdf::geometry::Area dummy, double dummyArea) {
+  auto innerGeom = osm2rdf::geometry::Area();
+  auto outerGeom = osm2rdf::geometry::Area();
 
-  double intersectArea = boost::geometry::area(intersect);
+  FactHandler factHandler(_config, _writer);
 
-  return fabs(1 - aArea / intersectArea) < threshold;
+  if (_config.simplifyGeometries > 0) {
+    dummy = simplifyGeometry(dummy);
+  }
+
+  if (!_config.dontUseInnerOuterGeoms) {
+    innerGeom = simplifiedArea(dummy, true);
+    outerGeom = simplifiedArea(dummy, false);
+  }
+
+#pragma omp critical(addIntersectGeom)
+  {
+    _dummyAreaCount++;
+
+    size_t dummyId = std::numeric_limits<id_t>::max() - _dummyAreaCount;
+    size_t dummyObjId = _dummyAreaCount;
+
+    osm2rdf::geometry::Box box;
+    boost::geometry::envelope(dummy, box);
+
+    _spatialStorageArea.push_back(SpatialAreaValue(
+        box, dummyId, dummy, dummyObjId, dummyArea, 2, innerGeom, outerGeom));
+
+    std::string s = _writer->generateIRI(
+        osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION, dummyObjId);
+
+    factHandler.writeBoostGeometry(
+        s, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, dummy);
+  }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+std::string osm2rdf::osm::GeometryHandler<W>::areaNamespace(
+    uint8_t type) const {
+  switch (type) {
+    case 0:
+      return osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
+    case 1:
+      return osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
+    case 2:
+      return osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION;
+    default:
+      return osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
+  }
 }
 
 // ____________________________________________________________________________

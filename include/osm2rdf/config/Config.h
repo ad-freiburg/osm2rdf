@@ -61,6 +61,11 @@ struct Config {
   bool adminRelationsOnly = false;
   bool skipWikiLinks = false;
 
+
+  // Dummy areas
+  double dummyGridCellSize = std::numeric_limits<double>::infinity();
+  double minIntersectArea = std::numeric_limits<double>::infinity();
+
   // Addition filters / data
   bool addAreaEnvelopeRatio = false;
   double minimalAreaEnvelopeRatio = -1.0;
@@ -89,6 +94,7 @@ struct Config {
   osm2rdf::util::OutputMergeMode mergeOutput =
       osm2rdf::util::OutputMergeMode::CONCATENATE;
   bool outputCompress = true;
+  bool outputKeepFiles = false;
 
   // osmium location cache
   std::filesystem::path cache{std::filesystem::temp_directory_path()};

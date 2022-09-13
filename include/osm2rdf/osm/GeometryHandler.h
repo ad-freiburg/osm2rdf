@@ -42,7 +42,7 @@ namespace osm2rdf::osm {
 // Area: envelope, id, geometry, osm id, area, fromWay
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t,
                    osm2rdf::geometry::Area, osm2rdf::osm::Area::id_t,
-                   osm2rdf::geometry::area_result_t, bool,
+                   osm2rdf::geometry::area_result_t, uint8_t,
                    osm2rdf::geometry::Area, osm2rdf::geometry::Area>
     SpatialAreaValue;
 
@@ -101,6 +101,13 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, prepareDAGEmpty);
   FRIEND_TEST(OSM_GeometryHandler, prepareDAGSimple);
 
+  // Generate dummy regions
+  void prepareDummyRegionsIntersect();
+  void prepareDummyRegionsGrid();
+
+  // Add explicit dummy regions for each polygon in a multipolygon
+  void prepareExplicitMPs();
+
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpNamedAreaRelations();
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsEmpty);
@@ -144,7 +151,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, statisticLine);
 
   template <typename G>
-  [[nodiscard]] G simplifyGeometry(const G& g);
+  [[nodiscard]] G simplifyGeometry(const G& g) const;
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryWay);
 
@@ -178,8 +185,9 @@ class GeometryHandler {
   osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g,
                                          bool inner) const;
 
-  bool coveredByApprox(const osm2rdf::geometry::Area& a,
-      const osm2rdf::geometry::Area& b, double threshold) const;
+  std::string areaNamespace(uint8_t type) const;
+
+  void addDummyRegion(osm2rdf::geometry::Area dummy, double area);
 
   // Global config
   osm2rdf::config::Config _config;
@@ -216,6 +224,8 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, addWay);
   std::ofstream _ofsWays;
   boost::archive::binary_oarchive _oaWays;
+
+  size_t _dummyAreaCount = 0;
 };
 
 }  // namespace osm2rdf::osm
