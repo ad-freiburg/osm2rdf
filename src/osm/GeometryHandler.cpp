@@ -732,21 +732,13 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
         osm2rdf::geometry::Area intersect;
         boost::geometry::intersection(entryGeom, areaGeom, intersect);
         double intersectArea = boost::geometry::area(intersect);
-<<<<<<< Updated upstream
         double entryCovered = intersectArea / entryArea;
         double areaCovered = intersectArea / areaArea;
 
         if (intersectArea > MIN_AREA && entryCovered < 0.98 && areaCovered < 0.98 && (entryCovered < 0.5 || areaCovered < 0.5)) {
-=======
-        bool isEntryEqualIntersection = fabs(1 - entryArea / intersectArea) < 0.05;
-        bool isAreaEqualIntersection = fabs(1 - areaArea / intersectArea) < 0.05;
-
-        if (!isEntryEqualIntersection && !isAreaEqualIntersection && intersectArea > MIN_AREA) {
->>>>>>> Stashed changes
           addDummyRegion(intersect, intersectArea);
         }
 
-<<<<<<< Updated upstream
         // difference in entry
         osm2rdf::geometry::Area diffEntry;
         boost::geometry::difference(entryGeom, intersect, diffEntry);
@@ -765,6 +757,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
         double diffAreaAreaCovered = diffAreaArea / areaArea;
         if (diffAreaArea > MIN_AREA && diffAreaEntryCovered < 0.98 && diffAreaAreaCovered < 0.98 && (diffAreaEntryCovered < 0.5 || diffAreaAreaCovered < 0.5)) {
           addDummyRegion(diffArea, diffAreaArea);
+/* Something stashed by Hannah...
 =======
           // difference in entry
           osm2rdf::geometry::Area diffEntry;
@@ -782,6 +775,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
           //   addDummyRegion(diffArea, areaArea);
           // }
 >>>>>>> Stashed changes
+*/
         }
       }
 #pragma omp critical(progress)
@@ -1542,24 +1536,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           containsChecks++;
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
-#endif
-          bool isCoveredByEnvelope =
-              boost::geometry::covered_by(wayEnvelope, areaEnvelope);
-#ifdef ENABLE_GEOMETRY_STATISTIC
-          auto end = std::chrono::steady_clock::now();
-          if (_config.writeGeometricRelationStatistics) {
-            _statistics.write(statisticLine(
-                __func__, "Way", "isCoveredByEnvelope", areaId, "area", wayId,
-                "way", std::chrono::nanoseconds(end - start),
-                isCoveredByEnvelope));
-          }
-#endif
-          if (!isCoveredByEnvelope) {
-            continue;
-          }
-          containsOkEnvelope++;
-#ifdef ENABLE_GEOMETRY_STATISTIC
-          start = std::chrono::steady_clock::now();
 #endif
           bool isCoveredBy = wayInArea(way, area);
 #ifdef ENABLE_GEOMETRY_STATISTIC
