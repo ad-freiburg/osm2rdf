@@ -732,13 +732,21 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
         osm2rdf::geometry::Area intersect;
         boost::geometry::intersection(entryGeom, areaGeom, intersect);
         double intersectArea = boost::geometry::area(intersect);
+<<<<<<< Updated upstream
         double entryCovered = intersectArea / entryArea;
         double areaCovered = intersectArea / areaArea;
 
         if (intersectArea > MIN_AREA && entryCovered < 0.98 && areaCovered < 0.98 && (entryCovered < 0.5 || areaCovered < 0.5)) {
+=======
+        bool isEntryEqualIntersection = fabs(1 - entryArea / intersectArea) < 0.05;
+        bool isAreaEqualIntersection = fabs(1 - areaArea / intersectArea) < 0.05;
+
+        if (!isEntryEqualIntersection && !isAreaEqualIntersection && intersectArea > MIN_AREA) {
+>>>>>>> Stashed changes
           addDummyRegion(intersect, intersectArea);
         }
 
+<<<<<<< Updated upstream
         // difference in entry
         osm2rdf::geometry::Area diffEntry;
         boost::geometry::difference(entryGeom, intersect, diffEntry);
@@ -757,6 +765,23 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
         double diffAreaAreaCovered = diffAreaArea / areaArea;
         if (diffAreaArea > MIN_AREA && diffAreaEntryCovered < 0.98 && diffAreaAreaCovered < 0.98 && (diffAreaEntryCovered < 0.5 || diffAreaAreaCovered < 0.5)) {
           addDummyRegion(diffArea, diffAreaArea);
+=======
+          // difference in entry
+          osm2rdf::geometry::Area diffEntry;
+          boost::geometry::difference(entryGeom, intersect, diffEntry);
+          double diffEntryArea = boost::geometry::area(diffEntry);
+          // if (diffEntryArea > MIN_AREA) {
+          //   addDummyRegion(diffEntry, diffEntryArea);
+          // }
+
+          // difference in area
+          osm2rdf::geometry::Area diffArea;
+          boost::geometry::difference(areaGeom, intersect, diffArea);
+          double areaArea = boost::geometry::area(diffArea);
+          // if (areaArea > MIN_AREA) {
+          //   addDummyRegion(diffArea, areaArea);
+          // }
+>>>>>>> Stashed changes
         }
       }
 #pragma omp critical(progress)
