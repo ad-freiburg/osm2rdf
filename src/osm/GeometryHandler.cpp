@@ -537,15 +537,15 @@ void osm2rdf::osm::GeometryHandler<W>::prepareExplicitMPs() {
     // we only iterate over all original elements - dummy areas will be added
     // to the end of _spatialStorageArea, and thus ignored for dummy area
     // creation
-    size_t spatialStorageAreaSize = _spatialStorageArea.size();
+    std::vector<std::pair<osm2rdf::geometry::Area, double>> newDummyRegions;
 
 #pragma omp parallel for shared(                                       \
     std::cout, std::cerr,                                              \
     osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION,             \
     osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
-    progressBar, spatialStorageAreaSize) default(none) schedule(dynamic)
+    progressBar, newDummyRegions) default(none) schedule(dynamic)
 
-    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
+    for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryGeom = std::get<2>(entry);
 
@@ -554,7 +554,9 @@ void osm2rdf::osm::GeometryHandler<W>::prepareExplicitMPs() {
         for (const auto& poly : entryGeom) {
           osm2rdf::geometry::Area singlePolyMP{poly};
           double area = boost::geometry::area(singlePolyMP);
-          addDummyRegion(singlePolyMP, area);
+
+#pragma omp critical(addMPDummy)
+            newDummyRegions.push_back({singlePolyMP, area});
         }
       }
 #pragma omp critical(progress)
@@ -565,6 +567,11 @@ void osm2rdf::osm::GeometryHandler<W>::prepareExplicitMPs() {
     std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done, added "
               << (_dummyAreaCount - dummyAreaCountBef) << " new areas"
               << std::endl;
+
+#pragma omp parallel for shared(newDummyRegions) default(none) schedule(dynamic)
+    for (size_t i = 0; i < newDummyRegions.size(); i++) {
+      addDummyRegion(newDummyRegions[i].first, newDummyRegions[i].second);
+    }
   }
 }
 
@@ -590,21 +597,18 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsGrid() {
 
     progressBar.update(entryCount);
 
-    // we only iterate over all original elements - dummy areas will be added
-    // to the end of _spatialStorageArea, and thus ignored for dummy area
-    // creation
-    size_t spatialStorageAreaSize = _spatialStorageArea.size();
-
     double GRID_W = _config.dummyGridCellSize;
     double MAX_AREA = GRID_W * GRID_W;
 
+    std::vector<std::pair<osm2rdf::geometry::Area, double>> newDummyRegions;
+
 #pragma omp parallel for shared(                                       \
-    std::cout, std::cerr, MAX_AREA, GRID_W,                            \
+    std::cout, std::cerr, MAX_AREA, GRID_W, newDummyRegions,           \
     osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION,             \
     osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
-    progressBar, spatialStorageAreaSize) default(none) schedule(dynamic)
+    progressBar) default(none) schedule(dynamic)
 
-    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
+    for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryGeom = std::get<2>(entry);
@@ -634,7 +638,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsGrid() {
           double intersectArea = boost::geometry::area(boxIntersect);
 
           if (intersectArea > 0) {
-            addDummyRegion(boxIntersect, intersectArea);
+#pragma omp critical(addGridDummy)
+            newDummyRegions.push_back({boxIntersect, intersectArea});
           }
         }
       }
@@ -645,8 +650,13 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsGrid() {
     progressBar.done();
 
     std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done, added "
-              << (_dummyAreaCount - dummyAreaCountBef) << " dummy areas"
+              << newDummyRegions.size() << " dummy areas"
               << std::endl;
+
+#pragma omp parallel for shared(newDummyRegions) default(none) schedule(dynamic)
+    for (size_t i = 0; i < newDummyRegions.size(); i++) {
+      addDummyRegion(newDummyRegions[i].first, newDummyRegions[i].second);
+    }
   }
 }
 
@@ -675,17 +685,17 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
     // we only iterate over all original elements - dummy areas will be added
     // to the end of _spatialStorageArea, and thus ignored for dummy area
     // creation
-    size_t spatialStorageAreaSize = _spatialStorageArea.size();
-
     double MIN_AREA = _config.minIntersectArea;
+
+    std::vector<std::pair<osm2rdf::geometry::Area, double>> newDummyRegions;
 
 #pragma omp parallel for shared(                                       \
     std::cout, std::cerr, MIN_AREA,                                    \
     osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION,             \
     osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
-    progressBar, spatialStorageAreaSize) default(none) schedule(dynamic)
+    progressBar, newDummyRegions) default(none) schedule(dynamic)
 
-    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
+    for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
@@ -736,7 +746,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
         double areaCovered = intersectArea / areaArea;
 
         if (intersectArea > MIN_AREA && entryCovered < 0.98 && areaCovered < 0.98 && (entryCovered < 0.5 || areaCovered < 0.5)) {
-          addDummyRegion(intersect, intersectArea);
+#pragma omp critical(addDummy)
+            newDummyRegions.push_back({intersect, intersectArea});
         }
 
         // difference in entry
@@ -746,7 +757,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
         double diffEntryEntryCovered = diffEntryArea / entryArea;
         double diffEntryAreaCovered = diffEntryArea / areaArea;
         if (diffEntryArea > MIN_AREA && diffEntryAreaCovered < 0.98 && diffEntryEntryCovered < 0.98 && (diffEntryAreaCovered < 0.5 || diffEntryEntryCovered < 0.5)) {
-          addDummyRegion(diffEntry, diffEntryArea);
+#pragma omp critical(addDummy)
+            newDummyRegions.push_back({diffEntry, diffEntryArea});
         }
 
         // difference in area
@@ -756,7 +768,8 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
         double diffAreaEntryCovered = diffAreaArea / entryArea;
         double diffAreaAreaCovered = diffAreaArea / areaArea;
         if (diffAreaArea > MIN_AREA && diffAreaEntryCovered < 0.98 && diffAreaAreaCovered < 0.98 && (diffAreaEntryCovered < 0.5 || diffAreaAreaCovered < 0.5)) {
-          addDummyRegion(diffArea, diffAreaArea);
+#pragma omp critical(addDummy)
+            newDummyRegions.push_back({diffArea, diffAreaArea});
         }
       }
 #pragma omp critical(progress)
@@ -765,8 +778,13 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
     progressBar.done();
 
     std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done, added "
-              << (_dummyAreaCount - dummyAreaCountBef) << " dummy areas"
+              << newDummyRegions.size() << " dummy areas"
               << std::endl;
+
+#pragma omp parallel for shared(newDummyRegions) default(none) schedule(dynamic)
+    for (size_t i = 0; i < newDummyRegions.size(); i++) {
+      addDummyRegion(newDummyRegions[i].first, newDummyRegions[i].second);
+    }
   }
 }
 
@@ -797,14 +815,12 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 
     progressBar.update(entryCount);
 
-    size_t spatialStorageAreaSize = _spatialStorageArea.size();
-
 #pragma omp parallel for shared(tmpDirectedAreaGraph,           \
     std::cout, std::cerr,\
-                               osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,    entryCount, progressBar, spatialStorageAreaSize) reduction(+:checks, skippedBySize, skippedByDAG, \
+                               osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,    entryCount, progressBar) reduction(+:checks, skippedBySize, skippedByDAG, \
     contains, containsOk) default(none) schedule(dynamic)
 
-    for (size_t i = 0; i < spatialStorageAreaSize; i++) {
+    for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryEnvelope = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
@@ -1846,7 +1862,7 @@ void osm2rdf::osm::GeometryHandler<W>::addDummyRegion(
     outerGeom = simplifiedArea(dummy, false);
   }
 
-#pragma omp critical(addIntersectGeom)
+#pragma omp critical(addDummyGeom)
   {
     _dummyAreaCount++;
 
