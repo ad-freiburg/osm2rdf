@@ -692,8 +692,6 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
       const auto& entryGeom = std::get<2>(entry);
       const auto& entryArea = std::get<4>(entry);
 
-      if (entryArea <= MIN_AREA) continue;
-
       // Set containing all areas we already checked
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skip;
@@ -717,32 +715,48 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
           continue;
         }
 
-        if (areaArea <= MIN_AREA) continue;
+        // intersection will never be over the threshold, discard
+        if (entryArea <= MIN_AREA && areaArea <= MIN_AREA) continue;
+
+        // if only entryArea is too small, the intersection will still be too
+        // small, but the difference might be over the threshold.
+        // The best case scenario is then that the intersection is the entire
+        // "entry", but if even in that case the resulting geometry covers too
+        // much of "area", discard
+        if (entryArea <= MIN_AREA && (areaArea - entryArea) / areaArea >= 0.5 ) continue;
+
+        // same as above for entry
+        if (areaArea <= MIN_AREA && (entryArea - areaArea) / areaArea >= 0.5 ) continue;
 
         // intersection
         osm2rdf::geometry::Area intersect;
         boost::geometry::intersection(entryGeom, areaGeom, intersect);
         double intersectArea = boost::geometry::area(intersect);
-        bool isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
+        double entryCovered = intersectArea / entryArea;
+        double areaCovered = intersectArea / areaArea;
 
-        if (!isCoveredBy && intersectArea > MIN_AREA) {
+        if (intersectArea > MIN_AREA && entryCovered < 0.98 && areaCovered < 0.98 && (entryCovered < 0.5 || areaCovered < 0.5)) {
           addDummyRegion(intersect, intersectArea);
+        }
 
-          // difference in entry
-          osm2rdf::geometry::Area diffEntry;
-          boost::geometry::difference(entryGeom, intersect, diffEntry);
-          double diffEntryArea = boost::geometry::area(diffEntry);
-          if (diffEntryArea > MIN_AREA) {
-            addDummyRegion(diffEntry, diffEntryArea);
-          }
+        // difference in entry
+        osm2rdf::geometry::Area diffEntry;
+        boost::geometry::difference(entryGeom, intersect, diffEntry);
+        double diffEntryArea = boost::geometry::area(diffEntry);
+        double diffEntryEntryCovered = diffEntryArea / entryArea;
+        double diffEntryAreaCovered = diffEntryArea / areaArea;
+        if (diffEntryArea > MIN_AREA && diffEntryAreaCovered < 0.98 && diffEntryEntryCovered < 0.98 && (diffEntryAreaCovered < 0.5 || diffEntryEntryCovered < 0.5)) {
+          addDummyRegion(diffEntry, diffEntryArea);
+        }
 
-          // difference in area
-          osm2rdf::geometry::Area diffArea;
-          boost::geometry::difference(areaGeom, intersect, diffArea);
-          double areaArea = boost::geometry::area(diffArea);
-          if (areaArea > MIN_AREA) {
-            addDummyRegion(diffArea, areaArea);
-          }
+        // difference in area
+        osm2rdf::geometry::Area diffArea;
+        boost::geometry::difference(areaGeom, intersect, diffArea);
+        double diffAreaArea = boost::geometry::area(diffArea);
+        double diffAreaEntryCovered = diffAreaArea / entryArea;
+        double diffAreaAreaCovered = diffAreaArea / areaArea;
+        if (diffAreaArea > MIN_AREA && diffAreaEntryCovered < 0.98 && diffAreaAreaCovered < 0.98 && (diffAreaEntryCovered < 0.5 || diffAreaAreaCovered < 0.5)) {
+          addDummyRegion(diffArea, diffAreaArea);
         }
       }
 #pragma omp critical(progress)
@@ -1089,7 +1103,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
 #endif
-          // doesIntersect = boost::geometry::intersects(entryGeom, areaGeom);
+
           doesIntersect = areaIntersectsArea(entry, area);
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto end = std::chrono::steady_clock::now();
@@ -1352,7 +1366,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     size_t skippedInDAG = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared( \
-    std::cout, \
+    std::cout, std::cerr,\
     osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, nodeData, \
     osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
@@ -1367,7 +1381,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 #pragma omp critical(loadEntry)
       ia >> way;
 
-      const auto& wayEnvelope = std::get<0>(way);
       const auto& wayEnvelopes = std::get<4>(way);
       const auto& wayId = std::get<1>(way);
       const auto& wayNodeIds = std::get<3>(way);
@@ -1434,7 +1447,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
 
-        const auto& areaEnvelope = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromType = std::get<5>(area);
@@ -1508,22 +1520,6 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 #ifdef ENABLE_GEOMETRY_STATISTIC
           auto start = std::chrono::steady_clock::now();
 #endif
-          bool isCoveredByEnvelope =
-              boost::geometry::covered_by(wayEnvelope, areaEnvelope);
-#ifdef ENABLE_GEOMETRY_STATISTIC
-          auto end = std::chrono::steady_clock::now();
-          if (_config.writeGeometricRelationStatistics) {
-            _statistics.write(statisticLine(
-                __func__, "Way", "isCoveredByEnvelope", areaId, "area", wayId,
-                "way", std::chrono::nanoseconds(end - start),
-                isCoveredByEnvelope));
-          }
-#endif
-          if (!isCoveredByEnvelope) {
-            continue;
-          }
-          containsOkEnvelope++;
-
           bool isCoveredBy = wayInArea(way, area);
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
@@ -1698,6 +1694,9 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
   const auto& geomB = std::get<2>(b);
   const auto& innerGeomB = std::get<6>(b);
   const auto& outerGeomB = std::get<7>(b);
+  const auto& envelopeB = std::get<0>(a);
+
+  if (!boost::geometry::covered_by(envelopeA, envelopeB)) return false;
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
@@ -1841,10 +1840,6 @@ void osm2rdf::osm::GeometryHandler<W>::addDummyRegion(
   auto outerGeom = osm2rdf::geometry::Area();
 
   FactHandler factHandler(_config, _writer);
-
-  if (_config.simplifyGeometries > 0) {
-    dummy = simplifyGeometry(dummy);
-  }
 
   if (!_config.dontUseInnerOuterGeoms) {
     innerGeom = simplifiedArea(dummy, true);
