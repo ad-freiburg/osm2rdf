@@ -30,8 +30,7 @@ clean-input:
 	rm -rf ./input/
 
 build:
-	cmake -S . -B build
-	# cmake -DENABLE_GEOMETRY_STATISTIC=1 -S . -B build
+	cmake -DENABLE_GEOMETRY_STATISTIC=1 -S . -B build
 
 compile: build
 	cmake --build build --target osm2rdf osm2rdf-stats

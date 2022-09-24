@@ -1,5 +1,7 @@
-// Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Copyright 2020 - 2022, University of Freiburg
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>
+//          Hannah Bast <bast@cs.uni-freiburg.de>
 
 // This file is part of osm2rdf.
 //
@@ -25,6 +27,7 @@ namespace osm2rdf::config::constants {
 
 const static inline std::string BZIP2_EXTENSION = ".bz2";
 const static inline std::string STATS_EXTENSION = ".stats";
+const static inline std::string CONTAINS_STATS_EXTENSION = ".contains-stats";
 const static inline std::string JSON_EXTENSION = ".json";
 
 const static inline std::string HEADER = "Config";

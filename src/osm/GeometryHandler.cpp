@@ -1,5 +1,7 @@
-// Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Copyright 2020 - 2022, University of Freiburg
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>
+//          Hannah Bast <bast@cs.uni-freiburg.de>
 
 // This file is part of osm2rdf.
 //
@@ -615,6 +617,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsGrid() {
       const auto& entryArea = std::get<4>(entry);
 
       if (entryArea <= MAX_AREA) continue;
+
 
       double boxW = entryEnvelope.max_corner().get<0>() -
                     entryEnvelope.min_corner().get<0>();
@@ -1536,7 +1539,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
 #endif
           bool isCoveredBy = wayInArea(way, area);
 #ifdef ENABLE_GEOMETRY_STATISTIC
-          end = std::chrono::steady_clock::now();
+          auto end = std::chrono::steady_clock::now();
 #endif
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
