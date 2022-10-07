@@ -22,8 +22,8 @@ cmake_minimum_required(VERSION 3.16...3.18)
 # ----------------------------------------------------------------------------
 project(
         osm2rdf
-        VERSION 0.5
-        DESCRIPTION "Convert osm to ttl"
+        VERSION 0.2
+        DESCRIPTION "Convert osm to rdf"
         LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -72,6 +72,10 @@ find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenMP REQUIRED)
+# Disable installation of google stuff
+set(INSTALL_GMOCK OFF)
+set(INSTALL_GTEST OFF)
+set(BENCHMARK_ENABLE_INSTALL OFF)
 
 find_package(Git QUIET)
 if (GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
@@ -220,3 +224,9 @@ add_subdirectory(src)
 
 # The executable code is here
 add_subdirectory(apps)
+
+# Install target settings
+install(
+        FILES build/apps/osm2rdf DESTINATION bin
+        PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE COMPONENT binaries
+)
