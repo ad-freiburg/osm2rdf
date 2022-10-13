@@ -39,11 +39,20 @@
 #include "osm2rdf/util/Output.h"
 
 namespace osm2rdf::osm {
+
+const static int NUM_GRID_CELLS = 16000;
+
+struct BoxIdCmp {
+  bool operator()(int32_t left, int32_t right) {
+    return abs(left) < abs(right);
+  }
+};
+
 // Area: envelope, id, geometry, osm id, area, fromWay
-typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t,
-                   osm2rdf::geometry::Area, osm2rdf::osm::Area::id_t,
-                   osm2rdf::geometry::area_result_t, uint8_t,
-                   osm2rdf::geometry::Area, osm2rdf::geometry::Area>
+typedef std::tuple<
+    osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t, osm2rdf::geometry::Area,
+    osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t, uint8_t,
+    osm2rdf::geometry::Area, osm2rdf::geometry::Area, std::vector<int32_t>>
     SpatialAreaValue;
 
 typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
@@ -61,7 +70,7 @@ typedef std::vector<osm2rdf::osm::Node::id_t> WayNodeList;
 // Way: envelope, osm id, geometry, node list
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
                    osm2rdf::geometry::Way, WayNodeList,
-                   std::vector<osm2rdf::geometry::Box>>
+                   std::vector<osm2rdf::geometry::Box>, std::vector<int32_t>>
     SpatialWayValue;
 typedef std::vector<SpatialWayValue> SpatialWayVector;
 
@@ -189,6 +198,19 @@ class GeometryHandler {
 
   void addDummyRegion(osm2rdf::geometry::Area dummy, double area);
 
+  std::vector<int32_t> getBoxIds(const osm2rdf::geometry::Area&,
+                                 const osm2rdf::geometry::Box& envelope) const;
+  std::vector<int32_t> getBoxIds(const osm2rdf::geometry::Way&,
+                                 const osm2rdf::geometry::Box& envelope) const;
+  int32_t getBoxId(const osm2rdf::geometry::Location&) const;
+
+  uint8_t wayInAreaBoxIds(const std::vector<int32_t>& areaBoxIds,
+                          const std::vector<int32_t>& wayBoxIds) const;
+  uint8_t nodeInAreaBoxIds(const std::vector<int32_t>& areaBoxIds,
+                           int32_t ndBoxId) const;
+  uint8_t wayIntersectsAreaBoxIds(const std::vector<int32_t>& areaBoxIds,
+                                  const std::vector<int32_t>& wayBoxIds) const;
+
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
@@ -248,6 +270,7 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialWayValue& v,
   ar& boost::serialization::make_nvp("geom", std::get<2>(v));
   ar& boost::serialization::make_nvp("nodeIds", std::get<3>(v));
   ar& boost::serialization::make_nvp("boxes", std::get<4>(v));
+  ar& boost::serialization::make_nvp("boxids", std::get<5>(v));
 }
 
 template <class Archive>
