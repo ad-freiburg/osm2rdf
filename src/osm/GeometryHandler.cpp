@@ -107,15 +107,17 @@ std::string osm2rdf::osm::GeometryHandler<W>::statisticLine(
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
-  auto geom = area.geom();
-
   // inner simplified geom, empty by default
   auto innerGeom = osm2rdf::geometry::Area();
 
   // outer simplified geom, empty by default
   auto outerGeom = osm2rdf::geometry::Area();
 
-  geom = simplifyGeometry(geom);
+  osm2rdf::geometry::Area geom = area.geom();
+
+  if (_config.simplifyGeometries > 0) {
+    geom = simplifyGeometry(area.geom());
+  }
 
   if (!_config.dontUseInnerOuterGeoms && (area.hasName() || !area.fromWay())) {
     innerGeom = simplifiedArea(geom, true);
@@ -125,15 +127,18 @@ void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
   const auto& boxIds = getBoxIds(area.geom(), area.envelope());
 
   // if (area.objId() == 7379046) {
-  // // std::cout << geom.size() << std::endl;
-  // std::cout << "envelope|" << boost::geometry::wkt(area.envelope()) <<
-  // std::endl; std::cout << "inner|" <<
-  // boost::geometry::wkt(innerGeom.front().outer()) << std::endl; std::cout <<
-  // "outer|" << boost::geometry::wkt(outerGeom.front().outer()) << std::endl;
-  // std::cout << "full|" << boost::geometry::wkt(geom.front().outer()) <<
-  // std::endl;
+  // if (area.objId() == 54224) {
+    // // std::cout << geom.size() << std::endl;
+    // std::cout << "envelope|" << boost::geometry::wkt(area.envelope())
+    // << std::endl;
+    // std::cout << "inner|" << boost::geometry::wkt(innerGeom.front().outer())
+    // << std::endl;
+    // std::cout << "outer|" << boost::geometry::wkt(outerGeom.front().outer())
+    // << std::endl;
+    // std::cout << "full|" << boost::geometry::wkt(geom.front().outer())
+    // << std::endl;
 
-  // exit(1);
+    // exit(1);
   // }
 
 #pragma omp critical(areaDataInsert)
@@ -395,7 +400,7 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
 
       // inner polygons are given in counter-clockswise order
 
-      double eps = boost::geometry::perimeter(origInner) *
+      double eps = sqrt(-boost::geometry::area(origInner) / 3.14) * 3.14 * 2 *
                    _config.simplifyGeometriesInnerOuter;
 
       // simplify the inner geometries with outer simplification, because
@@ -419,7 +424,7 @@ osm2rdf::geometry::Area osm2rdf::osm::GeometryHandler<W>::simplifiedArea(
       numPointsNew += poly.outer().size();
       simplified.outer() = poly.outer();
     } else {
-      double eps = boost::geometry::perimeter(poly.outer()) *
+      double eps = sqrt(boost::geometry::area(poly.outer()) / 3.14) * 3.14 * 2 *
                    _config.simplifyGeometriesInnerOuter;
 
       // simplify the outer geometry with inner simplification
@@ -1974,6 +1979,61 @@ std::vector<int32_t> osm2rdf::osm::GeometryHandler<W>::getBoxIds(
 
 // ____________________________________________________________________________
 template <typename W>
+void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
+    const osm2rdf::geometry::Area& area, int xFrom, int xTo, int yFrom, int yTo,
+    int xWidth, int yHeight, std::vector<int32_t>* ret) const {
+  double GRID_W = 360.0 / NUM_GRID_CELLS;
+  double GRID_H = 180.0 / NUM_GRID_CELLS;
+
+  for (int32_t y = yFrom; y < yTo; y += yHeight) {
+    for (int32_t x = xFrom; x < xTo; x += xWidth) {
+      int localXWidth = std::min(xTo - x, xWidth);
+      int localYHeight = std::min(yTo - y, yHeight);
+
+      osm2rdf::geometry::Box box;
+      box.min_corner().set<0>(x * GRID_W - 180.0);
+      box.min_corner().set<1>(y * GRID_H - 90.0);
+      box.max_corner().set<0>((x + localXWidth) * GRID_W - 180.0);
+      box.max_corner().set<1>((y + localYHeight) * GRID_H - 90.0);
+
+      boost::geometry::model::ring<osm2rdf::geometry::Location> ring;
+      ring.push_back(box.min_corner());
+      ring.push_back({box.min_corner().get<0>(), box.max_corner().get<1>()});
+      ring.push_back(box.max_corner());
+      ring.push_back({box.max_corner().get<0>(), box.min_corner().get<1>()});
+      ring.push_back(box.min_corner());
+      osm2rdf::geometry::Polygon bboxPoly;
+      bboxPoly.inners().reserve(1);
+      bboxPoly.inners().push_back(ring);
+
+      if (boost::geometry::intersects(area, box)) {
+        if (boost::geometry::covered_by(bboxPoly, area)) {
+          // we can insert all at once
+          for (int32_t ly = y; ly < y + localYHeight; ly++) {
+            for (int32_t lx = x; lx < x + localXWidth; lx++) {
+              ret->push_back(ly * NUM_GRID_CELLS + lx + 1);
+            }
+          }
+        } else {
+          if (localXWidth == 1 && localYHeight == 1) {
+            ret->push_back(-(y * NUM_GRID_CELLS + x + 1));
+          } else {
+            // we need to check in detail on a smaller level!
+            // recurse down...
+            int newXWidth = (localXWidth + 1) / 2;
+            int newYHeight = (localYHeight + 1) / 2;
+
+            getBoxIds(area, x, x + localXWidth, y, y + localYHeight, newXWidth,
+                      newYHeight, ret);
+          }
+        }
+      }
+    }
+  }
+}
+
+// ____________________________________________________________________________
+template <typename W>
 std::vector<int32_t> osm2rdf::osm::GeometryHandler<W>::getBoxIds(
     const osm2rdf::geometry::Area& area,
     const osm2rdf::geometry::Box& envelope) const {
@@ -1988,36 +2048,9 @@ std::vector<int32_t> osm2rdf::osm::GeometryHandler<W>::getBoxIds(
 
   std::vector<int32_t> boxIds;
 
-  for (int32_t y = startY; y < endY; y++) {
-    for (int32_t x = startX; x < endX; x++) {
-      osm2rdf::geometry::Box box;
-      box.min_corner().set<0>(x * GRID_W - 180.0);
-      box.min_corner().set<1>(y * GRID_H - 90.0);
-      box.max_corner().set<0>((x + 1) * GRID_W - 180.0);
-      box.max_corner().set<1>((y + 1) * GRID_H - 90.0);
-
-      boost::geometry::model::ring<osm2rdf::geometry::Location> ring;
-      ring.push_back(box.min_corner());
-      ring.push_back({box.min_corner().get<0>(), box.max_corner().get<1>()});
-      ring.push_back(box.max_corner());
-      ring.push_back({box.max_corner().get<0>(), box.min_corner().get<1>()});
-      ring.push_back(box.min_corner());
-      osm2rdf::geometry::Polygon bboxPoly;
-      bboxPoly.inners().push_back(ring);
-
-      uint8_t code = 0;
-
-      if (boost::geometry::intersects(area, box)) {
-        code = 1;
-        if (boost::geometry::covered_by(bboxPoly, area)) {
-          code = 2;
-        }
-      }
-
-      if (code == 1) boxIds.push_back(-(y * NUM_GRID_CELLS + x + 1));
-      if (code == 2) boxIds.push_back(y * NUM_GRID_CELLS + x + 1);
-    }
-  }
+  getBoxIds(area, startX, endX, startY, endY, (endX - startX + 3) / 4,
+            (endY - startY + 3) / 4, &boxIds);
+  std::sort(boxIds.begin(), boxIds.end(), BoxIdCmp());
 
   assert(boxIds.size());
 
@@ -2060,7 +2093,7 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::wayIntersectsAreaBoxIds(
     const std::vector<int32_t>& areaBoxIds) const {
   uint8_t res = 0;
 
-  size_t numEq =0;
+  size_t numEq = 0;
 
   // 0: no res
   // 1: possible intersect
@@ -2084,14 +2117,16 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::wayIntersectsAreaBoxIds(
       do {
         if (j + gallop >= areaBoxIds.size()) {
           j = std::lower_bound(areaBoxIds.begin() + j + gallop / 2,
-                               areaBoxIds.end(), fabs(wayBoxIds[i]), BoxIdCmp()) -
+                               areaBoxIds.end(), fabs(wayBoxIds[i]),
+                               BoxIdCmp()) -
               areaBoxIds.begin();
           break;
         }
 
         if (abs(areaBoxIds[j + gallop]) >= abs(wayBoxIds[i])) {
           j = std::lower_bound(areaBoxIds.begin() + j + gallop / 2,
-                               areaBoxIds.begin() + j + gallop, fabs(wayBoxIds[i]), BoxIdCmp()) -
+                               areaBoxIds.begin() + j + gallop,
+                               fabs(wayBoxIds[i]), BoxIdCmp()) -
               areaBoxIds.begin();
           break;
         }
@@ -2114,7 +2149,7 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::wayInAreaBoxIds(
     const std::vector<int32_t>& areaBoxIds) const {
   uint8_t res = 0;
 
-  size_t numEq =0;
+  size_t numEq = 0;
 
   // 0: no res
   // 1: possibly in
@@ -2138,14 +2173,16 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::wayInAreaBoxIds(
       do {
         if (j + gallop >= areaBoxIds.size()) {
           j = std::lower_bound(areaBoxIds.begin() + j + gallop / 2,
-                               areaBoxIds.end(), fabs(wayBoxIds[i]), BoxIdCmp()) -
+                               areaBoxIds.end(), fabs(wayBoxIds[i]),
+                               BoxIdCmp()) -
               areaBoxIds.begin();
           break;
         }
 
         if (abs(areaBoxIds[j + gallop]) >= abs(wayBoxIds[i])) {
           j = std::lower_bound(areaBoxIds.begin() + j + gallop / 2,
-                               areaBoxIds.begin() + j + gallop, fabs(wayBoxIds[i])) -
+                               areaBoxIds.begin() + j + gallop,
+                               fabs(wayBoxIds[i])) -
               areaBoxIds.begin();
           break;
         }
@@ -2164,9 +2201,9 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::wayInAreaBoxIds(
 // ____________________________________________________________________________
 template <typename W>
 uint8_t osm2rdf::osm::GeometryHandler<W>::nodeInAreaBoxIds(
-    const std::vector<int32_t>& areaBoxIds,
-    int32_t ndBoxId) const {
-  auto f = std::lower_bound(areaBoxIds.begin(), areaBoxIds.end(), ndBoxId, BoxIdCmp());
+    const std::vector<int32_t>& areaBoxIds, int32_t ndBoxId) const {
+  auto f = std::lower_bound(areaBoxIds.begin(), areaBoxIds.end(), ndBoxId,
+                            BoxIdCmp());
 
   if (f == areaBoxIds.end() || abs(*f) != ndBoxId) return 0;
   if (*f > 0) return 2;

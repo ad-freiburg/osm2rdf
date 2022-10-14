@@ -40,7 +40,7 @@
 
 namespace osm2rdf::osm {
 
-const static int NUM_GRID_CELLS = 16000;
+const static int NUM_GRID_CELLS = 8000;
 
 struct BoxIdCmp {
   bool operator()(int32_t left, int32_t right) {
@@ -198,8 +198,13 @@ class GeometryHandler {
 
   void addDummyRegion(osm2rdf::geometry::Area dummy, double area);
 
+  void getBoxIds(const osm2rdf::geometry::Area&, int xFrom,
+                                 int xTo, int yFrom, int yTo, int xWidth,
+                                 int yWidth, std::vector<int32_t>* ret) const;
+
   std::vector<int32_t> getBoxIds(const osm2rdf::geometry::Area&,
                                  const osm2rdf::geometry::Box& envelope) const;
+
   std::vector<int32_t> getBoxIds(const osm2rdf::geometry::Way&,
                                  const osm2rdf::geometry::Box& envelope) const;
   int32_t getBoxId(const osm2rdf::geometry::Location&) const;
