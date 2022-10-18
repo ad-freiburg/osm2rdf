@@ -2059,6 +2059,8 @@ osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::getBoxIds(
     const osm2rdf::geometry::Area& area, const osm2rdf::geometry::Box& envelope,
     const osm2rdf::geometry::Area& inner,
     const osm2rdf::geometry::Area& outer) const {
+  if (area.front().outer().size() < 1000) return {};
+
   int32_t startX = floor((envelope.min_corner().get<0>() + 180.0) / GRID_W);
   int32_t startY = floor((envelope.min_corner().get<1>() + 90.0) / GRID_H);
 
@@ -2105,6 +2107,7 @@ template <typename W>
 uint8_t osm2rdf::osm::GeometryHandler<W>::polyIntersectPolyBoxIds(
     const osm2rdf::osm::BoxIdList& wayBoxIds,
     const osm2rdf::osm::BoxIdList& areaBoxIds, bool contains) const {
+  if (areaBoxIds.size() == 0 || wayBoxIds.size() == 0) return 1;
   uint8_t res = 0;
 
   size_t numEq = 0;
@@ -2135,8 +2138,7 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::polyIntersectPolyBoxIds(
         ii = 0;
         i++;
       } else {
-        jj++;
-        if (jj > areaBoxIds[j].second) {
+        if (++jj > areaBoxIds[j].second) {
           j++;
           jj = 0;
         }
@@ -2147,8 +2149,7 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::polyIntersectPolyBoxIds(
       ii = 0;
       i++;
     } else if (abs(wayBoxIds[i].first) + ii < abs(areaBoxIds[j].first) + jj) {
-      ii++;
-      if (ii > wayBoxIds[i].second) {
+      if (++ii > wayBoxIds[i].second) {
         i++;
         ii = 0;
       }
@@ -2225,6 +2226,7 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::areaIntersectsAreaBoxIds(
 template <typename W>
 osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::pack(
     const osm2rdf::osm::BoxIdList& ids) const {
+  if (ids.size() == 0) return ids;
   // assume the list is sorted!
 
   osm2rdf::osm::BoxIdList ret;
