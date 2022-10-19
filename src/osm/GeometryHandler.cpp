@@ -111,7 +111,7 @@ void osm2rdf::osm::GeometryHandler<W>::relation(
   // careful, tags is returned via copy (why?)
   const auto& tags = rel.tags();
   auto i = tags.find("type");
-  if (i != tags.end() && i->second == "boundary") {
+  if (i != tags.end() && (i->second == "boundary" || i->second == "multipolygon")) {
     bool inserted = false;
 
     for (const auto& m : rel.members()) {
