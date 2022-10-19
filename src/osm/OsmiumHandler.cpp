@@ -176,12 +176,15 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
   if (_config.adminRelationsOnly && relation.tags()["admin_level"] == nullptr) {
     return;
   }
-  const auto& r = osm2rdf::osm::Relation(relation);
+
+  const auto r = osm2rdf::osm::Relation(relation);
   if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
 #pragma omp task
     _dumpHandler.relation(r);
   }
+
+   _geometryHandler.relation(r);
 }
 
 // ____________________________________________________________________________

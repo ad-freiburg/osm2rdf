@@ -40,7 +40,7 @@
 
 namespace osm2rdf::osm {
 
-const static int NUM_GRID_CELLS = 4000;
+const static int NUM_GRID_CELLS = 10000;
 
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
@@ -71,7 +71,7 @@ typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
 typedef std::vector<SpatialAreaValue> SpatialAreaVector;
 
 // Node: envelope, osm  id, geometry
-typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Node::id_t,
+typedef std::tuple<osm2rdf::osm::Node::id_t,
                    osm2rdf::geometry::Node>
     SpatialNodeValue;
 typedef std::vector<SpatialNodeValue> SpatialNodeVector;
@@ -105,6 +105,7 @@ class GeometryHandler {
   void area(const osm2rdf::osm::Area& area);
   void node(const osm2rdf::osm::Node& node);
   void way(const osm2rdf::osm::Way& way);
+  void relation(const osm2rdf::osm::Relation& rel);
   // close external storage files
   void closeExternalStorage();
   // Calculate data
@@ -241,6 +242,8 @@ class GeometryHandler {
                                    const osm2rdf::osm::BoxIdList& b) const;
   osm2rdf::osm::BoxIdList pack(const osm2rdf::osm::BoxIdList& ids) const;
 
+  bool borderContained(osm2rdf::osm::Way::id_t wayId, osm2rdf::osm::Area::id_t areaId) const;
+
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
@@ -256,6 +259,8 @@ class GeometryHandler {
   SpatialAreaVector _spatialStorageArea;
   std::unordered_map<osm2rdf::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
+  std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<osm2rdf::osm::Area::id_t>>
+      _areaBorderWaysIndex;
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelation);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromWay);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios);
@@ -287,9 +292,8 @@ namespace boost::serialization {
 template <class Archive>
 void serialize(Archive& ar, osm2rdf::osm::SpatialNodeValue& v,
                [[maybe_unused]] const unsigned int version) {
-  ar& boost::serialization::make_nvp("envelope", std::get<0>(v));
-  ar& boost::serialization::make_nvp("id", std::get<1>(v));
-  ar& boost::serialization::make_nvp("geom", std::get<2>(v));
+  ar& boost::serialization::make_nvp("id", std::get<0>(v));
+  ar& boost::serialization::make_nvp("geom", std::get<1>(v));
 }
 
 template <class Archive>

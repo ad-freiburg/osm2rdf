@@ -73,6 +73,7 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
     }
     oCount++;
   }
+
   // Correct possibly invalid geometry...
   boost::geometry::correct(_geom);
   boost::geometry::envelope(_geom, _envelope);
