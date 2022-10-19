@@ -128,8 +128,8 @@ void osm2rdf::osm::GeometryHandler<W>::relation(
     if (inserted) {
 #pragma omp critical
       {
-        std::sort(_areaBorderWaysIndex[rel.id()].begin(),
-                  _areaBorderWaysIndex[rel.id()].end());
+        std::sort(_areaBorderWaysIndex[m.id()].begin(),
+                  _areaBorderWaysIndex[m.id()].end());
       }
     }
   }
