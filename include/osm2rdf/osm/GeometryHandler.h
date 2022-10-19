@@ -59,10 +59,11 @@ struct BoxIdCmp {
 typedef std::vector<BoxId> BoxIdList;
 
 // Area: envelope, id, geometry, osm id, area, fromWay
-typedef std::tuple<
-    osm2rdf::geometry::Box, osm2rdf::osm::Area::id_t, osm2rdf::geometry::Area,
-    osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t, uint8_t,
-    osm2rdf::geometry::Area, osm2rdf::geometry::Area, osm2rdf::osm::BoxIdList>
+typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
+                   osm2rdf::osm::Area::id_t, osm2rdf::geometry::Area,
+                   osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t,
+                   uint8_t, osm2rdf::geometry::Area, osm2rdf::geometry::Area,
+                   osm2rdf::osm::BoxIdList>
     SpatialAreaValue;
 
 typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
@@ -208,36 +209,36 @@ class GeometryHandler {
 
   void addDummyRegion(osm2rdf::geometry::Area dummy, double area);
 
-  void getBoxIds(const osm2rdf::geometry::Area&, 
-      
-                                 const osm2rdf::geometry::Area& inner,
-const osm2rdf::geometry::Area& outer,
-      int xFrom,
-                                 int xTo, int yFrom, int yTo, int xWidth,
-                                 int yWidth, osm2rdf::osm::BoxIdList* ret) const;
+  void getBoxIds(const osm2rdf::geometry::Area&,
+
+                 const osm2rdf::geometry::Area& inner,
+                 const osm2rdf::geometry::Area& outer, int xFrom, int xTo,
+                 int yFrom, int yTo, int xWidth, int yWidth,
+                 osm2rdf::osm::BoxIdList* ret) const;
 
   osm2rdf::osm::BoxIdList getBoxIds(const osm2rdf::geometry::Area&,
-                                 const osm2rdf::geometry::Box& envelope,
-                                 const osm2rdf::geometry::Area& inner,
-const osm2rdf::geometry::Area& outer
-                                 ) const;
+                                    const osm2rdf::geometry::Box& envelope,
+                                    const osm2rdf::geometry::Area& inner,
+                                    const osm2rdf::geometry::Area& outer) const;
 
-  osm2rdf::osm::BoxIdList getBoxIds(const osm2rdf::geometry::Way&,
-                                 const osm2rdf::geometry::Box& envelope) const;
+  osm2rdf::osm::BoxIdList getBoxIds(
+      const osm2rdf::geometry::Way&,
+      const osm2rdf::geometry::Box& envelope) const;
   int32_t getBoxId(const osm2rdf::geometry::Location&) const;
 
   uint8_t polyIntersectPolyBoxIds(const osm2rdf::osm::BoxIdList& a,
-                          const osm2rdf::osm::BoxIdList& b, bool earlyStop) const;
+                                  const osm2rdf::osm::BoxIdList& b,
+                                  bool earlyStop) const;
   uint8_t nodeInAreaBoxIds(const osm2rdf::osm::BoxIdList& areaBoxIds,
                            int32_t ndBoxId) const;
   uint8_t wayIntersectsAreaBoxIds(const osm2rdf::osm::BoxIdList& way,
                                   const osm2rdf::osm::BoxIdList& area) const;
   uint8_t wayInAreaBoxIds(const osm2rdf::osm::BoxIdList& way,
-                                  const osm2rdf::osm::BoxIdList& area) const;
+                          const osm2rdf::osm::BoxIdList& area) const;
   uint8_t areaInAreaBoxIds(const osm2rdf::osm::BoxIdList& a,
-                                  const osm2rdf::osm::BoxIdList& b) const;
+                           const osm2rdf::osm::BoxIdList& b) const;
   uint8_t areaIntersectsAreaBoxIds(const osm2rdf::osm::BoxIdList& a,
-                                  const osm2rdf::osm::BoxIdList& b) const;
+                                   const osm2rdf::osm::BoxIdList& b) const;
   osm2rdf::osm::BoxIdList pack(const osm2rdf::osm::BoxIdList& ids) const;
 
   // Global config
