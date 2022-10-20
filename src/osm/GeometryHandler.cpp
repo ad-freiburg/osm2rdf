@@ -169,7 +169,7 @@ void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
   std::unordered_map<int32_t, osm2rdf::geometry::Area> cutouts;
 
   const auto& boxIds =
-      pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom,
+      pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom, area.geom(),
                      totPoints > MIN_CUTOUT_POINTS ? &cutouts : 0));
 
 #pragma omp critical(areaDataInsert)
@@ -2206,7 +2206,7 @@ void osm2rdf::osm::GeometryHandler<W>::addDummyRegion(
 
     _spatialStorageArea.push_back(SpatialAreaValue(
         {box, box}, dummyId, dummy, dummyObjId, dummyArea, 2, innerGeom,
-        outerGeom, pack(getBoxIds(dummy, {box, box}, innerGeom, outerGeom, 0)),
+        outerGeom, pack(getBoxIds(dummy, {box, box}, innerGeom, outerGeom, dummy, 0)),
         cutouts));
 
     std::string s = _writer->generateIRI(
@@ -2260,7 +2260,9 @@ void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
     const osm2rdf::geometry::Area& inner, const osm2rdf::geometry::Area& outer,
     const std::vector<osm2rdf::geometry::Box>& envelopes, int xFrom, int xTo,
     int yFrom, int yTo, int xWidth, int yHeight, osm2rdf::osm::BoxIdList* ret,
+    const osm2rdf::geometry::Area& curIsect,
     std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const {
+
   for (int32_t y = yFrom; y < yTo; y += yHeight) {
     for (int32_t x = xFrom; x < xTo; x += xWidth) {
       int localXWidth = std::min(xTo - x, xWidth);
@@ -2317,17 +2319,17 @@ void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
             }
           }
         } else {
+          // compute cutout if requested
+          osm2rdf::geometry::Area intersection;
+          if (cutouts) {
+            boost::geometry::intersection(bboxPoly, curIsect, intersection);
+          }
+
           if (localXWidth == 1 && localYHeight == 1) {
             // only intersecting
             int32_t newId = -(y * NUM_GRID_CELLS + x + 1);
 
-            // compute cutout if requested
-            if (cutouts) {
-              osm2rdf::geometry::Area intersection;
-
-              boost::geometry::intersection(bboxPoly, area, intersection);
-              (*cutouts)[-newId] = intersection;
-            }
+            if (cutouts) (*cutouts)[-newId] = intersection;
 
             if (ret->size() && ret->back().second < 254 &&
                 ret->back().first - ret->back().second == newId + 1)
@@ -2341,7 +2343,7 @@ void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
             int newYHeight = (localYHeight + 1) / 2;
 
             getBoxIds(area, inner, outer, envelopes, x, x + localXWidth, y,
-                      y + localYHeight, newXWidth, newYHeight, ret, cutouts);
+                      y + localYHeight, newXWidth, newYHeight, ret, intersection, cutouts);
           }
         }
       }
@@ -2355,6 +2357,7 @@ osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::getBoxIds(
     const osm2rdf::geometry::Area& area,
     const std::vector<osm2rdf::geometry::Box>& envelopes,
     const osm2rdf::geometry::Area& inner, const osm2rdf::geometry::Area& outer,
+    const osm2rdf::geometry::Area& curIsect,
     std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const {
   size_t totNumPoints = 0;
   for (const auto& p : area) totNumPoints += p.outer().size();
@@ -2368,7 +2371,7 @@ osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::getBoxIds(
   osm2rdf::osm::BoxIdList boxIds;
 
   getBoxIds(area, inner, outer, envelopes, startX, endX, startY, endY,
-            (endX - startX + 3) / 4, (endY - startY + 3) / 4, &boxIds, cutouts);
+            (endX - startX + 3) / 4, (endY - startY + 3) / 4, &boxIds, area, cutouts);
   std::sort(boxIds.begin(), boxIds.end(), BoxIdCmp());
 
   return boxIds;

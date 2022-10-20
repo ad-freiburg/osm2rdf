@@ -40,7 +40,7 @@
 
 namespace osm2rdf::osm {
 
-const static int NUM_GRID_CELLS = 10000;
+const static int NUM_GRID_CELLS = 5000;
 
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
@@ -233,12 +233,14 @@ class GeometryHandler {
                  int xFrom, int xTo,
                  int yFrom, int yTo, int xWidth, int yWidth,
                  osm2rdf::osm::BoxIdList* ret,
+                                    const osm2rdf::geometry::Area& curISect,
     std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const;
 
   osm2rdf::osm::BoxIdList getBoxIds(const osm2rdf::geometry::Area&,
                                     const std::vector<osm2rdf::geometry::Box>& envelopes,
                                     const osm2rdf::geometry::Area& inner,
                                     const osm2rdf::geometry::Area& outer,
+                                    const osm2rdf::geometry::Area& curISect,
                                     std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts
                                     ) const;
 
