@@ -44,10 +44,10 @@ class Way {
   explicit Way(const osmium::Way& way);
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] bool closed() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Way geom() const noexcept;
-  [[nodiscard]] std::vector<osm2rdf::osm::Node> nodes() const noexcept;
-  [[nodiscard]] osm2rdf::osm::TagList tags() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Way& geom() const noexcept;
+  [[nodiscard]] const std::vector<osm2rdf::osm::Node>& nodes() const noexcept;
+  [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
 
   bool operator==(const osm2rdf::osm::Way& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Way& other) const noexcept;

@@ -35,9 +35,9 @@ class Node {
   explicit Node(const osmium::Node& node);
   explicit Node(const osmium::NodeRef& nodeRef);
   [[nodiscard]] id_t id() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Location geom() const noexcept;
-  [[nodiscard]] osm2rdf::osm::TagList tags() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Location& geom() const noexcept;
+  [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
 
   bool operator==(const osm2rdf::osm::Node& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Node& other) const noexcept;
@@ -45,7 +45,6 @@ class Node {
  protected:
   id_t _id;
   osm2rdf::geometry::Location _geom;
-  osm2rdf::geometry::Box _envelope;
   osm2rdf::osm::TagList _tags;
 
   friend class boost::serialization::access;
@@ -53,7 +52,6 @@ class Node {
   void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
     ar& boost::serialization::make_nvp("_id", _id);
     ar& boost::serialization::make_nvp("_geom", _geom);
-    ar& boost::serialization::make_nvp("_envelope", _envelope);
     ar& boost::serialization::make_nvp("_tags", _tags);
   }
 };

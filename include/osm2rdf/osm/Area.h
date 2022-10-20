@@ -44,11 +44,11 @@ struct Area {
   [[nodiscard]] id_t objId() const noexcept;
 
   // Return the geometry.
-  [[nodiscard]] osm2rdf::geometry::Area geom() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Area& geom() const noexcept;
   // Return area of the geometry.
   [[nodiscard]] osm2rdf::geometry::area_result_t geomArea() const noexcept;
   // Return the envelope.
-  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
   // Return the are of the envelope.
   [[nodiscard]] osm2rdf::geometry::area_result_t envelopeArea() const noexcept;
   // Return the administration level, 0 otherwise.

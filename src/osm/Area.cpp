@@ -48,7 +48,7 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   }
   _hasName = (area.tags()["name"] != nullptr);
 
-  auto outerRings = area.outer_rings();
+  const auto& outerRings = area.outer_rings();
   _geom.resize(outerRings.size());
   // int and not size_t as boost uses int internal
   int oCount = 0;
@@ -59,7 +59,7 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
                               oCount);
     }
 
-    auto innerRings = area.inner_rings(oring);
+    const auto& innerRings = area.inner_rings(oring);
     _geom[oCount].inners().resize(innerRings.size());
     // int and not size_t as boost uses int internal
     int iCount = 0;
@@ -76,6 +76,7 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
 
   // Correct possibly invalid geometry...
   boost::geometry::correct(_geom);
+  boost::geometry::unique(_geom);
   boost::geometry::envelope(_geom, _envelope);
   _geomArea = boost::geometry::area(_geom);
   _envelopeArea = boost::geometry::area(_envelope);
@@ -92,12 +93,12 @@ osm2rdf::osm::Area::id_t osm2rdf::osm::Area::objId() const noexcept {
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Area osm2rdf::osm::Area::geom() const noexcept {
+const osm2rdf::geometry::Area& osm2rdf::osm::Area::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Box osm2rdf::osm::Area::envelope() const noexcept {
+const osm2rdf::geometry::Box& osm2rdf::osm::Area::envelope() const noexcept {
   return _envelope;
 }
 

@@ -35,9 +35,9 @@ class Relation {
   Relation();
   explicit Relation(const osmium::Relation& relation);
   [[nodiscard]] id_t id() const noexcept;
-  [[nodiscard]] std::vector<osm2rdf::osm::RelationMember> members()
+  [[nodiscard]] const std::vector<osm2rdf::osm::RelationMember>& members()
       const noexcept;
-  [[nodiscard]] osm2rdf::osm::TagList tags() const noexcept;
+  [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
 
   bool operator==(const osm2rdf::osm::Relation& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Relation& other) const noexcept;

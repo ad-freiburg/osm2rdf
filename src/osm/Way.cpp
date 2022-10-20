@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/Way.h"
-
 #include <vector>
 
 #include "boost/geometry.hpp"
@@ -25,6 +23,7 @@
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"
+#include "osm2rdf/osm/Way.h"
 #include "osmium/osm/way.hpp"
 
 // ____________________________________________________________________________
@@ -37,6 +36,7 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
   _tags = osm2rdf::osm::convertTagList(way.tags());
   _nodes.reserve(way.nodes().size());
+  _geom.reserve(way.nodes().size());
   for (const auto& nodeRef : way.nodes()) {
     _nodes.emplace_back(nodeRef);
     boost::geometry::append(_geom, osm2rdf::osm::Node(nodeRef).geom());
@@ -49,20 +49,23 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
 osm2rdf::osm::Way::id_t osm2rdf::osm::Way::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
-osm2rdf::osm::TagList osm2rdf::osm::Way::tags() const noexcept { return _tags; }
+const osm2rdf::osm::TagList& osm2rdf::osm::Way::tags() const noexcept {
+  return _tags;
+}
 
 // ____________________________________________________________________________
-std::vector<osm2rdf::osm::Node> osm2rdf::osm::Way::nodes() const noexcept {
+const std::vector<osm2rdf::osm::Node>& osm2rdf::osm::Way::nodes()
+    const noexcept {
   return _nodes;
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Way osm2rdf::osm::Way::geom() const noexcept {
+const osm2rdf::geometry::Way& osm2rdf::osm::Way::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Box osm2rdf::osm::Way::envelope() const noexcept {
+const osm2rdf::geometry::Box& osm2rdf::osm::Way::envelope() const noexcept {
   return _envelope;
 }
 

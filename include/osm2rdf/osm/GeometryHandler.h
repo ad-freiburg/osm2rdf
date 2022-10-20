@@ -77,7 +77,8 @@ typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    osm2rdf::osm::Area::id_t, osm2rdf::geometry::Area,
                    osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t,
                    uint8_t, osm2rdf::geometry::Area, osm2rdf::geometry::Area,
-                   osm2rdf::osm::BoxIdList>
+                   osm2rdf::osm::BoxIdList,
+                   std::unordered_map<int32_t, osm2rdf::geometry::Area>>
     SpatialAreaValue;
 
 typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
@@ -231,12 +232,15 @@ class GeometryHandler {
                  const std::vector<osm2rdf::geometry::Box>& envelopes,
                  int xFrom, int xTo,
                  int yFrom, int yTo, int xWidth, int yWidth,
-                 osm2rdf::osm::BoxIdList* ret) const;
+                 osm2rdf::osm::BoxIdList* ret,
+    std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const;
 
   osm2rdf::osm::BoxIdList getBoxIds(const osm2rdf::geometry::Area&,
                                     const std::vector<osm2rdf::geometry::Box>& envelopes,
                                     const osm2rdf::geometry::Area& inner,
-                                    const osm2rdf::geometry::Area& outer) const;
+                                    const osm2rdf::geometry::Area& outer,
+                                    std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts
+                                    ) const;
 
   osm2rdf::osm::BoxIdList getBoxIds(
       const osm2rdf::geometry::Way&,
@@ -278,6 +282,8 @@ class GeometryHandler {
 
   std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<MemberRel>>
       _areaBorderWaysIndex;
+
+  std::unordered_set<osm2rdf::osm::Node::id_t> _taggedNodes;
 
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelation);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromWay);
@@ -337,6 +343,7 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialAreaValue& v,
   ar& boost::serialization::make_nvp("inner", std::get<6>(v));
   ar& boost::serialization::make_nvp("outer", std::get<7>(v));
   ar& boost::serialization::make_nvp("boxids", std::get<8>(v));
+  ar& boost::serialization::make_nvp("cutouts", std::get<8>(v));
 }
 
 }  // namespace boost::serialization

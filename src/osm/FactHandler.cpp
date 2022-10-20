@@ -93,9 +93,11 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 
   writeTagList(s, node.tags());
 
+  osm2rdf::geometry::Box envelope;
+  boost::geometry::envelope(node.geom(), envelope);
+
   if (_config.addNodeEnvelope) {
-    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
-             node.envelope());
+    writeBox(s, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE, envelope);
   }
 }
 
