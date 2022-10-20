@@ -45,6 +45,20 @@ const static int NUM_GRID_CELLS = 10000;
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
 
+typedef std::pair<osm2rdf::osm::Area::id_t, bool> MemberRel;
+
+struct MemberRelCmp {
+  bool operator()(const MemberRel& left, const MemberRel& right) {
+    return left.first < right.first;
+  }
+  bool operator()(const MemberRel& left, osm2rdf::osm::Area::id_t right) {
+    return left.first < right;
+  }
+  bool operator()(osm2rdf::osm::Area::id_t left, const MemberRel& right) {
+    return left < right.first;
+  }
+};
+
 typedef std::pair<int32_t, uint8_t> BoxId;
 
 struct BoxIdCmp {
@@ -213,12 +227,14 @@ class GeometryHandler {
   void getBoxIds(const osm2rdf::geometry::Area&,
 
                  const osm2rdf::geometry::Area& inner,
-                 const osm2rdf::geometry::Area& outer, int xFrom, int xTo,
+                 const osm2rdf::geometry::Area& outer,
+                 const std::vector<osm2rdf::geometry::Box>& envelopes,
+                 int xFrom, int xTo,
                  int yFrom, int yTo, int xWidth, int yWidth,
                  osm2rdf::osm::BoxIdList* ret) const;
 
   osm2rdf::osm::BoxIdList getBoxIds(const osm2rdf::geometry::Area&,
-                                    const osm2rdf::geometry::Box& envelope,
+                                    const std::vector<osm2rdf::geometry::Box>& envelopes,
                                     const osm2rdf::geometry::Area& inner,
                                     const osm2rdf::geometry::Area& outer) const;
 
@@ -242,7 +258,7 @@ class GeometryHandler {
                                    const osm2rdf::osm::BoxIdList& b) const;
   osm2rdf::osm::BoxIdList pack(const osm2rdf::osm::BoxIdList& ids) const;
 
-  bool borderContained(osm2rdf::osm::Way::id_t wayId, osm2rdf::osm::Area::id_t areaId) const;
+  uint8_t borderContained(osm2rdf::osm::Way::id_t wayId, osm2rdf::osm::Area::id_t areaId) const;
 
   // Global config
   osm2rdf::config::Config _config;
@@ -259,8 +275,10 @@ class GeometryHandler {
   SpatialAreaVector _spatialStorageArea;
   std::unordered_map<osm2rdf::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
-  std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<osm2rdf::osm::Area::id_t>>
+
+  std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<MemberRel>>
       _areaBorderWaysIndex;
+
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelation);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromWay);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios);

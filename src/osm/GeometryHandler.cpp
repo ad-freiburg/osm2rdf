@@ -111,7 +111,8 @@ void osm2rdf::osm::GeometryHandler<W>::relation(
   // careful, tags is returned via copy (why?)
   const auto& tags = rel.tags();
   auto i = tags.find("type");
-  if (i != tags.end() && (i->second == "boundary" || i->second == "multipolygon")) {
+  if (i != tags.end() &&
+      (i->second == "boundary" || i->second == "multipolygon")) {
     bool inserted = false;
 
     for (const auto& m : rel.members()) {
@@ -119,9 +120,10 @@ void osm2rdf::osm::GeometryHandler<W>::relation(
           (m.role() == "outer" || m.role() == "inner")) {
 #pragma omp critical
         {
-          _areaBorderWaysIndex[m.id()].push_back(rel.id());
+          _areaBorderWaysIndex[m.id()].push_back(
+              {rel.id(), m.role() == "inner"});
           std::sort(_areaBorderWaysIndex[m.id()].begin(),
-                    _areaBorderWaysIndex[m.id()].end());
+                    _areaBorderWaysIndex[m.id()].end(), MemberRelCmp());
         }
       }
     }
@@ -137,11 +139,7 @@ void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
   // outer simplified geom, empty by default
   auto outerGeom = osm2rdf::geometry::Area();
 
-  osm2rdf::geometry::Area geom = area.geom();
-
-  if (_config.simplifyGeometries > 0) {
-    geom = simplifyGeometry(area.geom());
-  }
+  const auto& geom = simplifyGeometry(area.geom());
 
   if (!_config.dontUseInnerOuterGeoms && (area.hasName() || !area.fromWay())) {
     innerGeom = simplifiedArea(geom, true);
@@ -161,7 +159,7 @@ void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
   }
 
   const auto& boxIds =
-      pack(getBoxIds(area.geom(), area.envelope(), innerGeom, outerGeom));
+      pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom));
 
 #pragma omp critical(areaDataInsert)
   {
@@ -207,11 +205,7 @@ void osm2rdf::osm::GeometryHandler<W>::way(const osm2rdf::osm::Way& way) {
   for (const auto& nodeRef : way.nodes()) {
     nodeIds.push_back(nodeRef.id());
   }
-  auto geom = way.geom();
-  if (_config.simplifyGeometries > 0) {
-    geom = simplifyGeometry(geom);
-    std::cerr << "A" << std::endl;
-  }
+  const auto& geom = simplifyGeometry(way.geom());
 
   std::vector<osm2rdf::geometry::Box> boxes;
 
@@ -549,8 +543,10 @@ void osm2rdf::osm::GeometryHandler<W>::prepareRTree() {
             << " entries ... " << std::endl;
 
   for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
-    _spatialIndex.insert(
-        SpatialAreaRefValue(std::get<0>(_spatialStorageArea[i])[0], i));
+    for (size_t j = 1; j < std::get<0>(_spatialStorageArea[i]).size(); j++) {
+      _spatialIndex.insert(
+          SpatialAreaRefValue(std::get<0>(_spatialStorageArea[i])[j], i));
+    }
   }
 
   std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
@@ -741,7 +737,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
 
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
-      const auto& entryEnvelope = std::get<0>(entry);
+      const auto& entryEnvelopes = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
       const auto& entryArea = std::get<4>(entry);
@@ -749,9 +745,28 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
       // Set containing all areas we already checked
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skip;
+
       std::vector<SpatialAreaRefValue> queryResult;
-      _spatialIndex.query(boost::geometry::index::intersects(entryEnvelope[0]),
-                          std::back_inserter(queryResult));
+
+      for (size_t i = 1; i < entryEnvelopes.size(); i++) {
+        _spatialIndex.query(
+            boost::geometry::index::intersects(entryEnvelopes[i]),
+            std::back_inserter(queryResult));
+      }
+
+      if (entryEnvelopes.size() > 2) {
+        // remove duplicates, may occur since we used multiple envelope queries
+        // to build the result!
+        std::sort(
+            queryResult.begin(), queryResult.end(),
+            [](const auto& a, const auto& b) { return a.second < b.second; });
+        auto last = std::unique(
+            queryResult.begin(), queryResult.end(),
+            [](const auto& a, const auto& b) { return a.second == b.second; });
+
+        // duplicates were swapped to  the end of vector, beginning at last
+        queryResult.erase(last, queryResult.end());
+      }
 
       skip.insert(entryId);
 
@@ -875,14 +890,35 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
       const auto& entryEnvelopes = std::get<0>(entry);
       const auto& entryId = std::get<1>(entry);
       const auto& entryGeom = std::get<2>(entry);
+      const auto& entryObjId = std::get<3>(entry);
       const auto& entryArea = std::get<4>(entry);
+      const auto& entryBoxIds = std::get<8>(entry);
 
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skip;
+      std::set<osm2rdf::osm::Area::id_t> skipByContainedInInner;
       std::vector<SpatialAreaRefValue> queryResult;
-      _spatialIndex.query(boost::geometry::index::covers(entryEnvelopes[0]),
-                          std::back_inserter(queryResult));
+
+      for (size_t i = 1; i < entryEnvelopes.size(); i++) {
+        _spatialIndex.query(boost::geometry::index::covers(entryEnvelopes[0]),
+                            std::back_inserter(queryResult));
+      }
+
+      if (entryEnvelopes.size() > 2) {
+        // remove duplicates, may occur since we used multiple envelope queries
+        // to build the result!
+        std::sort(
+            queryResult.begin(), queryResult.end(),
+            [](const auto& a, const auto& b) { return a.second < b.second; });
+        auto last = std::unique(
+            queryResult.begin(), queryResult.end(),
+            [](const auto& a, const auto& b) { return a.second == b.second; });
+
+        // duplicates were swapped to  the end of vector, beginning at last
+        queryResult.erase(last, queryResult.end());
+      }
+
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
                 [this](const auto& a, const auto& b) {
@@ -892,9 +928,18 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
+        const auto& areaEnvelopes = std::get<0>(area);
         const auto& areaId = std::get<1>(area);
         const auto& areaGeom = std::get<2>(area);
+        const auto& areaObjId = std::get<3>(area);
         const auto& areaArea = std::get<4>(area);
+        const auto& areaFromType = std::get<5>(area);
+        const auto& areaBoxIds = std::get<8>(area);
+
+        if (areaFromType == 0 && skipByContainedInInner.find(areaObjId) !=
+                                     skipByContainedInInner.end()) {
+          continue;
+        }
 
         if (areaId == entryId) {
           continue;
@@ -914,14 +959,35 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         bool isCoveredBy = false;
         double intersectArea = 0;
 
+        //// move this into own function
         if (areaArea / entryArea > 0.95) {
-          osm2rdf::geometry::Area intersect;
-          boost::geometry::intersection(entryGeom, areaGeom, intersect);
+          bool intersects = false;
+          for (size_t i = 1; i < areaEnvelopes.size(); i++) {
+            for (size_t j = 1; j < entryEnvelopes.size(); j++) {
+              if (boost::geometry::intersects(areaEnvelopes[i],
+                                              entryEnvelopes[j]))
+                intersects = true;
+            }
+          }
 
-          intersectArea = boost::geometry::area(intersect);
+          if (intersects) {
+            const auto boxIdRes = areaInAreaBoxIds(entryBoxIds, areaBoxIds);
 
-          isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
+            if (boxIdRes == 2) {
+              isCoveredBy = true;
+              intersectArea = entryArea;
+            } else {
+              osm2rdf::geometry::Area intersect;
+              boost::geometry::intersection(entryGeom, areaGeom, intersect);
+
+              intersectArea = boost::geometry::area(intersect);
+
+              isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
+            }
+          }
         }
+
+        //////
 
 #ifdef ENABLE_GEOMETRY_STATISTIC
         auto end = std::chrono::steady_clock::now();
@@ -935,21 +1001,25 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
           continue;
         }
         containsOk++;
-#ifdef ENABLE_GEOMETRY_STATISTIC
-        start = std::chrono::steady_clock::now();
-#endif
+
+        if (areaFromType == 1) {
+          // we are countained in an area derived from a way.
+          const auto& relations = _areaBorderWaysIndex.find(areaObjId);
+          if (relations != _areaBorderWaysIndex.end()) {
+            for (auto r : relations->second) {
+              if (r.second) {
+                // way is inner geometry of this area relation, so if we
+                // encounter the enclosing area again for this way, we can
+                // be sure that we are not contained in it!
+                skipByContainedInInner.insert(r.first);
+              }
+            }
+          }
+        }
+
         bool isEqual = isCoveredBy && fabs(1 - areaArea / intersectArea) < 0.05;
-#ifdef ENABLE_GEOMETRY_STATISTIC
-        end = std::chrono::steady_clock::now();
-        if (_config.writeGeometricRelationStatistics) {
-          _statistics.write(statisticLine(
-              __func__, "DAG", "isEqual", areaId, "area", entryId, "area",
-              std::chrono::nanoseconds(end - start), isEqual));
-        }
-#endif
-        if (isEqual) {
-          continue;
-        }
+        if (isEqual) continue;
+
 #pragma omp critical(addEdge)
         {
           tmpDirectedAreaGraph.addEdge(entryId, areaId);
@@ -1323,6 +1393,7 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
       // Set containing all areas we are inside of
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skip;
+      std::set<osm2rdf::osm::Area::id_t> skipByContainedInInner;
       std::vector<SpatialAreaRefValue> queryResult;
       _spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                           std::back_inserter(queryResult));
@@ -1338,7 +1409,13 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromType = std::get<5>(area);
+
         checks++;
+
+        if (areaFromType == 0 && skipByContainedInInner.find(areaObjId) !=
+                                     skipByContainedInInner.end()) {
+          continue;
+        }
 
         if (skip.find(areaId) != skip.end()) {
           skippedByDAG++;
@@ -1363,6 +1440,22 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
           continue;
         }
         containsOk++;
+
+        if (areaFromType == 1) {
+          // we are countained in an area derived from a way.
+          const auto& relations = _areaBorderWaysIndex.find(areaObjId);
+          if (relations != _areaBorderWaysIndex.end()) {
+            for (auto r : relations->second) {
+              if (r.second) {
+                // way is inner geometry of this area relation, so if we
+                // encounter the enclosing area again for this way, we can
+                // be sure that we are not contained in it!
+                skipByContainedInInner.insert(r.first);
+              }
+            }
+          }
+        }
+
         skip.insert(areaId);
 
         const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
@@ -1400,7 +1493,6 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
     const osm2rdf::osm::NodesContainedInAreasData& nodeData) {
-
   if (_config.noWayGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << osm2rdf::util::currentTimeFormatted() << " "
@@ -1471,6 +1563,7 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
           skipIntersects;
       std::set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
           skipContains;
+      std::set<osm2rdf::osm::Area::id_t> skipByContainedInInner;
 
       // Store known areas in set.
       for (const auto& nodeId : wayNodeIds) {
@@ -1515,6 +1608,11 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromType = std::get<5>(area);
+
+        if (areaFromType == 0 && skipByContainedInInner.find(areaObjId) !=
+                                     skipByContainedInInner.end()) {
+          continue;
+        }
 
         if (areaFromType == 1 && areaObjId == wayId) {
           continue;
@@ -1621,6 +1719,21 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             continue;
           }
           containsOk++;
+
+          if (areaFromType == 1) {
+            // we are countained in an area derived from a way.
+            const auto& relations = _areaBorderWaysIndex.find(areaObjId);
+            if (relations != _areaBorderWaysIndex.end()) {
+              for (auto r : relations->second) {
+                if (r.second) {
+                  // way is inner geometry of this area relation, so if we
+                  // encounter the enclosing area again for this way, we can
+                  // be sure that we are not contained in it!
+                  skipByContainedInInner.insert(r.first);
+                }
+              }
+            }
+          }
 
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
@@ -2023,12 +2136,13 @@ void osm2rdf::osm::GeometryHandler<W>::addDummyRegion(
     size_t dummyId = std::numeric_limits<id_t>::max() - _dummyAreaCount;
     size_t dummyObjId = _dummyAreaCount;
 
+    // TODO: dummy may be a multipolygon, add all bounding boxes
     osm2rdf::geometry::Box box;
     boost::geometry::envelope(dummy, box);
 
     _spatialStorageArea.push_back(SpatialAreaValue(
         {box, box}, dummyId, dummy, dummyObjId, dummyArea, 2, innerGeom,
-        outerGeom, pack(getBoxIds(dummy, box, innerGeom, outerGeom))));
+        outerGeom, pack(getBoxIds(dummy, {box, box}, innerGeom, outerGeom))));
 
     std::string s = _writer->generateIRI(
         osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION, dummyObjId);
@@ -2079,7 +2193,8 @@ void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
     const osm2rdf::geometry::Area& area,
 
     const osm2rdf::geometry::Area& inner, const osm2rdf::geometry::Area& outer,
-    int xFrom, int xTo, int yFrom, int yTo, int xWidth, int yHeight,
+    const std::vector<osm2rdf::geometry::Box>& envelopes, int xFrom, int xTo,
+    int yFrom, int yTo, int xWidth, int yHeight,
     osm2rdf::osm::BoxIdList* ret) const {
   for (int32_t y = yFrom; y < yTo; y += yHeight) {
     for (int32_t x = xFrom; x < xTo; x += xWidth) {
@@ -2091,6 +2206,16 @@ void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
       box.min_corner().set<1>(y * GRID_H - 90.0);
       box.max_corner().set<0>((x + localXWidth + 1) * GRID_W - 180.0);
       box.max_corner().set<1>((y + localYHeight + 1) * GRID_H - 90.0);
+
+      bool boxIntersects = false;
+      for (size_t i = 1; i < envelopes.size(); i++) {
+        if (boost::geometry::intersects(envelopes[i], box))
+          boxIntersects = true;
+      }
+
+      if (!boxIntersects) {
+        continue;
+      }
 
       boost::geometry::model::ring<osm2rdf::geometry::Location> ring;
       ring.push_back(box.min_corner());
@@ -2140,7 +2265,7 @@ void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
             int newXWidth = (localXWidth + 1) / 2;
             int newYHeight = (localYHeight + 1) / 2;
 
-            getBoxIds(area, inner, outer, x, x + localXWidth, y,
+            getBoxIds(area, inner, outer, envelopes, x, x + localXWidth, y,
                       y + localYHeight, newXWidth, newYHeight, ret);
           }
         }
@@ -2152,21 +2277,22 @@ void osm2rdf::osm::GeometryHandler<W>::getBoxIds(
 // ____________________________________________________________________________
 template <typename W>
 osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::getBoxIds(
-    const osm2rdf::geometry::Area& area, const osm2rdf::geometry::Box& envelope,
+    const osm2rdf::geometry::Area& area,
+    const std::vector<osm2rdf::geometry::Box>& envelopes,
     const osm2rdf::geometry::Area& inner,
     const osm2rdf::geometry::Area& outer) const {
   size_t totNumPoints = 0;
   for (const auto& p : area) totNumPoints += p.outer().size();
 
-  int32_t startX = floor((envelope.min_corner().get<0>() + 180.0) / GRID_W);
-  int32_t startY = floor((envelope.min_corner().get<1>() + 90.0) / GRID_H);
+  int32_t startX = floor((envelopes[0].min_corner().get<0>() + 180.0) / GRID_W);
+  int32_t startY = floor((envelopes[0].min_corner().get<1>() + 90.0) / GRID_H);
 
-  int32_t endX = ceil((envelope.max_corner().get<0>() + 180.0) / GRID_W);
-  int32_t endY = ceil((envelope.max_corner().get<1>() + 90.0) / GRID_H);
+  int32_t endX = ceil((envelopes[0].max_corner().get<0>() + 180.0) / GRID_W);
+  int32_t endY = ceil((envelopes[0].max_corner().get<1>() + 90.0) / GRID_H);
 
   osm2rdf::osm::BoxIdList boxIds;
 
-  getBoxIds(area, inner, outer, startX, endX, startY, endY,
+  getBoxIds(area, inner, outer, envelopes, startX, endX, startY, endY,
             (endX - startX + 3) / 4, (endY - startY + 3) / 4, &boxIds);
   std::sort(boxIds.begin(), boxIds.end(), BoxIdCmp());
 
@@ -2359,18 +2485,24 @@ osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::pack(
 
 // ____________________________________________________________________________
 template <typename W>
-bool osm2rdf::osm::GeometryHandler<W>::borderContained(
+uint8_t osm2rdf::osm::GeometryHandler<W>::borderContained(
     osm2rdf::osm::Way::id_t wayId, osm2rdf::osm::Area::id_t areaObjId) const {
   const auto& relations = _areaBorderWaysIndex.find(wayId);
   if (relations != _areaBorderWaysIndex.end()) {
     auto a =
-        std::lower_bound(relations->second.begin(), relations->second.end(), areaObjId);
+        std::lower_bound(relations->second.begin(), relations->second.end(),
+                         areaObjId, MemberRelCmp());
 
-    if (a != relations->second.end() && (*a) == areaObjId) {
-      return true;
+    if (a != relations->second.end() && a->first == areaObjId) {
+      // if inner, return 1
+      if (a->second) return 1;
+
+      // else if outer, return 2
+      return 2;
     }
   }
-  return false;
+
+  return 0;
 }
 
 // ____________________________________________________________________________
