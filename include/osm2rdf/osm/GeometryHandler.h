@@ -285,8 +285,6 @@ class GeometryHandler {
   std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<MemberRel>>
       _areaBorderWaysIndex;
 
-  std::unordered_set<osm2rdf::osm::Node::id_t> _taggedNodes;
-
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelation);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromWay);
   FRIEND_TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios);

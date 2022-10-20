@@ -139,6 +139,7 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   }
   if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
     _areaGeometriesHandled++;
+#pragma omp task
     _geometryHandler.area(a);
   }
 }
@@ -161,6 +162,7 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   }
   if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
     _nodeGeometriesHandled++;
+#pragma omp task
     _geometryHandler.node(n);
   }
 }
@@ -184,6 +186,7 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
     _dumpHandler.relation(r);
   }
 
+#pragma omp task
    _geometryHandler.relation(r);
 }
 
@@ -205,6 +208,7 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   }
   if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
     _wayGeometriesHandled++;
+#pragma omp task
     _geometryHandler.way(w);
   }
 }

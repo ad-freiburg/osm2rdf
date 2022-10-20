@@ -203,7 +203,6 @@ template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::node(const osm2rdf::osm::Node& node) {
 #pragma omp critical(nodeDataInsert)
   {
-    if (!node.tags().empty()) _taggedNodes.insert(node.id());
     _oaNodes << SpatialNodeValue(node.id(), node.geom());
     _numNodes++;
   }
@@ -214,12 +213,8 @@ template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::way(const osm2rdf::osm::Way& way) {
   std::vector<uint64_t> nodeIds;
 
-  // TODO: intersection between the two node lists would be more
-  // efficient here
   for (const auto& nodeRef : way.nodes()) {
-    if (_taggedNodes.find(nodeRef.id()) != _taggedNodes.end()) {
-      nodeIds.push_back(nodeRef.id());
-    }
+    nodeIds.push_back(nodeRef.id());
   }
   const auto& geom = simplifyGeometry(way.geom());
 
