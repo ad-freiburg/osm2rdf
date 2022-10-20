@@ -120,16 +120,9 @@ void osm2rdf::osm::GeometryHandler<W>::relation(
 #pragma omp critical
         {
           _areaBorderWaysIndex[m.id()].push_back(rel.id());
+          std::sort(_areaBorderWaysIndex[m.id()].begin(),
+                    _areaBorderWaysIndex[m.id()].end());
         }
-        inserted = true;
-      }
-    }
-
-    if (inserted) {
-#pragma omp critical
-      {
-        std::sort(_areaBorderWaysIndex[m.id()].begin(),
-                  _areaBorderWaysIndex[m.id()].end());
       }
     }
   }
