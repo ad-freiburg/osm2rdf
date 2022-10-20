@@ -754,19 +754,17 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDummyRegionsIntersect() {
             std::back_inserter(queryResult));
       }
 
-      if (entryEnvelopes.size() > 2) {
-        // remove duplicates, may occur since we used multiple envelope queries
-        // to build the result!
-        std::sort(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second < b.second; });
-        auto last = std::unique(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second == b.second; });
+      // remove duplicates, may occur since we used multiple envelope queries
+      // to build the result!
+      std::sort(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second < b.second; });
+      auto last = std::unique(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second == b.second; });
 
-        // duplicates were swapped to  the end of vector, beginning at last
-        queryResult.erase(last, queryResult.end());
-      }
+      // duplicates were swapped to  the end of vector, beginning at last
+      queryResult.erase(last, queryResult.end());
 
       skip.insert(entryId);
 
@@ -905,19 +903,17 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
                             std::back_inserter(queryResult));
       }
 
-      if (entryEnvelopes.size() > 2) {
-        // remove duplicates, may occur since we used multiple envelope queries
-        // to build the result!
-        std::sort(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second < b.second; });
-        auto last = std::unique(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second == b.second; });
+      // remove duplicates, may occur since we used multiple envelope queries
+      // to build the result!
+      std::sort(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second < b.second; });
+      auto last = std::unique(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second == b.second; });
 
-        // duplicates were swapped to  the end of vector, beginning at last
-        queryResult.erase(last, queryResult.end());
-      }
+      // duplicates were swapped to  the end of vector, beginning at last
+      queryResult.erase(last, queryResult.end());
 
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
@@ -1214,19 +1210,17 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
             std::back_inserter(queryResult));
       }
 
-      if (entryEnvelopes.size() > 2) {
-        // remove duplicates, may occur since we used multiple envelope queries
-        // to build the result!
-        std::sort(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second < b.second; });
-        auto last = std::unique(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second == b.second; });
+      // remove duplicates, may occur since we used multiple envelope queries
+      // to build the result!
+      std::sort(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second < b.second; });
+      auto last = std::unique(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second == b.second; });
 
-        // duplicates were swapped to  the end of vector, beginning at last
-        queryResult.erase(last, queryResult.end());
-      }
+      // duplicates were swapped to  the end of vector, beginning at last
+      queryResult.erase(last, queryResult.end());
 
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
@@ -1397,6 +1391,19 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
       std::vector<SpatialAreaRefValue> queryResult;
       _spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                           std::back_inserter(queryResult));
+
+      // remove duplicates, may occur since we used multiple envelope queries
+      // to build the result!
+      std::sort(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second < b.second; });
+      auto last = std::unique(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second == b.second; });
+
+      // duplicates were swapped to  the end of vector, beginning at last
+      queryResult.erase(last, queryResult.end());
+
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
                 [this](const auto& a, const auto& b) {
@@ -1582,19 +1589,17 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
                             std::back_inserter(queryResult));
       }
 
-      if (wayEnvelopes.size() > 1) {
-        // remove duplicates, may occur since we used multiple envelope queries
-        // to build the result!
-        std::sort(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second < b.second; });
-        auto last = std::unique(
-            queryResult.begin(), queryResult.end(),
-            [](const auto& a, const auto& b) { return a.second == b.second; });
+      // remove duplicates, may occur since we used multiple envelope queries
+      // to build the result!
+      std::sort(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second < b.second; });
+      auto last = std::unique(
+          queryResult.begin(), queryResult.end(),
+          [](const auto& a, const auto& b) { return a.second == b.second; });
 
-        // duplicates were swapped to  the end of vector, beginning at last
-        queryResult.erase(last, queryResult.end());
-      }
+      // duplicates were swapped to  the end of vector, beginning at last
+      queryResult.erase(last, queryResult.end());
 
       // small -> big
       std::sort(queryResult.begin(), queryResult.end(),
