@@ -240,7 +240,6 @@ class GeometryHandler {
                                     const std::vector<osm2rdf::geometry::Box>& envelopes,
                                     const osm2rdf::geometry::Area& inner,
                                     const osm2rdf::geometry::Area& outer,
-                                    const osm2rdf::geometry::Area& curISect,
                                     std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts
                                     ) const;
 

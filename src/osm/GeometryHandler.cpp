@@ -169,7 +169,7 @@ void osm2rdf::osm::GeometryHandler<W>::area(const osm2rdf::osm::Area& area) {
   std::unordered_map<int32_t, osm2rdf::geometry::Area> cutouts;
 
   const auto& boxIds =
-      pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom, area.geom(),
+      pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom,
                      totPoints > MIN_CUTOUT_POINTS ? &cutouts : 0));
 
 #pragma omp critical(areaDataInsert)
@@ -1860,6 +1860,7 @@ bool osm2rdf::osm::GeometryHandler<W>::areaIntersectsArea(
   const auto& outerGeomB = std::get<7>(b);
   const auto& boxIdsA = std::get<8>(a);
   const auto& boxIdsB = std::get<8>(b);
+  const auto& cutoutsB = std::get<9>(b);
 
   bool intersects = false;
   for (size_t i = 1; i < envelopesB.size(); i++) {
@@ -1872,6 +1873,18 @@ bool osm2rdf::osm::GeometryHandler<W>::areaIntersectsArea(
 
   if (boxIdRes == 2) return true;
   if (boxIdRes == 0) return false;
+
+  if (boxIdsA.front().first == 1 && cutoutsB.size()) {
+    // special case: only one id
+    // TODO: if we return the full intersection above, it would be possible to
+    // check against every cutout geom
+
+    const auto& cutout = cutoutsB.find(abs(boxIdsA[1].first));
+
+    if (cutout != cutoutsB.end()) {
+      return boost::geometry::intersects(geomA, cutout->second);
+    }
+  }
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
@@ -1998,18 +2011,10 @@ bool osm2rdf::osm::GeometryHandler<W>::wayInArea(
 
   const auto boxIdRes = wayInAreaBoxIds(wayBoxIds, areaBoxIds);
 
-  if (boxIdRes == 2) {
-    return true;
-  }
-  if (boxIdRes == 0) {
-    return false;
-  }
+  if (boxIdRes == 2) return true;
+  if (boxIdRes == 0) return false;
 
   if (wayBoxIds.front().first == 1 && areaCutouts.size()) {
-    // special case: only one id
-    // TODO: if we return the full intersection above, it would be possible to
-    // check against every cutout geom
-
     const auto& cutout = areaCutouts.find(abs(wayBoxIds[1].first));
 
     if (cutout != areaCutouts.end()) {
@@ -2201,7 +2206,7 @@ void osm2rdf::osm::GeometryHandler<W>::addDummyRegion(
 
     _spatialStorageArea.push_back(SpatialAreaValue(
         {box, box}, dummyId, dummy, dummyObjId, dummyArea, 2, innerGeom,
-        outerGeom, pack(getBoxIds(dummy, {box, box}, innerGeom, outerGeom, dummy, 0)),
+        outerGeom, pack(getBoxIds(dummy, {box, box}, innerGeom, outerGeom, 0)),
         cutouts));
 
     std::string s = _writer->generateIRI(
@@ -2352,9 +2357,7 @@ osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::getBoxIds(
     const osm2rdf::geometry::Area& area,
     const std::vector<osm2rdf::geometry::Box>& envelopes,
     const osm2rdf::geometry::Area& inner, const osm2rdf::geometry::Area& outer,
-    const osm2rdf::geometry::Area& curIsect,
-    std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const {
-  size_t totNumPoints = 0;
+    std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const { size_t totNumPoints = 0;
   for (const auto& p : area) totNumPoints += p.outer().size();
 
   int32_t startX = floor((envelopes[0].min_corner().get<0>() + 180.0) / GRID_W);
