@@ -944,6 +944,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
         const auto& areaArea = std::get<4>(area);
         const auto& areaFromType = std::get<5>(area);
         const auto& areaBoxIds = std::get<8>(area);
+        const auto& areaCutouts = std::get<9>(area);
 
         if (areaFromType == 0 && skipByContainedInInner.find(areaObjId) !=
                                      skipByContainedInInner.end()) {
@@ -985,15 +986,23 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
             if (boxIdRes == 2) {
               isCoveredBy = true;
               intersectArea = entryArea;
+            } else if (entryBoxIds.front().first == 1 && areaCutouts.find(abs(entryBoxIds[1].first)) != areaCutouts.end()) {
+              const auto& cutout = areaCutouts.find(abs(entryBoxIds[1].first));
+              osm2rdf::geometry::Area intersect;
+              boost::geometry::intersection(entryGeom, cutout->second, intersect);
+
+              intersectArea = boost::geometry::area(intersect);
+              isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
             } else {
               osm2rdf::geometry::Area intersect;
               boost::geometry::intersection(entryGeom, areaGeom, intersect);
 
               intersectArea = boost::geometry::area(intersect);
-
               isCoveredBy = fabs(1 - entryArea / intersectArea) < 0.05;
             }
           }
+        } else {
+          skippedBySize++;
         }
 
         //////
@@ -1042,7 +1051,7 @@ void osm2rdf::osm::GeometryHandler<W>::prepareDAG() {
     progressBar.done();
 
     std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done with "
-              << checks << " checks, " << skippedBySize << " skipped by Size,"
+              << checks << " checks, " << skippedBySize << " skipped by size,"
               << std::endl;
     std::cerr << osm2rdf::util::formattedTimeSpacer << " " << skippedByDAG
               << " skipped by DAG" << std::endl;
