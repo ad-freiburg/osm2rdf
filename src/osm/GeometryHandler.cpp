@@ -2234,8 +2234,8 @@ osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::getBoxIds(
   int32_t startX = floor((envelope.min_corner().get<0>() + 180.0) / GRID_W);
   int32_t startY = floor((envelope.min_corner().get<1>() + 90.0) / GRID_H);
 
-  int32_t endX = ceil((envelope.max_corner().get<0>() + 180.0) / GRID_W);
-  int32_t endY = ceil((envelope.max_corner().get<1>() + 90.0) / GRID_H);
+  int32_t endX = floor((envelope.max_corner().get<0>() + 180.0) / GRID_W) + 1;
+  int32_t endY = floor((envelope.max_corner().get<1>() + 90.0) / GRID_H) + 1;
 
   osm2rdf::osm::BoxIdList boxIds;
 
@@ -2372,8 +2372,8 @@ osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::getBoxIds(
   int32_t startX = floor((envelopes[0].min_corner().get<0>() + 180.0) / GRID_W);
   int32_t startY = floor((envelopes[0].min_corner().get<1>() + 90.0) / GRID_H);
 
-  int32_t endX = ceil((envelopes[0].max_corner().get<0>() + 180.0) / GRID_W);
-  int32_t endY = ceil((envelopes[0].max_corner().get<1>() + 90.0) / GRID_H);
+  int32_t endX = floor((envelopes[0].max_corner().get<0>() + 180.0) / GRID_W) + 1;
+  int32_t endY = floor((envelopes[0].max_corner().get<1>() + 90.0) / GRID_H) + 1;
 
   osm2rdf::osm::BoxIdList boxIds;
 
@@ -2543,7 +2543,7 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::areaIntersectsAreaBoxIds(
 template <typename W>
 osm2rdf::osm::BoxIdList osm2rdf::osm::GeometryHandler<W>::pack(
     const osm2rdf::osm::BoxIdList& ids) const {
-  if (ids.size() == 0) return ids;
+  if (ids.size() == 0) return {{0, 0}};
   // assume the list is sorted!
 
   osm2rdf::osm::BoxIdList ret;
