@@ -2656,43 +2656,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_GeometryHandler, statisticLine) {
-  osm2rdf::config::Config config;
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, nullptr};
-  osm2rdf::osm::GeometryHandler gh{config, &writer};
-
-  ASSERT_EQ(
-      "{"
-      "\"function\":\"\","
-      "\"part\":\"\","
-      "\"check\":\"\","
-      "\"outer_id\":0,"
-      "\"outer_type\":\"\","
-      "\"inner_id\":0,"
-      "\"inner_type\":\"\","
-      "\"duration_ns\":0,"
-      "\"result\":false"
-      "},\n",
-      gh.statisticLine("", "", "", 0, "", 0, "",
-                       std::chrono::nanoseconds::zero(), false));
-
-  ASSERT_EQ(
-      "{"
-      "\"function\":\"f\","
-      "\"part\":\"p\","
-      "\"check\":\"c\","
-      "\"outer_id\":1,"
-      "\"outer_type\":\"to\","
-      "\"inner_id\":2,"
-      "\"inner_type\":\"ti\","
-      "\"duration_ns\":0,"
-      "\"result\":true"
-      "},\n",
-      gh.statisticLine("f", "p", "c", 1, "to", 2, "ti",
-                       std::chrono::nanoseconds::zero(), true));
-}
-
-// ____________________________________________________________________________
 TEST(OSM_GeometryHandler, simplifyGeometryArea) {
   osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_OSM_GeometryHandler",

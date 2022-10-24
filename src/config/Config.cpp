@@ -175,18 +175,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     oss << "\n"
         << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO;
   }
-  if (writeGeometricRelationStatistics) {
-#ifdef ENABLE_GEOMETRY_STATISTIC
-    oss << "\n"
-        << prefix
-        << osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO;
-#else
-    oss << "\n"
-        << prefix
-        << osm2rdf::config::constants::
-               WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED;
-#endif
-  }
   if (writeRDFStatistics) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_RDF_STATISTICS_INFO;
@@ -384,10 +372,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_LONG,
       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_HELP);
 
-  auto writeStatisticsOp = op.add<popl::Switch, popl::Attribute::expert>(
-      osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_SHORT,
-      osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG,
-      osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP);
   auto writeRDFStatisticsOp = op.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_SHORT,
       osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_LONG,
@@ -497,7 +481,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Dot
     writeDAGDotFiles = writeDotFilesOp->is_set();
 
-    writeGeometricRelationStatistics = writeStatisticsOp->is_set();
     writeRDFStatistics = writeRDFStatisticsOp->is_set();
 
     // Output
@@ -514,18 +497,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     rdfStatisticsPath = std::filesystem::path(output);
     rdfStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
     rdfStatisticsPath += osm2rdf::config::constants::JSON_EXTENSION;
-    geomStatisticsPath = std::filesystem::path(output);
-    geomStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
-    containsStatisticsPath = std::filesystem::path(output);
-    containsStatisticsPath +=
-        osm2rdf::config::constants::CONTAINS_STATS_EXTENSION;
 
     // Mark compressed output
     if (outputCompress && !output.empty() &&
         output.extension() != osm2rdf::config::constants::BZIP2_EXTENSION) {
       output += osm2rdf::config::constants::BZIP2_EXTENSION;
-      geomStatisticsPath += osm2rdf::config::constants::BZIP2_EXTENSION;
-      containsStatisticsPath += osm2rdf::config::constants::BZIP2_EXTENSION;
     }
 
     // osmium location cache

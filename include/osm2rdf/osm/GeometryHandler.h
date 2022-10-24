@@ -45,6 +45,8 @@ const static int NUM_GRID_CELLS = 5000;
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
 
+typedef std::unordered_set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t> SkipSet;
+
 typedef std::pair<osm2rdf::osm::Area::id_t, bool> MemberRel;
 
 struct MemberRelCmp {
@@ -137,13 +139,6 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, prepareDAGEmpty);
   FRIEND_TEST(OSM_GeometryHandler, prepareDAGSimple);
 
-  // Generate dummy regions
-  void prepareDummyRegionsIntersect();
-  void prepareDummyRegionsGrid();
-
-  // Add explicit dummy regions for each polygon in a multipolygon
-  void prepareExplicitMPs();
-
   // Calculate relations for each area, this dumps the generated DAG.
   void dumpNamedAreaRelations();
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsEmpty);
@@ -178,14 +173,6 @@ class GeometryHandler {
               dumpWayRelationsSimpleIntersectsWithNodeInfo);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo);
 
-  // Write a statistic line for a given spatial check
-  [[nodiscard]] std::string statisticLine(
-      std::string_view function, std::string_view part, std::string_view check,
-      uint64_t outerId, std::string_view outerType, uint64_t innerId,
-      std::string_view innerType, std::chrono::nanoseconds durationNS,
-      bool result);
-  FRIEND_TEST(OSM_GeometryHandler, statisticLine);
-
   template <typename G>
   [[nodiscard]] G simplifyGeometry(const G& g) const;
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
@@ -199,9 +186,6 @@ class GeometryHandler {
 
   bool areaIntersectsArea(const SpatialAreaValue& a,
                           const SpatialAreaValue&) const;
-
-  void printWayAreaStats(const SpatialWayValue& way,
-                         const SpatialAreaValue& area, double usec);
 
   static double signedDistanceFromPointToLine(
       const osm2rdf::geometry::Location& A,
@@ -221,9 +205,7 @@ class GeometryHandler {
   osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g,
                                          bool inner) const;
 
-  std::string areaNamespace(uint8_t type) const;
-
-  void addDummyRegion(osm2rdf::geometry::Area dummy, double area);
+  std::string areaNS(uint8_t type) const;
 
   void getBoxIds(const osm2rdf::geometry::Area&,
 
@@ -265,13 +247,15 @@ class GeometryHandler {
 
   uint8_t borderContained(osm2rdf::osm::Way::id_t wayId, osm2rdf::osm::Area::id_t areaId) const;
 
+  std::vector<SpatialAreaRefValue> indexQryCover(const SpatialAreaValue& area) const;
+  std::vector<SpatialAreaRefValue> indexQry(const SpatialNodeValue& area) const;
+  std::vector<SpatialAreaRefValue> indexQryIntersect(const SpatialAreaValue& area) const;
+  std::vector<SpatialAreaRefValue> indexQryIntersect(const SpatialWayValue& area) const;
+  void unique(std::vector<SpatialAreaRefValue>& area) const;
+
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
-  // Statistics
-  osm2rdf::util::Output _statistics;
-  // Detailed contains statistics
-  osm2rdf::util::Output _containsStatistics;
   // Store areas as r-tree
   SpatialIndex _spatialIndex;
   // Store dag
