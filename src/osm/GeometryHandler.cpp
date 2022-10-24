@@ -2481,7 +2481,7 @@ uint8_t osm2rdf::osm::GeometryHandler<W>::polyIntersectPolyBoxIds(
             abs(end->first) >= abs(wayBoxIds[i].first) + ii) {
           jj = 0;
           j = std::lower_bound(areaBoxIds.begin() + j + gallop / 2, end,
-                               wayBoxIds[i].first + ii, BoxIdCmp()) -
+                               abs(wayBoxIds[i].first) + ii, BoxIdCmp()) -
               areaBoxIds.begin();
           if (j > 0 &&
               abs(areaBoxIds[j - 1].first) < abs(wayBoxIds[i].first) + ii &&
