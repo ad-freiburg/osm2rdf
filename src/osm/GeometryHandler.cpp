@@ -749,6 +749,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
     const auto& entryFromType = std::get<5>(entry);
     std::string entryIRI =
         _writer->generateIRI(areaNS(entryFromType), entryObjId);
+
     for (const auto& dst : _directedAreaGraph.getEdges(id)) {
       assert(_spatialStorageAreaIndex[dst] < _spatialStorageArea.size());
       const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
@@ -855,9 +856,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
           intersectsChecks++;
 
           doesIntersect = areaIntersectsArea(entry, area);
-          if (!doesIntersect) {
-            continue;
-          }
+          if (!doesIntersect) continue;
+
           intersectsOk++;
 
           const auto& successors =
@@ -986,9 +986,7 @@ GeometryHandler<W>::dumpNodeRelations() {
 
         bool isCoveredBy = nodeInArea(node, area);
 
-        if (!isCoveredBy) {
-          continue;
-        }
+        if (!isCoveredBy) continue;
         containsOk++;
 
         if (areaFromType == 1) {
