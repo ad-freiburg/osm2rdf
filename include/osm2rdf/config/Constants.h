@@ -82,12 +82,12 @@ const static inline std::string OUTPUT_NO_COMPRESS_OPTION_HELP =
     "Do not compress output";
 
 const static inline std::string STORE_LOCATIONS_ON_DISK_INFO =
-    "Storing locations osmium locations on disk";
+    "Storing locations osmium locations on disk:";
 const static inline std::string STORE_LOCATIONS_ON_DISK_SHORT = "";
 const static inline std::string STORE_LOCATIONS_ON_DISK_LONG =
     "store-locations-on-disk";
 const static inline std::string STORE_LOCATIONS_ON_DISK_HELP =
-    "Store locations on disk - slower but reduced ram usage";
+    "Store locations on disk, optional valid values: sparse (default), dense";
 
 const static inline std::string NO_FACTS_INFO = "Not dumping facts";
 const static inline std::string NO_FACTS_OPTION_SHORT = "";

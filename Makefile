@@ -43,6 +43,9 @@ test: build
 benchmark: build
 	cmake --build build --target run_benchmarks
 
+install: compile
+	cmake --install build
+
 run: compile
 	for FILE in $(shell ls -Sr input); do ./build/apps/osm2rdf "./input/$${FILE}" -o "/tmp/$${FILE}.qlever"; done
 

@@ -31,7 +31,7 @@ namespace osm2rdf::config {
 
 struct Config {
   // Select what to do
-  bool storeLocationsOnDisk = false;
+  std::string storeLocationsOnDisk;
 
   bool noFacts = false;
   bool noAreaFacts = false;

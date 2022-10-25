@@ -16,10 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/config/Config.h"
-
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
+#include "osm2rdf/config/Config.h"
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
 #include "osm2rdf/util/CacheFile.h"
@@ -30,7 +29,7 @@ namespace osm2rdf::config {
 void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noFacts);
   ASSERT_FALSE(config.noGeometricRelations);
-  ASSERT_FALSE(config.storeLocationsOnDisk);
+  ASSERT_TRUE(config.storeLocationsOnDisk.empty());
 
   ASSERT_FALSE(config.noAreaFacts);
   ASSERT_FALSE(config.noNodeFacts);
@@ -404,7 +403,7 @@ TEST(CONFIG_Config, fromArgsNoGeometricRelationsLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLong) {
+TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongImplicit) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
@@ -416,7 +415,41 @@ TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLong) {
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.storeLocationsOnDisk);
+  ASSERT_EQ("sparse", config.storeLocationsOnDisk);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongSparse) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg = "--" +
+                   osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG +
+                   "=sparse";
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ("sparse", config.storeLocationsOnDisk);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongDense) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg = "--" +
+                   osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG +
+                   "=dense";
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ("dense", config.storeLocationsOnDisk);
 }
 
 // ____________________________________________________________________________
@@ -1305,8 +1338,9 @@ TEST(CONFIG_Config, getInfoOutputKeepFiles) {
 
   const std::string res = config.getInfo("");
 
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_INFO));
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_INFO));
 }
 
 }  // namespace osm2rdf::config
