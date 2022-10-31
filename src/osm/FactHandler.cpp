@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/FactHandler.h"
-
 #include <iomanip>
 #include <iostream>
 
@@ -25,6 +23,7 @@
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
+#include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/Way.h"
@@ -324,14 +323,22 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& s,
   if (key == "admin_level") {
     auto objectValue = _writer->generateLiteral(value, "");
     // Mark integer values
-    if (value.find_first_not_of("0123456789") == std::string::npos) {
+
+    char* p;
+    int64_t i = strtoll(value.c_str(), &p, 10);
+
+    if (p != value.c_str() && !*p) {
+      // if integer, dump as xsd:integer
       objectValue = _writer->generateLiteral(
-          value, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+          std::to_string(i), "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+    } else {
+      // if not, dump as string
+      _writer->writeTriple(
+          s,
+          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
+                               key),
+          objectValue);
     }
-    _writer->writeTriple(
-        s,
-        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, key),
-        objectValue);
   } else {
     try {
       _writer->writeTriple(

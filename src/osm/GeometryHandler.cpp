@@ -220,6 +220,14 @@ void GeometryHandler<W>::way(const Way& way) {
 template <typename W>
 template <typename G>
 G GeometryHandler<W>::simplifyGeometry(const G& g) const {
+  if (_config.simplifyGeometries == 0) {
+    // simple case, just remove colinear points
+
+    G geom;
+    boost::geometry::simplify(g, geom, 0);
+    return geom;
+  }
+
   G geom;
   auto perimeter_or_length =
       std::max(boost::geometry::perimeter(g), boost::geometry::length(g));

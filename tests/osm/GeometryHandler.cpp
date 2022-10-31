@@ -86,9 +86,13 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
 
   // Compare stored area with original
   const auto& dst = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
+
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src.geom(), std::get<2>(dst), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Cleanup
   output.close();
@@ -134,9 +138,13 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
 
   // Compare stored area with original
   const auto& dst = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
+
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src.geom(), std::get<2>(dst), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Cleanup
   output.close();
@@ -199,9 +207,13 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
 
   // Compare stored area with original
   const auto& dst1 = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src1.envelope() == std::get<0>(dst1));
+  ASSERT_TRUE(std::get<0>(dst1).size() > 0);
+  ASSERT_TRUE(src1.envelope() == std::get<0>(dst1)[0]);
   ASSERT_TRUE(src1.id() == std::get<1>(dst1));
-  ASSERT_TRUE(src1.geom() == std::get<2>(dst1));
+
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src1.geom(), std::get<2>(dst1), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Read area from dump and compare
   osm2rdf::osm::SpatialAreaValue dst2;
@@ -214,7 +226,8 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
   ifs.close();
 
   // Compare stored area with original
-  ASSERT_TRUE(src2.envelope() == std::get<0>(dst2));
+  ASSERT_TRUE(std::get<0>(dst2).size() > 0);
+  ASSERT_TRUE(src2.envelope() == std::get<0>(dst2)[0]);
   ASSERT_TRUE(src2.id() == std::get<1>(dst2));
   ASSERT_TRUE(src2.geom() == std::get<2>(dst2));
 
@@ -279,9 +292,13 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
 
   // Compare stored area with original
   const auto& dst1 = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src1.envelope() == std::get<0>(dst1));
+  ASSERT_TRUE(std::get<0>(dst1).size() > 0);
+  ASSERT_TRUE(src1.envelope() == std::get<0>(dst1)[0]);
   ASSERT_TRUE(src1.id() == std::get<1>(dst1));
-  ASSERT_TRUE(src1.geom() == std::get<2>(dst1));
+
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src1.geom(), std::get<2>(dst1), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Read area from dump and compare
   osm2rdf::osm::SpatialAreaValue dst2;
@@ -294,7 +311,8 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
   ifs.close();
 
   // Compare stored area with original
-  ASSERT_TRUE(src2.envelope() == std::get<0>(dst2));
+  ASSERT_TRUE(std::get<0>(dst2).size() > 0);
+  ASSERT_TRUE(src2.envelope() == std::get<0>(dst2)[0]);
   ASSERT_TRUE(src2.id() == std::get<1>(dst2));
   ASSERT_TRUE(src2.geom() == std::get<2>(dst2));
 
@@ -349,9 +367,13 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   ifs.close();
 
   // Compare stored area with original
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
+
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src.geom(), std::get<2>(dst), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Cleanup
   output.close();
@@ -448,9 +470,8 @@ TEST(OSM_GeometryHandler, addNode) {
   ifs.close();
 
   // Compare stored area with original
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
-  ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
+  ASSERT_TRUE(src.id() == std::get<0>(dst));
+  ASSERT_TRUE(src.geom() == std::get<1>(dst));
 
   // Cleanup
   output.close();
@@ -1429,16 +1450,6 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(
-      cerrBuffer.str(),
-      ::testing::HasSubstr("... done with looking at 4 areas\n"
-                           "                           2 intersection checks "
-                           "performed, 2 skipped by DAG\n"
-                           "                           intersect: 2 yes: 2\n"
-                           "                           3 contains checks "
-                           "performed, 1 skipped by DAG\n"
-                           "                           contains: 3 contains "
-                           "envelope: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
       "osmway:13 osm2rdf:intersects_nonarea osmrel:15 .\n"
@@ -1552,16 +1563,6 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(
-      cerrBuffer.str(),
-      ::testing::HasSubstr("... done with looking at 3 areas\n"
-                           "                           1 intersection checks "
-                           "performed, 2 skipped by DAG\n"
-                           "                           intersect: 1 yes: 1\n"
-                           "                           1 contains checks "
-                           "performed, 2 skipped by DAG\n"
-                           "                           contains: 1 contains "
-                           "envelope: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmrel:15 .\n",
@@ -1840,11 +1841,6 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas, 2 skipped by DAG\n"
-                  "                           1 checks performed\n"
-                  "                           contains: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:13 osm2rdf:intersects_nonarea osmnode:42 .\n"
       "osmway:13 osm2rdf:contains_nonarea osmnode:42 .\n",
@@ -1954,11 +1950,6 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas, 2 skipped by DAG\n"
-                  "                           1 checks performed\n"
-                  "                           contains: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmnode:42 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmnode:42 .\n",
@@ -2238,16 +2229,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 4 areas\n"
-                  "                           2 intersection checks performed, "
-                  "2 skipped by DAG, 0 skipped by NodeInfo\n"
-                  "                           intersect: 2 yes: 2\n"
-                  "                           3 contains checks performed, 1 "
-                  "skipped by DAG\n"
-                  "                           contains: 3 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
       "osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"
@@ -2359,16 +2340,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  ".. done with looking at 3 areas\n"
-                  "                           1 intersection checks performed, "
-                  "2 skipped by DAG, 0 skipped by NodeInfo\n"
-                  "                           intersect: 1 yes: 1\n"
-                  "                           1 contains checks performed, 2 "
-                  "skipped by DAG\n"
-                  "                           contains: 1 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n",
@@ -2493,16 +2464,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 4 areas\n"
-                  "                           0 intersection checks performed, "
-                  "2 skipped by DAG, 2 skipped by NodeInfo\n"
-                  "                           intersect: 0 yes: 0\n"
-                  "                           3 contains checks performed, 1 "
-                  "skipped by DAG\n"
-                  "                           contains: 3 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:13 osm2rdf:intersects_nonarea osmnode:1 .\n"
@@ -2631,16 +2592,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas\n"
-                  "                           0 intersection checks performed, "
-                  "2 skipped by DAG, 1 skipped by NodeInfo\n"
-                  "                           intersect: 0 yes: 0\n"
-                  "                           1 contains checks performed, 2 "
-                  "skipped by DAG\n"
-                  "                           contains: 1 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
@@ -2695,7 +2646,8 @@ TEST(OSM_GeometryHandler, simplifyGeometryArea) {
 
   // Compare stored area with original
   const auto& dst = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
   ASSERT_TRUE(src.geom() != std::get<2>(dst));
   // Access rings

@@ -483,11 +483,6 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(
       printedState,
       ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas, 0 skipped by DAG\n"
-                  "                           3 checks performed\n"
-                  "                           contains: 3 yes: 3\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
@@ -656,11 +651,6 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedState,
       ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas, 0 skipped by DAG\n"
-                  "                           3 checks performed\n"
-                  "                           contains: 3 yes: 3\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
@@ -798,11 +788,6 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedState,
       ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas, 0 skipped by DAG\n"
-                  "                           3 checks performed\n"
-                  "                           contains: 3 yes: 3\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
@@ -1039,26 +1024,9 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(
       printedState,
       ::testing::HasSubstr("Contains relations for 3 nodes in 2 areas ...\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr(
-                  "... done with looking at 6 areas, 3 skipped by DAG\n"
-                  "                           3 checks performed\n"
-                  "                           contains: 3 yes: 3\n"));
   ASSERT_THAT(
       printedState,
       ::testing::HasSubstr("Contains relations for 2 ways in 2 areas ...\n"));
-  ASSERT_THAT(
-      printedState,
-      ::testing::HasSubstr(
-          "... done with looking at 1 areas\n"
-          "                           1 intersection checks performed, 0 "
-          "skipped by DAG, 0 skipped by NodeInfo\n"
-          "                           intersect: 1 yes: 0\n"
-          "                           0 contains checks performed, 0 skipped "
-          "by DAG\n"
-          "                           contains: 0 contains envelope: 0 yes: 0\n"
-          "                           1 ways are areas in the DAG -> skipped "
-          "calculations for them\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
