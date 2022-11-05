@@ -327,18 +327,16 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& s,
     char* p;
     int64_t i = strtoll(value.c_str(), &p, 10);
 
+    // if integer, dump as xsd:integer
     if (p != value.c_str() && !*p) {
-      // if integer, dump as xsd:integer
       objectValue = _writer->generateLiteral(
           std::to_string(i), "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
-    } else {
-      // if not, dump as string
-      _writer->writeTriple(
-          s,
-          _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
-                               key),
-          objectValue);
     }
+    _writer->writeTriple(
+        s,
+        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
+                             key),
+        objectValue);
   } else {
     try {
       _writer->writeTriple(
