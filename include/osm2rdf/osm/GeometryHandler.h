@@ -45,7 +45,21 @@ const static int NUM_GRID_CELLS = 5000;
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
 
-typedef std::unordered_set<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t> SkipSet;
+typedef std::pair<int32_t, uint8_t> BoxId;
+
+enum RelInfoValue { DONTKNOW, YES, NO };
+
+struct GeomRelationInfo {
+  RelInfoValue intersects = DONTKNOW;
+  RelInfoValue contained = DONTKNOW;
+
+  std::vector<int32_t> toCheck;
+  int fullContained = -1;
+};
+
+typedef std::unordered_set<
+    osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
+    SkipSet;
 
 typedef std::pair<osm2rdf::osm::Area::id_t, bool> MemberRel;
 
@@ -60,8 +74,6 @@ struct MemberRelCmp {
     return left < right.first;
   }
 };
-
-typedef std::pair<int32_t, uint8_t> BoxId;
 
 struct BoxIdCmp {
   bool operator()(const BoxId& left, const BoxId& right) {
@@ -88,8 +100,7 @@ typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
 typedef std::vector<SpatialAreaValue> SpatialAreaVector;
 
 // Node: envelope, osm  id, geometry
-typedef std::tuple<osm2rdf::osm::Node::id_t,
-                   osm2rdf::geometry::Node>
+typedef std::tuple<osm2rdf::osm::Node::id_t, osm2rdf::geometry::Node>
     SpatialNodeValue;
 typedef std::vector<SpatialNodeValue> SpatialNodeVector;
 
@@ -178,14 +189,14 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryWay);
 
-  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&) const;
-  bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&) const;
-  bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&) const;
+  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
+  bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
+  bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
   bool wayIntersectsArea(const SpatialWayValue& a,
-                         const SpatialAreaValue&) const;
+                         const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
 
   bool areaIntersectsArea(const SpatialAreaValue& a,
-                          const SpatialAreaValue&) const;
+                          const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
 
   static double signedDistanceFromPointToLine(
       const osm2rdf::geometry::Location& A,
@@ -207,50 +218,43 @@ class GeometryHandler {
 
   std::string areaNS(uint8_t type) const;
 
-  void getBoxIds(const osm2rdf::geometry::Area&,
+  void getBoxIds(
+      const osm2rdf::geometry::Area&,
 
-                 const osm2rdf::geometry::Area& inner,
-                 const osm2rdf::geometry::Area& outer,
-                 const std::vector<osm2rdf::geometry::Box>& envelopes,
-                 int xFrom, int xTo,
-                 int yFrom, int yTo, int xWidth, int yWidth,
-                 osm2rdf::osm::BoxIdList* ret,
-                                    const osm2rdf::geometry::Area& curISect,
-    std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const;
+      const osm2rdf::geometry::Area& inner,
+      const osm2rdf::geometry::Area& outer,
+      const std::vector<osm2rdf::geometry::Box>& envelopes, int xFrom, int xTo,
+      int yFrom, int yTo, int xWidth, int yWidth, osm2rdf::osm::BoxIdList* ret,
+      const osm2rdf::geometry::Area& curISect,
+      std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const;
 
-  osm2rdf::osm::BoxIdList getBoxIds(const osm2rdf::geometry::Area&,
-                                    const std::vector<osm2rdf::geometry::Box>& envelopes,
-                                    const osm2rdf::geometry::Area& inner,
-                                    const osm2rdf::geometry::Area& outer,
-                                    std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts
-                                    ) const;
+  osm2rdf::osm::BoxIdList getBoxIds(
+      const osm2rdf::geometry::Area&,
+      const std::vector<osm2rdf::geometry::Box>& envelopes,
+      const osm2rdf::geometry::Area& inner,
+      const osm2rdf::geometry::Area& outer,
+      std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const;
 
   osm2rdf::osm::BoxIdList getBoxIds(
       const osm2rdf::geometry::Way&,
       const osm2rdf::geometry::Box& envelope) const;
   int32_t getBoxId(const osm2rdf::geometry::Location&) const;
 
-  uint8_t polyIntersectPolyBoxIds(const osm2rdf::osm::BoxIdList& a,
+  void boxIdIsect(const osm2rdf::osm::BoxIdList& a,
                                   const osm2rdf::osm::BoxIdList& b,
-                                  bool earlyStop) const;
-  uint8_t nodeInAreaBoxIds(const osm2rdf::osm::BoxIdList& areaBoxIds,
-                           int32_t ndBoxId) const;
-  uint8_t wayIntersectsAreaBoxIds(const osm2rdf::osm::BoxIdList& way,
-                                  const osm2rdf::osm::BoxIdList& area) const;
-  uint8_t wayInAreaBoxIds(const osm2rdf::osm::BoxIdList& way,
-                          const osm2rdf::osm::BoxIdList& area) const;
-  uint8_t areaInAreaBoxIds(const osm2rdf::osm::BoxIdList& a,
-                           const osm2rdf::osm::BoxIdList& b) const;
-  uint8_t areaIntersectsAreaBoxIds(const osm2rdf::osm::BoxIdList& a,
-                                   const osm2rdf::osm::BoxIdList& b) const;
+                                   GeomRelationInfo* geomRelInf) const;
   osm2rdf::osm::BoxIdList pack(const osm2rdf::osm::BoxIdList& ids) const;
 
-  uint8_t borderContained(osm2rdf::osm::Way::id_t wayId, osm2rdf::osm::Area::id_t areaId) const;
+  uint8_t borderContained(osm2rdf::osm::Way::id_t wayId,
+                          osm2rdf::osm::Area::id_t areaId) const;
 
-  std::vector<SpatialAreaRefValue> indexQryCover(const SpatialAreaValue& area) const;
+  std::vector<SpatialAreaRefValue> indexQryCover(
+      const SpatialAreaValue& area) const;
   std::vector<SpatialAreaRefValue> indexQry(const SpatialNodeValue& area) const;
-  std::vector<SpatialAreaRefValue> indexQryIntersect(const SpatialAreaValue& area) const;
-  std::vector<SpatialAreaRefValue> indexQryIntersect(const SpatialWayValue& area) const;
+  std::vector<SpatialAreaRefValue> indexQryIntersect(
+      const SpatialAreaValue& area) const;
+  std::vector<SpatialAreaRefValue> indexQryIntersect(
+      const SpatialWayValue& area) const;
   void unique(std::vector<SpatialAreaRefValue>& area) const;
 
   // Global config

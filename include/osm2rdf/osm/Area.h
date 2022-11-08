@@ -51,23 +51,16 @@ struct Area {
   [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
   // Return the are of the envelope.
   [[nodiscard]] osm2rdf::geometry::area_result_t envelopeArea() const noexcept;
-  // Return the administration level, 0 otherwise.
-  [[nodiscard]] char tagAdministrationLevel() const noexcept;
   // Return if this area is created from a way.
   [[nodiscard]] bool fromWay() const noexcept;
   // Return if this area has a name.
   [[nodiscard]] bool hasName() const noexcept;
-
-  bool operator==(const osm2rdf::osm::Area& other) const noexcept;
-  bool operator!=(const osm2rdf::osm::Area& other) const noexcept;
-  bool operator<(const osm2rdf::osm::Area& other) const noexcept;
 
  protected:
   // The osmium id
   id_t _id;
   // The OSM id
   id_t _objId;
-  char _tagAdministrationLevel;
   bool _hasName;
   osm2rdf::geometry::area_result_t _geomArea;
   osm2rdf::geometry::area_result_t _envelopeArea;
@@ -79,8 +72,6 @@ struct Area {
   void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
     ar& boost::serialization::make_nvp("_id", _id);
     ar& boost::serialization::make_nvp("_objId", _objId);
-    ar& boost::serialization::make_nvp("_tagAdministrationLevel",
-                                       _tagAdministrationLevel);
     ar& boost::serialization::make_nvp("_hasName", _hasName);
     ar& boost::serialization::make_nvp("_geomArea", _geomArea);
     ar& boost::serialization::make_nvp("_envelopeArea", _envelopeArea);

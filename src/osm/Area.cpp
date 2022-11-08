@@ -33,19 +33,12 @@
 osm2rdf::osm::Area::Area() {
   _id = std::numeric_limits<osm2rdf::osm::Area::id_t>::max();
   _objId = std::numeric_limits<osm2rdf::osm::Area::id_t>::max();
-  _tagAdministrationLevel = 0;
 }
 
 // ____________________________________________________________________________
 osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
   _objId = static_cast<osm2rdf::osm::Area::id_t>(area.orig_id());
-  if (area.tags()["boundary"] != nullptr &&
-      area.tags()["admin_level"] != nullptr) {
-    _tagAdministrationLevel =
-        static_cast<char>(strtol(area.tags()["admin_level"], nullptr,
-                                 osm2rdf::osm::constants::BASE10_BASE));
-  }
   _hasName = (area.tags()["name"] != nullptr);
 
   const auto& outerRings = area.outer_rings();
@@ -120,41 +113,4 @@ bool osm2rdf::osm::Area::hasName() const noexcept { return _hasName; }
 bool osm2rdf::osm::Area::fromWay() const noexcept {
   // https://github.com/osmcode/libosmium/blob/master/include/osmium/osm/area.hpp#L145-L153
   return (_id & 0x1U) == 0;
-}
-
-// ____________________________________________________________________________
-char osm2rdf::osm::Area::tagAdministrationLevel() const noexcept {
-  return _tagAdministrationLevel;
-}
-
-// ____________________________________________________________________________
-bool osm2rdf::osm::Area::operator==(
-    const osm2rdf::osm::Area& other) const noexcept {
-  return _id == other._id && _objId == other._objId &&
-         _tagAdministrationLevel == other._tagAdministrationLevel &&
-         _hasName == other._hasName && _geomArea == other._geomArea &&
-         _envelopeArea == other._envelopeArea && _envelope == other._envelope &&
-         _geom == other._geom;
-}
-
-// ____________________________________________________________________________
-bool osm2rdf::osm::Area::operator!=(
-    const osm2rdf::osm::Area& other) const noexcept {
-  return !(*this == other);
-}
-
-// ____________________________________________________________________________
-bool osm2rdf::osm::Area::operator<(
-    const osm2rdf::osm::Area& other) const noexcept {
-  // If administration level is different, higher first
-  // (higher = lower in hierarchy)
-  if (_tagAdministrationLevel != other._tagAdministrationLevel) {
-    return _tagAdministrationLevel > other._tagAdministrationLevel;
-  }
-  // Sort by area, smaller first
-  if (_envelopeArea != other._envelopeArea) {
-    return _envelopeArea < other._envelopeArea;
-  }
-  // No better metric -> sort by id, smaller first
-  return _id < other._id;
 }

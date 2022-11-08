@@ -563,7 +563,7 @@ void GeometryHandler<W>::prepareDAG() {
       SkipSet skip;
       std::unordered_set<Area::id_t> skipByContainedInInner;
 
-      auto queryResult = indexQryCover(entry);
+      const auto& queryResult = indexQryCover(entry);
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
@@ -606,9 +606,13 @@ void GeometryHandler<W>::prepareDAG() {
           }
 
           if (intersects) {
-            const auto boxIdRes = areaInAreaBoxIds(entryBoxIds, areaBoxIds);
+            GeomRelationInfo geomRelInf;
+            boxIdIsect(entryBoxIds, areaBoxIds, &geomRelInf);
 
-            if (boxIdRes == 2) {
+            if (geomRelInf.fullContained == 0 &&
+                geomRelInf.toCheck.size() == 0) {
+              isCoveredBy = false;
+            } else if (geomRelInf.fullContained == entryBoxIds[0].first) {
               isCoveredBy = true;
               intersectArea = entryArea;
             } else if (entryBoxIds.front().first == 1 &&
@@ -830,7 +834,7 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
       SpatialAreaValue entry;
 #pragma omp critical(loadEntry)
       ia >> entry;
-      const auto& entryEnvelopes = std::get<0>(entry);
+
       const auto& entryId = std::get<1>(entry);
       const auto& entryObjId = std::get<3>(entry);
       const auto& entryFromType = std::get<5>(entry);
@@ -841,7 +845,7 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
       SkipSet skipIntersects;
       SkipSet skipContains;
 
-      auto queryResult = indexQryIntersect(entry);
+      const auto& queryResult = indexQryIntersect(entry);
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
@@ -849,25 +853,19 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromType = std::get<5>(area);
 
+        // don't compare to itself
         if (areaId == entryId) continue;
 
         areas++;
 
-        bool doesIntersect = false;
-        std::string areaIRI =
+        GeomRelationInfo geomRelInf;
+
+        const auto& areaIRI =
             _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
         if (skipIntersects.find(areaId) != skipIntersects.end()) {
-          intersectsSkippedByDAG++;
-          doesIntersect = true;
-        } else {
-          intersectsChecks++;
-
-          doesIntersect = areaIntersectsArea(entry, area);
-          if (!doesIntersect) continue;
-
-          intersectsOk++;
-
+          geomRelInf.intersects = YES;
+        } else if (areaIntersectsArea(entry, area, &geomRelInf)) {
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
           skipIntersects.insert(successors.begin(), successors.end());
@@ -876,23 +874,24 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
                                entryIRI);
         }
 
-        if (!doesIntersect) continue;
+        if (geomRelInf.intersects == NO) continue;
 
         if (skipContains.find(areaId) != skipContains.end()) {
           containsSkippedByDAG++;
         } else {
           containsChecks++;
-          bool isCoveredBy = areaInArea(entry, area);
 
-          if (!isCoveredBy) continue;
-          containsOk++;
+          if (areaInArea(entry, area, &geomRelInf)) {
+            ;
+            containsOk++;
 
-          const auto& successors =
-              _directedAreaGraph.findSuccessorsFast(areaId);
-          skipContains.insert(successors.begin(), successors.end());
+            const auto& successors =
+                _directedAreaGraph.findSuccessorsFast(areaId);
+            skipContains.insert(successors.begin(), successors.end());
 
-          _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA,
-                               entryIRI);
+            _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA,
+                                 entryIRI);
+          }
         }
       }
 #pragma omp critical(progress)
@@ -971,7 +970,7 @@ GeometryHandler<W>::dumpNodeRelations() {
       SkipSet skip;
       std::unordered_set<Area::id_t> skipByContainedInInner;
 
-      auto queryResult = indexQry(node);
+      const auto& queryResult = indexQry(node);
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
@@ -992,7 +991,8 @@ GeometryHandler<W>::dumpNodeRelations() {
         }
         contains++;
 
-        bool isCoveredBy = nodeInArea(node, area);
+        GeomRelationInfo geomRelInf;
+        bool isCoveredBy = nodeInArea(node, area, &geomRelInf);
 
         if (!isCoveredBy) continue;
         containsOk++;
@@ -1124,7 +1124,8 @@ void GeometryHandler<W>::dumpWayRelations(
         skipNodeContained.insert(nodeDataIt->second.begin(),
                                  nodeDataIt->second.end());
       }
-      auto queryResult = indexQryIntersect(way);
+
+      const auto& queryResult = indexQryIntersect(way);
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
@@ -1138,6 +1139,8 @@ void GeometryHandler<W>::dumpWayRelations(
         }
 
         if (areaFromType == 1 && areaObjId == wayId) continue;
+
+        GeomRelationInfo geomRelInf;
 
         areas++;
 
@@ -1176,7 +1179,7 @@ void GeometryHandler<W>::dumpWayRelations(
         } else {
           intersectsChecks++;
 
-          doesIntersect = wayIntersectsArea(way, area);
+          doesIntersect = wayIntersectsArea(way, area, &geomRelInf);
 
           if (!doesIntersect) continue;
 
@@ -1199,7 +1202,7 @@ void GeometryHandler<W>::dumpWayRelations(
           containsSkippedByDAG++;
         } else {
           containsChecks++;
-          bool isCoveredBy = borderConted || wayInArea(way, area);
+          bool isCoveredBy = borderConted || wayInArea(way, area, &geomRelInf);
 
           if (!isCoveredBy) continue;
           containsOk++;
@@ -1261,7 +1264,8 @@ void GeometryHandler<W>::dumpWayRelations(
 // ____________________________________________________________________________
 template <typename W>
 bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
-                                    const SpatialAreaValue& b) const {
+                                    const SpatialAreaValue& b,
+                                    GeomRelationInfo* geomRelInf) const {
   const auto& geomA = std::get<1>(a);
   int32_t ndBoxId = getBoxId(geomA);
 
@@ -1271,17 +1275,36 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
   const auto& areaBoxIds = std::get<8>(b);
   const auto& areaCutouts = std::get<9>(b);
 
-  const auto boxIdRes = nodeInAreaBoxIds(areaBoxIds, ndBoxId);
+  if (geomRelInf->fullContained < 0)
+    boxIdIsect({{ndBoxId, 0}}, areaBoxIds, geomRelInf);
 
-  if (boxIdRes == 2) return true;
-  if (boxIdRes == 0) return false;
+  if (geomRelInf->fullContained > 0) {
+    geomRelInf->intersects = YES;
+    geomRelInf->contained = YES;
+    return true;
+  }
+
+  if (geomRelInf->toCheck.size() == 0) {
+    geomRelInf->intersects = NO;
+    geomRelInf->contained = NO;
+    return false;
+  }
 
   if (areaCutouts.size()) {
-    const auto& cutout = areaCutouts.find(ndBoxId);
+    for (auto boxId : geomRelInf->toCheck) {
+      const auto& cutout = areaCutouts.find(boxId);
 
-    if (cutout != areaCutouts.end()) {
-      return boost::geometry::intersects(geomA, cutout->second);
+      if (cutout != areaCutouts.end()) {
+        if (boost::geometry::intersects(geomA, cutout->second)) {
+          geomRelInf->intersects = YES;
+          geomRelInf->contained = YES;
+          return true;
+        }
+      }
     }
+    geomRelInf->intersects = NO;
+    geomRelInf->contained = NO;
+    return false;
   }
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
@@ -1312,10 +1335,9 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
 
 // ____________________________________________________________________________
 template <typename W>
-bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
-                                            const SpatialAreaValue& b) const {
-  const auto& envelopesA = std::get<0>(a);
-  const auto& envelopesB = std::get<0>(b);
+bool GeometryHandler<W>::areaIntersectsArea(
+    const SpatialAreaValue& a, const SpatialAreaValue& b,
+    GeomRelationInfo* geomRelInf) const {
   const auto& geomA = std::get<2>(a);
   const auto& geomB = std::get<2>(b);
   const auto& innerGeomA = std::get<6>(a);
@@ -1324,62 +1346,97 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
   const auto& outerGeomB = std::get<7>(b);
   const auto& boxIdsA = std::get<8>(a);
   const auto& boxIdsB = std::get<8>(b);
+  const auto& cutoutsA = std::get<9>(a);
   const auto& cutoutsB = std::get<9>(b);
 
-  bool intersects = false;
-  for (size_t i = 1; i < envelopesB.size(); i++) {
-    if (boost::geometry::intersects(envelopesA[0], envelopesB[i]))
-      intersects = true;
+  // if no geometric relation has been written so far, do it now
+  if (geomRelInf->fullContained < 0) boxIdIsect(boxIdsA, boxIdsB, geomRelInf);
+
+  // if there is at least one full contained box, we surely intersect
+  if (geomRelInf->fullContained > 0) {
+    geomRelInf->intersects = YES;
+    return true;
   }
-  if (!intersects) return false;
 
-  const auto boxIdRes = areaIntersectsAreaBoxIds(boxIdsA, boxIdsB);
+  // if there is no full contained box, and no potentially contained, we
+  // surely do not intersect
+  if (geomRelInf->toCheck.size() == 0) {
+    geomRelInf->intersects = NO;
+    return false;
+  }
 
-  if (boxIdRes == 2) return true;
-  if (boxIdRes == 0) return false;
+  // if we have cutouts for b or a, use them to check for intersection
+  if (cutoutsA.size() || cutoutsB.size()) {
+    for (auto boxId : geomRelInf->toCheck) {
+      const auto& cutoutA = cutoutsA.find(boxId);
+      const auto& cutoutB = cutoutsB.find(boxId);
 
-  if (boxIdsA.front().first == 1 && cutoutsB.size()) {
-    // special case: only one id
-    // TODO: if we return the full intersection above, it would be possible to
-    // check against every cutout geom
+      if (cutoutA != cutoutsA.end() && cutoutB != cutoutsB.end()) {
+        if (boost::geometry::intersects(cutoutA->second, cutoutB->second)) {
+          geomRelInf->intersects = YES;
+          return true;
+        }
+      }
 
-    const auto& cutout = cutoutsB.find(abs(boxIdsA[1].first));
+      if (cutoutA != cutoutsA.end()) {
+        if (boost::geometry::intersects(cutoutA->second, geomB)) {
+          geomRelInf->intersects = YES;
+          return true;
+        }
+      }
 
-    if (cutout != cutoutsB.end()) {
-      return boost::geometry::intersects(geomA, cutout->second);
+      if (cutoutB != cutoutsB.end()) {
+        if (boost::geometry::intersects(geomA, cutoutB->second)) {
+          geomRelInf->intersects = YES;
+          return true;
+        }
+      }
     }
+
+    geomRelInf->intersects = NO;
+    return false;
   }
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    return boost::geometry::intersects(geomA, geomB);
+    if (boost::geometry::intersects(geomA, geomB)) {
+      geomRelInf->intersects = YES;
+      return true;
+    } else {
+      geomRelInf->intersects = NO;
+      return false;
+    }
   }
 
   if (boost::geometry::intersects(innerGeomA, innerGeomB)) {
     // if simplified inner intersect, we definitely intersect
+    geomRelInf->intersects = YES;
     return true;
   }
 
   if (!boost::geometry::intersects(outerGeomA, outerGeomB)) {
     // if NOT intersecting simplified outer, we are definitely NOT
     // intersecting
+    geomRelInf->intersects = NO;
     return false;
   }
 
   if (boost::geometry::intersects(geomA, geomB)) {
+    geomRelInf->intersects = YES;
     return true;
   }
 
+  geomRelInf->intersects = NO;
   return false;
 }
 
 // ____________________________________________________________________________
 template <typename W>
 bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
-                                           const SpatialAreaValue& b) const {
+                                           const SpatialAreaValue& b,
+                                           GeomRelationInfo* geomRelInf) const {
   const auto& geomA = std::get<2>(a);
   const auto& wayBoxIds = std::get<5>(a);
-  const auto& wayEnvelope = std::get<0>(a);
 
   const auto& geomB = std::get<2>(b);
   const auto& envelopesB = std::get<0>(b);
@@ -1388,34 +1445,39 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
   const auto& areaBoxIds = std::get<8>(b);
   const auto& areaCutouts = std::get<9>(b);
 
-  bool intersects = false;
-  for (size_t i = 1; i < envelopesB.size(); i++) {
-    if (boost::geometry::intersects(wayEnvelope, envelopesB[i])) {
-      intersects = true;
-      break;
-    }
-  }
-  if (!intersects) return false;
+  // if we haven't intersected the box ids yet, do it now
+  if (geomRelInf->fullContained < 0)
+    boxIdIsect(wayBoxIds, areaBoxIds, geomRelInf);
 
-  const auto boxIdRes = wayIntersectsAreaBoxIds(wayBoxIds, areaBoxIds);
-
-  if (boxIdRes == 2) {
+  // if we have at least one of A's boxes fully contained in B, we surely
+  // intersect
+  if (geomRelInf->fullContained > 0) {
+    geomRelInf->intersects = YES;
     return true;
   }
-  if (boxIdRes == 0) {
+
+  // if not, and if we also have no potential intersection box, we are not
+  // contained
+  if (geomRelInf->toCheck.size() == 0) {
+    geomRelInf->intersects = NO;
     return false;
   }
 
-  if (wayBoxIds.front().first == 1 && areaCutouts.size()) {
-    // special case: only one id
-    // TODO: if we return the full intersection above, it would be possible to
-    // check against every cutout geom
+  // if we have potential intersection boxes, and areaCutouts to use,
+  // only check against them
+  if (areaCutouts.size()) {
+    for (auto boxId : geomRelInf->toCheck) {
+      const auto& cutout = areaCutouts.find(boxId);
 
-    const auto& cutout = areaCutouts.find(abs(wayBoxIds[1].first));
-
-    if (cutout != areaCutouts.end()) {
-      return boost::geometry::intersects(geomA, cutout->second);
+      if (cutout != areaCutouts.end()) {
+        if (boost::geometry::intersects(geomA, cutout->second)) {
+          geomRelInf->intersects = YES;
+          return true;
+        }
+      }
     }
+    geomRelInf->intersects = NO;
+    return false;
   }
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
@@ -1431,7 +1493,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
     return boost::geometry::intersects(geomA, outerGeomB);
   }
 
-  intersects = false;
+  bool intersects = false;
   for (size_t i = 1; i < envelopesB.size(); i++) {
     if (boost::geometry::intersects(geomA, envelopesB[i])) intersects = true;
   }
@@ -1462,7 +1524,8 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
 // ____________________________________________________________________________
 template <typename W>
 bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
-                                   const SpatialAreaValue& b) const {
+                                   const SpatialAreaValue& b,
+                                   GeomRelationInfo* geomRelInf) const {
   const auto& geomA = std::get<2>(a);
   const auto& envelopeA = std::get<0>(a);
   const auto& wayBoxIds = std::get<5>(a);
@@ -1474,6 +1537,11 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
   const auto& areaBoxIds = std::get<8>(b);
   const auto& areaCutouts = std::get<9>(b);
 
+  if (geomRelInf->intersects == NO) {
+    geomRelInf->contained = NO;
+    return false;
+  }
+
   bool covered = false;
   for (size_t i = 1; i < envelopesB.size(); i++) {
     if (boost::geometry::covered_by(envelopeA, envelopesB[i])) {
@@ -1483,16 +1551,35 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
   }
   if (!covered) return false;
 
-  const auto boxIdRes = wayInAreaBoxIds(wayBoxIds, areaBoxIds);
+  if (geomRelInf->fullContained < 0)
+    boxIdIsect(wayBoxIds, areaBoxIds, geomRelInf);
 
-  if (boxIdRes == 2) return true;
-  if (boxIdRes == 0) return false;
+  if (geomRelInf->fullContained == wayBoxIds[0].first) {
+    geomRelInf->contained = YES;
+    return true;
+  }
 
-  if (wayBoxIds.front().first == 1 && areaCutouts.size()) {
+  // the combined number of potential contains and sure contains is not equal
+  // to the number of A's boxes, so we cannot be contained
+  if ((static_cast<int32_t>(geomRelInf->toCheck.size()) + geomRelInf->fullContained) !=
+      wayBoxIds[0].first) {
+    geomRelInf->contained = NO;
+    return false;
+  }
+
+  // if the way is only in one box, and area cutouts are available, we can
+  // check against the corresponding cutout
+  if (wayBoxIds[0].first == 1 && areaCutouts.size()) {
     const auto& cutout = areaCutouts.find(abs(wayBoxIds[1].first));
 
     if (cutout != areaCutouts.end()) {
-      return boost::geometry::covered_by(geomA, cutout->second);
+      if (boost::geometry::covered_by(geomA, cutout->second)) {
+        geomRelInf->contained = YES;
+        return true;
+      } else {
+        geomRelInf->contained = NO;
+        return false;
+      }
     }
   }
 
@@ -1543,7 +1630,14 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
 // ____________________________________________________________________________
 template <typename W>
 bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
-                                    const SpatialAreaValue& b) const {
+                                    const SpatialAreaValue& b,
+                                    GeomRelationInfo* geomRelInf) const {
+  // if we don't intersect, we are not contained
+  if (geomRelInf->intersects == NO) {
+    geomRelInf->contained = NO;
+    return false;
+  }
+
   const auto& geomA = std::get<2>(a);
   const auto& areaA = std::get<4>(a);
   const auto& innerGeomA = std::get<6>(a);
@@ -1557,14 +1651,52 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
   const auto& outerGeomB = std::get<7>(b);
   const auto& boxIdsB = std::get<8>(b);
   const auto& envelopesB = std::get<0>(b);
+  const auto& cutoutsB = std::get<9>(b);
 
-  if (areaA > areaB) return false;
-  if (!boost::geometry::covered_by(envelopesA[0], envelopesB[0])) return false;
+  // if A is bigger than B, B cannot contain A
+  if (areaA > areaB) {
+    geomRelInf->contained = NO;
+    return false;
+  }
 
-  const auto boxIdRes = areaInAreaBoxIds(boxIdsA, boxIdsB);
+  // if A's envelope doesn't cover B's envelope, B cannot contain A
+  if (!boost::geometry::covered_by(envelopesA[0], envelopesB[0])) {
+    geomRelInf->contained = NO;
+    return false;
+  }
 
-  if (boxIdRes == 2) return true;
-  if (boxIdRes == 0) return false;
+  // if no box id intersection has been written, do it now
+  if (geomRelInf->fullContained < 0) boxIdIsect(boxIdsA, boxIdsB, geomRelInf);
+
+  // if all of A's boxes are fully contained, we are contained
+  if (geomRelInf->fullContained == boxIdsA[0].first) {
+    geomRelInf->contained = YES;
+    return true;
+  }
+
+  // else, if the number of surely contained and potentiall contained boxes is
+  // unequal the number of A's boxes, we are surely not contained
+  if ((static_cast<int32_t>(geomRelInf->toCheck.size()) + geomRelInf->fullContained) !=
+      boxIdsA[0].first) {
+    geomRelInf->contained = NO;
+    return false;
+  }
+
+  // if A is in only one box, we can check it against the corresponding
+  // cutout of B, if available
+  if (boxIdsA[0].first == 1 && cutoutsB.size()) {
+    const auto& cutout = cutoutsB.find(abs(boxIdsA[1].first));
+
+    if (cutout != cutoutsB.end()) {
+      if (boost::geometry::covered_by(geomA, cutout->second)) {
+        geomRelInf->contained = YES;
+        return true;
+      } else {
+        geomRelInf->contained = NO;
+        return false;
+      }
+    }
+  }
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB) ||
@@ -1788,41 +1920,38 @@ std::string GeometryHandler<W>::areaNS(uint8_t type) const {
 
 // ____________________________________________________________________________
 template <typename W>
-uint8_t GeometryHandler<W>::polyIntersectPolyBoxIds(const BoxIdList& wayBoxIds,
-                                                    const BoxIdList& areaBoxIds,
-                                                    bool contains) const {
-  if (areaBoxIds.size() == 0 || wayBoxIds.size() == 0) return 1;
+void GeometryHandler<W>::boxIdIsect(const BoxIdList& wayBoxIds,
+                                    const BoxIdList& areaBoxIds,
+                                    GeomRelationInfo* geomRelInf) const {
+  geomRelInf->fullContained = 0;
 
   // shortcuts
   if (abs(wayBoxIds[1].first) >
       abs(areaBoxIds.back().first) + areaBoxIds.back().second)
-    return 0;
+    return;
   if (abs(wayBoxIds.back().first) + wayBoxIds.back().second <
       areaBoxIds[1].first)
-    return 0;
-
-  uint8_t res = 0;
-
-  size_t numEq = 0;
-
-  // 0: no res
-  // 1: possibly in
-  // 2: in
+    return;
 
   size_t i = 1;
   int32_t ii = 0;
   size_t j = 1;
   int32_t jj = 0;
 
-  size_t numTot = wayBoxIds[0].first;
+  bool noContained = false;
 
   while (i < wayBoxIds.size() && j < areaBoxIds.size()) {
     if (abs(wayBoxIds[i].first) + ii == abs(areaBoxIds[j].first) + jj) {
-      if (areaBoxIds[j].first > 0 && res == 0) res = 2;
-      if (areaBoxIds[j].first > 0 && !contains) return 2;
-      if (areaBoxIds[j].first < 0) res = 1;
+      if (areaBoxIds[j].first > 0) {
+        geomRelInf->fullContained++;
 
-      numEq++;
+        // we now know that we surely intersect. If we know already that
+        // we cannot be contained, return here
+        if (noContained) return;
+      }
+      if (areaBoxIds[j].first < 0) {
+        geomRelInf->toCheck.push_back(abs(wayBoxIds[i].first));
+      }
 
       if (++ii > wayBoxIds[i].second) {
         i++;
@@ -1833,7 +1962,13 @@ uint8_t GeometryHandler<W>::polyIntersectPolyBoxIds(const BoxIdList& wayBoxIds,
         jj = 0;
       }
     } else if (abs(wayBoxIds[i].first) + ii < abs(areaBoxIds[j].first) + jj) {
-      if (contains) return 0;
+      // if we already know that we intersect, we are now sure that we
+      // cannot be contained - it is irrelevant by how "much" we cannot be
+      // contained, so just return
+      if (geomRelInf->fullContained > 0) return;
+
+      // set noContained marker to true for later
+      noContained = true;
 
       if (abs(wayBoxIds[i].first) + wayBoxIds[i].second <
           abs(areaBoxIds[j].first) + jj) {
@@ -1874,43 +2009,6 @@ uint8_t GeometryHandler<W>::polyIntersectPolyBoxIds(const BoxIdList& wayBoxIds,
       } while (true);
     }
   }
-
-  if (contains && numEq != numTot) return 0;
-
-  return res;
-}
-
-// ____________________________________________________________________________
-template <typename W>
-uint8_t GeometryHandler<W>::nodeInAreaBoxIds(const BoxIdList& areaBoxIds,
-                                             int32_t ndBoxId) const {
-  return wayIntersectsAreaBoxIds({{1, 0}, {ndBoxId, 0}}, areaBoxIds);
-}
-
-// ____________________________________________________________________________
-template <typename W>
-uint8_t GeometryHandler<W>::wayIntersectsAreaBoxIds(
-    const BoxIdList& way, const BoxIdList& area) const {
-  return polyIntersectPolyBoxIds(way, area, false);
-}
-
-// ____________________________________________________________________________
-template <typename W>
-uint8_t GeometryHandler<W>::wayInAreaBoxIds(const BoxIdList& way,
-                                            const BoxIdList& area) const {
-  return polyIntersectPolyBoxIds(way, area, true);
-}
-// ____________________________________________________________________________
-template <typename W>
-uint8_t GeometryHandler<W>::areaInAreaBoxIds(const BoxIdList& a,
-                                             const BoxIdList& b) const {
-  return polyIntersectPolyBoxIds(a, b, true);
-}
-// ____________________________________________________________________________
-template <typename W>
-uint8_t GeometryHandler<W>::areaIntersectsAreaBoxIds(const BoxIdList& a,
-                                                     const BoxIdList& b) const {
-  return polyIntersectPolyBoxIds(a, b, false);
 }
 
 // ____________________________________________________________________________
