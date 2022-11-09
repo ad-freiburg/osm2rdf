@@ -26,6 +26,8 @@
 #include "osm2rdf/osm/Way.h"
 #include "osmium/osm/way.hpp"
 
+using osm2rdf::geometry::Location;
+
 // ____________________________________________________________________________
 osm2rdf::osm::Way::Way() {
   _id = std::numeric_limits<osm2rdf::osm::Way::id_t>::max();
@@ -39,7 +41,7 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _geom.reserve(way.nodes().size());
   for (const auto& nodeRef : way.nodes()) {
     _nodes.emplace_back(nodeRef);
-    boost::geometry::append(_geom, osm2rdf::osm::Node(nodeRef).geom());
+    boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()});
   }
   boost::geometry::unique(_geom);
   boost::geometry::envelope(_geom, _envelope);

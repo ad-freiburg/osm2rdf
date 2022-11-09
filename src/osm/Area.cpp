@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/Area.h"
-
 #include <iostream>
 #include <limits>
 
@@ -25,9 +23,12 @@
 #include "osm2rdf/geometry/Area.h"
 #include "osm2rdf/geometry/Box.h"
 #include "osm2rdf/geometry/Global.h"
+#include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osm2rdf/osm/Node.h"
 #include "osmium/osm/area.hpp"
+
+using osm2rdf::geometry::Location;
 
 // ____________________________________________________________________________
 osm2rdf::osm::Area::Area() {
@@ -48,8 +49,8 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   for (const auto& oring : outerRings) {
     _geom[oCount].outer().reserve(oring.size());
     for (const auto& nodeRef : oring) {
-      boost::geometry::append(_geom, osm2rdf::osm::Node(nodeRef).geom(), -1,
-                              oCount);
+      boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()},
+                              -1, oCount);
     }
 
     const auto& innerRings = area.inner_rings(oring);
@@ -59,7 +60,7 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
     for (const auto& iring : innerRings) {
       _geom[oCount].inners()[iCount].reserve(iring.size());
       for (const auto& nodeRef : iring) {
-        boost::geometry::append(_geom, osm2rdf::osm::Node(nodeRef).geom(),
+        boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()},
                                 iCount, oCount);
       }
       iCount++;

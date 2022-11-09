@@ -73,11 +73,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       {
 #pragma omp single
         {
-          while (true) {
-            osmium::memory::Buffer buf = reader.read();
-            if (!buf) {
-              break;
-            }
+          while (auto buf = reader.read()) {
             osmium::apply(
                 buf, *locationHandler,
                 mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
@@ -179,7 +175,7 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
     return;
   }
 
-  const auto r = osm2rdf::osm::Relation(relation);
+  const auto& r = osm2rdf::osm::Relation(relation);
   if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
 #pragma omp task
