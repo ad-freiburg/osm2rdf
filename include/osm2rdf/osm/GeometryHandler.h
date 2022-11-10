@@ -45,6 +45,106 @@ const static int NUM_GRID_CELLS = 5000;
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
 
+struct GeomRelationStats {
+  size_t _totalChecks = 0;
+  size_t _fullChecks = 0;
+  size_t _skippedByNonIntersect = 0;
+  size_t _skippedByDAG = 0;
+  size_t _skippedByAreaSize = 0;
+  size_t _skippedByBoxIdIntersect = 0;
+  size_t _skippedByBoxIdIntersectCutout = 0;
+  size_t _skippedByContainedInInnerRing = 0;
+  size_t _skippedByBorderContained = 0;
+  size_t _skippedByNodeContained = 0;
+  size_t _skippedByInner = 0;
+  size_t _skippedByOuter = 0;
+  size_t _skippedByBox = 0;
+  size_t _skippedByConvexHull = 0;
+
+  GeomRelationStats& operator+=(const GeomRelationStats& lh) {
+    _totalChecks += lh._totalChecks;
+    _fullChecks += lh._fullChecks;
+    _skippedByNonIntersect += lh._skippedByNonIntersect;
+    _skippedByDAG += lh._skippedByDAG;
+    _skippedByAreaSize += lh._skippedByAreaSize;
+    _skippedByBoxIdIntersect += lh._skippedByBoxIdIntersect;
+    _skippedByBoxIdIntersectCutout += lh._skippedByBoxIdIntersectCutout;
+    _skippedByContainedInInnerRing += lh._skippedByContainedInInnerRing;
+    _skippedByInner += lh._skippedByInner;
+    _skippedByOuter += lh._skippedByOuter;
+    _skippedByBox += lh._skippedByBox;
+    _skippedByConvexHull += lh._skippedByConvexHull;
+    _skippedByBorderContained += lh._skippedByBorderContained;
+    _skippedByNodeContained += lh._skippedByNodeContained;
+    return *this;
+  }
+
+  void checked() { _totalChecks++; }
+  void skippedByNonIntersect() { _skippedByNonIntersect++; }
+  void skippedByDAG() { _skippedByDAG++; }
+  void skippedByAreaSize() { _skippedByAreaSize++; }
+  void skippedByBoxIdIntersect() { _skippedByBoxIdIntersect++; }
+  void skippedByBoxIdIntersectCutout() { _skippedByBoxIdIntersectCutout++; }
+  void skippedByContainedInInnerRing() { _skippedByContainedInInnerRing++; }
+  void skippedByInner() { _skippedByInner++; }
+  void skippedByOuter() { _skippedByOuter++; }
+  void skippedByBox() { _skippedByBox++; }
+  void skippedByConvexHull() { _skippedByConvexHull++; }
+  void skippedByBorderContained() { _skippedByBorderContained++; }
+  void skippedByNodeContained() { _skippedByNodeContained++; }
+  void fullCheck() { _fullChecks++; }
+
+  std::string printPercNum(size_t n) const {
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(3) << n << " ("
+       << ((static_cast<double>(n) / static_cast<double>(_totalChecks)) * 100.0)
+       << "%)";
+    return ss.str();
+  }
+
+  std::string printTotalChecks() const { return std::to_string(_totalChecks); }
+  std::string printSkippedByDAG() const { return printPercNum(_skippedByDAG); }
+  std::string printSkippedByAreaSize() const {
+    return printPercNum(_skippedByAreaSize);
+  }
+  std::string printSkippedByBox() const { return printPercNum(_skippedByBox); }
+  std::string printSkippedByBoxIdIntersect() const {
+    return printPercNum(_skippedByBoxIdIntersect);
+  }
+  std::string printSkippedByNonIntersect() const {
+    return printPercNum(_skippedByNonIntersect);
+  }
+  std::string printSkippedByBoxIdIntersectCutout() const {
+    return printPercNum(_skippedByBoxIdIntersectCutout);
+  }
+  std::string printSkippedByContainedInInnerRing() const {
+    return printPercNum(_skippedByContainedInInnerRing);
+  }
+  std::string printSkippedByConvexHull() const {
+    return printPercNum(_skippedByConvexHull);
+  }
+  std::string printSkippedByBorderContained() const {
+    return printPercNum(_skippedByBorderContained);
+  }
+  std::string printSkippedByInner() const {
+    return printPercNum(_skippedByInner);
+  }
+  std::string printSkippedByOuter() const {
+    return printPercNum(_skippedByOuter);
+  }
+  std::string printSkippedByNodeContained() const {
+    return printPercNum(_skippedByNodeContained);
+  }
+  std::string printFullChecks() const { return printPercNum(_fullChecks); }
+};
+
+#pragma omp declare \
+reduction(  \
+        + : \
+            GeomRelationStats :  \
+                omp_out += omp_in ) \
+initializer( omp_priv = omp_orig )
+
 typedef std::pair<int32_t, uint8_t> BoxId;
 
 enum RelInfoValue { DONTKNOW, YES, NO };
@@ -52,6 +152,8 @@ enum RelInfoValue { DONTKNOW, YES, NO };
 struct GeomRelationInfo {
   RelInfoValue intersects = DONTKNOW;
   RelInfoValue contained = DONTKNOW;
+
+  double intersectArea = -1;
 
   std::vector<int32_t> toCheck;
   int fullContained = -1;
@@ -92,7 +194,8 @@ typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t,
                    uint8_t, osm2rdf::geometry::Area, osm2rdf::geometry::Area,
                    osm2rdf::osm::BoxIdList,
-                   std::unordered_map<int32_t, osm2rdf::geometry::Area>>
+                   std::unordered_map<int32_t, osm2rdf::geometry::Area>,
+                   osm2rdf::geometry::Area>
     SpatialAreaValue;
 
 typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
@@ -189,14 +292,22 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryWay);
 
-  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
-  bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
-  bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
-  bool wayIntersectsArea(const SpatialWayValue& a,
-                         const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
+  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&,
+                  GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
+  bool areaInAreaApprox(const SpatialAreaValue& a, const SpatialAreaValue&,
+                        GeomRelationInfo* geomRelInf,
+                        GeomRelationStats* stats) const;
+  bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&,
+                  GeomRelationInfo* geomRelInf) const;
+  bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&,
+                 GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
+  bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValue&,
+                         GeomRelationInfo* geomRelInf,
+                         GeomRelationStats* stats) const;
 
-  bool areaIntersectsArea(const SpatialAreaValue& a,
-                          const SpatialAreaValue&, GeomRelationInfo* geomRelInf) const;
+  bool areaIntersectsArea(const SpatialAreaValue& a, const SpatialAreaValue&,
+                          GeomRelationInfo* geomRelInf,
+                          GeomRelationStats* stats) const;
 
   static double signedDistanceFromPointToLine(
       const osm2rdf::geometry::Location& A,
@@ -241,8 +352,8 @@ class GeometryHandler {
   int32_t getBoxId(const osm2rdf::geometry::Location&) const;
 
   void boxIdIsect(const osm2rdf::osm::BoxIdList& a,
-                                  const osm2rdf::osm::BoxIdList& b,
-                                   GeomRelationInfo* geomRelInf) const;
+                  const osm2rdf::osm::BoxIdList& b,
+                  GeomRelationInfo* geomRelInf) const;
   osm2rdf::osm::BoxIdList pack(const osm2rdf::osm::BoxIdList& ids) const;
 
   uint8_t borderContained(osm2rdf::osm::Way::id_t wayId,
@@ -331,6 +442,7 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialAreaValue& v,
   ar& boost::serialization::make_nvp("outer", std::get<7>(v));
   ar& boost::serialization::make_nvp("boxids", std::get<8>(v));
   ar& boost::serialization::make_nvp("cutouts", std::get<8>(v));
+  ar& boost::serialization::make_nvp("convexhull", std::get<9>(v));
 }
 
 }  // namespace boost::serialization
