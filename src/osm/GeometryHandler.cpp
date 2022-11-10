@@ -110,7 +110,7 @@ void GeometryHandler<W>::area(const Area& area) {
   osm2rdf::geometry::Area outerGeom;
 
   // the convex hull of the geometry
-  osm2rdf::geometry::Area convexHull;
+  osm2rdf::geometry::Polygon convexHull;
 
   const auto& geom = simplifyGeometry(area.geom());
 
@@ -128,11 +128,10 @@ void GeometryHandler<W>::area(const Area& area) {
 
   if (geom.size()) {
     boost::geometry::convex_hull(geom, convexHull);
-    if (convexHull.size() &&
-        convexHull.front().outer().size() >= geom.front().outer().size() / 2) {
+    if (convexHull.outer().size() >= geom.front().outer().size() / 2) {
       // if we haven't gained anything significant in terms of number of anchor
       // points, discard
-      convexHull = osm2rdf::geometry::Area();
+      convexHull = osm2rdf::geometry::Polygon();
     }
   }
 

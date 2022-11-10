@@ -195,7 +195,7 @@ typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    uint8_t, osm2rdf::geometry::Area, osm2rdf::geometry::Area,
                    osm2rdf::osm::BoxIdList,
                    std::unordered_map<int32_t, osm2rdf::geometry::Area>,
-                   osm2rdf::geometry::Area>
+                   osm2rdf::geometry::Polygon>
     SpatialAreaValue;
 
 typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
