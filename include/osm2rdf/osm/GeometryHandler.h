@@ -298,7 +298,7 @@ class GeometryHandler {
                         GeomRelationInfo* geomRelInf,
                         GeomRelationStats* stats) const;
   bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&,
-                  GeomRelationInfo* geomRelInf) const;
+                  GeomRelationInfo* geomRelInf, GeomRelationStats* statsa) const;
   bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&,
                  GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
   bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValue&,
@@ -441,8 +441,8 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialAreaValue& v,
   ar& boost::serialization::make_nvp("inner", std::get<6>(v));
   ar& boost::serialization::make_nvp("outer", std::get<7>(v));
   ar& boost::serialization::make_nvp("boxids", std::get<8>(v));
-  ar& boost::serialization::make_nvp("cutouts", std::get<8>(v));
-  ar& boost::serialization::make_nvp("convexhull", std::get<9>(v));
+  ar& boost::serialization::make_nvp("cutouts", std::get<9>(v));
+  ar& boost::serialization::make_nvp("convexhull", std::get<10>(v));
 }
 
 }  // namespace boost::serialization
