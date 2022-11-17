@@ -507,7 +507,6 @@ void GeometryHandler<W>::calculateRelations() {
 template <typename W>
 void GeometryHandler<W>::prepareRTree() {
   // empty the rtree!
-  _spatialIndex.clear();
   std::cerr << std::endl;
   std::cerr << osm2rdf::util::currentTimeFormatted() << " Sorting "
             << _spatialStorageArea.size() << " areas ... " << std::endl;
@@ -522,12 +521,15 @@ void GeometryHandler<W>::prepareRTree() {
             << " Packing area r-tree with " << _spatialStorageArea.size()
             << " entries ... " << std::endl;
 
+  std::vector<SpatialAreaRefValue> values;
+
   for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
     for (size_t j = 1; j < std::get<0>(_spatialStorageArea[i]).size(); j++) {
-      _spatialIndex.insert(
-          SpatialAreaRefValue(std::get<0>(_spatialStorageArea[i])[j], i));
+      values.push_back({std::get<0>(_spatialStorageArea[i])[j], i});
     }
   }
+
+  _spatialIndex = SpatialIndex(values.begin(), values.end());
 
   std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
             << std::endl;
