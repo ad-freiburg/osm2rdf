@@ -39,12 +39,27 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _tags = osm2rdf::osm::convertTagList(way.tags());
   _nodes.reserve(way.nodes().size());
   _geom.reserve(way.nodes().size());
+
+  double lonMin = std::numeric_limits<double>::infinity();
+  double latMin = std::numeric_limits<double>::infinity();
+  double lonMax = -std::numeric_limits<double>::infinity();
+  double latMax = -std::numeric_limits<double>::infinity();
+
   for (const auto& nodeRef : way.nodes()) {
+    if (nodeRef.lon() < lonMin) lonMin = nodeRef.lon();
+    if (nodeRef.lat() < latMin) latMin = nodeRef.lat();
+    if (nodeRef.lon() > lonMax) lonMax = nodeRef.lon();
+    if (nodeRef.lat() > latMax) latMax = nodeRef.lat();
+
     _nodes.emplace_back(nodeRef);
-    boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()});
+
+    // implicit boost::geometry::unique
+    if (nodeRef.lon() != _geom.back().get<0>() &&
+        nodeRef.lat() != _geom.back().get<1>()) {
+      boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()});
+    }
   }
-  boost::geometry::unique(_geom);
-  boost::geometry::envelope(_geom, _envelope);
+  _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
 }
 
 // ____________________________________________________________________________

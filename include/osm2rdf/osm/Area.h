@@ -55,6 +55,8 @@ struct Area {
   [[nodiscard]] bool fromWay() const noexcept;
   // Return if this area has a name.
   [[nodiscard]] bool hasName() const noexcept;
+  // finalize geometries
+  [[nodiscard]] void finalize() noexcept;
 
  protected:
   // The osmium id

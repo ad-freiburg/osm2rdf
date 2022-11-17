@@ -16,11 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/OsmiumHandler.h"
-
 #include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/osm/LocationHandler.h"
+#include "osm2rdf/osm/OsmiumHandler.h"
 #include "osm2rdf/util/Time.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
@@ -127,16 +126,20 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   if (_config.adminRelationsOnly && area.tags()["admin_level"] == nullptr) {
     return;
   }
-  const auto& a = osm2rdf::osm::Area(area);
-  if (!_config.noFacts && !_config.noAreaFacts) {
-    _areasDumped++;
+  auto a = osm2rdf::osm::Area(area);
 #pragma omp task
-    _dumpHandler.area(a);
-  }
-  if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
-    _areaGeometriesHandled++;
+  {
+    a.finalize();
+    if (!_config.noFacts && !_config.noAreaFacts) {
+      _areasDumped++;
 #pragma omp task
-    _geometryHandler.area(a);
+      _dumpHandler.area(a);
+    }
+    if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
+      _areaGeometriesHandled++;
+#pragma omp task
+      _geometryHandler.area(a);
+    }
   }
 }
 
@@ -183,7 +186,7 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
   }
 
 #pragma omp task
-   _geometryHandler.relation(r);
+  _geometryHandler.relation(r);
 }
 
 // ____________________________________________________________________________

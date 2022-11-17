@@ -37,10 +37,26 @@ osm2rdf::osm::Area::Area() {
 }
 
 // ____________________________________________________________________________
+void osm2rdf::osm::Area::finalize() noexcept {
+  // Correct possibly invalid geometry...
+  boost::geometry::correct(_geom);
+  boost::geometry::unique(_geom);
+  _geomArea = boost::geometry::area(_geom);
+  _envelopeArea = boost::geometry::area(_envelope);
+  assert(_geomArea > 0);
+  assert(_envelopeArea > 0);
+}
+
+// ____________________________________________________________________________
 osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
   _objId = static_cast<osm2rdf::osm::Area::id_t>(area.orig_id());
   _hasName = (area.tags()["name"] != nullptr);
+
+  double lonMin = std::numeric_limits<double>::infinity();
+  double latMin = std::numeric_limits<double>::infinity();
+  double lonMax = -std::numeric_limits<double>::infinity();
+  double latMax = -std::numeric_limits<double>::infinity();
 
   const auto& outerRings = area.outer_rings();
   _geom.resize(outerRings.size());
@@ -49,6 +65,11 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   for (const auto& oring : outerRings) {
     _geom[oCount].outer().reserve(oring.size());
     for (const auto& nodeRef : oring) {
+      if (nodeRef.lon() < lonMin) lonMin = nodeRef.lon();
+      if (nodeRef.lat() < latMin) latMin = nodeRef.lat();
+      if (nodeRef.lon() > lonMax) lonMax = nodeRef.lon();
+      if (nodeRef.lat() > latMax) latMax = nodeRef.lat();
+
       boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()},
                               -1, oCount);
     }
@@ -68,14 +89,7 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
     oCount++;
   }
 
-  // Correct possibly invalid geometry...
-  boost::geometry::correct(_geom);
-  boost::geometry::unique(_geom);
-  boost::geometry::envelope(_geom, _envelope);
-  _geomArea = boost::geometry::area(_geom);
-  _envelopeArea = boost::geometry::area(_envelope);
-  assert(_geomArea > 0);
-  assert(_envelopeArea > 0);
+  _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
 }
 
 // ____________________________________________________________________________
