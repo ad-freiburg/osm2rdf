@@ -65,10 +65,21 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   for (const auto& oring : outerRings) {
     _geom[oCount].outer().reserve(oring.size());
     for (const auto& nodeRef : oring) {
-      if (nodeRef.lon() < lonMin) lonMin = nodeRef.lon();
-      if (nodeRef.lat() < latMin) latMin = nodeRef.lat();
-      if (nodeRef.lon() > lonMax) lonMax = nodeRef.lon();
-      if (nodeRef.lat() > latMax) latMax = nodeRef.lat();
+      if (nodeRef.lon() < lonMin) {
+        lonMin = nodeRef.lon();
+      }
+
+      if (nodeRef.lat() < latMin) {
+        latMin = nodeRef.lat();
+      }
+
+      if (nodeRef.lon() > lonMax) {
+        lonMax = nodeRef.lon();
+      }
+
+      if (nodeRef.lat() > latMax) {
+        latMax = nodeRef.lat();
+      }
 
       boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()},
                               -1, oCount);

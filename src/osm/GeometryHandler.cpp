@@ -2048,7 +2048,6 @@ BoxIdList GeometryHandler<W>::getBoxIds(
 template <typename W>
 void GeometryHandler<W>::getBoxIds(
     const osm2rdf::geometry::Area& area,
-
     const osm2rdf::geometry::Area& inner, const osm2rdf::geometry::Area& outer,
     const std::vector<osm2rdf::geometry::Box>& envelopes, int xFrom, int xTo,
     int yFrom, int yTo, int xWidth, int yHeight, BoxIdList* ret,
@@ -2196,17 +2195,17 @@ std::string GeometryHandler<W>::areaNS(uint8_t type) const {
 
 // ____________________________________________________________________________
 template <typename W>
-void GeometryHandler<W>::boxIdIsect(const BoxIdList& wayBoxIds,
-                                    const BoxIdList& areaBoxIds,
+void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
+                                    const BoxIdList& idsB,
                                     GeomRelationInfo* geomRelInf) const {
   geomRelInf->fullContained = 0;
 
   // shortcuts
-  if (abs(wayBoxIds[1].first) >
-      abs(areaBoxIds.back().first) + areaBoxIds.back().second)
+  if (abs(idsA[1].first) >
+      abs(idsB.back().first) + idsB.back().second)
     return;
-  if (abs(wayBoxIds.back().first) + wayBoxIds.back().second <
-      areaBoxIds[1].first)
+  if (abs(idsA.back().first) + idsA.back().second <
+      idsB[1].first)
     return;
 
   size_t i = 1;
@@ -2216,28 +2215,28 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& wayBoxIds,
 
   bool noContained = false;
 
-  while (i < wayBoxIds.size() && j < areaBoxIds.size()) {
-    if (abs(wayBoxIds[i].first) + ii == abs(areaBoxIds[j].first) + jj) {
-      if (areaBoxIds[j].first > 0) {
+  while (i < idsA.size() && j < idsB.size()) {
+    if (abs(idsA[i].first) + ii == abs(idsB[j].first) + jj) {
+      if (idsB[j].first > 0) {
         geomRelInf->fullContained++;
 
         // we now know that we surely intersect. If we know already that
         // we cannot be contained, return here
         if (noContained) return;
       }
-      if (areaBoxIds[j].first < 0) {
-        geomRelInf->toCheck.push_back(abs(wayBoxIds[i].first));
+      if (idsB[j].first < 0) {
+        geomRelInf->toCheck.push_back(abs(idsA[i].first));
       }
 
-      if (++ii > wayBoxIds[i].second) {
+      if (++ii > idsA[i].second) {
         i++;
         ii = 0;
       }
-      if (++jj > areaBoxIds[j].second) {
+      if (++jj > idsB[j].second) {
         j++;
         jj = 0;
       }
-    } else if (abs(wayBoxIds[i].first) + ii < abs(areaBoxIds[j].first) + jj) {
+    } else if (abs(idsA[i].first) + ii < abs(idsB[j].first) + jj) {
       // if we already know that we intersect, we are now sure that we
       // cannot be contained - it is irrelevant by how "much" we cannot be
       // contained, so just return
@@ -2246,13 +2245,13 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& wayBoxIds,
       // set noContained marker to true for later
       noContained = true;
 
-      if (abs(wayBoxIds[i].first) + wayBoxIds[i].second <
-          abs(areaBoxIds[j].first) + jj) {
+      if (abs(idsA[i].first) + idsA[i].second <
+          abs(idsB[j].first) + jj) {
         // entire block smaller, jump it
         ii = 0;
         i++;
       } else {
-        if (++ii > wayBoxIds[i].second) {
+        if (++ii > idsA[i].second) {
           i++;
           ii = 0;
         }
@@ -2260,22 +2259,22 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& wayBoxIds,
     } else {
       size_t gallop = 1;
       do {
-        auto end = areaBoxIds.end();
-        if (j + gallop < areaBoxIds.size())
-          end = areaBoxIds.begin() + j + gallop;
+        auto end = idsB.end();
+        if (j + gallop < idsB.size())
+          end = idsB.begin() + j + gallop;
 
-        if (end == areaBoxIds.end() ||
-            abs(end->first) >= abs(wayBoxIds[i].first) + ii) {
+        if (end == idsB.end() ||
+            abs(end->first) >= abs(idsA[i].first) + ii) {
           jj = 0;
-          j = std::lower_bound(areaBoxIds.begin() + j + gallop / 2, end,
-                               abs(wayBoxIds[i].first) + ii, BoxIdCmp()) -
-              areaBoxIds.begin();
+          j = std::lower_bound(idsB.begin() + j + gallop / 2, end,
+                               abs(idsA[i].first) + ii, BoxIdCmp()) -
+              idsB.begin();
           if (j > 0 &&
-              abs(areaBoxIds[j - 1].first) < abs(wayBoxIds[i].first) + ii &&
-              abs(areaBoxIds[j - 1].first) + areaBoxIds[j - 1].second >=
-                  abs(wayBoxIds[i].first) + ii) {
+              abs(idsB[j - 1].first) < abs(idsA[i].first) + ii &&
+              abs(idsB[j - 1].first) + idsB[j - 1].second >=
+                  abs(idsA[i].first) + ii) {
             j--;
-            jj = (abs(wayBoxIds[i].first) + ii) - abs(areaBoxIds[j].first);
+            jj = (abs(idsA[i].first) + ii) - abs(idsB[j].first);
           }
           break;
         }
@@ -2354,11 +2353,11 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
 // ____________________________________________________________________________
 template <typename W>
 std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQry(
-    const SpatialNodeValue& n) const {
+    const SpatialNodeValue& node) const {
   std::vector<SpatialAreaRefValue> queryResult;
 
   osm2rdf::geometry::Box nodeEnvelope;
-  boost::geometry::envelope(std::get<1>(n), nodeEnvelope);
+  boost::geometry::envelope(std::get<1>(node), nodeEnvelope);
 
   _spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
                       std::back_inserter(queryResult));
@@ -2410,14 +2409,14 @@ void GeometryHandler<W>::unique(std::vector<SpatialAreaRefValue>& refs) const {
 // ____________________________________________________________________________
 template <typename W>
 uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
-                                            Area::id_t areaObjId) const {
+                                            Area::id_t areaId) const {
   const auto& relations = _areaBorderWaysIndex.find(wayId);
   if (relations != _areaBorderWaysIndex.end()) {
     auto a =
         std::lower_bound(relations->second.begin(), relations->second.end(),
-                         areaObjId, MemberRelCmp());
+                         areaId, MemberRelCmp());
 
-    if (a != relations->second.end() && a->first == areaObjId) {
+    if (a != relations->second.end() && a->first == areaId) {
       // if inner, return 1
       if (a->second) return 1;
       // else if outer, return 2

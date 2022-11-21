@@ -322,7 +322,7 @@ class GeometryHandler {
 
   static int polygonOrientation(
       const boost::geometry::model::ring<osm2rdf::geometry::Location>&
-          inputPoints);
+          polygon);
 
   osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g,
                                          bool inner) const;
@@ -330,12 +330,11 @@ class GeometryHandler {
   std::string areaNS(uint8_t type) const;
 
   void getBoxIds(
-      const osm2rdf::geometry::Area&,
-
+      const osm2rdf::geometry::Area& area,
       const osm2rdf::geometry::Area& inner,
       const osm2rdf::geometry::Area& outer,
       const std::vector<osm2rdf::geometry::Box>& envelopes, int xFrom, int xTo,
-      int yFrom, int yTo, int xWidth, int yWidth, osm2rdf::osm::BoxIdList* ret,
+      int yFrom, int yTo, int xWidth, int yHeight, osm2rdf::osm::BoxIdList* ret,
       const osm2rdf::geometry::Area& curISect,
       std::unordered_map<int32_t, osm2rdf::geometry::Area>* cutouts) const;
 
@@ -349,10 +348,11 @@ class GeometryHandler {
   osm2rdf::osm::BoxIdList getBoxIds(
       const osm2rdf::geometry::Way&,
       const osm2rdf::geometry::Box& envelope) const;
+
   int32_t getBoxId(const osm2rdf::geometry::Location&) const;
 
-  void boxIdIsect(const osm2rdf::osm::BoxIdList& a,
-                  const osm2rdf::osm::BoxIdList& b,
+  void boxIdIsect(const osm2rdf::osm::BoxIdList& idsA,
+                  const osm2rdf::osm::BoxIdList& idsB,
                   GeomRelationInfo* geomRelInf) const;
   osm2rdf::osm::BoxIdList pack(const osm2rdf::osm::BoxIdList& ids) const;
 
@@ -361,12 +361,12 @@ class GeometryHandler {
 
   std::vector<SpatialAreaRefValue> indexQryCover(
       const SpatialAreaValue& area) const;
-  std::vector<SpatialAreaRefValue> indexQry(const SpatialNodeValue& area) const;
+  std::vector<SpatialAreaRefValue> indexQry(const SpatialNodeValue& node) const;
   std::vector<SpatialAreaRefValue> indexQryIntersect(
       const SpatialAreaValue& area) const;
   std::vector<SpatialAreaRefValue> indexQryIntersect(
-      const SpatialWayValue& area) const;
-  void unique(std::vector<SpatialAreaRefValue>& area) const;
+      const SpatialWayValue& way) const;
+  void unique(std::vector<SpatialAreaRefValue>& refs) const;
 
   // Global config
   osm2rdf::config::Config _config;

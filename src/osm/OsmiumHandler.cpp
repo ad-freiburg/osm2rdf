@@ -126,19 +126,19 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   if (_config.adminRelationsOnly && area.tags()["admin_level"] == nullptr) {
     return;
   }
-  auto a = osm2rdf::osm::Area(area);
+  auto osmArea = osm2rdf::osm::Area(area);
 #pragma omp task
   {
-    a.finalize();
+    osmArea.finalize();
     if (!_config.noFacts && !_config.noAreaFacts) {
       _areasDumped++;
 #pragma omp task
-      _factHandler.area(a);
+      _factHandler.area(osmArea);
     }
     if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
       _areaGeometriesHandled++;
 #pragma omp task
-      _geometryHandler.area(a);
+      _geometryHandler.area(osmArea);
     }
   }
 }
@@ -150,19 +150,19 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   if (_config.adminRelationsOnly) {
     return;
   }
-  const auto& n = osm2rdf::osm::Node(node);
+  const auto& osmNode = osm2rdf::osm::Node(node);
   if (node.tags().empty()) {
     return;
   }
   if (!_config.noFacts && !_config.noNodeFacts) {
     _nodesDumped++;
 #pragma omp task
-    _factHandler.node(n);
+    _factHandler.node(osmNode);
   }
   if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
     _nodeGeometriesHandled++;
 #pragma omp task
-    _geometryHandler.node(n);
+    _geometryHandler.node(osmNode);
   }
 }
 
@@ -178,15 +178,15 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
     return;
   }
 
-  const auto& r = osm2rdf::osm::Relation(relation);
+  const auto& osmRelation = osm2rdf::osm::Relation(relation);
   if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
 #pragma omp task
-    _factHandler.relation(r);
+    _factHandler.relation(osmRelation);
   }
 
 #pragma omp task
-  _geometryHandler.relation(r);
+  _geometryHandler.relation(osmRelation);
 }
 
 // ____________________________________________________________________________
@@ -199,16 +199,16 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   if (_config.adminRelationsOnly) {
     return;
   }
-  const auto& w = osm2rdf::osm::Way(way);
+  const auto& osmWay = osm2rdf::osm::Way(way);
   if (!_config.noFacts && !_config.noWayFacts) {
     _waysDumped++;
 #pragma omp task
-    _factHandler.way(w);
+    _factHandler.way(osmWay);
   }
   if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
     _wayGeometriesHandled++;
 #pragma omp task
-    _geometryHandler.way(w);
+    _geometryHandler.way(osmWay);
   }
 }
 
