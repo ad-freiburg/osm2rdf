@@ -57,7 +57,7 @@ class OsmiumHandler : public osmium::handler::Handler {
 
  protected:
   osm2rdf::config::Config _config;
-  osm2rdf::osm::FactHandler<W> _dumpHandler;
+  osm2rdf::osm::FactHandler<W> _factHandler;
   osm2rdf::osm::GeometryHandler<W> _geometryHandler;
   size_t _areasSeen = 0;
   size_t _areasDumped = 0;
