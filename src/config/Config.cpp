@@ -159,13 +159,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << std::to_string(simplifyGeometries);
     }
   }
-  oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
-  if (minimalAreaEnvelopeRatio > 0) {
-    oss << "\n"
-        << prefix
-        << osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO
-        << std::to_string(minimalAreaEnvelopeRatio);
-  }
   if (writeDAGDotFiles) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
@@ -341,7 +334,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_HELP, simplifyWKT);
-  auto wktDeviationOp = op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
+  auto wktDeviationOp = op.add<popl::Value<double>, popl::Attribute::expert>(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_HELP,
@@ -351,12 +344,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WKT_PRECISION_OPTION_SHORT,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_HELP, wktPrecision);
-  auto minimalAreaEnvelopeRatioOp =
-      op.add<popl::Value<double>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT,
-          osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG,
-          osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP,
-          minimalAreaEnvelopeRatio);
 
   auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::expert>(
       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_SHORT,
@@ -450,7 +437,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
-    minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();
     simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();

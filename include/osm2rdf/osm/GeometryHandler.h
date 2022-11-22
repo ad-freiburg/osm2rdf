@@ -324,7 +324,7 @@ class GeometryHandler {
       const boost::geometry::model::ring<osm2rdf::geometry::Location>&
           polygon);
 
-  osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& g,
+  osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& area,
                                          bool inner) const;
 
   std::string areaNS(uint8_t type) const;

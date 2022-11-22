@@ -109,7 +109,7 @@ class Writer {
 
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.
-  bool addPrefix(std::string_view p, std::string_view v);
+  bool addPrefix(std::string prefix, std::string_view value);
   // resolvePrefix resolves the given prefix. If the prefix is unknown it is
   // returned as provided.
   std::string resolvePrefix(std::string_view p);

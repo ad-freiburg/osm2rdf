@@ -49,11 +49,13 @@ using osm2rdf::osm::Node;
 using osm2rdf::osm::Relation;
 using osm2rdf::osm::SpatialAreaRefValue;
 using osm2rdf::osm::Way;
+using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::util::DirectedGraph;
+using osm2rdf::util::currentTimeFormatted;
 
 // ____________________________________________________________________________
 template <typename W>
@@ -82,18 +84,18 @@ template <typename W>
 void GeometryHandler<W>::relation(const Relation& rel) {
   // careful, tags is returned via copy (why?)
   const auto& tags = rel.tags();
-  auto i = tags.find("type");
-  if (i != tags.end() &&
-      (i->second == "boundary" || i->second == "multipolygon")) {
-    for (const auto& m : rel.members()) {
-      if (m.type() == RelationMemberType::WAY &&
-          (m.role() == "outer" || m.role() == "inner")) {
+  auto typeTag = tags.find("type");
+  if (typeTag != tags.end() &&
+      (typeTag->second == "boundary" || typeTag->second == "multipolygon")) {
+    for (const auto& member : rel.members()) {
+      if (member.type() == RelationMemberType::WAY &&
+          (member.role() == "outer" || member.role() == "inner")) {
 #pragma omp critical
         {
-          _areaBorderWaysIndex[m.id()].push_back(
-              {rel.id(), m.role() == "inner"});
-          std::sort(_areaBorderWaysIndex[m.id()].begin(),
-                    _areaBorderWaysIndex[m.id()].end(), MemberRelCmp());
+          _areaBorderWaysIndex[member.id()].push_back(
+              {rel.id(), member.role() == "inner"});
+          std::sort(_areaBorderWaysIndex[member.id()].begin(),
+                    _areaBorderWaysIndex[member.id()].end(), MemberRelCmp());
         }
       }
     }
@@ -115,7 +117,7 @@ void GeometryHandler<W>::area(const Area& area) {
   const auto& geom = simplifyGeometry(area.geom());
 
   size_t totPoints = 0;
-  size_t MIN_CUTOUT_POINTS = 10000;
+  const size_t MIN_CUTOUT_POINTS = 10000;
 
   for (const auto& poly : geom) {
     totPoints += poly.outer().size();
@@ -138,9 +140,9 @@ void GeometryHandler<W>::area(const Area& area) {
   std::vector<osm2rdf::geometry::Box> envelopes;
   envelopes.push_back(area.envelope());
   if (area.geom().size() > 1) {
-    for (const auto& p : area.geom()) {
+    for (const auto& polygon : area.geom()) {
       osm2rdf::geometry::Box box;
-      boost::geometry::envelope(p, box);
+      boost::geometry::envelope(polygon, box);
       envelopes.push_back(box);
     }
   } else {
@@ -156,21 +158,10 @@ void GeometryHandler<W>::area(const Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
-      if (_config.minimalAreaEnvelopeRatio <= 0.0 ||
-          area.geomArea() / area.envelopeArea() >=
-              _config.minimalAreaEnvelopeRatio) {
-        _spatialStorageArea.push_back(
-            SpatialAreaValue(envelopes, area.id(), geom, area.objId(),
-                             area.geomArea(), area.fromWay() ? 1 : 0, innerGeom,
-                             outerGeom, boxIds, cutouts, convexHull));
-      } else {
-        // we have bad area envelope proportions -> treat as unnamed area
-        _oaUnnamedAreas << SpatialAreaValue(
-            envelopes, area.id(), geom, area.objId(), area.geomArea(),
-            area.fromWay() ? 1 : 0, innerGeom, outerGeom, boxIds, cutouts,
-            convexHull);
-        _numUnnamedAreas++;
-      }
+      _spatialStorageArea.push_back({envelopes, area.id(), geom, area.objId(),
+                                     area.geomArea(), area.fromWay() ? 1 : 0,
+                                     innerGeom, outerGeom, boxIds, cutouts,
+                                     convexHull});
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
       _oaUnnamedAreas << SpatialAreaValue(
@@ -204,20 +195,20 @@ void GeometryHandler<W>::way(const Way& way) {
 
   std::vector<osm2rdf::geometry::Box> boxes;
 
-  size_t CHUNKSIZE = 25;
+  const size_t CHUNKSIZE = 25;
 
   if (geom.size() >= 2 * CHUNKSIZE) {
-    size_t i = 0;
-    while (i < geom.size()) {
+    size_t curSize = 0;
+    while (curSize < geom.size()) {
       osm2rdf::geometry::Box box;
 
       osm2rdf::geometry::Way tmp(
-          geom.begin() + i,
-          geom.begin() + std::min(i + CHUNKSIZE, geom.size()));
+          geom.begin() + curSize,
+          geom.begin() + std::min(curSize + CHUNKSIZE, geom.size()));
 
       boost::geometry::envelope(tmp, box);
       boxes.push_back(box);
-      i += CHUNKSIZE;
+      curSize += CHUNKSIZE;
     }
   } else {
     boxes.push_back(way.envelope());
@@ -234,35 +225,32 @@ void GeometryHandler<W>::way(const Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 template <typename G>
-G GeometryHandler<W>::simplifyGeometry(const G& g) const {
+G GeometryHandler<W>::simplifyGeometry(const G& geom) const {
+  G simplifiedGeom;
+
   if (_config.simplifyGeometries == 0) {
     // simple case, just remove colinear points
+    boost::geometry::simplify(geom, simplifiedGeom, 0);
+    return simplifiedGeom;
+  }
 
-    G geom;
-    boost::geometry::simplify(g, geom, 0);
+  auto perimeterOrLength =
+      std::max(boost::geometry::perimeter(geom), boost::geometry::length(geom));
+  do {
+    boost::geometry::simplify(geom, simplifiedGeom,
+                              BASE_SIMPLIFICATION_FACTOR * perimeterOrLength *
+                                  _config.simplifyGeometries);
+    perimeterOrLength /= 2;
+  } while ((boost::geometry::is_empty(simplifiedGeom) ||
+            !boost::geometry::is_valid(simplifiedGeom)) &&
+           perimeterOrLength >= BASE_SIMPLIFICATION_FACTOR);
+  if (!boost::geometry::is_valid(simplifiedGeom)) {
     return geom;
   }
-
-  G geom;
-  auto perimeter_or_length =
-      std::max(boost::geometry::perimeter(g), boost::geometry::length(g));
-  do {
-    boost::geometry::simplify(
-        g, geom,
-        osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR *
-            perimeter_or_length * _config.simplifyGeometries);
-    perimeter_or_length /= 2;
-  } while (
-      (boost::geometry::is_empty(geom) || !boost::geometry::is_valid(geom)) &&
-      perimeter_or_length >=
-          osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR);
-  if (!boost::geometry::is_valid(geom)) {
-    return g;
+  if (boost::geometry::is_empty(simplifiedGeom)) {
+    return geom;
   }
-  if (boost::geometry::is_empty(geom)) {
-    return g;
-  }
-  return geom;
+  return simplifiedGeom;
 }
 
 // ____________________________________________________________________________
@@ -276,7 +264,7 @@ bool GeometryHandler<W>::ioDouglasPeucker(
   // this is basically a verbatim translation from Hannah's qlever map UI code
 
   assert(r >= l);
-  assert(inputPoints.size());
+  assert(!inputPoints.empty());
   assert(r < inputPoints.size());
 
   if (l == r) {
@@ -390,23 +378,23 @@ double GeometryHandler<W>::signedDistanceFromPointToLine(
 // ____________________________________________________________________________
 template <typename W>
 osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
-    const osm2rdf::geometry::Area& g, bool inner) const {
+    const osm2rdf::geometry::Area& area, bool inner) const {
   // default value: empty area, means no inner geom
   osm2rdf::geometry::Area ret;
 
   // skip trivial / erroneous geoms
-  if (!boost::geometry::is_valid(g)) {
+  if (!boost::geometry::is_valid(area)) {
     return ret;
   }
 
-  if (boost::geometry::is_empty(g)) {
+  if (boost::geometry::is_empty(area)) {
     return ret;
   }
 
   size_t numPointsOld = 0;
   size_t numPointsNew = 0;
 
-  for (const auto& poly : g) {
+  for (const auto& poly : area) {
     osm2rdf::geometry::Polygon simplified;
     numPointsOld += poly.outer().size();
 
@@ -508,16 +496,16 @@ template <typename W>
 void GeometryHandler<W>::prepareRTree() {
   // empty the rtree!
   std::cerr << std::endl;
-  std::cerr << osm2rdf::util::currentTimeFormatted() << " Sorting "
+  std::cerr << currentTimeFormatted() << " Sorting "
             << _spatialStorageArea.size() << " areas ... " << std::endl;
   std::sort(_spatialStorageArea.begin(), _spatialStorageArea.end(),
             [](const auto& a, const auto& b) {
               return std::get<4>(a) > std::get<4>(b);
             });
-  std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done "
+  std::cerr << currentTimeFormatted() << " ... done "
             << std::endl;
 
-  std::cerr << osm2rdf::util::currentTimeFormatted()
+  std::cerr << currentTimeFormatted()
             << " Packing area r-tree with " << _spatialStorageArea.size()
             << " entries ... " << std::endl;
 
@@ -531,7 +519,7 @@ void GeometryHandler<W>::prepareRTree() {
 
   _spatialIndex = SpatialIndex(values.begin(), values.end());
 
-  std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
+  std::cerr << currentTimeFormatted() << " ... done"
             << std::endl;
 }
 
@@ -548,7 +536,7 @@ void GeometryHandler<W>::prepareDAG() {
       _spatialStorageAreaIndex[std::get<1>(area)] = i;
     }
 
-    std::cerr << osm2rdf::util::currentTimeFormatted()
+    std::cerr << currentTimeFormatted()
               << " Generating non-reduced DAG from "
               << _spatialStorageArea.size() << " areas ... " << std::endl;
 
@@ -559,9 +547,11 @@ void GeometryHandler<W>::prepareDAG() {
 
     progressBar.update(entryCount);
 
-#pragma omp parallel for shared(tmpDirectedAreaGraph,           \
-    std::cout, std::cerr,\
-                               osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, progressBar) reduction(+:stats) default(none) schedule(dynamic)
+#pragma omp parallel for shared(                                               \
+        tmpDirectedAreaGraph, std::cout, std::cerr,                            \
+            osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION,             \
+            osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
+            progressBar) reduction(+ : stats) default(none) schedule(dynamic)
 
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
@@ -588,7 +578,9 @@ void GeometryHandler<W>::prepareDAG() {
           continue;
         }
 
-        if (areaId == entryId) continue;
+        if (areaId == entryId) {
+          continue;
+        }
 
         if (skip.find(areaId) != skip.end()) {
           stats.skippedByDAG();
@@ -596,7 +588,9 @@ void GeometryHandler<W>::prepareDAG() {
         }
 
         GeomRelationInfo geomRelInf;
-        if (!areaInAreaApprox(entry, area, &geomRelInf, &stats)) continue;
+        if (!areaInAreaApprox(entry, area, &geomRelInf, &stats)) {
+          continue;
+        }
 
         if (areaFromType == 1) {
           // we are countained in an area derived from a way.
@@ -614,7 +608,9 @@ void GeometryHandler<W>::prepareDAG() {
         }
 
         // skip equal geometries
-        if (fabs(1 - areaArea / geomRelInf.intersectArea) < 0.05) continue;
+        if (fabs(1 - areaArea / geomRelInf.intersectArea) < 0.05) {
+          continue;
+        }
 
 #pragma omp critical(addEdge)
         {
@@ -628,7 +624,7 @@ void GeometryHandler<W>::prepareDAG() {
     }
     progressBar.done();
 
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done.\n"
+    std::cerr << currentTimeFormatted() << " ... done.\n"
               << osm2rdf::util::formattedTimeSpacer << " checked "
               << stats.printTotalChecks() << " area pairs A, B\n"
               << osm2rdf::util::formattedTimeSpacer << " decided "
@@ -655,48 +651,48 @@ void GeometryHandler<W>::prepareDAG() {
               << std::endl;
   }
   if (_config.writeDAGDotFiles) {
-    std::cerr << osm2rdf::util::currentTimeFormatted()
+    std::cerr << currentTimeFormatted()
               << " Dumping non-reduced DAG as " << _config.output
               << ".non-reduced.dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".non-reduced.dot";
     tmpDirectedAreaGraph.dump(p);
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " done" << std::endl;
+    std::cerr << currentTimeFormatted() << " done" << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " Reducing DAG with "
+    std::cerr << currentTimeFormatted() << " Reducing DAG with "
               << tmpDirectedAreaGraph.getNumEdges() << " edges and "
               << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
               << std::endl;
 
     // Prepare non-reduced DAG for cleanup
     tmpDirectedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr << osm2rdf::util::currentTimeFormatted()
+    std::cerr << currentTimeFormatted()
               << " ... fast lookup prepared ... " << std::endl;
 
     _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
 
-    std::cerr << osm2rdf::util::currentTimeFormatted()
+    std::cerr << currentTimeFormatted()
               << " ... done, resulting in DAG with "
               << _directedAreaGraph.getNumEdges() << " edges and "
               << _directedAreaGraph.getNumVertices() << " vertices"
               << std::endl;
   }
   if (_config.writeDAGDotFiles) {
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " Dumping DAG as "
+    std::cerr << currentTimeFormatted() << " Dumping DAG as "
               << _config.output << ".dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".dot";
     _directedAreaGraph.dump(p);
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " done" << std::endl;
+    std::cerr << currentTimeFormatted() << " done" << std::endl;
   }
   {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted()
+    std::cerr << currentTimeFormatted()
               << " Preparing fast above lookup in DAG ..." << std::endl;
     _directedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
+    std::cerr <<currentTimeFormatted() << " ... done"
               << std::endl;
   }
 }
@@ -705,7 +701,7 @@ void GeometryHandler<W>::prepareDAG() {
 template <typename W>
 void GeometryHandler<W>::dumpNamedAreaRelations() {
   std::cerr << std::endl;
-  std::cerr << osm2rdf::util::currentTimeFormatted()
+  std::cerr << currentTimeFormatted()
             << " Dumping relations from DAG with "
             << _directedAreaGraph.getNumEdges() << " edges and "
             << _directedAreaGraph.getNumVertices() << " vertices ... "
@@ -717,14 +713,14 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
   progressBar.update(entryCount);
   std::vector<DirectedGraph<Area::id_t>::entry_t> vertices =
       _directedAreaGraph.getVertices();
-#pragma omp parallel for shared(                                            \
-    vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                  \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,                       \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,                    \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,                \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,                  \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, progressBar, \
-    entryCount) default(none) schedule(static)
+#pragma omp parallel for shared(                                       \
+        vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,         \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,       \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,     \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            progressBar, entryCount) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
     const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
@@ -754,7 +750,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
   progressBar.done();
 
-  std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done"
+  std::cerr << currentTimeFormatted() << " ... done"
             << std::endl;
 }
 
@@ -763,18 +759,18 @@ template <typename W>
 void GeometryHandler<W>::dumpUnnamedAreaRelations() {
   if (_config.noAreaGeometricRelations) {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Skipping contains relation for unnamed areas ... disabled"
               << std::endl;
   } else if (_numUnnamedAreas == 0) {
     std::cerr << std::endl;
     std::cerr
-        << osm2rdf::util::currentTimeFormatted() << " "
+        << currentTimeFormatted() << " "
         << "Skipping contains relation for unnamed areas ... no unnamed area"
         << std::endl;
   } else {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Contains relations for " << _numUnnamedAreas
               << " unnamed areas in " << _spatialIndex.size() << " areas ..."
               << std::endl;
@@ -786,13 +782,14 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
     GeomRelationStats intersectStats, containsStats;
     size_t entryCount = 0;
     progressBar.update(entryCount);
-#pragma omp parallel for shared( \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
-    progressBar, entryCount, ia) reduction(+:intersectStats, containsStats) \
-    default(none) schedule(dynamic)
+#pragma omp parallel for shared(                                       \
+        osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                   \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            progressBar, entryCount, ia)                               \
+    reduction(+ : intersectStats, containsStats) default(none)         \
+    schedule(dynamic)
     for (size_t i = 0; i < _numUnnamedAreas; i++) {
       SpatialAreaValue entry;
 #pragma omp critical(loadEntry)
@@ -863,7 +860,7 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
     }
     progressBar.done();
 
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done.\n"
+    std::cerr << currentTimeFormatted() << " ... done.\n"
               << osm2rdf::util::formattedTimeSpacer << " checked "
               << intersectStats.printTotalChecks()
               << " area/area pairs A, B for intersect\n"
@@ -898,7 +895,7 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << " because A did not intersect B\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByBox()
-              << " by non-intersecting bounding boxes \n"
+              << " by non-containing bounding boxes \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByBoxIdIntersect()
               << " by box id intersect\n"
@@ -933,17 +930,17 @@ GeometryHandler<W>::dumpNodeRelations() {
   NodesContainedInAreasData nodeData;
   if (_config.noNodeGeometricRelations) {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Skipping contains relation for nodes ... disabled"
               << std::endl;
   } else if (_numNodes == 0) {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Skipping contains relation for nodes ... no nodes"
               << std::endl;
   } else {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Contains relations for " << _numNodes << " nodes in "
               << _spatialIndex.size() << " areas ..." << std::endl;
 
@@ -958,14 +955,14 @@ GeometryHandler<W>::dumpNodeRelations() {
 
     progressBar.update(entryCount);
 
-#pragma omp parallel for shared( \
-    std::cout, \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,\
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, nodeData, \
-    progressBar, ia, entryCount) reduction(+:stats) default(none) schedule(dynamic)
+#pragma omp parallel for shared(                                       \
+        std::cout, osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,       \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,               \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            nodeData, progressBar, ia, entryCount)                     \
+    reduction(+ : stats) default(none) schedule(dynamic)
     for (size_t i = 0; i < _numNodes; i++) {
       SpatialNodeValue node;
 #pragma omp critical(loadEntry)
@@ -1038,7 +1035,7 @@ GeometryHandler<W>::dumpNodeRelations() {
     }
     progressBar.done();
 
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done.\n"
+    std::cerr << currentTimeFormatted() << " ... done.\n"
               << osm2rdf::util::formattedTimeSpacer << " checked "
               << stats.printTotalChecks()
               << " node/area pairs A, B for intersect\n"
@@ -1074,16 +1071,16 @@ void GeometryHandler<W>::dumpWayRelations(
     const NodesContainedInAreasData& nodeData) {
   if (_config.noWayGeometricRelations) {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Skipping contains relation for ways ... disabled"
               << std::endl;
   } else if (_numWays == 0) {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Skipping contains relation for ways ... no ways" << std::endl;
   } else {
     std::cerr << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " "
+    std::cerr << currentTimeFormatted() << " "
               << "Contains relations for " << _numWays << " ways in "
               << _spatialIndex.size() << " areas ..." << std::endl;
 
@@ -1096,14 +1093,14 @@ void GeometryHandler<W>::dumpWayRelations(
     GeomRelationStats intersectStats, containsStats;
 
     progressBar.update(entryCount);
-#pragma omp parallel for shared( \
-    std::cout, std::cerr,\
-    osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, nodeData, \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
-    progressBar, entryCount, ia) reduction(+:intersectStats, containsStats)  \
-    default(none) schedule(dynamic)
+#pragma omp parallel for shared(                                           \
+        std::cout, std::cerr, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
+            nodeData, osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,    \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,     \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,       \
+            progressBar, entryCount, ia)                                   \
+    reduction(+ : intersectStats, containsStats) default(none)             \
+    schedule(dynamic)
 
     for (size_t i = 0; i < _numWays; i++) {
       SpatialWayValue way;
@@ -1250,7 +1247,7 @@ void GeometryHandler<W>::dumpWayRelations(
     }
     progressBar.done();
 
-    std::cerr << osm2rdf::util::currentTimeFormatted() << " ... done.\n"
+    std::cerr << currentTimeFormatted() << " ... done.\n"
               << osm2rdf::util::formattedTimeSpacer << " checked "
               << intersectStats.printTotalChecks()
               << " way/area pairs A, B for intersect\n"
@@ -2047,8 +2044,8 @@ BoxIdList GeometryHandler<W>::getBoxIds(
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::getBoxIds(
-    const osm2rdf::geometry::Area& area,
-    const osm2rdf::geometry::Area& inner, const osm2rdf::geometry::Area& outer,
+    const osm2rdf::geometry::Area& area, const osm2rdf::geometry::Area& inner,
+    const osm2rdf::geometry::Area& outer,
     const std::vector<osm2rdf::geometry::Box>& envelopes, int xFrom, int xTo,
     int yFrom, int yTo, int xWidth, int yHeight, BoxIdList* ret,
     const osm2rdf::geometry::Area& curIsect,
@@ -2201,12 +2198,8 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
   geomRelInf->fullContained = 0;
 
   // shortcuts
-  if (abs(idsA[1].first) >
-      abs(idsB.back().first) + idsB.back().second)
-    return;
-  if (abs(idsA.back().first) + idsA.back().second <
-      idsB[1].first)
-    return;
+  if (abs(idsA[1].first) > abs(idsB.back().first) + idsB.back().second) return;
+  if (abs(idsA.back().first) + idsA.back().second < idsB[1].first) return;
 
   size_t i = 1;
   int32_t ii = 0;
@@ -2245,8 +2238,7 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
       // set noContained marker to true for later
       noContained = true;
 
-      if (abs(idsA[i].first) + idsA[i].second <
-          abs(idsB[j].first) + jj) {
+      if (abs(idsA[i].first) + idsA[i].second < abs(idsB[j].first) + jj) {
         // entire block smaller, jump it
         ii = 0;
         i++;
@@ -2260,17 +2252,14 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
       size_t gallop = 1;
       do {
         auto end = idsB.end();
-        if (j + gallop < idsB.size())
-          end = idsB.begin() + j + gallop;
+        if (j + gallop < idsB.size()) end = idsB.begin() + j + gallop;
 
-        if (end == idsB.end() ||
-            abs(end->first) >= abs(idsA[i].first) + ii) {
+        if (end == idsB.end() || abs(end->first) >= abs(idsA[i].first) + ii) {
           jj = 0;
           j = std::lower_bound(idsB.begin() + j + gallop / 2, end,
                                abs(idsA[i].first) + ii, BoxIdCmp()) -
               idsB.begin();
-          if (j > 0 &&
-              abs(idsB[j - 1].first) < abs(idsA[i].first) + ii &&
+          if (j > 0 && abs(idsB[j - 1].first) < abs(idsA[i].first) + ii &&
               abs(idsB[j - 1].first) + idsB[j - 1].second >=
                   abs(idsA[i].first) + ii) {
             j--;
@@ -2412,9 +2401,8 @@ uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
                                             Area::id_t areaId) const {
   const auto& relations = _areaBorderWaysIndex.find(wayId);
   if (relations != _areaBorderWaysIndex.end()) {
-    auto a =
-        std::lower_bound(relations->second.begin(), relations->second.end(),
-                         areaId, MemberRelCmp());
+    auto a = std::lower_bound(relations->second.begin(),
+                              relations->second.end(), areaId, MemberRelCmp());
 
     if (a != relations->second.end() && a->first == areaId) {
       // if inner, return 1

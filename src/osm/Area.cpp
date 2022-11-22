@@ -133,6 +133,22 @@ osm2rdf::geometry::area_result_t osm2rdf::osm::Area::envelopeArea()
 }
 
 // ____________________________________________________________________________
+bool osm2rdf::osm::Area::operator==(
+    const osm2rdf::osm::Area& other) const noexcept {
+  return _id == other._id && _objId == other._objId &&
+         _hasName == other._hasName && _geomArea == other._geomArea &&
+         _envelopeArea == other._envelopeArea && _envelope == other._envelope &&
+         _geom == other._geom;
+}
+
+// ____________________________________________________________________________
+bool osm2rdf::osm::Area::operator!=(
+    const osm2rdf::osm::Area& other) const noexcept {
+  return !(*this == other);
+}
+
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Area::hasName() const noexcept { return _hasName; }
 
 // ____________________________________________________________________________

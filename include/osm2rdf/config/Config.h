@@ -63,7 +63,6 @@ struct Config {
 
   // Addition filters / data
   bool addAreaEnvelopeRatio = false;
-  double minimalAreaEnvelopeRatio = -1.0;
 
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
@@ -77,7 +76,7 @@ struct Config {
 
   // Output modifiers
   uint16_t simplifyWKT = 250;
-  uint16_t wktDeviation = 5;
+  double wktDeviation = 5;
   uint16_t wktPrecision = 7;
 
   // Output, empty for stdout

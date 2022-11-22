@@ -58,6 +58,9 @@ struct Area {
   // finalize geometries
   void finalize() noexcept;
 
+  bool operator==(const osm2rdf::osm::Area& other) const noexcept;
+  bool operator!=(const osm2rdf::osm::Area& other) const noexcept;
+
  protected:
   // The osmium id
   id_t _id;

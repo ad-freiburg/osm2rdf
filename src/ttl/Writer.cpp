@@ -143,14 +143,13 @@ osm2rdf::ttl::Writer<T>::~Writer() {
 
 // ____________________________________________________________________________
 template <typename T>
-bool osm2rdf::ttl::Writer<T>::addPrefix(std::string_view p,
-                                        std::string_view v) {
-  std::string key{p};
-  auto prefix = _prefixes.find(key);
-  if (prefix != _prefixes.end()) {
+bool osm2rdf::ttl::Writer<T>::addPrefix(std::string prefix,
+                                        std::string_view value) {
+  auto prefixIt = _prefixes.find(prefix);
+  if (prefixIt != _prefixes.end()) {
     return false;
   }
-  _prefixes[key] = std::string(v);
+  _prefixes[prefix] = value;
   return true;
 }
 

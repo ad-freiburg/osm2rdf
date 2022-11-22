@@ -793,24 +793,6 @@ TEST(CONFIG_Config, fromArgsAdminRelationsOnlyLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsMinimalAreaEnvelopeRatioLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-
-  const auto arg =
-      "--" +
-      osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG;
-  const int argc = 4;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("0.75"),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_FLOAT_EQ(0.75, config.minimalAreaEnvelopeRatio);
-}
-
-// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSkipWikiLinksLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1250,23 +1232,6 @@ TEST(CONFIG_Config, getInfoAdminRelationsOnly) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_INFO));
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoMinimalAreaEnvelopeRatio) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-
-  const std::string res1 = config.getInfo("");
-  ASSERT_THAT(
-      res1, ::testing::Not(::testing::HasSubstr(
-                osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO)));
-
-  config.minimalAreaEnvelopeRatio = 0.5;
-  const std::string res2 = config.getInfo("");
-  ASSERT_THAT(
-      res2, ::testing::HasSubstr(
-                osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO));
 }
 
 // ____________________________________________________________________________
