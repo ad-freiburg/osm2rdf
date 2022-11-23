@@ -247,7 +247,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                                  "^^" + IRI__XSD_INTEGER));
     _writer->writeTriple(
         subj, IRI__OSMWAY_UNIQUE_NODE_COUNT,
-        _writer->generateLiteral(std::to_string(numUniquePoints),
+        _writer->generateLiteralUnsafe(std::to_string(numUniquePoints),
                                  "^^" + IRI__XSD_INTEGER));
   }
 
@@ -320,7 +320,7 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
 
     // if integer, dump as xsd:integer
     if (firstNonMatched != value.c_str() && *firstNonMatched == 0) {
-      objectValue = _writer->generateLiteral(
+      objectValue = _writer->generateLiteralUnsafe(
           std::to_string(lvl),
           "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
     }
@@ -411,7 +411,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
   }
   _writer->writeTriple(subj,
                        _writer->generateIRIUnsafe(NAMESPACE__OSM_META, "facts"),
-                       _writer->generateLiteral(std::to_string(tagTripleCount),
+                       _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
                                                 "^^" + IRI__XSD_INTEGER));
 }
 

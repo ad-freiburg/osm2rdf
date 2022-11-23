@@ -54,8 +54,8 @@ using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
-using osm2rdf::util::DirectedGraph;
 using osm2rdf::util::currentTimeFormatted;
+using osm2rdf::util::DirectedGraph;
 
 // ____________________________________________________________________________
 template <typename W>
@@ -502,12 +502,10 @@ void GeometryHandler<W>::prepareRTree() {
             [](const auto& a, const auto& b) {
               return std::get<4>(a) > std::get<4>(b);
             });
-  std::cerr << currentTimeFormatted() << " ... done "
-            << std::endl;
+  std::cerr << currentTimeFormatted() << " ... done " << std::endl;
 
-  std::cerr << currentTimeFormatted()
-            << " Packing area r-tree with " << _spatialStorageArea.size()
-            << " entries ... " << std::endl;
+  std::cerr << currentTimeFormatted() << " Packing area r-tree with "
+            << _spatialStorageArea.size() << " entries ... " << std::endl;
 
   std::vector<SpatialAreaRefValue> values;
 
@@ -519,8 +517,7 @@ void GeometryHandler<W>::prepareRTree() {
 
   _spatialIndex = SpatialIndex(values.begin(), values.end());
 
-  std::cerr << currentTimeFormatted() << " ... done"
-            << std::endl;
+  std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
 
 // ____________________________________________________________________________
@@ -536,8 +533,7 @@ void GeometryHandler<W>::prepareDAG() {
       _spatialStorageAreaIndex[std::get<1>(area)] = i;
     }
 
-    std::cerr << currentTimeFormatted()
-              << " Generating non-reduced DAG from "
+    std::cerr << currentTimeFormatted() << " Generating non-reduced DAG from "
               << _spatialStorageArea.size() << " areas ... " << std::endl;
 
     osm2rdf::util::ProgressBar progressBar{_spatialStorageArea.size(), true};
@@ -651,9 +647,8 @@ void GeometryHandler<W>::prepareDAG() {
               << std::endl;
   }
   if (_config.writeDAGDotFiles) {
-    std::cerr << currentTimeFormatted()
-              << " Dumping non-reduced DAG as " << _config.output
-              << ".non-reduced.dot ..." << std::endl;
+    std::cerr << currentTimeFormatted() << " Dumping non-reduced DAG as "
+              << _config.output << ".non-reduced.dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".non-reduced.dot";
     tmpDirectedAreaGraph.dump(p);
@@ -668,20 +663,19 @@ void GeometryHandler<W>::prepareDAG() {
 
     // Prepare non-reduced DAG for cleanup
     tmpDirectedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr << currentTimeFormatted()
-              << " ... fast lookup prepared ... " << std::endl;
+    std::cerr << currentTimeFormatted() << " ... fast lookup prepared ... "
+              << std::endl;
 
     _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
 
-    std::cerr << currentTimeFormatted()
-              << " ... done, resulting in DAG with "
+    std::cerr << currentTimeFormatted() << " ... done, resulting in DAG with "
               << _directedAreaGraph.getNumEdges() << " edges and "
               << _directedAreaGraph.getNumVertices() << " vertices"
               << std::endl;
   }
   if (_config.writeDAGDotFiles) {
-    std::cerr << currentTimeFormatted() << " Dumping DAG as "
-              << _config.output << ".dot ..." << std::endl;
+    std::cerr << currentTimeFormatted() << " Dumping DAG as " << _config.output
+              << ".dot ..." << std::endl;
     std::filesystem::path p{_config.output};
     p += ".dot";
     _directedAreaGraph.dump(p);
@@ -692,8 +686,7 @@ void GeometryHandler<W>::prepareDAG() {
     std::cerr << currentTimeFormatted()
               << " Preparing fast above lookup in DAG ..." << std::endl;
     _directedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr <<currentTimeFormatted() << " ... done"
-              << std::endl;
+    std::cerr << currentTimeFormatted() << " ... done" << std::endl;
   }
 }
 
@@ -701,8 +694,7 @@ void GeometryHandler<W>::prepareDAG() {
 template <typename W>
 void GeometryHandler<W>::dumpNamedAreaRelations() {
   std::cerr << std::endl;
-  std::cerr << currentTimeFormatted()
-            << " Dumping relations from DAG with "
+  std::cerr << currentTimeFormatted() << " Dumping relations from DAG with "
             << _directedAreaGraph.getNumEdges() << " edges and "
             << _directedAreaGraph.getNumVertices() << " vertices ... "
             << std::endl;
@@ -750,8 +742,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
   progressBar.done();
 
-  std::cerr << currentTimeFormatted() << " ... done"
-            << std::endl;
+  std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
 
 // ____________________________________________________________________________
