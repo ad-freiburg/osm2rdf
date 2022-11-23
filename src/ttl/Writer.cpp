@@ -280,7 +280,16 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v,
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
                                                      std::string_view s) {
-  return std::string(v) + std::string(s);
+
+  // only put literal in quotes
+  std::string ret;
+  ret.reserve(v.size() + 2 + s.size());
+	ret += '"';
+  ret += v;
+  ret += '"';
+  ret += s;
+
+  return ret;
 }
 
 // ____________________________________________________________________________

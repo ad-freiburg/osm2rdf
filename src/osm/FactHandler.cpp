@@ -163,9 +163,10 @@ void osm2rdf::osm::FactHandler<W>::relation(
       _writer->writeTriple(blankNode,
                            _writer->generateIRIUnsafe(NAMESPACE__OSM, "role"),
                            _writer->generateLiteral(role, ""));
-      _writer->writeTriple(blankNode, IRI__OSM_META__POS,
-                           _writer->generateLiteralUnsafe(std::to_string(inRelPos++),
-                                                    "^^" + IRI__XSD_INTEGER));
+      _writer->writeTriple(
+          blankNode, IRI__OSM_META__POS,
+          _writer->generateLiteralUnsafe(std::to_string(inRelPos++),
+                                         "^^" + IRI__XSD_INTEGER));
     }
   }
 }
@@ -191,9 +192,10 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
           blankNode, osm2rdf::ttl::constants::IRI__OSMWAY_NODE,
           _writer->generateIRI(NAMESPACE__OSM_NODE, node.id()));
 
-      _writer->writeTriple(blankNode, IRI__OSM_META__POS,
-                           _writer->generateLiteralUnsafe(std::to_string(wayOrder++),
-                                                    "^^" + IRI__XSD_INTEGER));
+      _writer->writeTriple(
+          blankNode, IRI__OSM_META__POS,
+          _writer->generateLiteralUnsafe(std::to_string(wayOrder++),
+                                         "^^" + IRI__XSD_INTEGER));
 
       if (_config.addWayNodeGeometry) {
         const std::string& subj =
@@ -221,9 +223,10 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
         const double distance = osm2rdf::osm::constants::EARTH_RADIUS_KM *
                                 osm2rdf::osm::constants::METERS_IN_KM * 2 *
                                 asin(sqrt(haversine));
-        _writer->writeTriple(lastBlankNode, IRI__OSMWAY_NEXT_NODE_DISTANCE,
-                             _writer->generateLiteralUnsafe(std::to_string(distance),
-                                                      "^^" + IRI__XSD_DECIMAL));
+        _writer->writeTriple(
+            lastBlankNode, IRI__OSMWAY_NEXT_NODE_DISTANCE,
+            _writer->generateLiteralUnsafe(std::to_string(distance),
+                                           "^^" + IRI__XSD_DECIMAL));
       }
       lastBlankNode = blankNode;
       lastNode = node;
@@ -244,11 +247,11 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     _writer->writeTriple(
         subj, IRI__OSMWAY_NODE_COUNT,
         _writer->generateLiteralUnsafe(std::to_string(way.nodes().size()),
-                                 "^^" + IRI__XSD_INTEGER));
+                                       "^^" + IRI__XSD_INTEGER));
     _writer->writeTriple(
         subj, IRI__OSMWAY_UNIQUE_NODE_COUNT,
         _writer->generateLiteralUnsafe(std::to_string(numUniquePoints),
-                                 "^^" + IRI__XSD_INTEGER));
+                                       "^^" + IRI__XSD_INTEGER));
   }
 
   if (_config.addSortMetadata) {
@@ -312,18 +315,25 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
   const std::string& key = tag.first;
   const std::string& value = tag.second;
   if (key == "admin_level") {
-    auto objectValue = _writer->generateLiteral(value, "");
-    // Mark integer values
+    std::string objectValue;
+    std::string rTrimmed;
+
+    // right trim, left trim is done by strtoll
+    auto end = std::find_if(value.rbegin(), value.rend(),
+                            [](int c) { return std::isspace(c) == 0; });
+    rTrimmed = value.substr(0, end.base() - value.begin());
 
     char* firstNonMatched;
-    int64_t lvl = strtoll(value.c_str(), &firstNonMatched, BASE10);
+    int64_t lvl = strtoll(rTrimmed.c_str(), &firstNonMatched, BASE10);
 
     // if integer, dump as xsd:integer
-    if (firstNonMatched != value.c_str() && *firstNonMatched == 0) {
-      objectValue = _writer->generateLiteralUnsafe(
-          std::to_string(lvl),
-          "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+    if (firstNonMatched != rTrimmed.c_str() && (*firstNonMatched) == 0) {
+      objectValue = _writer->generateLiteralUnsafe(std::to_string(lvl),
+                                                   "^^" + IRI__XSD_INTEGER);
+    } else {
+      objectValue = _writer->generateLiteral(value, "");
     }
+
     _writer->writeTriple(subj, _writer->generateIRI(NAMESPACE__OSM_TAG, key),
                          objectValue);
   } else {
@@ -409,10 +419,10 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
       }
     }
   }
-  _writer->writeTriple(subj,
-                       _writer->generateIRIUnsafe(NAMESPACE__OSM_META, "facts"),
-                       _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
-                                                "^^" + IRI__XSD_INTEGER));
+  _writer->writeTriple(
+      subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_META, "facts"),
+      _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
+                                     "^^" + IRI__XSD_INTEGER));
 }
 
 // ____________________________________________________________________________

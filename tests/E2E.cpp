@@ -926,8 +926,7 @@ TEST(E2E, tf) {
               ::testing::HasSubstr(
                   "Skipping contains relation for nodes ... no nodes\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("0 intersection checks performed, 0 skipped "
-                                   "by DAG, 0 skipped by NodeInfo\n"));
+              ::testing::HasSubstr("decided 0 (0.000%) by DAG\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));

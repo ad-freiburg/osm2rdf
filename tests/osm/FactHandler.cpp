@@ -228,7 +228,8 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
 
   dh.area(a);
   output.flush();
@@ -278,7 +279,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioRectangle) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
 
   dh.area(a);
   output.flush();
@@ -329,7 +331,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+	a.finalize();
 
   dh.area(a);
   output.flush();
