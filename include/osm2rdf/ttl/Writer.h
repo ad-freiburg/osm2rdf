@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -109,28 +110,40 @@ class Writer {
 
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.
-  bool addPrefix(std::string prefix, std::string_view value);
+  bool addPrefix(const std::string& prefix, std::string_view value);
   // resolvePrefix resolves the given prefix. If the prefix is unknown it is
   // returned as provided.
   std::string resolvePrefix(std::string_view p);
 
   // generateBlankNode creates a new unique identifier for a blank node.
   std::string generateBlankNode();
+
+  // generateIRI creates a IRI from given prefix p and string value v.
+  // Assumes that both p and v are "safe", that is, they can be used
+  // directly in the TTL
+  std::string generateIRIUnsafe(std::string_view p, std::string_view v);
+
   // generateIRI creates a IRI from given prefix p and ID value v.
   std::string generateIRI(std::string_view p, uint64_t v);
   // generateIRI creates a IRI from given prefix p and string value v.
   std::string generateIRI(std::string_view p, std::string_view v);
+
   // generateLangTag creates a LangTag from the given string.
   std::string generateLangTag(std::string_view s);
   // generateLangTag creates a Literal from the given string value v.
   // If suffix s is not empty, it will be appended as is.
   std::string generateLiteral(std::string_view v, std::string_view s);
 
+  // Assumes that both p and v are "safe", that is, they can be used
+  // directly in the TTL
+  std::string generateLiteralUnsafe(std::string_view v, std::string_view s);
+
   // -------------------------------------------------------------------------
   // Following functions are used by the ones above. These functions implement
   // the grammars.
   // -------------------------------------------------------------------------
   std::string formatIRI(std::string_view p, std::string_view v);
+  std::string formatIRIUnsafe(std::string_view p, std::string_view v);
 
   std::string STRING_LITERAL_QUOTE(std::string_view s);
   FRIEND_TEST(WriterGrammarNT, RULE_9_STRING_LITERAL_QUOTE);
@@ -143,6 +156,7 @@ class Writer {
   FRIEND_TEST(WriterGrammarNT, RULE_8_IRIREF);
   FRIEND_TEST(WriterGrammarTTL, RULE_18_IRIREF);
 
+  std::string PrefixedNameUnsafe(std::string_view p, std::string_view v);
   std::string PrefixedName(std::string_view p, std::string_view v);
   FRIEND_TEST(WriterGrammarTTL, RULE_136s_PREFIXEDNAME);
 

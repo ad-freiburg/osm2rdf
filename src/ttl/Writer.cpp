@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -143,7 +144,7 @@ osm2rdf::ttl::Writer<T>::~Writer() {
 
 // ____________________________________________________________________________
 template <typename T>
-bool osm2rdf::ttl::Writer<T>::addPrefix(std::string prefix,
+bool osm2rdf::ttl::Writer<T>::addPrefix(const std::string& prefix,
                                         std::string_view value) {
   auto prefixIt = _prefixes.find(prefix);
   if (prefixIt != _prefixes.end()) {
@@ -216,13 +217,21 @@ std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateIRI(std::string_view p,
                                                  uint64_t v) {
-  return generateIRI(p, std::to_string(v));
+  return generateIRIUnsafe(p, std::to_string(v));
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateIRIUnsafe(std::string_view p,
+                                                 std::string_view v) {
+  return formatIRIUnsafe(p, v);
 }
 
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateIRI(std::string_view p,
                                                  std::string_view v) {
+  // trims whitespace
   auto begin = std::find_if(v.begin(), v.end(),
                             [](int c) { return std::isspace(c) == 0; });
   auto end = std::find_if(v.rbegin(), v.rend(),
@@ -269,10 +278,24 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v,
 
 // ____________________________________________________________________________
 template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
+                                                     std::string_view s) {
+  return std::string(v) + std::string(s);
+}
+
+// ____________________________________________________________________________
+template <typename T>
 void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
-  _out->write(s + " " + p + " " + o + " .\n");
+  _out->write(s);
+  _out->write(' ');
+  _out->write(p);
+  _out->write(' ');
+  _out->write(o);
+  _out->write(' ');
+  _out->write('.');
+  _out->writeNewLine();
 #if defined(_OPENMP)
   _lineCount[omp_get_thread_num()]++;
 #else
@@ -292,6 +315,50 @@ std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::formatIRI(
   }
   return IRIREF(p, v);
 }
+
+// ____________________________________________________________________________
+template <>
+std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::formatIRIUnsafe(
+    std::string_view p, std::string_view v) {
+  return formatIRI(p, v);
+}
+
+// ____________________________________________________________________________
+template <>
+std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::formatIRIUnsafe(
+    std::string_view p, std::string_view v) {
+  // TTL: [135s] iri
+  //      https://www.w3.org/TR/turtle/#grammar-production-iri
+  //      [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  //      [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  auto prefix = _prefixes.find(std::string{p});
+  // If known prefix -> PrefixedName
+  if (prefix != _prefixes.end()) {
+    return PrefixedNameUnsafe(p, v);
+  }
+  return IRIREF(p, v);
+}
+
+// ____________________________________________________________________________
+template <>
+std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::formatIRIUnsafe(
+    std::string_view p, std::string_view v) {
+  // TTL: [135s] iri
+  //      https://www.w3.org/TR/turtle/#grammar-production-iri
+  //      [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  //      [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  auto prefix = _prefixes.find(std::string{p});
+  // If known prefix -> PrefixedName
+  if (prefix != _prefixes.end()) {
+    return PrefixedNameUnsafe(p, v);
+  }
+  return IRIREF(p, v);
+}
+
 // ____________________________________________________________________________
 template <>
 std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::formatIRI(
@@ -346,6 +413,15 @@ std::string osm2rdf::ttl::Writer<T>::PrefixedName(std::string_view p,
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
   return encodePN_PREFIX(p) + ":" + encodePN_LOCAL(v);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::PrefixedNameUnsafe(std::string_view p,
+                                                  std::string_view v) {
+  // TTL: [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  return std::string(p) + ":" + std::string(v);
 }
 
 // ____________________________________________________________________________

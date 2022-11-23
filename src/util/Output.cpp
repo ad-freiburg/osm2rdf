@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/util/Output.h"
-
 #include <cmath>
 #include <cstdio>
 #include <iostream>
@@ -26,6 +24,7 @@
 #include "boost/iostreams/filtering_stream.hpp"
 #include "omp.h"
 #include "osm2rdf/config/Config.h"
+#include "osm2rdf/util/Output.h"
 
 // ____________________________________________________________________________
 osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
@@ -46,7 +45,8 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
       _prefix(prefix),
       _partCount(partCount),
       _numOuts(_partCount + 2),
-      _partCountDigits(std::floor(std::log10(_numOuts)) + 1) {}
+      _partCountDigits(std::floor(std::log10(_numOuts)) + 1),
+      _toStdOut(_config.output.empty()) {}
 
 // ____________________________________________________________________________
 osm2rdf::util::Output::~Output() { close(); }
@@ -57,9 +57,10 @@ bool osm2rdf::util::Output::open() {
   assert(_numOuts == _partCount + 2);
   _outs = new boost::iostreams::filtering_ostream[_numOuts];
   _outFiles = new std::ofstream[_numOuts];
+  _outBufs = new std::stringstream[_numOuts];
 
   // Prepare final output file
-  if (!_config.output.empty() && _config.mergeOutput != OutputMergeMode::NONE) {
+  if (!_toStdOut && _config.mergeOutput != OutputMergeMode::NONE) {
     _outFile.open(_prefix, std::ofstream::out | std::ofstream::trunc);
     if (!_outFile.is_open()) {
       std::cerr << "Can't open final output file: " << _prefix << std::endl;
@@ -72,7 +73,7 @@ bool osm2rdf::util::Output::open() {
     if (_config.outputCompress) {
       _outs[i].push(boost::iostreams::bzip2_compressor{});
     }
-    if (_config.output.empty()) {
+    if (_toStdOut) {
       _outs[i].push(std::cout);
     } else {
       _outFiles[i].open(partFilename(i),
@@ -89,7 +90,7 @@ bool osm2rdf::util::Output::open() {
   if (_config.outputCompress) {
     _outs[_partCount].push(boost::iostreams::bzip2_compressor{});
   }
-  if (_config.output.empty()) {
+  if (_toStdOut) {
     _outs[_partCount].push(std::cout);
   } else {
     _outFiles[_partCount].open(partFilename(-1));
@@ -104,7 +105,7 @@ bool osm2rdf::util::Output::open() {
   if (_config.outputCompress) {
     _outs[_partCount + 1].push(boost::iostreams::bzip2_compressor{});
   }
-  if (_config.output.empty()) {
+  if (_toStdOut) {
     _outs[_partCount + 1].push(std::cout);
   } else {
     _outFiles[_partCount + 1].open(partFilename(-2));
@@ -141,6 +142,7 @@ void osm2rdf::util::Output::close(std::string_view prefix,
   }
   delete[] _outFiles;
   delete[] _outs;
+  delete[] _outBufs;
   _open = false;
 
   // Handle merging of files
@@ -188,7 +190,8 @@ void osm2rdf::util::Output::concatenate() {
 
   // Prefix
   std::string filename = partFilename(-1);
-  std::ifstream inFilePrefix{filename, std::ifstream::in | std::ifstream::binary};
+  std::ifstream inFilePrefix{filename,
+                             std::ifstream::in | std::ifstream::binary};
   if (!inFilePrefix.is_open() || !inFilePrefix.good()) {
     std::cerr << "Error opening file: " << filename << std::endl;
   }
@@ -214,7 +217,8 @@ void osm2rdf::util::Output::concatenate() {
 
   // Suffix
   filename = partFilename(-2);
-  std::ifstream inFileSuffix{filename, std::ifstream::in | std::ifstream::binary};
+  std::ifstream inFileSuffix{filename,
+                             std::ifstream::in | std::ifstream::binary};
   if (!inFileSuffix.is_open() || !inFileSuffix.good()) {
     std::cerr << "Error opening file: " << filename << std::endl;
   }
@@ -285,18 +289,60 @@ void osm2rdf::util::Output::merge() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::write(std::string_view line) {
+void osm2rdf::util::Output::writeNewLine() {
 #if defined(_OPENMP)
-  write(line, omp_get_thread_num());
+  writeNewLine(omp_get_thread_num());
 #else
-  write(line, 0);
+  writeNewLine(0);
 #endif
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::write(std::string_view line, size_t part) {
+void osm2rdf::util::Output::writeNewLine(size_t part) {
+  if (_toStdOut) {
+    _outBufs[part].put('\n');
+    _outs[part] << _outBufs[part].rdbuf();
+  } else {
+    _outs[part].put('\n');
+  }
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::Output::write(std::string_view strv) {
+#if defined(_OPENMP)
+  write(strv, omp_get_thread_num());
+#else
+  write(strv, 0);
+#endif
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::Output::write(std::string_view strv, size_t part) {
   assert(part < _numOuts);
-  _outs[part] << line;
+  if (_toStdOut) {
+    _outBufs[part].write(strv.data(), strv.size());
+  } else {
+    _outs[part].write(strv.data(), strv.size());
+  }
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::Output::write(const char c) {
+#if defined(_OPENMP)
+  write(c, omp_get_thread_num());
+#else
+  write(c, 0);
+#endif
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::Output::write(const char c, size_t part) {
+  assert(part < _numOuts);
+  if (_toStdOut) {
+    _outBufs[part].put(c);
+  } else {
+    _outs[part].put(c);
+  }
 }
 
 // ____________________________________________________________________________

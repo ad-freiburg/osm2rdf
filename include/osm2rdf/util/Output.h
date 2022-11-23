@@ -37,11 +37,22 @@ class Output {
   // Close all output streams.
   void close();
   void close(std::string_view prefix, std::string_view suffix);
+
   // Write the given line into the correct part for the current (openmp) thread.
-  void write(std::string_view line);
-  // Write the given line into the specified part.
-  void write(std::string_view line, size_t part);
-  // Flush all part.
+  void write(std::string_view strv);
+  // Write the given string view into the specified part.
+  void write(std::string_view strv, size_t part); // Flush all part.
+
+  // Write the given char into the correct part for the current (openmp) thread.
+  void write(const char c);
+  // Write the given char view into the specified part.
+  void write(const char c, size_t part); // Flush all part.
+
+  // Write a newline, this will also flush outputs to std::out
+  void writeNewLine();
+  // Write a newline into the specified part.
+  void writeNewLine(size_t part);
+
   void flush();
   // Flush the given part.
   void flush(size_t part);
@@ -70,6 +81,11 @@ class Output {
   std::ofstream* _outFiles;
   // Final output file
   std::ofstream _outFile;
+
+  std::stringstream* _outBufs;
+
+  // true if output goes to stdout
+  bool _toStdOut;
 };
 
 }  // namespace osm2rdf::util
