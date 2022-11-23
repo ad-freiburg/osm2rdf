@@ -651,10 +651,6 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
   output.flush();
   output.close();
 
-  // Reset std::cerr and std::cout
-  std::cerr.rdbuf(cerrBufferOrig);
-  std::cout.rdbuf(coutBufferOrig);
-
   ASSERT_EQ(0, gh._directedAreaGraph.getNumVertices());
   ASSERT_EQ(0, gh._directedAreaGraph.getNumEdges());
   gh.prepareDAG();
@@ -667,6 +663,10 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
             gh._directedAreaGraph.getEdges(26));
   ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
             gh._directedAreaGraph.getEdges(24));
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
 }
 
 // ____________________________________________________________________________
@@ -2677,6 +2677,7 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Way src{buffer.get<osmium::Way>(0)};
+  ASSERT_EQ(3, src.geom().size());
 
   ASSERT_EQ(0, gh._numWays);
   gh.way(src);
@@ -2694,7 +2695,11 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   // Compare stored area with original
   ASSERT_TRUE(src.envelope() == std::get<0>(dst));
   ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() != std::get<2>(dst));
+
+  // what did that line test? surely we expect the two geometries to be
+  // equivalent?
+  // ASSERT_TRUE(src.geom() != std::get<2>(dst));
+
   // Access rings
   const auto srcWay = src.geom();
   const auto dstWay = std::get<2>(dst);

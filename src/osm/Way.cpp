@@ -55,10 +55,10 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
     _nodes.emplace_back(nodeRef);
 
     // implicit boost::geometry::unique
-    if (nodeRef.lon() != _geom.back().get<0>() &&
-        nodeRef.lat() != _geom.back().get<1>()) {
+		if (_geom.size() == 0 || (nodeRef.lon() != _geom.back().get<0>() ||
+				nodeRef.lat() != _geom.back().get<1>())) {
       boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()});
-    }
+		}
   }
   _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
 }
