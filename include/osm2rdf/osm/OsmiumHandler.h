@@ -59,6 +59,7 @@ class OsmiumHandler : public osmium::handler::Handler {
   osm2rdf::config::Config _config;
   osm2rdf::osm::FactHandler<W> _dumpHandler;
   osm2rdf::osm::GeometryHandler<W> _geometryHandler;
+  osm2rdf::osm::RelationHandler _relationHandler;
   size_t _areasSeen = 0;
   size_t _areasDumped = 0;
   size_t _areaGeometriesHandled = 0;
@@ -71,6 +72,7 @@ class OsmiumHandler : public osmium::handler::Handler {
   size_t _waysSeen = 0;
   size_t _waysDumped = 0;
   size_t _wayGeometriesHandled = 0;
+  bool _secondPass = false;
 };
 }  // namespace osm2rdf::osm
 

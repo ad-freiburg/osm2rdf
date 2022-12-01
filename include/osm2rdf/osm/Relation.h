@@ -21,8 +21,12 @@
 
 #include <vector>
 
+#include "RelationHandler.h"
 #include "boost/serialization/nvp.hpp"
 #include "boost/serialization/vector.hpp"
+#include "osm2rdf/geometry/Relation.h"
+#include "osm2rdf/osm/Box.h"
+#include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/relation.hpp"
@@ -38,6 +42,11 @@ class Relation {
   [[nodiscard]] std::vector<osm2rdf::osm::RelationMember> members()
       const noexcept;
   [[nodiscard]] osm2rdf::osm::TagList tags() const noexcept;
+  [[nodiscard]] bool hasGeometry() const noexcept;
+  [[nodiscard]] bool hasCompleteGeometry() const noexcept;
+  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
+  [[nodiscard]] osm2rdf::geometry::Relation geom() const noexcept;
+  void buildGeometry(osm2rdf::osm::RelationHandler& relationHandler);
 
   bool operator==(const osm2rdf::osm::Relation& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Relation& other) const noexcept;
@@ -46,6 +55,9 @@ class Relation {
   id_t _id;
   std::vector<osm2rdf::osm::RelationMember> _members;
   osm2rdf::osm::TagList _tags;
+  osm2rdf::geometry::Box _envelope;
+  osm2rdf::geometry::Relation _geom;
+  bool _hasCompleteGeometry;
 
   friend class boost::serialization::access;
   template <class Archive>
@@ -53,6 +65,10 @@ class Relation {
     ar& boost::serialization::make_nvp("_id", _id);
     ar& boost::serialization::make_nvp("_members", _members);
     ar& boost::serialization::make_nvp("_tags", _tags);
+    ar& boost::serialization::make_nvp("_envelope", _envelope);
+    ar& boost::serialization::make_nvp("_geom", _geom);
+    ar& boost::serialization::make_nvp("_hasCompleteGeometry",
+                                       _hasCompleteGeometry);
   }
 };
 

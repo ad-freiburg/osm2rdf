@@ -153,6 +153,21 @@ void osm2rdf::osm::FactHandler<W>::relation(
               "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER));
     }
   }
+
+  if (relation.hasGeometry()) {
+    writeBoostGeometry(s, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+                       relation.geom());
+    if (_config.addRelationEnvelope) {
+      writeBox(s, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
+               relation.envelope());
+    }
+    _writer->writeTriple(
+        s,
+        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META,
+                             "completeGeometry"),
+        relation.hasCompleteGeometry() ? osm2rdf::ttl::constants::LITERAL__YES
+                                       : osm2rdf::ttl::constants::LITERAL__NO);
+  }
 }
 
 // ____________________________________________________________________________
@@ -271,6 +286,7 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
                                                       const std::string& p,
                                                       const G& g) {
   std::ostringstream tmp;
+  tmp << std::fixed << std::setprecision(_config.wktPrecision);
   if (_config.simplifyWKT > 0 &&
       boost::geometry::num_points(g) > _config.simplifyWKT) {
     G geom;
@@ -286,11 +302,9 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& s,
         (boost::geometry::is_empty(geom) || !boost::geometry::is_valid(geom)) &&
         perimeter_or_length >=
             osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR);
-    tmp << std::fixed << std::setprecision(_config.wktPrecision)
-        << boost::geometry::wkt(geom);
+    tmp << boost::geometry::wkt(geom);
   } else {
-    tmp << std::fixed << std::setprecision(_config.wktPrecision)
-        << boost::geometry::wkt(g);
+    tmp << boost::geometry::wkt(g);
   }
   _writer->writeTriple(
       s, p,

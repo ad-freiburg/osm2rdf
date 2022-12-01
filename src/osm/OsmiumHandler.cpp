@@ -21,6 +21,7 @@
 #include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/osm/LocationHandler.h"
+#include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/util/Time.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
@@ -34,7 +35,8 @@ osm2rdf::osm::OsmiumHandler<W>::OsmiumHandler(
     const osm2rdf::config::Config& config, osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
       _dumpHandler(osm2rdf::osm::FactHandler<W>(config, writer)),
-      _geometryHandler(osm2rdf::osm::GeometryHandler<W>(config, writer)) {}
+      _geometryHandler(osm2rdf::osm::GeometryHandler<W>(config, writer)),
+      _relationHandler(osm2rdf::osm::RelationHandler(config)) {}
 
 // ____________________________________________________________________________
 template <typename W>
@@ -53,8 +55,10 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       osmium::io::Reader reader{input_file};
       osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
       std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "OSM Pass 1 ... (Relations for areas)" << std::endl;
-      osmium::relations::read_relations(progress, input_file, mp_manager);
+                << "OSM Pass 1 ... (Relations for areas, Relation members)"
+                << std::endl;
+      osmium::relations::read_relations(progress, input_file, mp_manager,
+                                        _relationHandler);
       std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
                 << std::endl;
     }
@@ -68,6 +72,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
                                                osmium::osm_entity_bits::object};
       osm2rdf::osm::LocationHandler* locationHandler =
           osm2rdf::osm::LocationHandler::create(_config);
+      _relationHandler.setLocationHandler(locationHandler);
 
 #pragma omp parallel
       {
@@ -79,7 +84,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
               break;
             }
             osmium::apply(
-                buf, *locationHandler,
+                buf, *locationHandler, _relationHandler,
                 mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
                   osmium::apply(buffer, *this);
                 }),
@@ -176,7 +181,8 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
   if (_config.adminRelationsOnly && relation.tags()["admin_level"] == nullptr) {
     return;
   }
-  const auto& r = osm2rdf::osm::Relation(relation);
+  auto r = osm2rdf::osm::Relation(relation);
+  r.buildGeometry(_relationHandler);
   if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
 #pragma omp task
