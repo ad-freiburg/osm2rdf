@@ -355,6 +355,8 @@ class GeometryHandler {
   void boxIdIsect(const osm2rdf::osm::BoxIdList& idsA,
                   const osm2rdf::osm::BoxIdList& idsB,
                   GeomRelationInfo* geomRelInf) const;
+  FRIEND_TEST(OSM_GeometryHandler, boxIdintersect);
+
   osm2rdf::osm::BoxIdList pack(const osm2rdf::osm::BoxIdList& ids) const;
 
   uint8_t borderContained(osm2rdf::osm::Way::id_t wayId,

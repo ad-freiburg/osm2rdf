@@ -2712,4 +2712,79 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   std::filesystem::remove_all(config.output);
 }
 
+// ____________________________________________________________________________
+TEST(OSM_GeometryHandler, boxIdintersect) {
+  osm2rdf::config::Config config;
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
+
+  {
+    // first element is size marker!
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 0}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 0}, {5, 0}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(1, geomRelInf.fullContained);
+    ASSERT_EQ(0, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 0}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 0}, {-5, 0}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(0, geomRelInf.fullContained);
+    ASSERT_EQ(1, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 0}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {-3, 2}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(0, geomRelInf.fullContained);
+    ASSERT_EQ(1, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 1}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {-3, 0}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(1, geomRelInf.fullContained);
+    ASSERT_EQ(0, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {40, 20}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 100}, {600, 0}, {1200, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(21, geomRelInf.fullContained);
+    ASSERT_EQ(0, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {40, 20}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 56}, {-60, 0}, {1200, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(20, geomRelInf.fullContained);
+    ASSERT_EQ(1, geomRelInf.toCheck.size());
+  }
+}
+
 }  // namespace osm2rdf::osm
