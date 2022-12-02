@@ -1,4 +1,4 @@
-// Copyright 2020, University of Freiburg
+// Copyright 2022, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/geometry/Node.h"
+#include "osm2rdf/geometry/Relation.h"
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
@@ -28,59 +28,24 @@
 namespace osm2rdf::geometry {
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Node getDefaultObject() { return osm2rdf::geometry::Node(); }
-
-// ____________________________________________________________________________
-osm2rdf::geometry::Node getFilledObject() {
-  return osm2rdf::geometry::Node(10, 20);
+osm2rdf::geometry::Relation getDefaultObject() {
+  return osm2rdf::geometry::Relation();
 }
 
 // ____________________________________________________________________________
-TEST(GEOMETRY_Node, equalsOperator) {
-  osm2rdf::geometry::Node o1(10, 10);
-  osm2rdf::geometry::Node o2(10, 20);
-  osm2rdf::geometry::Node o3(20, 10);
-
-  ASSERT_TRUE(o1 == o1);
-  ASSERT_FALSE(o1 == o2);
-  ASSERT_FALSE(o1 == o3);
-
-  ASSERT_FALSE(o2 == o1);
-  ASSERT_TRUE(o2 == o2);
-  ASSERT_FALSE(o2 == o3);
-
-  ASSERT_FALSE(o3 == o1);
-  ASSERT_FALSE(o3 == o2);
-  ASSERT_TRUE(o3 == o3);
+osm2rdf::geometry::Relation getFilledObject() {
+  osm2rdf::geometry::Relation obj;
+  return obj;
 }
 
 // ____________________________________________________________________________
-TEST(GEOMETRY_Node, notEqualsOperator) {
-  osm2rdf::geometry::Node o1(10, 10);
-  osm2rdf::geometry::Node o2(10, 20);
-  osm2rdf::geometry::Node o3(20, 10);
-
-  ASSERT_FALSE(o1 != o1);
-  ASSERT_TRUE(o1 != o2);
-  ASSERT_TRUE(o1 != o3);
-
-  ASSERT_TRUE(o2 != o1);
-  ASSERT_FALSE(o2 != o2);
-  ASSERT_TRUE(o2 != o3);
-
-  ASSERT_TRUE(o3 != o1);
-  ASSERT_TRUE(o3 != o2);
-  ASSERT_FALSE(o3 != o3);
-}
-
-// ____________________________________________________________________________
-TEST(GEOMETRY_Node, serializationBinary) {
+TEST(GEOMETRY_Relation, serializationBinary) {
   std::stringstream boostBuffer;
 
-  osm2rdf::geometry::Node origDefaultObject = getDefaultObject();
-  osm2rdf::geometry::Node origFilledObject = getFilledObject();
-  osm2rdf::geometry::Node loadedDefaultObject;
-  osm2rdf::geometry::Node loadedFilledObject;
+  osm2rdf::geometry::Relation origDefaultObject = getDefaultObject();
+  osm2rdf::geometry::Relation origFilledObject = getFilledObject();
+  osm2rdf::geometry::Relation loadedDefaultObject;
+  osm2rdf::geometry::Relation loadedFilledObject;
 
   // Store and load
   boost::archive::binary_oarchive oa(boostBuffer);
@@ -97,13 +62,13 @@ TEST(GEOMETRY_Node, serializationBinary) {
 }
 
 // ____________________________________________________________________________
-TEST(GEOMETRY_Node, serializationText) {
+TEST(GEOMETRY_Relation, serializationText) {
   std::stringstream boostBuffer;
 
-  osm2rdf::geometry::Node origDefaultObject = getDefaultObject();
-  osm2rdf::geometry::Node origFilledObject = getFilledObject();
-  osm2rdf::geometry::Node loadedDefaultObject;
-  osm2rdf::geometry::Node loadedFilledObject;
+  osm2rdf::geometry::Relation origDefaultObject = getDefaultObject();
+  osm2rdf::geometry::Relation origFilledObject = getFilledObject();
+  osm2rdf::geometry::Relation loadedDefaultObject;
+  osm2rdf::geometry::Relation loadedFilledObject;
 
   // Store and load
   boost::archive::text_oarchive oa(boostBuffer);

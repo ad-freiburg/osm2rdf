@@ -24,6 +24,7 @@
 osm2rdf::osm::RelationHandler::RelationHandler(
     const osm2rdf::config::Config& config) {
   _config = config;
+  _locationHandler = nullptr;
 }
 
 // ____________________________________________________________________________
@@ -39,7 +40,7 @@ void osm2rdf::osm::RelationHandler::prepare_for_lookup() {
   auto lastWay = std::unique(_wayIds.begin(), _wayIds.end());
   _wayIds.erase(lastWay, _wayIds.end());
 
-  firstPassDone = true;
+  _firstPassDone = true;
 
   std::cout << " -> " << std::to_string(_relationIds.size()) << " "
             << std::to_string(_wayIds.size());
@@ -50,6 +51,11 @@ void osm2rdf::osm::RelationHandler::prepare_for_lookup() {
 void osm2rdf::osm::RelationHandler::setLocationHandler(
     osm2rdf::osm::LocationHandler* locationHandler) {
   _locationHandler = locationHandler;
+}
+
+// ____________________________________________________________________________
+bool osm2rdf::osm::RelationHandler::hasLocationHandler() const {
+  return _locationHandler != nullptr;
 }
 
 // ____________________________________________________________________________
@@ -66,7 +72,7 @@ std::vector<uint64_t> osm2rdf::osm::RelationHandler::get_noderefs_of_way(
 
 // ____________________________________________________________________________
 void osm2rdf::osm::RelationHandler::relation(const osmium::Relation& relation) {
-  if (firstPassDone) {
+  if (_firstPassDone) {
     return;
   }
   for (const auto& relationMember : relation.cmembers()) {
@@ -84,7 +90,7 @@ void osm2rdf::osm::RelationHandler::relation(const osmium::Relation& relation) {
 
 // ____________________________________________________________________________
 void osm2rdf::osm::RelationHandler::way(const osmium::Way& way) {
-  if (!firstPassDone) {
+  if (!_firstPassDone) {
     return;
   }
   if (std::find(_wayIds.begin(), _wayIds.end(), way.positive_id()) !=

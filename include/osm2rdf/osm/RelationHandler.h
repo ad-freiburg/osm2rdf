@@ -31,6 +31,7 @@ class RelationHandler : public osmium::handler::Handler {
   void way(const osmium::Way& way);
   void prepare_for_lookup();
   void setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler);
+  bool hasLocationHandler() const;
   osmium::Location get_node_location(const uint64_t id) const;
   std::vector<uint64_t> get_noderefs_of_way(const uint64_t id);
 
@@ -40,7 +41,7 @@ class RelationHandler : public osmium::handler::Handler {
   std::vector<uint64_t> _relationIds;
   std::vector<uint64_t> _wayIds;
   std::unordered_map<uint64_t, std::vector<uint64_t>> _ways;
-  bool firstPassDone = false;
+  bool _firstPassDone = false;
 };
 }
 

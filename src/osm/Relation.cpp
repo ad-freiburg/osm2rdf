@@ -131,7 +131,9 @@ bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::operator==(const Relation& other) const noexcept {
-  return _id == other._id && _members == other._members && _tags == other._tags;
+  return _id == other._id && _envelope == other._envelope &&
+         _members == other._members && _geom == other._geom &&
+         _tags == other._tags;
 }
 
 // ____________________________________________________________________________

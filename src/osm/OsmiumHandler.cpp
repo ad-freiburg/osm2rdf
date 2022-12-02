@@ -182,7 +182,9 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
     return;
   }
   auto r = osm2rdf::osm::Relation(relation);
-  r.buildGeometry(_relationHandler);
+  if (_relationHandler.hasLocationHandler()) {
+    r.buildGeometry(_relationHandler);
+  }
   if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
 #pragma omp task

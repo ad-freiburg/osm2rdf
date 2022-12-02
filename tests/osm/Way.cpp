@@ -300,7 +300,7 @@ TEST(OSM_Way, serializationBinary) {
   // Store and load
   boost::archive::binary_oarchive oa(boostBuffer);
   oa << src;
-  // std::cerr << buffer.str() << std::endl;
+  // std::cerr << boostBuffer.str() << std::endl;
   boost::archive::binary_iarchive ia(boostBuffer);
   ia >> dst;
 
@@ -331,7 +331,7 @@ TEST(OSM_Way, serializationText) {
   // Store and load
   boost::archive::text_oarchive oa(boostBuffer);
   oa << src;
-  // std::cerr << buffer.str() << std::endl;
+  // std::cerr << boostBuffer.str() << std::endl;
   boost::archive::text_iarchive ia(boostBuffer);
   ia >> dst;
 
