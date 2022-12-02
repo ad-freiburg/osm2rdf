@@ -78,7 +78,6 @@ osm2rdf::geometry::Box osm2rdf::osm::Relation::envelope() const noexcept {
 // ____________________________________________________________________________
 void osm2rdf::osm::Relation::buildGeometry(
     osm2rdf::osm::RelationHandler& relationHandler) {
-  assert(_geom.empty());
   _hasCompleteGeometry = true;
   for (const auto& member : _members) {
     osmium::Location res;
@@ -107,10 +106,14 @@ void osm2rdf::osm::Relation::buildGeometry(
         res = relationHandler.get_node_location(member.id());
         if (res.valid()) {
           boost::geometry::traits::emplace_back<geometry::Relation>::apply(
-              _geom, std::move(osm2rdf::geometry::Node{res.lon(), res.lat()}));
+              _geom, osm2rdf::geometry::Node{res.lon(), res.lat()});
         } else {
           _hasCompleteGeometry = false;
         }
+        break;
+      case RelationMemberType::RELATION:
+        // Mark relations containing relations as incomplete for now.
+        _hasCompleteGeometry = false;
         break;
       default:
         break;

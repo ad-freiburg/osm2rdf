@@ -29,9 +29,6 @@ osm2rdf::osm::RelationHandler::RelationHandler(
 
 // ____________________________________________________________________________
 void osm2rdf::osm::RelationHandler::prepare_for_lookup() {
-  std::cout << std::to_string(_relationIds.size()) << " "
-            << std::to_string(_wayIds.size());
-
   std::sort(_relationIds.begin(), _relationIds.end());
   auto lastRelation = std::unique(_relationIds.begin(), _relationIds.end());
   _relationIds.erase(lastRelation, _relationIds.end());
@@ -41,10 +38,6 @@ void osm2rdf::osm::RelationHandler::prepare_for_lookup() {
   _wayIds.erase(lastWay, _wayIds.end());
 
   _firstPassDone = true;
-
-  std::cout << " -> " << std::to_string(_relationIds.size()) << " "
-            << std::to_string(_wayIds.size());
-  std::cout << std::endl;
 }
 
 // ____________________________________________________________________________
