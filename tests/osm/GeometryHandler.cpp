@@ -2696,9 +2696,7 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   ASSERT_TRUE(src.envelope() == std::get<0>(dst));
   ASSERT_TRUE(src.id() == std::get<1>(dst));
 
-  // what did that line test? surely we expect the two geometries to be
-  // equivalent?
-  // ASSERT_TRUE(src.geom() != std::get<2>(dst));
+  ASSERT_TRUE(src.geom() != std::get<2>(dst));
 
   // Access rings
   const auto srcWay = src.geom();
