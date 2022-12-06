@@ -264,7 +264,7 @@ TEST(OSM_Relation, serializationText) {
   // Store and load
   boost::archive::text_oarchive oa(boostBuffer);
   oa << src;
-  std::cerr << boostBuffer.str() << std::endl;
+  // std::cerr << boostBuffer.str() << std::endl;
   boost::archive::text_iarchive ia(boostBuffer);
   ia >> dst;
 
