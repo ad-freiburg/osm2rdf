@@ -37,9 +37,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Global settings
 # ----------------------------------------------------------------------------
 
-option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enable" 0)
-
 # set(CMAKE_VERBOSE_MAKEFILE ON)
+
+option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enable" 0)
 
 # Enable verbose makefile
 if (ENABLE_GEOMETRY_STATISTIC)

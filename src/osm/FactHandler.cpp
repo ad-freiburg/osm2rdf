@@ -60,8 +60,6 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY;
 
-const static int BASE10 = 10;
-
 // ____________________________________________________________________________
 template <typename W>
 osm2rdf::osm::FactHandler<W>::FactHandler(const osm2rdf::config::Config& config,
@@ -324,7 +322,8 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
     rTrimmed = value.substr(0, end.base() - value.begin());
 
     char* firstNonMatched;
-    int64_t lvl = strtoll(rTrimmed.c_str(), &firstNonMatched, BASE10);
+    int64_t lvl = strtoll(rTrimmed.c_str(), &firstNonMatched,
+                          osm2rdf::osm::constants::BASE10_BASE);
 
     // if integer, dump as xsd:integer
     if (firstNonMatched != rTrimmed.c_str() && (*firstNonMatched) == 0) {

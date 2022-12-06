@@ -160,13 +160,13 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << std::to_string(simplifyGeometries);
     }
   }
-	oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
+  oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
   if (writeDAGDotFiles) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
   }
 
-  if (storeLocationsOnDisk.size()) {
+  if (!storeLocationsOnDisk.empty()) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO
         << " " << storeLocationsOnDisk;

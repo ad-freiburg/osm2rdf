@@ -128,7 +128,7 @@ void GeometryHandler<W>::area(const Area& area) {
     outerGeom = simplifiedArea(geom, false);
   }
 
-  if (geom.size()) {
+  if (!geom.empty()) {
     boost::geometry::convex_hull(geom, convexHull);
     if (convexHull.outer().size() >= geom.front().outer().size() / 2) {
       // if we haven't gained anything significant in terms of number of anchor
@@ -158,16 +158,16 @@ void GeometryHandler<W>::area(const Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
-      _spatialStorageArea.push_back({envelopes, area.id(), geom, area.objId(),
-                                     area.geomArea(), area.fromWay() ? 1 : 0,
-                                     innerGeom, outerGeom, boxIds, cutouts,
-                                     convexHull});
+      _spatialStorageArea.push_back(
+          {envelopes, area.id(), geom, area.objId(), area.geomArea(),
+           area.fromWay() ? AreaFromType::FROM_WAY : AreaFromType::FROM_REL,
+           innerGeom, outerGeom, boxIds, cutouts, convexHull});
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
       _oaUnnamedAreas << SpatialAreaValue(
           envelopes, area.id(), geom, area.objId(), area.geomArea(),
-          area.fromWay() ? 1 : 0, innerGeom, outerGeom, boxIds, cutouts,
-          convexHull);
+          area.fromWay() ? AreaFromType::FROM_WAY : AreaFromType::FROM_REL,
+          innerGeom, outerGeom, boxIds, cutouts, convexHull);
       _numUnnamedAreas++;
     }
   }
@@ -256,7 +256,7 @@ G GeometryHandler<W>::simplifyGeometry(const G& geom) const {
 // ____________________________________________________________________________
 template <typename W>
 template <int MODE>
-bool GeometryHandler<W>::ioDouglasPeucker(
+bool GeometryHandler<W>::innerOuterDouglasPeucker(
     const boost::geometry::model::ring<osm2rdf::geometry::Location>&
         inputPoints,
     boost::geometry::model::ring<osm2rdf::geometry::Location>& outputPoints,
@@ -349,8 +349,9 @@ bool GeometryHandler<W>::ioDouglasPeucker(
   // and the part to the right of m. NOTE: It's a matter of taste whether we
   // include m in the left recursion or the right recursion, but we should not
   // include it in both.
-  bool a = ioDouglasPeucker<MODE>(inputPoints, outputPoints, l, m, eps);
-  bool b = ioDouglasPeucker<MODE>(inputPoints, outputPoints, m + 1, r, eps);
+  bool a = innerOuterDouglasPeucker<MODE>(inputPoints, outputPoints, l, m, eps);
+  bool b =
+      innerOuterDouglasPeucker<MODE>(inputPoints, outputPoints, m + 1, r, eps);
 
   return a || b;
 }
@@ -417,11 +418,13 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
       boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
       size_t m = floor(origInner.size() / 2);
       if (inner) {
-        ioDouglasPeucker<2>(origInner, retDP, 0, m, eps);
-        ioDouglasPeucker<2>(origInner, retDP, m + 1, origInner.size() - 1, eps);
+        innerOuterDouglasPeucker<2>(origInner, retDP, 0, m, eps);
+        innerOuterDouglasPeucker<2>(origInner, retDP, m + 1,
+                                    origInner.size() - 1, eps);
       } else {
-        ioDouglasPeucker<3>(origInner, retDP, 0, m, eps);
-        ioDouglasPeucker<3>(origInner, retDP, m + 1, origInner.size() - 1, eps);
+        innerOuterDouglasPeucker<3>(origInner, retDP, 0, m, eps);
+        innerOuterDouglasPeucker<3>(origInner, retDP, m + 1,
+                                    origInner.size() - 1, eps);
       }
       retDP.push_back(retDP.front());  // ensure valid polyon
       simplified.inners().push_back(retDP);
@@ -439,13 +442,13 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
       boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
       size_t m = floor(poly.outer().size() / 2);
       if (inner) {
-        ioDouglasPeucker<2>(poly.outer(), retDP, 0, m, eps);
-        ioDouglasPeucker<2>(poly.outer(), retDP, m + 1, poly.outer().size() - 1,
-                            eps);
+        innerOuterDouglasPeucker<2>(poly.outer(), retDP, 0, m, eps);
+        innerOuterDouglasPeucker<2>(poly.outer(), retDP, m + 1,
+                                    poly.outer().size() - 1, eps);
       } else {
-        ioDouglasPeucker<3>(poly.outer(), retDP, 0, m, eps);
-        ioDouglasPeucker<3>(poly.outer(), retDP, m + 1, poly.outer().size() - 1,
-                            eps);
+        innerOuterDouglasPeucker<3>(poly.outer(), retDP, 0, m, eps);
+        innerOuterDouglasPeucker<3>(poly.outer(), retDP, m + 1,
+                                    poly.outer().size() - 1, eps);
       }
       retDP.push_back(retDP.front());  // ensure valid polyon
       numPointsNew += retDP.size();
@@ -1334,14 +1337,14 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
     return true;
   }
 
-  if (geomRelInf->toCheck.size() == 0) {
+  if (geomRelInf->toCheck.empty()) {
     geomRelInf->intersects = NO;
     geomRelInf->contained = NO;
     stats->skippedByBoxIdIntersect();
     return false;
   }
 
-  if (areaCutouts.size()) {
+  if (!areaCutouts.empty()) {
     stats->skippedByBoxIdIntersectCutout();
     for (auto boxId : geomRelInf->toCheck) {
       const auto& cutout = areaCutouts.find(boxId);
@@ -1438,14 +1441,14 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
 
   // if there is no full contained box, and no potentially contained, we
   // surely do not intersect
-  if (geomRelInf->toCheck.size() == 0) {
+  if (geomRelInf->toCheck.empty()) {
     geomRelInf->intersects = NO;
     stats->skippedByBoxIdIntersect();
     return false;
   }
 
   // if we have cutouts for b or a, use them to check for intersection
-  if (cutoutsA.size() || cutoutsB.size()) {
+  if (!cutoutsA.empty() || !cutoutsB.empty()) {
     stats->skippedByBoxIdIntersectCutout();
     for (auto boxId : geomRelInf->toCheck) {
       const auto& cutoutA = cutoutsA.find(boxId);
@@ -1549,7 +1552,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
 
   // if not, and if we also have no potential intersection box, we are not
   // contained
-  if (geomRelInf->toCheck.size() == 0) {
+  if (geomRelInf->toCheck.empty()) {
     geomRelInf->intersects = NO;
     stats->skippedByBoxIdIntersect();
     return false;
@@ -1557,7 +1560,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
 
   // if we have potential intersection boxes, and areaCutouts to use,
   // only check against them
-  if (areaCutouts.size()) {
+  if (!areaCutouts.empty()) {
     for (auto boxId : geomRelInf->toCheck) {
       const auto& cutout = areaCutouts.find(boxId);
 
@@ -1702,7 +1705,7 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
 
   // if the way is only in one box, and area cutouts are available, we can
   // check against the corresponding cutout
-  if (wayBoxIds[0].first == 1 && areaCutouts.size()) {
+  if (wayBoxIds[0].first == 1 && !areaCutouts.empty()) {
     const auto& cutout = areaCutouts.find(abs(wayBoxIds[1].first));
 
     if (cutout != areaCutouts.end()) {
@@ -1824,7 +1827,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   if (geomRelInf->fullContained < 0)
     boxIdIsect(entryBoxIds, areaBoxIds, geomRelInf);
 
-  if (geomRelInf->fullContained == 0 && geomRelInf->toCheck.size() == 0) {
+  if (geomRelInf->fullContained == 0 && geomRelInf->toCheck.empty()) {
     stats->skippedByBoxIdIntersect();
     return false;
   } else if (geomRelInf->fullContained == entryBoxIds[0].first) {
@@ -1935,7 +1938,7 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
 
   // if A is in only one box, we can check it against the corresponding
   // cutout of B, if available
-  if (boxIdsA[0].first == 1 && cutoutsB.size()) {
+  if (boxIdsA[0].first == 1 && !cutoutsB.empty()) {
     const auto& cutout = cutoutsB.find(abs(boxIdsA[1].first));
 
     if (cutout != cutoutsB.end()) {
@@ -2168,14 +2171,12 @@ int32_t GeometryHandler<W>::getBoxId(
 
 // ____________________________________________________________________________
 template <typename W>
-std::string GeometryHandler<W>::areaNS(uint8_t type) const {
+std::string GeometryHandler<W>::areaNS(AreaFromType type) const {
   switch (type) {
-    case 0:
+    case FROM_REL:
       return osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
-    case 1:
+    case FROM_WAY:
       return osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
-    case 2:
-      return osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_PARTITION;
     default:
       return osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
   }
@@ -2269,7 +2270,7 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
 // ____________________________________________________________________________
 template <typename W>
 BoxIdList GeometryHandler<W>::pack(const BoxIdList& ids) const {
-  if (ids.size() == 0) return {{0, 0}};
+  if (ids.empty()) return {{0, 0}};
   // assume the list is sorted!
 
   BoxIdList ret;

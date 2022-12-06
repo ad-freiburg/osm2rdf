@@ -45,6 +45,13 @@ struct Config {
   bool noNodeGeometricRelations = false;
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
+
+  // the epsilon for the inner/outer douglas-peucker is based on the
+  // circumference of a hypothetical circle. By dividing by ~pi, we base the
+  // epsilon on 1/n of the radius of this hypothetical circle (n = 20 in this
+  // case). Think of this is maximum portion of the radius that is
+  // "collapsed away" by the inner simplification, or added by the outer
+  // simplification
   double simplifyGeometriesInnerOuter = 1/(3.14 * 20);
   bool dontUseInnerOuterGeoms = false;
   bool approximateSpatialRels = false;

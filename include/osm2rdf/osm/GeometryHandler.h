@@ -139,16 +139,14 @@ struct GeomRelationStats {
   std::string printFullChecks() const { return printPercNum(_fullChecks); }
 };
 
-#pragma omp declare \
-reduction(  \
-        + : \
-            GeomRelationStats :  \
-                omp_out += omp_in ) \
-initializer( omp_priv = omp_orig )
+#pragma omp declare reduction(+ : GeomRelationStats : omp_out += omp_in) \
+    initializer(omp_priv = omp_orig)
 
 typedef std::pair<int32_t, uint8_t> BoxId;
 
 enum RelInfoValue { DONTKNOW, YES, NO };
+
+enum AreaFromType { FROM_REL = 0, FROM_WAY = 1 };
 
 struct GeomRelationInfo {
   RelInfoValue intersects = DONTKNOW;
@@ -193,8 +191,8 @@ typedef std::vector<BoxId> BoxIdList;
 typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    osm2rdf::osm::Area::id_t, osm2rdf::geometry::Area,
                    osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t,
-                   uint8_t, osm2rdf::geometry::Area, osm2rdf::geometry::Area,
-                   osm2rdf::osm::BoxIdList,
+                   AreaFromType, osm2rdf::geometry::Area,
+                   osm2rdf::geometry::Area, osm2rdf::osm::BoxIdList,
                    std::unordered_map<int32_t, osm2rdf::geometry::Area>,
                    osm2rdf::geometry::Polygon>
     SpatialAreaValue;
@@ -299,7 +297,8 @@ class GeometryHandler {
                         GeomRelationInfo* geomRelInf,
                         GeomRelationStats* stats) const;
   bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&,
-                  GeomRelationInfo* geomRelInf, GeomRelationStats* statsa) const;
+                  GeomRelationInfo* geomRelInf,
+                  GeomRelationStats* statsa) const;
   bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&,
                  GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
   bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValue&,
@@ -316,23 +315,21 @@ class GeometryHandler {
       const osm2rdf::geometry::Location& C);
 
   template <int MODE>
-  bool ioDouglasPeucker(
+  bool innerOuterDouglasPeucker(
       const boost::geometry::model::ring<osm2rdf::geometry::Location>& input,
       boost::geometry::model::ring<osm2rdf::geometry::Location>& output,
       size_t l, size_t r, double eps) const;
 
   static int polygonOrientation(
-      const boost::geometry::model::ring<osm2rdf::geometry::Location>&
-          polygon);
+      const boost::geometry::model::ring<osm2rdf::geometry::Location>& polygon);
 
   osm2rdf::geometry::Area simplifiedArea(const osm2rdf::geometry::Area& area,
                                          bool inner) const;
 
-  std::string areaNS(uint8_t type) const;
+  std::string areaNS(AreaFromType type) const;
 
   void getBoxIds(
-      const osm2rdf::geometry::Area& area,
-      const osm2rdf::geometry::Area& inner,
+      const osm2rdf::geometry::Area& area, const osm2rdf::geometry::Area& inner,
       const osm2rdf::geometry::Area& outer,
       const std::vector<osm2rdf::geometry::Box>& envelopes, int xFrom, int xTo,
       int yFrom, int yTo, int xWidth, int yHeight, osm2rdf::osm::BoxIdList* ret,
