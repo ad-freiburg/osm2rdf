@@ -72,7 +72,6 @@ class OsmiumHandler : public osmium::handler::Handler {
   size_t _waysSeen = 0;
   size_t _waysDumped = 0;
   size_t _wayGeometriesHandled = 0;
-  bool _secondPass = false;
 };
 }  // namespace osm2rdf::osm
 
