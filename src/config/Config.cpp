@@ -159,6 +159,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << prefix << osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INFO
           << std::to_string(simplifyGeometries);
     }
+    if (writeGeomRelTransClosure) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_INFO;
+    }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
   if (writeDAGDotFiles) {
@@ -259,6 +263,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_SHORT,
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_HELP);
+  auto writeGeomRelTransClosureOp =
+      op.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT,
+          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG,
+          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP);
 
   auto addAreaEnvelopeOp = op.add<popl::Switch>(
       osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
@@ -419,6 +428,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noAreaGeometricRelations = noAreaGeometricRelationsOp->is_set();
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
     noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
+
+    writeGeomRelTransClosure = writeGeomRelTransClosureOp->is_set();
 
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();

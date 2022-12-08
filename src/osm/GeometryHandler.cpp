@@ -52,6 +52,8 @@ using osm2rdf::osm::Way;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
+using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
+using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::util::currentTimeFormatted;
@@ -727,17 +729,22 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
     for (const auto& dst : _directedAreaGraph.getEdges(id)) {
       assert(_spatialStorageAreaIndex[dst] < _spatialStorageArea.size());
       const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
+      const auto& areaId = std::get<1>(area);
       const auto& areaObjId = std::get<3>(area);
       const auto& areaFromType = std::get<5>(area);
       std::string areaIRI =
           _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
-      _writer->writeTriple(areaIRI,
-                           osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,
-                           entryIRI);
-      _writer->writeTriple(
-          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,
-          entryIRI);
+      _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_AREA, entryIRI);
+      _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_AREA, entryIRI);
+
+      // transitive closure
+      const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+
+      writeTransitiveClosure(successors, entryIRI,
+                             IRI__OSM2RDF_INTERSECTS_AREA);
+      writeTransitiveClosure(successors, entryIRI,
+                             IRI__OSM2RDF_CONTAINS_AREA);
     }
 #pragma omp critical(progress)
     progressBar.update(entryCount++);
@@ -827,6 +834,10 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               _directedAreaGraph.findSuccessorsFast(areaId);
           skipIntersects.insert(successors.begin(), successors.end());
 
+          // transitive closure
+          writeTransitiveClosure(successors, entryIRI,
+                                 IRI__OSM2RDF_INTERSECTS_NON_AREA);
+
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                entryIRI);
         }
@@ -843,6 +854,10 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
             const auto& successors =
                 _directedAreaGraph.findSuccessorsFast(areaId);
             skipContains.insert(successors.begin(), successors.end());
+
+            // transitive closure
+            writeTransitiveClosure(successors, entryIRI,
+                                   IRI__OSM2RDF_CONTAINS_NON_AREA);
 
             _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA,
                                  entryIRI);
@@ -1015,6 +1030,13 @@ GeometryHandler<W>::dumpNodeRelations() {
 
         std::string areaIRI =
             _writer->generateIRI(areaNS(areaFromType), areaObjId);
+
+        // transitive closure
+        writeTransitiveClosure(successors, nodeIRI,
+                               IRI__OSM2RDF_INTERSECTS_NON_AREA);
+        writeTransitiveClosure(successors, nodeIRI,
+                               IRI__OSM2RDF_CONTAINS_NON_AREA);
+
         _writer->writeTriple(
             areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
             nodeIRI);
@@ -1172,6 +1194,10 @@ void GeometryHandler<W>::dumpWayRelations(
           std::string areaIRI =
               _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
+          // transitive closure
+          writeTransitiveClosure(successors, wayIRI,
+                                 IRI__OSM2RDF_INTERSECTS_NON_AREA);
+
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                wayIRI);
         } else if (skipNodeContained.find(areaId) != skipNodeContained.end()) {
@@ -1185,6 +1211,10 @@ void GeometryHandler<W>::dumpWayRelations(
           std::string areaIRI =
               _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
+          // transitive closure
+          writeTransitiveClosure(successors, wayIRI,
+                                 IRI__OSM2RDF_INTERSECTS_NON_AREA);
+
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                wayIRI);
         } else if (wayIntersectsArea(way, area, &geomRelInf, &intersectStats)) {
@@ -1194,6 +1224,10 @@ void GeometryHandler<W>::dumpWayRelations(
 
           std::string areaIRI =
               _writer->generateIRI(areaNS(areaFromType), areaObjId);
+
+          // transitive closure
+          writeTransitiveClosure(successors, wayIRI,
+                                 IRI__OSM2RDF_INTERSECTS_NON_AREA);
 
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                wayIRI);
@@ -1232,6 +1266,10 @@ void GeometryHandler<W>::dumpWayRelations(
 
           std::string areaIRI =
               _writer->generateIRI(areaNS(areaFromType), areaObjId);
+
+          // transitive closure
+          writeTransitiveClosure(successors, wayIRI,
+                                 IRI__OSM2RDF_CONTAINS_NON_AREA);
 
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA, wayIRI);
         }
@@ -2405,6 +2443,25 @@ uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
   }
 
   return 0;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void GeometryHandler<W>::writeTransitiveClosure(
+    const std::vector<osm2rdf::osm::Area::id_t>& successors,
+    const std::string& entryIRI, const std::string& rel) {
+  // transitive closure
+  if (_config.writeGeomRelTransClosure) {
+    for (const auto& succ : successors) {
+      auto succIdx = _spatialStorageAreaIndex[succ];
+      const auto& succAreaId = std::get<3>(_spatialStorageArea[succIdx]);
+      const auto& succAreaFromType = std::get<5>(_spatialStorageArea[succIdx]);
+      const auto& succAreaIRI =
+          _writer->generateIRI(areaNS(succAreaFromType), succAreaId);
+
+      _writer->writeTriple(succAreaIRI, rel, entryIRI);
+    }
+  }
 }
 
 // ____________________________________________________________________________

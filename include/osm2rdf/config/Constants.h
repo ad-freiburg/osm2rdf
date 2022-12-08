@@ -102,6 +102,14 @@ const static inline std::string NO_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump geometric relations";
 
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_INFO =
+    "Not dumping geometric relations";
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT = "";
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG =
+    "write-transitive-closure";
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP =
+    "Write the transitive closure of all geometric relations";
+
 const static inline std::string NO_AREA_OPTION_SHORT = "";
 const static inline std::string NO_AREA_OPTION_LONG = "no-areas";
 const static inline std::string NO_AREA_OPTION_HELP = "Ignore areas";

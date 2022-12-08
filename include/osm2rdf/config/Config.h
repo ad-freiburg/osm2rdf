@@ -87,6 +87,9 @@ struct Config {
   double wktDeviation = 5;
   uint16_t wktPrecision = 7;
 
+  // Transitive clouse
+  bool writeGeomRelTransClosure = false;
+
   // Output, empty for stdout
   std::filesystem::path output;
   std::string outputFormat = "qlever";
