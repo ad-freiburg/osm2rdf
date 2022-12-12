@@ -87,7 +87,6 @@ docker-build:
 	${DOCKER} build -t osm2rdf .
 
 docker-fr: docker-dirs docker-build input/freiburg-regbez-latest.osm.pbf
-	${DOCKER} build -t osm2rdf .
 	${DOCKER} run --rm -v `pwd`/input/:/input/ -v `pwd`/output/:/output/ -v `pwd`/scratch/:/scratch/ -it osm2rdf /input/freiburg-regbez-latest.osm.pbf -o /output/freiburg-regbez-latest.osm.ttl -t /scratch/ --write-rdf-statistics
 
 docker-bw: docker-dirs docker-build input/baden-wuerttemberg-latest.osm.pbf

@@ -201,6 +201,13 @@ const static inline std::string ADD_RELATION_BORDER_MEMBERS_OPTION_LONG =
 const static inline std::string ADD_RELATION_BORDER_MEMBERS_OPTION_HELP =
     "Add relation border members (inner and outer)";
 
+const static inline std::string ADD_RELATION_ENVELOPE_INFO = "Adding relation envelopes";
+const static inline std::string ADD_RELATION_ENVELOPE_OPTION_SHORT = "";
+const static inline std::string ADD_RELATION_ENVELOPE_OPTION_LONG =
+    "add-relation-envelope";
+const static inline std::string ADD_RELATION_ENVELOPE_OPTION_HELP =
+    "Add envelope to relations";
+
 const static inline std::string ADD_WAY_ENVELOPE_INFO = "Adding way envelopes";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_ENVELOPE_OPTION_LONG =

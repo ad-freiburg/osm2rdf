@@ -208,6 +208,18 @@ typedef std::vector<SpatialNodeValue> SpatialNodeVector;
 
 typedef std::vector<osm2rdf::osm::Node::id_t> WayNodeList;
 
+typedef std::vector<osm2rdf::osm::Node::id_t> RelationNodeList;
+typedef std::vector<osm2rdf::osm::Way::id_t> RelationWayList;
+typedef std::vector<osm2rdf::osm::Relation::id_t> RelationRelationList;
+
+// Relation: envelope, osm id, geometry, node list, way list, relation list
+#if BOOST_VERSION >= 107700
+typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
+                   osm2rdf::geometry::Relation, RelationNodeList, RelationWayList,
+                   RelationRelationList>
+    SpatialRelationValue;
+#endif  // BOOST_VERSION >= 107700
+
 // Way: envelope, osm id, geometry, node list
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
                    osm2rdf::geometry::Way, WayNodeList,
@@ -234,8 +246,9 @@ class GeometryHandler {
   // Add data
   void area(const osm2rdf::osm::Area& area);
   void node(const osm2rdf::osm::Node& node);
+  void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
-  void relation(const osm2rdf::osm::Relation& rel);
+
   // close external storage files
   void closeExternalStorage();
   // Calculate data
@@ -419,6 +432,19 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialNodeValue& v,
   ar& boost::serialization::make_nvp("id", std::get<0>(v));
   ar& boost::serialization::make_nvp("geom", std::get<1>(v));
 }
+
+#if BOOST_VERSION >= 107700
+template <class Archive>
+void serialize(Archive& ar, osm2rdf::osm::SpatialRelationValue& v,
+               [[maybe_unused]] const unsigned int version) {
+  ar& boost::serialization::make_nvp("envelope", std::get<0>(v));
+  ar& boost::serialization::make_nvp("id", std::get<1>(v));
+  ar& boost::serialization::make_nvp("geom", std::get<2>(v));
+  ar& boost::serialization::make_nvp("nodeIds", std::get<3>(v));
+  ar& boost::serialization::make_nvp("wayIds", std::get<4>(v));
+  ar& boost::serialization::make_nvp("relationIds", std::get<5>(v));
+}
+#endif  // BOOST_VERSION >= 107700
 
 template <class Archive>
 void serialize(Archive& ar, osm2rdf::osm::SpatialWayValue& v,

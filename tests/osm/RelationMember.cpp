@@ -158,7 +158,7 @@ TEST(OSM_RelationMember, serializationBinary) {
   oa << s1;
   oa << s2;
   oa << s3;
-  // std::cerr << buffer.str() << std::endl;
+  // std::cerr << boostBuffer.str() << std::endl;
   boost::archive::binary_iarchive ia(boostBuffer);
   ia >> d1;
   ia >> d2;
@@ -202,7 +202,7 @@ TEST(OSM_RelationMember, serializationText) {
   oa << s1;
   oa << s2;
   oa << s3;
-  // std::cerr << buffer.str() << std::endl;
+  // std::cerr << boostBuffer.str() << std::endl;
   boost::archive::text_iarchive ia(boostBuffer);
   ia >> d1;
   ia >> d2;

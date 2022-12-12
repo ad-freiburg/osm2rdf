@@ -167,6 +167,23 @@ void osm2rdf::osm::FactHandler<W>::relation(
                                          "^^" + IRI__XSD_INTEGER));
     }
   }
+
+#if BOOST_VERSION >= 107700
+  if (relation.hasGeometry()) {
+    writeBoostGeometry(subj, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
+                       relation.geom());
+    if (_config.addRelationEnvelope) {
+      writeBox(subj, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
+               relation.envelope());
+    }
+    _writer->writeTriple(
+        subj,
+        _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META,
+                             "completeGeometry"),
+        relation.hasCompleteGeometry() ? osm2rdf::ttl::constants::LITERAL__YES
+                                       : osm2rdf::ttl::constants::LITERAL__NO);
+  }
+#endif  // BOOST_VERSION >= 107700
 }
 
 // ____________________________________________________________________________
@@ -270,6 +287,7 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& subj,
                                                       const std::string& pred,
                                                       const G& geom) {
   std::ostringstream tmp;
+  tmp << std::fixed << std::setprecision(_config.wktPrecision);
   if (_config.simplifyWKT > 0 &&
       boost::geometry::num_points(geom) > _config.simplifyWKT) {
     G simplifiedGeom;
@@ -283,11 +301,9 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& subj,
     } while ((boost::geometry::is_empty(simplifiedGeom) ||
               !boost::geometry::is_valid(simplifiedGeom)) &&
              perimeter_or_length >= BASE_SIMPLIFICATION_FACTOR);
-    tmp << std::fixed << std::setprecision(_config.wktPrecision)
-        << boost::geometry::wkt(simplifiedGeom);
+    tmp << boost::geometry::wkt(simplifiedGeom);
   } else {
-    tmp << std::fixed << std::setprecision(_config.wktPrecision)
-        << boost::geometry::wkt(geom);
+    tmp << boost::geometry::wkt(geom);
   }
   _writer->writeTriple(subj, pred,
                        "\"" + tmp.str() + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);

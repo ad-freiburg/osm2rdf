@@ -50,10 +50,10 @@ using osm2rdf::osm::Relation;
 using osm2rdf::osm::SpatialAreaRefValue;
 using osm2rdf::osm::Way;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
-using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
-using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
-using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA;
+using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
+using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
+using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::util::currentTimeFormatted;
@@ -188,7 +188,8 @@ void GeometryHandler<W>::node(const Node& node) {
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::way(const Way& way) {
-  std::vector<uint64_t> nodeIds;
+  WayNodeList nodeIds;
+  nodeIds.reserve(way.nodes().size());
 
   for (const auto& nodeRef : way.nodes()) {
     nodeIds.push_back(nodeRef.id());
@@ -743,8 +744,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
       writeTransitiveClosure(successors, entryIRI,
                              IRI__OSM2RDF_INTERSECTS_AREA);
-      writeTransitiveClosure(successors, entryIRI,
-                             IRI__OSM2RDF_CONTAINS_AREA);
+      writeTransitiveClosure(successors, entryIRI, IRI__OSM2RDF_CONTAINS_AREA);
     }
 #pragma omp critical(progress)
     progressBar.update(entryCount++);

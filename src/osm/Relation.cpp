@@ -16,9 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <iostream>
 #include <vector>
 
+#include "boost/geometry.hpp"
 #include "osm2rdf/osm/Relation.h"
+#include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/relation.hpp"
@@ -26,6 +29,7 @@
 // ____________________________________________________________________________
 osm2rdf::osm::Relation::Relation() {
   _id = std::numeric_limits<osm2rdf::osm::Relation::id_t>::max();
+  _hasCompleteGeometry = false;
 }
 
 // ____________________________________________________________________________
@@ -36,6 +40,7 @@ osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
   for (const auto& member : relation.cmembers()) {
     _members.emplace_back(member);
   }
+  _hasCompleteGeometry = false;
 }
 
 // ____________________________________________________________________________
@@ -54,9 +59,91 @@ osm2rdf::osm::Relation::members() const noexcept {
   return _members;
 }
 
+#if BOOST_VERSION >= 107700
+// ____________________________________________________________________________
+bool osm2rdf::osm::Relation::hasGeometry() const noexcept {
+  return !(_geom.empty());
+}
+
+// ____________________________________________________________________________
+osm2rdf::geometry::Relation osm2rdf::osm::Relation::geom() const noexcept {
+  return _geom;
+}
+
+// ____________________________________________________________________________
+osm2rdf::geometry::Box osm2rdf::osm::Relation::envelope() const noexcept {
+  return _envelope;
+}
+
+// ____________________________________________________________________________
+void osm2rdf::osm::Relation::buildGeometry(
+    osm2rdf::osm::RelationHandler& relationHandler) {
+  _hasCompleteGeometry = true;
+  for (const auto& member : _members) {
+    osmium::Location res;
+    osm2rdf::geometry::Way way;
+    std::vector<uint64_t> nodeRefs;
+    switch (member.type()) {
+      case RelationMemberType::WAY:
+        nodeRefs = relationHandler.get_noderefs_of_way(member.id());
+        if (nodeRefs.empty()) {
+          _hasCompleteGeometry = false;
+          break;
+        }
+        for (const auto& nodeRef : nodeRefs) {
+          res = relationHandler.get_node_location(nodeRef);
+          if (res.valid()) {
+            boost::geometry::append(
+                way, osm2rdf::geometry::Node{res.lon(), res.lat()});
+          } else {
+            _hasCompleteGeometry = false;
+          }
+        }
+        boost::geometry::traits::emplace_back<geometry::Relation>::apply(
+            _geom, std::move(way));
+        break;
+      case RelationMemberType::NODE:
+        res = relationHandler.get_node_location(member.id());
+        if (res.valid()) {
+          boost::geometry::traits::emplace_back<geometry::Relation>::apply(
+              _geom, osm2rdf::geometry::Node{res.lon(), res.lat()});
+        } else {
+          _hasCompleteGeometry = false;
+        }
+        break;
+      case RelationMemberType::RELATION:
+        // Mark relations containing relations as incomplete for now.
+        _hasCompleteGeometry = false;
+        break;
+      default:
+        break;
+    }
+  }
+  if (!_geom.empty()) {
+    boost::geometry::envelope(_geom, _envelope);
+  } else {
+    _envelope.min_corner() = geometry::Location{0, 0};
+    _envelope.max_corner() = geometry::Location{0, 0};
+  }
+}
+#endif  // BOOST_VERSION >= 107700
+
+// ____________________________________________________________________________
+bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
+  return _hasCompleteGeometry;
+}
+
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::operator==(const Relation& other) const noexcept {
-  return _id == other._id && _members == other._members && _tags == other._tags;
+  return _id == other._id &&
+#if BOOST_VERSION >= 107700
+         _envelope == other._envelope &&
+#endif  // BOOST_VERSION >= 107700
+         _members == other._members &&
+#if BOOST_VERSION >= 107700
+         _geom == other._geom &&
+#endif  // BOOST_VERSION >= 107700
+         _tags == other._tags;
 }
 
 // ____________________________________________________________________________
