@@ -55,7 +55,11 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       osmium::io::Reader reader{input_file};
       osmium::ProgressBar progress{reader.file_size(), osmium::isatty(2)};
       std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "OSM Pass 1 ... (Relations for areas, Relation members)"
+                << "OSM Pass 1 ... (Relations for areas"
+#if BOOST_VERSION >= 107700
+                << ", Relation members"
+#endif  // BOOST_VERSION >= 107700
+                << ")"
                 << std::endl;
       osmium::relations::read_relations(progress, input_file, mp_manager
 #if BOOST_VERSION >= 107700
