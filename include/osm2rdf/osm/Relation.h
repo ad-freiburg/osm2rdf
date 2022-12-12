@@ -42,11 +42,13 @@ class Relation {
   [[nodiscard]] std::vector<osm2rdf::osm::RelationMember> members()
       const noexcept;
   [[nodiscard]] osm2rdf::osm::TagList tags() const noexcept;
-  [[nodiscard]] bool hasGeometry() const noexcept;
   [[nodiscard]] bool hasCompleteGeometry() const noexcept;
+#if BOOST_VERSION >= 107700
+  [[nodiscard]] bool hasGeometry() const noexcept;
   [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
   [[nodiscard]] osm2rdf::geometry::Relation geom() const noexcept;
   void buildGeometry(osm2rdf::osm::RelationHandler& relationHandler);
+#endif  // BOOST_VERSION >= 107700
 
   bool operator==(const osm2rdf::osm::Relation& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Relation& other) const noexcept;
@@ -55,8 +57,10 @@ class Relation {
   id_t _id;
   std::vector<osm2rdf::osm::RelationMember> _members;
   osm2rdf::osm::TagList _tags;
+#if BOOST_VERSION >= 107700
   osm2rdf::geometry::Box _envelope;
   osm2rdf::geometry::Relation _geom;
+#endif  // BOOST_VERSION >= 107700
   bool _hasCompleteGeometry;
 
   friend class boost::serialization::access;
@@ -65,8 +69,10 @@ class Relation {
     ar& boost::serialization::make_nvp("_id", _id);
     ar& boost::serialization::make_nvp("_members", _members);
     ar& boost::serialization::make_nvp("_tags", _tags);
+#if BOOST_VERSION >= 107700
     ar& boost::serialization::make_nvp("_envelope", _envelope);
     ar& boost::serialization::make_nvp("_geom", _geom);
+#endif  // BOOST_VERSION >= 107700
     ar& boost::serialization::make_nvp("_hasCompleteGeometry",
                                        _hasCompleteGeometry);
   }

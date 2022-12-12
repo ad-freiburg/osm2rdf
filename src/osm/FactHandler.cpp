@@ -154,6 +154,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
     }
   }
 
+#if BOOST_VERSION >= 107700
   if (relation.hasGeometry()) {
     writeBoostGeometry(s, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
                        relation.geom());
@@ -168,6 +169,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
         relation.hasCompleteGeometry() ? osm2rdf::ttl::constants::LITERAL__YES
                                        : osm2rdf::ttl::constants::LITERAL__NO);
   }
+#endif  // BOOST_VERSION >= 107700
 }
 
 // ____________________________________________________________________________

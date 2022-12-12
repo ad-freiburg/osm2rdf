@@ -25,6 +25,8 @@
 
 #include "gtest/gtest.h"
 
+#if BOOST_VERSION >= 107700
+
 namespace osm2rdf::geometry {
 
 // ____________________________________________________________________________
@@ -85,3 +87,4 @@ TEST(GEOMETRY_Relation, serializationText) {
 }
 
 }  // namespace osm2rdf::geometry
+#endif  // BOOST_VERSION >= 107700

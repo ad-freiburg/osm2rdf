@@ -57,8 +57,11 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       std::cerr << osm2rdf::util::currentTimeFormatted()
                 << "OSM Pass 1 ... (Relations for areas, Relation members)"
                 << std::endl;
-      osmium::relations::read_relations(progress, input_file, mp_manager,
-                                        _relationHandler);
+      osmium::relations::read_relations(progress, input_file, mp_manager
+#if BOOST_VERSION >= 107700
+                                        , _relationHandler
+#endif  // BOOST_VERSION >= 107700
+      );
       std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
                 << std::endl;
     }
@@ -84,7 +87,10 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
               break;
             }
             osmium::apply(
-                buf, *locationHandler, _relationHandler,
+                buf, *locationHandler,
+#if BOOST_VERSION >= 107700
+                _relationHandler,
+#endif  // BOOST_VERSION >= 107700
                 mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
                   osmium::apply(buffer, *this);
                 }),
@@ -182,9 +188,11 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
     return;
   }
   auto r = osm2rdf::osm::Relation(relation);
+#if BOOST_VERSION >= 107700
   if (_relationHandler.hasLocationHandler()) {
     r.buildGeometry(_relationHandler);
   }
+#endif  // BOOST_VERSION >= 107700
   if (!_config.noFacts && !_config.noRelationFacts) {
     _relationsDumped++;
 #pragma omp task

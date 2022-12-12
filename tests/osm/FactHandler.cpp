@@ -498,6 +498,8 @@ TEST(OSM_FactHandler, relation) {
   std::cout.rdbuf(sbuf);
 }
 
+
+#if BOOST_VERSION >= 107700
 // ____________________________________________________________________________
 TEST(OSM_FactHandler, relationWithGeometry) {
   // Capture std::cout
@@ -585,6 +587,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
   // Cleanup
   std::cout.rdbuf(sbuf);
 }
+#endif  // BOOST_VERSION >= 107700
 
 // ____________________________________________________________________________
 TEST(OSM_FactHandler, way) {
