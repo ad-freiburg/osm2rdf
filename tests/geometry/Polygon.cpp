@@ -150,7 +150,7 @@ TEST(GEOMETRY_Polygon, notEqualsOperator) {
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Polygon, serializationBinary) {
-  std::stringstream buffer;
+  std::stringstream boostBuffer;
 
   osm2rdf::geometry::Polygon origDefaultObject = getDefaultObject();
   osm2rdf::geometry::Polygon origFilledObject = getFilledObject();
@@ -158,11 +158,11 @@ TEST(GEOMETRY_Polygon, serializationBinary) {
   osm2rdf::geometry::Polygon loadedFilledObject;
 
   // Store and load
-  boost::archive::binary_oarchive oa(buffer);
+  boost::archive::binary_oarchive oa(boostBuffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  // std::cerr << buffer.str() << std::endl;
-  boost::archive::binary_iarchive ia(buffer);
+  // std::cerr << boostBuffer.str() << std::endl;
+  boost::archive::binary_iarchive ia(boostBuffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 
@@ -173,7 +173,7 @@ TEST(GEOMETRY_Polygon, serializationBinary) {
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Polygon, serializationText) {
-  std::stringstream buffer;
+  std::stringstream boostBuffer;
 
   osm2rdf::geometry::Polygon origDefaultObject = getDefaultObject();
   osm2rdf::geometry::Polygon origFilledObject = getFilledObject();
@@ -181,11 +181,11 @@ TEST(GEOMETRY_Polygon, serializationText) {
   osm2rdf::geometry::Polygon loadedFilledObject;
 
   // Store and load
-  boost::archive::text_oarchive oa(buffer);
+  boost::archive::text_oarchive oa(boostBuffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  // std::cerr << buffer.str() << std::endl;
-  boost::archive::text_iarchive ia(buffer);
+  // std::cerr << boostBuffer.str() << std::endl;
+  boost::archive::text_iarchive ia(boostBuffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 

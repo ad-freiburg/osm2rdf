@@ -147,7 +147,7 @@ void osm2rdf::osm::GeometryHandler<W>::node(const osm2rdf::osm::Node& node) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::GeometryHandler<W>::way(const osm2rdf::osm::Way& way) {
-  std::vector<uint64_t> nodeIds;
+  WayNodeList nodeIds;
   nodeIds.reserve(way.nodes().size());
   for (const auto& nodeRef : way.nodes()) {
     nodeIds.push_back(nodeRef.id());
@@ -425,12 +425,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
   progressBar.update(entryCount);
   std::vector<osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t>::entry_t>
       vertices = _directedAreaGraph.getVertices();
-#pragma omp parallel for shared( \
-    vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA, \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, \
+#pragma omp parallel for shared(                                            \
+    vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                  \
+    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,                       \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,                    \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,                \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,                  \
     osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, progressBar, \
     entryCount) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
@@ -452,10 +452,12 @@ void osm2rdf::osm::GeometryHandler<W>::dumpNamedAreaRelations() {
                       : osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
           areaObjId);
 
+      _writer->writeTriple(areaIRI,
+                           osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,
+                           entryIRI);
       _writer->writeTriple(
-          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA, entryIRI);
-      _writer->writeTriple(
-          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, entryIRI);
+          areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,
+          entryIRI);
     }
 #pragma omp critical(progress)
     progressBar.update(entryCount++);
@@ -583,7 +585,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpUnnamedAreaRelations() {
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
+              areaIRI,
+              osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               entryIRI);
         }
 
@@ -763,9 +766,9 @@ osm2rdf::osm::GeometryHandler<W>::dumpNodeRelations() {
         _writer->writeTriple(
             areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
             nodeIRI);
-        _writer->writeTriple(areaIRI,
-                             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
-                             nodeIRI);
+        _writer->writeTriple(
+            areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
+            nodeIRI);
       }
 #pragma omp critical(nodeDataChange)
       std::copy(skip.begin(), skip.end(), std::back_inserter(nodeData[nodeId]));
@@ -903,7 +906,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
+              areaIRI,
+              osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
         } else {
           intersectsChecks++;
@@ -929,7 +933,8 @@ void osm2rdf::osm::GeometryHandler<W>::dumpWayRelations(
             skipIntersects.insert(newSkip);
           }
           _writer->writeTriple(
-              areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
+              areaIRI,
+              osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
               wayIRI);
         }
         if (!doesIntersect) {

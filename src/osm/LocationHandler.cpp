@@ -22,9 +22,9 @@
 
 #include "osm2rdf/config/Config.h"
 #include "osmium/handler/node_locations_for_ways.hpp"
+#include "osmium/index/map/dense_file_array.hpp"
 #include "osmium/index/map/flex_mem.hpp"
 #include "osmium/index/map/sparse_file_array.hpp"
-#include "osmium/index/map/dense_file_array.hpp"
 
 // ____________________________________________________________________________
 osm2rdf::osm::LocationHandler* osm2rdf::osm::LocationHandler::create(
@@ -38,6 +38,13 @@ osm2rdf::osm::LocationHandler* osm2rdf::osm::LocationHandler::create(
   }
 
   return new osm2rdf::osm::LocationHandlerRAM(config);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+osmium::Location osm2rdf::osm::LocationHandlerImpl<T>::get_node_location(
+    const osmium::object_id_type id) const {
+  return _handler.get_node_location(id);
 }
 
 // ____________________________________________________________________________
@@ -68,6 +75,14 @@ osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
       _index(_cacheFile.fileDescriptor()),
       _handler(_index) {
   _handler.ignore_errors();
+}
+
+// ____________________________________________________________________________
+osmium::Location
+osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
+    osmium::unsigned_object_id_type, osmium::Location>>::
+    get_node_location(const osmium::object_id_type id) const {
+  return _handler.get_node_location(id);
 }
 
 // ____________________________________________________________________________
@@ -106,4 +121,12 @@ void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
     osmium::unsigned_object_id_type,
     osmium::Location>>::way(osmium::Way& way) {  // NOLINT
   _handler.way(way);
+}
+
+// ____________________________________________________________________________
+osmium::Location
+osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
+    osmium::unsigned_object_id_type, osmium::Location>>::
+    get_node_location(const osmium::object_id_type id) const {
+  return _handler.get_node_location(id);
 }

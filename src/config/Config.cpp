@@ -81,6 +81,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
             << prefix
             << osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_INFO;
       }
+      if (addRelationEnvelope) {
+        oss << "\n"
+            << prefix
+            << osm2rdf::config::constants::ADD_RELATION_ENVELOPE_INFO;
+      }
     }
     if (noWayFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_WAY_FACTS_INFO;
@@ -171,7 +176,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
         << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
   }
 
-  if (storeLocationsOnDisk.size()) {
+  if (!storeLocationsOnDisk.empty()) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO
         << " " << storeLocationsOnDisk;
@@ -289,6 +294,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_SHORT,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_HELP);
+#if BOOST_VERSION >= 107700
+  auto addRelationEnvelopeOp = op.add<popl::Switch>(
+      osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG,
+      osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_HELP);
+#endif  // BOOST_VERSION >= 107700
   auto addNodeEnvelopeOp = op.add<popl::Switch>(
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG,
@@ -444,6 +455,9 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
     addRelationBorderMembers = addRelationBorderMembersOp->is_set();
+#if BOOST_VERSION >= 107700
+    addRelationEnvelope = addRelationEnvelopeOp->is_set();
+#endif  // BOOST_VERSION >= 107700
     addNodeEnvelope = addNodeEnvelopeOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();

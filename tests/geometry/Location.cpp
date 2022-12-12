@@ -77,7 +77,7 @@ TEST(GEOMETRY_Location, notEqualsOperator) {
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Location, serializationBinary) {
-  std::stringstream buffer;
+  std::stringstream boostBuffer;
 
   osm2rdf::geometry::Location origDefaultObject = getDefaultObject();
   osm2rdf::geometry::Location origFilledObject = getFilledObject();
@@ -85,11 +85,11 @@ TEST(GEOMETRY_Location, serializationBinary) {
   osm2rdf::geometry::Location loadedFilledObject;
 
   // Store and load
-  boost::archive::binary_oarchive oa(buffer);
+  boost::archive::binary_oarchive oa(boostBuffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  // std::cerr << buffer.str() << std::endl;
-  boost::archive::binary_iarchive ia(buffer);
+  // std::cerr << boostBuffer.str() << std::endl;
+  boost::archive::binary_iarchive ia(boostBuffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 
@@ -100,7 +100,7 @@ TEST(GEOMETRY_Location, serializationBinary) {
 
 // ____________________________________________________________________________
 TEST(GEOMETRY_Location, serializationText) {
-  std::stringstream buffer;
+  std::stringstream boostBuffer;
 
   osm2rdf::geometry::Location origDefaultObject = getDefaultObject();
   osm2rdf::geometry::Location origFilledObject = getFilledObject();
@@ -108,11 +108,11 @@ TEST(GEOMETRY_Location, serializationText) {
   osm2rdf::geometry::Location loadedFilledObject;
 
   // Store and load
-  boost::archive::text_oarchive oa(buffer);
+  boost::archive::text_oarchive oa(boostBuffer);
   oa << origDefaultObject;
   oa << origFilledObject;
-  // std::cerr << buffer.str() << std::endl;
-  boost::archive::text_iarchive ia(buffer);
+  // std::boostBuffer << buffer.str() << std::endl;
+  boost::archive::text_iarchive ia(boostBuffer);
   ia >> loadedDefaultObject;
   ia >> loadedFilledObject;
 

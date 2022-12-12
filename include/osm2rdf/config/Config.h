@@ -49,6 +49,7 @@ struct Config {
   bool addAreaEnvelope = false;
   bool addNodeEnvelope = false;
   bool addRelationBorderMembers = false;
+  bool addRelationEnvelope = false;
   bool addSortMetadata = true;
   bool addWayEnvelope = false;
   bool addWayMetadata = false;
