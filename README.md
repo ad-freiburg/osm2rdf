@@ -3,6 +3,9 @@ Convert OpenStreetMap (OSM) data to Turtle (TTL). `osm2rdf` converts various for
 
 ## Getting started
 
+Some features require [boost](https://www.boost.org/) version **1.78 or newer**.
+To enable these features boost has to be updated manualy on most systems as distributions do ship older versions.
+
 ### Docker
 
 The provided `Makefile` contains targets which build a Docker image, prepare input and output directories and downloads data.

@@ -60,7 +60,7 @@ std::vector<osm2rdf::osm::RelationMember> osm2rdf::osm::Relation::members()
   return _members;
 }
 
-#if BOOST_VERSION >= 107700
+#if BOOST_VERSION >= 107800
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::hasGeometry() const noexcept {
   return !(_geom.empty());
@@ -127,7 +127,7 @@ void osm2rdf::osm::Relation::buildGeometry(
     _envelope.max_corner() = geometry::Location{0, 0};
   }
 }
-#endif  // BOOST_VERSION >= 107700
+#endif  // BOOST_VERSION >= 107800
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
@@ -137,13 +137,13 @@ bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::operator==(const Relation& other) const noexcept {
   return _id == other._id &&
-#if BOOST_VERSION >= 107700
+#if BOOST_VERSION >= 107800
          _envelope == other._envelope &&
-#endif  // BOOST_VERSION >= 107700
+#endif  // BOOST_VERSION >= 107800
          _members == other._members &&
-#if BOOST_VERSION >= 107700
+#if BOOST_VERSION >= 107800
          _geom == other._geom &&
-#endif  // BOOST_VERSION >= 107700
+#endif  // BOOST_VERSION >= 107800
          _tags == other._tags;
 }
 
