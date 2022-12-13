@@ -26,7 +26,7 @@
 #include "osm2rdf/geometry/Node.h"
 #include "osm2rdf/geometry/Way.h"
 
-#if BOOST_VERSION >= 107700
+#if BOOST_VERSION >= 107800
 
 namespace osm2rdf::geometry {
 typedef boost::variant<osm2rdf::geometry::Node, osm2rdf::geometry::Way,
@@ -72,6 +72,6 @@ void serialize(Archive& ar, osm2rdf::geometry::Relation& m,
 }
 }  // namespace boost::serialization
 
-#endif  // BOOST_VERSION >= 107700
+#endif  // BOOST_VERSION >= 107800
 
 #endif  // OSM2RDF_GEOMETRY_GEOMETRYCOLLECTION_H
