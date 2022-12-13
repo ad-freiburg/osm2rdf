@@ -294,12 +294,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_SHORT,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_HELP);
-#if BOOST_VERSION >= 107700
+#if BOOST_VERSION >= 107800
   auto addRelationEnvelopeOp = op.add<popl::Switch>(
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG,
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_HELP);
-#endif  // BOOST_VERSION >= 107700
+#endif  // BOOST_VERSION >= 107800
   auto addNodeEnvelopeOp = op.add<popl::Switch>(
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG,
@@ -455,9 +455,9 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
     addRelationBorderMembers = addRelationBorderMembersOp->is_set();
-#if BOOST_VERSION >= 107700
+#if BOOST_VERSION >= 107800
     addRelationEnvelope = addRelationEnvelopeOp->is_set();
-#endif  // BOOST_VERSION >= 107700
+#endif  // BOOST_VERSION >= 107800
     addNodeEnvelope = addNodeEnvelopeOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
