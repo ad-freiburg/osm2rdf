@@ -29,14 +29,6 @@ osm2rdf::osm::RelationHandler::RelationHandler(
 
 // ____________________________________________________________________________
 void osm2rdf::osm::RelationHandler::prepare_for_lookup() {
-  std::sort(_relationIds.begin(), _relationIds.end());
-  auto lastRelation = std::unique(_relationIds.begin(), _relationIds.end());
-  _relationIds.erase(lastRelation, _relationIds.end());
-
-  std::sort(_wayIds.begin(), _wayIds.end());
-  auto lastWay = std::unique(_wayIds.begin(), _wayIds.end());
-  _wayIds.erase(lastWay, _wayIds.end());
-
   _firstPassDone = true;
 }
 
@@ -71,10 +63,11 @@ void osm2rdf::osm::RelationHandler::relation(const osmium::Relation& relation) {
   for (const auto& relationMember : relation.cmembers()) {
     switch (relationMember.type()) {
       case osmium::item_type::way:
-        _wayIds.push_back(relationMember.positive_ref());
+        _ways[relationMember.positive_ref()] = {};
         break;
       case osmium::item_type::relation:
-        _relationIds.push_back(relationMember.positive_ref());
+        _relations[relationMember.positive_ref()] = {};
+        break;
       default:
         break;
     }
@@ -86,12 +79,11 @@ void osm2rdf::osm::RelationHandler::way(const osmium::Way& way) {
   if (!_firstPassDone) {
     return;
   }
-  if (std::find(_wayIds.begin(), _wayIds.end(), way.positive_id()) !=
-      _wayIds.end()) {
+  if (_ways.find(way.positive_id()) != _ways.end()) {
     std::vector<uint64_t> ids;
     for (const auto& nodeRef : way.nodes()) {
       ids.push_back(nodeRef.positive_ref());
     }
-    _ways.insert({way.positive_id(), ids});
+    _ways[way.positive_id()] = std::move(ids);
   }
 }
