@@ -217,10 +217,12 @@ void GeometryHandler<W>::way(const Way& way) {
     boxes.push_back(way.envelope());
   }
 
+  const auto& boxIds = pack(getBoxIds(geom, way.envelope()));
+
 #pragma omp critical(wayDataInsert)
   {
     _oaWays << SpatialWayValue(way.envelope(), way.id(), geom, nodeIds, boxes,
-                               pack(getBoxIds(geom, way.envelope())));
+                               boxIds);
     _numWays++;
   }
 }
