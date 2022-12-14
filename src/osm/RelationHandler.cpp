@@ -45,14 +45,14 @@ bool osm2rdf::osm::RelationHandler::hasLocationHandler() const {
 
 // ____________________________________________________________________________
 osmium::Location osm2rdf::osm::RelationHandler::get_node_location(
-    const uint64_t id) const {
-  return _locationHandler->get_node_location(id);
+    const uint64_t nodeId) const {
+  return _locationHandler->get_node_location(nodeId);
 }
 
 // ____________________________________________________________________________
 std::vector<uint64_t> osm2rdf::osm::RelationHandler::get_noderefs_of_way(
-    const uint64_t id) {
-  return _ways[id];
+    const uint64_t wayId) {
+  return _ways[wayId];
 }
 
 // ____________________________________________________________________________

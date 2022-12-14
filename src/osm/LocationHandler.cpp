@@ -43,8 +43,8 @@ osm2rdf::osm::LocationHandler* osm2rdf::osm::LocationHandler::create(
 // ____________________________________________________________________________
 template <typename T>
 osmium::Location osm2rdf::osm::LocationHandlerImpl<T>::get_node_location(
-    const osmium::object_id_type id) const {
-  return _handler.get_node_location(id);
+    const osmium::object_id_type nodeId) const {
+  return _handler.get_node_location(nodeId);
 }
 
 // ____________________________________________________________________________
@@ -55,7 +55,7 @@ void osm2rdf::osm::LocationHandlerImpl<T>::node(const osmium::Node& node) {
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::osm::LocationHandlerImpl<T>::way(osmium::Way& way) {  // NOLINT
+void osm2rdf::osm::LocationHandlerImpl<T>::way(osmium::Way& way) {
   _handler.way(way);
 }
 
@@ -81,8 +81,8 @@ osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
 osmium::Location
 osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type, osmium::Location>>::
-    get_node_location(const osmium::object_id_type id) const {
-  return _handler.get_node_location(id);
+    get_node_location(const osmium::object_id_type nodeId) const {
+  return _handler.get_node_location(nodeId);
 }
 
 // ____________________________________________________________________________
@@ -95,7 +95,7 @@ void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
 // ____________________________________________________________________________
 void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type,
-    osmium::Location>>::way(osmium::Way& way) {  // NOLINT
+    osmium::Location>>::way(osmium::Way& way) {
   _handler.way(way);
 }
 
@@ -119,7 +119,7 @@ void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
 // ____________________________________________________________________________
 void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
     osmium::unsigned_object_id_type,
-    osmium::Location>>::way(osmium::Way& way) {  // NOLINT
+    osmium::Location>>::way(osmium::Way& way) {
   _handler.way(way);
 }
 
@@ -127,6 +127,6 @@ void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
 osmium::Location
 osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
     osmium::unsigned_object_id_type, osmium::Location>>::
-    get_node_location(const osmium::object_id_type id) const {
-  return _handler.get_node_location(id);
+    get_node_location(const osmium::object_id_type nodeId) const {
+  return _handler.get_node_location(nodeId);
 }

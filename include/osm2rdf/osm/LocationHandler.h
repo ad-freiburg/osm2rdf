@@ -38,7 +38,7 @@ class LocationHandler : public osmium::handler::Handler {
  public:
   virtual ~LocationHandler() {}
   virtual void node(const osmium::Node& node) = 0;
-  virtual void way(osmium::Way& way) = 0;  // NOLINT
+  virtual void way(osmium::Way& way) = 0;
   [[nodiscard]] virtual osmium::Location get_node_location(
       const osmium::object_id_type id) const = 0;
   // Helper creating the correct instance.
@@ -50,9 +50,9 @@ class LocationHandlerImpl : public LocationHandler {
  public:
   explicit LocationHandlerImpl(const osm2rdf::config::Config& config);
   void node(const osmium::Node& node);
-  void way(osmium::Way& way);  // NOLINT
+  void way(osmium::Way& way);
   [[nodiscard]] osmium::Location get_node_location(
-      const osmium::object_id_type id) const;
+      const osmium::object_id_type nodeId) const;
 
  protected:
   T _index;
@@ -66,9 +66,9 @@ class LocationHandlerImpl<osmium::index::map::SparseFileArray<
  public:
   explicit LocationHandlerImpl(const osm2rdf::config::Config& config);
   void node(const osmium::Node& node);
-  void way(osmium::Way& way);  // NOLINT
+  void way(osmium::Way& way);
   [[nodiscard]] osmium::Location get_node_location(
-      const osmium::object_id_type id) const;
+      const osmium::object_id_type nodeId) const;
 
  protected:
   osm2rdf::util::CacheFile _cacheFile;
@@ -87,9 +87,9 @@ class LocationHandlerImpl<osmium::index::map::DenseFileArray<
  public:
   explicit LocationHandlerImpl(const osm2rdf::config::Config& config);
   void node(const osmium::Node& node);
-  void way(osmium::Way& way);  // NOLINT
+  void way(osmium::Way& way);
   [[nodiscard]] osmium::Location get_node_location(
-      const osmium::object_id_type id) const;
+      const osmium::object_id_type nodeId) const;
 
  protected:
   osm2rdf::util::CacheFile _cacheFile;
