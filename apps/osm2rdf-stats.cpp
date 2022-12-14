@@ -163,25 +163,25 @@ class OsmiumIdHandler : public osmium::handler::Handler {
   }
 
   static std::string idInfo(const uint64_t max) {
-    std::string s{"<= "};
+    std::string size{"<= "};
     if (max <= std::numeric_limits<uint8_t>::max()) {
-      s += " uint8_t";
-      return s;
+      size += " uint8_t";
+      return size;
     }
     if (max <= std::numeric_limits<uint16_t>::max()) {
-      s += "uint16_t";
-      return s;
+      size += "uint16_t";
+      return size;
     }
     if (max <= std::numeric_limits<uint32_t>::max()) {
-      s += "uint32_t";
-      return s;
+      size += "uint32_t";
+      return size;
     }
     if (max <= std::numeric_limits<uint64_t>::max()) {
-      s += "uint64_t";
-      return s;
+      size += "uint64_t";
+      return size;
     }
-    s += "unknown!";
-    return s;
+    size += "unknown!";
+    return size;
   }
 
  protected:
