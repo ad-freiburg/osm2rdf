@@ -52,7 +52,7 @@ struct Config {
   // case). Think of this is maximum portion of the radius that is
   // "collapsed away" by the inner simplification, or added by the outer
   // simplification
-  double simplifyGeometriesInnerOuter = 1/(3.14 * 20);
+  double simplifyGeometriesInnerOuter = 1 / (3.14 * 20);
   bool dontUseInnerOuterGeoms = false;
   bool approximateSpatialRels = false;
 
@@ -112,8 +112,8 @@ struct Config {
   [[nodiscard]] std::string getInfo(std::string_view prefix) const;
 
   // Generate a path inside the cache directory.
-  [[nodiscard]] std::filesystem::path getTempPath(const std::string& p,
-                                                  const std::string& s) const;
+  [[nodiscard]] std::filesystem::path getTempPath(
+      const std::string& path, const std::string& suffix) const;
 };
 }  // namespace osm2rdf::config
 
