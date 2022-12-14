@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -38,7 +39,6 @@ class FactHandler {
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
- protected:
   template <typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
                           const G& g);
@@ -46,6 +46,8 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1);
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2);
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
+
+ protected:
 
   void writeBox(const std::string& s, const std::string& p,
                 const osm2rdf::geometry::Box& box);
@@ -55,6 +57,13 @@ class FactHandler {
   void writeTag(const std::string& s, const osm2rdf::osm::Tag& tag);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_Integer);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS);
+  FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyIRI);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
 

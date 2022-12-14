@@ -16,12 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/Relation.h"
-
 #include <iostream>
 #include <vector>
 
 #include "boost/geometry.hpp"
+#include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
@@ -50,13 +49,13 @@ osm2rdf::osm::Relation::id_t osm2rdf::osm::Relation::id() const noexcept {
 }
 
 // ____________________________________________________________________________
-osm2rdf::osm::TagList osm2rdf::osm::Relation::tags() const noexcept {
+const osm2rdf::osm::TagList& osm2rdf::osm::Relation::tags() const noexcept {
   return _tags;
 }
 
 // ____________________________________________________________________________
-std::vector<osm2rdf::osm::RelationMember> osm2rdf::osm::Relation::members()
-    const noexcept {
+const std::vector<osm2rdf::osm::RelationMember>&
+osm2rdf::osm::Relation::members() const noexcept {
   return _members;
 }
 

@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -163,14 +164,12 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << prefix << osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INFO
           << std::to_string(simplifyGeometries);
     }
+    if (writeGeomRelTransClosure) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_INFO;
+    }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
-  if (minimalAreaEnvelopeRatio > 0) {
-    oss << "\n"
-        << prefix
-        << osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_INFO
-        << std::to_string(minimalAreaEnvelopeRatio);
-  }
   if (writeDAGDotFiles) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
@@ -182,18 +181,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
         << " " << storeLocationsOnDisk;
   }
 
-  if (writeGeometricRelationStatistics) {
-#ifdef ENABLE_GEOMETRY_STATISTIC
-    oss << "\n"
-        << prefix
-        << osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_INFO;
-#else
-    oss << "\n"
-        << prefix
-        << osm2rdf::config::constants::
-               WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED;
-#endif
-  }
   if (writeRDFStatistics) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_RDF_STATISTICS_INFO;
@@ -281,6 +268,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_SHORT,
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_HELP);
+  auto writeGeomRelTransClosureOp =
+      op.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT,
+          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG,
+          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP);
 
   auto addAreaEnvelopeOp = op.add<popl::Switch>(
       osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
@@ -340,16 +332,31 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_HELP);
 
   auto simplifyGeometriesOp =
-      op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
+      op.add<popl::Value<double>, popl::Attribute::expert>(
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_SHORT,
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_HELP,
           simplifyGeometries);
+
+  auto simplifyGeometriesInnerOuterOp = op.add<popl::Value<double>,
+                                               popl::Attribute::expert>(
+      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_SHORT,
+      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG,
+      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP,
+      simplifyGeometriesInnerOuter);
+  auto dontUseInnerOuterGeomsOp = op.add<popl::Switch>(
+      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
+      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
+      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
+  auto approximateSpatialRelsOp = op.add<popl::Switch>(
+      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_SHORT,
+      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_LONG,
+      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_HELP);
   auto simplifyWKTOp = op.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
       osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_HELP, simplifyWKT);
-  auto wktDeviationOp = op.add<popl::Value<uint16_t>, popl::Attribute::expert>(
+  auto wktDeviationOp = op.add<popl::Value<double>, popl::Attribute::expert>(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_SHORT,
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_HELP,
@@ -359,22 +366,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WKT_PRECISION_OPTION_SHORT,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_HELP, wktPrecision);
-  auto minimalAreaEnvelopeRatioOp =
-      op.add<popl::Value<double>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT,
-          osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG,
-          osm2rdf::config::constants::MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP,
-          minimalAreaEnvelopeRatio);
 
   auto writeDotFilesOp = op.add<popl::Switch, popl::Attribute::expert>(
       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_SHORT,
       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_LONG,
       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_HELP);
 
-  auto writeStatisticsOp = op.add<popl::Switch, popl::Attribute::expert>(
-      osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_SHORT,
-      osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG,
-      osm2rdf::config::constants::WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP);
   auto writeRDFStatisticsOp = op.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_SHORT,
       osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_LONG,
@@ -443,6 +440,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
     noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
 
+    writeGeomRelTransClosure = writeGeomRelTransClosureOp->is_set();
+
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();
     noNodeFacts |= noNodesOp->is_set();
@@ -465,9 +464,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
-    minimalAreaEnvelopeRatio = minimalAreaEnvelopeRatioOp->value();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();
+    simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();
+    dontUseInnerOuterGeoms = dontUseInnerOuterGeomsOp->value();
+    approximateSpatialRels = approximateSpatialRelsOp->value();
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
@@ -484,7 +485,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Dot
     writeDAGDotFiles = writeDotFilesOp->is_set();
 
-    writeGeometricRelationStatistics = writeStatisticsOp->is_set();
     writeRDFStatistics = writeRDFStatisticsOp->is_set();
 
     // Output
@@ -501,14 +501,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     rdfStatisticsPath = std::filesystem::path(output);
     rdfStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
     rdfStatisticsPath += osm2rdf::config::constants::JSON_EXTENSION;
-    geomStatisticsPath = std::filesystem::path(output);
-    geomStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
 
     // Mark compressed output
     if (outputCompress && !output.empty() &&
         output.extension() != osm2rdf::config::constants::BZIP2_EXTENSION) {
       output += osm2rdf::config::constants::BZIP2_EXTENSION;
-      geomStatisticsPath += osm2rdf::config::constants::BZIP2_EXTENSION;
     }
 
     // osmium location cache

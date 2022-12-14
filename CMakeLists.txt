@@ -30,14 +30,22 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# export compile commands to tools like clang
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # ----------------------------------------------------------------------------
 # Global settings
 # ----------------------------------------------------------------------------
-# Enable geometry statistics
-#add_definitions(-DENABLE_GEOMETRY_STATISTIC)
+
+# set(CMAKE_VERBOSE_MAKEFILE ON)
+
+option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enable" 0)
 
 # Enable verbose makefile
-#set(CMAKE_VERBOSE_MAKEFILE ON)
+if (ENABLE_GEOMETRY_STATISTIC)
+	# Enable geometry statistics
+	add_definitions(-DENABLE_GEOMETRY_STATISTIC)
+endif()
 
 add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)

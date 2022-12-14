@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -16,11 +17,10 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/OsmiumHandler.h"
-
 #include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/osm/LocationHandler.h"
+#include "osm2rdf/osm/OsmiumHandler.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/util/Time.h"
 #include "osmium/area/assembler.hpp"
@@ -34,7 +34,7 @@ template <typename W>
 osm2rdf::osm::OsmiumHandler<W>::OsmiumHandler(
     const osm2rdf::config::Config& config, osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
-      _dumpHandler(osm2rdf::osm::FactHandler<W>(config, writer)),
+      _factHandler(osm2rdf::osm::FactHandler<W>(config, writer)),
       _geometryHandler(osm2rdf::osm::GeometryHandler<W>(config, writer)),
       _relationHandler(osm2rdf::osm::RelationHandler(config)) {}
 
@@ -85,11 +85,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       {
 #pragma omp single
         {
-          while (true) {
-            osmium::memory::Buffer buf = reader.read();
-            if (!buf) {
-              break;
-            }
+          while (auto buf = reader.read()) {
             osmium::apply(
                 buf, *locationHandler,
 #if BOOST_VERSION >= 107800
@@ -146,15 +142,20 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   if (_config.adminRelationsOnly && area.tags()["admin_level"] == nullptr) {
     return;
   }
-  const auto& a = osm2rdf::osm::Area(area);
-  if (!_config.noFacts && !_config.noAreaFacts) {
-    _areasDumped++;
+  auto osmArea = osm2rdf::osm::Area(area);
 #pragma omp task
-    _dumpHandler.area(a);
-  }
-  if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
-    _areaGeometriesHandled++;
-    _geometryHandler.area(a);
+  {
+    osmArea.finalize();
+    if (!_config.noFacts && !_config.noAreaFacts) {
+      _areasDumped++;
+#pragma omp task
+      _factHandler.area(osmArea);
+    }
+    if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
+      _areaGeometriesHandled++;
+#pragma omp task
+      _geometryHandler.area(osmArea);
+    }
   }
 }
 
@@ -165,18 +166,19 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   if (_config.adminRelationsOnly) {
     return;
   }
-  const auto& n = osm2rdf::osm::Node(node);
+  const auto& osmNode = osm2rdf::osm::Node(node);
   if (node.tags().empty()) {
     return;
   }
   if (!_config.noFacts && !_config.noNodeFacts) {
     _nodesDumped++;
 #pragma omp task
-    _dumpHandler.node(n);
+    _factHandler.node(osmNode);
   }
   if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
     _nodeGeometriesHandled++;
-    _geometryHandler.node(n);
+#pragma omp task
+    _geometryHandler.node(osmNode);
   }
 }
 
@@ -191,17 +193,28 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
   if (_config.adminRelationsOnly && relation.tags()["admin_level"] == nullptr) {
     return;
   }
-  auto r = osm2rdf::osm::Relation(relation);
+  auto osmRelation = osm2rdf::osm::Relation(relation);
 #if BOOST_VERSION >= 107800
-  if (_relationHandler.hasLocationHandler()) {
-    r.buildGeometry(_relationHandler);
-  }
-#endif  // BOOST_VERSION >= 107800
-  if (!_config.noFacts && !_config.noRelationFacts) {
-    _relationsDumped++;
+  // only task this away if we actually build the relation geometries,
+  // otherwise this just adds multithreading overhead for nothing
 #pragma omp task
-    _dumpHandler.relation(r);
+  {
+    if (_relationHandler.hasLocationHandler()) {
+      osmRelation.buildGeometry(_relationHandler);
+    }
+#endif  // BOOST_VERSION >= 107800
+    if (!_config.noFacts && !_config.noRelationFacts) {
+      _relationsDumped++;
+#pragma omp task
+      _factHandler.relation(osmRelation);
+    }
+
+#pragma omp task
+    _geometryHandler.relation(osmRelation);
+
+#if BOOST_VERSION >= 107800
   }
+#endif
 }
 
 // ____________________________________________________________________________
@@ -214,15 +227,16 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   if (_config.adminRelationsOnly) {
     return;
   }
-  const auto& w = osm2rdf::osm::Way(way);
+  const auto& osmWay = osm2rdf::osm::Way(way);
   if (!_config.noFacts && !_config.noWayFacts) {
     _waysDumped++;
 #pragma omp task
-    _dumpHandler.way(w);
+    _factHandler.way(osmWay);
   }
   if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
     _wayGeometriesHandled++;
-    _geometryHandler.way(w);
+#pragma omp task
+    _geometryHandler.way(osmWay);
   }
 }
 

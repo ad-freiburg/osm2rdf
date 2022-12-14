@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -43,7 +44,17 @@ struct Config {
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
   bool noWayGeometricRelations = false;
-  uint16_t simplifyGeometries = 0;
+  double simplifyGeometries = 0;
+
+  // the epsilon for the inner/outer douglas-peucker is based on the
+  // circumference of a hypothetical circle. By dividing by ~pi, we base the
+  // epsilon on 1/n of the radius of this hypothetical circle (n = 20 in this
+  // case). Think of this is maximum portion of the radius that is
+  // "collapsed away" by the inner simplification, or added by the outer
+  // simplification
+  double simplifyGeometriesInnerOuter = 1/(3.14 * 20);
+  bool dontUseInnerOuterGeoms = false;
+  bool approximateSpatialRels = false;
 
   // Select amount to dump
   bool addAreaEnvelope = false;
@@ -61,7 +72,6 @@ struct Config {
 
   // Addition filters / data
   bool addAreaEnvelopeRatio = false;
-  double minimalAreaEnvelopeRatio = -1.0;
 
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
@@ -70,15 +80,16 @@ struct Config {
   bool writeDAGDotFiles = false;
 
   // Statistics
-  bool writeGeometricRelationStatistics = false;
-  std::filesystem::path geomStatisticsPath;
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
   // Output modifiers
   uint16_t simplifyWKT = 250;
-  uint16_t wktDeviation = 5;
+  double wktDeviation = 5;
   uint16_t wktPrecision = 7;
+
+  // Transitive clouse
+  bool writeGeomRelTransClosure = false;
 
   // Output, empty for stdout
   std::filesystem::path output;

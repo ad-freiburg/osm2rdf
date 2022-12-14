@@ -5,3 +5,5 @@ output/
 scratch/
 perf.data*
 /include/osm2rdf/Version.h
+*.swp
+*.swo

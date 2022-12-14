@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -57,7 +58,7 @@ class OsmiumHandler : public osmium::handler::Handler {
 
  protected:
   osm2rdf::config::Config _config;
-  osm2rdf::osm::FactHandler<W> _dumpHandler;
+  osm2rdf::osm::FactHandler<W> _factHandler;
   osm2rdf::osm::GeometryHandler<W> _geometryHandler;
   osm2rdf::osm::RelationHandler _relationHandler;
   size_t _areasSeen = 0;

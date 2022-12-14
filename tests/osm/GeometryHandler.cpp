@@ -1,5 +1,6 @@
 // Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
 //
@@ -86,9 +87,13 @@ TEST(OSM_GeometryHandler, addNamedAreaFromRelation) {
 
   // Compare stored area with original
   const auto& dst = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
+
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src.geom(), std::get<2>(dst), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Cleanup
   output.close();
@@ -134,169 +139,13 @@ TEST(OSM_GeometryHandler, addNamedAreaFromWay) {
 
   // Compare stored area with original
   const auto& dst = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
 
-  // Cleanup
-  output.close();
-  std::filesystem::remove_all(config.cache);
-  std::filesystem::remove_all(config.output);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_GeometryHandler, addNamedAreaFromRelationWithRatios) {
-  osm2rdf::config::Config config;
-  config.output = config.getTempPath(
-      "TEST_OSM_GeometryHandler", "addNamedAreaFromRelationWithRatios-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
-                                    "addNamedAreaFromRelationWithRatios-cache");
-  config.minimalAreaEnvelopeRatio = 0.75;
-  std::filesystem::create_directories(config.output);
-  std::filesystem::create_directories(config.cache);
-  osm2rdf::util::Output output{config, config.output};
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::GeometryHandler gh{config, &writer};
-
-  const int areaId = 43;
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer1{initial_buffer_size,
-                                 osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer buffer2{initial_buffer_size,
-                                 osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(buffer1, osmium::builder::attr::_id(areaId),
-                            osmium::builder::attr::_tag("name", "Name"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.61}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }));
-  // Rombus in square -> ratio ~0.5
-  osmium::builder::add_area(buffer2, osmium::builder::attr::_id(areaId + 2),
-                            osmium::builder::attr::_tag("name", "Name2"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {0.0, 5.0}},
-                                {2, {5.0, 10.0}},
-                                {3, {10.0, 5.0}},
-                                {4, {5.0, 0.0}},
-                                {1, {0.0, 5.0}},
-                            }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area src1{buffer1.get<osmium::Area>(0)};
-  const osm2rdf::osm::Area src2{buffer2.get<osmium::Area>(0)};
-  ASSERT_FALSE(src1.fromWay());
-
-  ASSERT_EQ(0, gh._spatialStorageArea.size());
-  ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(src1);
-  ASSERT_EQ(1, gh._spatialStorageArea.size());
-  gh.area(src2);
-  ASSERT_EQ(1, gh._numUnnamedAreas);
-
-  // Compare stored area with original
-  const auto& dst1 = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src1.envelope() == std::get<0>(dst1));
-  ASSERT_TRUE(src1.id() == std::get<1>(dst1));
-  ASSERT_TRUE(src1.geom() == std::get<2>(dst1));
-
-  // Read area from dump and compare
-  osm2rdf::osm::SpatialAreaValue dst2;
-
-  gh.closeExternalStorage();
-  std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
-                    std::ios::binary);
-  boost::archive::binary_iarchive ia(ifs);
-  ia >> dst2;
-  ifs.close();
-
-  // Compare stored area with original
-  ASSERT_TRUE(src2.envelope() == std::get<0>(dst2));
-  ASSERT_TRUE(src2.id() == std::get<1>(dst2));
-  ASSERT_TRUE(src2.geom() == std::get<2>(dst2));
-
-  // Cleanup
-  output.close();
-  std::filesystem::remove_all(config.cache);
-  std::filesystem::remove_all(config.output);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_GeometryHandler, addNamedAreaFromWayWithRatios) {
-  osm2rdf::config::Config config;
-  config.output = config.getTempPath("TEST_OSM_GeometryHandler",
-                                     "addNamedAreaFromWayWithRatios-output");
-  config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
-                                    "addNamedAreaFromWayWithRatios-cache");
-  config.minimalAreaEnvelopeRatio = 0.75;
-  std::filesystem::create_directories(config.output);
-  std::filesystem::create_directories(config.cache);
-  osm2rdf::util::Output output{config, config.output};
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::GeometryHandler gh{config, &writer};
-
-  const int areaId = 42;
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer buffer1{initial_buffer_size,
-                                 osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer buffer2{initial_buffer_size,
-                                 osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(buffer1, osmium::builder::attr::_id(areaId),
-                            osmium::builder::attr::_tag("name", "Name"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.61}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }));
-  // Rombus in square -> ratio ~0.5
-  osmium::builder::add_area(buffer2, osmium::builder::attr::_id(areaId + 2),
-                            osmium::builder::attr::_tag("name", "Name2"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {0.0, 5.0}},
-                                {2, {5.0, 10.0}},
-                                {3, {10.0, 5.0}},
-                                {4, {5.0, 0.0}},
-                                {1, {0.0, 5.0}},
-                            }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area src1{buffer1.get<osmium::Area>(0)};
-  const osm2rdf::osm::Area src2{buffer2.get<osmium::Area>(0)};
-  ASSERT_TRUE(src1.fromWay());
-
-  ASSERT_EQ(0, gh._spatialStorageArea.size());
-  ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(src1);
-  ASSERT_EQ(1, gh._spatialStorageArea.size());
-  gh.area(src2);
-  ASSERT_EQ(1, gh._numUnnamedAreas);
-
-  // Compare stored area with original
-  const auto& dst1 = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src1.envelope() == std::get<0>(dst1));
-  ASSERT_TRUE(src1.id() == std::get<1>(dst1));
-  ASSERT_TRUE(src1.geom() == std::get<2>(dst1));
-
-  // Read area from dump and compare
-  osm2rdf::osm::SpatialAreaValue dst2;
-
-  gh.closeExternalStorage();
-  std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
-                    std::ios::binary);
-  boost::archive::binary_iarchive ia(ifs);
-  ia >> dst2;
-  ifs.close();
-
-  // Compare stored area with original
-  ASSERT_TRUE(src2.envelope() == std::get<0>(dst2));
-  ASSERT_TRUE(src2.id() == std::get<1>(dst2));
-  ASSERT_TRUE(src2.geom() == std::get<2>(dst2));
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src.geom(), std::get<2>(dst), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Cleanup
   output.close();
@@ -349,9 +198,13 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   ifs.close();
 
   // Compare stored area with original
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
+
+  osm2rdf::geometry::Area diff;
+  boost::geometry::difference(src.geom(), std::get<2>(dst), diff);
+  ASSERT_FLOAT_EQ(boost::geometry::area(diff), 0);
 
   // Cleanup
   output.close();
@@ -448,9 +301,8 @@ TEST(OSM_GeometryHandler, addNode) {
   ifs.close();
 
   // Compare stored area with original
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
-  ASSERT_TRUE(src.id() == std::get<1>(dst));
-  ASSERT_TRUE(src.geom() == std::get<2>(dst));
+  ASSERT_TRUE(src.id() == std::get<0>(dst));
+  ASSERT_TRUE(src.geom() == std::get<1>(dst));
 
   // Cleanup
   output.close();
@@ -606,17 +458,28 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
                             }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  // Create osm2rdf object from osmium object
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   gh.closeExternalStorage();
 
   ASSERT_EQ(0, gh._spatialIndex.size());
   gh.prepareRTree();
   ASSERT_EQ(gh._spatialStorageArea.size(), gh._spatialIndex.size());
 
-  std::vector<SpatialAreaValue> queryResult;
+  std::vector<SpatialAreaRefValue> queryResult;
   osm2rdf::geometry::Box nodeEnvelope;
 
   queryResult.clear();
@@ -768,12 +631,25 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
                             }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   gh.closeExternalStorage();
   gh.prepareRTree();
+
+  output.flush();
+  output.close();
 
   ASSERT_EQ(0, gh._directedAreaGraph.getNumVertices());
   ASSERT_EQ(0, gh._directedAreaGraph.getNumEdges());
@@ -787,9 +663,6 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
             gh._directedAreaGraph.getEdges(26));
   ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
             gh._directedAreaGraph.getEdges(24));
-
-  output.flush();
-  output.close();
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -909,10 +782,20 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
                             }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1073,10 +956,20 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
                             }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1304,10 +1197,20 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2) {
                             }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   gh.closeExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
@@ -1411,13 +1314,26 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
                                 {1, {40.1, 7.56}},
                             }));
 
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  auto area5 = osm2rdf::osm::Area(osmiumBuffer5.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+  area5.finalize();
+
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(osm2rdf::osm::Area(osmiumBuffer5.get<osmium::Area>(0)));
+  gh.area(area5);
   ASSERT_EQ(1, gh._numUnnamedAreas);
   gh.closeExternalStorage();
   gh.prepareRTree();
@@ -1429,16 +1345,6 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(
-      cerrBuffer.str(),
-      ::testing::HasSubstr("... done with looking at 4 areas\n"
-                           "                           2 intersection checks "
-                           "performed, 2 skipped by DAG\n"
-                           "                           intersect: 2 yes: 2\n"
-                           "                           3 contains checks "
-                           "performed, 1 skipped by DAG\n"
-                           "                           contains: 3 contains "
-                           "envelope: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
       "osmway:13 osm2rdf:intersects_nonarea osmrel:15 .\n"
@@ -1535,12 +1441,25 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
                             }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  auto area5 = osm2rdf::osm::Area(osmiumBuffer5.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+  area5.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   ASSERT_EQ(0, gh._numUnnamedAreas);
-  gh.area(osm2rdf::osm::Area(osmiumBuffer5.get<osmium::Area>(0)));
+  gh.area(area5);
   ASSERT_EQ(1, gh._numUnnamedAreas);
   gh.closeExternalStorage();
   gh.prepareRTree();
@@ -1552,16 +1471,6 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(
-      cerrBuffer.str(),
-      ::testing::HasSubstr("... done with looking at 3 areas\n"
-                           "                           1 intersection checks "
-                           "performed, 2 skipped by DAG\n"
-                           "                           intersect: 1 yes: 1\n"
-                           "                           1 contains checks "
-                           "performed, 2 skipped by DAG\n"
-                           "                           contains: 1 contains "
-                           "envelope: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmrel:15 .\n",
@@ -1822,10 +1731,21 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
       osmium::builder::attr::_tag("foo", "bar"));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   ASSERT_EQ(0, gh._numNodes);
   gh.node(osm2rdf::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
   ASSERT_EQ(1, gh._numNodes);
@@ -1840,11 +1760,6 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas, 2 skipped by DAG\n"
-                  "                           1 checks performed\n"
-                  "                           contains: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:13 osm2rdf:intersects_nonarea osmnode:42 .\n"
       "osmway:13 osm2rdf:contains_nonarea osmnode:42 .\n",
@@ -1936,10 +1851,21 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
       osmium::builder::attr::_tag("foo", "bar"));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   ASSERT_EQ(0, gh._numNodes);
   gh.node(osm2rdf::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
   ASSERT_EQ(1, gh._numNodes);
@@ -1954,11 +1880,6 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas, 2 skipped by DAG\n"
-                  "                           1 checks performed\n"
-                  "                           contains: 1 yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmnode:42 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmnode:42 .\n",
@@ -2221,10 +2142,21 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
                            }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   ASSERT_EQ(0, gh._numWays);
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
@@ -2238,16 +2170,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 4 areas\n"
-                  "                           2 intersection checks performed, "
-                  "2 skipped by DAG, 0 skipped by NodeInfo\n"
-                  "                           intersect: 2 yes: 2\n"
-                  "                           3 contains checks performed, 1 "
-                  "skipped by DAG\n"
-                  "                           contains: 3 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
       "osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"
@@ -2342,10 +2264,21 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
                            }));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   ASSERT_EQ(0, gh._numWays);
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
@@ -2359,16 +2292,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  ".. done with looking at 3 areas\n"
-                  "                           1 intersection checks performed, "
-                  "2 skipped by DAG, 0 skipped by NodeInfo\n"
-                  "                           intersect: 1 yes: 1\n"
-                  "                           1 contains checks performed, 2 "
-                  "skipped by DAG\n"
-                  "                           contains: 1 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n",
@@ -2474,10 +2397,21 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
       osmium::builder::attr::_tag("foo", "bar"));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   gh.node(osm2rdf::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
   gh.node(osm2rdf::osm::Node(osmiumBuffer7.get<osmium::Node>(0)));
@@ -2493,29 +2427,29 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 4 areas\n"
-                  "                           0 intersection checks performed, "
-                  "2 skipped by DAG, 2 skipped by NodeInfo\n"
-                  "                           intersect: 0 yes: 0\n"
-                  "                           3 contains checks performed, 1 "
-                  "skipped by DAG\n"
-                  "                           contains: 3 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:13 osm2rdf:intersects_nonarea osmnode:1 .\n"
-                           "osmway:13 osm2rdf:contains_nonarea osmnode:1 .\n"));
+      ::testing::HasSubstr("osmway:13 osm2rdf:intersects_nonarea osmnode:1 .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
+      ::testing::HasSubstr("osmway:13 osm2rdf:contains_nonarea osmnode:1 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
                            "osmway:11 osm2rdf:contains_nonarea osmnode:2 .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
-                           "osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"
-                           "osmway:12 osm2rdf:contains_nonarea osmway:42 .\n"));
+      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
+                           ));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:12 osm2rdf:contains_nonarea osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -2611,10 +2545,21 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
       osmium::builder::attr::_tag("foo", "bar"));
 
   // Create osm2rdf object from osmium object
-  gh.area(osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
-  gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
+  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
+  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
+  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
+  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+
+  area1.finalize();
+  area2.finalize();
+  area3.finalize();
+  area4.finalize();
+
+  gh.area(area1);
+  gh.area(area2);
+  gh.area(area3);
+  gh.area(area4);
+
   ASSERT_EQ(0, gh._numWays);
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
@@ -2631,16 +2576,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(cerrBuffer.str(),
-              ::testing::HasSubstr(
-                  "... done with looking at 3 areas\n"
-                  "                           0 intersection checks performed, "
-                  "2 skipped by DAG, 1 skipped by NodeInfo\n"
-                  "                           intersect: 0 yes: 0\n"
-                  "                           1 contains checks performed, 2 "
-                  "skipped by DAG\n"
-                  "                           contains: 1 contains envelope: 1 "
-                  "yes: 1\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
@@ -2653,43 +2588,6 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
   std::cout.rdbuf(coutBufferOrig);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_GeometryHandler, statisticLine) {
-  osm2rdf::config::Config config;
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, nullptr};
-  osm2rdf::osm::GeometryHandler gh{config, &writer};
-
-  ASSERT_EQ(
-      "{"
-      "\"function\":\"\","
-      "\"part\":\"\","
-      "\"check\":\"\","
-      "\"outer_id\":0,"
-      "\"outer_type\":\"\","
-      "\"inner_id\":0,"
-      "\"inner_type\":\"\","
-      "\"duration_ns\":0,"
-      "\"result\":false"
-      "},\n",
-      gh.statisticLine("", "", "", 0, "", 0, "",
-                       std::chrono::nanoseconds::zero(), false));
-
-  ASSERT_EQ(
-      "{"
-      "\"function\":\"f\","
-      "\"part\":\"p\","
-      "\"check\":\"c\","
-      "\"outer_id\":1,"
-      "\"outer_type\":\"to\","
-      "\"inner_id\":2,"
-      "\"inner_type\":\"ti\","
-      "\"duration_ns\":0,"
-      "\"result\":true"
-      "},\n",
-      gh.statisticLine("f", "p", "c", 1, "to", 2, "ti",
-                       std::chrono::nanoseconds::zero(), true));
 }
 
 // ____________________________________________________________________________
@@ -2732,7 +2630,8 @@ TEST(OSM_GeometryHandler, simplifyGeometryArea) {
 
   // Compare stored area with original
   const auto& dst = gh._spatialStorageArea[0];
-  ASSERT_TRUE(src.envelope() == std::get<0>(dst));
+  ASSERT_TRUE(std::get<0>(dst).size() > 0);
+  ASSERT_TRUE(src.envelope() == std::get<0>(dst)[0]);
   ASSERT_TRUE(src.id() == std::get<1>(dst));
   ASSERT_TRUE(src.geom() != std::get<2>(dst));
   // Access rings
@@ -2778,6 +2677,7 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Way src{buffer.get<osmium::Way>(0)};
+  ASSERT_EQ(3, src.geom().size());
 
   ASSERT_EQ(0, gh._numWays);
   gh.way(src);
@@ -2795,7 +2695,9 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   // Compare stored area with original
   ASSERT_TRUE(src.envelope() == std::get<0>(dst));
   ASSERT_TRUE(src.id() == std::get<1>(dst));
+
   ASSERT_TRUE(src.geom() != std::get<2>(dst));
+
   // Access rings
   const auto srcWay = src.geom();
   const auto dstWay = std::get<2>(dst);
@@ -2806,6 +2708,81 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   output.close();
   std::filesystem::remove_all(config.cache);
   std::filesystem::remove_all(config.output);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_GeometryHandler, boxIdintersect) {
+  osm2rdf::config::Config config;
+  osm2rdf::util::Output output{config, config.output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
+
+  {
+    // first element is size marker!
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 0}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 0}, {5, 0}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(1, geomRelInf.fullContained);
+    ASSERT_EQ(0, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 0}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 0}, {-5, 0}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(0, geomRelInf.fullContained);
+    ASSERT_EQ(1, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 0}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {-3, 2}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(0, geomRelInf.fullContained);
+    ASSERT_EQ(1, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {5, 1}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {-3, 0}, {6, 0}, {12, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(1, geomRelInf.fullContained);
+    ASSERT_EQ(0, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {40, 20}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 100}, {600, 0}, {1200, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(21, geomRelInf.fullContained);
+    ASSERT_EQ(0, geomRelInf.toCheck.size());
+  }
+
+  {
+    osm2rdf::osm::BoxIdList a{{1, 0}, {40, 20}};
+    osm2rdf::osm::BoxIdList b{{4, 0}, {3, 56}, {-60, 0}, {1200, 0}};
+    osm2rdf::osm::GeomRelationInfo geomRelInf;
+
+    gh.boxIdIsect(a, b, &geomRelInf);
+
+    ASSERT_EQ(20, geomRelInf.fullContained);
+    ASSERT_EQ(1, geomRelInf.toCheck.size());
+  }
 }
 
 }  // namespace osm2rdf::osm

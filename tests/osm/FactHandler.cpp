@@ -228,7 +228,8 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
 
   dh.area(a);
   output.flush();
@@ -278,7 +279,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioRectangle) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
 
   dh.area(a);
   output.flush();
@@ -329,7 +331,8 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+	a.finalize();
 
   dh.area(a);
   output.flush();
@@ -1310,6 +1313,265 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  const std::string expected =
+      subject + " " + predicate + " " + object + " .\n";
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(expected, buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "admin_level";
+  const std::string tagValue = "";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object = writer.generateLiteral(
+      tagValue, "");
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  const std::string expected =
+      subject + " " + predicate + " " + object + " .\n";
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(expected, buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "admin_level";
+  const std::string tagValue = "       ";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object = writer.generateLiteral(
+      tagValue, "");
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  const std::string expected =
+      subject + " " + predicate + " " + object + " .\n";
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(expected, buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "admin_level";
+  const std::string tagValue = "5";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object = writer.generateLiteral(
+      tagValue,  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  const std::string expected =
+      subject + " " + predicate + " " + object + " .\n";
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(expected, buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "admin_level";
+  const std::string tagValue = "+5";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object = writer.generateLiteral(
+      "5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  const std::string expected =
+      subject + " " + predicate + " " + object + " .\n";
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(expected, buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "admin_level";
+  const std::string tagValue = "-5";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object = writer.generateLiteral(
+      "-5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  const std::string expected =
+      subject + " " + predicate + " " + object + " .\n";
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(expected, buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "admin_level";
+  const std::string tagValue = "   -5  ";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object = writer.generateLiteral(
+      "-5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  const std::string expected =
+      subject + " " + predicate + " " + object + " .\n";
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(expected, buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "admin_level";
+  const std::string tagValue = "+5  ";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object = writer.generateLiteral(
+      "5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";

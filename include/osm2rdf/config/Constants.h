@@ -1,5 +1,7 @@
-// Copyright 2020, University of Freiburg
-// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
+// Copyright 2020 - 2022, University of Freiburg
+// Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
+//          Patrick Brosi <brosi@cs.uni-freiburg.de>
+//          Hannah Bast <bast@cs.uni-freiburg.de>
 
 // This file is part of osm2rdf.
 //
@@ -25,6 +27,7 @@ namespace osm2rdf::config::constants {
 
 const static inline std::string BZIP2_EXTENSION = ".bz2";
 const static inline std::string STATS_EXTENSION = ".stats";
+const static inline std::string CONTAINS_STATS_EXTENSION = ".contains-stats";
 const static inline std::string JSON_EXTENSION = ".json";
 
 const static inline std::string HEADER = "Config";
@@ -98,6 +101,14 @@ const static inline std::string NO_GEOM_RELATIONS_OPTION_LONG =
     "no-geometric-relations";
 const static inline std::string NO_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump geometric relations";
+
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_INFO =
+    "Not dumping geometric relations";
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT = "";
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG =
+    "write-transitive-closure";
+const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP =
+    "Write the transitive closure of all geometric relations";
 
 const static inline std::string NO_AREA_OPTION_SHORT = "";
 const static inline std::string NO_AREA_OPTION_LONG = "no-areas";
@@ -258,8 +269,41 @@ const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_SHORT = "";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_LONG =
     "simplify-geometries";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_HELP =
-    "Factor for geometry simplifaction, 0 to disable; This only affects "
+    "Factor for geometry simplifaction, 0 to disable; will be multiplied with "
+    "the geometry "
+    "perimeter or length. This only affects "
     "relationship calculations and not the geometry dump";
+
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_INFO =
+    "Simplifying inner/outer geometries with factor: ";
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_SHORT =
+    "";
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG =
+    "simplify-inner-outer-geometries";
+const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP =
+    "Factor for geometry simplifaction of inner/outer geometries, will be "
+    "multiplied with the geometry perimter. This only affects "
+    "relationship calculations and not the geometry dump";
+
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_INFO =
+    "Don't use inner/outer simplified geometries of areas: ";
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT =
+    "";
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG =
+    "no-inner-outer";
+const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
+    "Don't use inner/outer simplified geometries of areas for contains "
+    "relation.";
+
+const static inline std::string APPROX_SPATIAL_REL_INFO =
+    "Approximate spatial relations using inner/outer simplified geometries.";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT =
+    "";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_LONG =
+    "approximate-spatial-relations";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP = "Use "
+  "simplified inner/outer geometries for approximate calcuation of spatial "
+  "relations";
 
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
@@ -305,22 +349,9 @@ const static inline std::string WRITE_DAG_DOT_FILES_OPTION_LONG =
 const static inline std::string WRITE_DAG_DOT_FILES_OPTION_HELP =
     "Writes .dot files for DAG states";
 
-const static inline std::string WRITE_GEOM_RELATION_STATISTICS_INFO =
-    "Storing statistics about geometry calculations - SLOW!";
-const static inline std::string WRITE_GEOM_RELATION_STATISTICS_INFO_DISABLED =
-    "Storing statistics not available - recompile with "
-    "-DENABLE_GEOMETRY_STATISTIC";
-const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_SHORT =
-    "";
-const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_LONG =
-    "write-geometric-relation-statistics";
-const static inline std::string WRITE_GEOM_RELATION_STATISTICS_OPTION_HELP =
-    "Writes statistics about geometry calculations - slow!";
-
 const static inline std::string WRITE_RDF_STATISTICS_INFO =
     "Storing RDF statistics as .stats.json";
-const static inline std::string WRITE_RDF_STATISTICS_OPTION_SHORT =
-    "";
+const static inline std::string WRITE_RDF_STATISTICS_OPTION_SHORT = "";
 const static inline std::string WRITE_RDF_STATISTICS_OPTION_LONG =
     "write-rdf-statistics";
 const static inline std::string WRITE_RDF_STATISTICS_OPTION_HELP =
