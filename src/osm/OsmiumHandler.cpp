@@ -195,18 +195,26 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
   }
   auto osmRelation = osm2rdf::osm::Relation(relation);
 #if BOOST_VERSION >= 107800
-  if (_relationHandler.hasLocationHandler()) {
-    osmRelation.buildGeometry(_relationHandler);
-  }
-#endif  // BOOST_VERSION >= 107800
-  if (!_config.noFacts && !_config.noRelationFacts) {
-    _relationsDumped++;
+  // only task this away if we actually build the relation geometries,
+  // otherwise this just adds multithreading overhead for nothing
 #pragma omp task
-    _factHandler.relation(osmRelation);
-  }
+  {
+    if (_relationHandler.hasLocationHandler()) {
+      osmRelation.buildGeometry(_relationHandler);
+    }
+#endif  // BOOST_VERSION >= 107800
+    if (!_config.noFacts && !_config.noRelationFacts) {
+      _relationsDumped++;
+#pragma omp task
+      _factHandler.relation(osmRelation);
+    }
 
 #pragma omp task
-  _geometryHandler.relation(osmRelation);
+    _geometryHandler.relation(osmRelation);
+
+#if BOOST_VERSION >= 107800
+  }
+#endif
 }
 
 // ____________________________________________________________________________

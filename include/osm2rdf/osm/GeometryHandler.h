@@ -148,6 +148,8 @@ enum RelInfoValue { DONTKNOW, YES, NO };
 
 enum AreaFromType { FROM_REL = 0, FROM_WAY = 1 };
 
+enum InnerOuterDouglasPeuckerMode { INNER = 2, OUTER = 3 };
+
 struct GeomRelationInfo {
   RelInfoValue intersects = DONTKNOW;
   RelInfoValue contained = DONTKNOW;
@@ -327,7 +329,7 @@ class GeometryHandler {
       const osm2rdf::geometry::Location& B,
       const osm2rdf::geometry::Location& C);
 
-  template <int MODE>
+  template <InnerOuterDouglasPeuckerMode MODE>
   bool innerOuterDouglasPeucker(
       const boost::geometry::model::ring<osm2rdf::geometry::Location>& input,
       boost::geometry::model::ring<osm2rdf::geometry::Location>& output,

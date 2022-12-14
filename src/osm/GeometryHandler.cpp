@@ -84,7 +84,6 @@ GeometryHandler<W>::~GeometryHandler() = default;
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::relation(const Relation& rel) {
-  // careful, tags is returned via copy (why?)
   const auto& tags = rel.tags();
   auto typeTag = tags.find("type");
   if (typeTag != tags.end() &&
@@ -139,6 +138,8 @@ void GeometryHandler<W>::area(const Area& area) {
     }
   }
 
+  // add the bounding boxes of the entire (multi-) polygon, and of all its
+  // individual components
   std::vector<osm2rdf::geometry::Box> envelopes;
   envelopes.push_back(area.envelope());
   if (area.geom().size() > 1) {
@@ -148,6 +149,8 @@ void GeometryHandler<W>::area(const Area& area) {
       envelopes.push_back(box);
     }
   } else {
+    // if only one element was contained, don't recalulate the entire bounding
+    // box
     envelopes.push_back(area.envelope());
   }
 
@@ -200,6 +203,8 @@ void GeometryHandler<W>::way(const Way& way) {
 
   const size_t CHUNKSIZE = 25;
 
+  // for large ways, sample individual smaller bounding boxes to allow for
+  // fine-grained R-tree requests later on
   if (geom.size() >= 2 * CHUNKSIZE) {
     size_t curSize = 0;
     while (curSize < geom.size()) {
@@ -260,7 +265,7 @@ G GeometryHandler<W>::simplifyGeometry(const G& geom) const {
 
 // ____________________________________________________________________________
 template <typename W>
-template <int MODE>
+template <osm2rdf::osm::InnerOuterDouglasPeuckerMode MODE>
 bool GeometryHandler<W>::innerOuterDouglasPeucker(
     const boost::geometry::model::ring<osm2rdf::geometry::Location>&
         inputPoints,
@@ -324,7 +329,7 @@ bool GeometryHandler<W>::innerOuterDouglasPeucker(
   // INNER Douglas-Peucker: Simplify iff there is no point to the *left* and the
   // rightmost point has distance <= eps. Otherwise m is the leftmost point or,
   // if there is no such point, the rightmost point.
-  if (MODE == 2) {
+  if (MODE == INNER) {
     simplify = (max_dist_left == 0 && max_dist_right <= eps);
     m = max_dist_left > 0 ? m_left : m_right;
   }
@@ -332,7 +337,7 @@ bool GeometryHandler<W>::innerOuterDouglasPeucker(
   // OUTER Douglas-Peucker: Simplify iff there is no point to the *right*
   // *and* the leftmost point has distance <= eps. Otherwise m is the rightmost
   // point or if there is no such point the leftmost point.
-  if (MODE == 3) {
+  if (MODE == OUTER) {
     simplify = (max_dist_right == 0 && max_dist_left <= eps);
     m = max_dist_right > 0 ? m_right : m_left;
   }
@@ -423,12 +428,12 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
       boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
       size_t m = floor(origInner.size() / 2);
       if (inner) {
-        innerOuterDouglasPeucker<2>(origInner, retDP, 0, m, eps);
-        innerOuterDouglasPeucker<2>(origInner, retDP, m + 1,
+        innerOuterDouglasPeucker<INNER>(origInner, retDP, 0, m, eps);
+        innerOuterDouglasPeucker<INNER>(origInner, retDP, m + 1,
                                     origInner.size() - 1, eps);
       } else {
-        innerOuterDouglasPeucker<3>(origInner, retDP, 0, m, eps);
-        innerOuterDouglasPeucker<3>(origInner, retDP, m + 1,
+        innerOuterDouglasPeucker<OUTER>(origInner, retDP, 0, m, eps);
+        innerOuterDouglasPeucker<OUTER>(origInner, retDP, m + 1,
                                     origInner.size() - 1, eps);
       }
       retDP.push_back(retDP.front());  // ensure valid polyon
@@ -447,12 +452,12 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
       boost::geometry::model::ring<osm2rdf::geometry::Location> retDP;
       size_t m = floor(poly.outer().size() / 2);
       if (inner) {
-        innerOuterDouglasPeucker<2>(poly.outer(), retDP, 0, m, eps);
-        innerOuterDouglasPeucker<2>(poly.outer(), retDP, m + 1,
+        innerOuterDouglasPeucker<INNER>(poly.outer(), retDP, 0, m, eps);
+        innerOuterDouglasPeucker<INNER>(poly.outer(), retDP, m + 1,
                                     poly.outer().size() - 1, eps);
       } else {
-        innerOuterDouglasPeucker<3>(poly.outer(), retDP, 0, m, eps);
-        innerOuterDouglasPeucker<3>(poly.outer(), retDP, m + 1,
+        innerOuterDouglasPeucker<OUTER>(poly.outer(), retDP, 0, m, eps);
+        innerOuterDouglasPeucker<OUTER>(poly.outer(), retDP, m + 1,
                                     poly.outer().size() - 1, eps);
       }
       retDP.push_back(retDP.front());  // ensure valid polyon
@@ -502,7 +507,6 @@ void GeometryHandler<W>::calculateRelations() {
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::prepareRTree() {
-  // empty the rtree!
   std::cerr << std::endl;
   std::cerr << currentTimeFormatted() << " Sorting "
             << _spatialStorageArea.size() << " areas ... " << std::endl;
