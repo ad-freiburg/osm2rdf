@@ -17,10 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/geometry/Way.h"
+
 #include <vector>
 
 #include "boost/geometry.hpp"
-#include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"

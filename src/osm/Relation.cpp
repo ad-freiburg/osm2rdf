@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "boost/geometry.hpp"
+#include "boost/version.hpp"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"

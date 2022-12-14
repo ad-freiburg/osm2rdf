@@ -27,6 +27,7 @@
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
+#include "boost/version.hpp"
 #include "gtest/gtest_prod.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/geometry/Area.h"

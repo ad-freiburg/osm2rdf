@@ -24,6 +24,7 @@
 #include "RelationHandler.h"
 #include "boost/serialization/nvp.hpp"
 #include "boost/serialization/vector.hpp"
+#include "boost/version.hpp"
 #include "osm2rdf/geometry/Relation.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/RelationHandler.h"

@@ -21,6 +21,7 @@
 #include <iostream>
 #include <string>
 
+#include "boost/version.hpp"
 #include "omp.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/config/Constants.h"

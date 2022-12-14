@@ -18,6 +18,7 @@
 
 #include "osm2rdf/osm/FactHandler.h"
 
+#include "boost/version.hpp"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2rdf/osm/Node.h"
