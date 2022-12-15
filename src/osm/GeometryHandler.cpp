@@ -343,7 +343,7 @@ bool GeometryHandler<W>::innerOuterDouglasPeucker(
   }
 
   // Simplification case: If m is at most eps away from the line segment
-  // conecting l and r, we can simplify the part of the polygon from l to r by
+  // connecting l and r, we can simplify the part of the polygon from l to r by
   // the line segment that connects l and r.
   // assert(m > l);
   // assert(m < r);
@@ -430,11 +430,11 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
       if (inner) {
         innerOuterDouglasPeucker<INNER>(origInner, retDP, 0, m, eps);
         innerOuterDouglasPeucker<INNER>(origInner, retDP, m + 1,
-                                    origInner.size() - 1, eps);
+                                        origInner.size() - 1, eps);
       } else {
         innerOuterDouglasPeucker<OUTER>(origInner, retDP, 0, m, eps);
         innerOuterDouglasPeucker<OUTER>(origInner, retDP, m + 1,
-                                    origInner.size() - 1, eps);
+                                        origInner.size() - 1, eps);
       }
       retDP.push_back(retDP.front());  // ensure valid polyon
       simplified.inners().push_back(retDP);
@@ -454,11 +454,11 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
       if (inner) {
         innerOuterDouglasPeucker<INNER>(poly.outer(), retDP, 0, m, eps);
         innerOuterDouglasPeucker<INNER>(poly.outer(), retDP, m + 1,
-                                    poly.outer().size() - 1, eps);
+                                        poly.outer().size() - 1, eps);
       } else {
         innerOuterDouglasPeucker<OUTER>(poly.outer(), retDP, 0, m, eps);
         innerOuterDouglasPeucker<OUTER>(poly.outer(), retDP, m + 1,
-                                    poly.outer().size() - 1, eps);
+                                        poly.outer().size() - 1, eps);
       }
       retDP.push_back(retDP.front());  // ensure valid polyon
       numPointsNew += retDP.size();
@@ -469,8 +469,8 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
   }
 
   if (numPointsNew >= numPointsOld) {
-    // gain too low, return empty poly to avoid extra space and double
-    // checking later on
+    // gain too low, return empty poly to avoid extra space and double-checking
+    // later on
     return osm2rdf::geometry::Area();
   }
 
@@ -523,7 +523,7 @@ void GeometryHandler<W>::prepareRTree() {
 
   for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
     for (size_t j = 1; j < std::get<0>(_spatialStorageArea[i]).size(); j++) {
-      values.push_back({std::get<0>(_spatialStorageArea[i])[j], i});
+      values.emplace_back(std::get<0>(_spatialStorageArea[i])[j], i);
     }
   }
 
@@ -600,7 +600,7 @@ void GeometryHandler<W>::prepareDAG() {
         }
 
         if (areaFromType == 1) {
-          // we are countained in an area derived from a way.
+          // we are contained in an area derived from a way.
           const auto& relations = _areaBorderWaysIndex.find(areaObjId);
           if (relations != _areaBorderWaysIndex.end()) {
             for (auto r : relations->second) {
@@ -716,14 +716,14 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
   progressBar.update(entryCount);
   std::vector<DirectedGraph<Area::id_t>::entry_t> vertices =
       _directedAreaGraph.getVertices();
-#pragma omp parallel for shared(                                       \
-        vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,         \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,       \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,     \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
-            progressBar, entryCount) default(none) schedule(static)
+#pragma omp parallel for shared(                                            \
+    vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                  \
+    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,                       \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,                    \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,                \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,                  \
+    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, progressBar, \
+    entryCount) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
     const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
@@ -1134,10 +1134,7 @@ void GeometryHandler<W>::dumpWayRelations(
 
       // Check if our "area" has successors in the DAG, if yes we are part of
       // the DAG and don't need to calculate any relation again.
-
-      const auto& successors = _directedAreaGraph.findSuccessorsFast(wayId * 2);
-
-      if (!successors.empty()) {
+      if (!_directedAreaGraph.findSuccessorsFast(wayId * 2).empty()) {
         continue;
       }
 
@@ -1169,8 +1166,9 @@ void GeometryHandler<W>::dumpWayRelations(
         intersectStats.checked();
         containsStats.checked();
 
-        if (areaFromType == 0 && skipByContainedInInner.find(areaObjId) !=
-                                     skipByContainedInInner.end()) {
+        if (areaFromType == AreaFromType::FROM_REL &&
+            skipByContainedInInner.find(areaObjId) !=
+                skipByContainedInInner.end()) {
           intersectStats.skippedByContainedInInnerRing();
           containsStats.skippedByContainedInInnerRing();
           continue;
@@ -1185,7 +1183,8 @@ void GeometryHandler<W>::dumpWayRelations(
         if (skipIntersects.find(areaId) != skipIntersects.end()) {
           intersectStats.skippedByDAG();
           geomRelInf.intersects = YES;
-        } else if (areaFromType == 0 && borderContained(wayId, areaObjId)) {
+        } else if (areaFromType == AreaFromType::FROM_REL &&
+                   borderContained(wayId, areaObjId)) {
           intersectStats.skippedByBorderContained();
           containsStats.skippedByBorderContained();
 
@@ -1250,7 +1249,7 @@ void GeometryHandler<W>::dumpWayRelations(
         } else {
           if (!wayInArea(way, area, &geomRelInf, &containsStats)) continue;
 
-          if (areaFromType == 1) {
+          if (areaFromType == AreaFromType::FROM_WAY) {
             // we are countained in an area derived from a way.
             const auto& relations = _areaBorderWaysIndex.find(areaObjId);
             if (relations != _areaBorderWaysIndex.end()) {
@@ -2066,7 +2065,7 @@ BoxIdList GeometryHandler<W>::getBoxIds(
 
       if (boost::geometry::intersects(way, box)) {
         int32_t newId = y * NUM_GRID_CELLS + x + 1;
-        if (boxIds.size() && boxIds.back().second < 254 &&
+        if (!boxIds.empty() && boxIds.back().second < 254 &&
             boxIds.back().first + boxIds.back().second == newId - 1)
           boxIds.back().second++;
         else
@@ -2153,7 +2152,7 @@ void GeometryHandler<W>::getBoxIds(
 
             if (cutouts) (*cutouts)[-newId] = intersection;
 
-            if (ret->size() && ret->back().second < 254 &&
+            if (!ret->empty() && ret->back().second < 254 &&
                 ret->back().first - ret->back().second == newId + 1)
               ret->back().second++;
             else

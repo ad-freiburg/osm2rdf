@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "boost/geometry.hpp"
+#include "boost/version.hpp"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"

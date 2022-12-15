@@ -32,8 +32,8 @@ class RelationHandler : public osmium::handler::Handler {
   void prepare_for_lookup();
   void setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler);
   bool hasLocationHandler() const;
-  osmium::Location get_node_location(const uint64_t id) const;
-  std::vector<uint64_t> get_noderefs_of_way(const uint64_t id);
+  osmium::Location get_node_location(const uint64_t nodeId) const;
+  std::vector<uint64_t> get_noderefs_of_way(const uint64_t wayId);
 
  protected:
   osm2rdf::config::Config _config;

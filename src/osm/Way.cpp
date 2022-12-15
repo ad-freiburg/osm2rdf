@@ -17,10 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/geometry/Way.h"
+
 #include <vector>
 
 #include "boost/geometry.hpp"
-#include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"
@@ -55,10 +56,10 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
     _nodes.emplace_back(nodeRef);
 
     // implicit boost::geometry::unique
-		if (_geom.size() == 0 || (nodeRef.lon() != _geom.back().get<0>() ||
-				nodeRef.lat() != _geom.back().get<1>())) {
+    if (_geom.empty() || (nodeRef.lon() != _geom.back().get<0>() ||
+                          nodeRef.lat() != _geom.back().get<1>())) {
       boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()});
-		}
+    }
   }
   _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
 }

@@ -29,8 +29,8 @@
 template <typename T>
 void osm2rdf::util::DirectedGraph<T>::addEdge(T src, T dst) {
   _adjacency[src].push_back(dst);
-  if (_adjacency.count(dst) == 0) {
-    _adjacency[dst].size();
+  if (_adjacency.find(dst) == _adjacency.end()) {
+    _adjacency[dst] = {};
   }
   _numEdges++;
 }
@@ -52,15 +52,15 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::findSuccessors(T src) const {
 template <typename T>
 void osm2rdf::util::DirectedGraph<T>::findSuccessorsHelper(
     T src, std::vector<T>* tmp) const {
-  const auto& it = _adjacency.find(src);
-  if (it == _adjacency.end()) {
+  const auto& entry = _adjacency.find(src);
+  if (entry == _adjacency.end()) {
     return;
   }
 
-  // Copy direct parents.
-  tmp->insert(tmp->end(), it->second.begin(), it->second.end());
-  // Add parents parents.
-  for (const auto& dst : it->second) {
+  // Copy direct successors.
+  tmp->insert(tmp->end(), entry->second.begin(), entry->second.end());
+  // Recursively add all successors.
+  for (const auto& dst : entry->second) {
     findSuccessorsHelper(dst, tmp);
   }
 }
@@ -72,11 +72,11 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::findSuccessorsFast(
   if (!_preparedFast) {
     throw std::runtime_error("findSuccessorsFast not prepared");
   }
-  const auto& it = _successors.find(src);
-  if (it == _successors.end()) {
+  const auto& entry = _successors.find(src);
+  if (entry == _successors.end()) {
     return std::vector<T>();
   }
-  return it->second;
+  return entry->second;
 }
 
 // ____________________________________________________________________________

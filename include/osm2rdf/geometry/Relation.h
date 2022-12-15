@@ -22,6 +22,7 @@
 #include <boost/geometry/algorithms/equals.hpp>
 #include "boost/geometry/geometries/geometries.hpp"
 #include "boost/variant.hpp"
+#include "boost/version.hpp"
 #include "osm2rdf/geometry/Area.h"
 #include "osm2rdf/geometry/Node.h"
 #include "osm2rdf/geometry/Way.h"
