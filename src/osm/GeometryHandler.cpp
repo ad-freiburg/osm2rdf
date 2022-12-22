@@ -707,31 +707,40 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
   std::cerr << std::endl;
   std::cerr << currentTimeFormatted() << " Dumping relations from DAG with "
             << _directedAreaGraph.getNumEdges() << " edges and "
-            << _directedAreaGraph.getNumVertices() << " vertices ... "
+            << _directedAreaGraph.getNumVertices()
+            << " vertices and calculation intersect relationships... "
             << std::endl;
 
   osm2rdf::util::ProgressBar progressBar{_directedAreaGraph.getNumVertices(),
                                          true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
+  GeomRelationStats intersectStats;
+
   std::vector<DirectedGraph<Area::id_t>::entry_t> vertices =
       _directedAreaGraph.getVertices();
-#pragma omp parallel for shared(                                            \
-    vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                  \
-    osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,                       \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,                    \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,                \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,                  \
-    osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, progressBar, \
-    entryCount) default(none) schedule(static)
+#pragma omp parallel for shared(                                       \
+        vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,         \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,       \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,     \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            progressBar, entryCount)                                   \
+    reduction(+ : intersectStats) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
     const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
+    const auto& entryId = std::get<1>(entry);
     const auto& entryObjId = std::get<3>(entry);
     const auto& entryFromType = std::get<5>(entry);
     std::string entryIRI =
         _writer->generateIRI(areaNS(entryFromType), entryObjId);
 
+    // all areas we can skip via the DAG
+    SkipSet skip;
+
+    // contains relations, simply dump the DAG
     for (const auto& dst : _directedAreaGraph.getEdges(id)) {
       assert(_spatialStorageAreaIndex[dst] < _spatialStorageArea.size());
       const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
@@ -747,17 +756,79 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
       // transitive closure
       const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
 
+      skip.insert(areaId);
+      skip.insert(successors.begin(), successors.end());
+
       writeTransitiveClosure(successors, entryIRI,
                              IRI__OSM2RDF_INTERSECTS_AREA);
       writeTransitiveClosure(successors, entryIRI, IRI__OSM2RDF_CONTAINS_AREA);
     }
+
+    // intersect relation, use R-Tree
+    const auto& queryResult = indexQryIntersect(entry);
+
+    for (const auto& areaRef : queryResult) {
+      const auto& area = _spatialStorageArea[areaRef.second];
+      const auto& areaId = std::get<1>(area);
+      const auto& areaObjId = std::get<3>(area);
+      const auto& areaFromType = std::get<5>(area);
+
+      intersectStats.checked();
+
+      // don't compare to itself
+      if (areaId == entryId) continue;
+
+      GeomRelationInfo geomRelInf;
+
+      const auto& areaIRI =
+          _writer->generateIRI(areaNS(areaFromType), areaObjId);
+
+      if (skip.find(areaId) != skip.end()) {
+        geomRelInf.intersects = YES;
+        intersectStats.skippedByDAG();
+      } else if (areaIntersectsArea(entry, area, &geomRelInf,
+                                    &intersectStats)) {
+        const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+        skip.insert(successors.begin(), successors.end());
+
+        // transitive closure
+        writeTransitiveClosure(successors, entryIRI,
+                               IRI__OSM2RDF_INTERSECTS_AREA);
+
+        _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_AREA, entryIRI);
+      }
+    }
+
 #pragma omp critical(progress)
     progressBar.update(entryCount++);
   }
 
   progressBar.done();
 
-  std::cerr << currentTimeFormatted() << " ... done" << std::endl;
+  std::cerr << currentTimeFormatted() << " ... done.\n"
+            << osm2rdf::util::formattedTimeSpacer << " checked "
+            << intersectStats.printTotalChecks()
+            << " area/area pairs A, B for intersect\n"
+            << osm2rdf::util::formattedTimeSpacer << " decided "
+            << intersectStats.printSkippedByDAG() << " by DAG\n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << intersectStats.printSkippedByBox()
+            << " by non-intersecting bounding boxes \n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << intersectStats.printSkippedByBoxIdIntersect()
+            << " by box id intersect\n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << intersectStats.printSkippedByBoxIdIntersectCutout()
+            << " by check against box id cutout\n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << intersectStats.printSkippedByInner()
+            << " by inner simplified geom\n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << intersectStats.printSkippedByOuter()
+            << " by outer simplified geom\n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << intersectStats.printFullChecks() << " by full geometric check"
+            << std::endl;
 }
 
 // ____________________________________________________________________________
