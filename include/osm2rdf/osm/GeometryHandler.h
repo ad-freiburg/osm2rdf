@@ -253,7 +253,7 @@ class GeometryHandler {
   void way(const osm2rdf::osm::Way& way);
 
   // close external storage files
-  void closeExternalStorage();
+  void flushExternalStorage();
   // Calculate data
   void calculateRelations();
 
@@ -386,6 +386,10 @@ class GeometryHandler {
       const SpatialWayValue& way) const;
   void unique(std::vector<SpatialAreaRefValue>& refs) const;
 
+  std::fstream& getFsUnnamedAreas() { return _fsUnnamedAreas; }
+  std::fstream& getFsNodes() { return _fsNodes; }
+  std::fstream& getFsWays() { return _fsWays; }
+
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
@@ -409,17 +413,20 @@ class GeometryHandler {
   size_t _numUnnamedAreas = 0;
   FRIEND_TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation);
   FRIEND_TEST(OSM_GeometryHandler, addUnnamedAreaFromWay);
-  std::ofstream _ofsUnnamedAreas;
+  std::string _tmpPathUnnamedAreas;
+  std::fstream _fsUnnamedAreas;
   boost::archive::binary_oarchive _oaUnnamedAreas;
 
   size_t _numNodes = 0;
   FRIEND_TEST(OSM_GeometryHandler, addNode);
-  std::ofstream _ofsNodes;
+  std::string _tmpPathNodes;
+  std::fstream _fsNodes;
   boost::archive::binary_oarchive _oaNodes;
 
   size_t _numWays = 0;
   FRIEND_TEST(OSM_GeometryHandler, addWay);
-  std::ofstream _ofsWays;
+  std::string _tmpPathWays;
+  std::fstream _fsWays;
   boost::archive::binary_oarchive _oaWays;
 
   size_t _dummyAreaCount = 0;
