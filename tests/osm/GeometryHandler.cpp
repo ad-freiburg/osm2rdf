@@ -190,9 +190,10 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
   // Read area from dump and compare
   osm2rdf::osm::SpatialAreaValue dst;
 
-  gh.closeExternalStorage();
-  std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
-                    std::ios::binary);
+  gh.flushExternalStorage();
+  auto& ifs = gh.getFsUnnamedAreas();
+  ifs.clear();
+  ifs.seekg(0, std::ios::beg);
   boost::archive::binary_iarchive ia(ifs);
   ia >> dst;
   ifs.close();
@@ -249,9 +250,10 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromWay) {
   // Read area from dump and compare
   osm2rdf::osm::SpatialAreaValue dst;
 
-  gh.closeExternalStorage();
-  std::ifstream ifs(config.getTempPath("spatial", "areas_unnamed"),
-                    std::ios::binary);
+  gh.flushExternalStorage();
+  auto& ifs = gh.getFsUnnamedAreas();
+  ifs.clear();
+  ifs.seekg(0, std::ios::beg);
   boost::archive::binary_iarchive ia(ifs);
   // No area is stored -> expect an exception on loading
   ASSERT_THROW(ia >> dst, boost::archive::archive_exception);
@@ -294,8 +296,10 @@ TEST(OSM_GeometryHandler, addNode) {
   // Read area from dump and compare
   osm2rdf::osm::SpatialNodeValue dst;
 
-  gh.closeExternalStorage();
-  std::ifstream ifs(config.getTempPath("spatial", "nodes"), std::ios::binary);
+  gh.flushExternalStorage();
+  auto& ifs = gh.getFsNodes();
+  ifs.clear();
+  ifs.seekg(0, std::ios::beg);
   boost::archive::binary_iarchive ia(ifs);
   ia >> dst;
   ifs.close();
@@ -343,8 +347,10 @@ TEST(OSM_GeometryHandler, addWay) {
   // Read area from dump and compare
   osm2rdf::osm::SpatialWayValue dst;
 
-  gh.closeExternalStorage();
-  std::ifstream ifs(config.getTempPath("spatial", "ways"), std::ios::binary);
+  gh.flushExternalStorage();
+  auto& ifs = gh.getFsWays();
+  ifs.clear();
+  ifs.seekg(0, std::ios::beg);
   boost::archive::binary_iarchive ia(ifs);
   ia >> dst;
   ifs.close();
@@ -473,7 +479,7 @@ TEST(OSM_GeometryHandler, prepareRTreeSimple) {
   gh.area(area3);
   gh.area(area4);
 
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
 
   ASSERT_EQ(0, gh._spatialIndex.size());
   gh.prepareRTree();
@@ -645,7 +651,7 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
   gh.area(area3);
   gh.area(area4);
 
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
 
   output.flush();
@@ -796,7 +802,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
   gh.area(area3);
   gh.area(area4);
 
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -970,7 +976,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
   gh.area(area3);
   gh.area(area4);
 
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -1211,7 +1217,7 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2) {
   gh.area(area3);
   gh.area(area4);
 
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -1335,7 +1341,7 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
   ASSERT_EQ(0, gh._numUnnamedAreas);
   gh.area(area5);
   ASSERT_EQ(1, gh._numUnnamedAreas);
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -1461,7 +1467,7 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
   ASSERT_EQ(0, gh._numUnnamedAreas);
   gh.area(area5);
   ASSERT_EQ(1, gh._numUnnamedAreas);
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -1632,7 +1638,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsEmpty2) {
   gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
   gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
   gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -1749,7 +1755,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   ASSERT_EQ(0, gh._numNodes);
   gh.node(osm2rdf::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
   ASSERT_EQ(1, gh._numNodes);
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -1869,7 +1875,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   ASSERT_EQ(0, gh._numNodes);
   gh.node(osm2rdf::osm::Node(osmiumBuffer5.get<osmium::Node>(0)));
   ASSERT_EQ(1, gh._numNodes);
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -2041,7 +2047,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsEmpty2) {
   gh.area(osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0)));
   gh.area(osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0)));
   gh.area(osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0)));
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -2160,7 +2166,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   ASSERT_EQ(0, gh._numWays);
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -2282,7 +2288,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   ASSERT_EQ(0, gh._numWays);
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -2415,7 +2421,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   gh.node(osm2rdf::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
   gh.node(osm2rdf::osm::Node(osmiumBuffer7.get<osmium::Node>(0)));
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -2564,7 +2570,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
   ASSERT_EQ(1, gh._numWays);
   gh.node(osm2rdf::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
-  gh.closeExternalStorage();
+  gh.flushExternalStorage();
   gh.prepareRTree();
   gh.prepareDAG();
 
@@ -2686,8 +2692,10 @@ TEST(OSM_GeometryHandler, simplifyGeometryWay) {
   // Read area from dump and compare
   osm2rdf::osm::SpatialWayValue dst;
 
-  gh.closeExternalStorage();
-  std::ifstream ifs(config.getTempPath("spatial", "ways"), std::ios::binary);
+  gh.flushExternalStorage();
+  auto& ifs = gh.getFsWays();
+  ifs.clear();
+  ifs.seekg(0, std::ios::beg);
   boost::archive::binary_iarchive ia(ifs);
   ia >> dst;
   ifs.close();
