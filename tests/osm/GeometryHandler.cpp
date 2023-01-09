@@ -744,6 +744,8 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
                                        osmium::memory::Buffer::auto_grow::yes};
   osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
                                        osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_area(osmiumBuffer1, osmium::builder::attr::_id(22),
                             osmium::builder::attr::_tag("name", "22"),
                             osmium::builder::attr::_outer_ring({
@@ -780,21 +782,33 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
                                 {4, {50.1, 0.51}},
                                 {1, {20.0, 0.51}},
                             }));
+  osmium::builder::add_area(osmiumBuffer5, osmium::builder::attr::_id(30),
+                            osmium::builder::attr::_tag("name", "30"),
+                            osmium::builder::attr::_outer_ring({
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.71}},
+                                {3, {48.05, 7.71}},
+                                {4, {48.05, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }));
 
   // Create osm2rdf object from osmium object
   auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
   auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
   auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
   auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
+  auto area5 = osm2rdf::osm::Area(osmiumBuffer5.get<osmium::Area>(0));
   area1.finalize();
   area2.finalize();
   area3.finalize();
   area4.finalize();
+  area5.finalize();
 
   gh.area(area1);
   gh.area(area2);
   gh.area(area3);
   gh.area(area4);
+  gh.area(area5);
 
   gh.closeExternalStorage();
   gh.prepareRTree();
@@ -872,6 +886,24 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
                              "intersects_area") +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
+  ASSERT_THAT(
+      printedData,
+      Not(::testing::HasSubstr(
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
+          " " +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
+                             "contains_area") +
+          " " +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 15))));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
+          " " +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
+                             "intersects_area") +
+          " " +
+          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 15)));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1347,7 +1379,9 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
+      "osmrel:15 osm2rdf:intersects_nonarea osmway:11 .\n"
       "osmway:13 osm2rdf:intersects_nonarea osmrel:15 .\n"
+      "osmrel:15 osm2rdf:intersects_nonarea osmway:13 .\n"
       "osmway:12 osm2rdf:contains_nonarea osmrel:15 .\n",
       printedData);
 
@@ -1473,6 +1507,7 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
+      "osmrel:15 osm2rdf:intersects_nonarea osmway:11 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmrel:15 .\n",
       printedData);
 
@@ -1762,6 +1797,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:13 osm2rdf:intersects_nonarea osmnode:42 .\n"
+      "osmnode:42 osm2rdf:intersects_nonarea osmway:13 .\n"
       "osmway:13 osm2rdf:contains_nonarea osmnode:42 .\n",
       printedData);
 
@@ -1882,6 +1918,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmnode:42 .\n"
+      "osmnode:42 osm2rdf:intersects_nonarea osmway:11 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmnode:42 .\n",
       printedData);
 
@@ -2172,7 +2209,9 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
+      "osmway:42 osm2rdf:intersects_nonarea osmway:11 .\n"
       "osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"
+      "osmway:42 osm2rdf:intersects_nonarea osmway:13 .\n"
       "osmway:12 osm2rdf:contains_nonarea osmway:42 .\n",
       printedData);
 
@@ -2294,6 +2333,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
+      "osmway:42 osm2rdf:intersects_nonarea osmway:11 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n",
       printedData);
 
@@ -2579,10 +2619,12 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
+                           "osmnode:2 osm2rdf:intersects_nonarea osmway:11 .\n"
                            "osmway:11 osm2rdf:contains_nonarea osmnode:2 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
+                           "osmway:42 osm2rdf:intersects_nonarea osmway:11 .\n"
                            "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
