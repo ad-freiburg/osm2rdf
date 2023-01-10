@@ -18,6 +18,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <unistd.h>
+
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -65,16 +67,29 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                                     osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
       _writer(writer),
-      _ofsUnnamedAreas(config.getTempPath("spatial", "areas_unnamed"),
-                       std::ios::binary),
-      _oaUnnamedAreas(_ofsUnnamedAreas),
-      _ofsNodes(config.getTempPath("spatial", "nodes"), std::ios::binary),
-      _oaNodes(_ofsNodes),
-      _ofsWays(config.getTempPath("spatial", "ways"), std::ios::binary),
-      _oaWays(_ofsWays) {
-  _ofsUnnamedAreas << std::fixed << std::setprecision(_config.wktPrecision);
-  _ofsWays << std::fixed << std::setprecision(_config.wktPrecision);
-  _ofsNodes << std::fixed << std::setprecision(_config.wktPrecision);
+      _tmpPathUnnamedAreas(config.getTempPath("spatial", "areas_unnamed")),
+      _fsUnnamedAreas(_tmpPathUnnamedAreas, std::ios::in | std::ios::out |
+                                                std::ios::trunc |
+                                                std::ios::binary),
+      _oaUnnamedAreas(_fsUnnamedAreas),
+      _tmpPathNodes(config.getTempPath("spatial", "nodes")),
+      _fsNodes(_tmpPathNodes, std::ios::in | std::ios::out | std::ios::trunc |
+                                  std::ios::binary),
+      _oaNodes(_fsNodes),
+      _tmpPathWays(config.getTempPath("spatial", "ways")),
+      _fsWays(_tmpPathWays, std::ios::in | std::ios::out | std::ios::trunc |
+                                std::ios::binary),
+      _oaWays(_fsWays) {
+  // immediately unlink all opened files to ensure their removal at exit / crash
+  // note that if one of the initializations above fails after a file was
+  // opened, it will not be deleted
+  unlink(_tmpPathUnnamedAreas.c_str());
+  unlink(_tmpPathNodes.c_str());
+  unlink(_tmpPathWays.c_str());
+
+  _fsUnnamedAreas << std::fixed << std::setprecision(_config.wktPrecision);
+  _fsWays << std::fixed << std::setprecision(_config.wktPrecision);
+  _fsNodes << std::fixed << std::setprecision(_config.wktPrecision);
 }
 
 // ___________________________________________________________________________
@@ -479,15 +494,15 @@ osm2rdf::geometry::Area GeometryHandler<W>::simplifiedArea(
 
 // ____________________________________________________________________________
 template <typename W>
-void GeometryHandler<W>::closeExternalStorage() {
-  if (_ofsNodes.is_open()) {
-    _ofsNodes.close();
+void GeometryHandler<W>::flushExternalStorage() {
+  if (_fsNodes.is_open()) {
+    _fsNodes.flush();
   }
-  if (_ofsUnnamedAreas.is_open()) {
-    _ofsUnnamedAreas.close();
+  if (_fsUnnamedAreas.is_open()) {
+    _fsUnnamedAreas.flush();
   }
-  if (_ofsWays.is_open()) {
-    _ofsWays.close();
+  if (_fsWays.is_open()) {
+    _fsWays.flush();
   }
 }
 
@@ -495,7 +510,7 @@ void GeometryHandler<W>::closeExternalStorage() {
 template <typename W>
 void GeometryHandler<W>::calculateRelations() {
   // Ensure functions can open external storage for reading.
-  closeExternalStorage();
+  flushExternalStorage();
   prepareRTree();
   prepareDAG();
   dumpNamedAreaRelations();
@@ -854,9 +869,11 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << "Contains relations for " << _numUnnamedAreas
               << " unnamed areas in " << _spatialIndex.size() << " areas ..."
               << std::endl;
-    std::ifstream ifs(_config.getTempPath("spatial", "areas_unnamed"),
-                      std::ios::binary);
-    boost::archive::binary_iarchive ia(ifs);
+
+    // reset stream
+    _fsUnnamedAreas.clear();
+    _fsUnnamedAreas.seekg(0, std::ios::beg);
+    boost::archive::binary_iarchive ia(_fsUnnamedAreas);
 
     osm2rdf::util::ProgressBar progressBar{_numUnnamedAreas, true};
     GeomRelationStats intersectStats, containsStats;
@@ -1034,9 +1051,9 @@ GeometryHandler<W>::dumpNodeRelations() {
               << "Contains relations for " << _numNodes << " nodes in "
               << _spatialIndex.size() << " areas ..." << std::endl;
 
-    std::ifstream ifs(_config.getTempPath("spatial", "nodes"),
-                      std::ios::binary);
-    boost::archive::binary_iarchive ia(ifs);
+    _fsNodes.clear();
+    _fsNodes.seekg(0, std::ios::beg);
+    boost::archive::binary_iarchive ia(_fsNodes);
 
     osm2rdf::util::ProgressBar progressBar{_numNodes, true};
     size_t entryCount = 0;
@@ -1184,8 +1201,9 @@ void GeometryHandler<W>::dumpWayRelations(
               << "Contains relations for " << _numWays << " ways in "
               << _spatialIndex.size() << " areas ..." << std::endl;
 
-    std::ifstream ifs(_config.getTempPath("spatial", "ways"), std::ios::binary);
-    boost::archive::binary_iarchive ia(ifs);
+    _fsWays.clear();
+    _fsWays.seekg(0, std::ios::beg);
+    boost::archive::binary_iarchive ia(_fsWays);
 
     osm2rdf::util::ProgressBar progressBar{_numWays, true};
     size_t entryCount = 0;
