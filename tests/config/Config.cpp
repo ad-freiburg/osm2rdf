@@ -42,6 +42,7 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
 
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addAreaEnvelopeRatio);
+  ASSERT_FALSE(config.addAreaMetadata);
   ASSERT_FALSE(config.addNodeEnvelope);
   ASSERT_FALSE(config.addRelationBorderMembers);
   ASSERT_TRUE(config.addSortMetadata);
@@ -663,6 +664,22 @@ TEST(CONFIG_Config, fromArgsAddAreaEnvelopeRatioLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddAreaMetadataLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_AREA_METADATA_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addAreaMetadata);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1041,6 +1058,18 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelope) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::ADD_AREA_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddAreaMetadata) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addAreaMetadata= true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2rdf::config::constants::ADD_AREA_METADATA_INFO));
 }
 
 // ____________________________________________________________________________

@@ -56,6 +56,8 @@ struct Area {
   [[nodiscard]] bool fromWay() const noexcept;
   // Return if this area has a name.
   [[nodiscard]] bool hasName() const noexcept;
+  // Return number of polygons.
+  [[nodiscard]] size_t numOuterPolygons() const noexcept;
   // finalize geometries
   void finalize() noexcept;
 
@@ -72,6 +74,7 @@ struct Area {
   osm2rdf::geometry::area_result_t _envelopeArea;
   osm2rdf::geometry::Area _geom;
   osm2rdf::geometry::Box _envelope;
+  size_t _numPolygons;
 
   friend class boost::serialization::access;
   template <class Archive>

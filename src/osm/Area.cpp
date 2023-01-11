@@ -100,6 +100,7 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
     }
     oCount++;
   }
+  _numPolygons = oCount;
 
   _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
 }
@@ -156,4 +157,9 @@ bool osm2rdf::osm::Area::hasName() const noexcept { return _hasName; }
 bool osm2rdf::osm::Area::fromWay() const noexcept {
   // https://github.com/osmcode/libosmium/blob/master/include/osmium/osm/area.hpp#L145-L153
   return (_id & 0x1U) == 0;
+}
+
+// ____________________________________________________________________________
+size_t osm2rdf::osm::Area::numOuterPolygons() const noexcept {
+  return _numPolygons;
 }

@@ -98,6 +98,15 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
         _writer->generateIRIUnsafe(NAMESPACE__OSM_META, "area_envelope_ratio"),
         _writer->generateLiteralUnsafe(tmp.str(), "^^" + IRI__XSD_DOUBLE));
   }
+
+  if (_config.addAreaMetadata) {
+    _writer->writeTriple(
+        subj,
+        _writer->generateIRIUnsafe(NAMESPACE__OSM_META,
+                                   "multipolygon_outer_polygon_count"),
+        _writer->generateLiteralUnsafe(std::to_string(area.numOuterPolygons()),
+                                       "^^" + IRI__XSD_INTEGER));
+  }
 }
 
 // ____________________________________________________________________________
