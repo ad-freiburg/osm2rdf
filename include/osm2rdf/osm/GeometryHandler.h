@@ -346,7 +346,12 @@ class GeometryHandler {
 
   void writeTransitiveClosure(
       const std::vector<osm2rdf::osm::Area::id_t>& successors,
-      const std::string& entryIRI, const std::string& rel, bool symmetric);
+      const std::string& entryIRI, const std::string& rel,
+      const std::string& symmRel);
+
+  void writeTransitiveClosure(
+      const std::vector<osm2rdf::osm::Area::id_t>& successors,
+      const std::string& entryIRI, const std::string& rel);
 
   void getBoxIds(
       const osm2rdf::geometry::Area& area, const osm2rdf::geometry::Area& inner,

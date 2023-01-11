@@ -1803,7 +1803,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:13 osm2rdf:intersects_nonarea osmnode:42 .\n"
-      "osmnode:42 osm2rdf:intersects_nonarea osmway:13 .\n"
+      "osmnode:42 osm2rdf:intersects_area osmway:13 .\n"
       "osmway:13 osm2rdf:contains_nonarea osmnode:42 .\n",
       printedData);
 
@@ -1924,7 +1924,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmnode:42 .\n"
-      "osmnode:42 osm2rdf:intersects_nonarea osmway:11 .\n"
+      "osmnode:42 osm2rdf:intersects_area osmway:11 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmnode:42 .\n",
       printedData);
 
@@ -2215,9 +2215,9 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
-      "osmway:42 osm2rdf:intersects_nonarea osmway:11 .\n"
+      "osmway:42 osm2rdf:intersects_area osmway:11 .\n"
       "osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"
-      "osmway:42 osm2rdf:intersects_nonarea osmway:13 .\n"
+      "osmway:42 osm2rdf:intersects_area osmway:13 .\n"
       "osmway:12 osm2rdf:contains_nonarea osmway:42 .\n",
       printedData);
 
@@ -2339,7 +2339,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   const std::string printedData = coutBuffer.str();
   ASSERT_EQ(
       "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
-      "osmway:42 osm2rdf:intersects_nonarea osmway:11 .\n"
+      "osmway:42 osm2rdf:intersects_area osmway:11 .\n"
       "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n",
       printedData);
 
@@ -2625,12 +2625,12 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
-                           "osmnode:2 osm2rdf:intersects_nonarea osmway:11 .\n"
+                           "osmnode:2 osm2rdf:intersects_area osmway:11 .\n"
                            "osmway:11 osm2rdf:contains_nonarea osmnode:2 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
-                           "osmway:42 osm2rdf:intersects_nonarea osmway:11 .\n"
+                           "osmway:42 osm2rdf:intersects_area osmway:11 .\n"
                            "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
