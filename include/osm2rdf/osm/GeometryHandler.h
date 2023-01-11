@@ -218,8 +218,8 @@ typedef std::vector<osm2rdf::osm::Relation::id_t> RelationRelationList;
 // Relation: envelope, osm id, geometry, node list, way list, relation list
 #if BOOST_VERSION >= 107800
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
-                   osm2rdf::geometry::Relation, RelationNodeList, RelationWayList,
-                   RelationRelationList>
+                   osm2rdf::geometry::Relation, RelationNodeList,
+                   RelationWayList, RelationRelationList>
     SpatialRelationValue;
 #endif  // BOOST_VERSION >= 107800
 
@@ -344,7 +344,9 @@ class GeometryHandler {
 
   std::string areaNS(AreaFromType type) const;
 
-  void writeTransitiveClosure(const std::vector<osm2rdf::osm::Area::id_t>& successors, const std::string& entryIRI, const std::string& rel);
+  void writeTransitiveClosure(
+      const std::vector<osm2rdf::osm::Area::id_t>& successors,
+      const std::string& entryIRI, const std::string& rel, bool symmetric);
 
   void getBoxIds(
       const osm2rdf::geometry::Area& area, const osm2rdf::geometry::Area& inner,
