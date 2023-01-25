@@ -196,6 +196,57 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, areaAddMetadata) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addAreaMetadata = true;
+  config.addSortMetadata = false;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
+                            osmium::builder::attr::_outer_ring({
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }),
+                            osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+
+  dh.area(a);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
+      "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
+      "osmway:21 osmmeta:multipolygon_outer_polygon_count \"1\"^^xsd:integer .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, areaAddSortMetadata) {
   // Capture std::cout
   std::stringstream buffer;

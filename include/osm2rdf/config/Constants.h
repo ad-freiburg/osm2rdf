@@ -185,6 +185,13 @@ const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_LONG =
 const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_HELP =
     "Add area/envelope ratio to areas";
 
+const static inline std::string ADD_AREA_METADATA_INFO = "Adding area metadata";
+const static inline std::string ADD_AREA_METADATA_OPTION_SHORT = "";
+const static inline std::string ADD_AREA_METADATA_OPTION_LONG =
+    "add-area-metadata";
+const static inline std::string ADD_AREA_METADATA_OPTION_HELP =
+    "Add information about the area structure";
+
 const static inline std::string ADD_NODE_ENVELOPE_INFO =
     "Adding node envelopes";
 const static inline std::string ADD_NODE_ENVELOPE_OPTION_SHORT = "";
