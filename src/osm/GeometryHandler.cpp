@@ -1002,6 +1002,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << containsStats.printSkippedByNonIntersect()
               << " because A did not intersect B\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
+              << containsStats.printSkippedByAreaSize() << " by area size\n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByBox()
               << " by non-containing bounding boxes \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
@@ -1019,6 +1021,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByOuter()
               << " by outer simplified geom\n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << containsStats.printSkippedByConvexHull() << " by convex hull\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printFullChecks() << " by full geometric check"
 
