@@ -57,16 +57,24 @@ struct Config {
   bool approximateSpatialRels = false;
 
   // Select amount to dump
+  bool addAreaConvexHull = false;
   bool addAreaEnvelope = false;
+  bool addAreaOrientedBoundingBox = false;
+  bool addNodeConvexHull = false;
   bool addNodeEnvelope = false;
+  bool addNodeOrientedBoundingBox = false;
   bool addRelationBorderMembers = false;
+  bool addRelationConvexHull = false;
   bool addRelationEnvelope = false;
+  bool addRelationOrientedBoundingBox = false;
   bool addSortMetadata = true;
+  bool addWayConvexHull = false;
   bool addWayEnvelope = false;
   bool addWayMetadata = false;
   bool addWayNodeGeometry = false;
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
+  bool addWayOrientedBoundingBox = false;
   bool adminRelationsOnly = false;
   bool skipWikiLinks = false;
 

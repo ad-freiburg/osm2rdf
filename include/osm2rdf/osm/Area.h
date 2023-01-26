@@ -27,6 +27,7 @@
 #include "boost/serialization/nvp.hpp"
 #include "osm2rdf/geometry/Area.h"
 #include "osm2rdf/geometry/Global.h"
+#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/osm/Box.h"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/box.hpp"
@@ -50,8 +51,12 @@ struct Area {
   [[nodiscard]] osm2rdf::geometry::area_result_t geomArea() const noexcept;
   // Return the envelope.
   [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
-  // Return the are of the envelope.
+  // Return the area of the envelope.
   [[nodiscard]] osm2rdf::geometry::area_result_t envelopeArea() const noexcept;
+  // Return the convex hull of the area.
+  [[nodiscard]] const osm2rdf::geometry::Polygon& convexHull() const noexcept;
+  // Return the oriented bounding box of the area.
+  [[nodiscard]] const osm2rdf::geometry::Polygon& orientedBoundingBox() const noexcept;
   // Return if this area is created from a way.
   [[nodiscard]] bool fromWay() const noexcept;
   // Return if this area has a name.
@@ -72,6 +77,8 @@ struct Area {
   osm2rdf::geometry::area_result_t _envelopeArea;
   osm2rdf::geometry::Area _geom;
   osm2rdf::geometry::Box _envelope;
+  osm2rdf::geometry::Polygon _convexHull;
+  osm2rdf::geometry::Polygon _obb;
 
   friend class boost::serialization::access;
   template <class Archive>
@@ -83,6 +90,8 @@ struct Area {
     ar& boost::serialization::make_nvp("_envelopeArea", _envelopeArea);
     ar& boost::serialization::make_nvp("_geom", _geom);
     ar& boost::serialization::make_nvp("_envelope", _envelope);
+    ar& boost::serialization::make_nvp("_convexHull", _convexHull);
+    ar& boost::serialization::make_nvp("_obb", _obb);
   }
 };
 

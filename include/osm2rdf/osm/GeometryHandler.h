@@ -61,6 +61,7 @@ struct GeomRelationStats {
   size_t _skippedByInner = 0;
   size_t _skippedByOuter = 0;
   size_t _skippedByBox = 0;
+  size_t _skippedByOrientedBox = 0;
   size_t _skippedByConvexHull = 0;
 
   GeomRelationStats& operator+=(const GeomRelationStats& lh) {
@@ -75,6 +76,7 @@ struct GeomRelationStats {
     _skippedByInner += lh._skippedByInner;
     _skippedByOuter += lh._skippedByOuter;
     _skippedByBox += lh._skippedByBox;
+    _skippedByOrientedBox += lh._skippedByOrientedBox;
     _skippedByConvexHull += lh._skippedByConvexHull;
     _skippedByBorderContained += lh._skippedByBorderContained;
     _skippedByNodeContained += lh._skippedByNodeContained;
@@ -91,6 +93,7 @@ struct GeomRelationStats {
   void skippedByInner() { _skippedByInner++; }
   void skippedByOuter() { _skippedByOuter++; }
   void skippedByBox() { _skippedByBox++; }
+  void skippedByOrientedBox() { _skippedByOrientedBox++; }
   void skippedByConvexHull() { _skippedByConvexHull++; }
   void skippedByBorderContained() { _skippedByBorderContained++; }
   void skippedByNodeContained() { _skippedByNodeContained++; }
@@ -110,6 +113,7 @@ struct GeomRelationStats {
     return printPercNum(_skippedByAreaSize);
   }
   std::string printSkippedByBox() const { return printPercNum(_skippedByBox); }
+  std::string printSkippedByOrientedBox() const { return printPercNum(_skippedByOrientedBox); }
   std::string printSkippedByBoxIdIntersect() const {
     return printPercNum(_skippedByBoxIdIntersect);
   }
@@ -197,7 +201,7 @@ typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    AreaFromType, osm2rdf::geometry::Area,
                    osm2rdf::geometry::Area, osm2rdf::osm::BoxIdList,
                    std::unordered_map<int32_t, osm2rdf::geometry::Area>,
-                   osm2rdf::geometry::Polygon>
+                   osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon>
     SpatialAreaValue;
 
 typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
@@ -219,14 +223,16 @@ typedef std::vector<osm2rdf::osm::Relation::id_t> RelationRelationList;
 #if BOOST_VERSION >= 107800
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
                    osm2rdf::geometry::Relation, RelationNodeList,
-                   RelationWayList, RelationRelationList>
+                   RelationWayList, RelationRelationList,
+                   osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon>
     SpatialRelationValue;
 #endif  // BOOST_VERSION >= 107800
 
 // Way: envelope, osm id, geometry, node list
 typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
                    osm2rdf::geometry::Way, WayNodeList,
-                   std::vector<osm2rdf::geometry::Box>, osm2rdf::osm::BoxIdList>
+                   std::vector<osm2rdf::geometry::Box>, osm2rdf::osm::BoxIdList,
+                   osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon>
     SpatialWayValue;
 typedef std::vector<SpatialWayValue> SpatialWayVector;
 
@@ -460,6 +466,8 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialRelationValue& v,
   ar& boost::serialization::make_nvp("nodeIds", std::get<3>(v));
   ar& boost::serialization::make_nvp("wayIds", std::get<4>(v));
   ar& boost::serialization::make_nvp("relationIds", std::get<5>(v));
+  ar& boost::serialization::make_nvp("convexhull", std::get<6>(v));
+  ar& boost::serialization::make_nvp("obb", std::get<7>(v));
 }
 #endif  // BOOST_VERSION >= 107800
 
@@ -471,7 +479,9 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialWayValue& v,
   ar& boost::serialization::make_nvp("geom", std::get<2>(v));
   ar& boost::serialization::make_nvp("nodeIds", std::get<3>(v));
   ar& boost::serialization::make_nvp("boxes", std::get<4>(v));
-  ar& boost::serialization::make_nvp("boxids", std::get<5>(v));
+  ar& boost::serialization::make_nvp("boxIds", std::get<5>(v));
+  ar& boost::serialization::make_nvp("convexhull", std::get<6>(v));
+  ar& boost::serialization::make_nvp("obb", std::get<7>(v));
 }
 
 template <class Archive>
@@ -485,9 +495,10 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialAreaValue& v,
   ar& boost::serialization::make_nvp("fromWay", std::get<5>(v));
   ar& boost::serialization::make_nvp("inner", std::get<6>(v));
   ar& boost::serialization::make_nvp("outer", std::get<7>(v));
-  ar& boost::serialization::make_nvp("boxids", std::get<8>(v));
+  ar& boost::serialization::make_nvp("boxIds", std::get<8>(v));
   ar& boost::serialization::make_nvp("cutouts", std::get<9>(v));
   ar& boost::serialization::make_nvp("convexhull", std::get<10>(v));
+  ar& boost::serialization::make_nvp("obb", std::get<11>(v));
 }
 
 }  // namespace boost::serialization

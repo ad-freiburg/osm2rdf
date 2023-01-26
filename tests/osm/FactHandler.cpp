@@ -144,6 +144,60 @@ TEST(OSM_FactHandler, areaFromRelation) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, areaAddConvexHull) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addAreaConvexHull = true;
+  config.addSortMetadata = false;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
+                            osmium::builder::attr::_outer_ring({
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }),
+                            osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
+
+  dh.area(a);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
+      "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
+      "osmway:21 osmmeta:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
+      "7.6,48.1 "
+      "7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, areaAddEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
@@ -178,7 +232,8 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
 
   dh.area(a);
   output.flush();
@@ -189,6 +244,59 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
       "osmway:21 osmmeta:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, areaAddOrientedBoundingBox) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addAreaOrientedBoundingBox = true;
+  config.addSortMetadata = false;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
+                            osmium::builder::attr::_outer_ring({
+                                {1, {48.0, 7.51}},
+                                {2, {48.0, 7.61}},
+                                {3, {48.1, 7.61}},
+                                {4, {48.1, 7.51}},
+                                {1, {48.0, 7.51}},
+                            }),
+                            osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
+
+  dh.area(a);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
+      "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
+      "osmway:21 osmmeta:obb \"POLYGON((48.0 7.6,48.1 7.6,48.1 7.5,48.0 "
+      "7.5,48.0 7.6))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -333,7 +441,7 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
-	a.finalize();
+  a.finalize();
 
   dh.area(a);
   output.flush();
@@ -396,6 +504,55 @@ TEST(OSM_FactHandler, node) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, nodeAddConvexHull) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addNodeConvexHull = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
+
+  dh.node(n);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmnode:42 rdf:type osm:node .\n"
+      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 osmkey:city \"Freiburg\" .\n"
+      "osmnode:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmnode:42 osmmeta:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
+      "48.0,7.5 "
+      "48.0,7.5 48.0))\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, nodeAddEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
@@ -436,6 +593,54 @@ TEST(OSM_FactHandler, nodeAddEnvelope) {
       "osmnode:42 osmkey:city \"Freiburg\" .\n"
       "osmnode:42 osmmeta:facts \"1\"^^xsd:integer .\n"
       "osmnode:42 osmmeta:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
+      "48.0,7.5 48.0))\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, nodeAddOrientedBoundingBox) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addNodeOrientedBoundingBox = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
+
+  dh.node(n);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmnode:42 rdf:type osm:node .\n"
+      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 osmkey:city \"Freiburg\" .\n"
+      "osmnode:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmnode:42 osmmeta:obb \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0))\"^^geo:wktLiteral .\n",
       buffer.str());
 
@@ -502,6 +707,185 @@ TEST(OSM_FactHandler, relation) {
   std::cout.rdbuf(sbuf);
 }
 
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, relationAddConvexHull) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addRelationConvexHull = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
+      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
+      osmium::builder::attr::_member(osmium::item_type::relation, 1, "foo"),
+      osmium::builder::attr::_member(osmium::item_type::undefined, 1, "bar"),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer.get<osmium::Relation>(0)};
+
+  dh.relation(r);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmkey:city \"Freiburg\" .\n"
+      "osmrel:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0 .\n"
+      "_:0 osm:id osmnode:1 .\n"
+      "_:0 osm:role \"label\" .\n"
+      "_:0 osmmeta:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:1 .\n"
+      "_:1 osm:id osmrel:1 .\n"
+      "_:1 osm:role \"foo\" .\n"
+      "_:1 osmmeta:pos \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:2 .\n"
+      "_:2 osm:id osm:1 .\n"
+      "_:2 osm:role \"bar\" .\n"
+      "_:2 osmmeta:pos \"2\"^^xsd:integer .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, relationAddEnvelop) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addRelationEnvelope = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
+      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
+      osmium::builder::attr::_member(osmium::item_type::relation, 1, "foo"),
+      osmium::builder::attr::_member(osmium::item_type::undefined, 1, "bar"),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer.get<osmium::Relation>(0)};
+
+  dh.relation(r);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmkey:city \"Freiburg\" .\n"
+      "osmrel:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0 .\n"
+      "_:0 osm:id osmnode:1 .\n"
+      "_:0 osm:role \"label\" .\n"
+      "_:0 osmmeta:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:1 .\n"
+      "_:1 osm:id osmrel:1 .\n"
+      "_:1 osm:role \"foo\" .\n"
+      "_:1 osmmeta:pos \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:2 .\n"
+      "_:2 osm:id osm:1 .\n"
+      "_:2 osm:role \"bar\" .\n"
+      "_:2 osmmeta:pos \"2\"^^xsd:integer .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, relationAddOrientedBoundingBox) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addRelationOrientedBoundingBox = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
+      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
+      osmium::builder::attr::_member(osmium::item_type::relation, 1, "foo"),
+      osmium::builder::attr::_member(osmium::item_type::undefined, 1, "bar"),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Relation r{osmiumBuffer.get<osmium::Relation>(0)};
+
+  dh.relation(r);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmkey:city \"Freiburg\" .\n"
+      "osmrel:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0 .\n"
+      "_:0 osm:id osmnode:1 .\n"
+      "_:0 osm:role \"label\" .\n"
+      "_:0 osmmeta:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:1 .\n"
+      "_:1 osm:id osmrel:1 .\n"
+      "_:1 osm:role \"foo\" .\n"
+      "_:1 osmmeta:pos \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:2 .\n"
+      "_:2 osm:id osm:1 .\n"
+      "_:2 osm:role \"bar\" .\n"
+      "_:2 osmmeta:pos \"2\"^^xsd:integer .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
 
 #if BOOST_VERSION >= 107800
 // ____________________________________________________________________________
@@ -585,6 +969,279 @@ TEST(OSM_FactHandler, relationWithGeometry) {
       "_:0 osmmeta:pos \"0\"^^xsd:integer .\n"
       "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
+      "osmrel:42 osmmeta:completeGeometry \"yes\" .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, relationWithGeometryAddConvexHull) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addRelationConvexHull = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(
+      osmiumBuffer1, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_member(osmium::item_type::node, 23, "label"),
+      osmium::builder::attr::_member(osmium::item_type::way, 55, "outer"),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_node(
+      osmiumBuffer2, osmium::builder::attr::_id(1),
+      osmium::builder::attr::_location(osmium::Location(7.52, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer3, osmium::builder::attr::_id(2),
+      osmium::builder::attr::_location(osmium::Location(7.61, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer4, osmium::builder::attr::_id(23),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_way(osmiumBuffer5, osmium::builder::attr::_id(55),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.52}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  RelationHandler rh = RelationHandler(config);
+  LocationHandler* lh = LocationHandler::create(config);
+  // Create osm2rdf object from osmium object
+  osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
+  rh.relation(osmiumBuffer1.get<osmium::Relation>(0));
+  // Fill location and relation handler with data.
+  lh->node(osmiumBuffer2.get<osmium::Node>(0));
+  lh->node(osmiumBuffer3.get<osmium::Node>(0));
+  lh->node(osmiumBuffer4.get<osmium::Node>(0));
+  rh.prepare_for_lookup();
+  rh.setLocationHandler(lh);
+  rh.way(osmiumBuffer5.get<osmium::Way>(0));
+
+  r.buildGeometry(rh);
+
+  dh.relation(r);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmkey:city \"Freiburg\" .\n"
+      "osmrel:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0 .\n"
+      "_:0 osm:id osmnode:23 .\n"
+      "_:0 osm:role \"label\" .\n"
+      "_:0 osmmeta:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
+      "osmrel:42 osmmeta:convex_hull \"POLYGON((7.5 48.0,7.6 48.0,7.5 48.0,7.5 "
+      "48.0))\"^^geo:wktLiteral .\n"
+      "osmrel:42 osmmeta:completeGeometry \"yes\" .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, relationWithGeometryAddEnvelope) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addRelationEnvelope = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(
+      osmiumBuffer1, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_member(osmium::item_type::node, 23, "label"),
+      osmium::builder::attr::_member(osmium::item_type::way, 55, "outer"),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_node(
+      osmiumBuffer2, osmium::builder::attr::_id(1),
+      osmium::builder::attr::_location(osmium::Location(7.52, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer3, osmium::builder::attr::_id(2),
+      osmium::builder::attr::_location(osmium::Location(7.61, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer4, osmium::builder::attr::_id(23),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_way(osmiumBuffer5, osmium::builder::attr::_id(55),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.52}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  RelationHandler rh = RelationHandler(config);
+  LocationHandler* lh = LocationHandler::create(config);
+  // Create osm2rdf object from osmium object
+  osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
+  rh.relation(osmiumBuffer1.get<osmium::Relation>(0));
+  // Fill location and relation handler with data.
+  lh->node(osmiumBuffer2.get<osmium::Node>(0));
+  lh->node(osmiumBuffer3.get<osmium::Node>(0));
+  lh->node(osmiumBuffer4.get<osmium::Node>(0));
+  rh.prepare_for_lookup();
+  rh.setLocationHandler(lh);
+  rh.way(osmiumBuffer5.get<osmium::Way>(0));
+
+  r.buildGeometry(rh);
+
+  dh.relation(r);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmkey:city \"Freiburg\" .\n"
+      "osmrel:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0 .\n"
+      "_:0 osm:id osmnode:23 .\n"
+      "_:0 osm:role \"label\" .\n"
+      "_:0 osmmeta:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
+      "osmrel:42 osmmeta:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.6 48.0,7.6 "
+      "48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
+      "osmrel:42 osmmeta:completeGeometry \"yes\" .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, relationWithGeometryAddOrientedBoundingBox) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addRelationOrientedBoundingBox = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(
+      osmiumBuffer1, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_member(osmium::item_type::node, 23, "label"),
+      osmium::builder::attr::_member(osmium::item_type::way, 55, "outer"),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_node(
+      osmiumBuffer2, osmium::builder::attr::_id(1),
+      osmium::builder::attr::_location(osmium::Location(7.52, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer3, osmium::builder::attr::_id(2),
+      osmium::builder::attr::_location(osmium::Location(7.61, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer4, osmium::builder::attr::_id(23),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_way(osmiumBuffer5, osmium::builder::attr::_id(55),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.52}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  RelationHandler rh = RelationHandler(config);
+  LocationHandler* lh = LocationHandler::create(config);
+  // Create osm2rdf object from osmium object
+  osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
+  rh.relation(osmiumBuffer1.get<osmium::Relation>(0));
+  // Fill location and relation handler with data.
+  lh->node(osmiumBuffer2.get<osmium::Node>(0));
+  lh->node(osmiumBuffer3.get<osmium::Node>(0));
+  lh->node(osmiumBuffer4.get<osmium::Node>(0));
+  rh.prepare_for_lookup();
+  rh.setLocationHandler(lh);
+  rh.way(osmiumBuffer5.get<osmium::Way>(0));
+
+  r.buildGeometry(rh);
+
+  dh.relation(r);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmkey:city \"Freiburg\" .\n"
+      "osmrel:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0 .\n"
+      "_:0 osm:id osmnode:23 .\n"
+      "_:0 osm:role \"label\" .\n"
+      "_:0 osmmeta:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
+      "osmrel:42 osmmeta:obb \"POLYGON((7.6 48.0,7.6 48.0,7.5 48.0,7.5 "
+      "48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osmmeta:completeGeometry \"yes\" .\n",
       buffer.str());
 
@@ -694,6 +1351,58 @@ TEST(OSM_FactHandler, wayAddSortMetadata) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, wayAddWayConvexHull) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addSortMetadata = false;
+  config.addWayConvexHull = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+
+  dh.way(w);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "7.6)\"^^geo:wktLiteral .\n"
+      "osmway:42 osmmeta:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
+      "7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, wayAddWayEnvelope) {
   // Capture std::cout
   std::stringstream buffer;
@@ -739,6 +1448,58 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osmmeta:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n",
+      buffer.str());
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, wayAddWayOrientedBoundingBox) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+  config.addSortMetadata = false;
+  config.addWayOrientedBoundingBox = true;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+
+  dh.way(w);
+  output.flush();
+  output.close();
+
+  ASSERT_EQ(
+      "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmkey:city \"Freiburg\" .\n"
+      "osmway:42 osmmeta:facts \"1\"^^xsd:integer .\n"
+      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "7.6)\"^^geo:wktLiteral .\n"
+      "osmway:42 osmmeta:obb \"POLYGON((48.1 7.6,48.1 7.6,48.0 7.5,48.0 "
+      "7.5,48.1 7.6))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -1349,8 +2110,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2) {
   const std::string subject = "subject";
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
-  const std::string object = writer.generateLiteral(
-      tagValue, "");
+  const std::string object = writer.generateLiteral(tagValue, "");
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1386,8 +2146,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3) {
   const std::string subject = "subject";
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
-  const std::string object = writer.generateLiteral(
-      tagValue, "");
+  const std::string object = writer.generateLiteral(tagValue, "");
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1424,7 +2183,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      tagValue,  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1461,7 +2220,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1498,7 +2257,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "-5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1535,7 +2294,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "-5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1572,7 +2331,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "5",  "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";

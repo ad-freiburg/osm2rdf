@@ -17,9 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/config/Config.h"
+
+#include "boost/version.hpp"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "osm2rdf/config/Config.h"
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
 #include "osm2rdf/util/CacheFile.h"
@@ -40,12 +42,21 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noNodeGeometricRelations);
   ASSERT_FALSE(config.noWayGeometricRelations);
 
+  ASSERT_FALSE(config.addAreaConvexHull);
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addAreaEnvelopeRatio);
+  ASSERT_FALSE(config.addAreaOrientedBoundingBox);
+  ASSERT_FALSE(config.addNodeConvexHull);
   ASSERT_FALSE(config.addNodeEnvelope);
+  ASSERT_FALSE(config.addNodeOrientedBoundingBox);
   ASSERT_FALSE(config.addRelationBorderMembers);
+  ASSERT_FALSE(config.addRelationConvexHull);
+  ASSERT_FALSE(config.addRelationEnvelope);
+  ASSERT_FALSE(config.addRelationOrientedBoundingBox);
   ASSERT_TRUE(config.addSortMetadata);
+  ASSERT_FALSE(config.addWayConvexHull);
   ASSERT_FALSE(config.addWayEnvelope);
+  ASSERT_FALSE(config.addWayOrientedBoundingBox);
   ASSERT_FALSE(config.addWayNodeGeometry);
   ASSERT_FALSE(config.addWayNodeOrder);
   ASSERT_FALSE(config.addWayNodeSpatialMetadata);
@@ -631,6 +642,22 @@ TEST(CONFIG_Config, fromArgsNoWayGeometricRelationsLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddAreaConvexHullLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addAreaConvexHull);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddAreaEnvelopeLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -663,6 +690,39 @@ TEST(CONFIG_Config, fromArgsAddAreaEnvelopeRatioLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddAreaOrientedBoundingBoxLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addAreaOrientedBoundingBox);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddNodeConvexHullLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addNodeConvexHull);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -679,7 +739,24 @@ TEST(CONFIG_Config, fromArgsAddNodeEnvelopeLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsAddRelationBorderMemebersLong) {
+TEST(CONFIG_Config, fromArgsAddNodeOrientedBoundingBoxLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addNodeOrientedBoundingBox);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddRelationBorderMembersLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
@@ -693,6 +770,75 @@ TEST(CONFIG_Config, fromArgsAddRelationBorderMemebersLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.addRelationBorderMembers);
+}
+
+#if BOOST_VERSION >= 107800
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddRelationConvexHullLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addRelationConvexHull);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddRelationEnvelopeLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addRelationEnvelope);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddRelationOrientedBoundingBoxLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addRelationOrientedBoundingBox);
+}
+#endif  // BOOST_VERSION >= 107800
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddWayConvexHullLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_WAY_CONVEX_HULL_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addWayConvexHull);
 }
 
 // ____________________________________________________________________________
@@ -709,6 +855,22 @@ TEST(CONFIG_Config, fromArgsAddWayEnvelopeLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.addWayEnvelope);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddWayOrientedBoundingBOxLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addWayOrientedBoundingBox);
 }
 
 // ____________________________________________________________________________
@@ -1033,6 +1195,17 @@ TEST(CONFIG_Config, getInfoNoWayDump) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddAreaConvexHull) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addAreaConvexHull = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_INFO));
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddAreaEnvelope) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1041,6 +1214,19 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelope) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::ADD_AREA_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddAreaOrientedBoundingBox) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addAreaOrientedBoundingBox = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(
+      res,
+      ::testing::HasSubstr(
+          osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO));
 }
 
 // ____________________________________________________________________________
@@ -1056,6 +1242,17 @@ TEST(CONFIG_Config, getInfoAddAreaEnvelopeRatio) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddNodeConvexHull) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addNodeConvexHull = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_INFO));
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddNodeEnvelope) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1064,6 +1261,19 @@ TEST(CONFIG_Config, getInfoAddNodeEnvelope) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::ADD_NODE_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddNodeOrientedBoundingBox) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addNodeOrientedBoundingBox = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(
+      res,
+      ::testing::HasSubstr(
+          osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO));
 }
 
 // ____________________________________________________________________________
@@ -1079,6 +1289,53 @@ TEST(CONFIG_Config, getInfoAddRelationBorderMembers) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddRelationConvexHull) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addRelationConvexHull = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddRelationEnvelope) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addRelationEnvelope = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddRelationOrientedBoundingBox) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addRelationOrientedBoundingBox = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(
+      res,
+      ::testing::HasSubstr(
+          osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddWayConvexHull) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addWayConvexHull = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2rdf::config::constants::ADD_WAY_CONVEX_HULL_INFO));
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayEnvelope) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1087,6 +1344,18 @@ TEST(CONFIG_Config, getInfoAddWayEnvelope) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::ADD_WAY_ENVELOPE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddWayOrientedBoundingBox) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addWayOrientedBoundingBox = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(
+               osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO));
 }
 
 // ____________________________________________________________________________

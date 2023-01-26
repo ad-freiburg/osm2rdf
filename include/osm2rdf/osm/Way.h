@@ -29,6 +29,7 @@
 #include "boost/serialization/unordered_map.hpp"
 #include "boost/serialization/vector.hpp"
 #include "osm2rdf/geometry/Location.h"
+#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"
@@ -46,6 +47,10 @@ class Way {
   [[nodiscard]] bool closed() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Way& geom() const noexcept;
+  // Return the convex hull.
+  [[nodiscard]] const osm2rdf::geometry::Polygon& convexHull() const noexcept;
+  // Return the oriented bounding box.
+  [[nodiscard]] const osm2rdf::geometry::Polygon& orientedBoundingBox() const noexcept;
   [[nodiscard]] const std::vector<osm2rdf::osm::Node>& nodes() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
 
@@ -57,6 +62,8 @@ class Way {
   std::vector<osm2rdf::osm::Node> _nodes;
   osm2rdf::geometry::Way _geom;
   osm2rdf::geometry::Box _envelope;
+  osm2rdf::geometry::Polygon _convexHull;
+  osm2rdf::geometry::Polygon _obb;
   osm2rdf::osm::TagList _tags;
 
   friend class boost::serialization::access;
@@ -66,6 +73,8 @@ class Way {
     ar& boost::serialization::make_nvp("_nodes", _nodes);
     ar& boost::serialization::make_nvp("_geom", _geom);
     ar& boost::serialization::make_nvp("_envelope", _envelope);
+    ar& boost::serialization::make_nvp("_convexHull", _envelope);
+    ar& boost::serialization::make_nvp("_obb", _geom);
     ar& boost::serialization::make_nvp("_tags", _tags);
   }
 };

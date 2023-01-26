@@ -45,7 +45,8 @@ TEST(OSM_Area, FromAreaVirtualWay) {
                             }));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
   ASSERT_EQ(42, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_TRUE(a.fromWay());
@@ -72,7 +73,8 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
                             }));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_FALSE(a.fromWay());
@@ -102,7 +104,8 @@ TEST(OSM_Area, BoundaryWithAdminLevel) {
       osmium::builder::attr::_tag("admin_level", "4"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_FALSE(a.fromWay());

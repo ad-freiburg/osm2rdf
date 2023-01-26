@@ -35,7 +35,9 @@ using osm2rdf::osm::constants::AREA_PRECISION;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL;
+using osm2rdf::ttl::constants::IRI__OSM_META__CONVEX_HULL;
 using osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE;
+using osm2rdf::ttl::constants::IRI__OSM_META__OBB;
 using osm2rdf::ttl::constants::IRI__OSM_META__POS;
 using osm2rdf::ttl::constants::IRI__OSM_NODE;
 using osm2rdf::ttl::constants::IRI__OSM_RELATION;
@@ -76,8 +78,14 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 
   writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, area.geom());
 
+  if (_config.addAreaConvexHull){
+    writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL, area.convexHull());
+  }
   if (_config.addAreaEnvelope) {
     writeBox(subj, IRI__OSM_META__ENVELOPE, area.envelope());
+  }
+  if (_config.addAreaOrientedBoundingBox){
+    writeBoostGeometry(subj, IRI__OSM_META__OBB, area.orientedBoundingBox());
   }
 
   if (_config.addSortMetadata) {
@@ -112,11 +120,14 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 
   writeTagList(subj, node.tags());
 
-  osm2rdf::geometry::Box envelope;
-  boost::geometry::envelope(node.geom(), envelope);
-
+  if (_config.addNodeConvexHull) {
+    writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL, node.convexHull());
+  }
   if (_config.addNodeEnvelope) {
-    writeBox(subj, IRI__OSM_META__ENVELOPE, envelope);
+    writeBox(subj, IRI__OSM_META__ENVELOPE, node.envelope());
+  }
+  if (_config.addNodeOrientedBoundingBox) {
+    writeBoostGeometry(subj, IRI__OSM_META__OBB, node.orientedBoundingBox());
   }
 }
 
@@ -173,10 +184,18 @@ void osm2rdf::osm::FactHandler<W>::relation(
   if (relation.hasGeometry()) {
     writeBoostGeometry(subj, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
                        relation.geom());
+
+    if (_config.addRelationConvexHull) {
+      writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL, relation.convexHull());
+    }
     if (_config.addRelationEnvelope) {
       writeBox(subj, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
                relation.envelope());
     }
+    if (_config.addRelationOrientedBoundingBox) {
+      writeBoostGeometry(subj, IRI__OSM_META__OBB, relation.orientedBoundingBox());
+    }
+
     _writer->writeTriple(
         subj,
         _writer->generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META,
@@ -253,8 +272,15 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   size_t numUniquePoints = locations.size();
   writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, locations);
 
+  if (_config.addWayConvexHull) {
+    writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL, way.convexHull());
+  }
   if (_config.addWayEnvelope) {
     writeBox(subj, IRI__OSM_META__ENVELOPE, way.envelope());
+  }
+
+  if (_config.addWayOrientedBoundingBox) {
+    writeBoostGeometry(subj, IRI__OSM_META__OBB, way.orientedBoundingBox());
   }
 
   if (_config.addWayMetadata) {

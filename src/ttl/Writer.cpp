@@ -80,8 +80,12 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_nonarea");
+  osm2rdf::ttl::constants::IRI__OSM_META__CONVEX_HULL =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "convex_hull");
   osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "envelope");
+  osm2rdf::ttl::constants::IRI__OSM_META__OBB =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "obb");
   osm2rdf::ttl::constants::IRI__OSM_META__POS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "pos");
   osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =

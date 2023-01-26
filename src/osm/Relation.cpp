@@ -16,12 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/Relation.h"
+
 #include <iostream>
 #include <vector>
 
 #include "boost/geometry.hpp"
 #include "boost/version.hpp"
-#include "osm2rdf/osm/Relation.h"
+#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
@@ -67,13 +69,23 @@ bool osm2rdf::osm::Relation::hasGeometry() const noexcept {
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Relation osm2rdf::osm::Relation::geom() const noexcept {
+const osm2rdf::geometry::Relation& osm2rdf::osm::Relation::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Box osm2rdf::osm::Relation::envelope() const noexcept {
+const osm2rdf::geometry::Box& osm2rdf::osm::Relation::envelope() const noexcept {
   return _envelope;
+}
+
+// ____________________________________________________________________________
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::convexHull() const noexcept {
+  return _convexHull;
+}
+
+// ____________________________________________________________________________
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::orientedBoundingBox() const noexcept {
+  return _obb;
 }
 
 // ____________________________________________________________________________
@@ -122,6 +134,8 @@ void osm2rdf::osm::Relation::buildGeometry(
   }
   if (!_geom.empty()) {
     boost::geometry::envelope(_geom, _envelope);
+    boost::geometry::convex_hull(_geom, _convexHull);
+    _obb = osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
   } else {
     _envelope.min_corner() = geometry::Location{0, 0};
     _envelope.max_corner() = geometry::Location{0, 0};

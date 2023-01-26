@@ -20,7 +20,9 @@
 #include "boost/geometry/algorithms/envelope.hpp"
 #include "osm2rdf/geometry/Box.h"
 #include "osm2rdf/geometry/Global.h"
+#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/osm/Node.h"
+#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
@@ -51,6 +53,23 @@ osm2rdf::osm::Node::id_t osm2rdf::osm::Node::id() const noexcept { return _id; }
 // ____________________________________________________________________________
 const osm2rdf::geometry::Location& osm2rdf::osm::Node::geom() const noexcept {
   return _geom;
+}
+
+// ____________________________________________________________________________
+osm2rdf::geometry::Box osm2rdf::osm::Node::envelope() const noexcept {
+ osm2rdf::geometry::Box envelope;
+ boost::geometry::envelope(geom(), envelope);
+ return envelope;
+}
+
+// ____________________________________________________________________________
+osm2rdf::geometry::Polygon osm2rdf::osm::Node::convexHull() const noexcept {
+  return osm2rdf::osm::generic::boxToPolygon(envelope());
+}
+
+// ____________________________________________________________________________
+osm2rdf::geometry::Polygon osm2rdf::osm::Node::orientedBoundingBox() const noexcept {
+  return convexHull();
 }
 
 // ____________________________________________________________________________
