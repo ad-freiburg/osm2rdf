@@ -21,6 +21,7 @@
 
 #include "boost/serialization/nvp.hpp"
 #include "osm2rdf/geometry/Box.h"
+#include "osm2rdf/geometry/Polygon.h"
 
 namespace osm2rdf::osm {
 
@@ -29,6 +30,8 @@ class Box {
   Box();
   explicit Box(const osm2rdf::geometry::Box& box);
   [[nodiscard]] osm2rdf::geometry::Box geom() const;
+  [[nodiscard]] osm2rdf::geometry::Polygon convexHull() const noexcept;
+  [[nodiscard]] osm2rdf::geometry::Polygon orientedBoundingBox() const noexcept;
 
   bool operator==(const osm2rdf::osm::Box& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Box& other) const noexcept;

@@ -26,6 +26,7 @@
 #include "osm2rdf/geometry/Global.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
+#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/Node.h"
 #include "osmium/osm/area.hpp"
 
@@ -44,8 +45,12 @@ void osm2rdf::osm::Area::finalize() noexcept {
   boost::geometry::unique(_geom);
   _geomArea = boost::geometry::area(_geom);
   _envelopeArea = boost::geometry::area(_envelope);
+  boost::geometry::convex_hull(_geom, _convexHull);
+  _obb = osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
   assert(_geomArea > 0);
   assert(_envelopeArea > 0);
+  assert(boost::geometry::area(_convexHull) > 0);
+  assert(boost::geometry::area(_obb) > 0);
 }
 
 // ____________________________________________________________________________
@@ -131,6 +136,16 @@ osm2rdf::geometry::area_result_t osm2rdf::osm::Area::geomArea() const noexcept {
 osm2rdf::geometry::area_result_t osm2rdf::osm::Area::envelopeArea()
     const noexcept {
   return _envelopeArea;
+}
+
+// ____________________________________________________________________________
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Area::convexHull() const noexcept {
+    return _convexHull;
+}
+
+// ____________________________________________________________________________
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Area::orientedBoundingBox() const noexcept {
+  return _obb;
 }
 
 // ____________________________________________________________________________

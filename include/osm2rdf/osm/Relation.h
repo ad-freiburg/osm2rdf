@@ -25,6 +25,7 @@
 #include "boost/serialization/nvp.hpp"
 #include "boost/serialization/vector.hpp"
 #include "boost/version.hpp"
+#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/geometry/Relation.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/RelationHandler.h"
@@ -46,8 +47,10 @@ class Relation {
   [[nodiscard]] bool hasCompleteGeometry() const noexcept;
 #if BOOST_VERSION >= 107800
   [[nodiscard]] bool hasGeometry() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Relation geom() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Relation& geom() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Polygon& convexHull() const noexcept;
+  [[nodiscard]] const osm2rdf::geometry::Polygon& orientedBoundingBox() const noexcept;
   void buildGeometry(osm2rdf::osm::RelationHandler& relationHandler);
 #endif  // BOOST_VERSION >= 107800
 
@@ -61,6 +64,8 @@ class Relation {
 #if BOOST_VERSION >= 107800
   osm2rdf::geometry::Box _envelope;
   osm2rdf::geometry::Relation _geom;
+  osm2rdf::geometry::Polygon _convexHull;
+  osm2rdf::geometry::Polygon _obb;
 #endif  // BOOST_VERSION >= 107800
   bool _hasCompleteGeometry;
 
@@ -73,6 +78,8 @@ class Relation {
 #if BOOST_VERSION >= 107800
     ar& boost::serialization::make_nvp("_envelope", _envelope);
     ar& boost::serialization::make_nvp("_geom", _geom);
+    ar& boost::serialization::make_nvp("_convexHull", _envelope);
+    ar& boost::serialization::make_nvp("_obb", _geom);
 #endif  // BOOST_VERSION >= 107800
     ar& boost::serialization::make_nvp("_hasCompleteGeometry",
                                        _hasCompleteGeometry);

@@ -17,13 +17,15 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/geometry/Way.h"
-
 #include <vector>
 
 #include "boost/geometry.hpp"
+#include "osm2rdf/geometry/Box.h"
+#include "osm2rdf/geometry/Polygon.h"
+#include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"
+#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osm2rdf/osm/Way.h"
 #include "osmium/osm/way.hpp"
@@ -48,10 +50,10 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   double latMax = -std::numeric_limits<double>::infinity();
 
   for (const auto& nodeRef : way.nodes()) {
-    if (nodeRef.lon() < lonMin) lonMin = nodeRef.lon();
-    if (nodeRef.lat() < latMin) latMin = nodeRef.lat();
-    if (nodeRef.lon() > lonMax) lonMax = nodeRef.lon();
-    if (nodeRef.lat() > latMax) latMax = nodeRef.lat();
+    if (nodeRef.lon() < lonMin) { lonMin = nodeRef.lon(); }
+    if (nodeRef.lat() < latMin) { latMin = nodeRef.lat(); }
+    if (nodeRef.lon() > lonMax) { lonMax = nodeRef.lon(); }
+    if (nodeRef.lat() > latMax) { latMax = nodeRef.lat(); }
 
     _nodes.emplace_back(nodeRef);
 
@@ -62,6 +64,8 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
     }
   }
   _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
+  boost::geometry::convex_hull(_geom, _convexHull);
+  _obb = osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
 }
 
 // ____________________________________________________________________________
@@ -86,6 +90,16 @@ const osm2rdf::geometry::Way& osm2rdf::osm::Way::geom() const noexcept {
 // ____________________________________________________________________________
 const osm2rdf::geometry::Box& osm2rdf::osm::Way::envelope() const noexcept {
   return _envelope;
+}
+
+// ____________________________________________________________________________
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::convexHull() const noexcept {
+  return _convexHull;
+}
+
+// ____________________________________________________________________________
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::orientedBoundingBox() const noexcept {
+  return _obb;
 }
 
 // ____________________________________________________________________________

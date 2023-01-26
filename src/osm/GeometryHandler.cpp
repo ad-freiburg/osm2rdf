@@ -20,6 +20,7 @@
 
 #include <unistd.h>
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
@@ -145,7 +146,7 @@ void GeometryHandler<W>::area(const Area& area) {
   }
 
   if (!geom.empty()) {
-    boost::geometry::convex_hull(geom, convexHull);
+    convexHull = area.convexHull();
     if (convexHull.outer().size() >= geom.front().outer().size() / 2) {
       // if we haven't gained anything significant in terms of number of anchor
       // points, discard
@@ -164,7 +165,7 @@ void GeometryHandler<W>::area(const Area& area) {
       envelopes.push_back(box);
     }
   } else {
-    // if only one element was contained, don't recalulate the entire bounding
+    // if only one element was contained, don't recalculate the entire bounding
     // box
     envelopes.push_back(area.envelope());
   }
@@ -181,13 +182,15 @@ void GeometryHandler<W>::area(const Area& area) {
       _spatialStorageArea.push_back(
           {envelopes, area.id(), geom, area.objId(), area.geomArea(),
            area.fromWay() ? AreaFromType::FROM_WAY : AreaFromType::FROM_REL,
-           innerGeom, outerGeom, boxIds, cutouts, convexHull});
+           innerGeom, outerGeom, boxIds, cutouts, convexHull,
+           area.orientedBoundingBox()});
     } else if (!area.fromWay()) {
       // Areas from ways are handled in GeometryHandler<W>::way
       _oaUnnamedAreas << SpatialAreaValue(
           envelopes, area.id(), geom, area.objId(), area.geomArea(),
           area.fromWay() ? AreaFromType::FROM_WAY : AreaFromType::FROM_REL,
-          innerGeom, outerGeom, boxIds, cutouts, convexHull);
+          innerGeom, outerGeom, boxIds, cutouts, convexHull,
+          area.orientedBoundingBox());
       _numUnnamedAreas++;
     }
   }
@@ -242,7 +245,8 @@ void GeometryHandler<W>::way(const Way& way) {
 #pragma omp critical(wayDataInsert)
   {
     _oaWays << SpatialWayValue(way.envelope(), way.id(), geom, nodeIds, boxes,
-                               boxIds);
+                               boxIds, way.convexHull(),
+                               way.orientedBoundingBox());
     _numWays++;
   }
 }
@@ -657,6 +661,9 @@ void GeometryHandler<W>::prepareDAG() {
               << stats.printSkippedByBox()
               << " by non-intersecting bounding boxes \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
+              << stats.printSkippedByOrientedBox()
+              << " by non-intersecting oriented bounding boxes \n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
               << stats.printSkippedByBoxIdIntersect()
               << " by box id intersect\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
@@ -833,6 +840,9 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
             << intersectStats.printSkippedByBox()
             << " by non-intersecting bounding boxes \n"
             << osm2rdf::util::formattedTimeSpacer << "         "
+            << intersectStats.printSkippedByOrientedBox()
+            << " by non-intersecting oriented bounding boxes \n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
             << intersectStats.printSkippedByBoxIdIntersect()
             << " by box id intersect\n"
             << osm2rdf::util::formattedTimeSpacer << "         "
@@ -914,7 +924,7 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
         containsStats.checked();
 
         // don't compare to itself
-        if (areaId == entryId) continue;
+        if (areaId == entryId) { continue; }
 
         GeomRelationInfo geomRelInf;
 
@@ -978,6 +988,9 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << intersectStats.printSkippedByBox()
               << " by non-intersecting bounding boxes \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
+              << intersectStats.printSkippedByOrientedBox()
+              << " by non-intersecting oriented bounding boxes \n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
               << intersectStats.printSkippedByBoxIdIntersect()
               << " by box id intersect\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
@@ -1006,6 +1019,9 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByBox()
               << " by non-containing bounding boxes \n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << containsStats.printSkippedByOrientedBox()
+              << " by non-containing oriented bounding boxes \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByBoxIdIntersect()
               << " by box id intersect\n"
@@ -1110,10 +1126,10 @@ GeometryHandler<W>::dumpNodeRelations() {
         }
 
         GeomRelationInfo geomRelInf;
-        if (!nodeInArea(node, area, &geomRelInf, &stats)) continue;
+        if (!nodeInArea(node, area, &geomRelInf, &stats)) { continue; }
 
         if (areaFromType == 1) {
-          // we are countained in an area derived from a way.
+          // we are contained in an area derived from a way.
           const auto& relations = _areaBorderWaysIndex.find(areaObjId);
           if (relations != _areaBorderWaysIndex.end()) {
             for (auto r : relations->second) {
@@ -1254,7 +1270,7 @@ void GeometryHandler<W>::dumpWayRelations(
       // Store known areas in set.
       for (const auto& nodeId : wayNodeIds) {
         auto nodeDataIt = nodeData.find(nodeId);
-        if (nodeDataIt == nodeData.end()) continue;
+        if (nodeDataIt == nodeData.end()) { continue; }
 
         skipNodeContained.insert(nodeDataIt->second.begin(),
                                  nodeDataIt->second.end());
@@ -1279,7 +1295,8 @@ void GeometryHandler<W>::dumpWayRelations(
           continue;
         }
 
-        if (areaFromType == 1 && areaObjId == wayId) continue;
+        if (areaFromType == AreaFromType::FROM_WAY &&
+            areaObjId == wayId) { continue; }
 
         GeomRelationInfo geomRelInf;
 
@@ -1358,7 +1375,7 @@ void GeometryHandler<W>::dumpWayRelations(
         if (skipContains.find(areaId) != skipContains.end()) {
           containsStats.skippedByDAG();
         } else {
-          if (!wayInArea(way, area, &geomRelInf, &containsStats)) continue;
+          if (!wayInArea(way, area, &geomRelInf, &containsStats)) { continue; }
 
           if (areaFromType == AreaFromType::FROM_WAY) {
             // we are countained in an area derived from a way.
@@ -1411,6 +1428,9 @@ void GeometryHandler<W>::dumpWayRelations(
               << intersectStats.printSkippedByBox()
               << " by non-intersecting bounding boxes \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
+              << intersectStats.printSkippedByOrientedBox()
+              << " by non-intersecting oriented bounding boxes \n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
               << intersectStats.printSkippedByBoxIdIntersect()
               << " by box id intersect\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
@@ -1440,6 +1460,9 @@ void GeometryHandler<W>::dumpWayRelations(
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByBox()
               << " by non-intersecting bounding boxes \n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << containsStats.printSkippedByOrientedBox()
+              << " by non-intersecting oriented bounding boxes \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printSkippedByBoxIdIntersect()
               << " by box id intersect\n"
@@ -1690,6 +1713,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
   const auto& areaBoxIds = std::get<8>(b);
   const auto& areaCutouts = std::get<9>(b);
   // const auto& areaConvexHull = std::get<10>(b);
+  const auto& areaOBB = std::get<11>(b);
 
   // if we haven't intersected the box ids yet, do it now
   if (geomRelInf->fullContained < 0)
@@ -1732,10 +1756,18 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
+    // we definitely don't intersect if ...
     if (!boost::geometry::intersects(geomA, envelopesB[0])) {
-      // if does not intersect with envelope, we definitely dont intersect
+      // ... does not intersect with envelope
       geomRelInf->intersects = NO;
       stats->skippedByBox();
+      return false;
+    }
+
+    if (!boost::geometry::intersects(geomA, areaOBB)) {
+      // ... does not intersect with oriented bounding box
+      geomRelInf->intersects = NO;
+      stats->skippedByOrientedBox();
       return false;
     }
 
@@ -2047,6 +2079,7 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
   const auto& outerGeomA = std::get<7>(a);
   const auto& boxIdsA = std::get<8>(a);
   const auto& envelopesA = std::get<0>(a);
+  const auto& obbA = std::get<11>(a);
 
   const auto& geomB = std::get<2>(b);
   const auto& areaB = std::get<4>(b);
@@ -2055,6 +2088,7 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
   const auto& boxIdsB = std::get<8>(b);
   const auto& envelopesB = std::get<0>(b);
   const auto& cutoutsB = std::get<9>(b);
+  const auto& obbB = std::get<11>(b);
 
   // if A is bigger than B, B cannot contain A
   if (areaA > areaB) {
@@ -2070,6 +2104,13 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
     return false;
   }
 
+  // if A's obb doesn't cover B's obb, B cannot contain A
+  if (!boost::geometry::covered_by(obbA, obbB)) {
+    geomRelInf->contained = NO;
+    stats->skippedByOrientedBox();
+    return false;
+  }
+
   // if no box id intersection has been written, do it now
   if (geomRelInf->fullContained < 0) boxIdIsect(boxIdsA, boxIdsB, geomRelInf);
 
@@ -2080,7 +2121,7 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
     return true;
   }
 
-  // else, if the number of surely contained and potentiall contained boxes is
+  // else, if the number of surely contained and potentially contained boxes is
   // unequal the number of A's boxes, we are surely not contained
   if ((static_cast<int32_t>(geomRelInf->toCheck.size()) +
        geomRelInf->fullContained) != boxIdsA[0].first) {
@@ -2210,11 +2251,12 @@ void GeometryHandler<W>::getBoxIds(
 
       bool boxIntersects = false;
       for (size_t i = 1; i < envelopes.size(); i++) {
-        if (boost::geometry::intersects(envelopes[i], box))
+        if (boost::geometry::intersects(envelopes[i], box)) {
           boxIntersects = true;
+        }
       }
 
-      if (!boxIntersects) continue;
+      if (!boxIntersects) { continue; }
 
       boost::geometry::model::ring<osm2rdf::geometry::Location> ring;
       ring.push_back(box.min_corner());
@@ -2261,13 +2303,14 @@ void GeometryHandler<W>::getBoxIds(
             // only intersecting
             int32_t newId = -(y * NUM_GRID_CELLS + x + 1);
 
-            if (cutouts) (*cutouts)[-newId] = intersection;
+            if (cutouts) { (*cutouts)[-newId] = intersection; }
 
             if (!ret->empty() && ret->back().second < 254 &&
-                ret->back().first - ret->back().second == newId + 1)
+                ret->back().first - ret->back().second == newId + 1) {
               ret->back().second++;
-            else
+            } else {
               ret->push_back({newId, 0});
+            }
           } else {
             // we need to check in detail on a smaller level!
             // recurse down...
@@ -2343,8 +2386,8 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
   geomRelInf->fullContained = 0;
 
   // shortcuts
-  if (abs(idsA[1].first) > abs(idsB.back().first) + idsB.back().second) return;
-  if (abs(idsA.back().first) + idsA.back().second < idsB[1].first) return;
+  if (abs(idsA[1].first) > abs(idsB.back().first) + idsB.back().second) { return; }
+  if (abs(idsA.back().first) + idsA.back().second < idsB[1].first) { return; }
 
   size_t i = 1;
   int32_t ii = 0;
@@ -2360,7 +2403,7 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
 
         // we now know that we surely intersect. If we know already that
         // we cannot be contained, return here
-        if (noContained) return;
+        if (noContained) { return; }
       }
       if (idsB[j].first < 0) {
         geomRelInf->toCheck.push_back(abs(idsA[i].first));
@@ -2378,7 +2421,7 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
       // if we already know that we intersect, we are now sure that we
       // cannot be contained - it is irrelevant by how "much" we cannot be
       // contained, so just return
-      if (geomRelInf->fullContained > 0) return;
+      if (geomRelInf->fullContained > 0) { return; }
 
       // set noContained marker to true for later
       noContained = true;
@@ -2435,14 +2478,15 @@ BoxIdList GeometryHandler<W>::pack(const BoxIdList& ids) const {
     ret[0].first += ids[i].second + 1;
     if (ret.back().second < 254 - ids[i].second && ids[i].first > 0 &&
         ret.back().first > 0 &&
-        ret.back().first + ret.back().second == ids[i].first - 1)
+        ret.back().first + ret.back().second == ids[i].first - 1) {
       ret.back().second += 1 + ids[i].second;
-    else if (ret.back().second < 254 - ids[i].second && ids[i].first < 0 &&
+    } else if (ret.back().second < 254 - ids[i].second && ids[i].first < 0 &&
              ret.back().first < 0 &&
-             ret.back().first - ret.back().second == ids[i].first + 1)
+             ret.back().first - ret.back().second == ids[i].first + 1) {
       ret.back().second += 1 + ids[i].second;
-    else
+    } else {
       ret.push_back(ids[i]);
+    }
   }
 
   return ret;
@@ -2551,7 +2595,7 @@ uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
 
     if (a != relations->second.end() && a->first == areaId) {
       // if inner, return 1
-      if (a->second) return 1;
+      if (a->second) { return 1; }
       // else if outer, return 2
       return 2;
     }

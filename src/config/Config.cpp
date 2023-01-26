@@ -56,9 +56,17 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     if (noAreaFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_AREA_FACTS_INFO;
     } else {
+      if (addAreaConvexHull) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_INFO;
+      }
       if (addAreaEnvelope) {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_AREA_ENVELOPE_INFO;
+      }
+      if (addAreaOrientedBoundingBox) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addAreaEnvelopeRatio) {
         oss << "\n"
@@ -69,9 +77,17 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     if (noNodeFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_NODE_FACTS_INFO;
     } else {
+      if (addNodeConvexHull) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_INFO;
+      }
       if (addNodeEnvelope) {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_NODE_ENVELOPE_INFO;
+      }
+      if (addNodeOrientedBoundingBox) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noRelationFacts) {
@@ -83,17 +99,33 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
             << prefix
             << osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_INFO;
       }
+      if (addRelationConvexHull) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO;
+      }
       if (addRelationEnvelope) {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_RELATION_ENVELOPE_INFO;
+      }
+      if (addRelationOrientedBoundingBox) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noWayFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_WAY_FACTS_INFO;
     } else {
+      if (addWayConvexHull) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_WAY_CONVEX_HULL_INFO;
+      }
       if (addWayEnvelope) {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_WAY_ENVELOPE_INFO;
+      }
+      if (addWayOrientedBoundingBox) {
+        oss << "\n"
+            << prefix << osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addWayMetadata) {
         oss << "\n"
@@ -276,10 +308,18 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG,
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP);
 
-  auto addAreaEnvelopeOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG,
-      osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_HELP);
+    auto addAreaConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+        osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_SHORT,
+        osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_LONG,
+        osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_HELP);
+    auto addAreaEnvelopeOp = parser.add<popl::Switch>(
+        osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
+        osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG,
+        osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_HELP);
+    auto addAreaOrientedBoundingBoxOp = parser.add<popl::Switch>(
+        osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
+        osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG,
+        osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP);
   auto addAreaEnvelopeRatioOp =
       parser.add<popl::Switch, popl::Attribute::advanced>(
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT,
@@ -290,19 +330,43 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_HELP);
 #if BOOST_VERSION >= 107800
+  auto addRelationConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG,
+      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_HELP);
   auto addRelationEnvelopeOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG,
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_HELP);
+  auto addRelationOrientedBoundingBoxOp = parser.add<popl::Switch>(
+      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG,
+      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_HELP);
 #endif  // BOOST_VERSION >= 107800
+  auto addNodeConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_LONG,
+      osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_HELP);
   auto addNodeEnvelopeOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG,
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_HELP);
+  auto addNodeOrientedBoundingBoxOp = parser.add<popl::Switch>(
+      osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_LONG,
+      osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_HELP);
+  auto addWayConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_WAY_CONVEX_HULL_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_WAY_CONVEX_HULL_OPTION_LONG,
+      osm2rdf::config::constants::ADD_WAY_CONVEX_HULL_OPTION_HELP);
   auto addWayEnvelopeOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_ENVELOPE_OPTION_LONG,
       osm2rdf::config::constants::ADD_WAY_ENVELOPE_OPTION_HELP);
+  auto addWayOrientedBoundingBoxOp = parser.add<popl::Switch>(
+      osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_LONG,
+      osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_HELP);
   auto addWayMetadataOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
@@ -457,14 +521,22 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noWayGeometricRelations |= noWaysOp->is_set();
 
     // Select amount to dump
+    addAreaConvexHull = addAreaConvexHullOp->is_set();
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
+    addAreaOrientedBoundingBox = addAreaOrientedBoundingBoxOp->is_set();
     addRelationBorderMembers = addRelationBorderMembersOp->is_set();
 #if BOOST_VERSION >= 107800
+    addRelationConvexHull = addRelationConvexHullOp->is_set();
     addRelationEnvelope = addRelationEnvelopeOp->is_set();
+    addRelationOrientedBoundingBox = addRelationOrientedBoundingBoxOp->is_set();
 #endif  // BOOST_VERSION >= 107800
+    addNodeConvexHull = addNodeConvexHullOp->is_set();
     addNodeEnvelope = addNodeEnvelopeOp->is_set();
+    addNodeOrientedBoundingBox = addNodeOrientedBoundingBoxOp->is_set();
+    addWayConvexHull = addWayConvexHullOp->is_set();
     addWayEnvelope = addWayEnvelopeOp->is_set();
+    addWayOrientedBoundingBox = addWayOrientedBoundingBoxOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
     addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();

@@ -19,6 +19,8 @@
 #include "osm2rdf/osm/Box.h"
 
 #include "osm2rdf/geometry/Box.h"
+#include "osm2rdf/geometry/Polygon.h"
+#include "osm2rdf/osm/Generic.h"
 
 // ____________________________________________________________________________
 osm2rdf::osm::Box::Box() = default;
@@ -28,6 +30,16 @@ osm2rdf::osm::Box::Box(const osm2rdf::geometry::Box& box) : _geom(box) {}
 
 // ____________________________________________________________________________
 osm2rdf::geometry::Box osm2rdf::osm::Box::geom() const { return _geom; }
+
+// ____________________________________________________________________________
+osm2rdf::geometry::Polygon osm2rdf::osm::Box::convexHull() const noexcept {
+  return osm2rdf::osm::generic::boxToPolygon(_geom);
+}
+
+// ____________________________________________________________________________
+osm2rdf::geometry::Polygon osm2rdf::osm::Box::orientedBoundingBox() const noexcept {
+    return convexHull();
+}
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Box::operator==(

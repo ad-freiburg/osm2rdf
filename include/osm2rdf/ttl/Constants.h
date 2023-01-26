@@ -46,7 +46,9 @@ inline std::string IRI__OSM2RDF_CONTAINS_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_NON_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_AREA;
 
+inline std::string IRI__OSM_META__CONVEX_HULL;
 inline std::string IRI__OSM_META__ENVELOPE;
+inline std::string IRI__OSM_META__OBB;
 inline std::string IRI__OSM_META__POS;
 inline std::string IRI__OSMWAY_IS_CLOSED;
 inline std::string IRI__OSMWAY_NEXT_NODE;

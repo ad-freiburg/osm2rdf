@@ -22,6 +22,7 @@
 #include "boost/serialization/nvp.hpp"
 #include "osm2rdf/geometry/Box.h"
 #include "osm2rdf/geometry/Location.h"
+#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
@@ -35,9 +36,11 @@ class Node {
   explicit Node(const osmium::Node& node);
   explicit Node(const osmium::NodeRef& nodeRef);
   [[nodiscard]] id_t id() const noexcept;
-  [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
+  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Location& geom() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
+  [[nodiscard]] osm2rdf::geometry::Polygon convexHull() const noexcept;
+  [[nodiscard]] osm2rdf::geometry::Polygon orientedBoundingBox() const noexcept;
 
   bool operator==(const osm2rdf::osm::Node& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Node& other) const noexcept;
