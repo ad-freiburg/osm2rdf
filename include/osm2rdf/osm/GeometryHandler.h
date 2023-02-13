@@ -99,7 +99,7 @@ struct GeomRelationStats {
   void skippedByNodeContained() { _skippedByNodeContained++; }
   void fullCheck() { _fullChecks++; }
 
-  std::string printPercNum(size_t n) const {
+  [[nodiscard]] std::string printPercNum(size_t n) const {
     std::stringstream ss;
     ss << std::fixed << std::setprecision(3) << n << " ("
        << ((static_cast<double>(n) / static_cast<double>(_totalChecks)) * 100.0)
@@ -107,41 +107,51 @@ struct GeomRelationStats {
     return ss.str();
   }
 
-  std::string printTotalChecks() const { return std::to_string(_totalChecks); }
-  std::string printSkippedByDAG() const { return printPercNum(_skippedByDAG); }
-  std::string printSkippedByAreaSize() const {
+  [[nodiscard]] std::string printTotalChecks() const {
+    return std::to_string(_totalChecks);
+  }
+  [[nodiscard]] std::string printSkippedByDAG() const {
+    return printPercNum(_skippedByDAG);
+  }
+  [[nodiscard]] std::string printSkippedByAreaSize() const {
     return printPercNum(_skippedByAreaSize);
   }
-  std::string printSkippedByBox() const { return printPercNum(_skippedByBox); }
-  std::string printSkippedByOrientedBox() const { return printPercNum(_skippedByOrientedBox); }
-  std::string printSkippedByBoxIdIntersect() const {
+  [[nodiscard]] std::string printSkippedByBox() const {
+    return printPercNum(_skippedByBox);
+  }
+  [[nodiscard]] std::string printSkippedByOrientedBox() const {
+    return printPercNum(_skippedByOrientedBox);
+  }
+  [[nodiscard]] std::string printSkippedByBoxIdIntersect() const {
     return printPercNum(_skippedByBoxIdIntersect);
   }
-  std::string printSkippedByNonIntersect() const {
+  [[nodiscard]] std::string printSkippedByNonIntersect() const {
     return printPercNum(_skippedByNonIntersect);
   }
-  std::string printSkippedByBoxIdIntersectCutout() const {
+  [[nodiscard]] std::string printSkippedByBoxIdIntersectCutout() const {
     return printPercNum(_skippedByBoxIdIntersectCutout);
   }
-  std::string printSkippedByContainedInInnerRing() const {
+  [[nodiscard]] std::string printSkippedByContainedInInnerRing() const {
     return printPercNum(_skippedByContainedInInnerRing);
   }
-  std::string printSkippedByConvexHull() const {
+  [[nodiscard]] std::string printSkippedByConvexHull() const {
     return printPercNum(_skippedByConvexHull);
   }
-  std::string printSkippedByBorderContained() const {
+  [[nodiscard]] std::string printSkippedByBorderContained() const {
     return printPercNum(_skippedByBorderContained);
   }
-  std::string printSkippedByInner() const {
+  [[nodiscard]] std::string printSkippedByInner() const {
     return printPercNum(_skippedByInner);
   }
-  std::string printSkippedByOuter() const {
+  [[nodiscard]] std::string printSkippedByOuter() const {
     return printPercNum(_skippedByOuter);
   }
-  std::string printSkippedByNodeContained() const {
+  [[nodiscard]] std::string printSkippedByNodeContained() const {
     return printPercNum(_skippedByNodeContained);
   }
-  std::string printFullChecks() const { return printPercNum(_fullChecks); }
+  [[nodiscard]] std::string printFullChecks() const {
+    return printPercNum(_fullChecks);
+  }
 };
 
 #pragma omp declare reduction(+ : GeomRelationStats : omp_out += omp_in) \
@@ -149,15 +159,15 @@ struct GeomRelationStats {
 
 typedef std::pair<int32_t, uint8_t> BoxId;
 
-enum RelInfoValue { DONTKNOW, YES, NO };
+enum class RelInfoValue { DONT_KNOW, YES, NO };
 
-enum AreaFromType { FROM_REL = 0, FROM_WAY = 1 };
+enum class AreaFromType { RELATION, WAY };
 
-enum InnerOuterDouglasPeuckerMode { INNER = 2, OUTER = 3 };
+enum class InnerOuterDouglasPeuckerMode { INNER, OUTER };
 
 struct GeomRelationInfo {
-  RelInfoValue intersects = DONTKNOW;
-  RelInfoValue contained = DONTKNOW;
+  RelInfoValue intersects = RelInfoValue::DONT_KNOW;
+  RelInfoValue contained = RelInfoValue::DONT_KNOW;
 
   double intersectArea = -1;
 
