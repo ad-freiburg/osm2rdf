@@ -17,8 +17,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/ttl/Writer.h"
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -29,6 +27,7 @@
 #include "omp.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Constants.h"
+#include "osm2rdf/ttl/Writer.h"
 #include "osmium/osm/item_type.hpp"
 
 // ____________________________________________________________________________
@@ -65,11 +64,17 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
        "https://www.openstreetmap.org/way/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_META,
-       "https://www.openstreetmap.org/meta/"}};
+       "https://www.openstreetmap.org/meta/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_GEOM,
+       "https://www.openstreetmap.org/geom/"}};
 
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_SERIALIZATION = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasSerialization");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
   osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =
@@ -225,7 +230,7 @@ std::string osm2rdf::ttl::Writer<T>::generateIRI(std::string_view p,
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateIRIUnsafe(std::string_view p,
-                                                 std::string_view v) {
+                                                       std::string_view v) {
   return formatIRIUnsafe(p, v);
 }
 
@@ -281,12 +286,11 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v,
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
-                                                     std::string_view s) {
-
+                                                           std::string_view s) {
   // only put literal in quotes
   std::string ret;
   ret.reserve(v.size() + 2 + s.size());
-	ret += '"';
+  ret += '"';
   ret += v;
   ret += '"';
   ret += s;
@@ -429,7 +433,7 @@ std::string osm2rdf::ttl::Writer<T>::PrefixedName(std::string_view p,
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::PrefixedNameUnsafe(std::string_view p,
-                                                  std::string_view v) {
+                                                        std::string_view v) {
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
   return std::string(p) + ":" + std::string(v);

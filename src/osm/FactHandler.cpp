@@ -33,6 +33,7 @@
 
 using osm2rdf::osm::constants::AREA_PRECISION;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
+using osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL;
 using osm2rdf::ttl::constants::IRI__OSM_META__CONVEX_HULL;
@@ -56,6 +57,7 @@ using osm2rdf::ttl::constants::IRI__XSD_INTEGER;
 using osm2rdf::ttl::constants::LITERAL__NO;
 using osm2rdf::ttl::constants::LITERAL__YES;
 using osm2rdf::ttl::constants::NAMESPACE__OSM;
+using osm2rdf::ttl::constants::NAMESPACE__OSM_GEOM;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_META;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
@@ -76,15 +78,24 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
       area.fromWay() ? NAMESPACE__OSM_WAY : NAMESPACE__OSM_RELATION,
       area.objId());
 
-  writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, area.geom());
+  if (_config.addGeometryObjects) {
+    const std::string& geomObj = _writer->generateIRI(
+        NAMESPACE__OSM_GEOM, (area.fromWay() ? "wayarea_" : "relarea_") +
+                                 std::to_string(area.objId()));
 
-  if (_config.addAreaConvexHull){
+    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
+    writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, area.geom());
+  } else {
+    writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, area.geom());
+  }
+
+  if (_config.addAreaConvexHull) {
     writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL, area.convexHull());
   }
   if (_config.addAreaEnvelope) {
     writeBox(subj, IRI__OSM_META__ENVELOPE, area.envelope());
   }
-  if (_config.addAreaOrientedBoundingBox){
+  if (_config.addAreaOrientedBoundingBox) {
     writeBoostGeometry(subj, IRI__OSM_META__OBB, area.orientedBoundingBox());
   }
 
@@ -116,7 +127,15 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
 
-  writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, node.geom());
+  if (_config.addGeometryObjects) {
+    const std::string& geomObj = _writer->generateIRI(
+        NAMESPACE__OSM_GEOM, "node_" + std::to_string(node.id()));
+
+    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
+    writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
+  } else {
+    writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, node.geom());
+  }
 
   writeTagList(subj, node.tags());
 
@@ -182,18 +201,27 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
 #if BOOST_VERSION >= 107800
   if (relation.hasGeometry()) {
-    writeBoostGeometry(subj, osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY,
-                       relation.geom());
+    if (_config.addGeometryObjects) {
+      const std::string& geomObj = _writer->generateIRI(
+          NAMESPACE__OSM_GEOM, "relation_" + std::to_string(relation.id()));
+
+      _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
+      writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, relation.geom());
+    } else {
+      writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, relation.geom());
+    }
 
     if (_config.addRelationConvexHull) {
-      writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL, relation.convexHull());
+      writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL,
+                         relation.convexHull());
     }
     if (_config.addRelationEnvelope) {
       writeBox(subj, osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE,
                relation.envelope());
     }
     if (_config.addRelationOrientedBoundingBox) {
-      writeBoostGeometry(subj, IRI__OSM_META__OBB, relation.orientedBoundingBox());
+      writeBoostGeometry(subj, IRI__OSM_META__OBB,
+                         relation.orientedBoundingBox());
     }
 
     _writer->writeTriple(
@@ -238,7 +266,15 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
         _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
 
-        writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, node.geom());
+        if (_config.addGeometryObjects) {
+          const std::string& geomObj = _writer->generateIRI(
+              NAMESPACE__OSM_GEOM, "node_" + std::to_string(node.id()));
+
+          _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
+          // node geometry has already been written
+        } else {
+          writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, node.geom());
+        }
       }
 
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
@@ -270,7 +306,16 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
   osm2rdf::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
-  writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, locations);
+
+  if (_config.addGeometryObjects) {
+    const std::string& geomObj = _writer->generateIRI(
+        NAMESPACE__OSM_GEOM, "way_" + std::to_string(way.id()));
+
+    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
+    writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, locations);
+  } else {
+    writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, locations);
+  }
 
   if (_config.addWayConvexHull) {
     writeBoostGeometry(subj, IRI__OSM_META__CONVEX_HULL, way.convexHull());

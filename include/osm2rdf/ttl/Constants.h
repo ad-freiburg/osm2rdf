@@ -27,6 +27,7 @@ namespace osm2rdf::ttl::constants {
 const static inline std::string NAMESPACE__GEOSPARQL = "geo";
 const static inline std::string NAMESPACE__OPENGIS = "ogc";
 const static inline std::string NAMESPACE__OSM_META = "osmmeta";
+const static inline std::string NAMESPACE__OSM_GEOM = "osmgeom";
 const static inline std::string NAMESPACE__OSM_NODE = "osmnode";
 const static inline std::string NAMESPACE__OSM_RELATION = "osmrel";
 const static inline std::string NAMESPACE__OSM_TAG = "osmkey";
@@ -39,6 +40,8 @@ const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 
 // Generated constants (depending on output format)
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
+inline std::string IRI__GEOSPARQL__HAS_SERIALIZATION;
+inline std::string IRI__GEOSPARQL__AS_WKT;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
 
 inline std::string IRI__OSM2RDF_CONTAINS_NON_AREA;
