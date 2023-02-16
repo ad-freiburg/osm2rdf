@@ -202,7 +202,7 @@ const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP =
     "Add oriented-bounding-box to areas";
 
 const static inline std::string ADD_GEOMETRY_OBJECTS_INFO =
-    "Adding area envelopes";
+    "Adding intermediate geometry objects";
 const static inline std::string ADD_GEOMETRY_OBJECTS_OPTION_SHORT = "";
 const static inline std::string ADD_GEOMETRY_OBJECTS_OPTION_LONG =
     "add-geometry-objects";

@@ -50,6 +50,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       // own prefix
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
        "https://osm2rdf.cs.uni-freiburg.de/rdf#"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM,
+       "https://osm2rdf.cs.uni-freiburg.de/rdf/geom#"},
       // osm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OSM,
        "https://www.openstreetmap.org/"},
@@ -62,19 +64,15 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
        "https://www.openstreetmap.org/wiki/Key:"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
-       "https://www.openstreetmap.org/way/"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM_META,
-       "https://www.openstreetmap.org/meta/"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM_GEOM,
-       "https://www.openstreetmap.org/geom/"}};
+       "https://www.openstreetmap.org/way/"}};
 
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_SERIALIZATION = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasSerialization");
-  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
   osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =
@@ -85,14 +83,14 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_nonarea");
-  osm2rdf::ttl::constants::IRI__OSM_META__CONVEX_HULL =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "convex_hull");
-  osm2rdf::ttl::constants::IRI__OSM_META__ENVELOPE =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "envelope");
-  osm2rdf::ttl::constants::IRI__OSM_META__OBB =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "obb");
-  osm2rdf::ttl::constants::IRI__OSM_META__POS =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "pos");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "convex_hull");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "envelope");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "obb");
+  osm2rdf::ttl::constants::IRI__OSM2RDF__POS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "pos");
   osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
   osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =
