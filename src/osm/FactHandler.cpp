@@ -78,7 +78,7 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
       area.fromWay() ? NAMESPACE__OSM_WAY : NAMESPACE__OSM_RELATION,
       area.objId());
 
-  if (_config.useGeometryObjects) {
+  if (!_config.hasGeometryAsWkt) {
     const std::string& geomObj = _writer->generateIRI(
         NAMESPACE__OSM2RDF_GEOM, (area.fromWay() ? "wayarea_" : "relarea_") +
                                 std::to_string(area.objId()));
@@ -127,7 +127,7 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
 
-  if (_config.useGeometryObjects) {
+  if (!_config.hasGeometryAsWkt) {
     const std::string& geomObj = _writer->generateIRI(
         NAMESPACE__OSM2RDF_GEOM, "node_" + std::to_string(node.id()));
 
@@ -201,7 +201,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
 #if BOOST_VERSION >= 107800
   if (relation.hasGeometry()) {
-    if (_config.useGeometryObjects) {
+    if (!_config.hasGeometryAsWkt) {
       const std::string& geomObj = _writer->generateIRI(
           NAMESPACE__OSM2RDF_GEOM, "relation_" + std::to_string(relation.id()));
 
@@ -264,7 +264,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
         _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
 
-        if (_config.useGeometryObjects) {
+        if (!_config.hasGeometryAsWkt) {
           const std::string& geomObj = _writer->generateIRI(
               NAMESPACE__OSM2RDF_GEOM, "node_" + std::to_string(node.id()));
 
@@ -305,7 +305,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   osm2rdf::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
 
-  if (_config.useGeometryObjects) {
+  if (!_config.hasGeometryAsWkt) {
     const std::string& geomObj = _writer->generateIRI(
         NAMESPACE__OSM2RDF, "way_" + std::to_string(way.id()));
 

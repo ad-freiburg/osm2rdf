@@ -53,6 +53,7 @@ TEST(OSM_FactHandler, areaFromWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -102,6 +103,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -151,6 +153,7 @@ TEST(OSM_FactHandler, areaAddConvexHull) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -205,6 +208,7 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -259,6 +263,7 @@ TEST(OSM_FactHandler, areaAddOrientedBoundingBox) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -312,6 +317,7 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -363,6 +369,7 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioRectangle) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -415,6 +422,7 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -467,6 +475,7 @@ TEST(OSM_FactHandler, node) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -512,6 +521,7 @@ TEST(OSM_FactHandler, nodeAddConvexHull) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -561,6 +571,7 @@ TEST(OSM_FactHandler, nodeAddEnvelope) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -610,6 +621,7 @@ TEST(OSM_FactHandler, nodeAddOrientedBoundingBox) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -658,6 +670,7 @@ TEST(OSM_FactHandler, relation) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -717,6 +730,7 @@ TEST(OSM_FactHandler, relationAddConvexHull) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -777,6 +791,7 @@ TEST(OSM_FactHandler, relationAddEnvelop) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -837,6 +852,7 @@ TEST(OSM_FactHandler, relationAddOrientedBoundingBox) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -898,6 +914,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -986,6 +1003,7 @@ TEST(OSM_FactHandler, relationWithGeometryAddConvexHull) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1078,6 +1096,7 @@ TEST(OSM_FactHandler, relationWithGeometryAddEnvelope) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1170,6 +1189,7 @@ TEST(OSM_FactHandler, relationWithGeometryAddOrientedBoundingBox) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1262,6 +1282,7 @@ TEST(OSM_FactHandler, way) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1311,6 +1332,7 @@ TEST(OSM_FactHandler, wayAddSortMetadata) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1362,6 +1384,7 @@ TEST(OSM_FactHandler, wayAddWayConvexHull) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1414,6 +1437,7 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1467,6 +1491,7 @@ TEST(OSM_FactHandler, wayAddWayOrientedBoundingBox) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1519,6 +1544,7 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1580,6 +1606,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1636,6 +1663,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1695,6 +1723,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1766,6 +1795,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1819,6 +1849,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1857,6 +1888,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1902,6 +1934,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1943,6 +1976,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -1985,6 +2019,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -2024,6 +2059,7 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 2;
@@ -2063,6 +2099,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2100,6 +2137,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2136,6 +2174,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2172,6 +2211,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2209,6 +2249,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2246,6 +2287,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2283,6 +2325,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2320,6 +2363,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2357,6 +2401,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2393,6 +2438,7 @@ TEST(OSM_FactHandler, writeTag_KeyIRI) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2429,6 +2475,7 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2467,6 +2514,7 @@ TEST(OSM_FactHandler, writeTagList) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2516,6 +2564,7 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2556,6 +2605,7 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
@@ -2602,6 +2652,7 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2648,6 +2699,7 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2694,6 +2746,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2740,6 +2793,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2786,6 +2840,7 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.skipWikiLinks = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;

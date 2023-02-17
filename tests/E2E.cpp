@@ -54,6 +54,7 @@ TEST(E2E, singleNode) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -119,6 +120,7 @@ TEST(E2E, singleNodeWithTags) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -233,6 +235,7 @@ TEST(E2E, singleWayWithTagsAndNodes) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -336,6 +339,7 @@ TEST(E2E, osmWikiExample) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -431,6 +435,7 @@ TEST(E2E, building51NT) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -599,6 +604,7 @@ TEST(E2E, building51TTL) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -736,6 +742,7 @@ TEST(E2E, building51QLEVER) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -873,6 +880,7 @@ TEST(E2E, tf) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -967,6 +975,7 @@ TEST(E2E, building51inTF) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
