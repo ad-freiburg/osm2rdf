@@ -126,6 +126,7 @@ TEST(TTL_WriterNT, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -151,6 +152,7 @@ TEST(TTL_WriterTTL, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -178,6 +180,7 @@ TEST(TTL_WriterQLEVER, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -599,6 +602,7 @@ TEST(TTL_WriterNT, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -660,6 +664,7 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -721,6 +726,7 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};

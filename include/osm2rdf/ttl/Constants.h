@@ -26,18 +26,20 @@ namespace osm2rdf::ttl::constants {
 // Real constants
 const static inline std::string NAMESPACE__GEOSPARQL = "geo";
 const static inline std::string NAMESPACE__OPENGIS = "ogc";
-const static inline std::string NAMESPACE__OSM_META = "osmmeta";
 const static inline std::string NAMESPACE__OSM_NODE = "osmnode";
 const static inline std::string NAMESPACE__OSM_RELATION = "osmrel";
 const static inline std::string NAMESPACE__OSM_TAG = "osmkey";
 const static inline std::string NAMESPACE__OSM_WAY = "osmway";
 const static inline std::string NAMESPACE__OSM = "osm";
 const static inline std::string NAMESPACE__OSM2RDF = "osm2rdf";
+const static inline std::string NAMESPACE__OSM2RDF_GEOM = "osm2rdfgeom";
 const static inline std::string NAMESPACE__RDF = "rdf";
 const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 
 // Generated constants (depending on output format)
+inline std::string IRI__GEOSPARQL__HAS_SERIALIZATION;
+inline std::string IRI__GEOSPARQL__AS_WKT;
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
 
@@ -46,10 +48,10 @@ inline std::string IRI__OSM2RDF_CONTAINS_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_NON_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_AREA;
 
-inline std::string IRI__OSM_META__CONVEX_HULL;
-inline std::string IRI__OSM_META__ENVELOPE;
-inline std::string IRI__OSM_META__OBB;
-inline std::string IRI__OSM_META__POS;
+inline std::string IRI__OSM2RDF_GEOM__CONVEX_HULL;
+inline std::string IRI__OSM2RDF_GEOM__ENVELOPE;
+inline std::string IRI__OSM2RDF_GEOM__OBB;
+inline std::string IRI__OSM2RDF__POS;
 inline std::string IRI__OSMWAY_IS_CLOSED;
 inline std::string IRI__OSMWAY_NEXT_NODE;
 inline std::string IRI__OSMWAY_NEXT_NODE_DISTANCE;

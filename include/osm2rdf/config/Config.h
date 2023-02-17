@@ -76,6 +76,7 @@ struct Config {
   bool addWayNodeSpatialMetadata = false;
   bool addWayOrientedBoundingBox = false;
   bool adminRelationsOnly = false;
+  bool hasGeometryAsWkt = false;
   bool skipWikiLinks = false;
 
   // Addition filters / data
