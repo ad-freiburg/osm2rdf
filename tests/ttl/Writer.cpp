@@ -205,15 +205,15 @@ TEST(TTL_WriterNT, generateBlankNode) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:0", res.c_str());
+    ASSERT_STREQ("_:0_0", res.c_str());
   }
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:1", res.c_str());
+    ASSERT_STREQ("_:0_1", res.c_str());
   }
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:2", res.c_str());
+    ASSERT_STREQ("_:0_2", res.c_str());
   }
 }
 
@@ -223,15 +223,15 @@ TEST(TTL_WriterTTL, generateBlankNode) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:0", res.c_str());
+    ASSERT_STREQ("_:0_0", res.c_str());
   }
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:1", res.c_str());
+    ASSERT_STREQ("_:0_1", res.c_str());
   }
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:2", res.c_str());
+    ASSERT_STREQ("_:0_2", res.c_str());
   }
 }
 
@@ -241,15 +241,15 @@ TEST(TTL_WriterQLEVER, generateBlankNode) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:0", res.c_str());
+    ASSERT_STREQ("_:0_0", res.c_str());
   }
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:1", res.c_str());
+    ASSERT_STREQ("_:0_1", res.c_str());
   }
   {
     const std::string res = w.generateBlankNode();
-    ASSERT_STREQ("_:2", res.c_str());
+    ASSERT_STREQ("_:0_2", res.c_str());
   }
 }
 

@@ -17,6 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/ttl/Writer.h"
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -27,7 +29,6 @@
 #include "omp.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Constants.h"
-#include "osm2rdf/ttl/Writer.h"
 #include "osmium/osm/item_type.hpp"
 
 // ____________________________________________________________________________
@@ -132,9 +133,11 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 #else
   _numOuts = 1;
 #endif
+  _blankNodeCount = new uint64_t[_numOuts];
   _headerLines = new uint64_t[_numOuts];
   _lineCount = new uint64_t[_numOuts];
   for (size_t i = 0; i < _numOuts; ++i) {
+    _blankNodeCount[i] = 0;
     _headerLines[i] = 0;
     _lineCount[i] = 0;
   }
@@ -143,6 +146,7 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 // ____________________________________________________________________________
 template <typename T>
 osm2rdf::ttl::Writer<T>::~Writer() {
+  delete[] _blankNodeCount;
   delete[] _headerLines;
   delete[] _lineCount;
 }
@@ -174,9 +178,11 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeStatisticJson(
     const std::filesystem::path& output) {
   // Combine data from threads.
+  uint64_t blankNodeCount = 0;
   uint64_t headerLines = 0;
   uint64_t lineCount = 0;
   for (size_t i = 0; i < _numOuts; ++i) {
+    blankNodeCount += _blankNodeCount[i];
     headerLines += _headerLines[i];
     lineCount += _lineCount[i];
   }
@@ -184,7 +190,7 @@ void osm2rdf::ttl::Writer<T>::writeStatisticJson(
   // Write json
   std::ofstream out{output};
   out << "{" << std::endl;
-  out << "  \"blankNodes\": " << _blankNodeCounter << "," << std::endl;
+  out << "  \"blankNodes\": " << blankNodeCount << "," << std::endl;
   out << "  \"header\": " << headerLines << "," << std::endl;
   out << "  \"lines\": " << lineCount << "," << std::endl;
   out << "  \"triples\": " << lineCount - headerLines << std::endl;
@@ -212,10 +218,12 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::writeHeader() {}
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
-  uint64_t blankNodeId;
-#pragma omp critical(generateBlankNode)
-  blankNodeId = _blankNodeCounter++;
-  return "_:" + std::to_string(blankNodeId);
+  int theadId = 0;
+#if defined(_OPENMP)
+  theadId = omp_get_thread_num();
+#endif
+  return "_:" + std::to_string(theadId) + "_" +
+         std::to_string(_blankNodeCount[theadId]++);
 }
 
 // ____________________________________________________________________________
