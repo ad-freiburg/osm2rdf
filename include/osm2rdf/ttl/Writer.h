@@ -207,9 +207,9 @@ class Writer {
   osm2rdf::util::Output* _out;
 
   // Counter
+  uint64_t* _blankNodeCount;
   uint64_t* _headerLines;
   uint64_t* _lineCount;
-  uint64_t _blankNodeCounter = 0;
   // Number of parts.
   std::size_t _numOuts;
 
