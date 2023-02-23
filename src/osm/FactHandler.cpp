@@ -354,27 +354,27 @@ template <typename G>
 void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& subj,
                                                       const std::string& pred,
                                                       const G& geom) {
-  std::ostringstream tmp;
-  tmp << std::fixed << std::setprecision(_config.wktPrecision);
-  if (_config.simplifyWKT > 0 &&
-      boost::geometry::num_points(geom) > _config.simplifyWKT) {
+  std::ostringstream wkt;
+  wkt << std::fixed << std::setprecision(_config.geometriesDumpPrecision);
+  if (_config.geometriesDumpMinNumPointsForSimplification > 0 &&
+      boost::geometry::num_points(geom) > _config.geometriesDumpMinNumPointsForSimplification) {
     G simplifiedGeom;
     auto perimeter_or_length = std::max(boost::geometry::perimeter(geom),
                                         boost::geometry::length(geom));
     do {
       boost::geometry::simplify(geom, simplifiedGeom,
                                 BASE_SIMPLIFICATION_FACTOR *
-                                    perimeter_or_length * _config.wktDeviation);
+                                    perimeter_or_length * _config.geometriesDumpDeviation);
       perimeter_or_length /= 2;
     } while ((boost::geometry::is_empty(simplifiedGeom) ||
               !boost::geometry::is_valid(simplifiedGeom)) &&
              perimeter_or_length >= BASE_SIMPLIFICATION_FACTOR);
-    tmp << boost::geometry::wkt(simplifiedGeom);
+    wkt << boost::geometry::wkt(simplifiedGeom);
   } else {
-    tmp << boost::geometry::wkt(geom);
+    wkt << boost::geometry::wkt(geom);
   }
   _writer->writeTriple(subj, pred,
-                       "\"" + tmp.str() + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+                       "\"" + wkt.str() + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
 }
 
 // ____________________________________________________________________________
@@ -383,11 +383,11 @@ void osm2rdf::osm::FactHandler<W>::writeBox(const std::string& subj,
                                             const std::string& pred,
                                             const osm2rdf::geometry::Box& box) {
   // Box can not be simplified -> output directly.
-  std::ostringstream tmp;
-  tmp << std::fixed << std::setprecision(_config.wktPrecision)
+  std::ostringstream wkt;
+  wkt << std::fixed << std::setprecision(_config.geometriesDumpPrecision)
       << boost::geometry::wkt(box);
   _writer->writeTriple(subj, pred,
-                       "\"" + tmp.str() + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+                       "\"" + wkt.str() + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
 }
 
 // ____________________________________________________________________________

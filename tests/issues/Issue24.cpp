@@ -36,7 +36,7 @@ TEST(Issue24, areaFromWayHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -85,7 +85,7 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -135,7 +135,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -184,7 +184,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -234,7 +234,7 @@ TEST(Issue24, nodeHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -278,7 +278,7 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -324,7 +324,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -410,7 +410,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -498,7 +498,7 @@ TEST(Issue24, wayHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -546,7 +546,7 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};

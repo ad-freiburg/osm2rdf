@@ -145,18 +145,18 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
             << osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO;
       }
     }
-    if (simplifyWKT > 0) {
-      oss << "\n" << prefix << osm2rdf::config::constants::SIMPLIFY_WKT_INFO;
+    if (geometriesDumpMinNumPointsForSimplification > 0) {
+      oss << "\n" << prefix << osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_DUMP_INFO;
       oss << "\n"
-          << prefix << osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_INFO
-          << std::to_string(wktDeviation);
+          << prefix << osm2rdf::config::constants::GEOMETRIES_DUMP_DEVIATION_INFO
+          << std::to_string(geometriesDumpDeviation);
     }
     if (skipWikiLinks) {
       oss << "\n" << prefix << osm2rdf::config::constants::SKIP_WIKI_LINKS_INFO;
     }
     oss << "\n"
-        << prefix << osm2rdf::config::constants::WKT_PRECISION_INFO
-        << std::to_string(wktPrecision);
+        << prefix << osm2rdf::config::constants::GEOMETRIES_DUMP_PRECISION_INFO
+        << std::to_string(geometriesDumpPrecision);
     if (!semicolonTagKeys.empty()) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::SEMICOLON_TAG_KEYS_INFO;
@@ -425,20 +425,22 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_HELP);
   auto simplifyWKTOp =
       parser.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
-          osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
-          osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_HELP, simplifyWKT);
+          osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_DUMP_OPTION_SHORT,
+          osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_DUMP_OPTION_LONG,
+          osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_DUMP_OPTION_HELP,
+          geometriesDumpMinNumPointsForSimplification);
   auto wktDeviationOp =
       parser.add<popl::Value<double>, popl::Attribute::expert>(
-          osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_SHORT,
-          osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
-          osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_HELP,
-          wktDeviation);
+          osm2rdf::config::constants::GEOMETRIES_DUMP_DEVIATION_OPTION_SHORT,
+          osm2rdf::config::constants::GEOMETRIES_DUMP_DEVIATION_OPTION_LONG,
+          osm2rdf::config::constants::GEOMETRIES_DUMP_DEVIATION_OPTION_HELP,
+      geometriesDumpDeviation);
   auto wktPrecisionOp =
       parser.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::WKT_PRECISION_OPTION_SHORT,
-          osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
-          osm2rdf::config::constants::WKT_PRECISION_OPTION_HELP, wktPrecision);
+          osm2rdf::config::constants::GEOMETRIES_DUMP_PRECISION_OPTION_SHORT,
+          osm2rdf::config::constants::GEOMETRIES_DUMP_PRECISION_OPTION_LONG,
+          osm2rdf::config::constants::GEOMETRIES_DUMP_PRECISION_OPTION_HELP,
+          geometriesDumpPrecision);
 
   auto writeDotFilesOp = parser.add<popl::Switch, popl::Attribute::expert>(
       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_SHORT,
@@ -552,9 +554,9 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();
     dontUseInnerOuterGeoms = dontUseInnerOuterGeomsOp->value();
     approximateSpatialRels = approximateSpatialRelsOp->value();
-    simplifyWKT = simplifyWKTOp->value();
-    wktDeviation = wktDeviationOp->value();
-    wktPrecision = wktPrecisionOp->value();
+    geometriesDumpMinNumPointsForSimplification = simplifyWKTOp->value();
+    geometriesDumpDeviation = wktDeviationOp->value();
+    geometriesDumpPrecision = wktPrecisionOp->value();
 
     addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;

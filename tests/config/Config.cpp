@@ -71,9 +71,9 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.writeRDFStatistics);
 
   ASSERT_EQ(0, config.simplifyGeometries);
-  ASSERT_EQ(250, config.simplifyWKT);
-  ASSERT_EQ(5, config.wktDeviation);
-  ASSERT_EQ(7, config.wktPrecision);
+  ASSERT_EQ(250, config.geometriesDumpMinNumPointsForSimplification);
+  ASSERT_EQ(5, config.geometriesDumpDeviation);
+  ASSERT_EQ(7, config.geometriesDumpPrecision);
 
   ASSERT_EQ(osm2rdf::util::OutputMergeMode::CONCATENATE, config.mergeOutput);
   ASSERT_TRUE(config.outputCompress);
@@ -341,7 +341,7 @@ TEST(CONFIG_Config, fromArgsInvalidValue) {
   osm2rdf::util::CacheFile dummyInput("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG;
+      "--" + osm2rdf::config::constants::GEOMETRIES_DUMP_DEVIATION_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/output"),
@@ -989,52 +989,52 @@ TEST(CONFIG_Config, fromArgsSimplifyGeometriesLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsSimplifyWKTLong) {
+TEST(CONFIG_Config, fromArgsSimplifyGeometriesDumpLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_DUMP_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("25"),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ(25, config.simplifyWKT);
+  ASSERT_EQ(25, config.geometriesDumpMinNumPointsForSimplification);
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsSimplifyWKTDeviationLong) {
+TEST(CONFIG_Config, fromArgsGeometriesDumpDeviationLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG;
+      "--" + osm2rdf::config::constants::GEOMETRIES_DUMP_DEVIATION_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("25"),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ(25, config.wktDeviation);
+  ASSERT_EQ(25, config.geometriesDumpDeviation);
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsSimplifyWKTPrecisionLong) {
+TEST(CONFIG_Config, fromArgsGeometriesDumpPrecisionLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" + osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::GEOMETRIES_DUMP_PRECISION_OPTION_LONG;
   const int argc = 4;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("2"),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ(2, config.wktPrecision);
+  ASSERT_EQ(2, config.geometriesDumpPrecision);
 }
 
 // ____________________________________________________________________________
@@ -1426,14 +1426,14 @@ TEST(CONFIG_Config, getInfoSimplifyGeometries) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoSimplifyWKT) {
+TEST(CONFIG_Config, getInfoSimplifyGeometriesDump) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  config.simplifyWKT = 250;
+  config.geometriesDumpMinNumPointsForSimplification = 250;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2rdf::config::constants::SIMPLIFY_WKT_INFO));
+      res, ::testing::HasSubstr(osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_DUMP_INFO));
 }
 
 // ____________________________________________________________________________

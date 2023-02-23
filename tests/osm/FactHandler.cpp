@@ -56,7 +56,7 @@ TEST(OSM_FactHandler, areaFromWay) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -106,7 +106,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -156,7 +156,7 @@ TEST(OSM_FactHandler, areaAddConvexHull) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addAreaConvexHull = true;
   config.addSortMetadata = false;
 
@@ -211,7 +211,7 @@ TEST(OSM_FactHandler, areaAddEnvelope) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addAreaEnvelope = true;
   config.addSortMetadata = false;
 
@@ -266,7 +266,7 @@ TEST(OSM_FactHandler, areaAddOrientedBoundingBox) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addAreaOrientedBoundingBox = true;
   config.addSortMetadata = false;
 
@@ -320,7 +320,7 @@ TEST(OSM_FactHandler, areaAddSortMetadata) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -372,7 +372,7 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioRectangle) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addAreaEnvelopeRatio = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -425,7 +425,7 @@ TEST(OSM_FactHandler, areaAddAreaEnvelopeRatioDiamond) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addAreaEnvelopeRatio = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -478,7 +478,7 @@ TEST(OSM_FactHandler, node) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -524,7 +524,7 @@ TEST(OSM_FactHandler, nodeAddConvexHull) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addNodeConvexHull = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -574,7 +574,7 @@ TEST(OSM_FactHandler, nodeAddEnvelope) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addNodeEnvelope = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -624,7 +624,7 @@ TEST(OSM_FactHandler, nodeAddOrientedBoundingBox) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addNodeOrientedBoundingBox = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -673,7 +673,7 @@ TEST(OSM_FactHandler, relation) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -733,7 +733,7 @@ TEST(OSM_FactHandler, relationAddConvexHull) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addRelationConvexHull = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -794,7 +794,7 @@ TEST(OSM_FactHandler, relationAddEnvelop) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addRelationEnvelope = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -855,7 +855,7 @@ TEST(OSM_FactHandler, relationAddOrientedBoundingBox) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addRelationOrientedBoundingBox = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -917,7 +917,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -1006,7 +1006,7 @@ TEST(OSM_FactHandler, relationWithGeometryAddConvexHull) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addRelationConvexHull = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1099,7 +1099,7 @@ TEST(OSM_FactHandler, relationWithGeometryAddEnvelope) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addRelationEnvelope = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1192,7 +1192,7 @@ TEST(OSM_FactHandler, relationWithGeometryAddOrientedBoundingBox) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addRelationOrientedBoundingBox = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1285,7 +1285,7 @@ TEST(OSM_FactHandler, way) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1335,7 +1335,7 @@ TEST(OSM_FactHandler, wayAddSortMetadata) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1387,7 +1387,7 @@ TEST(OSM_FactHandler, wayAddWayConvexHull) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayConvexHull = true;
 
@@ -1440,7 +1440,7 @@ TEST(OSM_FactHandler, wayAddWayEnvelope) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayEnvelope = true;
 
@@ -1494,7 +1494,7 @@ TEST(OSM_FactHandler, wayAddWayOrientedBoundingBox) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayOrientedBoundingBox = true;
 
@@ -1547,7 +1547,7 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeGeometry = true;
   config.addWayNodeOrder = true;
@@ -1609,7 +1609,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeOrder = true;
 
@@ -1666,7 +1666,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeOrder = true;
   config.addWayNodeSpatialMetadata = true;
@@ -1726,7 +1726,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayNodeOrder = true;
   config.addWayNodeSpatialMetadata = true;
@@ -1798,7 +1798,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
   config.addWayMetadata = true;
 
@@ -1852,7 +1852,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -1891,10 +1891,10 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
-  config.simplifyWKT = 2;
+  config.geometriesDumpPrecision = 1;
+  config.geometriesDumpMinNumPointsForSimplification = 2;
   // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
-  config.wktDeviation = 5;
+  config.geometriesDumpDeviation = 5;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -1937,10 +1937,10 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
-  config.simplifyWKT = 2;
+  config.geometriesDumpPrecision = 1;
+  config.geometriesDumpMinNumPointsForSimplification = 2;
   // Simplify all nodes with distance <= 5% of small side (100 * 0.05 = 5)
-  config.wktDeviation = 5;
+  config.geometriesDumpDeviation = 5;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -1979,10 +1979,10 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
-  config.simplifyWKT = 2;
+  config.geometriesDumpPrecision = 1;
+  config.geometriesDumpMinNumPointsForSimplification = 2;
   // Simplify all nodes with distance <= 80% of small side (100 * 0.8 = 80)
-  config.wktDeviation = 80;
+  config.geometriesDumpDeviation = 80;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -2022,7 +2022,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -2062,7 +2062,7 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 2;
+  config.geometriesDumpPrecision = 2;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();

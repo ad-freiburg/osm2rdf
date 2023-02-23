@@ -92,12 +92,12 @@ struct Config {
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
-  // Output modifiers
-  uint16_t simplifyWKT = 250;
-  double wktDeviation = 5;
-  uint16_t wktPrecision = 7;
+  // Geometry output modifiers
+  uint16_t geometriesDumpMinNumPointsForSimplification = 250;
+  double geometriesDumpDeviation = 5;
+  uint16_t geometriesDumpPrecision = 7;
 
-  // Transitive clouse
+  // Transitive closure
   bool writeGeomRelTransClosure = false;
 
   // Output, empty for stdout
