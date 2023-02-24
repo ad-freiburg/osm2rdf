@@ -1841,7 +1841,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWay) {
+TEST(OSM_FactHandler, writeBoostGeometryWktWay) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -1866,7 +1866,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
   way.push_back(osm2rdf::geometry::Location{0, 80});
   way.push_back(osm2rdf::geometry::Location{0, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeBoostGeometryWkt(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -1880,7 +1880,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
+TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify1) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -1912,7 +1912,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
   way.push_back(osm2rdf::geometry::Location{0, 500});
   way.push_back(osm2rdf::geometry::Location{0, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeBoostGeometryWkt(subject, predicate, dh.simplifyGeometry(way));
   output.flush();
   output.close();
 
@@ -1926,7 +1926,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
+TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify2) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -1954,7 +1954,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
   way.push_back(osm2rdf::geometry::Location{0, 80});
   way.push_back(osm2rdf::geometry::Location{100, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeBoostGeometryWkt(subject, predicate, dh.simplifyGeometry(way));
   output.flush();
   output.close();
 
@@ -1968,7 +1968,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
+TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify3) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -1997,7 +1997,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
   way.push_back(osm2rdf::geometry::Location{0, 80});
   way.push_back(osm2rdf::geometry::Location{100, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeBoostGeometryWkt(subject, predicate, dh.simplifyGeometry(way));
   output.flush();
   output.close();
 
@@ -2011,7 +2011,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoxPrecision1) {
+TEST(OSM_FactHandler, writeBoostGeometryWktPrecision1) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -2035,7 +2035,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
   box.min_corner() = osm2rdf::geometry::Location{50, 50};
   box.max_corner() = osm2rdf::geometry::Location{200, 200};
 
-  dh.writeBox(subject, predicate, box);
+  dh.writeBoostGeometryWkt(subject, predicate, box);
   output.flush();
   output.close();
 
@@ -2051,7 +2051,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoxPrecision2) {
+TEST(OSM_FactHandler, writeBoostGeometryWktPrecision2) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -2075,7 +2075,7 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
   box.min_corner() = osm2rdf::geometry::Location{50, 50};
   box.max_corner() = osm2rdf::geometry::Location{200, 200};
 
-  dh.writeBox(subject, predicate, box);
+  dh.writeBoostGeometryWkt(subject, predicate, box);
   output.flush();
   output.close();
 
