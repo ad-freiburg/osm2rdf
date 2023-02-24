@@ -39,20 +39,32 @@ class FactHandler {
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
-  template <typename G>
-  void writeBoostGeometry(const std::string& s, const std::string& p,
-                          const G& g);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWay);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
-
  protected:
+  template <typename G>
+  G simplifyGeometry(const G& g);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify1);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify2);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify3);
 
-  void writeBox(const std::string& s, const std::string& p,
-                const osm2rdf::geometry::Box& box);
-  FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
-  FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
+  template <typename G>
+  void writeBoostGeometryWkt(const std::string& s, const std::string& p,
+                             const G& g);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktWay);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktPrecision1);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktPrecision2);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify1);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify2);
+  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWktWaySimplify3);
+
+  template <typename G>
+  void writeBoostGeometryGeoJson(const std::string& s, const std::string& p,
+                                 const G& geom);
+  void writeBoostGeometryGeoJson(const std::string& s, const std::string& p,
+                                 const osm2rdf::geometry::Relation & geom);
+  template <typename G>
+  std::string convertBoostGeometryToGeoJson(const G& geom);
+  template <typename G>
+  std::string convertBoostGeometryToWKT(const G& geom);
 
   void writeTag(const std::string& s, const osm2rdf::osm::Tag& tag);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);

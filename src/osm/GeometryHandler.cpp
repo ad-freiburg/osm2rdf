@@ -88,9 +88,9 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
   unlink(_tmpPathNodes.c_str());
   unlink(_tmpPathWays.c_str());
 
-  _fsUnnamedAreas << std::fixed << std::setprecision(_config.wktPrecision);
-  _fsWays << std::fixed << std::setprecision(_config.wktPrecision);
-  _fsNodes << std::fixed << std::setprecision(_config.wktPrecision);
+  _fsUnnamedAreas << std::fixed << std::setprecision(_config.geometriesDumpPrecision);
+  _fsWays << std::fixed << std::setprecision(_config.geometriesDumpPrecision);
+  _fsNodes << std::fixed << std::setprecision(_config.geometriesDumpPrecision);
 }
 
 // ___________________________________________________________________________

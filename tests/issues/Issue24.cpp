@@ -36,7 +36,7 @@ TEST(Issue24, areaFromWayHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -85,7 +85,7 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -116,7 +116,11 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry osm2rdfgeom:wayarea_21 "
       ".\nosm2rdfgeom:wayarea_21 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
-      "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n",
+      "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral "
+      ".\nosm2rdfgeom:wayarea_21 geo:asGeoJSON \"{\\\"type\\\": "
+      "\\\"MultiPolygon\\\", \\\"coordinates:\\\" "
+      "[[[[48.0,7.5],[48.0,7.6],[48.1,7.6],[48.1,7.5],[48.0,7.5]]]]}\"^^geo:"
+      "geoJSONLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -135,7 +139,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -184,7 +188,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -215,7 +219,11 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   ASSERT_EQ(
       "osmrel:10 geo:hasGeometry osm2rdfgeom:relarea_10 "
       ".\nosm2rdfgeom:relarea_10 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
-      "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n",
+      "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral "
+      ".\nosm2rdfgeom:relarea_10 geo:asGeoJSON \"{\\\"type\\\": "
+      "\\\"MultiPolygon\\\", \\\"coordinates:\\\" "
+      "[[[[48.0,7.5],[48.0,7.6],[48.1,7.6],[48.1,7.5],[48.0,7.5]]]]}\"^^geo:"
+      "geoJSONLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -234,7 +242,7 @@ TEST(Issue24, nodeHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -278,7 +286,7 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -303,7 +311,9 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
       "osmnode:42 geo:hasGeometry osm2rdfgeom:node_42 .\n"
-      "osm2rdfgeom:node_42 geo:asWKT \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osm2rdfgeom:node_42 geo:asWKT \"POINT(7.5 48.0)\"^^geo:wktLiteral "
+      ".\nosm2rdfgeom:node_42 geo:asGeoJSON \"{\\\"type\\\": \\\"Point\\\", "
+      "\\\"coordinates:\\\" [7.5,48.0]}\"^^geo:geoJSONLiteral .\n"
       "osmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\n",
       buffer.str());
 
@@ -324,7 +334,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -410,7 +420,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -477,7 +487,12 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
       "osmrel:42 geo:hasGeometry osm2rdfgeom:relation_42 "
       ".\nosm2rdfgeom:relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
-      "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\nosmrel:42 "
+      "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral "
+      ".\nosm2rdfgeom:relation_42 geo:asGeoJSON \"{\\\"type\\\": "
+      "\\\"GeometryCollection\\\", \\\"geometries\\\": [{\\\"type\\\": "
+      "\\\"Point\\\", \\\"coordinates:\\\" [7.5,48.0]},{\\\"type\\\": "
+      "\\\"LineString\\\", \\\"coordinates:\\\" "
+      "[[7.5,48.0],[7.6,48.0]]}]}\"^^geo:geoJSONLiteral .\nosmrel:42 "
       "osm2rdf:completeGeometry \"yes\" .\n",
       buffer.str());
 
@@ -498,7 +513,7 @@ TEST(Issue24, wayHasGeometryAsWkt) {
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -546,7 +561,7 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
   config.hasGeometryAsWkt = false;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.wktPrecision = 1;
+  config.geometriesDumpPrecision = 1;
   config.addSortMetadata = false;
 
   osm2rdf::util::Output output{config, config.output};
@@ -576,7 +591,9 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
       "osmway:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
       "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
-      "7.6)\"^^geo:wktLiteral .\n",
+      "7.6)\"^^geo:wktLiteral .\n"
+      "osm2rdf:way_42 geo:asGeoJSON \"{\\\"type\\\": \\\"LineString\\\", "
+      "\\\"coordinates:\\\" [[48.0,7.5],[48.1,7.6]]}\"^^geo:geoJSONLiteral .\n",
       buffer.str());
 
   // Cleanup

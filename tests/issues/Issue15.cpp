@@ -46,7 +46,7 @@ TEST(Issue15, Relation_8291361_expected) {
   // Problem in FactHandler::writeBoostGeometry
   // assert(!boost::geometry::is_empty(geom));
   // Disabling simplifyWKT to ensure error does not trigger
-  config.simplifyWKT = 0;
+  config.geometriesDumpMinNumPointsForSimplification = 0;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -146,7 +146,7 @@ TEST(Issue15, Way_201387026_expected) {
   // Problem in FactHandler::writeBoostGeometry
   // assert(!boost::geometry::is_empty(geom));
   // Disabling simplifyWKT to ensure error does not trigger
-  config.simplifyWKT = 0;
+  config.geometriesDumpMinNumPointsForSimplification = 0;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();

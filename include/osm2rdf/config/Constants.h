@@ -195,7 +195,8 @@ const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_HELP =
 
 const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_INFO =
     "Adding area oriented-bounding-boxes";
-const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
+const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT =
+    "";
 const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG =
     "add-area-oriented-bounding-box";
 const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP =
@@ -227,7 +228,8 @@ const static inline std::string ADD_NODE_ENVELOPE_OPTION_HELP =
 
 const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_INFO =
     "Adding node oriented-bounding-boxes";
-const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
+const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_SHORT =
+    "";
 const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_LONG =
     "add-node-oriented-bounding-box";
 const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_HELP =
@@ -249,7 +251,8 @@ const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_LONG =
 const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_HELP =
     "Add convex hull to relations";
 
-const static inline std::string ADD_RELATION_ENVELOPE_INFO = "Adding relation envelopes";
+const static inline std::string ADD_RELATION_ENVELOPE_INFO =
+    "Adding relation envelopes";
 const static inline std::string ADD_RELATION_ENVELOPE_OPTION_SHORT = "";
 const static inline std::string ADD_RELATION_ENVELOPE_OPTION_LONG =
     "add-relation-envelope";
@@ -258,7 +261,8 @@ const static inline std::string ADD_RELATION_ENVELOPE_OPTION_HELP =
 
 const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO =
     "Adding relation oriented-bounding-boxes";
-const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
+const static inline std::string
+    ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
 const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG =
     "add-relation-oriented-bounding-box";
 const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_HELP =
@@ -341,7 +345,7 @@ const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_SHORT = "";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_LONG =
     "simplify-geometries";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_HELP =
-    "Factor for geometry simplifaction, 0 to disable; will be multiplied with "
+    "Factor for geometry simplification, 0 to disable; will be multiplied with "
     "the geometry "
     "perimeter or length. This only affects "
     "relationship calculations and not the geometry dump";
@@ -369,26 +373,29 @@ const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
 
 const static inline std::string APPROX_SPATIAL_REL_INFO =
     "Approximate spatial relations using inner/outer simplified geometries.";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT =
-    "";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT = "";
 const static inline std::string APPROX_SPATIAL_REL_OPTION_LONG =
     "approximate-spatial-relations";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP = "Use "
-  "simplified inner/outer geometries for approximate calcuation of spatial "
-  "relations";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP =
+    "Use "
+    "simplified inner/outer geometries for approximate calcuation of spatial "
+    "relations";
 
-const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
-const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
-const static inline std::string SIMPLIFY_WKT_OPTION_LONG = "simplify-wkt";
-const static inline std::string SIMPLIFY_WKT_OPTION_HELP =
-    "Simplify WKT-Geometries over this number of nodes, 0 to disable";
+const static inline std::string SIMPLIFY_GEOMETRIES_DUMP_INFO =
+    "Simplifying output geometries";
+const static inline std::string SIMPLIFY_GEOMETRIES_DUMP_OPTION_SHORT = "s";
+const static inline std::string SIMPLIFY_GEOMETRIES_DUMP_OPTION_LONG =
+    "simplify-geometries-dump";
+const static inline std::string SIMPLIFY_GEOMETRIES_DUMP_OPTION_HELP =
+    "Simplify dumped geometries with more than this number of nodes, 0 to "
+    "disable";
 
-const static inline std::string SIMPLIFY_WKT_DEVIATION_INFO =
-    "Simplifying wkt geometries with factor: ";
-const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_SHORT = "";
-const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_LONG =
-    "simplify-wkt-deviation";
-const static inline std::string SIMPLIFY_WKT_DEVIATION_OPTION_HELP =
+const static inline std::string GEOMETRIES_DUMP_DEVIATION_INFO =
+    "Simplifying dumped geometries with factor: ";
+const static inline std::string GEOMETRIES_DUMP_DEVIATION_OPTION_SHORT = "";
+const static inline std::string GEOMETRIES_DUMP_DEVIATION_OPTION_LONG =
+    "geometries-dump-deviation";
+const static inline std::string GEOMETRIES_DUMP_DEVIATION_OPTION_HELP =
     "Same effect as simplify-geometries but for the simplification of dumped "
     "geometries";
 
@@ -406,12 +413,13 @@ const static inline std::string SEMICOLON_TAG_KEYS_OPTION_LONG =
     "split-tag-key-by-semicolon";
 const static inline std::string SEMICOLON_TAG_KEYS_OPTION_HELP = "";
 
-const static inline std::string WKT_PRECISION_INFO =
-    "Dumping WKT with precision: ";
-const static inline std::string WKT_PRECISION_OPTION_SHORT = "";
-const static inline std::string WKT_PRECISION_OPTION_LONG = "wkt-precision";
-const static inline std::string WKT_PRECISION_OPTION_HELP =
-    "Precision (number of decimal digits) for WKT coordinates";
+const static inline std::string GEOMETRIES_DUMP_PRECISION_INFO =
+    "Dumping geometries with precision: ";
+const static inline std::string GEOMETRIES_DUMP_PRECISION_OPTION_SHORT = "";
+const static inline std::string GEOMETRIES_DUMP_PRECISION_OPTION_LONG =
+    "geometries-dump-precision";
+const static inline std::string GEOMETRIES_DUMP_PRECISION_OPTION_HELP =
+    "Precision (number of decimal digits) for dumped geometry coordinates";
 
 const static inline std::string WRITE_DAG_DOT_FILES_INFO =
     "Storing DAG states as .dot files";

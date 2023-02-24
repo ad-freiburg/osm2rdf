@@ -38,9 +38,11 @@ const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 
 // Generated constants (depending on output format)
-inline std::string IRI__GEOSPARQL__HAS_SERIALIZATION;
+inline std::string IRI__GEOSPARQL__AS_GEOJSON;
 inline std::string IRI__GEOSPARQL__AS_WKT;
+inline std::string IRI__GEOSPARQL__GEOJSON_LITERAL;
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
+inline std::string IRI__GEOSPARQL__HAS_SERIALIZATION;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
 
 inline std::string IRI__OSM2RDF_CONTAINS_NON_AREA;
