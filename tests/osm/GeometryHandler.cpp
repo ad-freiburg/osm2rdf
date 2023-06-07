@@ -160,6 +160,7 @@ TEST(OSM_GeometryHandler, addUnnamedAreaFromRelation) {
                                      "addUnnamedAreaFromRelation-output");
   config.cache = config.getTempPath("TEST_OSM_GeometryHandler",
                                     "addUnnamedAreaFromRelation-cache");
+  config.splitNamedAndUnnamedAreas = true;
   std::filesystem::create_directories(config.output);
   std::filesystem::create_directories(config.cache);
   osm2rdf::util::Output output{config, config.output};
@@ -1282,6 +1283,7 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.splitNamedAndUnnamedAreas = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
@@ -1410,6 +1412,7 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.splitNamedAndUnnamedAreas = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
@@ -2833,6 +2836,42 @@ TEST(OSM_GeometryHandler, boxIdintersect) {
     ASSERT_EQ(20, geomRelInf.fullContained);
     ASSERT_EQ(1, geomRelInf.toCheck.size());
   }
+}
+
+
+// ____________________________________________________________________________
+TEST(OSM_GeometryHandler, baseline) {
+
+  // Capture std::cerr and std::cout
+  std::stringstream cerrBuffer;
+  std::stringstream coutBuffer;
+  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
+  std::streambuf* coutBufferOrig = std::cout.rdbuf();
+  std::cerr.rdbuf(cerrBuffer.rdbuf());
+  std::cout.rdbuf(coutBuffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.geometryOptimizations = osm2rdf::config::GeometryRelationOptimization::NONE;
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
+  osm2rdf::osm::GeometryHandler gh{config, &writer};
+
+  gh.calculateRelations();
+
+  output.flush();
+  output.close();
+
+  ASSERT_THAT(cerrBuffer.str(),
+              ::testing::HasSubstr(
+                  "Skipping contains relation for nodes ... disabled"));
+
+  // Reset std::cerr and std::cout
+  std::cerr.rdbuf(cerrBufferOrig);
+  std::cout.rdbuf(coutBufferOrig);
 }
 
 }  // namespace osm2rdf::osm

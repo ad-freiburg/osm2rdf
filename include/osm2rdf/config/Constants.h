@@ -195,7 +195,8 @@ const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_HELP =
 
 const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_INFO =
     "Adding area oriented-bounding-boxes";
-const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
+const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT =
+    "";
 const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG =
     "add-area-oriented-bounding-box";
 const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP =
@@ -227,7 +228,8 @@ const static inline std::string ADD_NODE_ENVELOPE_OPTION_HELP =
 
 const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_INFO =
     "Adding node oriented-bounding-boxes";
-const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
+const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_SHORT =
+    "";
 const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_LONG =
     "add-node-oriented-bounding-box";
 const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_HELP =
@@ -249,7 +251,8 @@ const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_LONG =
 const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_HELP =
     "Add convex hull to relations";
 
-const static inline std::string ADD_RELATION_ENVELOPE_INFO = "Adding relation envelopes";
+const static inline std::string ADD_RELATION_ENVELOPE_INFO =
+    "Adding relation envelopes";
 const static inline std::string ADD_RELATION_ENVELOPE_OPTION_SHORT = "";
 const static inline std::string ADD_RELATION_ENVELOPE_OPTION_LONG =
     "add-relation-envelope";
@@ -258,7 +261,8 @@ const static inline std::string ADD_RELATION_ENVELOPE_OPTION_HELP =
 
 const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO =
     "Adding relation oriented-bounding-boxes";
-const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
+const static inline std::string
+    ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
 const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG =
     "add-relation-oriented-bounding-box";
 const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_HELP =
@@ -326,14 +330,14 @@ const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_LONG =
 const static inline std::string ADMIN_RELATIONS_ONLY_OPTION_HELP =
     "Only handle nodes and relations with \"admin-level\" tag";
 
-const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_INFO =
-    "Minimal area/envelope ratio: ";
-const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_SHORT = "";
-const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_LONG =
-    "minimal-area-envelope-ratio";
-const static inline std::string MINIMAL_AREA_ENVELOPE_RATIO_OPTION_HELP =
-    "Minimal ratio of area to envelope to include a named area in the DAG;"
-    " Value <=0 includes every area";
+const static inline std::string SPLIT_NAMED_AND_UNNAMED_AREAS_INFO =
+    "Splitting named and unnamed areas";
+const static inline std::string SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_SHORT = "";
+const static inline std::string SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_LONG =
+    "split-named-and-unnamed-areas";
+const static inline std::string SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_HELP =
+    "Treat unnamed areas differntly than named areas. Only named areas will be "
+    "included in the DAG.";
 
 const static inline std::string SIMPLIFY_GEOMETRIES_INFO =
     "Simplifying relationship geometries with factor: ";
@@ -341,9 +345,8 @@ const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_SHORT = "";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_LONG =
     "simplify-geometries";
 const static inline std::string SIMPLIFY_GEOMETRIES_OPTION_HELP =
-    "Factor for geometry simplifaction, 0 to disable; will be multiplied with "
-    "the geometry "
-    "perimeter or length. This only affects "
+    "Factor for geometry simplification, 0 to disable; will be multiplied with "
+    "the geometry perimeter or length. This only affects "
     "relationship calculations and not the geometry dump";
 
 const static inline std::string SIMPLIFY_GEOMETRIES_INNER_OUTER_INFO =
@@ -369,13 +372,13 @@ const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
 
 const static inline std::string APPROX_SPATIAL_REL_INFO =
     "Approximate spatial relations using inner/outer simplified geometries.";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT =
-    "";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT = "";
 const static inline std::string APPROX_SPATIAL_REL_OPTION_LONG =
     "approximate-spatial-relations";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP = "Use "
-  "simplified inner/outer geometries for approximate calcuation of spatial "
-  "relations";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP =
+    "Use "
+    "simplified inner/outer geometries for approximate calcuation of spatial "
+    "relations";
 
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";

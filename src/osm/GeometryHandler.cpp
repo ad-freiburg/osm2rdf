@@ -18,6 +18,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/GeometryHandler.h"
+
 #include <unistd.h>
 
 #include <algorithm>
@@ -34,7 +36,6 @@
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osm2rdf/osm/FactHandler.h"
-#include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/DirectedAcyclicGraph.h"
@@ -140,7 +141,9 @@ void GeometryHandler<W>::area(const Area& area) {
     totPoints += poly.outer().size();
   }
 
-  if (!_config.dontUseInnerOuterGeoms && (area.hasName() || !area.fromWay())) {
+  if ((_config.geometryOptimizations &
+       osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) &&
+      (area.hasName() || !area.fromWay())) {
     innerGeom = simplifiedArea(geom, true);
     outerGeom = simplifiedArea(geom, false);
   }
@@ -178,7 +181,7 @@ void GeometryHandler<W>::area(const Area& area) {
 
 #pragma omp critical(areaDataInsert)
   {
-    if (area.hasName()) {
+    if (!_config.splitNamedAndUnnamedAreas || area.hasName()) {
       _spatialStorageArea.push_back(
           {envelopes, area.id(), geom, area.objId(), area.geomArea(),
            area.fromWay() ? AreaFromType::WAY : AreaFromType::RELATION,
@@ -602,14 +605,14 @@ void GeometryHandler<W>::prepareDAG() {
 
         stats.checked();
 
+        if (areaId == entryId) {
+          continue;
+        }
+
         if (areaFromType == AreaFromType::RELATION &&
             skipByContainedInInner.find(areaObjId) !=
                 skipByContainedInInner.end()) {
           stats.skippedByContainedInInnerRing();
-          continue;
-        }
-
-        if (areaId == entryId) {
           continue;
         }
 
@@ -893,7 +896,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
     boost::archive::binary_iarchive ia(_fsUnnamedAreas);
 
     osm2rdf::util::ProgressBar progressBar{_numUnnamedAreas, true};
-    GeomRelationStats intersectStats, containsStats;
+    GeomRelationStats intersectStats;
+    GeomRelationStats containsStats;
     size_t entryCount = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                       \
@@ -1246,7 +1250,8 @@ void GeometryHandler<W>::dumpWayRelations(
     osm2rdf::util::ProgressBar progressBar{_numWays, true};
     size_t entryCount = 0;
 
-    GeomRelationStats intersectStats, containsStats;
+    GeomRelationStats intersectStats;
+    GeomRelationStats containsStats;
 
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                           \
@@ -1532,8 +1537,9 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
     return false;
   }
 
-  if (geomRelInf->fullContained < 0)
+  if (geomRelInf->fullContained < 0) {
     boxIdIsect({{1, 0}, {ndBoxId, 0}}, areaBoxIds, geomRelInf);
+  }
 
   if (geomRelInf->fullContained > 0) {
     geomRelInf->intersects = RelInfoValue::YES;
@@ -1567,7 +1573,9 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
     return false;
   }
 
-  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+  if (!(_config.geometryOptimizations &
+        osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
+      boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     stats->fullCheck();
     if (boost::geometry::covered_by(geomA, geomB)) {
@@ -1581,7 +1589,7 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
     }
   }
 
-  if (_config.approximateSpatialRels) {
+  if (false) {
     stats->skippedByOuter();
     if (boost::geometry::covered_by(geomA, outerGeomB)) {
       geomRelInf->intersects = RelInfoValue::YES;
@@ -1638,7 +1646,10 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
   const auto& obbA = std::get<11>(a);
   const auto& obbB = std::get<11>(b);
 
-  if (!boost::geometry::intersects(obbA, obbB)) {
+  if (_config.geometryOptimizations &
+          osm2rdf::config::GeometryRelationOptimization::
+              OBJECT_ORIENTED_BOUNDING_BOX &&
+      !boost::geometry::intersects(obbA, obbB)) {
     // ... oriented bounding boxes do no intersect
     geomRelInf->intersects = RelInfoValue::NO;
     stats->skippedByOrientedBox();
@@ -1696,7 +1707,9 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
     return false;
   }
 
-  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+  if (!(_config.geometryOptimizations &
+        osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
+      boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     stats->fullCheck();
     if (boost::geometry::intersects(geomA, geomB)) {
@@ -1804,7 +1817,9 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
     return false;
   }
 
-  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+  if (!(_config.geometryOptimizations &
+        osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
+      boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     // we definitely don't intersect if ...
     if (!boost::geometry::intersects(geomA, envelopesB[0])) {
@@ -1831,7 +1846,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
     }
   }
 
-  if (_config.approximateSpatialRels) {
+  if (false) {
     stats->skippedByOuter();
     if (boost::geometry::intersects(geomA, outerGeomB)) {
       geomRelInf->intersects = RelInfoValue::YES;
@@ -1931,6 +1946,26 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     return false;
   }
 
+  if (_config.geometryOptimizations &
+      osm2rdf::config::GeometryRelationOptimization::
+          OBJECT_ORIENTED_BOUNDING_BOX) {
+    if (!boost::geometry::covered_by(geomA, obbB)) {
+      // if geom is not covered by oriented bounding box, we are
+      // not contained
+      geomRelInf->contained = RelInfoValue::NO;
+      stats->skippedByOrientedBox();
+      return false;
+    }
+
+    if (boost::geometry::covered_by(obbA, geomB)) {
+      // if geom A's OBB is covered by geom B, we are
+      // definitely contained
+      geomRelInf->contained = RelInfoValue::YES;
+      stats->skippedByOrientedBox();
+      return true;
+    }
+  }
+
   if (geomRelInf->fullContained < 0)
     boxIdIsect(wayBoxIds, areaBoxIds, geomRelInf);
 
@@ -1966,7 +2001,9 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     }
   }
 
-  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+  if (!(_config.geometryOptimizations &
+        osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
+      boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     stats->fullCheck();
 
@@ -1979,7 +2016,7 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     }
   }
 
-  if (_config.approximateSpatialRels) {
+  if (false) {
     stats->skippedByOuter();
     if (boost::geometry::covered_by(geomA, outerGeomB)) {
       geomRelInf->contained = RelInfoValue::YES;
@@ -2022,22 +2059,6 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     geomRelInf->contained = RelInfoValue::NO;
     stats->skippedByOuter();
     return false;
-  }
-
-  if (!boost::geometry::covered_by(geomA, obbB)) {
-    // if geom is not covered by oriented bounding box, we are
-    // not contained
-    geomRelInf->contained = RelInfoValue::NO;
-    stats->skippedByOrientedBox();
-    return false;
-  }
-
-  if (boost::geometry::covered_by(obbA, geomB)) {
-    // if geom A's OBB is covered by geom B, we are
-    // definitely contained
-    geomRelInf->contained = RelInfoValue::YES;
-    stats->skippedByOrientedBox();
-    return true;
   }
 
   stats->fullCheck();
@@ -2181,44 +2202,52 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
     return false;
   }
 
-  // if no box id intersection has been written, do it now
-  if (geomRelInf->fullContained < 0) boxIdIsect(boxIdsA, boxIdsB, geomRelInf);
+  if (_config.geometryOptimizations &
+      osm2rdf::config::GeometryRelationOptimization::INTERSECTION_CELL_IDS) {
+    // if no box id intersection has been written, do it now
+    if (geomRelInf->fullContained < 0) boxIdIsect(boxIdsA, boxIdsB, geomRelInf);
 
-  // if all of A's boxes are fully contained, we are contained
-  if (geomRelInf->fullContained == boxIdsA[0].first) {
-    geomRelInf->contained = RelInfoValue::YES;
-    stats->skippedByBoxIdIntersect();
-    return true;
-  }
+    // if all of A's boxes are fully contained, we are contained
+    if (geomRelInf->fullContained == boxIdsA[0].first) {
+      geomRelInf->contained = RelInfoValue::YES;
+      stats->skippedByBoxIdIntersect();
+      return true;
+    }
 
-  // else, if the number of surely contained and potentially contained boxes is
-  // unequal the number of A's boxes, we are surely not contained
-  if ((static_cast<int32_t>(geomRelInf->toCheck.size()) +
-       geomRelInf->fullContained) != boxIdsA[0].first) {
-    geomRelInf->contained = RelInfoValue::NO;
-    stats->skippedByBoxIdIntersect();
-    return false;
-  }
+    // else, if the number of surely contained and potentially contained boxes
+    // is unequal the number of A's boxes, we are surely not contained
+    if ((static_cast<int32_t>(geomRelInf->toCheck.size()) +
+         geomRelInf->fullContained) != boxIdsA[0].first) {
+      geomRelInf->contained = RelInfoValue::NO;
+      stats->skippedByBoxIdIntersect();
+      return false;
+    }
 
-  // if A is in only one box, we can check it against the corresponding
-  // cutout of B, if available
-  if (boxIdsA[0].first == 1 && !cutoutsB.empty()) {
-    const auto& cutout = cutoutsB.find(abs(boxIdsA[1].first));
+    if (_config.geometryOptimizations &
+        osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS) {
+      // if A is in only one box, we can check it against the corresponding
+      // cutout of B, if available
+      if (boxIdsA[0].first == 1 && !cutoutsB.empty()) {
+        const auto& cutout = cutoutsB.find(abs(boxIdsA[1].first));
 
-    if (cutout != cutoutsB.end()) {
-      if (boost::geometry::covered_by(geomA, cutout->second)) {
-        geomRelInf->contained = RelInfoValue::YES;
-        stats->skippedByBoxIdIntersectCutout();
-        return true;
-      } else {
-        stats->skippedByBoxIdIntersectCutout();
-        geomRelInf->contained = RelInfoValue::NO;
-        return false;
+        if (cutout != cutoutsB.end()) {
+          if (boost::geometry::covered_by(geomA, cutout->second)) {
+            geomRelInf->contained = RelInfoValue::YES;
+            stats->skippedByBoxIdIntersectCutout();
+            return true;
+          } else {
+            stats->skippedByBoxIdIntersectCutout();
+            geomRelInf->contained = RelInfoValue::NO;
+            return false;
+          }
+        }
       }
     }
   }
 
-  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
+  if (!(_config.geometryOptimizations &
+        osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
+      boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB) ||
       boost::geometry::is_empty(outerGeomA) ||
       boost::geometry::is_empty(innerGeomA)) {
