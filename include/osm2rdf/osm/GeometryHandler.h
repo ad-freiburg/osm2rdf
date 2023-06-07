@@ -279,6 +279,8 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, prepareRTreeEmpty);
   FRIEND_TEST(OSM_GeometryHandler, prepareRTreeSimple);
 
+  void prepareWayRTree();
+
   // Generate DAG for areas using prepared r-tree.
   void prepareDAG();
   FRIEND_TEST(OSM_GeometryHandler, prepareDAGEmpty);
@@ -318,6 +320,9 @@ class GeometryHandler {
               dumpWayRelationsSimpleIntersectsWithNodeInfo);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo);
 
+  // Calculate way/way relation.
+  void dumpWayWayRelations();
+
   template <typename G>
   [[nodiscard]] G simplifyGeometry(const G& g) const;
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
@@ -333,7 +338,13 @@ class GeometryHandler {
                   GeomRelationStats* statsa) const;
   bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&,
                  GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
+  bool wayInWay(const SpatialWayValue& a, const SpatialWayValue&,
+                 GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
   bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValue&,
+                         GeomRelationInfo* geomRelInf,
+                         GeomRelationStats* stats) const;
+
+  bool wayIntersectsWay(const SpatialWayValue& a, const SpatialWayValue&,
                          GeomRelationInfo* geomRelInf,
                          GeomRelationStats* stats) const;
 
@@ -407,6 +418,8 @@ class GeometryHandler {
       const SpatialAreaValue& area) const;
   std::vector<SpatialAreaRefValue> indexQryIntersect(
       const SpatialWayValue& way) const;
+  std::vector<SpatialAreaRefValue> wayIndexQryIntersect(
+      const SpatialWayValue& way) const;
   void unique(std::vector<SpatialAreaRefValue>& refs) const;
 
   std::fstream& getFsUnnamedAreas() { return _fsUnnamedAreas; }
@@ -418,12 +431,19 @@ class GeometryHandler {
   osm2rdf::ttl::Writer<W>* _writer;
   // Store areas as r-tree
   SpatialIndex _spatialIndex;
+
+  // Store ways as r-tree
+  SpatialIndex _spatialWayIndex;
+
   // Store dag
   osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t> _directedAreaGraph;
+
   // Spatial Data
   SpatialAreaVector _spatialStorageArea;
   std::unordered_map<osm2rdf::osm::Area::id_t, uint64_t>
       _spatialStorageAreaIndex;
+
+  SpatialWayVector _spatialStorageWay;
 
   std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<MemberRel>>
       _areaBorderWaysIndex;
