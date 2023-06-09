@@ -53,6 +53,7 @@ class Way {
   [[nodiscard]] const osm2rdf::geometry::Polygon& orientedBoundingBox() const noexcept;
   [[nodiscard]] const std::vector<osm2rdf::osm::Node>& nodes() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
+  [[nodiscard]] bool hasName() const noexcept;
 
   bool operator==(const osm2rdf::osm::Way& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Way& other) const noexcept;

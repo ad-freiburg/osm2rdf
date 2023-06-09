@@ -149,6 +149,11 @@ bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
 }
 
 // ____________________________________________________________________________
+bool osm2rdf::osm::Relation::hasName() const noexcept {
+  return _tags.find("name") != _tags.end();
+}
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Relation::operator==(const Relation& other) const noexcept {
   return _id == other._id &&
 #if BOOST_VERSION >= 107800

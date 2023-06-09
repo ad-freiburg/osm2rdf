@@ -186,6 +186,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n"
           << prefix << osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_INFO;
     }
+    if (geometricRelationsForNamedOnly) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_INFO;
+    }
     if (noAreaGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
@@ -384,6 +388,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT,
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG,
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP);
+  auto geometricRelationsForNamedOnlyOp=
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_SHORT,
+          osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_LONG,
+          osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_HELP);
 
   auto addAreaConvexHullOp =
       parser.add<popl::Switch, popl::Attribute::advanced>(
@@ -593,6 +602,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     noFacts = noFactsOp->is_set();
     noGeometricRelations = noGeometricRelationsOp->is_set();
+    geometricRelationsForNamedOnly = geometricRelationsForNamedOnlyOp->is_set();
 
     if (storeLocationsOnDiskOp->is_set()) {
       storeLocationsOnDisk = storeLocationsOnDiskOp->value();

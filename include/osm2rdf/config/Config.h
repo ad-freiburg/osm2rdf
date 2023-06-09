@@ -58,6 +58,8 @@ struct Config {
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
 
+  bool geometricRelationsForNamedOnly = false;
+
   // the epsilon for the inner/outer douglas-peucker is based on the
   // circumference of a hypothetical circle. By dividing by ~pi, we base the
   // epsilon on 1/n of the radius of this hypothetical circle (n = 20 in this

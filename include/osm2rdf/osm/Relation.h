@@ -47,6 +47,7 @@ class Relation {
   [[nodiscard]] bool hasCompleteGeometry() const noexcept;
 #if BOOST_VERSION >= 107800
   [[nodiscard]] bool hasGeometry() const noexcept;
+  [[nodiscard]] bool hasName() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Relation& geom() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Polygon& convexHull() const noexcept;

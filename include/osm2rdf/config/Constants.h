@@ -96,6 +96,14 @@ const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
 const static inline std::string NO_FACTS_OPTION_HELP = "Do not dump facts";
 
+const static inline std::string GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_INFO =
+    "Only calculating geometric relations for named objects";
+const static inline std::string GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_SHORT = "";
+const static inline std::string GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_LONG =
+    "geometric-relations-for-named-only";
+const static inline std::string GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_HELP =
+    "Only named objects are considered for geometric relations";
+
 const static inline std::string NO_GEOM_RELATIONS_INFO =
     "Not dumping geometric relations";
 const static inline std::string NO_GEOM_RELATIONS_OPTION_SHORT = "";
