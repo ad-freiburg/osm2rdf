@@ -141,6 +141,21 @@ void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
 
 // ____________________________________________________________________________
 template <typename T>
+void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFastNoLeafes() {
+  for (const auto& vertex : getVertices()) {
+    if (_successors[vertex].empty()) {
+      for (const auto& successor : findSuccessors(vertex)) {
+        if (_successors[successor].empty()) {
+          _successors[successor] = findSuccessors(successor);
+        }
+      }
+    }
+  }
+  _preparedFast = true;
+}
+
+// ____________________________________________________________________________
+template <typename T>
 size_t osm2rdf::util::DirectedGraph<T>::getNumEdges() const {
   return _numEdges;
 }

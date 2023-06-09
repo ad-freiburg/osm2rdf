@@ -54,6 +54,7 @@ struct Config {
   bool noGeometricRelations = false;
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
+  bool noRelationGeometricRelations = false;
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
 
@@ -119,6 +120,8 @@ struct Config {
 
   // Transitive closure
   bool writeGeomRelTransClosure = false;
+
+  bool pruneLeafesFromDag = false;
 
   // Output, empty for stdout
   std::filesystem::path output;

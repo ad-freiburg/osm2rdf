@@ -48,6 +48,9 @@ class DirectedGraph {
   // prepareFindSuccessorsFast calculates for each vertex the successors and
   // stores them in a helper map.
   void prepareFindSuccessorsFast();
+  // prepareFindSuccessorsFastNoLeafes calculates for each non leaf vertex the
+  // successors and stores them in a helper map.
+  void prepareFindSuccessorsFastNoLeafes();
   // getNumEdges returns the number of stored edges. If an edge is defined
   // multiple times it is counted multiple times too.
   [[nodiscard]] size_t getNumEdges() const;

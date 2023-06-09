@@ -154,6 +154,13 @@ const static inline std::string NO_RELATION_FACTS_OPTION_LONG =
     "no-relation-facts";
 const static inline std::string NO_RELATION_FACTS_OPTION_HELP =
     "Do not dump relation facts";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_INFO =
+    "Ignoring relation geometric relations";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_OPTION_SHORT = "";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_OPTION_LONG =
+    "no-relation-geometric-relations";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_OPTION_HELP =
+    "Do not dump relation geometric relations";
 
 const static inline std::string NO_WAY_OPTION_SHORT = "";
 const static inline std::string NO_WAY_OPTION_LONG = "no-ways";
@@ -374,6 +381,14 @@ const static inline std::string GEOMETRY_RELATION_OPTIMIZATION_OPTION_HELP =
     "\napproximate-polygons / ap"
     "\nintersection-cell-ids / ici"
     "\narea-cutouts / ac";
+
+const static inline std::string PRUNE_LEAFES_FROM_DAG_INFO =
+    "Prune leafes from DAG";
+const static inline std::string PRUNE_LEAFES_FROM_DAG_OPTION_SHORT = "";
+const static inline std::string PRUNE_LEAFES_FROM_DAG_OPTION_LONG =
+    "prune-leafes-from-dag";
+const static inline std::string PRUNE_LEAFES_FROM_DAG_OPTION_HELP =
+    "Remove the initial leaf layer from the dag during reduction";
 
 const static inline std::string SIMPLIFY_GEOMETRIES_INFO =
     "Simplifying relationship geometries with factor: ";

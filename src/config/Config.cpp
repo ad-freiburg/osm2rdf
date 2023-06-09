@@ -194,6 +194,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_INFO;
     }
+    if (noRelationGeometricRelations) {
+      oss << "\n"
+          << prefix
+          << osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_INFO;
+    }
     if (noWayGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO;
@@ -265,6 +270,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     oss << "\n"
         << prefix
         << osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_INFO;
+  }
+  if (pruneLeafesFromDag) {
+    oss << "\n"
+        << prefix << osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_INFO;
   }
   if (writeDAGDotFiles) {
     oss << "\n"
@@ -360,6 +369,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_SHORT,
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_HELP);
+  auto noRelationGeometricRelationsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_LONG,
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_HELP);
   auto noWayGeometricRelationsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_SHORT,
@@ -481,6 +495,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT,
       osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_LONG,
       osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_HELP);
+  auto pruneLeafesFromDagOp = parser.add<popl::Switch, popl::Attribute::expert>(
+      osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_OPTION_SHORT,
+      osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_OPTION_LONG,
+      osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_OPTION_HELP);
 
   auto simplifyGeometriesOp =
       parser.add<popl::Value<double>, popl::Attribute::expert>(
@@ -588,6 +606,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     noAreaGeometricRelations = noAreaGeometricRelationsOp->is_set();
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
+    noRelationGeometricRelations = noRelationGeometricRelationsOp->is_set();
     noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
 
     writeGeomRelTransClosure = writeGeomRelTransClosureOp->is_set();
@@ -630,6 +649,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
+
+    pruneLeafesFromDag = pruneLeafesFromDagOp->is_set();
 
     addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;
