@@ -639,29 +639,30 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::GeometryRelationOptimization::NONE;
       for (size_t i = 0; i < geometryRelationOptimizationOp->count(); ++i) {
         std::string value = geometryRelationOptimizationOp->value(i);
-        if (value == "cg" || value == "containment-graph") {
+        if (value == "-") {
+        } else if (value == "cg" || value == "containment-graph") {
           geometryOptimizations |=
               osm2rdf::config::GeometryRelationOptimization::CONTAINMENT_GRAPH;
-        }
-        if (value == "oobb" || value == "object-oriented-bounding-box") {
+        } else if (value == "oobb" || value == "object-oriented-bounding-box") {
           geometryOptimizations |= osm2rdf::config::
               GeometryRelationOptimization::OBJECT_ORIENTED_BOUNDING_BOX;
-        }
-        if (value == "pp" || value == "polygon-partitioning") {
+        } else if (value == "pp" || value == "polygon-partitioning") {
           geometryOptimizations |= osm2rdf::config::
               GeometryRelationOptimization::POLYGON_PARTITIONING;
-        }
-        if (value == "ap" || value == "approximate-polygons") {
+        } else if (value == "ap" || value == "approximate-polygons") {
           geometryOptimizations |= osm2rdf::config::
               GeometryRelationOptimization::APPROXIMATE_POLYGONS;
-        }
-        if (value == "ici" || value == "intersection-cell-ids") {
+        } else if (value == "ici" || value == "intersection-cell-ids") {
           geometryOptimizations |= osm2rdf::config::
               GeometryRelationOptimization::INTERSECTION_CELL_IDS;
-        }
-        if (value == "ac" || value == "area-cutouts") {
+        } else if (value == "ac" || value == "area-cutouts") {
           geometryOptimizations |=
               osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS;
+        } else {
+          std::cerr << "Invalid option '" << value
+                    << "' for Geometry Relation Optimization \n"
+                    << parser.help() << "\n";
+          exit(osm2rdf::config::ExitCode::UNKNOWN_ARGUMENT);
         }
       }
     }
