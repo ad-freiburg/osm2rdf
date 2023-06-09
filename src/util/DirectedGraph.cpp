@@ -207,9 +207,17 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdges(T src) const {
 template <typename T>
 std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdgesFast(T src) const {
   if (!_preparedFast) {
-    throw std::runtime_error("findSuccessorsFast not prepared");
+    throw std::runtime_error("getEdgesFast not prepared");
   }
-  return _successors.at(src);
+  const auto& res = _successors.at(src);
+  if (_prunedLeafes && res.empty()) {
+      std::vector<T> successors(getEdges(src));
+      std::sort(successors.begin(), successors.end());
+      const auto it = std::unique(successors.begin(), successors.end());
+      successors.resize(std::distance(successors.begin(), it));
+      return successors;
+  }
+  return res;
 }
 
 // ____________________________________________________________________________
