@@ -209,6 +209,57 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_INFO;
     }
   }
+  oss << "\n"
+      << prefix
+      << osm2rdf::config::constants::SECTION_GEOMETRY_RELATION_OPTIMIZATION;
+  if (geometryOptimizations ==
+      osm2rdf::config::GeometryRelationOptimization::NONE) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_NONE_INFO;
+  }
+  if (geometryOptimizations & CONTAINMENT_GRAPH) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_CONTAINMENT_GRAPH_INFO;
+  }
+  if (geometryOptimizations & OBJECT_ORIENTED_BOUNDING_BOX) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_OBJECT_ORIENTED_BOUNDING_BOX_INFO;
+  }
+  if (geometryOptimizations & POLYGON_PARTITIONING) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_POLYGON_PARTITIONING_INFO;
+  }
+  if (geometryOptimizations & APPROXIMATE_POLYGONS) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_APPROXIMATE_POLYGONS_INFO;
+  }
+  if (geometryOptimizations & INTERSECTION_CELL_IDS) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_INTERSECTION_CELL_IDS_INFO;
+  }
+  if (geometryOptimizations & AREA_CUTOUTS) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_AREA_CUTOUTS_INFO;
+  }
+  if (geometryOptimizations & SEMANTIC_INFORMATION) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_SEMANTIC_INFORMATION_INFO;
+  }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
   if (splitNamedAndUnnamedAreas) {
     oss << "\n"
@@ -425,6 +476,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_SHORT,
       osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_LONG,
       osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_HELP);
+  auto geometryRelationOptimizationOp = parser.add<popl::Value<std::string>,
+                                                   popl::Attribute::advanced>(
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT,
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_LONG,
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_HELP);
 
   auto simplifyGeometriesOp =
       parser.add<popl::Value<double>, popl::Attribute::expert>(
@@ -439,10 +495,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG,
       osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP,
       simplifyGeometriesInnerOuter);
-  auto dontUseInnerOuterGeomsOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
   auto approximateSpatialRelsOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_SHORT,
       osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_LONG,
@@ -581,6 +633,38 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;
+
+    if (geometryRelationOptimizationOp->is_set()) {
+      geometryOptimizations =
+          osm2rdf::config::GeometryRelationOptimization::NONE;
+      for (size_t i = 0; i < geometryRelationOptimizationOp->count(); ++i) {
+        std::string value = geometryRelationOptimizationOp->value(i);
+        if (value == "cg" || value == "containment-graph") {
+          geometryOptimizations |=
+              osm2rdf::config::GeometryRelationOptimization::CONTAINMENT_GRAPH;
+        }
+        if (value == "oobb" || value == "object-oriented-bounding-box") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::OBJECT_ORIENTED_BOUNDING_BOX;
+        }
+        if (value == "pp" || value == "polygon-partitioning") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::POLYGON_PARTITIONING;
+        }
+        if (value == "ap" || value == "approximate-polygons") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::APPROXIMATE_POLYGONS;
+        }
+        if (value == "ici" || value == "intersection-cell-ids") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::INTERSECTION_CELL_IDS;
+        }
+        if (value == "ac" || value == "area-cutouts") {
+          geometryOptimizations |=
+              osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS;
+        }
+      }
+    }
 
     if (semicolonTagKeysOp->is_set()) {
       for (size_t i = 0; i < semicolonTagKeysOp->count(); ++i) {
