@@ -69,6 +69,7 @@ class DirectedGraph {
   std::unordered_map<T, std::vector<T>> _successors;
   size_t _numEdges = 0;
   bool _preparedFast = false;
+  bool _prunedLeafes = false;
 };
 
 }  // namespace osm2rdf::util

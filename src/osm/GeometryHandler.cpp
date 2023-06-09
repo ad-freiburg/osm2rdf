@@ -734,7 +734,11 @@ void GeometryHandler<W>::prepareDAG() {
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted()
               << " Preparing fast above lookup in DAG ..." << std::endl;
-    _directedAreaGraph.prepareFindSuccessorsFast();
+    if (_config.pruneLeafesFromDag) {
+      _directedAreaGraph.prepareFindSuccessorsFastNoLeafes();
+    } else {
+      _directedAreaGraph.prepareFindSuccessorsFast();
+    }
     std::cerr << currentTimeFormatted() << " ... done" << std::endl;
   }
 }
