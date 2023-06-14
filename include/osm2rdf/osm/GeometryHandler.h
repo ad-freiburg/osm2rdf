@@ -35,6 +35,7 @@
 #include "osm2rdf/geometry/Node.h"
 #include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Area.h"
+#include "osm2rdf/osm/GeometryCache.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/CacheFile.h"
 #include "osm2rdf/util/DirectedGraph.h"
@@ -157,11 +158,7 @@ struct GeomRelationStats {
 #pragma omp declare reduction(+ : GeomRelationStats : omp_out += omp_in) \
     initializer(omp_priv = omp_orig)
 
-typedef std::pair<int32_t, uint8_t> BoxId;
-
 enum class RelInfoValue { DONT_KNOW, YES, NO };
-
-enum class AreaFromType { RELATION, WAY };
 
 enum class InnerOuterDouglasPeuckerMode { INNER, OUTER };
 
@@ -193,18 +190,11 @@ struct MemberRelCmp {
   }
 };
 
-struct BoxIdCmp {
-  bool operator()(const BoxId& left, const BoxId& right) {
-    return abs(left.first) < abs(right.first);
-  }
-  bool operator()(const BoxId& left, int32_t right) {
-    return abs(left.first) < abs(right);
-  }
-};
+typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
 
-typedef std::vector<BoxId> BoxIdList;
+// typedef std::vector<std::pair<size_t, osm2rdf::geometry::area_result_t>>
+// SpatialAreaVector;
 
-// Area: envelope, id, geometry, osm id, area, fromWay
 typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    osm2rdf::osm::Area::id_t, osm2rdf::geometry::Area,
                    osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t,
@@ -214,16 +204,20 @@ typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon>
     SpatialAreaValue;
 
-typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
+typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
+                   osm2rdf::osm::Area::id_t, osm2rdf::osm::Area::id_t,
+                   osm2rdf::geometry::area_result_t, AreaFromType,
+                   osm2rdf::osm::BoxIdList,
+                   std::unordered_map<int32_t, osm2rdf::geometry::Area>,
+                   osm2rdf::geometry::Polygon, size_t>
+    SpatialAreaValueLight;
 
-typedef std::vector<SpatialAreaValue> SpatialAreaVector;
+typedef std::vector<SpatialAreaValueLight> SpatialAreaVector;
 
 // Node: envelope, osm  id, geometry
 typedef std::tuple<osm2rdf::osm::Node::id_t, osm2rdf::geometry::Node>
     SpatialNodeValue;
 typedef std::vector<SpatialNodeValue> SpatialNodeVector;
-
-typedef std::vector<osm2rdf::osm::Node::id_t> WayNodeList;
 
 typedef std::vector<osm2rdf::osm::Node::id_t> RelationNodeList;
 typedef std::vector<osm2rdf::osm::Way::id_t> RelationWayList;
@@ -239,12 +233,13 @@ typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
 #endif  // BOOST_VERSION >= 107800
 
 // Way: envelope, osm id, geometry, node list
-typedef std::tuple<osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t,
-                   osm2rdf::geometry::Way, WayNodeList,
-                   std::vector<osm2rdf::geometry::Box>, osm2rdf::osm::BoxIdList,
-                   osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon>
+typedef std::tuple<
+    osm2rdf::geometry::Box, osm2rdf::osm::Way::id_t, osm2rdf::geometry::Way,
+    WayNodeList, std::vector<osm2rdf::geometry::Box>, osm2rdf::osm::BoxIdList,
+    osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon, size_t, size_t>
     SpatialWayValue;
-typedef std::vector<SpatialWayValue> SpatialWayVector;
+
+typedef std::vector<size_t> SpatialWayVector;
 
 typedef boost::geometry::index::rtree<SpatialAreaRefValue,
                                       boost::geometry::index::quadratic<32>>
@@ -279,7 +274,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, prepareRTreeEmpty);
   FRIEND_TEST(OSM_GeometryHandler, prepareRTreeSimple);
 
-  void prepareWayRTree();
+  void prepareWayRTree(size_t from, size_t to);
 
   // Generate DAG for areas using prepared r-tree.
   void prepareDAG();
@@ -328,27 +323,31 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryWay);
 
-  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&,
+  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValueLight&,
                   GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
-  bool areaInAreaApprox(const SpatialAreaValue& a, const SpatialAreaValue&,
+  bool areaInAreaApprox(const SpatialAreaValueLight& a,
+                        const SpatialAreaValueLight&,
                         GeomRelationInfo* geomRelInf,
                         GeomRelationStats* stats) const;
-  bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValue&,
+  bool nodeInArea(const SpatialNodeValue& a, const SpatialAreaValueLight&,
                   GeomRelationInfo* geomRelInf,
                   GeomRelationStats* statsa) const;
-  bool wayInArea(const SpatialWayValue& a, const SpatialAreaValue&,
+  bool wayInArea(const SpatialWayValue& a, const SpatialAreaValueLight&,
                  GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
   bool wayInWay(const SpatialWayValue& a, const SpatialWayValue&,
-                 GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
-  bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValue&,
+                GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
+  bool wayIntersectsArea(const SpatialWayValue& a, const SpatialAreaValueLight&,
                          GeomRelationInfo* geomRelInf,
                          GeomRelationStats* stats) const;
 
   bool wayIntersectsWay(const SpatialWayValue& a, const SpatialWayValue&,
-                         GeomRelationInfo* geomRelInf,
-                         GeomRelationStats* stats) const;
+                        GeomRelationInfo* geomRelInf,
+                        GeomRelationStats* stats) const;
 
-  bool areaIntersectsArea(const SpatialAreaValue& a, const SpatialAreaValue&,
+  bool areaIntersectsArea(const SpatialAreaValue& a, const SpatialAreaValueLight&,
+                          GeomRelationInfo* geomRelInf,
+                          GeomRelationStats* stats) const;
+  bool areaIntersectsArea(const SpatialAreaValueLight& a, const SpatialAreaValueLight&,
                           GeomRelationInfo* geomRelInf,
                           GeomRelationStats* stats) const;
 
@@ -412,8 +411,10 @@ class GeometryHandler {
                           osm2rdf::osm::Area::id_t areaId) const;
 
   std::vector<SpatialAreaRefValue> indexQryCover(
-      const SpatialAreaValue& area) const;
+      const SpatialAreaValueLight& area) const;
   std::vector<SpatialAreaRefValue> indexQry(const SpatialNodeValue& node) const;
+  std::vector<SpatialAreaRefValue> indexQryIntersect(
+      const SpatialAreaValueLight& area) const;
   std::vector<SpatialAreaRefValue> indexQryIntersect(
       const SpatialAreaValue& area) const;
   std::vector<SpatialAreaRefValue> indexQryIntersect(
@@ -421,6 +422,7 @@ class GeometryHandler {
   std::vector<SpatialAreaRefValue> wayIndexQryIntersect(
       const SpatialWayValue& way) const;
   void unique(std::vector<SpatialAreaRefValue>& refs) const;
+  void uniqueWay(std::vector<SpatialAreaRefValue>& refs) const;
 
   std::fstream& getFsUnnamedAreas() { return _fsUnnamedAreas; }
   std::fstream& getFsNodes() { return _fsNodes; }
@@ -444,6 +446,9 @@ class GeometryHandler {
       _spatialStorageAreaIndex;
 
   SpatialWayVector _spatialStorageWay;
+
+  GeometryCache<osm2rdf::osm::SpatialWayValue> _wayCache;
+  GeometryCache<osm2rdf::osm::SpatialAreaValueCache> _areaCache;
 
   std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<MemberRel>>
       _areaBorderWaysIndex;
@@ -512,6 +517,8 @@ void serialize(Archive& ar, osm2rdf::osm::SpatialWayValue& v,
   ar& boost::serialization::make_nvp("boxIds", std::get<5>(v));
   ar& boost::serialization::make_nvp("convexhull", std::get<6>(v));
   ar& boost::serialization::make_nvp("obb", std::get<7>(v));
+  ar& boost::serialization::make_nvp("offset", std::get<8>(v));
+  ar& boost::serialization::make_nvp("len", std::get<9>(v));
 }
 
 template <class Archive>
