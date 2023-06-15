@@ -780,8 +780,7 @@ TEST(CONFIG_Config, fromArgsAddRelationConvexHullLong) {
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" +
-      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG;
+      "--" + osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -797,8 +796,7 @@ TEST(CONFIG_Config, fromArgsAddRelationEnvelopeLong) {
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" +
-      osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG;
+      "--" + osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -813,9 +811,8 @@ TEST(CONFIG_Config, fromArgsAddRelationOrientedBoundingBoxLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg =
-      "--" +
-      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::
+                              ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -864,7 +861,8 @@ TEST(CONFIG_Config, fromArgsAddWayOrientedBoundingBOxLong) {
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+      "--" +
+      osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -1109,6 +1107,209 @@ TEST(CONFIG_Config, fromArgsOutputKeepFilesLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationInvalidShort) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "-" +
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT +
+      "xxx";
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+  ASSERT_EXIT(
+      config.fromArgs(argc, argv),
+      ::testing::ExitedWithCode(osm2rdf::config::ExitCode::UNKNOWN_ARGUMENT),
+      "^Invalid option 'xxx' for Geometry Relation Optimization");
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationDisableShort) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "-" +
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT +
+      "-";
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ(osm2rdf::config::GeometryRelationOptimization::NONE,
+            config.geometryOptimizations);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationDisableShort2) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "-" +
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT;
+  const int argc = 4;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("-"), const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ(osm2rdf::config::GeometryRelationOptimization::NONE,
+            config.geometryOptimizations);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationDisableLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_LONG;
+  const int argc = 4;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("-"),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ(osm2rdf::config::GeometryRelationOptimization::NONE,
+            config.geometryOptimizations);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationSingleShort) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "-" +
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT +
+      "oobb";
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ(osm2rdf::config::GeometryRelationOptimization::
+                OBJECT_ORIENTED_BOUNDING_BOX,
+            config.geometryOptimizations);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationSingleLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" +
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_LONG;
+  const int argc = 4;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("oobb"),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_EQ(osm2rdf::config::GeometryRelationOptimization::
+                OBJECT_ORIENTED_BOUNDING_BOX,
+            config.geometryOptimizations);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationMultipleShort) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg1 =
+      "-" + osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT +
+      "oobb";
+  const auto arg2 =
+      "-" + osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT +
+      "pp";
+  const auto arg3 =
+      "-" + osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT +
+      "ac";
+  const int argc = 5;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg1.c_str()),
+                      const_cast<char*>(arg2.c_str()),
+                      const_cast<char*>(arg3.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.geometryOptimizations |
+              osm2rdf::config::GeometryRelationOptimization::
+                  OBJECT_ORIENTED_BOUNDING_BOX);
+  ASSERT_TRUE(
+      config.geometryOptimizations |
+      osm2rdf::config::GeometryRelationOptimization::POLYGON_PARTITIONING);
+  ASSERT_TRUE(config.geometryOptimizations |
+              osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationMultipleShort2) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg1 =
+      "-" + osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT;
+  const auto arg2 =
+      "-" + osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT;
+  const auto arg3 =
+      "-" + osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT;
+  const int argc = 8;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg1.c_str()),
+                      const_cast<char*>("oobb"), const_cast<char*>(arg2.c_str()),
+                      const_cast<char*>("pp"), const_cast<char*>(arg3.c_str()),
+                      const_cast<char*>("ac"), const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.geometryOptimizations |
+              osm2rdf::config::GeometryRelationOptimization::
+                  OBJECT_ORIENTED_BOUNDING_BOX);
+  ASSERT_TRUE(
+      config.geometryOptimizations |
+      osm2rdf::config::GeometryRelationOptimization::POLYGON_PARTITIONING);
+  ASSERT_TRUE(config.geometryOptimizations |
+              osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS);
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsGeometryRelationOptimizationMultipleLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_LONG;
+  const int argc = 8;
+  char* argv[argc] = {
+      const_cast<char*>(""),     const_cast<char*>(arg.c_str()),
+      const_cast<char*>("oobb"), const_cast<char*>(arg.c_str()),
+      const_cast<char*>("pp"),   const_cast<char*>(arg.c_str()),
+      const_cast<char*>("ac"),   const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.geometryOptimizations |
+              osm2rdf::config::GeometryRelationOptimization::
+                  OBJECT_ORIENTED_BOUNDING_BOX);
+  ASSERT_TRUE(
+      config.geometryOptimizations |
+      osm2rdf::config::GeometryRelationOptimization::POLYGON_PARTITIONING);
+  ASSERT_TRUE(config.geometryOptimizations |
+              osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoHasSections) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1121,6 +1322,10 @@ TEST(CONFIG_Config, getInfoHasSections) {
               ::testing::HasSubstr(osm2rdf::config::constants::SECTION_FACTS));
   ASSERT_THAT(
       res, ::testing::HasSubstr(osm2rdf::config::constants::SECTION_CONTAINS));
+  ASSERT_THAT(
+      res,
+      ::testing::HasSubstr(
+          osm2rdf::config::constants::SECTION_GEOMETRY_RELATION_OPTIMIZATION));
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::SECTION_MISCELLANEOUS));
 }
@@ -1538,6 +1743,125 @@ TEST(CONFIG_Config, getInfoOutputKeepFiles) {
   ASSERT_THAT(res,
               ::testing::HasSubstr(
                   osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsNone) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations =
+      osm2rdf::config::GeometryRelationOptimization::NONE;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(osm2rdf::config::constants::
+                                    GEOMETRY_RELATION_OPTIMIZATION_NONE_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsContainmentGraph) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations =
+      osm2rdf::config::GeometryRelationOptimization::CONTAINMENT_GRAPH;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2rdf::config::constants::
+                      GEOMETRY_RELATION_OPTIMIZATION_CONTAINMENT_GRAPH_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsObjectOrientedBoundingBox) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations = osm2rdf::config::GeometryRelationOptimization::
+      OBJECT_ORIENTED_BOUNDING_BOX;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(
+      res,
+      ::testing::HasSubstr(
+          osm2rdf::config::constants::
+              GEOMETRY_RELATION_OPTIMIZATION_OBJECT_ORIENTED_BOUNDING_BOX_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsPolygonPartitioning) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations =
+      osm2rdf::config::GeometryRelationOptimization::POLYGON_PARTITIONING;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(
+               osm2rdf::config::constants::
+                   GEOMETRY_RELATION_OPTIMIZATION_POLYGON_PARTITIONING_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsApproximatePolygons) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations =
+      osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(
+               osm2rdf::config::constants::
+                   GEOMETRY_RELATION_OPTIMIZATION_APPROXIMATE_POLYGONS_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsIntersectionCellIDs) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations =
+      osm2rdf::config::GeometryRelationOptimization::INTERSECTION_CELL_IDS;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(
+               osm2rdf::config::constants::
+                   GEOMETRY_RELATION_OPTIMIZATION_INTERSECTION_CELL_IDS_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsAreaCutouts) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations =
+      osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(res, ::testing::HasSubstr(
+                       osm2rdf::config::constants::
+                           GEOMETRY_RELATION_OPTIMIZATION_AREA_CUTOUTS_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoGeometryOptimizationsSemanticInformation) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.geometryOptimizations =
+      osm2rdf::config::GeometryRelationOptimization::SEMANTIC_INFORMATION;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(
+               osm2rdf::config::constants::
+                   GEOMETRY_RELATION_OPTIMIZATION_SEMANTIC_INFORMATION_INFO));
 }
 
 }  // namespace osm2rdf::config

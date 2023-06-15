@@ -148,6 +148,92 @@ TEST(UTIL_DirectedGraph, prepareFindSuccessorsFast) {
 }
 
 // ____________________________________________________________________________
+TEST(UTIL_DirectedGraph, prepareFindSuccessorsFastNoLeafes) {
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
+  g.addEdge(1, 2);
+  g.addEdge(1, 0);
+  g.addEdge(1, 2);
+  { ASSERT_ANY_THROW(g.findSuccessorsFast(1)); }
+  {
+    g.prepareFindSuccessorsFastNoLeafes();
+    const auto res = g.findSuccessorsFast(1);
+    ASSERT_EQ(2, res.size());
+    ASSERT_EQ(0, res[0]);
+    ASSERT_EQ(2, res[1]);
+  }
+}
+
+// ____________________________________________________________________________
+TEST(UTIL_DirectedGraph, prepareFindSuccessorsFastNoLeafes2) {
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
+  g.addEdge(0, 1);
+  g.addEdge(1, 2);
+  g.addEdge(3, 2);
+  { ASSERT_ANY_THROW(g.findSuccessorsFast(1)); }
+  g.prepareFindSuccessorsFastNoLeafes();
+  {
+    const auto res = g.findSuccessorsFast(0); // leaf -> calculate result
+    ASSERT_EQ(2, res.size());
+    ASSERT_EQ(1, res[0]);
+    ASSERT_EQ(2, res[1]);
+  }
+  {
+    const auto res = g.findSuccessorsFast(1); // non-leaf -> result
+    ASSERT_EQ(1, res.size());
+    ASSERT_EQ(2, res[0]);
+  }
+  {
+    const auto res = g.findSuccessorsFast(2); // non-leaf but root
+    ASSERT_EQ(0, res.size());
+  }
+  {
+    const auto res = g.findSuccessorsFast(3); // leaf -> calculate result
+    ASSERT_EQ(1, res.size());
+    ASSERT_EQ(2, res[0]);
+  }
+}
+
+// ____________________________________________________________________________
+TEST(UTIL_DirectedGraph, prepareFindSuccessorsFastNoLeafes3) {
+  osm2rdf::util::DirectedGraph<uint8_t> g{};
+  g.addEdge(0, 1);
+  g.addEdge(1, 2);
+  g.addEdge(3, 2);
+  g.addEdge(2, 4);
+  g.addEdge(0, 4);
+  { ASSERT_ANY_THROW(g.findSuccessorsFast(1)); }
+  g.prepareFindSuccessorsFastNoLeafes();
+  {
+    const auto res = g.findSuccessorsFast(0); // leaf -> calculate result
+    ASSERT_EQ(3, res.size());
+    ASSERT_EQ(1, res[0]);
+    ASSERT_EQ(2, res[1]);
+    ASSERT_EQ(4, res[2]);
+  }
+  {
+    const auto res = g.findSuccessorsFast(1); // non-leaf -> result
+    ASSERT_EQ(2, res.size());
+    ASSERT_EQ(2, res[0]);
+    ASSERT_EQ(4, res[1]);
+  }
+  {
+    const auto res = g.findSuccessorsFast(2); // non-leaf -> result
+    ASSERT_EQ(1, res.size());
+    ASSERT_EQ(4, res[0]);
+  }
+  {
+    const auto res = g.findSuccessorsFast(3); // leaf -> calculate result
+    ASSERT_EQ(2, res.size());
+    ASSERT_EQ(2, res[0]);
+    ASSERT_EQ(4, res[1]);
+  }
+  {
+    const auto res = g.findSuccessorsFast(4); // non-leaf but root
+    ASSERT_EQ(0, res.size());
+  }
+}
+
+// ____________________________________________________________________________
 TEST(UTIL_DirectedGraph, getNumEdges) {
   osm2rdf::util::DirectedGraph<uint8_t> g{};
   ASSERT_EQ(0, g.getNumEdges());

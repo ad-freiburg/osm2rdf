@@ -78,6 +78,11 @@ const osm2rdf::osm::TagList& osm2rdf::osm::Node::tags() const noexcept {
 }
 
 // ____________________________________________________________________________
+bool osm2rdf::osm::Node::hasName() const noexcept {
+  return _tags.find("name") != _tags.end();
+}
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Node::operator==(
     const osm2rdf::osm::Node& other) const noexcept {
   return _id == other._id && _geom == other._geom && _tags == other._tags;

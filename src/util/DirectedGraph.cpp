@@ -76,6 +76,26 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::findSuccessorsFast(
   if (entry == _successors.end()) {
     return std::vector<T>();
   }
+  if (_prunedLeafes && entry->second.empty()) {
+    // No result, if we are a leaf compute the result.
+    const auto& adjacency = _adjacency.find(src);
+    if (adjacency == _adjacency.end()) {
+      return entry->second;
+    }
+    std::vector<T> successors;
+    // Collect parents
+    successors.insert(successors.end(), adjacency->second.begin(),
+                      adjacency->second.end());
+    for (const auto& successor : adjacency->second) {
+      const auto& res = findSuccessorsFast(successor);
+      successors.insert(successors.end(), res.begin(), res.end());
+    }
+    // Make unique
+    std::sort(successors.begin(), successors.end());
+    const auto it = std::unique(successors.begin(), successors.end());
+    successors.resize(std::distance(successors.begin(), it));
+    return successors;
+  }
   return entry->second;
 }
 
@@ -141,6 +161,22 @@ void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
 
 // ____________________________________________________________________________
 template <typename T>
+void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFastNoLeafes() {
+  for (const auto& vertex : getVertices()) {
+    if (_successors[vertex].empty()) {
+      for (const auto& successor : findSuccessors(vertex)) {
+        if (_successors[successor].empty()) {
+          _successors[successor] = findSuccessors(successor);
+        }
+      }
+    }
+  }
+  _preparedFast = true;
+  _prunedLeafes = true;
+}
+
+// ____________________________________________________________________________
+template <typename T>
 size_t osm2rdf::util::DirectedGraph<T>::getNumEdges() const {
   return _numEdges;
 }
@@ -171,9 +207,26 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdges(T src) const {
 template <typename T>
 std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdgesFast(T src) const {
   if (!_preparedFast) {
-    throw std::runtime_error("findSuccessorsFast not prepared");
+    throw std::runtime_error("getEdgesFast not prepared");
   }
-  return _successors.at(src);
+  const auto& res = _successors.at(src);
+  if (_prunedLeafes && res.empty()) {
+    std::vector<T> successors(_adjacency.at(src));
+    for (const auto& s : successors) {
+      const auto& res2 = _successors.find(s);
+      if (res2 == _successors.end()) {
+        continue;
+      }
+      successors.insert(successors.end(), res2->second.begin(),
+                        res2->second.end());
+    }
+    // Make unique
+    std::sort(successors.begin(), successors.end());
+    const auto it = std::unique(successors.begin(), successors.end());
+    successors.resize(std::distance(successors.begin(), it));
+    return successors;
+  }
+  return res;
 }
 
 // ____________________________________________________________________________

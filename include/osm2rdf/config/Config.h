@@ -54,8 +54,11 @@ struct Config {
   bool noGeometricRelations = false;
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
+  bool noRelationGeometricRelations = false;
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
+
+  bool geometricRelationsForNamedOnly = false;
 
   // the epsilon for the inner/outer douglas-peucker is based on the
   // circumference of a hypothetical circle. By dividing by ~pi, we base the
@@ -119,6 +122,8 @@ struct Config {
 
   // Transitive closure
   bool writeGeomRelTransClosure = false;
+
+  bool pruneLeafesFromDag = false;
 
   // Output, empty for stdout
   std::filesystem::path output;

@@ -301,13 +301,16 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple);
   FRIEND_TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP);
 
-  // Calculate relations for each area, this dumps the generated DAG.
+  // Calculate relations for each unnamed area, this uses the generated DAG.
   void dumpUnnamedAreaRelations();
   FRIEND_TEST(OSM_GeometryHandler, noAreaGeometricRelations);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty1);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsEmpty2);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects);
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly);
+
+  // Calculate relations for each area, this uses the generated DAG.
+  void dumpAreaRelations();
 
   // Calculate relations for each node.
   NodesContainedInAreasData dumpNodeRelations();
