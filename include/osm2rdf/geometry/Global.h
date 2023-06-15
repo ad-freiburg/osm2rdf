@@ -24,7 +24,7 @@ namespace osm2rdf::geometry {
 typedef double location_coordinate_t;
 
 // Area type used to represent the area of areas.
-typedef double area_result_t;
+typedef float area_result_t;
 }  // namespace osm2rdf::geometry
 
 #endif  // OSM2RDF_GEOMETRY_GLOBAL_H

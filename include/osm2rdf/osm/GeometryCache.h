@@ -56,6 +56,20 @@ typedef std::tuple<
 
 enum class AreaFromType { RELATION, WAY };
 
+typedef std::tuple<std::vector<osm2rdf::geometry::Box>,                   // 0
+                   osm2rdf::osm::Area::id_t,                              // 1
+                   osm2rdf::geometry::Area,                               // 2
+                   osm2rdf::osm::Area::id_t,                              // 3
+                   osm2rdf::geometry::area_result_t,                      // 4
+                   AreaFromType,                                          // 5
+                   osm2rdf::geometry::Area,                               // 6
+                   osm2rdf::geometry::Area,                               // 7
+                   osm2rdf::osm::BoxIdList,                               // 8
+                   std::unordered_map<int32_t, osm2rdf::geometry::Area>,  // 9
+                   osm2rdf::geometry::Polygon,                            // 10
+                   osm2rdf::geometry::Polygon>                            // 11
+    SpatialAreaValue;
+
 typedef std::tuple<osm2rdf::geometry::Area, osm2rdf::geometry::Area,
                    osm2rdf::geometry::Area, osm2rdf::geometry::Polygon>
     SpatialAreaValueCache;
@@ -64,15 +78,15 @@ template <typename W>
 class GeometryCache {
  public:
   GeometryCache(size_t maxSize) : _maxSize(maxSize) {
-    _waysGeomsFReads.resize(omp_get_max_threads());
+    _geomsFReads.resize(omp_get_max_threads());
     _accessCount.resize(omp_get_max_threads(), 0);
     _diskAccessCount.resize(omp_get_max_threads(), 0);
 
     _vals.resize(omp_get_max_threads());
     _idMap.resize(omp_get_max_threads());
 
-    _waysGeomsF.open(getFName(), std::ios::out | std::ios::in |
-                                     std::ios::binary | std::ios::trunc);
+    _geomsF.open(getFName(), std::ios::out | std::ios::in | std::ios::binary |
+                                 std::ios::trunc);
   }
 
   ~GeometryCache() {
@@ -87,9 +101,9 @@ class GeometryCache {
   }
 
   size_t add(const W& val);
-  W get(size_t off) const;
+  std::shared_ptr<W> get(size_t off) const;
   W getFromDisk(size_t off) const;
-  void cache(size_t off, const W& val) const;
+  std::shared_ptr<W> cache(size_t off, const W& val) const;
 
   void flush();
 
@@ -101,13 +115,14 @@ class GeometryCache {
   mutable std::vector<size_t> _accessCount;
   mutable std::vector<size_t> _diskAccessCount;
 
-  mutable std::fstream _waysGeomsF;
-  mutable std::vector<std::fstream> _waysGeomsFReads;
-  size_t _waysGeomsOffset = 0;
+  mutable std::fstream _geomsF;
+  mutable std::vector<std::fstream> _geomsFReads;
+  size_t _geomsOffset = 0;
 
-  mutable std::vector<std::list<std::pair<size_t, W>>> _vals;
+  mutable std::vector<std::list<std::pair<size_t, std::shared_ptr<W>>>> _vals;
   mutable std::vector<std::unordered_map<
-      size_t, typename std::list<std::pair<size_t, W>>::iterator>>
+      size_t,
+      typename std::list<std::pair<size_t, std::shared_ptr<W>>>::iterator>>
       _idMap;
 
   size_t _maxSize;

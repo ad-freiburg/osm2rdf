@@ -195,22 +195,36 @@ typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
 // typedef std::vector<std::pair<size_t, osm2rdf::geometry::area_result_t>>
 // SpatialAreaVector;
 
-typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
-                   osm2rdf::osm::Area::id_t, osm2rdf::geometry::Area,
-                   osm2rdf::osm::Area::id_t, osm2rdf::geometry::area_result_t,
-                   AreaFromType, osm2rdf::geometry::Area,
-                   osm2rdf::geometry::Area, osm2rdf::osm::BoxIdList,
-                   std::unordered_map<int32_t, osm2rdf::geometry::Area>,
-                   osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon>
-    SpatialAreaValue;
+struct SpatialAreaValueLight {
+  SpatialAreaValueLight(const std::vector<osm2rdf::geometry::Box>& envelopes,
+                        osm2rdf::osm::Area::id_t id,
+                        osm2rdf::osm::Area::id_t objId,
+                        osm2rdf::geometry::area_result_t area,
+                        AreaFromType fromType, size_t offset)
+      : envelopes(envelopes),
+        id(id),
+        objId(objId),
+        area(area),
+        _offset(offset) {
+    // ensure offset is not 0
+    _offset += 1;
+    if (fromType == AreaFromType::RELATION) _offset = -_offset;
+  }
+  std::vector<osm2rdf::geometry::Box> envelopes;
+  osm2rdf::osm::Area::id_t id;
+  osm2rdf::osm::Area::id_t objId;
+  osm2rdf::geometry::area_result_t area;
+  int64_t _offset;
 
-typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
-                   osm2rdf::osm::Area::id_t, osm2rdf::osm::Area::id_t,
-                   osm2rdf::geometry::area_result_t, AreaFromType,
-                   osm2rdf::osm::BoxIdList,
-                   std::unordered_map<int32_t, osm2rdf::geometry::Area>,
-                   osm2rdf::geometry::Polygon, size_t>
-    SpatialAreaValueLight;
+  const AreaFromType fromType() const {
+    if (_offset < 0) return AreaFromType::RELATION;
+    return AreaFromType::WAY;
+  }
+  size_t offset() const {
+    if (_offset < 0) return (-_offset) - 1;
+    return _offset - 1;
+  }
+};
 
 typedef std::vector<SpatialAreaValueLight> SpatialAreaVector;
 
@@ -344,10 +358,12 @@ class GeometryHandler {
                         GeomRelationInfo* geomRelInf,
                         GeomRelationStats* stats) const;
 
-  bool areaIntersectsArea(const SpatialAreaValue& a, const SpatialAreaValueLight&,
+  bool areaIntersectsArea(const SpatialAreaValue& a,
+                          const SpatialAreaValueLight&,
                           GeomRelationInfo* geomRelInf,
                           GeomRelationStats* stats) const;
-  bool areaIntersectsArea(const SpatialAreaValueLight& a, const SpatialAreaValueLight&,
+  bool areaIntersectsArea(const SpatialAreaValueLight& a,
+                          const SpatialAreaValueLight&,
                           GeomRelationInfo* geomRelInf,
                           GeomRelationStats* stats) const;
 
@@ -448,7 +464,7 @@ class GeometryHandler {
   SpatialWayVector _spatialStorageWay;
 
   GeometryCache<osm2rdf::osm::SpatialWayValue> _wayCache;
-  GeometryCache<osm2rdf::osm::SpatialAreaValueCache> _areaCache;
+  GeometryCache<osm2rdf::osm::SpatialAreaValue> _areaCache;
 
   std::unordered_map<osm2rdf::osm::Way::id_t, std::vector<MemberRel>>
       _areaBorderWaysIndex;
