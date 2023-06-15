@@ -20,6 +20,7 @@
 #ifndef OSM2RDF_OSM_GEOMETRYHANDLER_H_
 #define OSM2RDF_OSM_GEOMETRYHANDLER_H_
 
+#include <boost/interprocess/managed_mapped_file.hpp>
 #include <iostream>
 #include <unordered_map>
 #include <utility>
@@ -256,7 +257,19 @@ typedef std::tuple<
 typedef std::vector<size_t> SpatialWayVector;
 
 typedef boost::geometry::index::rtree<SpatialAreaRefValue,
-                                      boost::geometry::index::quadratic<32>>
+boost::geometry::index::quadratic<32>>
+SpatialWayIndex;
+
+typedef boost::geometry::index::indexable<SpatialAreaRefValue> indexable_t;
+typedef boost::geometry::index::equal_to<SpatialAreaRefValue> equal_to_t;
+typedef boost::interprocess::allocator<
+    SpatialAreaRefValue,
+    boost::interprocess::managed_mapped_file::segment_manager>
+    allocator_t;
+
+typedef boost::geometry::index::rtree<SpatialAreaRefValue,
+                                      boost::geometry::index::quadratic<32>,
+                                      indexable_t, equal_to_t, allocator_t>
     SpatialIndex;
 
 // node osm id -> area ids (not osm id)
@@ -340,7 +353,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryArea);
   FRIEND_TEST(OSM_GeometryHandler, simplifyGeometryWay);
 
-  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValueLight&,
+  bool areaInArea(const SpatialAreaValue& a, const SpatialAreaValue&,
                   GeomRelationInfo* geomRelInf, GeomRelationStats* stats) const;
   bool areaInAreaApprox(const SpatialAreaValueLight& a,
                         const SpatialAreaValueLight&,
@@ -451,10 +464,12 @@ class GeometryHandler {
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
   // Store areas as r-tree
-  SpatialIndex _spatialIndex;
+  SpatialIndex* _spatialIndex;
+
+  boost::interprocess::managed_mapped_file _mmfile;
 
   // Store ways as r-tree
-  SpatialIndex _spatialWayIndex;
+  SpatialWayIndex _spatialWayIndex;
 
   // Store dag
   osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t> _directedAreaGraph;

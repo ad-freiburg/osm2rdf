@@ -189,8 +189,7 @@ void GeometryHandler<W>::area(const Area& area) {
 
 #pragma omp critical(areaDataInsert)
   {
-    // if (!_config.splitNamedAndUnnamedAreas || area.hasName()) {
-    if (area.hasName()) {
+    if (!_config.splitNamedAndUnnamedAreas || area.hasName()) {
       if (_spatialStorageArea.size() % 10000000 == 0)
         std::cerr << "@ area " << _spatialStorageArea.size() << std::endl;
       _spatialStorageArea.emplace_back(SpatialAreaValueLight(
@@ -547,13 +546,7 @@ void GeometryHandler<W>::calculateRelations() {
   const auto& nodeData = dumpNodeRelations();
   dumpWayRelations(nodeData);
 
-  // size_t numBatches = 5;
-  // size_t batchSize = _spatialStorageWay.size() / numBatches;
-
-  // for (size_t i = 0; i < numBatches; i++) {
-  // prepareWayRTree(i * batchSize, (i + 1) * batchSize);
   dumpWayWayRelations();
-  // }
 }
 
 // ____________________________________________________________________________
@@ -578,7 +571,20 @@ void GeometryHandler<W>::prepareRTree() {
     }
   }
 
-  _spatialIndex = SpatialIndex(values.begin(), values.end());
+  // _spatialIndex = SpatialIndex(values.begin(), values.end());
+
+  unlink("rtree.bin");
+  _mmfile = boost::interprocess::managed_mapped_file(boost::interprocess::create_only, "rtree.bin", 200ul << 30);
+
+  _spatialIndex = _mmfile.find_or_construct<SpatialIndex>("rtree")(
+      boost::geometry::index::quadratic<32>(), indexable_t(), equal_to_t(), allocator_t(_mmfile.get_segment_manager()));
+
+  std::cerr << "C" << std::endl;
+
+  _spatialIndex->insert(values.begin(), values.end());
+
+  std::cerr << _spatialIndex->size() << std::endl;
+
 
   std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
@@ -586,10 +592,9 @@ void GeometryHandler<W>::prepareRTree() {
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::prepareWayRTree(size_t from, size_t to) {
-  std::cerr << std::endl;
-
-  std::cerr << currentTimeFormatted() << " Packing ways r-tree with "
-            << (to - from) << " entries ... " << std::endl;
+  // std::cerr << std::endl;
+  // std::cerr << currentTimeFormatted() << " Packing ways r-tree with "
+  // << (to - from) << " entries ... " << std::endl;
 
   std::vector<SpatialAreaRefValue> values;
 
@@ -600,9 +605,9 @@ void GeometryHandler<W>::prepareWayRTree(size_t from, size_t to) {
     }
   }
 
-  _spatialWayIndex = SpatialIndex(values.begin(), values.end());
+  _spatialWayIndex = SpatialWayIndex(values.begin(), values.end());
 
-  std::cerr << currentTimeFormatted() << " ... done" << std::endl;
+  // std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
 
 // ____________________________________________________________________________
@@ -942,7 +947,7 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted() << " "
               << "Contains relations for " << _numUnnamedAreas
-              << " unnamed areas in " << _spatialIndex.size() << " areas ..."
+              << " unnamed areas in " << _spatialIndex->size() << " areas ..."
               << std::endl;
 
     // reset stream
@@ -1027,7 +1032,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
         if (skipContains.find(areaId) != skipContains.end()) {
           containsStats.skippedByDAG();
         } else {
-          if (areaInArea(entry, area, &geomRelInf, &containsStats)) {
+          const auto& areaFull = _areaCache.get(area.offset());
+          if (areaInArea(entry, *areaFull, &geomRelInf, &containsStats)) {
             const auto& successors =
                 _directedAreaGraph.findSuccessorsFast(areaId);
             skipContains.insert(successors.begin(), successors.end());
@@ -1126,20 +1132,19 @@ void GeometryHandler<W>::dumpAreaRelations() {
     std::cerr << currentTimeFormatted() << " "
               << "Skipping contains relation for areas ... disabled"
               << std::endl;
-  } else if (_spatialIndex.empty()) {
+  } else if (_spatialIndex->empty()) {
     std::cerr << std::endl;
-    std::cerr
-        << currentTimeFormatted() << " "
-        << "Skipping contains relation for areas ... no area"
-        << std::endl;
+    std::cerr << currentTimeFormatted() << " "
+              << "Skipping contains relation for areas ... no area"
+              << std::endl;
   } else {
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted() << " "
-              << "Contains relations for " << _spatialIndex.size()
-              << " areas in " << _spatialIndex.size() << " areas ..."
+              << "Contains relations for " << _spatialIndex->size()
+              << " areas in " << _spatialIndex->size() << " areas ..."
               << std::endl;
 
-    osm2rdf::util::ProgressBar progressBar{_spatialIndex.size(), true};
+    osm2rdf::util::ProgressBar progressBar{_spatialIndex->size(), true};
     GeomRelationStats intersectStats;
     GeomRelationStats containsStats;
     size_t entryCount = 0;
@@ -1149,15 +1154,15 @@ void GeometryHandler<W>::dumpAreaRelations() {
             osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
-            progressBar, entryCount)                                   \
+            progressBar, entryCount, std::cerr)                                   \
     reduction(+ : intersectStats, containsStats) default(none)         \
     schedule(dynamic)
-    for (size_t i = 0; i < _spatialIndex.size(); i++) {
-      SpatialAreaValue entry = _spatialStorageArea[i];
+    for (size_t i = 0; i < _spatialIndex->size(); i++) {
+      const auto& entry = _spatialStorageArea[i];
 
-      const auto& entryId = std::get<1>(entry);
-      const auto& entryObjId = std::get<3>(entry);
-      const auto& entryFromType = std::get<5>(entry);
+      const auto& entryId = entry.id;
+      const auto& entryObjId = entry.objId;
+      const auto& entryFromType = entry.fromType();
       std::string entryIRI =
           _writer->generateIRI(areaNS(entryFromType), entryObjId);
 
@@ -1174,9 +1179,9 @@ void GeometryHandler<W>::dumpAreaRelations() {
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
-        const auto& areaId = std::get<1>(area);
-        const auto& areaObjId = std::get<3>(area);
-        const auto& areaFromType = std::get<5>(area);
+        const auto& areaId = area.id;
+        const auto& areaObjId = area.objId;
+        const auto& areaFromType = area.fromType();
 
         intersectStats.checked();
         containsStats.checked();
@@ -1219,7 +1224,9 @@ void GeometryHandler<W>::dumpAreaRelations() {
         if (skipContains.find(areaId) != skipContains.end()) {
           containsStats.skippedByDAG();
         } else {
-          if (areaInArea(entry, area, &geomRelInf, &containsStats)) {
+          const auto& entryFull = _areaCache.get(entry.offset());
+          const auto& areaFull = _areaCache.get(area.offset());
+          if (areaInArea(*entryFull, *areaFull, &geomRelInf, &containsStats)) {
             const auto& successors =
                 _directedAreaGraph.findSuccessorsFast(areaId);
             skipContains.insert(successors.begin(), successors.end());
@@ -1330,7 +1337,7 @@ GeometryHandler<W>::dumpNodeRelations() {
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted() << " "
               << "Contains relations for " << _numNodes << " nodes in "
-              << _spatialIndex.size() << " areas ..." << std::endl;
+              << _spatialIndex->size() << " areas ..." << std::endl;
 
     _fsNodes.clear();
     _fsNodes.seekg(0, std::ios::beg);
@@ -1476,10 +1483,9 @@ template <typename W>
 void GeometryHandler<W>::dumpWayWayRelations() {
   std::cerr << std::endl;
   std::cerr << currentTimeFormatted() << " "
-            << "Way/way relations for " << _numWays << " ways in "
-            << _numWays << " ways ..." << std::endl;
+            << "Way/way relations for " << _numWays << " ways in " << _numWays
+            << " ways ..." << std::endl;
 
-  osm2rdf::util::ProgressBar progressBar{_numWays, true};
   size_t entryCount = 0;
 
   GeomRelationStats intersectStats;
@@ -1487,6 +1493,8 @@ void GeometryHandler<W>::dumpWayWayRelations() {
 
   size_t numBatches = 5;
   size_t batchSize = _spatialStorageWay.size() / numBatches;
+
+  osm2rdf::util::ProgressBar progressBar{_numWays * numBatches, true};
 
   for (size_t i = 0; i < numBatches; i++) {
     prepareWayRTree(i * batchSize, (i + 1) * batchSize);
@@ -1658,7 +1666,7 @@ void GeometryHandler<W>::dumpWayRelations(
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted() << " "
               << "Contains relations for " << _numWays << " ways in "
-              << _spatialIndex.size() << " areas ..." << std::endl;
+              << _spatialIndex->size() << " areas ..." << std::endl;
 
     _fsWays.clear();
     _fsWays.seekg(0, std::ios::beg);
@@ -2869,7 +2877,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValueLight& a,
 // ____________________________________________________________________________
 template <typename W>
 bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
-                                    const SpatialAreaValueLight& b,
+                                    const SpatialAreaValue& b,
                                     GeomRelationInfo* geomRelInf,
                                     GeomRelationStats* stats) const {
   // if we don't intersect, we are not contained
@@ -2880,10 +2888,24 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
   }
 
   const auto& areaA = std::get<4>(a);
-  const auto& areaB = b.area;  // std::get<3>(b);
+  const auto& areaB = std::get<4>(b);
   const auto& envelopesA = std::get<0>(a);
-  const auto& envelopesB = b.envelopes;  // std::get<0>(b);
-                                         //
+  const auto& envelopesB = std::get<0>(b);
+
+  const auto& geomB = std::get<2>(b);
+  const auto& innerGeomB = std::get<6>(b);
+  const auto& outerGeomB = std::get<7>(b);
+
+  const auto& geomA = std::get<2>(a);
+  const auto& innerGeomA = std::get<6>(a);
+  const auto& outerGeomA = std::get<7>(a);
+
+  const auto& boxIdsA = std::get<8>(a);
+  const auto& boxIdsB = std::get<8>(b);
+
+  const auto& cutoutsB = std::get<9>(b);
+  const auto& obbB = std::get<11>(b);
+  //
 
   // if A is bigger than B, B cannot contain A
   if (areaA > areaB) {
@@ -2898,21 +2920,6 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
     stats->skippedByBox();
     return false;
   }
-
-  const auto& cacheB = _areaCache.get(b.offset());
-  const auto& geomB = std::get<2>(*cacheB);
-  const auto& innerGeomB = std::get<6>(*cacheB);
-  const auto& outerGeomB = std::get<7>(*cacheB);
-
-  const auto& geomA = std::get<2>(a);
-  const auto& innerGeomA = std::get<6>(a);
-  const auto& outerGeomA = std::get<7>(a);
-  const auto& boxIdsA = std::get<8>(a);
-
-  const auto& boxIdsB = std::get<8>(*cacheB);
-  const auto& cutoutsB = std::get<9>(*cacheB);
-
-  const auto& obbB = std::get<11>(*cacheB);
 
   if (_config.geometryOptimizations &
       osm2rdf::config::GeometryRelationOptimization::INTERSECTION_CELL_IDS) {
@@ -3353,7 +3360,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryCover(
   const auto& envelopes = area.envelopes;
 
   for (size_t i = 1; i < envelopes.size(); i++) {
-    _spatialIndex.query(boost::geometry::index::covers(envelopes[i]),
+    _spatialIndex->query(boost::geometry::index::covers(envelopes[i]),
                         std::back_inserter(queryResult));
   }
 
@@ -3371,7 +3378,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
   const auto& envelopes = area.envelopes;
 
   for (size_t i = 1; i < envelopes.size(); i++) {
-    _spatialIndex.query(boost::geometry::index::intersects(envelopes[i]),
+    _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
                         std::back_inserter(queryResult));
   }
 
@@ -3389,7 +3396,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
   const auto& envelopes = std::get<0>(area);
 
   for (size_t i = 1; i < envelopes.size(); i++) {
-    _spatialIndex.query(boost::geometry::index::intersects(envelopes[i]),
+    _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
                         std::back_inserter(queryResult));
   }
 
@@ -3407,7 +3414,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQry(
   osm2rdf::geometry::Box nodeEnvelope;
   boost::geometry::envelope(std::get<1>(node), nodeEnvelope);
 
-  _spatialIndex.query(boost::geometry::index::covers(nodeEnvelope),
+  _spatialIndex->query(boost::geometry::index::covers(nodeEnvelope),
                       std::back_inserter(queryResult));
 
   unique(queryResult);
@@ -3424,7 +3431,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
   const auto& envelopes = std::get<4>(way);
 
   for (size_t i = 0; i < envelopes.size(); i++) {
-    _spatialIndex.query(boost::geometry::index::intersects(envelopes[i]),
+    _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
                         std::back_inserter(queryResult));
   }
 
