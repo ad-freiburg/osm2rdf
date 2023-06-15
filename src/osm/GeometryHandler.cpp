@@ -190,8 +190,6 @@ void GeometryHandler<W>::area(const Area& area) {
 #pragma omp critical(areaDataInsert)
   {
     if (!_config.splitNamedAndUnnamedAreas || area.hasName()) {
-      if (_spatialStorageArea.size() % 10000000 == 0)
-        std::cerr << "@ area " << _spatialStorageArea.size() << std::endl;
       _spatialStorageArea.emplace_back(SpatialAreaValueLight(
           envelopes, area.id(), area.objId(), area.geomArea(),
           area.fromWay() ? AreaFromType::WAY : AreaFromType::RELATION,
@@ -546,6 +544,8 @@ void GeometryHandler<W>::calculateRelations() {
   const auto& nodeData = dumpNodeRelations();
   dumpWayRelations(nodeData);
 
+  _mmfile.find_or_construct<SpatialIndex>("rtree");
+
   dumpWayWayRelations();
 }
 
@@ -571,20 +571,15 @@ void GeometryHandler<W>::prepareRTree() {
     }
   }
 
-  // _spatialIndex = SpatialIndex(values.begin(), values.end());
-
   unlink("rtree.bin");
-  _mmfile = boost::interprocess::managed_mapped_file(boost::interprocess::create_only, "rtree.bin", 200ul << 30);
+  _mmfile = boost::interprocess::managed_mapped_file(
+      boost::interprocess::create_only, "rtree.bin", 200ul << 30);
 
   _spatialIndex = _mmfile.find_or_construct<SpatialIndex>("rtree")(
-      boost::geometry::index::quadratic<32>(), indexable_t(), equal_to_t(), allocator_t(_mmfile.get_segment_manager()));
-
-  std::cerr << "C" << std::endl;
+      boost::geometry::index::quadratic<32>(), indexable_t(), equal_to_t(),
+      allocator_t(_mmfile.get_segment_manager()));
 
   _spatialIndex->insert(values.begin(), values.end());
-
-  std::cerr << _spatialIndex->size() << std::endl;
-
 
   std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
@@ -605,7 +600,15 @@ void GeometryHandler<W>::prepareWayRTree(size_t from, size_t to) {
     }
   }
 
-  _spatialWayIndex = SpatialWayIndex(values.begin(), values.end());
+  unlink("rtree.bin");
+  _mmfile = boost::interprocess::managed_mapped_file(
+      boost::interprocess::create_only, "rtree.bin", 200ul << 30);
+
+  _spatialWayIndex = _mmfile.find_or_construct<SpatialIndex>("rtree")(
+      boost::geometry::index::quadratic<32>(), indexable_t(), equal_to_t(),
+      allocator_t(_mmfile.get_segment_manager()));
+
+  _spatialWayIndex->insert(values.begin(), values.end());
 
   // std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
@@ -735,9 +738,10 @@ void GeometryHandler<W>::prepareDAG() {
               << osm2rdf::util::formattedTimeSpacer << "         "
               << stats.printSkippedByConvexHull() << " by convex hull\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
-              << stats.printFullChecks() << " by full geometric check"
-
-              << std::endl;
+              << stats.printFullChecks() << " by full geometric check\n\n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << stats.printFullChecksWeighted()
+              << " num-points weighted checks" << std::endl;
   }
   if (_config.writeDAGDotFiles) {
     std::cerr << currentTimeFormatted() << " Dumping non-reduced DAG as "
@@ -925,8 +929,11 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
             << intersectStats.printSkippedByOuter()
             << " by outer simplified geom\n"
             << osm2rdf::util::formattedTimeSpacer << "         "
-            << intersectStats.printFullChecks() << " by full geometric check"
-            << std::endl;
+            << intersectStats.printFullChecks()
+            << " by full geometric check\n\n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << (intersectStats).printFullChecksWeighted()
+            << " num-points weighted checks" << std::endl;
 }
 
 // ____________________________________________________________________________
@@ -1114,7 +1121,12 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << containsStats.printSkippedByOrientedBox()
               << " by oriented bounding box\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
-              << containsStats.printFullChecks() << " by full geometric check"
+              << containsStats.printFullChecks()
+              << " by full geometric check\n\n"
+
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << (intersectStats + containsStats).printFullChecksWeighted()
+              << " num-points weighted checks"
 
               << std::endl;
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
@@ -1307,7 +1319,11 @@ void GeometryHandler<W>::dumpAreaRelations() {
               << containsStats.printSkippedByOrientedBox()
               << " by oriented bounding box\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
-              << containsStats.printFullChecks() << " by full geometric check"
+              << containsStats.printFullChecks()
+              << " by full geometric check\n\n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << (containsStats + intersectStats).printFullChecksWeighted()
+              << " num-points weighted checks"
 
               << std::endl;
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
@@ -1468,8 +1484,10 @@ GeometryHandler<W>::dumpNodeRelations() {
               << osm2rdf::util::formattedTimeSpacer << "         "
               << stats.printSkippedByOuter() << " by outer simplified geom\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
-              << stats.printFullChecks() << " by full geometric check"
-              << std::endl;
+              << stats.printFullChecks() << " by full geometric check\n\n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << stats.printFullChecksWeighted()
+              << " num-points weighted checks" << std::endl;
 
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
               << (static_cast<double>(stats._totalChecks) / _numWays)
@@ -1491,7 +1509,7 @@ void GeometryHandler<W>::dumpWayWayRelations() {
   GeomRelationStats intersectStats;
   GeomRelationStats containsStats;
 
-  size_t numBatches = 5;
+  size_t numBatches = 1;
   size_t batchSize = _spatialStorageWay.size() / numBatches;
 
   osm2rdf::util::ProgressBar progressBar{_numWays * numBatches, true};
@@ -1641,7 +1659,10 @@ void GeometryHandler<W>::dumpWayWayRelations() {
             << containsStats.printSkippedByOrientedBox()
             << " by oriented bounding-box \n"
             << osm2rdf::util::formattedTimeSpacer << "         "
-            << containsStats.printFullChecks() << " by full geometric check"
+            << containsStats.printFullChecks() << " by full geometric check\n\n"
+            << osm2rdf::util::formattedTimeSpacer << "         "
+            << (containsStats + intersectStats).printFullChecksWeighted()
+            << " num-points weighted checks"
 
             << std::endl;
   std::cerr << osm2rdf::util::formattedTimeSpacer << " "
@@ -1929,7 +1950,11 @@ void GeometryHandler<W>::dumpWayRelations(
               << containsStats.printSkippedByOrientedBox()
               << " by oriented bounding-box \n"
               << osm2rdf::util::formattedTimeSpacer << "         "
-              << containsStats.printFullChecks() << " by full geometric check"
+              << containsStats.printFullChecks()
+              << " by full geometric check\n\n"
+              << osm2rdf::util::formattedTimeSpacer << "         "
+              << (containsStats + intersectStats).printFullChecksWeighted()
+              << " num-points weighted checks"
 
               << std::endl;
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
@@ -2005,6 +2030,7 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     stats->fullCheck();
+    stats->fullCheckWeighted(boost::geometry::num_points(geomB));
     if (boost::geometry::covered_by(geomA, geomB)) {
       geomRelInf->intersects = RelInfoValue::YES;
       geomRelInf->contained = RelInfoValue::YES;
@@ -2029,6 +2055,7 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomB));
 
   if (boost::geometry::covered_by(geomA, geomB)) {
     return true;
@@ -2128,6 +2155,8 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValueLight& a,
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     stats->fullCheck();
+    stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                             boost::geometry::num_points(geomB));
     if (boost::geometry::intersects(geomA, geomB)) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
@@ -2153,6 +2182,8 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValueLight& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                           boost::geometry::num_points(geomB));
 
   if (boost::geometry::intersects(geomA, geomB)) {
     geomRelInf->intersects = RelInfoValue::YES;
@@ -2255,6 +2286,8 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     stats->fullCheck();
+    stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                             boost::geometry::num_points(geomB));
     if (boost::geometry::intersects(geomA, geomB)) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
@@ -2280,6 +2313,8 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                           boost::geometry::num_points(geomB));
 
   if (boost::geometry::intersects(geomA, geomB)) {
     geomRelInf->intersects = RelInfoValue::YES;
@@ -2380,6 +2415,8 @@ bool GeometryHandler<W>::wayInWay(const SpatialWayValue& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                           boost::geometry::num_points(geomB));
   if (boost::geometry::covered_by(geomA, geomB)) {
     geomRelInf->contained = RelInfoValue::YES;
     return true;
@@ -2460,6 +2497,8 @@ bool GeometryHandler<W>::wayIntersectsWay(const SpatialWayValue& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                           boost::geometry::num_points(geomB));
   if (boost::geometry::intersects(geomA, geomB)) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
@@ -2561,6 +2600,8 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
     }
 
     stats->fullCheck();
+    stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                             boost::geometry::num_points(geomB));
     if (boost::geometry::intersects(geomA, geomB)) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
@@ -2605,6 +2646,8 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                           boost::geometry::num_points(geomB));
   if (boost::geometry::intersects(geomA, geomB)) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
@@ -2721,6 +2764,8 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
     stats->fullCheck();
+    stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                             boost::geometry::num_points(geomB));
 
     if (boost::geometry::covered_by(geomA, geomB)) {
       geomRelInf->contained = RelInfoValue::YES;
@@ -2766,6 +2811,8 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                           boost::geometry::num_points(geomB));
   if (boost::geometry::covered_by(geomA, geomB)) {
     geomRelInf->contained = RelInfoValue::YES;
     return true;
@@ -2870,6 +2917,8 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValueLight& a,
 
     geomRelInf->intersectArea = boost::geometry::area(intersect);
     stats->fullCheck();
+    stats->fullCheckWeighted(boost::geometry::num_points(entryGeom) *
+                             boost::geometry::num_points(areaGeom));
     return fabs(1 - entryArea / geomRelInf->intersectArea) < 0.05;
   }
 }
@@ -2971,6 +3020,8 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
       boost::geometry::is_empty(outerGeomA) ||
       boost::geometry::is_empty(innerGeomA)) {
     stats->fullCheck();
+    stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                             boost::geometry::num_points(geomB));
 
     if (boost::geometry::covered_by(geomA, geomB)) {
       geomRelInf->contained = RelInfoValue::YES;
@@ -3006,6 +3057,8 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
   }
 
   stats->fullCheck();
+  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
+                           boost::geometry::num_points(geomB));
 
   if (boost::geometry::covered_by(geomA, geomB)) {
     geomRelInf->contained = RelInfoValue::YES;
@@ -3361,7 +3414,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryCover(
 
   for (size_t i = 1; i < envelopes.size(); i++) {
     _spatialIndex->query(boost::geometry::index::covers(envelopes[i]),
-                        std::back_inserter(queryResult));
+                         std::back_inserter(queryResult));
   }
 
   unique(queryResult);
@@ -3379,7 +3432,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
 
   for (size_t i = 1; i < envelopes.size(); i++) {
     _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
-                        std::back_inserter(queryResult));
+                         std::back_inserter(queryResult));
   }
 
   unique(queryResult);
@@ -3397,7 +3450,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
 
   for (size_t i = 1; i < envelopes.size(); i++) {
     _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
-                        std::back_inserter(queryResult));
+                         std::back_inserter(queryResult));
   }
 
   unique(queryResult);
@@ -3415,7 +3468,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQry(
   boost::geometry::envelope(std::get<1>(node), nodeEnvelope);
 
   _spatialIndex->query(boost::geometry::index::covers(nodeEnvelope),
-                      std::back_inserter(queryResult));
+                       std::back_inserter(queryResult));
 
   unique(queryResult);
 
@@ -3432,7 +3485,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
 
   for (size_t i = 0; i < envelopes.size(); i++) {
     _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
-                        std::back_inserter(queryResult));
+                         std::back_inserter(queryResult));
   }
 
   unique(queryResult);
@@ -3449,8 +3502,8 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::wayIndexQryIntersect(
   const auto& envelopes = std::get<4>(way);
 
   for (size_t i = 0; i < envelopes.size(); i++) {
-    _spatialWayIndex.query(boost::geometry::index::intersects(envelopes[i]),
-                           std::back_inserter(queryResult));
+    _spatialWayIndex->query(boost::geometry::index::intersects(envelopes[i]),
+                            std::back_inserter(queryResult));
   }
 
   uniqueWay(queryResult);

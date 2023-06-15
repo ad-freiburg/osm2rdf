@@ -89,16 +89,16 @@ class GeometryCache {
                                  std::ios::trunc);
   }
 
-  ~GeometryCache() {
-    size_t access = 0;
-    size_t diskAccess = 0;
-    for (size_t i = 0; i < _accessCount.size(); i++) {
-      access += _accessCount[i];
-      diskAccess += _diskAccessCount[i];
-    }
-    std::cerr << "Geometry cache: " << access << " accesses, " << diskAccess
-              << " disk lookups" << std::endl;
-  }
+  // ~GeometryCache() {
+    // size_t access = 0;
+    // size_t diskAccess = 0;
+    // for (size_t i = 0; i < _accessCount.size(); i++) {
+      // access += _accessCount[i];
+      // diskAccess += _diskAccessCount[i];
+    // }
+    // std::cerr << "Geometry cache: " << access << " accesses, " << diskAccess
+              // << " disk lookups" << std::endl;
+  // }
 
   size_t add(const W& val);
   std::shared_ptr<W> get(size_t off) const;

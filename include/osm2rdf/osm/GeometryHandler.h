@@ -52,6 +52,7 @@ const static double GRID_H = 180.0 / NUM_GRID_CELLS;
 struct GeomRelationStats {
   size_t _totalChecks = 0;
   size_t _fullChecks = 0;
+  double _fullChecksWeighted = 0;
   size_t _skippedByNonIntersect = 0;
   size_t _skippedByDAG = 0;
   size_t _skippedByAreaSize = 0;
@@ -69,6 +70,7 @@ struct GeomRelationStats {
   GeomRelationStats& operator+=(const GeomRelationStats& lh) {
     _totalChecks += lh._totalChecks;
     _fullChecks += lh._fullChecks;
+    _fullChecksWeighted += lh._fullChecksWeighted;
     _skippedByNonIntersect += lh._skippedByNonIntersect;
     _skippedByDAG += lh._skippedByDAG;
     _skippedByAreaSize += lh._skippedByAreaSize;
@@ -83,6 +85,27 @@ struct GeomRelationStats {
     _skippedByBorderContained += lh._skippedByBorderContained;
     _skippedByNodeContained += lh._skippedByNodeContained;
     return *this;
+  }
+
+  GeomRelationStats operator+(const GeomRelationStats& lh) {
+    GeomRelationStats a;
+    a._totalChecks += lh._totalChecks;
+    a._fullChecks += lh._fullChecks;
+    a._fullChecksWeighted += lh._fullChecksWeighted;
+    a._skippedByNonIntersect += lh._skippedByNonIntersect;
+    a._skippedByDAG += lh._skippedByDAG;
+    a._skippedByAreaSize += lh._skippedByAreaSize;
+    a._skippedByBoxIdIntersect += lh._skippedByBoxIdIntersect;
+    a._skippedByBoxIdIntersectCutout += lh._skippedByBoxIdIntersectCutout;
+    a._skippedByContainedInInnerRing += lh._skippedByContainedInInnerRing;
+    a._skippedByInner += lh._skippedByInner;
+    a._skippedByOuter += lh._skippedByOuter;
+    a._skippedByBox += lh._skippedByBox;
+    a._skippedByOrientedBox += lh._skippedByOrientedBox;
+    a._skippedByConvexHull += lh._skippedByConvexHull;
+    a._skippedByBorderContained += lh._skippedByBorderContained;
+    a._skippedByNodeContained += lh._skippedByNodeContained;
+    return a;
   }
 
   void checked() { _totalChecks++; }
@@ -100,6 +123,7 @@ struct GeomRelationStats {
   void skippedByBorderContained() { _skippedByBorderContained++; }
   void skippedByNodeContained() { _skippedByNodeContained++; }
   void fullCheck() { _fullChecks++; }
+  void fullCheckWeighted(int w) { _fullChecksWeighted += w; }
 
   [[nodiscard]] std::string printPercNum(size_t n) const {
     std::stringstream ss;
@@ -153,6 +177,9 @@ struct GeomRelationStats {
   }
   [[nodiscard]] std::string printFullChecks() const {
     return printPercNum(_fullChecks);
+  }
+  [[nodiscard]] std::string printFullChecksWeighted() const {
+    return std::to_string(_fullChecksWeighted);
   }
 };
 
@@ -255,10 +282,6 @@ typedef std::tuple<
     SpatialWayValue;
 
 typedef std::vector<size_t> SpatialWayVector;
-
-typedef boost::geometry::index::rtree<SpatialAreaRefValue,
-boost::geometry::index::quadratic<32>>
-SpatialWayIndex;
 
 typedef boost::geometry::index::indexable<SpatialAreaRefValue> indexable_t;
 typedef boost::geometry::index::equal_to<SpatialAreaRefValue> equal_to_t;
@@ -469,7 +492,7 @@ class GeometryHandler {
   boost::interprocess::managed_mapped_file _mmfile;
 
   // Store ways as r-tree
-  SpatialWayIndex _spatialWayIndex;
+  SpatialIndex* _spatialWayIndex;
 
   // Store dag
   osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t> _directedAreaGraph;

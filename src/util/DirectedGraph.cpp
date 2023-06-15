@@ -152,9 +152,9 @@ void osm2rdf::util::DirectedGraph<T>::dumpOsm(
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
-  const auto& vertices = getVertices();
-  for (size_t i = 0; i < vertices.size(); i++) {
-    _successors[vertices[i]] = findSuccessors(vertices[i]);
+  for (const auto& [vertex, _] : _adjacency) {
+    const auto& successors = findSuccessors(vertex);
+    if (successors.size()) _successors[vertex] = successors;
   }
   _preparedFast = true;
 }
@@ -162,11 +162,16 @@ void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFastNoLeafes() {
-  for (const auto& vertex : getVertices()) {
-    if (_successors[vertex].empty()) {
+  // for (const auto& vertex : getVertices()) {
+  for (const auto& [vertex, _] : _adjacency) {
+    auto i = _successors.find(vertex);
+    if (i == _successors.end() || i->second.empty()) {
       for (const auto& successor : findSuccessors(vertex)) {
-        if (_successors[successor].empty()) {
-          _successors[successor] = findSuccessors(successor);
+        auto j = _successors.find(successor);
+        if (j == _successors.end() || j->second.empty()) {
+          auto successors = findSuccessors(successor);;
+          successors.shrink_to_fit();
+          if (successors.size()) _successors[successor] = successors;
         }
       }
     }
@@ -209,8 +214,8 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdgesFast(T src) const {
   if (!_preparedFast) {
     throw std::runtime_error("getEdgesFast not prepared");
   }
-  const auto& res = _successors.at(src);
-  if (_prunedLeafes && res.empty()) {
+  const auto& res = _successors.find(src);
+  if (_prunedLeafes && (res == _successors.end() || res->second.empty())) {
     std::vector<T> successors(_adjacency.at(src));
     for (const auto& s : successors) {
       const auto& res2 = _successors.find(s);
@@ -226,7 +231,8 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdgesFast(T src) const {
     successors.resize(std::distance(successors.begin(), it));
     return successors;
   }
-  return res;
+  if (res == _successors.end()) return {};
+  return res->second;
 }
 
 // ____________________________________________________________________________
