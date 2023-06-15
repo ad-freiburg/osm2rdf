@@ -169,10 +169,6 @@ void GeometryHandler<W>::area(const Area& area) {
       boost::geometry::envelope(polygon, box);
       envelopes.push_back(box);
     }
-  } else {
-    // if only one element was contained, don't recalculate the entire bounding
-    // box
-    envelopes.push_back(area.envelope());
   }
 
   std::unordered_map<int32_t, osm2rdf::geometry::Area> cutouts;
@@ -180,6 +176,8 @@ void GeometryHandler<W>::area(const Area& area) {
   const auto& boxIds =
       pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom,
                      totPoints > MIN_CUTOUT_POINTS ? &cutouts : 0));
+
+  envelopes.shrink_to_fit();
 
   // value to be inserted
   const auto& value = SpatialAreaValue(
@@ -566,7 +564,7 @@ void GeometryHandler<W>::prepareRTree() {
 
   for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
     const auto& area = _spatialStorageArea[i];
-    for (size_t j = 1; j < area.envelopes.size(); j++) {
+    for (size_t j = (area.envelopes.size() > 1 ? 1 : 0); j < area.envelopes.size(); j++) {
       values.emplace_back(area.envelopes[j], i);
     }
   }
@@ -2612,7 +2610,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
   }
 
   bool intersects = false;
-  for (size_t i = 1; i < envelopesB.size(); i++) {
+  for (size_t i = (envelopesB.size() > 1 ? 1 : 0); i < envelopesB.size(); i++) {
     if (boost::geometry::intersects(geomA, envelopesB[i])) intersects = true;
   }
 
@@ -2682,7 +2680,7 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
   }
 
   bool covered = false;
-  for (size_t i = 1; i < envelopesB.size(); i++) {
+  for (size_t i = (envelopesB.size() > 1 ? 1 : 0); i < envelopesB.size(); i++) {
     if (boost::geometry::covered_by(envelopeA, envelopesB[i])) {
       covered = true;
       break;
@@ -2840,8 +2838,8 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValueLight& a,
   }
 
   bool intersects = false;
-  for (size_t i = 1; i < areaEnvelopes.size(); i++) {
-    for (size_t j = 1; j < entryEnvelopes.size(); j++) {
+  for (size_t i = (areaEnvelopes.size() > 1 ? 1 : 0); i < areaEnvelopes.size(); i++) {
+    for (size_t j = (entryEnvelopes.size() > 1 ? 1 : 0); j < entryEnvelopes.size(); j++) {
       if (boost::geometry::intersects(areaEnvelopes[i], entryEnvelopes[j]))
         intersects = true;
     }
@@ -3144,7 +3142,7 @@ void GeometryHandler<W>::getBoxIds(
       box.max_corner().set<1>((y + localYHeight + 1) * GRID_H - 90.0);
 
       bool boxIntersects = false;
-      for (size_t i = 1; i < envelopes.size(); i++) {
+      for (size_t i = (envelopes.size() > 1 ? 1 : 0); i < envelopes.size(); i++) {
         if (boost::geometry::intersects(envelopes[i], box)) {
           boxIntersects = true;
         }
@@ -3412,7 +3410,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryCover(
 
   const auto& envelopes = area.envelopes;
 
-  for (size_t i = 1; i < envelopes.size(); i++) {
+  for (size_t i = (envelopes.size() > 1 ? 1 : 0); i < envelopes.size(); i++) {
     _spatialIndex->query(boost::geometry::index::covers(envelopes[i]),
                          std::back_inserter(queryResult));
   }
@@ -3430,7 +3428,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
 
   const auto& envelopes = area.envelopes;
 
-  for (size_t i = 1; i < envelopes.size(); i++) {
+  for (size_t i = (envelopes.size() > 1 ? 1 : 0); i < envelopes.size(); i++) {
     _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
                          std::back_inserter(queryResult));
   }
@@ -3448,7 +3446,7 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
 
   const auto& envelopes = std::get<0>(area);
 
-  for (size_t i = 1; i < envelopes.size(); i++) {
+  for (size_t i = (envelopes.size() > 1 ? 1 : 0); i < envelopes.size(); i++) {
     _spatialIndex->query(boost::geometry::index::intersects(envelopes[i]),
                          std::back_inserter(queryResult));
   }

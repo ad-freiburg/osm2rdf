@@ -220,9 +220,6 @@ struct MemberRelCmp {
 
 typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
 
-// typedef std::vector<std::pair<size_t, osm2rdf::geometry::area_result_t>>
-// SpatialAreaVector;
-
 struct SpatialAreaValueLight {
   SpatialAreaValueLight(const std::vector<osm2rdf::geometry::Box>& envelopes,
                         osm2rdf::osm::Area::id_t id,
