@@ -211,11 +211,20 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdgesFast(T src) const {
   }
   const auto& res = _successors.at(src);
   if (_prunedLeafes && res.empty()) {
-      std::vector<T> successors(getEdges(src));
-      std::sort(successors.begin(), successors.end());
-      const auto it = std::unique(successors.begin(), successors.end());
-      successors.resize(std::distance(successors.begin(), it));
-      return successors;
+    std::vector<T> successors(_adjacency.at(src));
+    for (const auto& s : successors) {
+      const auto& res2 = _successors.find(s);
+      if (res2 == _successors.end()) {
+        continue;
+      }
+      successors.insert(successors.end(), res2->second.begin(),
+                        res2->second.end());
+    }
+    // Make unique
+    std::sort(successors.begin(), successors.end());
+    const auto it = std::unique(successors.begin(), successors.end());
+    successors.resize(std::distance(successors.begin(), it));
+    return successors;
   }
   return res;
 }
