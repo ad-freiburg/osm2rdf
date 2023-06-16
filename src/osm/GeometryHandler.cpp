@@ -2143,7 +2143,7 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValueLight& a,
         osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    if (fullCheckIntersect(geomA, geomB, stats)) {
+    if (boost::geometry::intersects(geomA, geomB)) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
     } else {

@@ -26,6 +26,7 @@
 #include <utility>
 #include <vector>
 #include <mutex>
+#include <atomic>
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
@@ -91,7 +92,7 @@ class SharedFileBuffer {
   template <typename T>
   SharedFileBuffer& operator<<(const T& el) {
     _buffer << el;
-    if (_buffer.tellp() > 10'000'000) {
+    if (_buffer.tellp() > 100'000'000) {
       flush();
     }
     return *this;
