@@ -64,6 +64,17 @@ struct GeomRelationStats {
   size_t _skippedByOrientedBox = 0;
   size_t _skippedByConvexHull = 0;
 
+  std::shared_ptr<std::ofstream> _fullCheckFile;
+  std::shared_ptr<std::mutex> _checkFileMutex = std::make_shared<std::mutex>();
+
+  explicit GeomRelationStats(const std::string& filename) {
+    std::string checkFileName = filename + ".full-check.tsv";
+    _fullCheckFile = std::make_shared<std::ofstream>(checkFileName);
+    if (!*_fullCheckFile) {
+      throw std::runtime_error{"Could not open file " + checkFileName};
+    }
+  }
+
   GeomRelationStats& operator+=(const GeomRelationStats& lh) {
     _totalChecks += lh._totalChecks;
     _fullChecks += lh._fullChecks;
@@ -97,7 +108,16 @@ struct GeomRelationStats {
   void skippedByConvexHull() { _skippedByConvexHull++; }
   void skippedByBorderContained() { _skippedByBorderContained++; }
   void skippedByNodeContained() { _skippedByNodeContained++; }
-  void fullCheck() { _fullChecks++; }
+  template <typename L, typename R>
+  void fullCheck(const L& leftGeom, const R& rightGeom, bool result, double timeInSeconds) {
+    size_t numPointsLeft = boost::geometry::num_points(leftGeom);
+    size_t numPointsRight = boost::geometry::num_points(rightGeom);
+    // TODO<joka921> Buffer locally.
+    std::lock_guard l{_checkFileMutex};
+    *_fullCheckFile << numPointsLeft << ' ' << numPointsRight << ' '
+                    << timeInSeconds << ' ' << result << std::endl;
+    _fullChecks++;
+  }
 
   [[nodiscard]] std::string printPercNum(size_t n) const {
     std::stringstream ss;

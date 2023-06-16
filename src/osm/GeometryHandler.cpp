@@ -41,6 +41,7 @@
 #include "osm2rdf/util/DirectedGraph.h"
 #include "osm2rdf/util/ProgressBar.h"
 #include "osm2rdf/util/Time.h"
+#include "osm2rdf/util/Timer.h"
 
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "modernize-loop-convert"
@@ -62,6 +63,7 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::util::currentTimeFormatted;
 using osm2rdf::util::DirectedGraph;
 
+using ad_utility::Timer;
 // ____________________________________________________________________________
 template <typename W>
 GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
@@ -1569,8 +1571,10 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    stats->fullCheck();
-    if (boost::geometry::covered_by(geomA, geomB)) {
+      ad_utility::Timer t{ad_utility::timer::Timer::InitialStatus::Started};
+      bool result = boost::geometry::covered_by(geomA, geomB);
+      stats->fullCheck(geomA, geomB,result, t.secs());
+    if (result) {
       geomRelInf->intersects = RelInfoValue::YES;
       geomRelInf->contained = RelInfoValue::YES;
       return true;
@@ -1606,13 +1610,10 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
     return false;
   }
 
-  stats->fullCheck();
-
-  if (boost::geometry::covered_by(geomA, geomB)) {
-    return true;
-  }
-
-  return false;
+  ad_utility::Timer t{ad_utility::timer::Timer::InitialStatus::Started};
+  auto result = boost::geometry::covered_by(geomA, geomB);
+  stats->fullCheck(geomA, geomB, result, t.secs());
+  return result;
 }
 
 // ____________________________________________________________________________
@@ -1698,8 +1699,10 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    stats->fullCheck();
-    if (boost::geometry::intersects(geomA, geomB)) {
+    ad_utility::Timer t{ad_utility::timer::Timer::InitialStatus::Started};
+    auto result = boost::geometry::intersects(geomA, geomB);
+    stats->fullCheck(geomA, geomB, result, t.secs());
+    if (result) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
     } else {
@@ -1723,9 +1726,10 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
     return false;
   }
 
-  stats->fullCheck();
-
-  if (boost::geometry::intersects(geomA, geomB)) {
+  ad_utility::Timer t{};
+  auto result = boost::geometry::intersects(geomA, geomB);
+  stats->fullCheck(geomA, geomB, result, t.secs());
+  if (result) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
   }
@@ -1821,8 +1825,10 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
       return false;
     }
 
-    stats->fullCheck();
-    if (boost::geometry::intersects(geomA, geomB)) {
+    ad_utility::Timer t{};
+    auto result = boost::geometry::intersects(geomA, geomB);
+    stats->fullCheck(geomA, geomB, result, t.secs());
+    if (result) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
     } else {
@@ -1876,8 +1882,10 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
     return false;
   }
 
-  stats->fullCheck();
-  if (boost::geometry::intersects(geomA, geomB)) {
+  ad_utility::Timer t{};
+  auto result = boost::geometry::intersects(geomA, geomB);
+  stats->fullCheck(geomA, geomB, result, t.secs());
+  if (result) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
   }
@@ -1968,9 +1976,10 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
 
   if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    stats->fullCheck();
-
-    if (boost::geometry::covered_by(geomA, geomB)) {
+    ad_utility::Timer t{};
+    auto result = boost::geometry::covered_by(geomA, geomB);
+    stats->fullCheck(geomA, geomB, result, t.secs());
+    if (result) {
       geomRelInf->contained = RelInfoValue::YES;
       return true;
     } else {
@@ -2040,8 +2049,10 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     return true;
   }
 
-  stats->fullCheck();
-  if (boost::geometry::covered_by(geomA, geomB)) {
+  ad_utility::Timer t{};
+  auto result = boost::geometry::covered_by(geomA, geomB);
+  stats->fullCheck(geomA, geomB, result, t.secs());
+  if (result) {
     geomRelInf->contained = RelInfoValue::YES;
     return true;
   }
@@ -2128,12 +2139,14 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
       return true;
     }
 
+    ad_utility::Timer t;
     osm2rdf::geometry::Area intersect;
     boost::geometry::intersection(entryGeom, areaGeom, intersect);
 
     geomRelInf->intersectArea = boost::geometry::area(intersect);
-    stats->fullCheck();
-    return fabs(1 - entryArea / geomRelInf->intersectArea) < 0.05;
+    bool result = fabs(1 - entryArea / geomRelInf->intersectArea) < 0.05;
+    stats->fullCheck(entryGeom, areaGeom, result, t.secs());
+    return result;
   }
 }
 
@@ -2222,9 +2235,10 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
       boost::geometry::is_empty(outerGeomB) ||
       boost::geometry::is_empty(outerGeomA) ||
       boost::geometry::is_empty(innerGeomA)) {
-    stats->fullCheck();
-
-    if (boost::geometry::covered_by(geomA, geomB)) {
+    Timer t;
+    bool result = boost::geometry::covered_by(geomA, geomB);
+    stats->fullCheck(geomA, geomB, result, t.secs());
+    if (result) {
       geomRelInf->contained = RelInfoValue::YES;
       return true;
     } else {
@@ -2257,9 +2271,10 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
     return false;
   }
 
-  stats->fullCheck();
-
-  if (boost::geometry::covered_by(geomA, geomB)) {
+  Timer t;
+  bool result = boost::geometry::covered_by(geomA, geomB);
+  stats->fullCheck(geomA, geomB, result, t.secs());
+  if (result) {
     geomRelInf->contained = RelInfoValue::YES;
     return true;
   }
