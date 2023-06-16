@@ -176,8 +176,8 @@ struct GeomRelationStats {
   void fullCheck(const L& leftGeom, const R& rightGeom, bool result, double timeInSeconds) {
     size_t numPointsLeft = boost::geometry::num_points(leftGeom);
     size_t numPointsRight = boost::geometry::num_points(rightGeom);
-    _fullCheckBuffer << numPointsLeft << ' ' << numPointsRight << ' '
-                    << timeInSeconds << ' ' << result << '\n';
+    _fullCheckBuffer << numPointsLeft << '\t' << numPointsRight << '\t'
+                    << timeInSeconds << '\t' << result << '\n';
   }
 
   [[nodiscard]] std::string printPercNum(size_t n) const {

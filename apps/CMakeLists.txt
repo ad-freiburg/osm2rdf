@@ -16,8 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-add_executable(osm2rdf osm2rdf.cpp
-        ../include/osm2rdf/util/Timer.h)
+add_executable(osm2rdf osm2rdf.cpp)
 target_link_libraries(osm2rdf PRIVATE osm2rdf_library)
 
 add_executable(osm2rdf-stats osm2rdf-stats.cpp)
