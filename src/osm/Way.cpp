@@ -108,6 +108,11 @@ bool osm2rdf::osm::Way::closed() const noexcept {
 }
 
 // ____________________________________________________________________________
+bool osm2rdf::osm::Way::hasName() const noexcept {
+  return _tags.find("name") != _tags.end();
+}
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Way::operator==(
     const osm2rdf::osm::Way& other) const noexcept {
   return _id == other._id && _envelope == other._envelope &&

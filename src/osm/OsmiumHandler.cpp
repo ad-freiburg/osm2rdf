@@ -17,12 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/OsmiumHandler.h"
+
 #include "boost/version.hpp"
 #include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/osm/LocationHandler.h"
-#include "osm2rdf/osm/OsmiumHandler.h"
 #include "osm2rdf/osm/RelationHandler.h"
+#include "osm2rdf/util/Ram.h"
 #include "osm2rdf/util/Time.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
@@ -42,8 +44,9 @@ osm2rdf::osm::OsmiumHandler<W>::OsmiumHandler(
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::handle() {
-  osmium::io::File input_file{_config.input};
   {
+    osmium::io::File input_file{_config.input};
+
     // Do not create empty areas
     osmium::area::Assembler::config_type assembler_config;
     assembler_config.create_empty_areas = false;
@@ -60,11 +63,11 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
 #if BOOST_VERSION >= 107800
                 << ", Relation members"
 #endif  // BOOST_VERSION >= 107800
-                << ")"
-                << std::endl;
+                << ")" << std::endl;
       osmium::relations::read_relations(progress, input_file, mp_manager
 #if BOOST_VERSION >= 107800
-                                        , _relationHandler
+                                        ,
+                                        _relationHandler
 #endif  // BOOST_VERSION >= 107800
       );
       std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
@@ -75,7 +78,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
     {
       std::cerr << std::endl;
       std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "OSM Pass 2 ... (dump)" << std::endl;
+                << "OSM Pass 2 ... (convert)" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
                                                osmium::osm_entity_bits::object};
       osm2rdf::osm::LocationHandler* locationHandler =
@@ -120,20 +123,28 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
                 << "ways seen:" << _waysSeen << " dumped: " << _waysDumped
                 << " geometry: " << _wayGeometriesHandled << std::endl;
     }
-
-    if (!_config.noGeometricRelations) {
-      std::cerr << std::endl;
-      std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "Calculating contains relation ..." << std::endl;
-      _geometryHandler.calculateRelations();
-      std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
-                << std::endl;
-    }
-
-    osmium::MemoryUsage memory;
-    std::cerr << osm2rdf::util::formattedTimeSpacer
-              << "Memory used: " << memory.peak() << " MBytes" << std::endl;
   }
+
+  std::cerr << osm2rdf::util::currentTimeFormatted() << "Free ram: "
+            << osm2rdf::util::ram::available() /
+                   (osm2rdf::util::ram::GIGA * 1.0)
+            << "G/"
+            << osm2rdf::util::ram::physPages() /
+                   (osm2rdf::util::ram::GIGA * 1.0)
+            << "G" << std::endl;
+
+  if (!_config.noGeometricRelations) {
+    std::cerr << std::endl;
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "Calculating contains relation ..." << std::endl;
+    _geometryHandler.calculateRelations();
+    std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
+              << std::endl;
+  }
+
+  osmium::MemoryUsage memory;
+  std::cerr << osm2rdf::util::formattedTimeSpacer
+            << "Memory used: " << memory.peak() << " MBytes" << std::endl;
 }
 
 // ____________________________________________________________________________
@@ -152,7 +163,8 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
 #pragma omp task
       _factHandler.area(osmArea);
     }
-    if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
+    if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations &&
+        (!_config.geometricRelationsForNamedOnly || osmArea.hasName())) {
       _areaGeometriesHandled++;
 #pragma omp task
       _geometryHandler.area(osmArea);
@@ -176,7 +188,8 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
 #pragma omp task
     _factHandler.node(osmNode);
   }
-  if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
+  if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations &&
+      (!_config.geometricRelationsForNamedOnly || osmNode.hasName())) {
     _nodeGeometriesHandled++;
 #pragma omp task
     _geometryHandler.node(osmNode);
@@ -210,8 +223,13 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
       _factHandler.relation(osmRelation);
     }
 
+    if (!_config.noGeometricRelations &&
+        !_config.noRelationGeometricRelations &&
+        (!_config.geometricRelationsForNamedOnly || osmRelation.hasName())) {
+      _relationGeometriesHandled++;
 #pragma omp task
-    _geometryHandler.relation(osmRelation);
+      _geometryHandler.relation(osmRelation);
+    }
 
 #if BOOST_VERSION >= 107800
   }
@@ -234,7 +252,8 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
 #pragma omp task
     _factHandler.way(osmWay);
   }
-  if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
+  if (!_config.noGeometricRelations && !_config.noWayGeometricRelations &&
+      (!_config.geometricRelationsForNamedOnly || osmWay.hasName())) {
     _wayGeometriesHandled++;
 #pragma omp task
     _geometryHandler.way(osmWay);

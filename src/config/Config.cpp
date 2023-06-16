@@ -17,13 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/config/Config.h"
+
 #include <filesystem>
 #include <iostream>
 #include <string>
 
 #include "boost/version.hpp"
 #include "omp.h"
-#include "osm2rdf/config/Config.h"
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
 #include "popl.hpp"
@@ -66,7 +67,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addAreaOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addAreaEnvelopeRatio) {
         oss << "\n"
@@ -87,7 +89,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addNodeOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noRelationFacts) {
@@ -101,7 +104,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addRelationConvexHull) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO;
       }
       if (addRelationEnvelope) {
         oss << "\n"
@@ -109,7 +113,9 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addRelationOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::
+                   ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noWayFacts) {
@@ -125,7 +131,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addWayOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addWayMetadata) {
         oss << "\n"
@@ -179,6 +186,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n"
           << prefix << osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_INFO;
     }
+    if (geometricRelationsForNamedOnly) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_INFO;
+    }
     if (noAreaGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
@@ -186,6 +197,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     if (noNodeGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_INFO;
+    }
+    if (noRelationGeometricRelations) {
+      oss << "\n"
+          << prefix
+          << osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_INFO;
     }
     if (noWayGeometricRelations) {
       oss << "\n"
@@ -202,7 +218,67 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_INFO;
     }
   }
+  oss << "\n"
+      << prefix
+      << osm2rdf::config::constants::SECTION_GEOMETRY_RELATION_OPTIMIZATION;
+  if (geometryOptimizations ==
+      osm2rdf::config::GeometryRelationOptimization::NONE) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_NONE_INFO;
+  }
+  if (geometryOptimizations & CONTAINMENT_GRAPH) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_CONTAINMENT_GRAPH_INFO;
+  }
+  if (geometryOptimizations & OBJECT_ORIENTED_BOUNDING_BOX) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_OBJECT_ORIENTED_BOUNDING_BOX_INFO;
+  }
+  if (geometryOptimizations & POLYGON_PARTITIONING) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_POLYGON_PARTITIONING_INFO;
+  }
+  if (geometryOptimizations & APPROXIMATE_POLYGONS) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_APPROXIMATE_POLYGONS_INFO;
+  }
+  if (geometryOptimizations & INTERSECTION_CELL_IDS) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_INTERSECTION_CELL_IDS_INFO;
+  }
+  if (geometryOptimizations & AREA_CUTOUTS) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_AREA_CUTOUTS_INFO;
+  }
+  if (geometryOptimizations & SEMANTIC_INFORMATION) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::
+               GEOMETRY_RELATION_OPTIMIZATION_SEMANTIC_INFORMATION_INFO;
+  }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
+  if (splitNamedAndUnnamedAreas) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_INFO;
+  }
+  if (pruneLeafesFromDag) {
+    oss << "\n"
+        << prefix << osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_INFO;
+  }
   if (writeDAGDotFiles) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
@@ -297,6 +373,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_SHORT,
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_HELP);
+  auto noRelationGeometricRelationsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_LONG,
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_HELP);
   auto noWayGeometricRelationsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_SHORT,
@@ -307,19 +388,25 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT,
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG,
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP);
+  auto geometricRelationsForNamedOnlyOp=
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_SHORT,
+          osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_LONG,
+          osm2rdf::config::constants::GEOMETRIC_RELATIONS_FOR_NAMED_ONLY_OPTION_HELP);
 
-    auto addAreaConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
-        osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_SHORT,
-        osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_LONG,
-        osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_HELP);
-    auto addAreaEnvelopeOp = parser.add<popl::Switch>(
-        osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
-        osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG,
-        osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_HELP);
-    auto addAreaOrientedBoundingBoxOp = parser.add<popl::Switch>(
-        osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
-        osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG,
-        osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP);
+  auto addAreaConvexHullOp =
+      parser.add<popl::Switch, popl::Attribute::advanced>(
+          osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_SHORT,
+          osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_LONG,
+          osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_HELP);
+  auto addAreaEnvelopeOp = parser.add<popl::Switch>(
+      osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_LONG,
+      osm2rdf::config::constants::ADD_AREA_ENVELOPE_OPTION_HELP);
+  auto addAreaOrientedBoundingBoxOp = parser.add<popl::Switch>(
+      osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG,
+      osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP);
   auto addAreaEnvelopeRatioOp =
       parser.add<popl::Switch, popl::Attribute::advanced>(
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT,
@@ -330,23 +417,28 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_HELP);
 #if BOOST_VERSION >= 107800
-  auto addRelationConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
-      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG,
-      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_HELP);
+  auto addRelationConvexHullOp =
+      parser.add<popl::Switch, popl::Attribute::advanced>(
+          osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_SHORT,
+          osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG,
+          osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_HELP);
   auto addRelationEnvelopeOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG,
       osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_HELP);
   auto addRelationOrientedBoundingBoxOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG,
-      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_HELP);
+      osm2rdf::config::constants::
+          ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT,
+      osm2rdf::config::constants::
+          ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG,
+      osm2rdf::config::constants::
+          ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_HELP);
 #endif  // BOOST_VERSION >= 107800
-  auto addNodeConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
-      osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_LONG,
-      osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_HELP);
+  auto addNodeConvexHullOp =
+      parser.add<popl::Switch, popl::Attribute::advanced>(
+          osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_SHORT,
+          osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_LONG,
+          osm2rdf::config::constants::ADD_NODE_CONVEX_HULL_OPTION_HELP);
   auto addNodeEnvelopeOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_SHORT,
       osm2rdf::config::constants::ADD_NODE_ENVELOPE_OPTION_LONG,
@@ -402,6 +494,21 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_LONG,
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_HELP);
 
+  auto splitNamedAndUnnamedAreasOp = parser.add<popl::Switch,
+                                                popl::Attribute::expert>(
+      osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_SHORT,
+      osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_LONG,
+      osm2rdf::config::constants::SPLIT_NAMED_AND_UNNAMED_AREAS_OPTION_HELP);
+  auto geometryRelationOptimizationOp = parser.add<popl::Value<std::string>,
+                                                   popl::Attribute::advanced>(
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_SHORT,
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_LONG,
+      osm2rdf::config::constants::GEOMETRY_RELATION_OPTIMIZATION_OPTION_HELP);
+  auto pruneLeafesFromDagOp = parser.add<popl::Switch, popl::Attribute::expert>(
+      osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_OPTION_SHORT,
+      osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_OPTION_LONG,
+      osm2rdf::config::constants::PRUNE_LEAFES_FROM_DAG_OPTION_HELP);
+
   auto simplifyGeometriesOp =
       parser.add<popl::Value<double>, popl::Attribute::expert>(
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_SHORT,
@@ -415,10 +522,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG,
       osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP,
       simplifyGeometriesInnerOuter);
-  auto dontUseInnerOuterGeomsOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
   auto approximateSpatialRelsOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_SHORT,
       osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_LONG,
@@ -499,6 +602,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     noFacts = noFactsOp->is_set();
     noGeometricRelations = noGeometricRelationsOp->is_set();
+    geometricRelationsForNamedOnly = geometricRelationsForNamedOnlyOp->is_set();
 
     if (storeLocationsOnDiskOp->is_set()) {
       storeLocationsOnDisk = storeLocationsOnDiskOp->value();
@@ -512,6 +616,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     noAreaGeometricRelations = noAreaGeometricRelationsOp->is_set();
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
+    noRelationGeometricRelations = noRelationGeometricRelationsOp->is_set();
     noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
 
     writeGeomRelTransClosure = writeGeomRelTransClosureOp->is_set();
@@ -548,16 +653,50 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     adminRelationsOnly = adminRelationsOnlyOp->is_set();
     hasGeometryAsWkt = hasGeometryAsWktOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
+    splitNamedAndUnnamedAreas = splitNamedAndUnnamedAreasOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();
     simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();
-    dontUseInnerOuterGeoms = dontUseInnerOuterGeomsOp->value();
-    approximateSpatialRels = approximateSpatialRelsOp->value();
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
 
+    pruneLeafesFromDag = pruneLeafesFromDagOp->is_set();
+
     addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;
+
+    if (geometryRelationOptimizationOp->is_set()) {
+      geometryOptimizations =
+          osm2rdf::config::GeometryRelationOptimization::NONE;
+      for (size_t i = 0; i < geometryRelationOptimizationOp->count(); ++i) {
+        std::string value = geometryRelationOptimizationOp->value(i);
+        if (value == "-") {
+        } else if (value == "cg" || value == "containment-graph") {
+          geometryOptimizations |=
+              osm2rdf::config::GeometryRelationOptimization::CONTAINMENT_GRAPH;
+        } else if (value == "oobb" || value == "object-oriented-bounding-box") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::OBJECT_ORIENTED_BOUNDING_BOX;
+        } else if (value == "pp" || value == "polygon-partitioning") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::POLYGON_PARTITIONING;
+        } else if (value == "ap" || value == "approximate-polygons") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::APPROXIMATE_POLYGONS;
+        } else if (value == "ici" || value == "intersection-cell-ids") {
+          geometryOptimizations |= osm2rdf::config::
+              GeometryRelationOptimization::INTERSECTION_CELL_IDS;
+        } else if (value == "ac" || value == "area-cutouts") {
+          geometryOptimizations |=
+              osm2rdf::config::GeometryRelationOptimization::AREA_CUTOUTS;
+        } else {
+          std::cerr << "Invalid option '" << value
+                    << "' for Geometry Relation Optimization \n"
+                    << parser.help() << "\n";
+          exit(osm2rdf::config::ExitCode::UNKNOWN_ARGUMENT);
+        }
+      }
+    }
 
     if (semicolonTagKeysOp->is_set()) {
       for (size_t i = 0; i < semicolonTagKeysOp->count(); ++i) {

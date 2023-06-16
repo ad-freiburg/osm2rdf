@@ -30,6 +30,17 @@
 
 namespace osm2rdf::config {
 
+enum GeometryRelationOptimization : uint8_t {
+  NONE = 0,
+  CONTAINMENT_GRAPH = 1 << 0,
+  OBJECT_ORIENTED_BOUNDING_BOX = 1 << 1,
+  POLYGON_PARTITIONING = 1 << 2,
+  APPROXIMATE_POLYGONS = 1 << 3,
+  INTERSECTION_CELL_IDS = 1 << 4,
+  AREA_CUTOUTS = 1 << 5,
+  SEMANTIC_INFORMATION = 1 << 6
+};
+
 struct Config {
   // Select what to do
   std::string storeLocationsOnDisk;
@@ -43,8 +54,11 @@ struct Config {
   bool noGeometricRelations = false;
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
+  bool noRelationGeometricRelations = false;
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
+
+  bool geometricRelationsForNamedOnly = false;
 
   // the epsilon for the inner/outer douglas-peucker is based on the
   // circumference of a hypothetical circle. By dividing by ~pi, we base the
@@ -53,8 +67,6 @@ struct Config {
   // "collapsed away" by the inner simplification, or added by the outer
   // simplification
   double simplifyGeometriesInnerOuter = 1 / (3.14 * 20);
-  bool dontUseInnerOuterGeoms = false;
-  bool approximateSpatialRels = false;
 
   // Select amount to dump
   bool addAreaConvexHull = false;
@@ -82,6 +94,17 @@ struct Config {
   // Addition filters / data
   bool addAreaEnvelopeRatio = false;
 
+  // Geometry...
+  bool splitNamedAndUnnamedAreas = false;
+  uint8_t geometryOptimizations =
+      GeometryRelationOptimization::CONTAINMENT_GRAPH |
+      GeometryRelationOptimization::OBJECT_ORIENTED_BOUNDING_BOX |
+      GeometryRelationOptimization::POLYGON_PARTITIONING |
+      GeometryRelationOptimization::APPROXIMATE_POLYGONS |
+      GeometryRelationOptimization::INTERSECTION_CELL_IDS |
+      GeometryRelationOptimization::AREA_CUTOUTS |
+      GeometryRelationOptimization::SEMANTIC_INFORMATION;
+
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
 
@@ -97,8 +120,10 @@ struct Config {
   double wktDeviation = 5;
   uint16_t wktPrecision = 7;
 
-  // Transitive clouse
+  // Transitive closure
   bool writeGeomRelTransClosure = false;
+
+  bool pruneLeafesFromDag = false;
 
   // Output, empty for stdout
   std::filesystem::path output;

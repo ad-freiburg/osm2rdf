@@ -18,9 +18,8 @@
 
 #include "osm2rdf/util/DirectedGraph.h"
 
-#include <stdint.h>
-
 #include <algorithm>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -75,6 +74,26 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::findSuccessorsFast(
   const auto& entry = _successors.find(src);
   if (entry == _successors.end()) {
     return std::vector<T>();
+  }
+  if (_prunedLeafes && entry->second.empty()) {
+    // No result, if we are a leaf compute the result.
+    const auto& adjacency = _adjacency.find(src);
+    if (adjacency == _adjacency.end()) {
+      return entry->second;
+    }
+    std::vector<T> successors;
+    // Collect parents
+    successors.insert(successors.end(), adjacency->second.begin(),
+                      adjacency->second.end());
+    for (const auto& successor : adjacency->second) {
+      const auto& res = findSuccessorsFast(successor);
+      successors.insert(successors.end(), res.begin(), res.end());
+    }
+    // Make unique
+    std::sort(successors.begin(), successors.end());
+    const auto it = std::unique(successors.begin(), successors.end());
+    successors.resize(std::distance(successors.begin(), it));
+    return successors;
   }
   return entry->second;
 }
@@ -132,11 +151,36 @@ void osm2rdf::util::DirectedGraph<T>::dumpOsm(
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
-  const auto& vertices = getVertices();
-  for (size_t i = 0; i < vertices.size(); i++) {
-    _successors[vertices[i]] = findSuccessors(vertices[i]);
+  for (const auto& [vertex, _] : _adjacency) {
+    const auto& successors = findSuccessors(vertex);
+    if (successors.size()) {
+      _successors[vertex] = successors;
+    }
   }
   _preparedFast = true;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFastNoLeafes() {
+  // for (const auto& vertex : getVertices()) {
+  for (const auto& [vertex, _] : _adjacency) {
+    auto i = _successors.find(vertex);
+    if (i == _successors.end() || i->second.empty()) {
+      for (const auto& successor : findSuccessors(vertex)) {
+        auto j = _successors.find(successor);
+        if (j == _successors.end() || j->second.empty()) {
+          auto successors = findSuccessors(successor);
+          successors.shrink_to_fit();
+          if (successors.size()) {
+            _successors[successor] = successors;
+          }
+        }
+      }
+    }
+  }
+  _preparedFast = true;
+  _prunedLeafes = true;
 }
 
 // ____________________________________________________________________________
@@ -171,9 +215,29 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdges(T src) const {
 template <typename T>
 std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdgesFast(T src) const {
   if (!_preparedFast) {
-    throw std::runtime_error("findSuccessorsFast not prepared");
+    throw std::runtime_error("getEdgesFast not prepared");
   }
-  return _successors.at(src);
+  const auto& res = _successors.find(src);
+  if (_prunedLeafes && (res == _successors.end() || res->second.empty())) {
+    std::vector<T> successors(_adjacency.at(src));
+    for (size_t i = 0; i < successors.size(); ++i) {
+      const auto& res2 = _successors.find(successors[i]);
+      if (res2 == _successors.end()) {
+        continue;
+      }
+      successors.insert(successors.end(), res2->second.begin(),
+                        res2->second.end());
+    }
+    // Make unique
+    std::sort(successors.begin(), successors.end());
+    const auto it = std::unique(successors.begin(), successors.end());
+    successors.resize(std::distance(successors.begin(), it));
+    return successors;
+  }
+  if (res == _successors.end()) {
+    return {};
+  }
+  return res->second;
 }
 
 // ____________________________________________________________________________

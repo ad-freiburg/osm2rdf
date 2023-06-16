@@ -30,12 +30,14 @@ constexpr int64_t MEGA = KILO * KILO;
 constexpr int64_t GIGA = KILO * MEGA;
 
 // ____________________________________________________________________________
-int64_t available() {
+inline int64_t available() {
   return sysconf(_SC_AVPHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
 }
 
 // ____________________________________________________________________________
-int64_t physPages() { return sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE); }
+inline int64_t physPages() {
+  return sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE);
+}
 
 }  // namespace osm2rdf::util::ram
 

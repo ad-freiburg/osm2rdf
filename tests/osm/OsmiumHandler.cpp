@@ -176,7 +176,7 @@ TEST(OSM_OsmiumHandler, noFacts) {
   ASSERT_EQ(1, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(0, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(0, oh.waysDumped());
   ASSERT_EQ(1, oh.wayGeometriesHandled());
@@ -250,7 +250,7 @@ TEST(OSM_OsmiumHandler, adminRelationsOnly) {
   ASSERT_EQ(0, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(1, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(1, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(0, oh.waysDumped());
   ASSERT_EQ(0, oh.wayGeometriesHandled());
@@ -287,7 +287,7 @@ TEST(OSM_OsmiumHandler, noAreaFacts) {
   ASSERT_EQ(1, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(1, oh.waysDumped());
   ASSERT_EQ(1, oh.wayGeometriesHandled());
@@ -324,7 +324,7 @@ TEST(OSM_OsmiumHandler, noNodeFacts) {
   ASSERT_EQ(1, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(1, oh.waysDumped());
   ASSERT_EQ(1, oh.wayGeometriesHandled());
@@ -361,7 +361,7 @@ TEST(OSM_OsmiumHandler, noRelationFacts) {
   ASSERT_EQ(1, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(0, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(1, oh.waysDumped());
   ASSERT_EQ(1, oh.wayGeometriesHandled());
@@ -398,7 +398,7 @@ TEST(OSM_OsmiumHandler, noWayFacts) {
   ASSERT_EQ(1, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(0, oh.waysDumped());
   ASSERT_EQ(1, oh.wayGeometriesHandled());
@@ -435,7 +435,7 @@ TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
   ASSERT_EQ(1, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(1, oh.waysDumped());
   ASSERT_EQ(1, oh.wayGeometriesHandled());
@@ -472,7 +472,7 @@ TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
   ASSERT_EQ(0, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(1, oh.waysDumped());
   ASSERT_EQ(1, oh.wayGeometriesHandled());
@@ -509,7 +509,7 @@ TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
   ASSERT_EQ(1, oh.nodeGeometriesHandled());
   ASSERT_EQ(3, oh.relationsSeen());
   ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
+  ASSERT_EQ(2, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(1, oh.waysDumped());
   ASSERT_EQ(0, oh.wayGeometriesHandled());
@@ -859,7 +859,7 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("nodes seen:4 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
 

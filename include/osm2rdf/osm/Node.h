@@ -38,6 +38,7 @@ class Node {
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Location& geom() const noexcept;
+  [[nodiscard]] bool hasName() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
   [[nodiscard]] osm2rdf::geometry::Polygon convexHull() const noexcept;
   [[nodiscard]] osm2rdf::geometry::Polygon orientedBoundingBox() const noexcept;
