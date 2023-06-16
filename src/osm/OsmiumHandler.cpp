@@ -24,6 +24,7 @@
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/osm/LocationHandler.h"
 #include "osm2rdf/osm/RelationHandler.h"
+#include "osm2rdf/util/Ram.h"
 #include "osm2rdf/util/Time.h"
 #include "osmium/area/assembler.hpp"
 #include "osmium/area/multipolygon_manager.hpp"
@@ -43,8 +44,9 @@ osm2rdf::osm::OsmiumHandler<W>::OsmiumHandler(
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::handle() {
-  osmium::io::File input_file{_config.input};
   {
+    osmium::io::File input_file{_config.input};
+
     // Do not create empty areas
     osmium::area::Assembler::config_type assembler_config;
     assembler_config.create_empty_areas = false;
@@ -121,20 +123,28 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
                 << "ways seen:" << _waysSeen << " dumped: " << _waysDumped
                 << " geometry: " << _wayGeometriesHandled << std::endl;
     }
-
-    if (!_config.noGeometricRelations) {
-      std::cerr << std::endl;
-      std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "Calculating contains relation ..." << std::endl;
-      _geometryHandler.calculateRelations();
-      std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
-                << std::endl;
-    }
-
-    osmium::MemoryUsage memory;
-    std::cerr << osm2rdf::util::formattedTimeSpacer
-              << "Memory used: " << memory.peak() << " MBytes" << std::endl;
   }
+
+  std::cerr << osm2rdf::util::currentTimeFormatted() << "Free ram: "
+            << osm2rdf::util::ram::available() /
+                   (osm2rdf::util::ram::GIGA * 1.0)
+            << "G/"
+            << osm2rdf::util::ram::physPages() /
+                   (osm2rdf::util::ram::GIGA * 1.0)
+            << "G" << std::endl;
+
+  if (!_config.noGeometricRelations) {
+    std::cerr << std::endl;
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "Calculating contains relation ..." << std::endl;
+    _geometryHandler.calculateRelations();
+    std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
+              << std::endl;
+  }
+
+  osmium::MemoryUsage memory;
+  std::cerr << osm2rdf::util::formattedTimeSpacer
+            << "Memory used: " << memory.peak() << " MBytes" << std::endl;
 }
 
 // ____________________________________________________________________________
