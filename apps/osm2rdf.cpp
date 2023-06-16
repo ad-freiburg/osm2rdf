@@ -41,6 +41,11 @@ void run(const osm2rdf::config::Config& config) {
   }
   osm2rdf::ttl::Writer<T> writer{config, &output};
   writer.writeHeader();
+  writer.writeTriple(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
+      writer.generateIRIUnsafe(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
+                               "git-info"),
+      osm2rdf::version::GIT_INFO);
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
   osmiumHandler.handle();
