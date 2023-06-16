@@ -25,6 +25,8 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <mutex>
+#include <atomic>
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
@@ -49,6 +51,56 @@ const static int NUM_GRID_CELLS = 5000;
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
 
+class SharedFileBuffer {
+ private:
+  std::shared_ptr<std::ofstream> _file;
+  std::shared_ptr<std::mutex> _mutex = std::make_shared<std::mutex>();
+  std::ostringstream _buffer;
+  static inline std::atomic<size_t> numInstances = 0;
+  size_t _instanceIndex = numInstances++;
+
+
+
+ public:
+  size_t instanceIndex() const {
+    return _instanceIndex;
+
+  }
+  explicit SharedFileBuffer(const std::string& filename)
+      : _file{std::make_shared<std::ofstream>(filename)} {
+    if (!*_file) {
+      throw std::runtime_error{"Could not open file " + filename};
+    }
+  }
+  SharedFileBuffer(const SharedFileBuffer& rhs)
+      : _file{rhs._file}, _mutex{rhs._mutex}, _buffer{} {}
+  SharedFileBuffer& operator=(const SharedFileBuffer& rhs) {
+    flush();
+    _file = rhs._file;
+    _mutex = rhs._mutex;
+    return *this;
+  }
+
+  void flush() {
+    if (_file && _mutex) {
+      std::lock_guard l{*_mutex};
+      *_file << std::move(_buffer).str();
+      _buffer.clear();
+    }
+  }
+
+  template <typename T>
+  SharedFileBuffer& operator<<(const T& el) {
+    _buffer << el;
+    if (_buffer.tellp() > 100'000'000) {
+      flush();
+    }
+    return *this;
+  }
+
+    ~SharedFileBuffer() { flush(); }
+};
+
 struct GeomRelationStats {
   size_t _totalChecks = 0;
   size_t _fullChecks = 0;
@@ -66,6 +118,11 @@ struct GeomRelationStats {
   size_t _skippedByBox = 0;
   size_t _skippedByOrientedBox = 0;
   size_t _skippedByConvexHull = 0;
+
+  SharedFileBuffer _fullCheckBuffer;
+
+  explicit GeomRelationStats(const std::string& filename) : _fullCheckBuffer{filename + ".full-check.ttl"} {
+  }
 
   GeomRelationStats& operator+=(const GeomRelationStats& lh) {
     _totalChecks += lh._totalChecks;
@@ -87,6 +144,7 @@ struct GeomRelationStats {
     return *this;
   }
 
+/*
   GeomRelationStats operator+(const GeomRelationStats& lh) {
     GeomRelationStats a;
     a._totalChecks += lh._totalChecks;
@@ -107,6 +165,7 @@ struct GeomRelationStats {
     a._skippedByNodeContained += lh._skippedByNodeContained;
     return a;
   }
+  */
 
   void checked() { _totalChecks++; }
   void skippedByNonIntersect() { _skippedByNonIntersect++; }
@@ -122,8 +181,15 @@ struct GeomRelationStats {
   void skippedByConvexHull() { _skippedByConvexHull++; }
   void skippedByBorderContained() { _skippedByBorderContained++; }
   void skippedByNodeContained() { _skippedByNodeContained++; }
-  void fullCheck() { _fullChecks++; }
-  void fullCheckWeighted(int w) { _fullChecksWeighted += w; }
+
+  template <typename L, typename R>
+  void fullCheck(const L& leftGeom, const R& rightGeom, bool result, double timeInSeconds) {
+    size_t numPointsLeft = boost::geometry::num_points(leftGeom);
+    size_t numPointsRight = boost::geometry::num_points(rightGeom);
+    _fullCheckBuffer << "[\n  <num-points-left> " << numPointsLeft << " ;\n  <num-points-right> " << numPointsRight
+                     << " ;\n  <time-for-check> " << timeInSeconds << " ;\n  <result> " << static_cast<int>(result)
+                     << " .\n] <statistics-type> <full-check> .\n";
+  }
 
   [[nodiscard]] std::string printPercNum(size_t n) const {
     std::stringstream ss;
@@ -241,7 +307,7 @@ struct SpatialAreaValueLight {
   osm2rdf::geometry::area_result_t area;
   int64_t _offset;
 
-  const AreaFromType fromType() const {
+  AreaFromType fromType() const {
     if (_offset < 0) return AreaFromType::RELATION;
     return AreaFromType::WAY;
   }
