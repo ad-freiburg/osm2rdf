@@ -576,7 +576,7 @@ void GeometryHandler<W>::prepareDAG() {
     osm2rdf::util::ProgressBar progressBar{_spatialStorageArea.size(), true};
     size_t entryCount = 0;
 
-    GeomRelationStats stats;
+    GeomRelationStats stats{_config.output};
 
     progressBar.update(entryCount);
 
@@ -744,7 +744,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
                                          true};
   size_t entryCount = 0;
   progressBar.update(entryCount);
-  GeomRelationStats intersectStats;
+  GeomRelationStats intersectStats{std::string{_config.output} + "namedAreaRelations"};
 
   std::vector<DirectedGraph<Area::id_t>::entry_t> vertices =
       _directedAreaGraph.getVertices();
