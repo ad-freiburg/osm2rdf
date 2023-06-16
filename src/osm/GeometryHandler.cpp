@@ -63,8 +63,24 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::util::currentTimeFormatted;
 using osm2rdf::util::DirectedGraph;
-
+using osm2rdf::osm::GeomRelationStats;
 using ad_utility::Timer;
+
+template <typename LeftGeo, typename RightGeo>
+bool fullCheckIntersect(const LeftGeo& l, const RightGeo& r, GeomRelationStats* stats) {
+  Timer t;
+  bool result = boost::geometry::intersects(l, r);
+  stats->fullCheck(l, r, result, t.secs());
+  return result;
+}
+template <typename LeftGeo, typename RightGeo>
+bool fullCheckContains(const LeftGeo& l, const RightGeo& r, GeomRelationStats* stats) {
+  Timer t;
+  bool result = boost::geometry::covered_by(l, r);
+  stats->fullCheck(l, r, result, t.secs());
+  return result;
+}
+
 // ____________________________________________________________________________
 template <typename W>
 GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
@@ -632,7 +648,7 @@ void GeometryHandler<W>::prepareDAG() {
     osm2rdf::util::ProgressBar progressBar{_spatialStorageArea.size(), true};
     size_t entryCount = 0;
 
-    GeomRelationStats stats{_config.output};
+    GeomRelationStats stats{std::string{_config.output} + "prepare-dag"};
 
     progressBar.update(entryCount);
 
@@ -963,8 +979,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
     boost::archive::binary_iarchive ia(_fsUnnamedAreas);
 
     osm2rdf::util::ProgressBar progressBar{_numUnnamedAreas, true};
-    GeomRelationStats intersectStats;
-    GeomRelationStats containsStats;
+    GeomRelationStats intersectStats{std::string{_config.output} + "intersect-stats"};
+    GeomRelationStats containsStats{std::string{_config.output} + "contains-stats"};
     size_t entryCount = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                       \
@@ -1124,10 +1140,6 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << containsStats.printFullChecks()
               << " by full geometric check\n\n"
 
-              << osm2rdf::util::formattedTimeSpacer << "         "
-              << (intersectStats + containsStats).printFullChecksWeighted()
-              << " num-points weighted checks"
-
               << std::endl;
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
               << (static_cast<double>(intersectStats._totalChecks) /
@@ -1157,8 +1169,8 @@ void GeometryHandler<W>::dumpAreaRelations() {
               << std::endl;
 
     osm2rdf::util::ProgressBar progressBar{_spatialIndex->size(), true};
-    GeomRelationStats intersectStats;
-    GeomRelationStats containsStats;
+    GeomRelationStats intersectStats{std::string{_config.output} + "intersect-area"};
+    GeomRelationStats containsStats{std::string{_config.output} + "contains-area"};
     size_t entryCount = 0;
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                       \
@@ -1321,9 +1333,6 @@ void GeometryHandler<W>::dumpAreaRelations() {
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printFullChecks()
               << " by full geometric check\n\n"
-              << osm2rdf::util::formattedTimeSpacer << "         "
-              << (containsStats + intersectStats).printFullChecksWeighted()
-              << " num-points weighted checks"
 
               << std::endl;
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
@@ -1362,7 +1371,7 @@ GeometryHandler<W>::dumpNodeRelations() {
     osm2rdf::util::ProgressBar progressBar{_numNodes, true};
     size_t entryCount = 0;
 
-    GeomRelationStats stats;
+    GeomRelationStats stats{std::string{_config.output} + "node-relations"};
 
     progressBar.update(entryCount);
 
@@ -1506,8 +1515,8 @@ void GeometryHandler<W>::dumpWayWayRelations() {
 
   size_t entryCount = 0;
 
-  GeomRelationStats intersectStats;
-  GeomRelationStats containsStats;
+  GeomRelationStats intersectStats{std::string{_config.output} + "intersect-way-way"};
+  GeomRelationStats containsStats{std::string{_config.output} + "contains-way-way"};
 
   size_t numBatches = 1;
   size_t batchSize = _spatialStorageWay.size() / numBatches;
@@ -1660,9 +1669,6 @@ void GeometryHandler<W>::dumpWayWayRelations() {
             << " by oriented bounding-box \n"
             << osm2rdf::util::formattedTimeSpacer << "         "
             << containsStats.printFullChecks() << " by full geometric check\n\n"
-            << osm2rdf::util::formattedTimeSpacer << "         "
-            << (containsStats + intersectStats).printFullChecksWeighted()
-            << " num-points weighted checks"
 
             << std::endl;
   std::cerr << osm2rdf::util::formattedTimeSpacer << " "
@@ -1696,8 +1702,8 @@ void GeometryHandler<W>::dumpWayRelations(
     osm2rdf::util::ProgressBar progressBar{_numWays, true};
     size_t entryCount = 0;
 
-    GeomRelationStats intersectStats;
-    GeomRelationStats containsStats;
+    GeomRelationStats intersectStats{std::string{_config.output} + "intersect-way"};
+    GeomRelationStats containsStats{std::string{_config.output} + "contains-way"};
 
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                           \
@@ -1952,9 +1958,6 @@ void GeometryHandler<W>::dumpWayRelations(
               << osm2rdf::util::formattedTimeSpacer << "         "
               << containsStats.printFullChecks()
               << " by full geometric check\n\n"
-              << osm2rdf::util::formattedTimeSpacer << "         "
-              << (containsStats + intersectStats).printFullChecksWeighted()
-              << " num-points weighted checks"
 
               << std::endl;
     std::cerr << osm2rdf::util::formattedTimeSpacer << " "
@@ -2029,10 +2032,7 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
         osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-      ad_utility::Timer t{ad_utility::timer::Timer::InitialStatus::Started};
-      bool result = boost::geometry::covered_by(geomA, geomB);
-      stats->fullCheck(geomA, geomB,result, t.secs());
-    if (result) {
+    if (fullCheckContains(geomA, geomB, stats)) {
       geomRelInf->intersects = RelInfoValue::YES;
       geomRelInf->contained = RelInfoValue::YES;
       return true;
@@ -2054,15 +2054,7 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
     stats->skippedByOuter();
     return false;
   }
-
-  stats->fullCheck();
-  stats->fullCheckWeighted(boost::geometry::num_points(geomB));
-
-  if (boost::geometry::covered_by(geomA, geomB)) {
-    return true;
-  }
-
-  return false;
+  return fullCheckContains(geomA, geomB, stats);
 }
 
 // ____________________________________________________________________________
@@ -2155,10 +2147,7 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValueLight& a,
         osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    stats->fullCheck();
-    stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
-                             boost::geometry::num_points(geomB));
-    if (boost::geometry::intersects(geomA, geomB)) {
+    if (fullCheckIntersect(geomA, geomB, stats)) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
     } else {
@@ -2182,9 +2171,7 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValueLight& a,
     return false;
   }
 
-  ad_utility::Timer t{ad_utility::timer::Timer::InitialStatus::Started};
-  auto result = boost::geometry::intersects(geomA, geomB);
-  if (result) {
+  if (fullCheckIntersect(geomA, geomB, stats)) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
   }
@@ -2285,10 +2272,7 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
         osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    ad_utility::Timer t{ad_utility::timer::Timer::InitialStatus::Started};
-    auto result = boost::geometry::intersects(geomA, geomB);
-    stats->fullCheck(geomA, geomB, result, t.secs());
-    if (result) {
+    if (fullCheckIntersect(geomA, geomB, stats)) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
     } else {
@@ -2312,10 +2296,7 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
     return false;
   }
 
-  ad_utility::Timer t{};
-  auto result = boost::geometry::intersects(geomA, geomB);
-  stats->fullCheck(geomA, geomB, result, t.secs());
-  if (result) {
+  if (fullCheckIntersect(geomA, geomB, stats)) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
   }
@@ -2413,10 +2394,7 @@ bool GeometryHandler<W>::wayInWay(const SpatialWayValue& a,
     return false;
   }
 
-  stats->fullCheck();
-  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
-                           boost::geometry::num_points(geomB));
-  if (boost::geometry::covered_by(geomA, geomB)) {
+  if (fullCheckContains(geomA, geomB, stats)) {
     geomRelInf->contained = RelInfoValue::YES;
     return true;
   }
@@ -2495,10 +2473,7 @@ bool GeometryHandler<W>::wayIntersectsWay(const SpatialWayValue& a,
     return false;
   }
 
-  stats->fullCheck();
-  stats->fullCheckWeighted(boost::geometry::num_points(geomA) *
-                           boost::geometry::num_points(geomB));
-  if (boost::geometry::intersects(geomA, geomB)) {
+  if (fullCheckIntersect(geomA, geomB, stats)) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
   }
@@ -2598,10 +2573,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
       return false;
     }
 
-    ad_utility::Timer t{};
-    auto result = boost::geometry::intersects(geomA, geomB);
-    stats->fullCheck(geomA, geomB, result, t.secs());
-    if (result) {
+    if (fullCheckIntersect(geomA, geomB, stats)) {
       geomRelInf->intersects = RelInfoValue::YES;
       return true;
     } else {
@@ -2644,10 +2616,7 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
     return false;
   }
 
-  ad_utility::Timer t{};
-  auto result = boost::geometry::intersects(geomA, geomB);
-  stats->fullCheck(geomA, geomB, result, t.secs());
-  if (result) {
+  if (fullCheckIntersect(geomA, geomB, stats)) {
     geomRelInf->intersects = RelInfoValue::YES;
     return true;
   }
@@ -2762,10 +2731,7 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
         osm2rdf::config::GeometryRelationOptimization::APPROXIMATE_POLYGONS) ||
       boost::geometry::is_empty(innerGeomB) ||
       boost::geometry::is_empty(outerGeomB)) {
-    ad_utility::Timer t{};
-    auto result = boost::geometry::covered_by(geomA, geomB);
-    stats->fullCheck(geomA, geomB, result, t.secs());
-    if (result) {
+    if (fullCheckContains(geomA, geomB, stats)) {
       geomRelInf->contained = RelInfoValue::YES;
       return true;
     } else {
@@ -2807,10 +2773,7 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     stats->skippedByOuter();
     return false;
   }
-  ad_utility::Timer t{};
-  auto result = boost::geometry::covered_by(geomA, geomB);
-  stats->fullCheck(geomA, geomB, result, t.secs());
-  if (result) {
+  if (fullCheckContains(geomA, geomB, stats)) {
     geomRelInf->contained = RelInfoValue::YES;
     return true;
   }
@@ -3016,10 +2979,7 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
       boost::geometry::is_empty(outerGeomB) ||
       boost::geometry::is_empty(outerGeomA) ||
       boost::geometry::is_empty(innerGeomA)) {
-    Timer t;
-    bool result = boost::geometry::covered_by(geomA, geomB);
-    stats->fullCheck(geomA, geomB, result, t.secs());
-    if (result) {
+    if (fullCheckContains(geomA, geomB, stats)) {
       geomRelInf->contained = RelInfoValue::YES;
       return true;
     } else {
@@ -3052,10 +3012,7 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
     return false;
   }
 
-  Timer t;
-  bool result = boost::geometry::covered_by(geomA, geomB);
-  stats->fullCheck(geomA, geomB, result, t.secs());
-  if (result) {
+  if (fullCheckContains(geomA, geomB, stats)) {
     geomRelInf->contained = RelInfoValue::YES;
     return true;
   }
