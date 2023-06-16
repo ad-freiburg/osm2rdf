@@ -1530,7 +1530,7 @@ void GeometryHandler<W>::dumpWayWayRelations() {
   reduction(+ : intersectStats, containsStats) default(none)             \
   schedule(dynamic)
 
-    for (size_t i = 0; i < _numWays; i++) {
+    for (size_t j = 0; j < _numWays; j++) {
       SpatialWayValue way;
 
 #pragma omp critical(loadEntry)
