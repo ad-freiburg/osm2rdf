@@ -25,6 +25,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <mutex>
 
 #include "boost/archive/binary_oarchive.hpp"
 #include "boost/geometry/index/rtree.hpp"
@@ -54,8 +55,16 @@ class SharedFileBuffer {
   std::shared_ptr<std::ofstream> _file;
   std::shared_ptr<std::mutex> _mutex = std::make_shared<std::mutex>();
   std::ostringstream _buffer;
+  static inline std::atomic<size_t> numInstances = 0;
+  size_t _instanceIndex = numInstances++;
+
+
 
  public:
+  size_t instanceIndex() const {
+    return _instanceIndex;
+
+  }
   explicit SharedFileBuffer(const std::string& filename)
       : _file{std::make_shared<std::ofstream>(filename)} {
     if (!*_file) {
@@ -111,7 +120,7 @@ struct GeomRelationStats {
 
   SharedFileBuffer _fullCheckBuffer;
 
-  explicit GeomRelationStats(const std::string& filename) : _fullCheckBuffer{filename + ".full-check.tsv"} {
+  explicit GeomRelationStats(const std::string& filename) : _fullCheckBuffer{filename + ".full-check.ttl"} {
   }
 
   GeomRelationStats& operator+=(const GeomRelationStats& lh) {
@@ -176,8 +185,9 @@ struct GeomRelationStats {
   void fullCheck(const L& leftGeom, const R& rightGeom, bool result, double timeInSeconds) {
     size_t numPointsLeft = boost::geometry::num_points(leftGeom);
     size_t numPointsRight = boost::geometry::num_points(rightGeom);
-    _fullCheckBuffer << numPointsLeft << '\t' << numPointsRight << '\t'
-                    << timeInSeconds << '\t' << result << '\n';
+    _fullCheckBuffer << "[\n  <num-points-left> " << numPointsLeft << " ;\n  <num-points-right> " << numPointsRight
+                     << " ;\n  <time-for-check> " << timeInSeconds << " ;\n  <result> " << static_cast<int>(result)
+                     << " .\n] <statistics-type> <full-check> .\n";
   }
 
   [[nodiscard]] std::string printPercNum(size_t n) const {

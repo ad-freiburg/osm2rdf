@@ -591,11 +591,9 @@ void GeometryHandler<W>::prepareRTree() {
   _mmfile = boost::interprocess::managed_mapped_file(
       boost::interprocess::create_only, "rtree.bin", 200ul << 30);
 
-  _spatialIndex = _mmfile.find_or_construct<SpatialIndex>("rtree")(
+  _spatialIndex = _mmfile.find_or_construct<SpatialIndex>("rtree")(values.begin(), values.end(),
       boost::geometry::index::quadratic<32>(), indexable_t(), equal_to_t(),
       allocator_t(_mmfile.get_segment_manager()));
-
-  _spatialIndex->insert(values.begin(), values.end());
 
   std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
@@ -620,11 +618,9 @@ void GeometryHandler<W>::prepareWayRTree(size_t from, size_t to) {
   _mmfile = boost::interprocess::managed_mapped_file(
       boost::interprocess::create_only, "rtree.bin", 200ul << 30);
 
-  _spatialWayIndex = _mmfile.find_or_construct<SpatialIndex>("rtree")(
+  _spatialWayIndex = _mmfile.find_or_construct<SpatialIndex>("rtree")(values.begin(), values.end(),
       boost::geometry::index::quadratic<32>(), indexable_t(), equal_to_t(),
       allocator_t(_mmfile.get_segment_manager()));
-
-  _spatialWayIndex->insert(values.begin(), values.end());
 
   // std::cerr << currentTimeFormatted() << " ... done" << std::endl;
 }
