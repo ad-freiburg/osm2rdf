@@ -308,7 +308,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   osm2rdf::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
 
-  if (!way.isArea()) {
+  if (_config.addAreaWayLinestrings || !way.isArea()) {
     if (!_config.hasGeometryAsWkt) {
       const std::string& geomObj = _writer->generateIRI(
           NAMESPACE__OSM2RDF, "way_" + std::to_string(way.id()));

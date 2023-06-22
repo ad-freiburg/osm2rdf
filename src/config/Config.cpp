@@ -66,8 +66,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addAreaOrientedBoundingBox) {
         oss << "\n"
-            << prefix
-            << osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix << osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addAreaEnvelopeRatio) {
         oss << "\n"
@@ -88,8 +87,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addNodeOrientedBoundingBox) {
         oss << "\n"
-            << prefix
-            << osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix << osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noRelationFacts) {
@@ -103,8 +101,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addRelationConvexHull) {
         oss << "\n"
-            << prefix
-            << osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO;
+            << prefix << osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO;
       }
       if (addRelationEnvelope) {
         oss << "\n"
@@ -112,9 +109,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addRelationOrientedBoundingBox) {
         oss << "\n"
-            << prefix
-            << osm2rdf::config::constants::
-                   ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix << osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noWayFacts) {
@@ -130,8 +125,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addWayOrientedBoundingBox) {
         oss << "\n"
-            << prefix
-            << osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix << osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addWayMetadata) {
         oss << "\n"
@@ -149,6 +143,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
         oss << "\n"
             << prefix
             << osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO;
+      }
+      if (addAreaWayLinestrings) {
+        oss << "\n"
+            << prefix
+            << osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_INFO;
       }
     }
     if (simplifyWKT > 0) {
@@ -335,6 +334,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT,
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_LONG,
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_HELP);
+  auto addAreaWayLinestringsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT,
+          osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
+          osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_HELP);
   auto addRelationBorderMembersOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_SHORT,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
@@ -571,6 +575,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
     addAreaOrientedBoundingBox = addAreaOrientedBoundingBoxOp->is_set();
+    addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
     addRelationBorderMembers = addRelationBorderMembersOp->is_set();
 #if BOOST_VERSION >= 107800
     addRelationConvexHull = addRelationConvexHullOp->is_set();
