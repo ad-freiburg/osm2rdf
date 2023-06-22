@@ -108,6 +108,23 @@ bool osm2rdf::osm::Way::closed() const noexcept {
 }
 
 // ____________________________________________________________________________
+bool osm2rdf::osm::Way::isArea() const noexcept {
+  if (_nodes.size() < 4) {
+    return false;
+  }
+  if (!closed()) {
+    return false;
+  }
+  const auto& areaTag = _tags.find("area");
+  if (areaTag != _tags.end()) {
+    if (areaTag->second == "no") {
+      return false;
+    }
+  }
+  return true;
+}
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Way::operator==(
     const osm2rdf::osm::Way& other) const noexcept {
   return _id == other._id && _envelope == other._envelope &&

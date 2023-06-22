@@ -17,6 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/FactHandler.h"
+
 #include <iomanip>
 #include <iostream>
 
@@ -25,7 +27,6 @@
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
-#include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/Way.h"
@@ -36,10 +37,10 @@ using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL;
+using osm2rdf::ttl::constants::IRI__OSM2RDF__POS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB;
-using osm2rdf::ttl::constants::IRI__OSM2RDF__POS;
 using osm2rdf::ttl::constants::IRI__OSM_NODE;
 using osm2rdf::ttl::constants::IRI__OSM_RELATION;
 using osm2rdf::ttl::constants::IRI__OSM_TAG;
@@ -81,7 +82,7 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   if (!_config.hasGeometryAsWkt) {
     const std::string& geomObj = _writer->generateIRI(
         NAMESPACE__OSM2RDF_GEOM, (area.fromWay() ? "wayarea_" : "relarea_") +
-                                std::to_string(area.objId()));
+                                     std::to_string(area.objId()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, area.geom());
@@ -96,7 +97,8 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
     writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
   }
   if (_config.addAreaOrientedBoundingBox) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB, area.orientedBoundingBox());
+    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
+                       area.orientedBoundingBox());
   }
 
   if (_config.addSortMetadata) {
@@ -146,7 +148,8 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
     writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, node.envelope());
   }
   if (_config.addNodeOrientedBoundingBox) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB, node.orientedBoundingBox());
+    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
+                       node.orientedBoundingBox());
   }
 }
 
@@ -305,14 +308,16 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   osm2rdf::geometry::Linestring locations{way.geom()};
   size_t numUniquePoints = locations.size();
 
-  if (!_config.hasGeometryAsWkt) {
-    const std::string& geomObj = _writer->generateIRI(
-        NAMESPACE__OSM2RDF, "way_" + std::to_string(way.id()));
+  if (!way.isArea()) {
+    if (!_config.hasGeometryAsWkt) {
+      const std::string& geomObj = _writer->generateIRI(
+          NAMESPACE__OSM2RDF, "way_" + std::to_string(way.id()));
 
-    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
-    writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, locations);
-  } else {
-    writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, locations);
+      _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
+      writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, locations);
+    } else {
+      writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, locations);
+    }
   }
 
   if (_config.addWayConvexHull) {
