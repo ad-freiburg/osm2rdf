@@ -53,8 +53,10 @@ using osm2rdf::osm::Relation;
 using osm2rdf::osm::SpatialAreaRefValue;
 using osm2rdf::osm::Way;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
+using osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
+using osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
@@ -749,8 +751,10 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 #pragma omp parallel for shared(                                       \
         vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,         \
             osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
+            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,            \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,       \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,          \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,     \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
             progressBar, entryCount)                                   \
@@ -787,9 +791,11 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
       skip.insert(areaId);
       skip.insert(successors.begin(), successors.end());
 
-      writeTransitiveClosure(successors, entryIRI, IRI__OSM2RDF_INTERSECTS_AREA,
-                             IRI__OSM2RDF_INTERSECTS_AREA);
-      writeTransitiveClosure(successors, entryIRI, IRI__OSM2RDF_CONTAINS_AREA);
+      writeTransitiveClosure(successors, entryIRI,
+                             IRI__OPENGIS_INTERSECTS,
+                             IRI__OPENGIS_INTERSECTS);
+      writeTransitiveClosure(successors, entryIRI,
+                             IRI__OPENGIS_CONTAINS);
     }
 
     // intersect relation, use R-Tree
@@ -823,8 +829,8 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
         // transitive closure
         writeTransitiveClosure(successors, entryIRI,
-                               IRI__OSM2RDF_INTERSECTS_AREA,
-                               IRI__OSM2RDF_INTERSECTS_AREA);
+                               IRI__OPENGIS_INTERSECTS,
+                               IRI__OPENGIS_INTERSECTS);
 
         _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_AREA, entryIRI);
         _writer->writeTriple(entryIRI, IRI__OSM2RDF_INTERSECTS_AREA, areaIRI);
@@ -899,7 +905,9 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
 #pragma omp parallel for shared(                                       \
         osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                   \
             osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,          \
+            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,          \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,            \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
             progressBar, entryCount, ia)                               \
     reduction(+ : intersectStats, containsStats) default(none)         \
@@ -951,8 +959,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
 
           // transitive closure
           writeTransitiveClosure(successors, entryIRI,
-                                 IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                 IRI__OSM2RDF_INTERSECTS_NON_AREA);
+                                 IRI__OPENGIS_INTERSECTS,
+                                 IRI__OPENGIS_INTERSECTS);
 
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                entryIRI);
@@ -975,7 +983,7 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
 
             // transitive closure
             writeTransitiveClosure(successors, entryIRI,
-                                   IRI__OSM2RDF_CONTAINS_NON_AREA);
+                                   IRI__OPENGIS_CONTAINS);
 
             _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA,
                                  entryIRI);
@@ -1096,7 +1104,9 @@ GeometryHandler<W>::dumpNodeRelations() {
         std::cout, osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,             \
             osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                     \
             osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,                \
+            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,                  \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,         \
+            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,                \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,       \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, nodeData, \
             progressBar, ia, entryCount) reduction(+ : stats) default(none)  \
@@ -1165,10 +1175,10 @@ GeometryHandler<W>::dumpNodeRelations() {
 
         // transitive closure
         writeTransitiveClosure(successors, nodeIRI,
-                               IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                               IRI__OSM2RDF_INTERSECTS_AREA);
+                               IRI__OPENGIS_INTERSECTS,
+                               IRI__OPENGIS_INTERSECTS);
         writeTransitiveClosure(successors, nodeIRI,
-                               IRI__OSM2RDF_CONTAINS_NON_AREA);
+                               IRI__OPENGIS_CONTAINS);
 
         _writer->writeTriple(
             areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -1252,8 +1262,10 @@ void GeometryHandler<W>::dumpWayRelations(
 #pragma omp parallel for shared(                                           \
         std::cout, std::cerr, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
             nodeData, osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,    \
+            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,              \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,     \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,         \
+            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,                \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,       \
             progressBar, entryCount, ia)                                   \
     reduction(+ : intersectStats, containsStats) default(none)             \
@@ -1340,8 +1352,8 @@ void GeometryHandler<W>::dumpWayRelations(
 
           // transitive closure
           writeTransitiveClosure(successors, wayIRI,
-                                 IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                 IRI__OSM2RDF_INTERSECTS_AREA);
+                                 IRI__OPENGIS_INTERSECTS,
+                                 IRI__OPENGIS_INTERSECTS);
 
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                wayIRI);
@@ -1359,8 +1371,8 @@ void GeometryHandler<W>::dumpWayRelations(
 
           // transitive closure
           writeTransitiveClosure(successors, wayIRI,
-                                 IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                 IRI__OSM2RDF_INTERSECTS_AREA);
+                                 IRI__OPENGIS_INTERSECTS,
+                                 IRI__OPENGIS_INTERSECTS);
 
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                wayIRI);
@@ -1375,8 +1387,8 @@ void GeometryHandler<W>::dumpWayRelations(
 
           // transitive closure
           writeTransitiveClosure(successors, wayIRI,
-                                 IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                 IRI__OSM2RDF_INTERSECTS_AREA);
+                                 IRI__OPENGIS_INTERSECTS,
+                                 IRI__OPENGIS_INTERSECTS);
 
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                wayIRI);
@@ -1421,9 +1433,12 @@ void GeometryHandler<W>::dumpWayRelations(
 
           // transitive closure
           writeTransitiveClosure(successors, wayIRI,
-                                 IRI__OSM2RDF_CONTAINS_NON_AREA);
+                                 IRI__OPENGIS_CONTAINS);
+         if (_config.writeGeomRelTransClosure) {
+           _writer->writeTriple(areaIRI, IRI__OPENGIS_CONTAINS, wayIRI);
+         }
 
-          _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA, wayIRI);
+         _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA, wayIRI);
         }
       }
 #pragma omp critical(progress)

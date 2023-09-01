@@ -43,8 +43,10 @@ inline std::string IRI__GEOSPARQL__AS_WKT;
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
 
+inline std::string IRI__OPENGIS_CONTAINS;
 inline std::string IRI__OSM2RDF_CONTAINS_NON_AREA;
 inline std::string IRI__OSM2RDF_CONTAINS_AREA;
+inline std::string IRI__OPENGIS_INTERSECTS;
 inline std::string IRI__OSM2RDF_INTERSECTS_NON_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_AREA;
 
