@@ -100,6 +100,9 @@ struct Config {
   // Transitive clouse
   bool writeGeomRelTransClosure = false;
 
+  // write simple contains and intersects relations
+  bool writeSimpleGeomRels;
+
   // Output, empty for stdout
   std::filesystem::path output;
   std::string outputFormat = "qlever";

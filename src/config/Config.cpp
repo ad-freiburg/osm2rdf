@@ -201,6 +201,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << prefix
           << osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_INFO;
     }
+    if (writeSimpleGeomRels) {
+      oss << "\n"
+          << prefix
+          << osm2rdf::config::constants::WRITE_SIMPLE_GEOM_REL_INFO;
+    }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
   if (writeDAGDotFiles) {
@@ -307,6 +312,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT,
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG,
           osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP);
+  auto writeSimpleGeomRelOp =
+      parser.add<popl::Switch>(
+          osm2rdf::config::constants::WRITE_SIMPLE_GEOM_REL_OPTION_SHORT,
+          osm2rdf::config::constants::WRITE_SIMPLE_GEOM_REL_OPTION_LONG,
+          osm2rdf::config::constants::WRITE_SIMPLE_GEOM_REL_OPTION_HELP);
 
     auto addAreaConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
         osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_SHORT,
@@ -515,6 +525,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
 
     writeGeomRelTransClosure = writeGeomRelTransClosureOp->is_set();
+    writeSimpleGeomRels = writeSimpleGeomRelOp->is_set();
 
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();
