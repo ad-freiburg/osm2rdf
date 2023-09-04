@@ -106,7 +106,7 @@ const static inline std::string GEOM_REL_TRANS_REDUCE_INFO =
     "Only writing transitive reduction of contains relation";
 const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_SHORT = "";
 const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_LONG =
-    "transitive-reduction"
+    "transitive-reduction";
 const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_HELP =
     "Only write transitive reduction of contains relation";
 
