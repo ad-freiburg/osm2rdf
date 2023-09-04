@@ -98,7 +98,10 @@ struct Config {
   uint16_t wktPrecision = 7;
 
   // Transitive clouse
-  bool writeGeomRelTransClosure = false;
+  bool computeTransRed = true;
+
+  // write simple contains and intersects relations
+  bool writeSplitGeomRels = false;
 
   // Output, empty for stdout
   std::filesystem::path output;

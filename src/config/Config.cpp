@@ -196,10 +196,15 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
           << prefix << osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INFO
           << std::to_string(simplifyGeometries);
     }
-    if (writeGeomRelTransClosure) {
+    if (computeTransRed) {
       oss << "\n"
           << prefix
-          << osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_INFO;
+          << osm2rdf::config::constants::GEOM_REL_TRANS_REDUCE_INFO;
+    }
+    if (writeSplitGeomRels) {
+      oss << "\n"
+          << prefix
+          << osm2rdf::config::constants::WRITE_SPLIT_GEOM_REL_INFO;
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
@@ -302,11 +307,16 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_SHORT,
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_HELP);
-  auto writeGeomRelTransClosureOp =
+  auto computeGeomRelTransRedOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
-          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT,
-          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG,
-          osm2rdf::config::constants::WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP);
+          osm2rdf::config::constants::GEOM_REL_TRANS_REDUCE_OPTION_SHORT,
+          osm2rdf::config::constants::GEOM_REL_TRANS_REDUCE_OPTION_LONG,
+          osm2rdf::config::constants::GEOM_REL_TRANS_REDUCE_OPTION_HELP);
+  auto writeSplitGeomRelOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::WRITE_SPLIT_GEOM_REL_OPTION_SHORT,
+          osm2rdf::config::constants::WRITE_SPLIT_GEOM_REL_OPTION_LONG,
+          osm2rdf::config::constants::WRITE_SPLIT_GEOM_REL_OPTION_HELP);
 
     auto addAreaConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
         osm2rdf::config::constants::ADD_AREA_CONVEX_HULL_OPTION_SHORT,
@@ -514,7 +524,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
     noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
 
-    writeGeomRelTransClosure = writeGeomRelTransClosureOp->is_set();
+    computeTransRed = computeGeomRelTransRedOp->is_set();
+    writeSplitGeomRels = writeSplitGeomRelOp->is_set();
 
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();

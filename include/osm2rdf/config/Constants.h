@@ -102,13 +102,21 @@ const static inline std::string NO_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump geometric relations";
 
-const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_INFO =
-    "Not dumping geometric relations";
-const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_SHORT = "";
-const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_LONG =
-    "write-transitive-closure";
-const static inline std::string WRITE_GEOM_REl_TRANS_CLOSURE_OPTION_HELP =
-    "Write the transitive closure of all geometric relations";
+const static inline std::string GEOM_REL_TRANS_REDUCE_INFO =
+    "Only writing transitive reduction of contains relation";
+const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_SHORT = "";
+const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_LONG =
+    "transitive-reduction"
+const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_HELP =
+    "Only write transitive reduction of contains relation";
+
+const static inline std::string WRITE_SPLIT_GEOM_REL_INFO =
+    "Writing deprecated contains and intersects relations with suffix _area and _nonarea";
+const static inline std::string WRITE_SPLIT_GEOM_REL_OPTION_SHORT = "";
+const static inline std::string WRITE_SPLIT_GEOM_REL_OPTION_LONG =
+    "write-osm2rdf-contains-and-intersects-triples";
+const static inline std::string WRITE_SPLIT_GEOM_REL_OPTION_HELP =
+    "Write deprecated contains and intersects relations with suffix _area and _nonarea";
 
 const static inline std::string NO_AREA_OPTION_SHORT = "";
 const static inline std::string NO_AREA_OPTION_LONG = "no-areas";
