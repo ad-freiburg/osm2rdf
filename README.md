@@ -1,5 +1,24 @@
 # osm2rdf
-Convert OpenStreetMap (OSM) data to Turtle (TTL). `osm2rdf` converts various formats using [Libosmium](https://github.com/osmcode/libosmium) into valid rdf files.
+
+`osm2rdf` is a tool for converting the complete [OpenStreetMap](https://www.openstreetmap.org) (OSM) data to [RDF Turtle](https://www.w3.org/TR/turtle) (TTL). The produced triples include:
+
+1. One triple `<o> <key> <value>` for each key-value pair (called "tag" in OSM) of each object.
+2. One triple `<o> geo:hasGeometry <wkt>` for the shape of each object (using [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) to represent the shape).
+3. One triple `<o1> geo:sfContains <o2>` for each pair of objects, where `<o1>` geometrically contains `<o2>`.
+4. One triple `<o1> geo:sfContains <o2>` for each pair of objects, where `<o1>` geometrically intersects `<o2>`.
+5. Triples for various other kinds of information (see `osm2rdf --help` for the many options of the tool).
+
+For the complete OSM data, the tool takes around 15 hours on standard hardware and produces around 40 billion triples with a size of around 200 GB for the compressed TTL file. 
+
+## Accompanying services and materials
+
+Weekly updated downloads for the complete data as well as for each individual country are provided on https://osm2rdf.cs.uni-freiburg.de .
+
+A SPARQL endpoint (based on [the QLever SPARQL engine](https://github.com/ad-freiburg/qlever)) for the complete OSM data is available under https://qlever.cs.uni-freiburg.de/osm-planet . The UI provides many example queries (click on the "Examples" button).
+
+The basic method behind `osm2rdf` is described in [this SIGSPATIAL'21 paper](https://ad-publications.cs.uni-freiburg.de/SIGSPATIAL_osm2rdf_BBKL_2021.pdf).
+
+The algorithm behind computing the predicates `geo:sfContains` and `geo:sfIntersects` will be published soon. For the complete OSM data, there are around 2 billion non-trivial geometric objects (this count excludes points that are merely base points of more complex shapes). It is very challenging to compute geometric relations between such a large number of objects in finite time.
 
 ## Getting started
 
