@@ -94,29 +94,21 @@ const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
 const static inline std::string NO_FACTS_OPTION_HELP = "Do not dump facts";
 
-const static inline std::string NO_GEOM_RELATIONS_INFO =
-    "Not dumping geometric relations";
-const static inline std::string NO_GEOM_RELATIONS_OPTION_SHORT = "";
-const static inline std::string NO_GEOM_RELATIONS_OPTION_LONG =
-    "no-geometric-relations";
-const static inline std::string NO_GEOM_RELATIONS_OPTION_HELP =
-    "Do not dump geometric relations";
+const static inline std::string OSM2RDF_GEO_TRIPLES_INFO =
+    "Writing mode of osm2rdf-style geometric triples";
+const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_SHORT = "";
+const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_LONG =
+    "write-osm2rdf-geo-triples";
+const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_HELP =
+    "Writing of osm2rdf-style geometric triples, either 'full', 'reduced', or 'none'";
 
-const static inline std::string GEOM_REL_TRANS_REDUCE_INFO =
-    "Only writing transitive reduction of contains relation";
-const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_SHORT = "";
-const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_LONG =
-    "transitive-reduction";
-const static inline std::string GEOM_REL_TRANS_REDUCE_OPTION_HELP =
-    "Only write transitive reduction of contains relation";
-
-const static inline std::string WRITE_SPLIT_GEOM_REL_INFO =
-    "Writing deprecated contains and intersects relations with suffix _area and _nonarea";
-const static inline std::string WRITE_SPLIT_GEOM_REL_OPTION_SHORT = "";
-const static inline std::string WRITE_SPLIT_GEOM_REL_OPTION_LONG =
-    "write-osm2rdf-contains-and-intersects-triples";
-const static inline std::string WRITE_SPLIT_GEOM_REL_OPTION_HELP =
-    "Write deprecated contains and intersects relations with suffix _area and _nonarea";
+const static inline std::string OGC_GEO_TRIPLES_INFO =
+    "Writing mode of OGC-style geometric triples";
+const static inline std::string OGC_GEO_TRIPLES_OPTION_SHORT = "";
+const static inline std::string OGC_GEO_TRIPLES_OPTION_LONG =
+    "write-ogc-geo-triples";
+const static inline std::string OGC_GEO_TRIPLES_OPTION_HELP =
+    "Writing of OGC-style geometric triples, either 'full', 'reduced', or 'none'";
 
 const static inline std::string NO_AREA_OPTION_SHORT = "";
 const static inline std::string NO_AREA_OPTION_LONG = "no-areas";
