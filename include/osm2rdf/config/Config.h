@@ -30,6 +30,12 @@
 
 namespace osm2rdf::config {
 
+enum GeoTriplesMode {
+  none = 0,
+  reduced = 1,
+  full = 2
+};
+
 struct Config {
   // Select what to do
   std::string storeLocationsOnDisk;
@@ -97,8 +103,8 @@ struct Config {
   double wktDeviation = 5;
   uint16_t wktPrecision = 7;
 
-  // Transitive clouse
-  bool writeGeomRelTransClosure = false;
+  GeoTriplesMode ogcGeoTriplesMode = full;
+  GeoTriplesMode osm2rdfGeoTriplesMode = none;
 
   // Output, empty for stdout
   std::filesystem::path output;
