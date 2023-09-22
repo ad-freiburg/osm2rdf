@@ -1,0 +1,31 @@
+name: Docker build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  merge_group:
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [ Dockerfile]
+
+    steps:
+      - name: Checkout the repository 
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Docker build
+        run: |
+          docker build -f ${{matrix.dockerfile}} -t osm2rdf .
+          docker run --rm osm2rdf
