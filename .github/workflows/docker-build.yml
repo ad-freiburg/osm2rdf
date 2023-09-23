@@ -52,6 +52,6 @@ jobs:
           docker logs qlever
           RESULT_JSON=$(curl http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }")
           echo "${RESULT_JSON}"
-          NUM_GEOMS=$(echo "${RESULT_JSON}" | jq --exit-status .results.bindings[0].count.value)
-          echo ${NUM_GEOMS}
+          NUM_GEOMS=$(echo "${RESULT_JSON}" | jq --exit-status --raw-output .results.bindings[0].count.value)
+          echo ${NUM_GEOMS} | numfmt --grouping
           test ${NUM_GEOMS} -gt 100000
