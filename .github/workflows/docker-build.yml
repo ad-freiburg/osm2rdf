@@ -23,7 +23,7 @@ jobs:
       - name: Checkout the repository 
         uses: actions/checkout@v3
         with:
-          submodules: 'recursive'
+          submodules: "recursive"
 
       - name: Docker build
         run: |
@@ -38,3 +38,10 @@ jobs:
           docker run --rm -v $(pwd):/data osm2rdf /data/osm-malta.pbf -o /data/osm-malta.ttl
           ls -l osm-malta.pbf osm-malta.ttl.bz2
           docker run --rm -v $(pwd):/data stain/jena riot --validate /data/osm-malta.ttl.bz2
+
+      - name: Build QLever index and count the number of geometries
+        run: |
+          cd osm-malta
+          docker run -u $(id -u):$(id -g) -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "bzcat osm-malta.ttl.bz2 | IndexBuilderMain -F ttl -f - -i osm-malta"
+          docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "ServerMain -i /data/osm-malta -p 7000"
+          curl -s http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }" | jq --exit-status .results.bindings[0].count.value
