@@ -43,5 +43,7 @@ jobs:
         run: |
           cd osm-malta
           docker run -u $(id -u):$(id -g) -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "bzcat osm-malta.ttl.bz2 | IndexBuilderMain -F ttl -f - -i osm-malta"
-          docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "ServerMain -i /data/osm-malta -p 7000"
-          curl -s http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }" | jq --exit-status .results.bindings[0].count.value
+          docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash --name qlever adfreiburg/qlever -c "ServerMain -i /data/osm-malta -p 7000"
+          sleep 5
+          docker logs qlever
+          curl http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }" | jq --exit-status .results.bindings[0].count.value
