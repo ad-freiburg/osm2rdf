@@ -37,4 +37,4 @@ jobs:
           ls -l osm-malta.pbf
           docker run --rm -v $(pwd):/data osm2rdf /data/osm-malta.pbf -o /data/osm-malta.ttl
           ls -l osm-malta.pbf osm-malta.ttl.bz2
-          docker run -it --rm -v $(pwd):/data stain/jena riot --validate /data/osm-malta.ttl.bz2
+          docker run --rm -v $(pwd):/data stain/jena riot --validate /data/osm-malta.ttl.bz2
