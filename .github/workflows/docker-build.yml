@@ -1,4 +1,4 @@
-name: Docker build
+name: End-to-end test (docker build)
 
 on:
   push:
@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   build:
+    name: End-to-end test (docker build)
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -25,7 +26,7 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Docker build
+      - name: Build the docker image
         run: |
           set -v
           docker build -f ${{matrix.dockerfile}} -t osm2rdf .
@@ -49,4 +50,8 @@ jobs:
           docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash --name qlever adfreiburg/qlever -c "ServerMain -i /data/osm-malta -p 7000"
           sleep 5
           docker logs qlever
-          curl http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }" | jq --exit-status .results.bindings[0].count.value
+          RESULT_JSON=$(curl http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }")
+          echo "${RESULT_JSON}"
+          NUM_GEOMS=$(echo "${RESULT_JSON}" | jq --exit-status .results.bindings[0].count.value)
+          echo ${NUM_GEOMS}
+          test ${NUM_GEOMS} -gt 100000
