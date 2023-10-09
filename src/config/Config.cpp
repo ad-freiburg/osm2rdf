@@ -178,7 +178,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_CONTAINS;
-  std::string modeStrings[3] = {"none", "full", "reduced"};
+  std::string modeStrings[3] = {"none", "reduced", "full"};
   oss << "\n"
       << prefix << osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_INFO << ": "
       << (modeStrings[osm2rdfGeoTriplesMode]);
