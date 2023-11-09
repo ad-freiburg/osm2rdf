@@ -299,7 +299,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly);
 
   // Calculate relations for each node.
-  NodesContainedInAreasData dumpNodeRelations();
+  void dumpNodeRelations();
   FRIEND_TEST(OSM_GeometryHandler, noNodeGeometricRelations);
   FRIEND_TEST(OSM_GeometryHandler, dumpNodeRelationsEmpty1);
   FRIEND_TEST(OSM_GeometryHandler, dumpNodeRelationsEmpty2);
@@ -307,8 +307,7 @@ class GeometryHandler {
   FRIEND_TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains);
 
   // Calculate relations for each way.
-  void dumpWayRelations(
-      const osm2rdf::osm::NodesContainedInAreasData& nodeData);
+  void dumpWayRelations();
   FRIEND_TEST(OSM_GeometryHandler, noWayGeometricRelations);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsEmpty1);
   FRIEND_TEST(OSM_GeometryHandler, dumpWayRelationsEmpty2);

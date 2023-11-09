@@ -1794,8 +1794,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  const auto nd = gh.dumpNodeRelations();
-  ASSERT_EQ(1, nd.size());
+  gh.dumpNodeRelations();
 
   output.flush();
   output.close();
@@ -1915,8 +1914,7 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  const auto nd = gh.dumpNodeRelations();
-  ASSERT_EQ(1, nd.size());
+  gh.dumpNodeRelations();
 
   output.flush();
   output.close();
@@ -1956,7 +1954,7 @@ TEST(OSM_GeometryHandler, noWayGeometricRelations) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations();
 
   output.flush();
   output.close();
@@ -1992,7 +1990,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsEmpty1) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations();
 
   output.flush();
   output.close();
@@ -2088,7 +2086,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsEmpty2) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations();
 
   output.flush();
   output.close();
@@ -2207,7 +2205,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations();
 
   output.flush();
   output.close();
@@ -2331,7 +2329,7 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  gh.dumpWayRelations(osm2rdf::osm::NodesContainedInAreasData{});
+  gh.dumpWayRelations();
 
   output.flush();
   output.close();
@@ -2465,9 +2463,8 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  const auto nd = gh.dumpNodeRelations();
-  ASSERT_EQ(2, nd.size());
-  gh.dumpWayRelations(nd);
+  gh.dumpNodeRelations();
+  gh.dumpWayRelations();
 
   output.flush();
   output.close();
@@ -2614,9 +2611,8 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  const auto nd = gh.dumpNodeRelations();
-  ASSERT_EQ(1, nd.size());
-  gh.dumpWayRelations(nd);
+  gh.dumpNodeRelations();
+  gh.dumpWayRelations();
 
   output.flush();
   output.close();

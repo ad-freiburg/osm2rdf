@@ -525,8 +525,8 @@ void GeometryHandler<W>::calculateRelations() {
   prepareDAG();
   dumpNamedAreaRelations();
   dumpUnnamedAreaRelations();
-  const auto& nodeData = dumpNodeRelations();
-  dumpWayRelations(nodeData);
+  dumpNodeRelations();
+  dumpWayRelations();
 }
 
 // ____________________________________________________________________________
@@ -1134,10 +1134,8 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
 
 // ____________________________________________________________________________
 template <typename W>
-osm2rdf::osm::NodesContainedInAreasData
-GeometryHandler<W>::dumpNodeRelations() {
+void GeometryHandler<W>::dumpNodeRelations() {
   // Store for each node all relevant areas
-  NodesContainedInAreasData nodeData;
   if (_config.noNodeGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted() << " "
@@ -1175,7 +1173,7 @@ GeometryHandler<W>::dumpNodeRelations() {
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,       \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS,                \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS,                  \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA, nodeData, \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,           \
             progressBar, ia, entryCount) reduction(+ : stats) default(none)  \
     schedule(dynamic)
     for (size_t i = 0; i < _numNodes; i++) {
@@ -1280,8 +1278,6 @@ GeometryHandler<W>::dumpNodeRelations() {
               areaIRI, osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS, nodeIRI);
         }
       }
-#pragma omp critical(nodeDataChange)
-      std::copy(skip.begin(), skip.end(), std::back_inserter(nodeData[nodeId]));
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
     }
@@ -1317,13 +1313,11 @@ GeometryHandler<W>::dumpNodeRelations() {
               << (static_cast<double>(stats._totalChecks) / _numWays)
               << " areas checked per geometry on average" << std::endl;
   }
-  return nodeData;
 }
 
 // ____________________________________________________________________________
 template <typename W>
-void GeometryHandler<W>::dumpWayRelations(
-    const NodesContainedInAreasData& nodeData) {
+void GeometryHandler<W>::dumpWayRelations() {
   if (_config.noWayGeometricRelations) {
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted() << " "
@@ -1351,7 +1345,7 @@ void GeometryHandler<W>::dumpWayRelations(
     progressBar.update(entryCount);
 #pragma omp parallel for shared(                                           \
         std::cout, std::cerr, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
-            nodeData, osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,    \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,              \
             osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,              \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,     \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,         \
@@ -1385,17 +1379,6 @@ void GeometryHandler<W>::dumpWayRelations(
       SkipSet skipIntersects;
       SkipSet skipContains;
       std::unordered_set<Area::id_t> skipByContainedInInner;
-
-      // Store known areas in set.
-      for (const auto& nodeId : wayNodeIds) {
-        auto nodeDataIt = nodeData.find(nodeId);
-        if (nodeDataIt == nodeData.end()) {
-          continue;
-        }
-
-        skipNodeContained.insert(nodeDataIt->second.begin(),
-                                 nodeDataIt->second.end());
-      }
 
       const auto& queryResult = indexQryIntersect(way);
 
