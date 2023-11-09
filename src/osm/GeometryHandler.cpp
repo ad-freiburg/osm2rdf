@@ -1375,7 +1375,6 @@ void GeometryHandler<W>::dumpWayRelations() {
       std::string wayIRI = _writer->generateIRI(NAMESPACE__OSM_WAY, wayId);
 
       // Set containing all areas we are inside of
-      SkipSet skipNodeContained;
       SkipSet skipIntersects;
       SkipSet skipContains;
       std::unordered_set<Area::id_t> skipByContainedInInner;
@@ -1417,41 +1416,6 @@ void GeometryHandler<W>::dumpWayRelations() {
 
           geomRelInf.intersects = RelInfoValue::YES;
           geomRelInf.contained = RelInfoValue::YES;
-
-          const auto& successors =
-              _directedAreaGraph.findSuccessorsFast(areaId);
-          skipIntersects.insert(successors.begin(), successors.end());
-
-          std::string areaIRI =
-              _writer->generateIRI(areaNS(areaFromType), areaObjId);
-
-          if (_config.osm2rdfGeoTriplesMode) {
-            if (_config.osm2rdfGeoTriplesMode > 1) {
-              // transitive closure
-              writeTransitiveClosure(successors, wayIRI,
-                                     IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                     IRI__OSM2RDF_INTERSECTS_AREA);
-            }
-
-            _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                 wayIRI);
-            _writer->writeTriple(wayIRI, IRI__OSM2RDF_INTERSECTS_AREA, areaIRI);
-          }
-
-          if (_config.ogcGeoTriplesMode) {
-            if (_config.ogcGeoTriplesMode > 1) {
-              // transitive closure
-              writeTransitiveClosure(successors, wayIRI,
-                                     IRI__OPENGIS_INTERSECTS,
-                                     IRI__OPENGIS_INTERSECTS);
-            }
-
-            _writer->writeTriple(areaIRI, IRI__OPENGIS_INTERSECTS, wayIRI);
-            _writer->writeTriple(wayIRI, IRI__OPENGIS_INTERSECTS, areaIRI);
-          }
-        } else if (skipNodeContained.find(areaId) != skipNodeContained.end()) {
-          intersectStats.skippedByNodeContained();
-          geomRelInf.intersects = RelInfoValue::YES;
 
           const auto& successors =
               _directedAreaGraph.findSuccessorsFast(areaId);
@@ -1588,10 +1552,6 @@ void GeometryHandler<W>::dumpWayRelations() {
               << osm2rdf::util::formattedTimeSpacer << "         "
               << intersectStats.printSkippedByBorderContained()
               << " because A was part of B's ring\n"
-              << osm2rdf::util::formattedTimeSpacer << "         "
-              << intersectStats.printSkippedByNodeContained()
-              << " because a node of A is in a "
-                 "ring of B\n"
               << osm2rdf::util::formattedTimeSpacer << "         "
               << intersectStats.printSkippedByBox()
               << " by non-intersecting bounding boxes \n"

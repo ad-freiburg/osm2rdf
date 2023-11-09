@@ -57,7 +57,6 @@ struct GeomRelationStats {
   size_t _skippedByBoxIdIntersectCutout = 0;
   size_t _skippedByContainedInInnerRing = 0;
   size_t _skippedByBorderContained = 0;
-  size_t _skippedByNodeContained = 0;
   size_t _skippedByInner = 0;
   size_t _skippedByOuter = 0;
   size_t _skippedByBox = 0;
@@ -79,7 +78,6 @@ struct GeomRelationStats {
     _skippedByOrientedBox += lh._skippedByOrientedBox;
     _skippedByConvexHull += lh._skippedByConvexHull;
     _skippedByBorderContained += lh._skippedByBorderContained;
-    _skippedByNodeContained += lh._skippedByNodeContained;
     return *this;
   }
 
@@ -96,7 +94,6 @@ struct GeomRelationStats {
   void skippedByOrientedBox() { _skippedByOrientedBox++; }
   void skippedByConvexHull() { _skippedByConvexHull++; }
   void skippedByBorderContained() { _skippedByBorderContained++; }
-  void skippedByNodeContained() { _skippedByNodeContained++; }
   void fullCheck() { _fullChecks++; }
 
   [[nodiscard]] std::string printPercNum(size_t n) const {
@@ -145,9 +142,6 @@ struct GeomRelationStats {
   }
   [[nodiscard]] std::string printSkippedByOuter() const {
     return printPercNum(_skippedByOuter);
-  }
-  [[nodiscard]] std::string printSkippedByNodeContained() const {
-    return printPercNum(_skippedByNodeContained);
   }
   [[nodiscard]] std::string printFullChecks() const {
     return printPercNum(_fullChecks);
