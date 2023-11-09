@@ -109,6 +109,7 @@ bool osm2rdf::osm::Way::closed() const noexcept {
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Way::isArea() const noexcept {
+  // See libosmium/include/osmium/area/multipolygon_manager.hpp:154
   if (_nodes.size() < 4) {
     return false;
   }
