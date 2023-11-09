@@ -201,6 +201,14 @@ const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG =
 const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP =
     "Add oriented-bounding-box to areas";
 
+const static inline std::string ADD_AREA_WAY_LINESTRINGS_INFO =
+    "Adding linestrings for ways which form areas";
+const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT = "";
+const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_LONG =
+    "add-area-way-linestrings";
+const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_HELP =
+    "Add linestrings for ways which form areas";
+
 const static inline std::string HASGEOMETRY_AS_WKT_INFO =
     "Letting geo:hasGeometry point directly to WKT serialization literal";
 const static inline std::string HASGEOMETRY_AS_WKT_OPTION_SHORT = "";

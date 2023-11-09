@@ -437,6 +437,7 @@ TEST(E2E, building51NT) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -606,6 +607,7 @@ TEST(E2E, building51TTL) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -744,6 +746,7 @@ TEST(E2E, building51QLEVER) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -882,6 +885,7 @@ TEST(E2E, tf) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -977,6 +981,7 @@ TEST(E2E, building51inTF) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file

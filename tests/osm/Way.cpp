@@ -186,6 +186,90 @@ TEST(OSM_Way, FromClosedWayWithDuplicateNodes) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_Way, isAreaFalseForClosedWayWithoutArea) {
+    // Create osmium object
+    const size_t initial_buffer_size = 10000;
+    osmium::memory::Buffer buffer{initial_buffer_size,
+                                  osmium::memory::Buffer::auto_grow::yes};
+    osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                             osmium::builder::attr::_nodes({
+                                 {1, {48.0, 7.51}},
+                                 {2, {48.1, 7.61}},
+                                 {1, {48.0, 7.51}},
+                             }));
+
+    // Create osm2rdf object from osmium object
+    const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+    ASSERT_TRUE(w.closed());
+
+    ASSERT_FALSE(w.isArea());
+}
+
+// ____________________________________________________________________________
+TEST(OSM_Way, isAreaFalseForOpenWay) {
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.0, 7.61}},
+                               {1, {48.1, 7.61}},
+                               {1, {48.1, 7.51}},
+                           }));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+  ASSERT_FALSE(w.closed());
+
+  ASSERT_FALSE(w.isArea());
+}
+
+// ____________________________________________________________________________
+TEST(OSM_Way, isAreaTrueForTriangle) {
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.0, 7.61}},
+                               {1, {48.1, 7.61}},
+                               {1, {48.0, 7.51}},
+                           }));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+  ASSERT_TRUE(w.closed());
+
+  ASSERT_TRUE(w.isArea());
+}
+
+// ____________________________________________________________________________
+TEST(OSM_Way, isAreaFalseForTriangleMarkedAsNoArea) {
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer buffer{initial_buffer_size,
+                                osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_way(buffer, osmium::builder::attr::_id(42),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.51}},
+                               {2, {48.0, 7.61}},
+                               {1, {48.1, 7.61}},
+                               {1, {48.0, 7.51}},
+                           }),
+                           osmium::builder::attr::_tag("area", "no"));
+
+  // Create osm2rdf object from osmium object
+  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+  ASSERT_TRUE(w.closed());
+
+  ASSERT_FALSE(w.isArea());
+}
+
+// ____________________________________________________________________________
 TEST(OSM_Way, equalsOperator) {
   // Create osmium object
   const size_t initial_buffer_size = 10000;
