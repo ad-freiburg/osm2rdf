@@ -17,13 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/config/Config.h"
+
 #include <filesystem>
 #include <iostream>
 #include <string>
 
 #include "boost/version.hpp"
 #include "omp.h"
-#include "osm2rdf/config/Config.h"
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
 #include "popl.hpp"
@@ -66,7 +67,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addAreaOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_AREA_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addAreaEnvelopeRatio) {
         oss << "\n"
@@ -87,7 +89,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addNodeOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_NODE_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noRelationFacts) {
@@ -101,7 +104,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addRelationConvexHull) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_INFO;
       }
       if (addRelationEnvelope) {
         oss << "\n"
@@ -109,7 +113,9 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addRelationOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::
+                   ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO;
       }
     }
     if (noWayFacts) {
@@ -125,7 +131,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
       if (addWayOrientedBoundingBox) {
         oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO;
+            << prefix
+            << osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_INFO;
       }
       if (addWayMetadata) {
         oss << "\n"
