@@ -727,6 +727,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.ogcGeoTriplesMode = config::reduced;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -843,8 +844,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "contains_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
@@ -852,8 +852,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "intersects_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
@@ -861,8 +860,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "contains_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
@@ -870,8 +868,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "intersects_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
@@ -879,8 +876,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "contains_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
   ASSERT_THAT(
@@ -888,8 +884,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "intersects_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
   ASSERT_THAT(
@@ -897,8 +892,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       Not(::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "contains_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 15))));
   ASSERT_THAT(
@@ -906,8 +900,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "intersects_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 15)));
 
@@ -1030,8 +1023,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "contains_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
@@ -1039,8 +1031,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 14) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "intersects_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12)));
   ASSERT_THAT(
@@ -1048,8 +1039,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "contains_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
@@ -1057,8 +1047,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "intersects_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 13)));
   ASSERT_THAT(
@@ -1066,8 +1055,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "contains_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
   ASSERT_THAT(
@@ -1075,8 +1063,7 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
       ::testing::HasSubstr(
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 12) +
           " " +
-          writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
-                             "intersects_area") +
+          osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS +
           " " +
           writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, 11)));
 
@@ -1383,13 +1370,17 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_EQ(
-      "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
-      "osmrel:15 osm2rdf:intersects_nonarea osmway:11 .\n"
-      "osmway:13 osm2rdf:intersects_nonarea osmrel:15 .\n"
-      "osmrel:15 osm2rdf:intersects_nonarea osmway:13 .\n"
-      "osmway:12 osm2rdf:contains_nonarea osmrel:15 .\n",
-      printedData);
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:11 ogc:sfIntersects osmrel:15 .\n"
+                           "osmrel:15 ogc:sfIntersects osmway:11 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:13 ogc:sfIntersects osmrel:15 .\n"
+                           "osmrel:15 ogc:sfIntersects osmway:13 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:12 ogc:sfContains osmrel:15 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1511,11 +1502,13 @@ TEST(OSM_GeometryHandler, dumpUnnamedAreaRelationsSimpleContainsOnly) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_EQ(
-      "osmway:11 osm2rdf:intersects_nonarea osmrel:15 .\n"
-      "osmrel:15 osm2rdf:intersects_nonarea osmway:11 .\n"
-      "osmway:11 osm2rdf:contains_nonarea osmrel:15 .\n",
-      printedData);
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:11 ogc:sfIntersects osmrel:15 .\n"
+                           "osmrel:15 ogc:sfIntersects osmway:11 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:11 ogc:sfContains osmrel:15 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1800,11 +1793,13 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_EQ(
-      "osmway:13 osm2rdf:intersects_nonarea osmnode:42 .\n"
-      "osmnode:42 osm2rdf:intersects_area osmway:13 .\n"
-      "osmway:13 osm2rdf:contains_nonarea osmnode:42 .\n",
-      printedData);
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:12 ogc:sfIntersects osmnode:42 .\n"
+                           "osmnode:42 ogc:sfIntersects osmway:12 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:13 ogc:sfContains osmnode:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1920,11 +1915,13 @@ TEST(OSM_GeometryHandler, dumpNodeRelationsSimpleContains) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_EQ(
-      "osmway:11 osm2rdf:intersects_nonarea osmnode:42 .\n"
-      "osmnode:42 osm2rdf:intersects_area osmway:11 .\n"
-      "osmway:11 osm2rdf:contains_nonarea osmnode:42 .\n",
-      printedData);
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:12 ogc:sfIntersects osmnode:42 .\n"
+                           "osmnode:42 ogc:sfIntersects osmway:12 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:11 ogc:sfContains osmnode:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -2211,13 +2208,17 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersects) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_EQ(
-      "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
-      "osmway:42 osm2rdf:intersects_area osmway:11 .\n"
-      "osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"
-      "osmway:42 osm2rdf:intersects_area osmway:13 .\n"
-      "osmway:12 osm2rdf:contains_nonarea osmway:42 .\n",
-      printedData);
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:11 ogc:sfIntersects osmway:42 .\n"
+                           "osmway:42 ogc:sfIntersects osmway:11 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:13 ogc:sfIntersects osmway:42 .\n"
+                           "osmway:42 ogc:sfIntersects osmway:13 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("osmway:12 ogc:sfContains osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -2335,299 +2336,27 @@ TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContains) {
   output.close();
 
   const std::string printedData = coutBuffer.str();
-  ASSERT_EQ(
-      "osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
-      "osmway:42 osm2rdf:intersects_area osmway:11 .\n"
-      "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n",
-      printedData);
-
-  // Reset std::cerr and std::cout
-  std::cerr.rdbuf(cerrBufferOrig);
-  std::cout.rdbuf(coutBufferOrig);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_GeometryHandler, dumpWayRelationsSimpleIntersectsWithNodeInfo) {
-  // Capture std::cerr and std::cout
-  std::stringstream cerrBuffer;
-  std::stringstream coutBuffer;
-  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
-  std::streambuf* coutBufferOrig = std::cout.rdbuf();
-  std::cerr.rdbuf(cerrBuffer.rdbuf());
-  std::cout.rdbuf(coutBuffer.rdbuf());
-
-  osm2rdf::config::Config config;
-  config.output = "";
-  config.outputCompress = false;
-  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  osm2rdf::util::Output output{config, config.output};
-  output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
-  osm2rdf::osm::GeometryHandler gh{config, &writer};
-
-  // Create osmium objects
-  /*
-           28 (14)
-             |
-           24 (12)
-            /  \
-     22 (11)    26 (13)
-   */
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer6{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer7{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(osmiumBuffer1, osmium::builder::attr::_id(22),
-                            osmium::builder::attr::_tag("name", "22"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.61}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }));
-  osmium::builder::add_area(osmiumBuffer2, osmium::builder::attr::_id(24),
-                            osmium::builder::attr::_tag("name", "24"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {40.0, 7.00}},
-                                {2, {40.0, 8.00}},
-                                {3, {50.0, 8.00}},
-                                {4, {50.0, 7.00}},
-                                {1, {40.0, 7.00}},
-                            }));
-  osmium::builder::add_area(osmiumBuffer3, osmium::builder::attr::_id(26),
-                            osmium::builder::attr::_tag("name", "26"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {40.0, 7.51}},
-                                {2, {40.0, 7.61}},
-                                {3, {40.1, 7.61}},
-                                {4, {40.1, 7.51}},
-                                {1, {40.0, 7.51}},
-                            }));
-  osmium::builder::add_area(osmiumBuffer4, osmium::builder::attr::_id(28),
-                            osmium::builder::attr::_tag("name", "28"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {20.0, 0.51}},
-                                {2, {20.0, 10.61}},
-                                {3, {50.1, 10.61}},
-                                {4, {50.1, 0.51}},
-                                {1, {20.0, 0.51}},
-                            }));
-  osmium::builder::add_way(osmiumBuffer5, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {40.1, 7.51}},
-                               {2, {48.1, 7.61}},
-                               {3, {48.2, 7.61}},
-                               {4, {48.2, 7.71}},
-                           }));
-  osmium::builder::add_node(
-      osmiumBuffer6, osmium::builder::attr::_id(1),
-      osmium::builder::attr::_location(osmium::Location(40.1, 7.51)),
-      osmium::builder::attr::_tag("foo", "bar"));
-  osmium::builder::add_node(
-      osmiumBuffer7, osmium::builder::attr::_id(2),
-      osmium::builder::attr::_location(osmium::Location(48.1, 7.61)),
-      osmium::builder::attr::_tag("foo", "bar"));
-
-  // Create osm2rdf object from osmium object
-  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
-  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
-  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
-  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
-
-  area1.finalize();
-  area2.finalize();
-  area3.finalize();
-  area4.finalize();
-
-  gh.area(area1);
-  gh.area(area2);
-  gh.area(area3);
-  gh.area(area4);
-
-  gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
-  gh.node(osm2rdf::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
-  gh.node(osm2rdf::osm::Node(osmiumBuffer7.get<osmium::Node>(0)));
-  gh.flushExternalStorage();
-  gh.prepareRTree();
-  gh.prepareDAG();
-
-  gh.dumpNodeRelations();
-  gh.dumpWayRelations();
-
-  output.flush();
-  output.close();
-
-  const std::string printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:13 osm2rdf:intersects_nonarea osmnode:1 .\n"));
+      ::testing::HasSubstr("osmway:11 ogc:sfIntersects osmway:42 .\n"
+                           "osmway:42 ogc:sfIntersects osmway:11 .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:13 osm2rdf:contains_nonarea osmnode:1 .\n"));
+      ::testing::HasSubstr("osmway:11 ogc:sfContains osmway:42 .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr(
-                           "osmway:11 osm2rdf:contains_nonarea osmnode:2 .\n"));
+      ::testing::HasSubstr("osmway:12 ogc:sfIntersects osmway:42 .\n"
+                           "osmway:42 ogc:sfIntersects osmway:12 .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
-                           ));
+      ::testing::HasSubstr("osmway:12 ogc:sfContains osmway:42 .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"));
+      ::testing::HasSubstr("osmway:14 ogc:sfIntersects osmway:42 .\n"
+                           "osmway:42 ogc:sfIntersects osmway:14 .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:13 osm2rdf:intersects_nonarea osmway:42 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:12 osm2rdf:contains_nonarea osmway:42 .\n"));
-
-  // Reset std::cerr and std::cout
-  std::cerr.rdbuf(cerrBufferOrig);
-  std::cout.rdbuf(coutBufferOrig);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_GeometryHandler, dumpWayRelationsSimpleContainsWithNodeInfo) {
-  // Capture std::cerr and std::cout
-  std::stringstream cerrBuffer;
-  std::stringstream coutBuffer;
-  std::streambuf* cerrBufferOrig = std::cerr.rdbuf();
-  std::streambuf* coutBufferOrig = std::cout.rdbuf();
-  std::cerr.rdbuf(cerrBuffer.rdbuf());
-  std::cout.rdbuf(coutBuffer.rdbuf());
-
-  osm2rdf::config::Config config;
-  config.output = "";
-  config.outputCompress = false;
-  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  osm2rdf::util::Output output{config, config.output};
-  output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
-  osm2rdf::osm::GeometryHandler gh{config, &writer};
-
-  // Create osmium objects
-  /*
-           28 (14)
-             |
-           24 (12)
-            /  \
-     22 (11)    26 (13)
-   */
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer6{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(osmiumBuffer1, osmium::builder::attr::_id(22),
-                            osmium::builder::attr::_tag("name", "22"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.61}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }));
-  osmium::builder::add_area(osmiumBuffer2, osmium::builder::attr::_id(24),
-                            osmium::builder::attr::_tag("name", "24"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {40.0, 7.00}},
-                                {2, {40.0, 8.00}},
-                                {3, {50.0, 8.00}},
-                                {4, {50.0, 7.00}},
-                                {1, {40.0, 7.00}},
-                            }));
-  osmium::builder::add_area(osmiumBuffer3, osmium::builder::attr::_id(26),
-                            osmium::builder::attr::_tag("name", "26"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {40.0, 7.51}},
-                                {2, {40.0, 7.61}},
-                                {3, {40.1, 7.61}},
-                                {4, {40.1, 7.51}},
-                                {1, {40.0, 7.51}},
-                            }));
-  osmium::builder::add_area(osmiumBuffer4, osmium::builder::attr::_id(28),
-                            osmium::builder::attr::_tag("name", "28"),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {20.0, 0.51}},
-                                {2, {20.0, 10.61}},
-                                {3, {50.1, 10.61}},
-                                {4, {50.1, 0.51}},
-                                {1, {20.0, 0.51}},
-                            }));
-  osmium::builder::add_way(osmiumBuffer5, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.02, 7.52}},
-                               {2, {48.04, 7.53}},
-                               {3, {48.06, 7.59}},
-                               {4, {48.08, 7.55}},
-                           }));
-  osmium::builder::add_node(
-      osmiumBuffer6, osmium::builder::attr::_id(2),
-      osmium::builder::attr::_location(osmium::Location(48.04, 7.53)),
-      osmium::builder::attr::_tag("foo", "bar"));
-
-  // Create osm2rdf object from osmium object
-  auto area1 = osm2rdf::osm::Area(osmiumBuffer1.get<osmium::Area>(0));
-  auto area2 = osm2rdf::osm::Area(osmiumBuffer2.get<osmium::Area>(0));
-  auto area3 = osm2rdf::osm::Area(osmiumBuffer3.get<osmium::Area>(0));
-  auto area4 = osm2rdf::osm::Area(osmiumBuffer4.get<osmium::Area>(0));
-
-  area1.finalize();
-  area2.finalize();
-  area3.finalize();
-  area4.finalize();
-
-  gh.area(area1);
-  gh.area(area2);
-  gh.area(area3);
-  gh.area(area4);
-
-  ASSERT_EQ(0, gh._numWays);
-  gh.way(osm2rdf::osm::Way(osmiumBuffer5.get<osmium::Way>(0)));
-  ASSERT_EQ(1, gh._numWays);
-  gh.node(osm2rdf::osm::Node(osmiumBuffer6.get<osmium::Node>(0)));
-  gh.flushExternalStorage();
-  gh.prepareRTree();
-  gh.prepareDAG();
-
-  gh.dumpNodeRelations();
-  gh.dumpWayRelations();
-
-  output.flush();
-  output.close();
-
-  const std::string printedData = coutBuffer.str();
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmnode:2 .\n"
-                           "osmnode:2 osm2rdf:intersects_area osmway:11 .\n"
-                           "osmway:11 osm2rdf:contains_nonarea osmnode:2 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:11 osm2rdf:intersects_nonarea osmway:42 .\n"
-                           "osmway:42 osm2rdf:intersects_area osmway:11 .\n"
-                           "osmway:11 osm2rdf:contains_nonarea osmway:42 .\n"));
+      ::testing::HasSubstr("osmway:14 ogc:sfContains osmway:42 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
