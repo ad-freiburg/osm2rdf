@@ -18,6 +18,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/GeometryHandler.h"
+
 #include <unistd.h>
 
 #include <algorithm>
@@ -34,7 +36,6 @@
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osm2rdf/osm/FactHandler.h"
-#include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/DirectedAcyclicGraph.h"
@@ -803,22 +804,23 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
       // transitive closure
       const auto& successors = _directedAreaGraph.findSuccessors(dst);
 
-      skip.insert(dst);
-      skip.insert(successors.begin(), successors.end());
-
       if (_config.osm2rdfGeoTriplesMode > 1) {
-        writeTransitiveClosure(successors, entryIRI,
+        writeTransitiveClosure(successors, skip, entryIRI,
                                IRI__OSM2RDF_INTERSECTS_AREA,
                                IRI__OSM2RDF_INTERSECTS_AREA);
-        writeTransitiveClosure(successors, entryIRI,
+        writeTransitiveClosure(successors, skip, entryIRI,
                                IRI__OSM2RDF_CONTAINS_AREA);
       }
 
       if (_config.ogcGeoTriplesMode > 1) {
-        writeTransitiveClosure(successors, entryIRI, IRI__OPENGIS_INTERSECTS,
+        writeTransitiveClosure(successors, skip, entryIRI,
+                               IRI__OPENGIS_INTERSECTS,
                                IRI__OPENGIS_INTERSECTS);
-        writeTransitiveClosure(successors, entryIRI, IRI__OPENGIS_CONTAINS);
+        writeTransitiveClosure(successors, skip, entryIRI,
+                               IRI__OPENGIS_CONTAINS);
       }
+      skip.insert(dst);
+      skip.insert(successors.begin(), successors.end());
     }
 
     // intersect relation, use R-Tree
@@ -849,7 +851,6 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
                                     &intersectStats)) {
         const auto& successors =
             _directedAreaGraph.findSuccessors(areaRef.second);
-        skip.insert(successors.begin(), successors.end());
 
         if (_config.osm2rdfGeoTriplesMode) {
           _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_AREA, entryIRI);
@@ -857,7 +858,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
           if (_config.osm2rdfGeoTriplesMode > 1) {
             // transitive closure
-            writeTransitiveClosure(successors, entryIRI,
+            writeTransitiveClosure(successors, skip, entryIRI,
                                    IRI__OSM2RDF_INTERSECTS_AREA,
                                    IRI__OSM2RDF_INTERSECTS_AREA);
           }
@@ -869,11 +870,12 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
           if (_config.ogcGeoTriplesMode > 1) {
             // transitive closure
-            writeTransitiveClosure(successors, entryIRI,
+            writeTransitiveClosure(successors, skip, entryIRI,
                                    IRI__OPENGIS_INTERSECTS,
                                    IRI__OPENGIS_INTERSECTS);
           }
         }
+        skip.insert(successors.begin(), successors.end());
       }
     }
 
@@ -997,32 +999,30 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
                                       &intersectStats)) {
           const auto& successors =
               _directedAreaGraph.findSuccessors(areaRef.second);
-          skipIntersects.insert(successors.begin(), successors.end());
 
           if (_config.osm2rdfGeoTriplesMode) {
             _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                  entryIRI);
             _writer->writeTriple(entryIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                  areaIRI);
-
             if (_config.osm2rdfGeoTriplesMode > 1) {
               // transitive closure
-              writeTransitiveClosure(successors, entryIRI,
+              writeTransitiveClosure(successors, skipIntersects, entryIRI,
                                      IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                      IRI__OSM2RDF_INTERSECTS_NON_AREA);
             }
           }
 
           if (_config.ogcGeoTriplesMode) {
+            _writer->writeTriple(areaIRI, IRI__OPENGIS_INTERSECTS, entryIRI);
+            _writer->writeTriple(entryIRI, IRI__OPENGIS_INTERSECTS, areaIRI);
             if (_config.ogcGeoTriplesMode > 1) {
-              writeTransitiveClosure(successors, entryIRI,
+              writeTransitiveClosure(successors, skipIntersects, entryIRI,
                                      IRI__OPENGIS_INTERSECTS,
                                      IRI__OPENGIS_INTERSECTS);
             }
-
-            _writer->writeTriple(areaIRI, IRI__OPENGIS_INTERSECTS, entryIRI);
-            _writer->writeTriple(entryIRI, IRI__OPENGIS_INTERSECTS, areaIRI);
           }
+          skipIntersects.insert(successors.begin(), successors.end());
         }
 
         if (geomRelInf.intersects == RelInfoValue::NO) {
@@ -1036,28 +1036,26 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
           if (areaInArea(entry, area, &geomRelInf, &containsStats)) {
             const auto& successors =
                 _directedAreaGraph.findSuccessors(areaRef.second);
-            skipContains.insert(successors.begin(), successors.end());
 
             if (_config.osm2rdfGeoTriplesMode) {
-              if (_config.osm2rdfGeoTriplesMode > 1) {
-                // transitive closure
-                writeTransitiveClosure(successors, entryIRI,
-                                       IRI__OSM2RDF_CONTAINS_NON_AREA);
-              }
-
               _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA,
                                    entryIRI);
+              if (_config.osm2rdfGeoTriplesMode > 1) {
+                // transitive closure
+                writeTransitiveClosure(successors, skipContains, entryIRI,
+                                       IRI__OSM2RDF_CONTAINS_NON_AREA);
+              }
             }
 
             if (_config.ogcGeoTriplesMode) {
+              _writer->writeTriple(areaIRI, IRI__OPENGIS_CONTAINS, entryIRI);
               if (_config.ogcGeoTriplesMode > 1) {
                 // transitive closure
-                writeTransitiveClosure(successors, entryIRI,
+                writeTransitiveClosure(successors, skipContains, entryIRI,
                                        IRI__OPENGIS_CONTAINS);
               }
-
-              _writer->writeTriple(areaIRI, IRI__OPENGIS_CONTAINS, entryIRI);
             }
+            skipContains.insert(successors.begin(), successors.end());
           }
         }
       }
@@ -1169,18 +1167,18 @@ void GeometryHandler<W>::dumpNodeRelations() {
 
     progressBar.update(entryCount);
 
-#pragma omp parallel for shared(                                             \
-        std::cout, osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,             \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                     \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,                \
-            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,                  \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,         \
-            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,                \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,       \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS,                \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS,                  \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,           \
-            progressBar, ia, entryCount) reduction(+ : stats) default(none)  \
+#pragma omp parallel for shared(                                            \
+        std::cout, osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,            \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                    \
+            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,               \
+            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,                 \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,        \
+            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,               \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,      \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS,               \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS,                 \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,          \
+            progressBar, ia, entryCount) reduction(+ : stats) default(none) \
     schedule(dynamic)
     for (size_t i = 0; i < _numNodes; i++) {
       SpatialNodeValue node;
@@ -1239,21 +1237,11 @@ void GeometryHandler<W>::dumpNodeRelations() {
 
         const auto& successors =
             _directedAreaGraph.findSuccessors(areaRef.second);
-        skip.insert(successors.begin(), successors.end());
 
         std::string areaIRI =
             _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
         if (_config.osm2rdfGeoTriplesMode) {
-          if (_config.osm2rdfGeoTriplesMode > 1) {
-            // transitive closure
-            writeTransitiveClosure(successors, nodeIRI,
-                                   IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                   IRI__OSM2RDF_INTERSECTS_AREA);
-            writeTransitiveClosure(successors, nodeIRI,
-                                   IRI__OSM2RDF_CONTAINS_NON_AREA);
-          }
-
           _writer->writeTriple(
               areaIRI,
               osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,
@@ -1264,16 +1252,18 @@ void GeometryHandler<W>::dumpNodeRelations() {
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,
               nodeIRI);
+
+          if (_config.osm2rdfGeoTriplesMode > 1) {
+            // transitive closure
+            writeTransitiveClosure(successors, skip, nodeIRI,
+                                   IRI__OSM2RDF_INTERSECTS_NON_AREA,
+                                   IRI__OSM2RDF_INTERSECTS_AREA);
+            writeTransitiveClosure(successors, skip, nodeIRI,
+                                   IRI__OSM2RDF_CONTAINS_NON_AREA);
+          }
         }
 
         if (_config.ogcGeoTriplesMode) {
-          if (_config.ogcGeoTriplesMode > 1) {
-            // transitive closure
-            writeTransitiveClosure(successors, nodeIRI, IRI__OPENGIS_INTERSECTS,
-                                   IRI__OPENGIS_INTERSECTS);
-            writeTransitiveClosure(successors, nodeIRI, IRI__OPENGIS_CONTAINS);
-          }
-
           _writer->writeTriple(areaIRI,
                                osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,
                                nodeIRI);
@@ -1282,7 +1272,17 @@ void GeometryHandler<W>::dumpNodeRelations() {
                                areaIRI);
           _writer->writeTriple(
               areaIRI, osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS, nodeIRI);
+
+          if (_config.ogcGeoTriplesMode > 1) {
+            // transitive closure
+            writeTransitiveClosure(successors, skip, nodeIRI,
+                                   IRI__OPENGIS_INTERSECTS,
+                                   IRI__OPENGIS_INTERSECTS);
+            writeTransitiveClosure(successors, skip, nodeIRI,
+                                   IRI__OPENGIS_CONTAINS);
+          }
         }
+        skip.insert(successors.begin(), successors.end());
       }
 #pragma omp critical(progress)
       progressBar.update(entryCount++);
@@ -1424,67 +1424,67 @@ void GeometryHandler<W>::dumpWayRelations() {
 
           const auto& successors =
               _directedAreaGraph.findSuccessors(areaRef.second);
-          skipIntersects.insert(successors.begin(), successors.end());
 
           std::string areaIRI =
               _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
           if (_config.osm2rdfGeoTriplesMode) {
-            if (_config.osm2rdfGeoTriplesMode > 1) {
-              // transitive closure
-              writeTransitiveClosure(successors, wayIRI,
-                                     IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                     IRI__OSM2RDF_INTERSECTS_AREA);
-            }
-
             _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                  wayIRI);
             _writer->writeTriple(wayIRI, IRI__OSM2RDF_INTERSECTS_AREA, areaIRI);
+
+            if (_config.osm2rdfGeoTriplesMode > 1) {
+              // transitive closure
+              writeTransitiveClosure(successors, skipIntersects, wayIRI,
+                                     IRI__OSM2RDF_INTERSECTS_NON_AREA,
+                                     IRI__OSM2RDF_INTERSECTS_AREA);
+            }
           }
 
           if (_config.ogcGeoTriplesMode) {
+            _writer->writeTriple(areaIRI, IRI__OPENGIS_INTERSECTS, wayIRI);
+            _writer->writeTriple(wayIRI, IRI__OPENGIS_INTERSECTS, areaIRI);
+
             if (_config.ogcGeoTriplesMode > 1) {
               // transitive closure
-              writeTransitiveClosure(successors, wayIRI,
+              writeTransitiveClosure(successors, skipIntersects, wayIRI,
                                      IRI__OPENGIS_INTERSECTS,
                                      IRI__OPENGIS_INTERSECTS);
             }
-
-            _writer->writeTriple(areaIRI, IRI__OPENGIS_INTERSECTS, wayIRI);
-            _writer->writeTriple(wayIRI, IRI__OPENGIS_INTERSECTS, areaIRI);
           }
+          skipIntersects.insert(successors.begin(), successors.end());
         } else if (wayIntersectsArea(way, area, &geomRelInf, &intersectStats)) {
           const auto& successors =
               _directedAreaGraph.findSuccessors(areaRef.second);
-          skipIntersects.insert(successors.begin(), successors.end());
 
           std::string areaIRI =
               _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
           if (_config.osm2rdfGeoTriplesMode) {
-            if (_config.osm2rdfGeoTriplesMode > 1) {
-              // transitive closure
-              writeTransitiveClosure(successors, wayIRI,
-                                     IRI__OSM2RDF_INTERSECTS_NON_AREA,
-                                     IRI__OSM2RDF_INTERSECTS_AREA);
-            }
-
             _writer->writeTriple(areaIRI, IRI__OSM2RDF_INTERSECTS_NON_AREA,
                                  wayIRI);
             _writer->writeTriple(wayIRI, IRI__OSM2RDF_INTERSECTS_AREA, areaIRI);
+
+            if (_config.osm2rdfGeoTriplesMode > 1) {
+              // transitive closure
+              writeTransitiveClosure(successors, skipIntersects, wayIRI,
+                                     IRI__OSM2RDF_INTERSECTS_NON_AREA,
+                                     IRI__OSM2RDF_INTERSECTS_AREA);
+            }
           }
 
           if (_config.ogcGeoTriplesMode) {
+            _writer->writeTriple(areaIRI, IRI__OPENGIS_INTERSECTS, wayIRI);
+            _writer->writeTriple(wayIRI, IRI__OPENGIS_INTERSECTS, areaIRI);
+
             if (_config.ogcGeoTriplesMode > 1) {
               // transitive closure
-              writeTransitiveClosure(successors, wayIRI,
+              writeTransitiveClosure(successors, skipIntersects, wayIRI,
                                      IRI__OPENGIS_INTERSECTS,
                                      IRI__OPENGIS_INTERSECTS);
             }
-
-            _writer->writeTriple(areaIRI, IRI__OPENGIS_INTERSECTS, wayIRI);
-            _writer->writeTriple(wayIRI, IRI__OPENGIS_INTERSECTS, areaIRI);
           }
+          skipIntersects.insert(successors.begin(), successors.end());
         }
 
         if (geomRelInf.intersects == RelInfoValue::NO) {
@@ -1518,29 +1518,31 @@ void GeometryHandler<W>::dumpWayRelations() {
 
           const auto& successors =
               _directedAreaGraph.findSuccessors(areaRef.second);
-          skipContains.insert(successors.begin(), successors.end());
 
           std::string areaIRI =
               _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
           if (_config.osm2rdfGeoTriplesMode) {
-            if (_config.osm2rdfGeoTriplesMode > 1) {
-              // transitive closure
-              writeTransitiveClosure(successors, wayIRI,
-                                     IRI__OSM2RDF_CONTAINS_NON_AREA);
-            }
             _writer->writeTriple(areaIRI, IRI__OSM2RDF_CONTAINS_NON_AREA,
                                  wayIRI);
+
+            if (_config.osm2rdfGeoTriplesMode > 1) {
+              // transitive closure
+              writeTransitiveClosure(successors, skipContains, wayIRI,
+                                     IRI__OSM2RDF_CONTAINS_NON_AREA);
+            }
           }
 
           if (_config.ogcGeoTriplesMode) {
+            _writer->writeTriple(areaIRI, IRI__OPENGIS_CONTAINS, wayIRI);
+
             if (_config.ogcGeoTriplesMode > 1) {
               // transitive closure
-              writeTransitiveClosure(successors, wayIRI, IRI__OPENGIS_CONTAINS);
+              writeTransitiveClosure(successors, skipContains, wayIRI,
+                                     IRI__OPENGIS_CONTAINS);
             }
-
-            _writer->writeTriple(areaIRI, IRI__OPENGIS_CONTAINS, wayIRI);
           }
+          skipContains.insert(successors.begin(), successors.end());
         }
       }
 #pragma omp critical(progress)
@@ -2835,10 +2837,13 @@ uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<uint32_t>& successors, const std::string& entryIRI,
+    const std::vector<uint32_t>& successors, const SkipSet& skipSet, const std::string& entryIRI,
     const std::string& rel, const std::string& symmRel) {
   // transitive closure
   for (const auto& succIdx : successors) {
+    if (skipSet.find(succIdx) != skipSet.end()) {
+      continue;
+    }
     const auto& succAreaId = std::get<3>(_spatialStorageArea[succIdx]);
     const auto& succAreaFromType = std::get<5>(_spatialStorageArea[succIdx]);
     const auto& succAreaIRI =
@@ -2852,10 +2857,13 @@ void GeometryHandler<W>::writeTransitiveClosure(
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<uint32_t>& successors, const std::string& entryIRI,
+    const std::vector<uint32_t>& successors, const SkipSet& skipSet, const std::string& entryIRI,
     const std::string& rel) {
   // transitive closure
   for (const auto& succIdx : successors) {
+    if (skipSet.find(succIdx) != skipSet.end()) {
+      continue;
+    }
     const auto& succAreaId = std::get<3>(_spatialStorageArea[succIdx]);
     const auto& succAreaFromType = std::get<5>(_spatialStorageArea[succIdx]);
     const auto& succAreaIRI =
