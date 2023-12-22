@@ -561,8 +561,8 @@ void GeometryHandler<W>::prepareRTree() {
 template <typename W>
 void GeometryHandler<W>::prepareDAG() {
   // Store dag
-  DirectedGraph<Area::id_t> tmpDirectedAreaGraph;
   {
+    DirectedGraph<Area::id_t> tmpDirectedAreaGraph;
     // Prepare id based lookup table for later usage...
     _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
     for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
@@ -685,34 +685,36 @@ void GeometryHandler<W>::prepareDAG() {
               << stats.printFullChecks() << " by full geometric check"
 
               << std::endl;
-  }
-  if (_config.writeDAGDotFiles) {
-    std::cerr << currentTimeFormatted() << " Dumping non-reduced DAG as "
-              << _config.output << ".non-reduced.dot ..." << std::endl;
-    std::filesystem::path p{_config.output};
-    p += ".non-reduced.dot";
-    tmpDirectedAreaGraph.dump(p);
-    std::cerr << currentTimeFormatted() << " done" << std::endl;
-  }
-  {
-    std::cerr << std::endl;
-    std::cerr << currentTimeFormatted() << " Reducing DAG with "
-              << tmpDirectedAreaGraph.getNumEdges() << " edges and "
-              << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
-              << std::endl;
 
-    // Prepare non-reduced DAG for cleanup
-    tmpDirectedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr << currentTimeFormatted() << " ... fast lookup prepared ... "
-              << std::endl;
+    if (_config.writeDAGDotFiles) {
+      std::cerr << currentTimeFormatted() << " Dumping non-reduced DAG as "
+                << _config.output << ".non-reduced.dot ..." << std::endl;
+      std::filesystem::path p{_config.output};
+      p += ".non-reduced.dot";
+      tmpDirectedAreaGraph.dump(p);
+      std::cerr << currentTimeFormatted() << " done" << std::endl;
+    }
+    {
+      std::cerr << std::endl;
+      std::cerr << currentTimeFormatted() << " Reducing DAG with "
+                << tmpDirectedAreaGraph.getNumEdges() << " edges and "
+                << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
+                << std::endl;
 
-    _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
+      // Prepare non-reduced DAG for cleanup
+      tmpDirectedAreaGraph.prepareFindSuccessorsFast();
+      std::cerr << currentTimeFormatted() << " ... fast lookup prepared ... "
+                << std::endl;
 
-    std::cerr << currentTimeFormatted() << " ... done, resulting in DAG with "
-              << _directedAreaGraph.getNumEdges() << " edges and "
-              << _directedAreaGraph.getNumVertices() << " vertices"
-              << std::endl;
+      _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
+
+      std::cerr << currentTimeFormatted() << " ... done, resulting in DAG with "
+                << _directedAreaGraph.getNumEdges() << " edges and "
+                << _directedAreaGraph.getNumVertices() << " vertices"
+                << std::endl;
+    }
   }
+
   if (_config.writeDAGDotFiles) {
     std::cerr << currentTimeFormatted() << " Dumping DAG as " << _config.output
               << ".dot ..." << std::endl;

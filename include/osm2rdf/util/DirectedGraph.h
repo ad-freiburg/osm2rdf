@@ -22,7 +22,7 @@
 #include <stdint.h>
 
 #include <filesystem>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 namespace osm2rdf::util {
@@ -62,8 +62,8 @@ class DirectedGraph {
 
  protected:
   void findSuccessorsHelper(T src, std::vector<T>* tmp) const;
-  std::unordered_map<T, std::vector<T>> _adjacency;
-  std::unordered_map<T, std::vector<T>> _successors;
+  std::map<T, std::vector<T>> _adjacency;
+  std::map<T, std::vector<T>> _successors;
   size_t _numEdges = 0;
   bool _preparedFast = false;
 };

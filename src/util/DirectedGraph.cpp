@@ -133,8 +133,8 @@ void osm2rdf::util::DirectedGraph<T>::dumpOsm(
 template <typename T>
 void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
   const auto& vertices = getVertices();
-  for (size_t i = 0; i < vertices.size(); i++) {
-    _successors[vertices[i]] = findSuccessors(vertices[i]);
+  for (const auto& [key, _] : _adjacency) {
+    _successors[key] = findSuccessors(key);
   }
   _preparedFast = true;
 }
