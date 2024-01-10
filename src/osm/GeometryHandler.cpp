@@ -58,6 +58,8 @@ using osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
+
+
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
@@ -563,12 +565,6 @@ void GeometryHandler<W>::prepareDAG() {
   // Store dag
   {
     DirectedGraph<Area::id_t> tmpDirectedAreaGraph;
-    // Prepare id based lookup table for later usage...
-    _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
-    for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
-      const auto& area = _spatialStorageArea[i];
-      _spatialStorageAreaIndex[std::get<1>(area)] = i;
-    }
 
     std::cerr << currentTimeFormatted() << " Generating non-reduced DAG from "
               << _spatialStorageArea.size() << " areas ... " << std::endl;
@@ -702,9 +698,9 @@ void GeometryHandler<W>::prepareDAG() {
                 << std::endl;
 
       // Prepare non-reduced DAG for cleanup
-      tmpDirectedAreaGraph.prepareFindSuccessorsFast();
-      std::cerr << currentTimeFormatted() << " ... fast lookup prepared ... "
-                << std::endl;
+      // tmpDirectedAreaGraph.prepareFindSuccessorsFast();
+      // std::cerr << currentTimeFormatted() << " ... fast lookup prepared ... "
+                // << std::endl;
 
       _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
 
@@ -729,6 +725,13 @@ void GeometryHandler<W>::prepareDAG() {
               << " Preparing fast above lookup in DAG ..." << std::endl;
     _directedAreaGraph.prepareFindSuccessorsFast();
     std::cerr << currentTimeFormatted() << " ... done" << std::endl;
+  }
+
+  // Prepare id based lookup table for later usage...
+  _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
+  for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
+    const auto& area = _spatialStorageArea[i];
+    _spatialStorageAreaIndex[std::get<1>(area)] = i;
   }
 }
 

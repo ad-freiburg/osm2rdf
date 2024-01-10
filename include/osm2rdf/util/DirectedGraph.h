@@ -57,8 +57,6 @@ class DirectedGraph {
   [[nodiscard]] std::vector<T> getVertices() const;
   // getEdges returns the stored edges for the given vertex.
   [[nodiscard]] std::vector<T> getEdges(T src) const;
-  // getEdges returns the stored edges but uses "fast" storage for lookup.
-  [[nodiscard]] std::vector<T> getEdgesFast(T src) const;
 
  protected:
   void findSuccessorsHelper(T src, std::vector<T>* tmp) const;
