@@ -208,7 +208,7 @@ typedef std::tuple<std::vector<osm2rdf::geometry::Box>,
                    osm2rdf::geometry::Polygon, osm2rdf::geometry::Polygon>
     SpatialAreaValue;
 
-typedef std::pair<osm2rdf::geometry::Box, size_t> SpatialAreaRefValue;
+typedef std::pair<osm2rdf::geometry::Box, uint32_t> SpatialAreaRefValue;
 
 typedef std::vector<SpatialAreaValue> SpatialAreaVector;
 
@@ -412,7 +412,7 @@ class GeometryHandler {
   // Store areas as r-tree
   SpatialIndex _spatialIndex;
   // Store dag
-  osm2rdf::util::DirectedGraph<osm2rdf::osm::Area::id_t> _directedAreaGraph;
+  osm2rdf::util::DirectedGraph<uint32_t> _directedAreaGraph;
   // Spatial Data
   SpatialAreaVector _spatialStorageArea;
   std::unordered_map<osm2rdf::osm::Area::id_t, uint64_t>

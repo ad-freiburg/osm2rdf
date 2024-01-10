@@ -828,10 +828,10 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
   ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
             gh._directedAreaGraph.getEdges(24));
 
-  ASSERT_EQ(2, gh._directedAreaGraph.findSuccessors(22).size());
-  ASSERT_EQ(1, gh._directedAreaGraph.findSuccessors(24).size());
-  ASSERT_EQ(2, gh._directedAreaGraph.findSuccessors(26).size());
-  ASSERT_EQ(0, gh._directedAreaGraph.findSuccessors(28).size());
+  ASSERT_EQ(2, gh._directedAreaGraph.findSuccesorsFast(22).size());
+  ASSERT_EQ(1, gh._directedAreaGraph.findSuccesorsFast(24).size());
+  ASSERT_EQ(2, gh._directedAreaGraph.findSuccesorsFast(26).size());
+  ASSERT_EQ(0, gh._directedAreaGraph.findSuccesorsFast(28).size());
 
   gh.dumpNamedAreaRelations();
 
