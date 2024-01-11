@@ -143,20 +143,24 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   if (_config.adminRelationsOnly && area.tags()["admin_level"] == nullptr) {
     return;
   }
-  auto osmArea = osm2rdf::osm::Area(area);
+  try {
+    auto osmArea = osm2rdf::osm::Area(area);
 #pragma omp task
-  {
-    osmArea.finalize();
-    if (!_config.noFacts && !_config.noAreaFacts) {
-      _areasDumped++;
+    {
+      osmArea.finalize();
+      if (!_config.noFacts && !_config.noAreaFacts) {
+        _areasDumped++;
 #pragma omp task
-      _factHandler.area(osmArea);
+        _factHandler.area(osmArea);
+      }
+      if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
+        _areaGeometriesHandled++;
+#pragma omp task
+        _geometryHandler.area(osmArea);
+      }
     }
-    if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
-      _areaGeometriesHandled++;
-#pragma omp task
-      _geometryHandler.area(osmArea);
-    }
+  } catch (const osmium::invalid_location& e) {
+    return;
   }
 }
 
@@ -167,19 +171,23 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   if (_config.adminRelationsOnly) {
     return;
   }
-  const auto& osmNode = osm2rdf::osm::Node(node);
-  if (node.tags().empty()) {
+  try {
+    const auto& osmNode = osm2rdf::osm::Node(node);
+    if (node.tags().empty()) {
+      return;
+    }
+    if (!_config.noFacts && !_config.noNodeFacts) {
+      _nodesDumped++;
+#pragma omp task
+      _factHandler.node(osmNode);
+    }
+    if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
+      _nodeGeometriesHandled++;
+#pragma omp task
+      _geometryHandler.node(osmNode);
+    }
+  } catch (const osmium::invalid_location& e) {
     return;
-  }
-  if (!_config.noFacts && !_config.noNodeFacts) {
-    _nodesDumped++;
-#pragma omp task
-    _factHandler.node(osmNode);
-  }
-  if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
-    _nodeGeometriesHandled++;
-#pragma omp task
-    _geometryHandler.node(osmNode);
   }
 }
 
@@ -194,28 +202,32 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
   if (_config.adminRelationsOnly && relation.tags()["admin_level"] == nullptr) {
     return;
   }
-  auto osmRelation = osm2rdf::osm::Relation(relation);
+  try {
+    auto osmRelation = osm2rdf::osm::Relation(relation);
 #if BOOST_VERSION >= 107800
-  // only task this away if we actually build the relation geometries,
-  // otherwise this just adds multithreading overhead for nothing
+    // only task this away if we actually build the relation geometries,
+    // otherwise this just adds multithreading overhead for nothing
 #pragma omp task
-  {
-    if (_relationHandler.hasLocationHandler()) {
-      osmRelation.buildGeometry(_relationHandler);
-    }
+    {
+      if (_relationHandler.hasLocationHandler()) {
+        osmRelation.buildGeometry(_relationHandler);
+      }
 #endif  // BOOST_VERSION >= 107800
-    if (!_config.noFacts && !_config.noRelationFacts) {
-      _relationsDumped++;
+      if (!_config.noFacts && !_config.noRelationFacts) {
+        _relationsDumped++;
 #pragma omp task
-      _factHandler.relation(osmRelation);
-    }
+        _factHandler.relation(osmRelation);
+      }
 
 #pragma omp task
-    _geometryHandler.relation(osmRelation);
+      _geometryHandler.relation(osmRelation);
 
 #if BOOST_VERSION >= 107800
-  }
+    }
 #endif
+  } catch (const osmium::invalid_location& e) {
+    return;
+  }
 }
 
 // ____________________________________________________________________________
@@ -228,16 +240,21 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   if (_config.adminRelationsOnly) {
     return;
   }
-  const auto& osmWay = osm2rdf::osm::Way(way);
-  if (!_config.noFacts && !_config.noWayFacts) {
-    _waysDumped++;
+  try {
+    const auto& osmWay = osm2rdf::osm::Way(way);
+
+    if (!_config.noFacts && !_config.noWayFacts) {
+      _waysDumped++;
 #pragma omp task
-    _factHandler.way(osmWay);
-  }
-  if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
-    _wayGeometriesHandled++;
+      _factHandler.way(osmWay);
+    }
+    if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
+      _wayGeometriesHandled++;
 #pragma omp task
-    _geometryHandler.way(osmWay);
+      _geometryHandler.way(osmWay);
+    }
+  } catch (const osmium::invalid_location& e) {
+    return;
   }
 }
 

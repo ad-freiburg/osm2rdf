@@ -59,7 +59,6 @@ using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
 
-
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
@@ -697,11 +696,6 @@ void GeometryHandler<W>::prepareDAG() {
                 << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
                 << std::endl;
 
-      // Prepare non-reduced DAG for cleanup
-      // tmpDirectedAreaGraph.prepareFindSuccessorsFast();
-      // std::cerr << currentTimeFormatted() << " ... fast lookup prepared ... "
-                // << std::endl;
-
       _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
 
       std::cerr << currentTimeFormatted() << " ... done, resulting in DAG with "
@@ -718,13 +712,6 @@ void GeometryHandler<W>::prepareDAG() {
     p += ".dot";
     _directedAreaGraph.dump(p);
     std::cerr << currentTimeFormatted() << " done" << std::endl;
-  }
-  {
-    std::cerr << std::endl;
-    std::cerr << currentTimeFormatted()
-              << " Preparing fast above lookup in DAG ..." << std::endl;
-    _directedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr << currentTimeFormatted() << " ... done" << std::endl;
   }
 
   // Prepare id based lookup table for later usage...
@@ -846,7 +833,8 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
         intersectStats.skippedByDAG();
       } else if (areaIntersectsArea(entry, area, &geomRelInf,
                                     &intersectStats)) {
-        const auto& successors = _directedAreaGraph.findSuccessors(areaRef.second);
+        const auto& successors =
+            _directedAreaGraph.findSuccessors(areaRef.second);
         skip.insert(successors.begin(), successors.end());
 
         if (_config.osm2rdfGeoTriplesMode) {
@@ -1235,7 +1223,8 @@ void GeometryHandler<W>::dumpNodeRelations() {
 
         skip.insert(areaRef.second);
 
-        const auto& successors = _directedAreaGraph.findSuccessors(areaRef.second);
+        const auto& successors =
+            _directedAreaGraph.findSuccessors(areaRef.second);
         skip.insert(successors.begin(), successors.end());
 
         std::string areaIRI =
@@ -1368,9 +1357,10 @@ void GeometryHandler<W>::dumpWayRelations() {
 
       const auto& wayId = std::get<1>(way);
 
-      // Check if our "area" has successors in the DAG, if yes we are part of
-      // the DAG and don't need to calculate any relation again.
-      if (!_directedAreaGraph.findSuccessors(_spatialStorageAreaIndex[wayId * 2]).empty()) {
+      // Check if an area computed from this way exists if yes we don't need to
+      // calculate any relation again.
+      auto it = _spatialStorageAreaIndex.find(wayId * 2);
+      if (it != _spatialStorageAreaIndex.end()) {
         continue;
       }
 
@@ -2829,9 +2819,8 @@ uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<uint32_t>& successors,
-    const std::string& entryIRI, const std::string& rel,
-    const std::string& symmRel) {
+    const std::vector<uint32_t>& successors, const std::string& entryIRI,
+    const std::string& rel, const std::string& symmRel) {
   // transitive closure
   for (const auto& succIdx : successors) {
     const auto& succAreaId = std::get<3>(_spatialStorageArea[succIdx]);
@@ -2847,8 +2836,8 @@ void GeometryHandler<W>::writeTransitiveClosure(
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<uint32_t>& successors,
-    const std::string& entryIRI, const std::string& rel) {
+    const std::vector<uint32_t>& successors, const std::string& entryIRI,
+    const std::string& rel) {
   // transitive closure
   for (const auto& succIdx : successors) {
     const auto& succAreaId = std::get<3>(_spatialStorageArea[succIdx]);
