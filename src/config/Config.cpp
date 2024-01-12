@@ -206,6 +206,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_INFO;
     }
+    if (noRelationGeometricRelations) {
+      oss << "\n"
+          << prefix
+          << osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_INFO;
+    }
     if (noWayGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO;
@@ -306,6 +311,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_SHORT,
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
           osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_HELP);
+  auto noRelationGeometricRelationsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_LONG,
+          osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_HELP);
   auto noWayGeometricRelationsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
           osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_SHORT,
@@ -537,6 +547,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     noAreaGeometricRelations = noAreaGeometricRelationsOp->is_set();
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
+    noRelationGeometricRelations = noRelationGeometricRelationsOp->is_set();
     noWayGeometricRelations = noWayGeometricRelationsOp->is_set();
 
     if (ogcGeoTriplesModeOp->is_set()) {
@@ -569,11 +580,15 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       }
     }
 
+    noGeometricRelations =
+        ogcGeoTriplesMode == none && osm2rdfGeoTriplesMode == none;
+
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();
     noNodeFacts |= noNodesOp->is_set();
     noNodeGeometricRelations |= noNodesOp->is_set();
     noRelationFacts |= noRelationsOp->is_set();
+    noRelationGeometricRelations |= noWaysOp->is_set();
     noWayFacts |= noWaysOp->is_set();
     noWayGeometricRelations |= noWaysOp->is_set();
 

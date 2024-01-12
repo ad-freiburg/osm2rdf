@@ -49,6 +49,7 @@ struct Config {
   bool noGeometricRelations = false;
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
+  bool noRelationGeometricRelations = false;
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
 
