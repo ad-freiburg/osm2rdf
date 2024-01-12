@@ -203,7 +203,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
   }
 
 #if BOOST_VERSION >= 107800
-  if (relation.hasGeometry()) {
+  if (relation.hasGeometry() && !relation.isArea()) {
     if (!_config.hasGeometryAsWkt) {
       const std::string& geomObj = _writer->generateIRI(
           NAMESPACE__OSM2RDF_GEOM, "relation_" + std::to_string(relation.id()));
