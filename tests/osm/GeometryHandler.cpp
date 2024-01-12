@@ -622,8 +622,8 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
                             osmium::builder::attr::_outer_ring({
                                 {1, {40.0, 7.51}},
                                 {2, {40.0, 7.61}},
-                                {3, {40.1, 7.61}},
-                                {4, {40.1, 7.51}},
+                                {3, {40.2, 7.61}},
+                                {4, {40.2, 7.51}},
                                 {1, {40.0, 7.51}},
                             }));
   osmium::builder::add_area(osmiumBuffer4, osmium::builder::attr::_id(28),
@@ -663,12 +663,12 @@ TEST(OSM_GeometryHandler, prepareDAGSimple) {
   ASSERT_EQ(4, gh._directedAreaGraph.getNumVertices());
   ASSERT_EQ(3, gh._directedAreaGraph.getNumEdges());
 
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
-            gh._directedAreaGraph.getEdges(22));
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
-            gh._directedAreaGraph.getEdges(26));
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
-            gh._directedAreaGraph.getEdges(24));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{1},
+            gh._directedAreaGraph.getEdges(3));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{1},
+            gh._directedAreaGraph.getEdges(2));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{0},
+            gh._directedAreaGraph.getEdges(1));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -776,8 +776,8 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
                             osmium::builder::attr::_outer_ring({
                                 {1, {40.0, 7.51}},
                                 {2, {40.0, 7.61}},
-                                {3, {40.1, 7.61}},
-                                {4, {40.1, 7.51}},
+                                {3, {40.2, 7.61}},
+                                {4, {40.2, 7.51}},
                                 {1, {40.0, 7.51}},
                             }));
   osmium::builder::add_area(osmiumBuffer4, osmium::builder::attr::_id(28),
@@ -793,8 +793,8 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
                             osmium::builder::attr::_tag("name", "30"),
                             osmium::builder::attr::_outer_ring({
                                 {1, {48.0, 7.51}},
-                                {2, {48.0, 7.71}},
-                                {3, {48.05, 7.71}},
+                                {2, {48.0, 7.81}},
+                                {3, {48.05, 7.81}},
                                 {4, {48.05, 7.51}},
                                 {1, {48.0, 7.51}},
                             }));
@@ -821,17 +821,18 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimple) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
-            gh._directedAreaGraph.getEdges(22));
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
-            gh._directedAreaGraph.getEdges(26));
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
-            gh._directedAreaGraph.getEdges(24));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{1},
+            gh._directedAreaGraph.getEdges(4));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{1},
+            gh._directedAreaGraph.getEdges(2));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{0},
+            gh._directedAreaGraph.getEdges(1));
 
-  ASSERT_EQ(2, gh._directedAreaGraph.findSuccesorsFast(22).size());
-  ASSERT_EQ(1, gh._directedAreaGraph.findSuccesorsFast(24).size());
-  ASSERT_EQ(2, gh._directedAreaGraph.findSuccesorsFast(26).size());
-  ASSERT_EQ(0, gh._directedAreaGraph.findSuccesorsFast(28).size());
+  ASSERT_EQ(2, gh._directedAreaGraph.findSuccessors(4).size());
+  ASSERT_EQ(2, gh._directedAreaGraph.findSuccessors(3).size());
+  ASSERT_EQ(2, gh._directedAreaGraph.findSuccessors(2).size());
+  ASSERT_EQ(1, gh._directedAreaGraph.findSuccessors(1).size());
+  ASSERT_EQ(0, gh._directedAreaGraph.findSuccessors(0).size());
 
   gh.dumpNamedAreaRelations();
 
@@ -972,8 +973,8 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
                             osmium::builder::attr::_outer_ring({
                                 {1, {40.0, 7.51}},
                                 {2, {40.0, 7.61}},
-                                {3, {40.1, 7.61}},
-                                {4, {40.1, 7.51}},
+                                {3, {40.2, 7.61}},
+                                {4, {40.2, 7.51}},
                                 {1, {40.0, 7.51}},
                             }));
   osmium::builder::add_area(osmiumBuffer4, osmium::builder::attr::_id(28),
@@ -1005,12 +1006,17 @@ TEST(OSM_GeometryHandler, dumpNamedAreaRelationsSimpleOpenMP) {
   gh.prepareRTree();
   gh.prepareDAG();
 
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
-            gh._directedAreaGraph.getEdges(22));
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{24},
-            gh._directedAreaGraph.getEdges(26));
-  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{28},
-            gh._directedAreaGraph.getEdges(24));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{1},
+            gh._directedAreaGraph.getEdges(3));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{1},
+            gh._directedAreaGraph.getEdges(2));
+  ASSERT_EQ(std::vector<osm2rdf::osm::Area::id_t>{0},
+            gh._directedAreaGraph.getEdges(1));
+
+  ASSERT_EQ(2, gh._directedAreaGraph.findSuccessors(3).size());
+  ASSERT_EQ(2, gh._directedAreaGraph.findSuccessors(2).size());
+  ASSERT_EQ(1, gh._directedAreaGraph.findSuccessors(1).size());
+  ASSERT_EQ(0, gh._directedAreaGraph.findSuccessors(0).size());
 
   gh.dumpNamedAreaRelations();
 
