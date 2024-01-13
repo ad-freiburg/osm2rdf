@@ -66,6 +66,7 @@ struct Config {
   bool addAreaConvexHull = false;
   bool addAreaEnvelope = false;
   bool addAreaOrientedBoundingBox = false;
+  bool addAreaWayLinestrings = false;
   bool addNodeConvexHull = false;
   bool addNodeEnvelope = false;
   bool addNodeOrientedBoundingBox = false;

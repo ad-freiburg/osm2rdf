@@ -17,13 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/config/Config.h"
+
 #include <filesystem>
 #include <iostream>
 #include <string>
 
 #include "boost/version.hpp"
 #include "omp.h"
-#include "osm2rdf/config/Config.h"
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
 #include "popl.hpp"
@@ -149,6 +150,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
         oss << "\n"
             << prefix
             << osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_INFO;
+      }
+      if (addAreaWayLinestrings) {
+        oss << "\n"
+            << prefix
+            << osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_INFO;
       }
     }
     if (simplifyWKT > 0) {
@@ -335,6 +341,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT,
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_LONG,
           osm2rdf::config::constants::ADD_AREA_ENVELOPE_RATIO_OPTION_HELP);
+  auto addAreaWayLinestringsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT,
+          osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
+          osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_HELP);
   auto addRelationBorderMembersOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_SHORT,
       osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
@@ -571,6 +582,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addAreaEnvelope = addAreaEnvelopeOp->is_set();
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
     addAreaOrientedBoundingBox = addAreaOrientedBoundingBoxOp->is_set();
+    addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
     addRelationBorderMembers = addRelationBorderMembersOp->is_set();
 #if BOOST_VERSION >= 107800
     addRelationConvexHull = addRelationConvexHullOp->is_set();

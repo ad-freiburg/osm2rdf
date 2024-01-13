@@ -1730,6 +1730,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
   config.addSortMetadata = false;
   config.addWayNodeOrder = true;
   config.addWayNodeSpatialMetadata = true;
+  config.addAreaWayLinestrings = true;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();

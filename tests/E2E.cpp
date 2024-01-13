@@ -437,6 +437,7 @@ TEST(E2E, building51NT) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -558,32 +559,32 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#intersects_nonarea> "
+                  "<http://www.opengis.net/rdf#sfIntersects> "
                   "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#contains_nonarea> "
+                  "<http://www.opengis.net/rdf#sfContains> "
                   "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#intersects_nonarea> "
+                  "<http://www.opengis.net/rdf#sfIntersects> "
                   "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#contains_nonarea> "
+                  "<http://www.opengis.net/rdf#sfContains> "
                   "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#intersects_nonarea> "
+                  "<http://www.opengis.net/rdf#sfIntersects> "
                   "<https://www.openstreetmap.org/node/5190342871> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<https://osm2rdf.cs.uni-freiburg.de/rdf#contains_nonarea> "
+                  "<http://www.opengis.net/rdf#sfContains> "
                   "<https://www.openstreetmap.org/node/5190342871> .\n"));
 
   // Reset std::cerr and std::cout
@@ -606,6 +607,7 @@ TEST(E2E, building51TTL) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -702,27 +704,27 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -744,6 +746,7 @@ TEST(E2E, building51QLEVER) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -840,27 +843,27 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -882,6 +885,7 @@ TEST(E2E, tf) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -977,6 +981,7 @@ TEST(E2E, building51inTF) {
   config.output = "";
   config.hasGeometryAsWkt = true;
   config.outputCompress = false;
+  config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -1097,35 +1102,35 @@ TEST(E2E, building51inTF) {
                   "osmway:4498466 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:4498466 osm2rdf:contains_area osmway:98284318 .\n"));
+                  "osmway:4498466 ogc:sfContains osmway:98284318 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:4498466 osm2rdf:intersects_area osmway:98284318 .\n"));
+          "osmway:4498466 ogc:sfIntersects osmway:98284318 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601105 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:2110601134 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:intersects_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmway:98284318 osm2rdf:contains_nonarea osmnode:5190342871 .\n"));
+          "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

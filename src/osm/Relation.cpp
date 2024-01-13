@@ -57,6 +57,15 @@ const osm2rdf::osm::TagList& osm2rdf::osm::Relation::tags() const noexcept {
 }
 
 // ____________________________________________________________________________
+bool osm2rdf::osm::Relation::isArea() const noexcept {
+  const auto& typeTag = _tags.find("type");
+  if (typeTag != _tags.end()) {
+    return typeTag->second == "multipolygon" || typeTag->second == "boundary";
+  }
+  return false;
+}
+
+// ____________________________________________________________________________
 const std::vector<osm2rdf::osm::RelationMember>&
 osm2rdf::osm::Relation::members() const noexcept {
   return _members;

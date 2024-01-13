@@ -45,6 +45,7 @@ class Way {
   explicit Way(const osmium::Way& way);
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] bool closed() const noexcept;
+  [[nodiscard]] bool isArea() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Way& geom() const noexcept;
   // Return the convex hull.

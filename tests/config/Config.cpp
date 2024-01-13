@@ -46,6 +46,7 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.addAreaEnvelope);
   ASSERT_FALSE(config.addAreaEnvelopeRatio);
   ASSERT_FALSE(config.addAreaOrientedBoundingBox);
+  ASSERT_FALSE(config.addAreaWayLinestrings);
   ASSERT_FALSE(config.addNodeConvexHull);
   ASSERT_FALSE(config.addNodeEnvelope);
   ASSERT_FALSE(config.addNodeOrientedBoundingBox);
@@ -115,51 +116,6 @@ TEST(CONFIG_Config, fromArgsHelpLong) {
   ASSERT_EXIT(config.fromArgs(argc, argv),
               ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
               "^Allowed options:");
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsHelpAdvancedShortMultiple) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-
-  const auto arg = "-" + osm2rdf::config::constants::HELP_OPTION_SHORT;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>(arg.c_str())};
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
-              osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsHelpAdvancedShortCombined) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-
-  const auto arg = "-" + osm2rdf::config::constants::HELP_OPTION_SHORT +
-                   osm2rdf::config::constants::HELP_OPTION_SHORT;
-  const int argc = 2;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str())};
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
-              osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsHelpAdvancedLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-
-  const auto arg = "--" + osm2rdf::config::constants::HELP_OPTION_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>(arg.c_str())};
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-  ASSERT_EXIT(config.fromArgs(argc, argv),
-              ::testing::ExitedWithCode(osm2rdf::config::ExitCode::SUCCESS),
-              osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_HELP);
 }
 
 // ____________________________________________________________________________
@@ -395,22 +351,6 @@ TEST(CONFIG_Config, fromArgsNoFactsLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.noFacts);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsNoGeometricRelationsLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-
-  const auto arg =
-      "--" + osm2rdf::config::constants::NO_GEOM_RELATIONS_OPTION_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.noGeometricRelations);
 }
 
 // ____________________________________________________________________________
@@ -707,6 +647,22 @@ TEST(CONFIG_Config, fromArgsAddAreaOrientedBoundingBoxLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsAddAreaWayLinestringsLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.addAreaWayLinestrings);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddNodeConvexHullLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -780,8 +736,7 @@ TEST(CONFIG_Config, fromArgsAddRelationConvexHullLong) {
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" +
-      osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG;
+      "--" + osm2rdf::config::constants::ADD_RELATION_CONVEX_HULL_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -797,8 +752,7 @@ TEST(CONFIG_Config, fromArgsAddRelationEnvelopeLong) {
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" +
-      osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG;
+      "--" + osm2rdf::config::constants::ADD_RELATION_ENVELOPE_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -813,9 +767,8 @@ TEST(CONFIG_Config, fromArgsAddRelationOrientedBoundingBoxLong) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg =
-      "--" +
-      osm2rdf::config::constants::ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+  const auto arg = "--" + osm2rdf::config::constants::
+                              ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -864,7 +817,8 @@ TEST(CONFIG_Config, fromArgsAddWayOrientedBoundingBOxLong) {
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_LONG;
+      "--" +
+      osm2rdf::config::constants::ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -1230,6 +1184,18 @@ TEST(CONFIG_Config, getInfoAddAreaOrientedBoundingBox) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoAddAreaWayLinestrings) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.addAreaWayLinestrings = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_INFO));
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddAreaEnvelopeRatio) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1445,17 +1411,6 @@ TEST(CONFIG_Config, getInfoSkipWikiLinks) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::SKIP_WIKI_LINKS_INFO));
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoNoGeometricRelations) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  config.noGeometricRelations = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::NO_GEOM_RELATIONS_INFO));
 }
 
 // ____________________________________________________________________________
