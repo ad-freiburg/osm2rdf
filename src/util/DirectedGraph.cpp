@@ -45,7 +45,7 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::findSuccessors(T src) const {
   q.push(src);
 
   while (!q.empty()) {
-    const auto& cur = q.front();
+    auto cur = q.front();
     visited.insert(cur);
     q.pop();
 
