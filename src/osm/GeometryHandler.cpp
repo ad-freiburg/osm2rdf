@@ -58,7 +58,6 @@ using osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
-
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
