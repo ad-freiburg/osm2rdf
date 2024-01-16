@@ -47,6 +47,8 @@ const static int NUM_GRID_CELLS = 5000;
 const static double GRID_W = 360.0 / NUM_GRID_CELLS;
 const static double GRID_H = 180.0 / NUM_GRID_CELLS;
 
+const double APPROX_CONTAINS_SLACK = 0.05;
+
 struct GeomRelationStats {
   size_t _totalChecks = 0;
   size_t _fullChecks = 0;

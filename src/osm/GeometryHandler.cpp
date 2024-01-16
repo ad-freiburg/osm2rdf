@@ -588,6 +588,7 @@ void GeometryHandler<W>::prepareDAG() {
     for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryId = std::get<1>(entry);
+      const auto& entryArea = std::get<4>(entry);
 
       // Set containing all areas we are inside of
       SkipSet skip;
@@ -615,14 +616,27 @@ void GeometryHandler<W>::prepareDAG() {
           continue;
         }
 
+        // skip equal geometries
+        if (APPROX_CONTAINS_SLACK == 0) {
+          if (fabs(areaArea - entryArea) < 0.0001 * 0.0001) {
+            continue;
+          }
+        }
+
         if (skip.find(areaId) != skip.end()) {
           stats.skippedByDAG();
           continue;
         }
 
         GeomRelationInfo geomRelInf;
-        if (!areaInAreaApprox(entry, area, &geomRelInf, &stats)) {
-          continue;
+        if (APPROX_CONTAINS_SLACK == 0) {
+          if (!areaInArea(entry, area, &geomRelInf, &stats)) {
+            continue;
+          }
+        } else {
+          if (!areaInAreaApprox(entry, area, &geomRelInf, &stats)) {
+            continue;
+          }
         }
 
         if (areaFromType == AreaFromType::WAY) {
@@ -640,8 +654,9 @@ void GeometryHandler<W>::prepareDAG() {
           }
         }
 
-        // skip equal geometries
-        if (fabs(1 - areaArea / geomRelInf.intersectArea) < 0.05) {
+        if (APPROX_CONTAINS_SLACK > 0 &&
+            fabs(1.0 - areaArea / geomRelInf.intersectArea) <
+                APPROX_CONTAINS_SLACK) {
           continue;
         }
 
@@ -2176,7 +2191,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   const auto& areaGeom = std::get<2>(b);
   const auto& areaConvexHull = std::get<10>(b);
 
-  if (areaArea / entryArea <= 0.95) {
+  if (areaArea / entryArea <= 1.0 - APPROX_CONTAINS_SLACK) {
     stats->skippedByAreaSize();
     return false;
   }
@@ -2212,7 +2227,8 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
 
     geomRelInf->intersectArea = boost::geometry::area(intersect);
     stats->skippedByBoxIdIntersectCutout();
-    return fabs(1 - entryArea / geomRelInf->intersectArea) < 0.05;
+    return fabs(1.0 - entryArea / geomRelInf->intersectArea) <
+           APPROX_CONTAINS_SLACK;
   } else {
     if (!boost::geometry::is_empty(entryConvexHull) &&
         !boost::geometry::is_empty(areaConvexHull) &&
@@ -2241,7 +2257,8 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
 
     geomRelInf->intersectArea = boost::geometry::area(intersect);
     stats->fullCheck();
-    return fabs(1 - entryArea / geomRelInf->intersectArea) < 0.05;
+    return fabs(1.0 - entryArea / geomRelInf->intersectArea) <
+           APPROX_CONTAINS_SLACK;
   }
 }
 
