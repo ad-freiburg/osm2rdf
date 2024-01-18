@@ -52,9 +52,12 @@ using osm2rdf::ttl::constants::IRI__OSMWAY_NODE;
 using osm2rdf::ttl::constants::IRI__OSMWAY_NODE_COUNT;
 using osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT;
 using osm2rdf::ttl::constants::IRI__RDF_TYPE;
+using osm2rdf::ttl::constants::IRI__XSD_DATE;
 using osm2rdf::ttl::constants::IRI__XSD_DECIMAL;
 using osm2rdf::ttl::constants::IRI__XSD_DOUBLE;
 using osm2rdf::ttl::constants::IRI__XSD_INTEGER;
+using osm2rdf::ttl::constants::IRI__XSD_YEAR;
+using osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH;
 using osm2rdf::ttl::constants::LITERAL__NO;
 using osm2rdf::ttl::constants::LITERAL__YES;
 using osm2rdf::ttl::constants::NAMESPACE__OSM;
@@ -431,7 +434,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
         (key == "wikidata" || hasSuffix(key, ":wikidata"))) {
       // Only take first wikidata entry if ; is found
       std::string valueTmp = value;
-      auto end = valueTmp.find(';');
+      const auto end = valueTmp.find(';');
       if (end != std::string::npos) {
         valueTmp = valueTmp.erase(end);
       }
@@ -448,7 +451,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
     }
     if (!_config.skipWikiLinks &&
         (key == "wikipedia" || hasSuffix(key, ":wikipedia"))) {
-      auto pos = value.find(':');
+      const auto pos = value.find(':');
       if (pos != std::string::npos) {
         const std::string& lang = value.substr(0, pos);
         const std::string& entry = value.substr(pos + 1);
@@ -462,6 +465,26 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
             subj, _writer->generateIRI(NAMESPACE__OSM, key),
             _writer->generateIRI("https://www.wikipedia.org/wiki/", value));
         tagTripleCount++;
+      }
+    }
+    if (key == "start_date" || key == "end_date") {
+      const auto dashCount = std::count(value.begin(), value.end(), '-');
+      switch (dashCount) {
+        case 2:
+          _writer->writeTriple(
+              subj, _writer->generateIRIUnsafe(NAMESPACE__OSM, key),
+              _writer->generateLiteralUnsafe(value, "^^" + IRI__XSD_DATE));
+          break;
+        case 1:
+          _writer->writeTriple(
+              subj, _writer->generateIRIUnsafe(NAMESPACE__OSM, key),
+              _writer->generateLiteralUnsafe(value, "^^" + IRI__XSD_YEAR_MONTH));
+          break;
+        case 0:
+          _writer->writeTriple(
+              subj, _writer->generateIRIUnsafe(NAMESPACE__OSM, key),
+              _writer->generateLiteralUnsafe(value, "^^" + IRI__XSD_YEAR));
+          break;
       }
     }
   }
