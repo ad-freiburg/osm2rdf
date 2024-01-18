@@ -36,6 +36,7 @@ template <typename T>
 osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
                                 osm2rdf::util::Output* output)
     : _config(config), _out(output) {
+  // Static prefixes
   _prefixes = {
       // well-known prefixes
       {osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL,
@@ -53,19 +54,32 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://osm2rdf.cs.uni-freiburg.de/rdf#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/geom#"},
+      // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
+      // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
       // osm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OSM,
        "https://www.openstreetmap.org/"},
-      // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
-      // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
-      {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
-       "https://www.openstreetmap.org/node/"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
-       "https://www.openstreetmap.org/relation/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
-       "https://www.openstreetmap.org/wiki/Key:"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
-       "https://www.openstreetmap.org/way/"}};
+       "https://www.openstreetmap.org/wiki/Key:"}};
+
+  // Dataset specific prefixes
+  switch (_config.sourceDataset) {
+    case config::OHM:
+      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_NODE] =
+          "https://www.openhistoricalmap.org/node/";
+      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION] =
+          "https://www.openhistoricalmap.org/relation/";
+      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_WAY] =
+          "https://www.openhistoricalmap.org/way/";
+      break;
+    default:
+      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_NODE] =
+          "https://www.openstreetmap.org/node/";
+      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION] =
+          "https://www.openstreetmap.org/relation/";
+      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_WAY] =
+          "https://www.openstreetmap.org/way/";
+  }
 
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
@@ -76,14 +90,14 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
-  osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_area");
+  osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_nonarea");
-  osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
+  osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(

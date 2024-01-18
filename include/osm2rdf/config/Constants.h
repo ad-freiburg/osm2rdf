@@ -94,6 +94,14 @@ const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
 const static inline std::string NO_FACTS_OPTION_HELP = "Do not dump facts";
 
+const static inline std::string SOURCE_DATASET_INFO =
+    "Source dataset";
+const static inline std::string SOURCE_DATASET_OPTION_SHORT = "";
+const static inline std::string SOURCE_DATASET_OPTION_LONG =
+    "source-dataset";
+const static inline std::string SOURCE_DATASET_OPTION_HELP =
+    "Source dataset, either 'OSM', or 'OHM'";
+
 const static inline std::string OSM2RDF_GEO_TRIPLES_INFO =
     "Writing mode of osm2rdf-style geometric triples";
 const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_SHORT = "";
