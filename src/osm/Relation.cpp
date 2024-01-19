@@ -38,6 +38,7 @@ osm2rdf::osm::Relation::Relation() {
 // ____________________________________________________________________________
 osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
   _id = relation.positive_id();
+  _timestamp = relation.timestamp().seconds_since_epoch();
   _tags = osm2rdf::osm::convertTagList(relation.tags());
   _members.reserve(relation.cmembers().size());
   for (const auto& member : relation.cmembers()) {
@@ -49,6 +50,11 @@ osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
 // ____________________________________________________________________________
 osm2rdf::osm::Relation::id_t osm2rdf::osm::Relation::id() const noexcept {
   return _id;
+}
+
+// ____________________________________________________________________________
+std::time_t osm2rdf::osm::Relation::timestamp() const noexcept {
+  return _timestamp;
 }
 
 // ____________________________________________________________________________
@@ -78,22 +84,26 @@ bool osm2rdf::osm::Relation::hasGeometry() const noexcept {
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Relation& osm2rdf::osm::Relation::geom() const noexcept {
+const osm2rdf::geometry::Relation& osm2rdf::osm::Relation::geom()
+    const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Box& osm2rdf::osm::Relation::envelope() const noexcept {
+const osm2rdf::geometry::Box& osm2rdf::osm::Relation::envelope()
+    const noexcept {
   return _envelope;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::convexHull() const noexcept {
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::convexHull()
+    const noexcept {
   return _convexHull;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::orientedBoundingBox() const noexcept {
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::orientedBoundingBox()
+    const noexcept {
   return _obb;
 }
 
@@ -144,7 +154,8 @@ void osm2rdf::osm::Relation::buildGeometry(
   if (!_geom.empty()) {
     boost::geometry::envelope(_geom, _envelope);
     boost::geometry::convex_hull(_geom, _convexHull);
-    _obb = osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
+    _obb =
+        osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
   } else {
     _envelope.min_corner() = geometry::Location{0, 0};
     _envelope.max_corner() = geometry::Location{0, 0};

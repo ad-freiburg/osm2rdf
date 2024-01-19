@@ -48,7 +48,6 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
 
  protected:
-
   void writeBox(const std::string& s, const std::string& p,
                 const osm2rdf::geometry::Box& box);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
@@ -76,6 +75,9 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithLang);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang);
   FRIEND_TEST(OSM_FactHandler, writeTagListSkipWikiLinks);
+
+  void writeSecondsAsISO(const std::string& s, const std::string& p,
+                         const std::time_t& t);
 
   bool hasSuffix(const std::string& s, const std::string& suffix) const;
 

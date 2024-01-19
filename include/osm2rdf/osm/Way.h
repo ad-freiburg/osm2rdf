@@ -44,6 +44,7 @@ class Way {
   Way();
   explicit Way(const osmium::Way& way);
   [[nodiscard]] id_t id() const noexcept;
+  [[nodiscard]] std::time_t timestamp() const noexcept;
   [[nodiscard]] bool closed() const noexcept;
   [[nodiscard]] bool isArea() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
@@ -60,6 +61,7 @@ class Way {
 
  protected:
   id_t _id;
+  std::time_t _timestamp;
   std::vector<osm2rdf::osm::Node> _nodes;
   osm2rdf::geometry::Way _geom;
   osm2rdf::geometry::Box _envelope;
@@ -71,6 +73,7 @@ class Way {
   template <class Archive>
   void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
     ar& boost::serialization::make_nvp("_id", _id);
+    ar& boost::serialization::make_nvp("_timestamp", _timestamp);
     ar& boost::serialization::make_nvp("_nodes", _nodes);
     ar& boost::serialization::make_nvp("_geom", _geom);
     ar& boost::serialization::make_nvp("_envelope", _envelope);

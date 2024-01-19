@@ -461,9 +461,9 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     // Dataset selection
     if (sourceDatasetOp->is_set()) {
-      if (osm2rdfGeoTriplesModeOp->value() == "OSM") {
+      if (sourceDatasetOp->value() == "OSM") {
         sourceDataset = OSM;
-      } else if (osm2rdfGeoTriplesModeOp->value() == "OHM") {
+      } else if (sourceDatasetOp->value() == "OHM") {
         sourceDataset = OHM;
       } else {
         throw popl::invalid_option(

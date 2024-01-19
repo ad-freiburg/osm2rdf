@@ -17,15 +17,16 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/geometry/Way.h"
+
 #include <vector>
 
 #include "boost/geometry.hpp"
 #include "osm2rdf/geometry/Box.h"
 #include "osm2rdf/geometry/Polygon.h"
-#include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Box.h"
-#include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Generic.h"
+#include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osm2rdf/osm/Way.h"
 #include "osmium/osm/way.hpp"
@@ -40,6 +41,7 @@ osm2rdf::osm::Way::Way() {
 // ____________________________________________________________________________
 osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
+  _timestamp = way.timestamp().seconds_since_epoch();
   _tags = osm2rdf::osm::convertTagList(way.tags());
   _nodes.reserve(way.nodes().size());
   _geom.reserve(way.nodes().size());
@@ -50,10 +52,18 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   double latMax = -std::numeric_limits<double>::infinity();
 
   for (const auto& nodeRef : way.nodes()) {
-    if (nodeRef.lon() < lonMin) { lonMin = nodeRef.lon(); }
-    if (nodeRef.lat() < latMin) { latMin = nodeRef.lat(); }
-    if (nodeRef.lon() > lonMax) { lonMax = nodeRef.lon(); }
-    if (nodeRef.lat() > latMax) { latMax = nodeRef.lat(); }
+    if (nodeRef.lon() < lonMin) {
+      lonMin = nodeRef.lon();
+    }
+    if (nodeRef.lat() < latMin) {
+      latMin = nodeRef.lat();
+    }
+    if (nodeRef.lon() > lonMax) {
+      lonMax = nodeRef.lon();
+    }
+    if (nodeRef.lat() > latMax) {
+      latMax = nodeRef.lat();
+    }
 
     _nodes.emplace_back(nodeRef);
 
@@ -70,6 +80,9 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
 
 // ____________________________________________________________________________
 osm2rdf::osm::Way::id_t osm2rdf::osm::Way::id() const noexcept { return _id; }
+
+// ____________________________________________________________________________
+std::time_t osm2rdf::osm::Way::timestamp() const noexcept { return _timestamp; }
 
 // ____________________________________________________________________________
 const osm2rdf::osm::TagList& osm2rdf::osm::Way::tags() const noexcept {
@@ -93,12 +106,14 @@ const osm2rdf::geometry::Box& osm2rdf::osm::Way::envelope() const noexcept {
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::convexHull() const noexcept {
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::convexHull()
+    const noexcept {
   return _convexHull;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::orientedBoundingBox() const noexcept {
+const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::orientedBoundingBox()
+    const noexcept {
   return _obb;
 }
 

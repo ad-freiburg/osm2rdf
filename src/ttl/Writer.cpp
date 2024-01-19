@@ -59,27 +59,23 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       // osm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OSM,
        "https://www.openstreetmap.org/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_META,
+       "https://www.openstreetmap.org/meta/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
-       "https://www.openstreetmap.org/wiki/Key:"}};
-
-  // Dataset specific prefixes
-  switch (_config.sourceDataset) {
-    case config::OHM:
-      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_NODE] =
-          "https://www.openhistoricalmap.org/node/";
-      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION] =
-          "https://www.openhistoricalmap.org/relation/";
-      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_WAY] =
-          "https://www.openhistoricalmap.org/way/";
-      break;
-    default:
-      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_NODE] =
-          "https://www.openstreetmap.org/node/";
-      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION] =
-          "https://www.openstreetmap.org/relation/";
-      _prefixes[osm2rdf::ttl::constants::NAMESPACE__OSM_WAY] =
-          "https://www.openstreetmap.org/way/";
-  }
+       "https://www.openstreetmap.org/wiki/Key:"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
+       "https://www.openstreetmap.org/node/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
+       "https://www.openstreetmap.org/relation/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
+       "https://www.openstreetmap.org/way/"},
+      // ohm prefixes
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE,
+       "https://www.openhistoricalmap.org/node/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
+       "https://www.openhistoricalmap.org/relation/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_WAY,
+       "https://www.openhistoricalmap.org/way/"}};
 
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
@@ -110,6 +106,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "obb");
   osm2rdf::ttl::constants::IRI__OSM2RDF__POS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "pos");
+  osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "timestamp");
   osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
   osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =
@@ -135,6 +133,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 
   osm2rdf::ttl::constants::IRI__XSD_DATE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "date");
+  osm2rdf::ttl::constants::IRI__XSD_DATE_TIME =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "dateTime");
   osm2rdf::ttl::constants::IRI__XSD_DECIMAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "decimal");
   osm2rdf::ttl::constants::IRI__XSD_DOUBLE =
