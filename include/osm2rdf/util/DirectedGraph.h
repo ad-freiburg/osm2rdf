@@ -22,7 +22,7 @@
 #include <stdint.h>
 
 #include <filesystem>
-#include <unordered_map>
+#include <map>
 #include <vector>
 
 namespace osm2rdf::util {
@@ -57,13 +57,11 @@ class DirectedGraph {
   [[nodiscard]] std::vector<T> getVertices() const;
   // getEdges returns the stored edges for the given vertex.
   [[nodiscard]] std::vector<T> getEdges(T src) const;
-  // getEdges returns the stored edges but uses "fast" storage for lookup.
-  [[nodiscard]] std::vector<T> getEdgesFast(T src) const;
 
  protected:
   void findSuccessorsHelper(T src, std::vector<T>* tmp) const;
-  std::unordered_map<T, std::vector<T>> _adjacency;
-  std::unordered_map<T, std::vector<T>> _successors;
+  std::map<T, std::vector<T>> _adjacency;
+  std::map<T, std::vector<T>> _successors;
   size_t _numEdges = 0;
   bool _preparedFast = false;
 };
