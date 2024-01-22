@@ -561,14 +561,8 @@ void GeometryHandler<W>::prepareRTree() {
 template <typename W>
 void GeometryHandler<W>::prepareDAG() {
   // Store dag
-  DirectedGraph<Area::id_t> tmpDirectedAreaGraph;
   {
-    // Prepare id based lookup table for later usage...
-    _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
-    for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
-      const auto& area = _spatialStorageArea[i];
-      _spatialStorageAreaIndex[std::get<1>(area)] = i;
-    }
+    DirectedGraph<Area::id_t> tmpDirectedAreaGraph;
 
     std::cerr << currentTimeFormatted() << " Generating non-reduced DAG from "
               << _spatialStorageArea.size() << " areas ... " << std::endl;
@@ -585,7 +579,7 @@ void GeometryHandler<W>::prepareDAG() {
             osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
             progressBar) reduction(+ : stats) default(none) schedule(dynamic)
 
-    for (size_t i = 0; i < _spatialStorageArea.size(); i++) {
+    for (uint32_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
       const auto& entryId = std::get<1>(entry);
 
@@ -615,7 +609,7 @@ void GeometryHandler<W>::prepareDAG() {
           continue;
         }
 
-        if (skip.find(areaId) != skip.end()) {
+        if (skip.find(areaRef.second) != skip.end()) {
           stats.skippedByDAG();
           continue;
         }
@@ -647,8 +641,8 @@ void GeometryHandler<W>::prepareDAG() {
 
 #pragma omp critical(addEdge)
         {
-          tmpDirectedAreaGraph.addEdge(entryId, areaId);
-          const auto& successors = tmpDirectedAreaGraph.findSuccessors(entryId);
+          tmpDirectedAreaGraph.addEdge(i, areaRef.second);
+          const auto& successors = tmpDirectedAreaGraph.findSuccessors(i);
           skip.insert(successors.begin(), successors.end());
         }
       }
@@ -685,34 +679,31 @@ void GeometryHandler<W>::prepareDAG() {
               << stats.printFullChecks() << " by full geometric check"
 
               << std::endl;
-  }
-  if (_config.writeDAGDotFiles) {
-    std::cerr << currentTimeFormatted() << " Dumping non-reduced DAG as "
-              << _config.output << ".non-reduced.dot ..." << std::endl;
-    std::filesystem::path p{_config.output};
-    p += ".non-reduced.dot";
-    tmpDirectedAreaGraph.dump(p);
-    std::cerr << currentTimeFormatted() << " done" << std::endl;
-  }
-  {
-    std::cerr << std::endl;
-    std::cerr << currentTimeFormatted() << " Reducing DAG with "
-              << tmpDirectedAreaGraph.getNumEdges() << " edges and "
-              << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
-              << std::endl;
 
-    // Prepare non-reduced DAG for cleanup
-    tmpDirectedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr << currentTimeFormatted() << " ... fast lookup prepared ... "
-              << std::endl;
+    if (_config.writeDAGDotFiles) {
+      std::cerr << currentTimeFormatted() << " Dumping non-reduced DAG as "
+                << _config.output << ".non-reduced.dot ..." << std::endl;
+      std::filesystem::path p{_config.output};
+      p += ".non-reduced.dot";
+      tmpDirectedAreaGraph.dump(p);
+      std::cerr << currentTimeFormatted() << " done" << std::endl;
+    }
+    {
+      std::cerr << std::endl;
+      std::cerr << currentTimeFormatted() << " Reducing DAG with "
+                << tmpDirectedAreaGraph.getNumEdges() << " edges and "
+                << tmpDirectedAreaGraph.getNumVertices() << " vertices ... "
+                << std::endl;
 
-    _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
+      _directedAreaGraph = osm2rdf::util::reduceDAG(tmpDirectedAreaGraph, true);
 
-    std::cerr << currentTimeFormatted() << " ... done, resulting in DAG with "
-              << _directedAreaGraph.getNumEdges() << " edges and "
-              << _directedAreaGraph.getNumVertices() << " vertices"
-              << std::endl;
+      std::cerr << currentTimeFormatted() << " ... done, resulting in DAG with "
+                << _directedAreaGraph.getNumEdges() << " edges and "
+                << _directedAreaGraph.getNumVertices() << " vertices"
+                << std::endl;
+    }
   }
+
   if (_config.writeDAGDotFiles) {
     std::cerr << currentTimeFormatted() << " Dumping DAG as " << _config.output
               << ".dot ..." << std::endl;
@@ -721,12 +712,12 @@ void GeometryHandler<W>::prepareDAG() {
     _directedAreaGraph.dump(p);
     std::cerr << currentTimeFormatted() << " done" << std::endl;
   }
-  {
-    std::cerr << std::endl;
-    std::cerr << currentTimeFormatted()
-              << " Preparing fast above lookup in DAG ..." << std::endl;
-    _directedAreaGraph.prepareFindSuccessorsFast();
-    std::cerr << currentTimeFormatted() << " ... done" << std::endl;
+
+  // Prepare id based lookup table for later usage...
+  _spatialStorageAreaIndex.reserve(_spatialStorageArea.size());
+  for (size_t i = 0; i < _spatialStorageArea.size(); ++i) {
+    const auto& area = _spatialStorageArea[i];
+    _spatialStorageAreaIndex[std::get<1>(area)] = i;
   }
 }
 
@@ -746,7 +737,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
   progressBar.update(entryCount);
   GeomRelationStats intersectStats;
 
-  std::vector<DirectedGraph<Area::id_t>::entry_t> vertices =
+  std::vector<DirectedGraph<uint32_t>::entry_t> vertices =
       _directedAreaGraph.getVertices();
 #pragma omp parallel for shared(                                         \
         vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,           \
@@ -763,7 +754,7 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
     schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
-    const auto& entry = _spatialStorageArea[_spatialStorageAreaIndex[id]];
+    const auto& entry = _spatialStorageArea[id];
     const auto& entryId = std::get<1>(entry);
     const auto& entryObjId = std::get<3>(entry);
     const auto& entryFromType = std::get<5>(entry);
@@ -775,9 +766,8 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
     // contains relations, simply dump the DAG
     for (const auto& dst : _directedAreaGraph.getEdges(id)) {
-      assert(_spatialStorageAreaIndex[dst] < _spatialStorageArea.size());
-      const auto& area = _spatialStorageArea[_spatialStorageAreaIndex[dst]];
-      const auto& areaId = std::get<1>(area);
+      assert(dst < _spatialStorageArea.size());
+      const auto& area = _spatialStorageArea[dst];
       const auto& areaObjId = std::get<3>(area);
       const auto& areaFromType = std::get<5>(area);
       std::string areaIRI =
@@ -796,9 +786,9 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
       }
 
       // transitive closure
-      const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+      const auto& successors = _directedAreaGraph.findSuccessors(dst);
 
-      skip.insert(areaId);
+      skip.insert(dst);
       skip.insert(successors.begin(), successors.end());
 
       if (_config.osm2rdfGeoTriplesMode > 1) {
@@ -837,12 +827,13 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
       const auto& areaIRI =
           _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
-      if (skip.find(areaId) != skip.end()) {
+      if (skip.find(areaRef.second) != skip.end()) {
         geomRelInf.intersects = RelInfoValue::YES;
         intersectStats.skippedByDAG();
       } else if (areaIntersectsArea(entry, area, &geomRelInf,
                                     &intersectStats)) {
-        const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+        const auto& successors =
+            _directedAreaGraph.findSuccessors(areaRef.second);
         skip.insert(successors.begin(), successors.end());
 
         if (_config.osm2rdfGeoTriplesMode) {
@@ -984,13 +975,13 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
         const auto& areaIRI =
             _writer->generateIRI(areaNS(areaFromType), areaObjId);
 
-        if (skipIntersects.find(areaId) != skipIntersects.end()) {
+        if (skipIntersects.find(areaRef.second) != skipIntersects.end()) {
           geomRelInf.intersects = RelInfoValue::YES;
           intersectStats.skippedByDAG();
         } else if (areaIntersectsArea(entry, area, &geomRelInf,
                                       &intersectStats)) {
           const auto& successors =
-              _directedAreaGraph.findSuccessorsFast(areaId);
+              _directedAreaGraph.findSuccessors(areaRef.second);
           skipIntersects.insert(successors.begin(), successors.end());
 
           if (_config.osm2rdfGeoTriplesMode) {
@@ -1024,12 +1015,12 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
           continue;
         }
 
-        if (skipContains.find(areaId) != skipContains.end()) {
+        if (skipContains.find(areaRef.second) != skipContains.end()) {
           containsStats.skippedByDAG();
         } else {
           if (areaInArea(entry, area, &geomRelInf, &containsStats)) {
             const auto& successors =
-                _directedAreaGraph.findSuccessorsFast(areaId);
+                _directedAreaGraph.findSuccessors(areaRef.second);
             skipContains.insert(successors.begin(), successors.end());
 
             if (_config.osm2rdfGeoTriplesMode) {
@@ -1192,7 +1183,6 @@ void GeometryHandler<W>::dumpNodeRelations() {
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
-        const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromType = std::get<5>(area);
 
@@ -1205,7 +1195,7 @@ void GeometryHandler<W>::dumpNodeRelations() {
           continue;
         }
 
-        if (skip.find(areaId) != skip.end()) {
+        if (skip.find(areaRef.second) != skip.end()) {
           stats.skippedByDAG();
           continue;
         }
@@ -1230,9 +1220,10 @@ void GeometryHandler<W>::dumpNodeRelations() {
           }
         }
 
-        skip.insert(areaId);
+        skip.insert(areaRef.second);
 
-        const auto& successors = _directedAreaGraph.findSuccessorsFast(areaId);
+        const auto& successors =
+            _directedAreaGraph.findSuccessors(areaRef.second);
         skip.insert(successors.begin(), successors.end());
 
         std::string areaIRI =
@@ -1364,11 +1355,11 @@ void GeometryHandler<W>::dumpWayRelations() {
       ia >> way;
 
       const auto& wayId = std::get<1>(way);
-      const auto& wayNodeIds = std::get<3>(way);
 
-      // Check if our "area" has successors in the DAG, if yes we are part of
-      // the DAG and don't need to calculate any relation again.
-      if (!_directedAreaGraph.findSuccessorsFast(wayId * 2).empty()) {
+      // Check if an area computed from this way exists if yes we don't need to
+      // calculate any relation again.
+      auto it = _spatialStorageAreaIndex.find(wayId * 2);
+      if (it != _spatialStorageAreaIndex.end()) {
         continue;
       }
 
@@ -1383,7 +1374,6 @@ void GeometryHandler<W>::dumpWayRelations() {
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
-        const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaFromType = std::get<5>(area);
 
@@ -1406,7 +1396,7 @@ void GeometryHandler<W>::dumpWayRelations() {
 
         // checks for intersect
 
-        if (skipIntersects.find(areaId) != skipIntersects.end()) {
+        if (skipIntersects.find(areaRef.second) != skipIntersects.end()) {
           intersectStats.skippedByDAG();
           geomRelInf.intersects = RelInfoValue::YES;
         } else if (areaFromType == AreaFromType::RELATION &&
@@ -1418,7 +1408,7 @@ void GeometryHandler<W>::dumpWayRelations() {
           geomRelInf.contained = RelInfoValue::YES;
 
           const auto& successors =
-              _directedAreaGraph.findSuccessorsFast(areaId);
+              _directedAreaGraph.findSuccessors(areaRef.second);
           skipIntersects.insert(successors.begin(), successors.end());
 
           std::string areaIRI =
@@ -1450,7 +1440,7 @@ void GeometryHandler<W>::dumpWayRelations() {
           }
         } else if (wayIntersectsArea(way, area, &geomRelInf, &intersectStats)) {
           const auto& successors =
-              _directedAreaGraph.findSuccessorsFast(areaId);
+              _directedAreaGraph.findSuccessors(areaRef.second);
           skipIntersects.insert(successors.begin(), successors.end());
 
           std::string areaIRI =
@@ -1489,7 +1479,7 @@ void GeometryHandler<W>::dumpWayRelations() {
 
         // checks for contains
 
-        if (skipContains.find(areaId) != skipContains.end()) {
+        if (skipContains.find(areaRef.second) != skipContains.end()) {
           containsStats.skippedByDAG();
         } else {
           if (!wayInArea(way, area, &geomRelInf, &containsStats)) {
@@ -1512,7 +1502,7 @@ void GeometryHandler<W>::dumpWayRelations() {
           }
 
           const auto& successors =
-              _directedAreaGraph.findSuccessorsFast(areaId);
+              _directedAreaGraph.findSuccessors(areaRef.second);
           skipContains.insert(successors.begin(), successors.end());
 
           std::string areaIRI =
@@ -2828,12 +2818,10 @@ uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<osm2rdf::osm::Area::id_t>& successors,
-    const std::string& entryIRI, const std::string& rel,
-    const std::string& symmRel) {
+    const std::vector<uint32_t>& successors, const std::string& entryIRI,
+    const std::string& rel, const std::string& symmRel) {
   // transitive closure
-  for (const auto& succ : successors) {
-    auto succIdx = _spatialStorageAreaIndex[succ];
+  for (const auto& succIdx : successors) {
     const auto& succAreaId = std::get<3>(_spatialStorageArea[succIdx]);
     const auto& succAreaFromType = std::get<5>(_spatialStorageArea[succIdx]);
     const auto& succAreaIRI =
@@ -2847,11 +2835,10 @@ void GeometryHandler<W>::writeTransitiveClosure(
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<osm2rdf::osm::Area::id_t>& successors,
-    const std::string& entryIRI, const std::string& rel) {
+    const std::vector<uint32_t>& successors, const std::string& entryIRI,
+    const std::string& rel) {
   // transitive closure
-  for (const auto& succ : successors) {
-    auto succIdx = _spatialStorageAreaIndex[succ];
+  for (const auto& succIdx : successors) {
     const auto& succAreaId = std::get<3>(_spatialStorageArea[succIdx]);
     const auto& succAreaFromType = std::get<5>(_spatialStorageArea[succIdx]);
     const auto& succAreaIRI =
