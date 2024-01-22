@@ -613,7 +613,7 @@ void GeometryHandler<W>::prepareDAG() {
         }
 
         // skip equal geometries
-        if (APPROX_CONTAINS_SLACK == 0) {
+        if (_config.approxContainsSlack == 0) {
           if (fabs(areaArea - entryArea) < 0.0001 * 0.0001) {
             continue;
           }
@@ -625,7 +625,7 @@ void GeometryHandler<W>::prepareDAG() {
         }
 
         GeomRelationInfo geomRelInf;
-        if (APPROX_CONTAINS_SLACK == 0) {
+        if (_config.approxContainsSlack == 0) {
           if (!areaInArea(entry, area, &geomRelInf, &stats)) {
             continue;
           }
@@ -650,9 +650,9 @@ void GeometryHandler<W>::prepareDAG() {
           }
         }
 
-        if (APPROX_CONTAINS_SLACK > 0 &&
+        if (_config.approxContainsSlack > 0 &&
             fabs(1.0 - areaArea / geomRelInf.intersectArea) <
-                APPROX_CONTAINS_SLACK) {
+                _config.approxContainsSlack) {
           continue;
         }
 
@@ -2184,7 +2184,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   const auto& areaGeom = std::get<2>(b);
   const auto& areaConvexHull = std::get<10>(b);
 
-  if (areaArea / entryArea <= 1.0 - APPROX_CONTAINS_SLACK) {
+  if (areaArea / entryArea <= 1.0 - _config.approxContainsSlack) {
     stats->skippedByAreaSize();
     return false;
   }
@@ -2221,7 +2221,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
     geomRelInf->intersectArea = boost::geometry::area(intersect);
     stats->skippedByBoxIdIntersectCutout();
     return fabs(1.0 - entryArea / geomRelInf->intersectArea) <
-           APPROX_CONTAINS_SLACK;
+           _config.approxContainsSlack;
   } else {
     if (!boost::geometry::is_empty(entryConvexHull) &&
         !boost::geometry::is_empty(areaConvexHull) &&
@@ -2251,7 +2251,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
     geomRelInf->intersectArea = boost::geometry::area(intersect);
     stats->fullCheck();
     return fabs(1.0 - entryArea / geomRelInf->intersectArea) <
-           APPROX_CONTAINS_SLACK;
+           _config.approxContainsSlack;
   }
 }
 

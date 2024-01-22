@@ -126,6 +126,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       << prefix << osm2rdf::config::constants::OGC_GEO_TRIPLES_INFO << ": "
       << (modeStrings[ogcGeoTriplesMode]);
 
+  oss << "\n"
+      << prefix << osm2rdf::config::constants::APPROX_CONTAINS_SLACK_INFO
+      << ": " << approxContainsSlack;
+
   if (ogcGeoTriplesMode || osm2rdfGeoTriplesMode) {
      if (noAreaGeometricRelations) {
       oss << "\n"
@@ -376,6 +380,13 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::CACHE_OPTION_LONG,
       osm2rdf::config::constants::CACHE_OPTION_HELP, cache);
 
+  auto approxContainsSlackOp =
+      parser.add<popl::Value<double>, popl::Attribute::expert>(
+          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_SHORT,
+          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_LONG,
+          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_HELP,
+          approxContainsSlack);
+
   try {
     parser.parse(argc, argv);
 
@@ -463,13 +474,19 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     if (sourceDatasetOp->is_set()) {
       if (sourceDatasetOp->value() == "OSM") {
         sourceDataset = OSM;
+        approxContainsSlack = 0.05;
       } else if (sourceDatasetOp->value() == "OHM") {
         sourceDataset = OHM;
+        approxContainsSlack = 0;
       } else {
         throw popl::invalid_option(
-            sourceDatasetOp.get(), popl::invalid_option::Error::invalid_argument,
+            sourceDatasetOp.get(),
+            popl::invalid_option::Error::invalid_argument,
             popl::OptionName::long_name, sourceDatasetOp->value(), "");
       }
+    }
+    if (approxContainsSlackOp->is_set()) {
+      approxContainsSlack = approxContainsSlackOp->value();
     }
 
     // Select amount to dump

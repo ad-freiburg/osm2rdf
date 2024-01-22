@@ -67,6 +67,7 @@ struct Config {
   // "collapsed away" by the inner simplification, or added by the outer
   // simplification
   double simplifyGeometriesInnerOuter = 1 / (3.14 * 20);
+  double approxContainsSlack = 0.05;
   bool dontUseInnerOuterGeoms = false;
   bool approximateSpatialRels = false;
 
