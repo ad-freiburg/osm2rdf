@@ -16,14 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/util/DirectedGraph.h"
-
 #include <stdint.h>
 
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <set>
+#include <queue>
+
+#include "osm2rdf/util/DirectedGraph.h"
 
 // ____________________________________________________________________________
 template <typename T>
@@ -38,31 +40,33 @@ void osm2rdf::util::DirectedGraph<T>::addEdge(T src, T dst) {
 // ____________________________________________________________________________
 template <typename T>
 std::vector<T> osm2rdf::util::DirectedGraph<T>::findSuccessors(T src) const {
+  std::queue<T> q;
+  std::set<T> visited;
+  q.push(src);
+
+  while (!q.empty()) {
+    auto cur = q.front();
+    visited.insert(cur);
+    q.pop();
+
+    const auto& entry = _adjacency.find(cur);
+    if (entry == _adjacency.end()) {
+      continue;
+    }
+
+    for (const auto& nd : entry->second) {
+      if (visited.find(nd) == visited.end()) q.push(nd);
+    }
+  }
+
+  visited.erase(src);
+
   std::vector<T> tmp;
-  // Collect parents
-  findSuccessorsHelper(src, &tmp);
-  // Make unique
-  std::sort(tmp.begin(), tmp.end());
-  const auto it2 = std::unique(tmp.begin(), tmp.end());
-  tmp.resize(std::distance(tmp.begin(), it2));
+  tmp.reserve(visited.size());
+  tmp.insert(tmp.end(), visited.begin(), visited.end());
+
+  // guaranteed to be sorted
   return tmp;
-}
-
-// ____________________________________________________________________________
-template <typename T>
-void osm2rdf::util::DirectedGraph<T>::findSuccessorsHelper(
-    T src, std::vector<T>* tmp) const {
-  const auto& entry = _adjacency.find(src);
-  if (entry == _adjacency.end()) {
-    return;
-  }
-
-  // Copy direct successors.
-  tmp->insert(tmp->end(), entry->second.begin(), entry->second.end());
-  // Recursively add all successors.
-  for (const auto& dst : entry->second) {
-    findSuccessorsHelper(dst, tmp);
-  }
 }
 
 // ____________________________________________________________________________
@@ -133,8 +137,8 @@ void osm2rdf::util::DirectedGraph<T>::dumpOsm(
 template <typename T>
 void osm2rdf::util::DirectedGraph<T>::prepareFindSuccessorsFast() {
   const auto& vertices = getVertices();
-  for (size_t i = 0; i < vertices.size(); i++) {
-    _successors[vertices[i]] = findSuccessors(vertices[i]);
+  for (const auto& [key, _] : _adjacency) {
+    _successors[key] = findSuccessors(key);
   }
   _preparedFast = true;
 }
@@ -165,15 +169,6 @@ std::vector<T> osm2rdf::util::DirectedGraph<T>::getVertices() const {
 template <typename T>
 std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdges(T src) const {
   return _adjacency.at(src);
-}
-
-// ____________________________________________________________________________
-template <typename T>
-std::vector<T> osm2rdf::util::DirectedGraph<T>::getEdgesFast(T src) const {
-  if (!_preparedFast) {
-    throw std::runtime_error("findSuccessorsFast not prepared");
-  }
-  return _successors.at(src);
 }
 
 // ____________________________________________________________________________
