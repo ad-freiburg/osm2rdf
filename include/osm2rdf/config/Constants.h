@@ -152,6 +152,13 @@ const static inline std::string NO_RELATION_FACTS_OPTION_LONG =
     "no-relation-facts";
 const static inline std::string NO_RELATION_FACTS_OPTION_HELP =
     "Do not dump relation facts";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_INFO =
+    "Ignoring relation geometric relations";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_OPTION_SHORT = "";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_OPTION_LONG =
+    "no-relation-geometric-relations";
+const static inline std::string NO_RELATION_GEOM_RELATIONS_OPTION_HELP =
+    "Do not dump relation geometric relations";
 
 const static inline std::string NO_WAY_OPTION_SHORT = "";
 const static inline std::string NO_WAY_OPTION_LONG = "no-ways";
