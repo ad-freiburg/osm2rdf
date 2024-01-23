@@ -89,10 +89,12 @@ TEST(OSM_FactHandler, areaFromWay) {
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
+      "osmway:21 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
+      "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmway:21 osm2rdfgeom:obb \"POLYGON((48.0 7.6,48.1 7.6,48.1 7.5,48.0 7.5,48.0 7.6))\"^^geo:wktLiteral .\n"
+      "osmway:21 osm2rdfgeom:obb \"POLYGON((48.0 7.6,48.1 7.6,48.1 7.5,48.0 "
+      "7.5,48.0 7.6))\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdf:area \"0.010000000000\"^^xsd:double .\n",
       buffer.str());
 
@@ -134,7 +136,8 @@ TEST(OSM_FactHandler, areaFromRelation) {
                             osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  osm2rdf::osm::Area a{osmiumBuffer.get<osmium::Area>(0)};
+  a.finalize();
 
   dh.area(a);
   output.flush();
@@ -143,10 +146,12 @@ TEST(OSM_FactHandler, areaFromRelation) {
   ASSERT_EQ(
       "osmrel:10 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmrel:10 osm2rdfgeom:convex_hull \"POLYGON(())\"^^geo:wktLiteral .\n"
+      "osmrel:10 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
+      "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
       "osmrel:10 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmrel:10 osm2rdfgeom:obb \"POLYGON(())\"^^geo:wktLiteral .\n"
+      "osmrel:10 osm2rdfgeom:obb \"POLYGON((48.0 7.6,48.1 7.6,48.1 7.5,48.0 "
+      "7.5,48.0 7.6))\"^^geo:wktLiteral .\n"
       "osmrel:10 osm2rdf:area \"0.010000000000\"^^xsd:double .\n",
       buffer.str());
 
