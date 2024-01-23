@@ -578,6 +578,7 @@ void GeometryHandler<W>::prepareDAG() {
 #pragma omp parallel for shared(                                               \
         tmpDirectedAreaGraph, std::cout, std::cerr,                            \
             osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
+            APPROX_CONTAINS_SLACK, \
             progressBar) reduction(+ : stats) default(none) schedule(dynamic)
 
     for (uint32_t i = 0; i < _spatialStorageArea.size(); i++) {

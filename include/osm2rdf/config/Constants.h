@@ -176,38 +176,6 @@ const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump way geometric relations";
 
-const static inline std::string ADD_AREA_CONVEX_HULL_INFO =
-    "Adding area convex hulls";
-const static inline std::string ADD_AREA_CONVEX_HULL_OPTION_SHORT = "";
-const static inline std::string ADD_AREA_CONVEX_HULL_OPTION_LONG =
-    "add-area-convex-hull";
-const static inline std::string ADD_AREA_CONVEX_HULL_OPTION_HELP =
-    "Add convex hull to areas";
-
-const static inline std::string ADD_AREA_ENVELOPE_INFO =
-    "Adding area envelopes";
-const static inline std::string ADD_AREA_ENVELOPE_OPTION_SHORT = "";
-const static inline std::string ADD_AREA_ENVELOPE_OPTION_LONG =
-    "add-area-envelope";
-const static inline std::string ADD_AREA_ENVELOPE_OPTION_HELP =
-    "Add envelope to areas";
-
-const static inline std::string ADD_AREA_ENVELOPE_RATIO_INFO =
-    "Adding area/envelope ratios";
-const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_SHORT = "";
-const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_LONG =
-    "add-area-envelope-ratio";
-const static inline std::string ADD_AREA_ENVELOPE_RATIO_OPTION_HELP =
-    "Add area/envelope ratio to areas";
-
-const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_INFO =
-    "Adding area oriented-bounding-boxes";
-const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
-const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_LONG =
-    "add-area-oriented-bounding-box";
-const static inline std::string ADD_AREA_ORIENTED_BOUNDING_BOX_OPTION_HELP =
-    "Add oriented-bounding-box to areas";
-
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_INFO =
     "Adding linestrings for ways which form areas";
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT = "";
@@ -223,76 +191,6 @@ const static inline std::string HASGEOMETRY_AS_WKT_OPTION_LONG =
     "hasgeometry-as-wkt";
 const static inline std::string HASGEOMETRY_AS_WKT_OPTION_HELP =
     "Let geo:hasGeometry point directly to a WKT literal";
-
-const static inline std::string ADD_NODE_CONVEX_HULL_INFO =
-    "Adding node convex hulls";
-const static inline std::string ADD_NODE_CONVEX_HULL_OPTION_SHORT = "";
-const static inline std::string ADD_NODE_CONVEX_HULL_OPTION_LONG =
-    "add-node-convex-hull";
-const static inline std::string ADD_NODE_CONVEX_HULL_OPTION_HELP =
-    "Add convex hull to nodes";
-
-const static inline std::string ADD_NODE_ENVELOPE_INFO =
-    "Adding node envelopes";
-const static inline std::string ADD_NODE_ENVELOPE_OPTION_SHORT = "";
-const static inline std::string ADD_NODE_ENVELOPE_OPTION_LONG =
-    "add-node-envelope";
-const static inline std::string ADD_NODE_ENVELOPE_OPTION_HELP =
-    "Add envelope to nodes";
-
-const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_INFO =
-    "Adding node oriented-bounding-boxes";
-const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
-const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_LONG =
-    "add-node-oriented-bounding-box";
-const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_HELP =
-    "Add oriented-bounding-box to nodes";
-
-const static inline std::string ADD_RELATION_CONVEX_HULL_INFO =
-    "Adding relation convex hulls";
-const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_SHORT = "";
-const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_LONG =
-    "add-relation-convex-hull";
-const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_HELP =
-    "Add convex hull to relations";
-
-const static inline std::string ADD_RELATION_ENVELOPE_INFO = "Adding relation envelopes";
-const static inline std::string ADD_RELATION_ENVELOPE_OPTION_SHORT = "";
-const static inline std::string ADD_RELATION_ENVELOPE_OPTION_LONG =
-    "add-relation-envelope";
-const static inline std::string ADD_RELATION_ENVELOPE_OPTION_HELP =
-    "Add envelope to relations";
-
-const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_INFO =
-    "Adding relation oriented-bounding-boxes";
-const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
-const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_LONG =
-    "add-relation-oriented-bounding-box";
-const static inline std::string ADD_RELATION_ORIENTED_BOUNDING_BOX_OPTION_HELP =
-    "Add oriented-bounding-box to relations";
-
-const static inline std::string ADD_WAY_CONVEX_HULL_INFO =
-    "Adding way convex hulls";
-const static inline std::string ADD_WAY_CONVEX_HULL_OPTION_SHORT = "";
-const static inline std::string ADD_WAY_CONVEX_HULL_OPTION_LONG =
-    "add-way-convex-hull";
-const static inline std::string ADD_WAY_CONVEX_HULL_OPTION_HELP =
-    "Add convex hull to ways";
-
-const static inline std::string ADD_WAY_ENVELOPE_INFO = "Adding way envelopes";
-const static inline std::string ADD_WAY_ENVELOPE_OPTION_SHORT = "";
-const static inline std::string ADD_WAY_ENVELOPE_OPTION_LONG =
-    "add-way-envelope";
-const static inline std::string ADD_WAY_ENVELOPE_OPTION_HELP =
-    "Add envelope to ways";
-
-const static inline std::string ADD_WAY_ORIENTED_BOUNDING_BOX_INFO =
-    "Adding way oriented-bounding-boxes";
-const static inline std::string ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_SHORT = "";
-const static inline std::string ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_LONG =
-    "add-way-oriented-bounding-box";
-const static inline std::string ADD_WAY_ORIENTED_BOUNDING_BOX_OPTION_HELP =
-    "Add oriented-bounding-box to ways";
 
 const static inline std::string ADD_WAY_METADATA_INFO = "Adding way metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_SHORT = "";
