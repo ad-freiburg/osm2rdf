@@ -50,7 +50,6 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.addNodeConvexHull);
   ASSERT_FALSE(config.addNodeEnvelope);
   ASSERT_FALSE(config.addNodeOrientedBoundingBox);
-  ASSERT_FALSE(config.addRelationBorderMembers);
   ASSERT_FALSE(config.addRelationConvexHull);
   ASSERT_FALSE(config.addRelationEnvelope);
   ASSERT_FALSE(config.addRelationOrientedBoundingBox);
@@ -62,7 +61,6 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.addWayNodeOrder);
   ASSERT_FALSE(config.addWayNodeSpatialMetadata);
   ASSERT_FALSE(config.addWayMetadata);
-  ASSERT_FALSE(config.adminRelationsOnly);
   ASSERT_FALSE(config.skipWikiLinks);
 
   ASSERT_EQ(0, config.semicolonTagKeys.size());
@@ -711,23 +709,6 @@ TEST(CONFIG_Config, fromArgsAddNodeOrientedBoundingBoxLong) {
   ASSERT_TRUE(config.addNodeOrientedBoundingBox);
 }
 
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsAddRelationBorderMembersLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-
-  const auto arg =
-      "--" +
-      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.addRelationBorderMembers);
-}
-
 #if BOOST_VERSION >= 107800
 // ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddRelationConvexHullLong) {
@@ -891,22 +872,6 @@ TEST(CONFIG_Config, fromArgsAddWayNodeSpatialMetadataLong) {
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.addWayNodeSpatialMetadata);
   ASSERT_TRUE(config.addWayNodeOrder);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsAdminRelationsOnlyLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-
-  const auto arg =
-      "--" + osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.adminRelationsOnly);
 }
 
 // ____________________________________________________________________________
@@ -1243,18 +1208,6 @@ TEST(CONFIG_Config, getInfoAddNodeOrientedBoundingBox) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoAddRelationBorderMembers) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  config.addRelationBorderMembers = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(
-      res, ::testing::HasSubstr(
-               osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_INFO));
-}
-
-// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddRelationConvexHull) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1446,17 +1399,6 @@ TEST(CONFIG_Config, getInfoWayGeomRelations) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO));
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoAdminRelationsOnly) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  config.adminRelationsOnly = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_INFO));
 }
 
 // ____________________________________________________________________________

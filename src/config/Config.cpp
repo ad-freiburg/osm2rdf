@@ -50,10 +50,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
   if (noFacts) {
     oss << "\n" << prefix << osm2rdf::config::constants::NO_FACTS_INFO;
   } else {
-    if (adminRelationsOnly) {
-      oss << "\n"
-          << prefix << osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_INFO;
-    }
     if (noAreaFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_AREA_FACTS_INFO;
     } else {
@@ -189,11 +185,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       << (modeStrings[ogcGeoTriplesMode]);
 
   if (ogcGeoTriplesMode || osm2rdfGeoTriplesMode) {
-    if (adminRelationsOnly) {
-      oss << "\n"
-          << prefix << osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_INFO;
-    }
-    if (noAreaGeometricRelations) {
+     if (noAreaGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
     }
@@ -414,10 +406,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::HASGEOMETRY_AS_WKT_OPTION_SHORT,
       osm2rdf::config::constants::HASGEOMETRY_AS_WKT_OPTION_LONG,
       osm2rdf::config::constants::HASGEOMETRY_AS_WKT_OPTION_HELP);
-  auto adminRelationsOnlyOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_OPTION_SHORT,
-      osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_OPTION_LONG,
-      osm2rdf::config::constants::ADMIN_RELATIONS_ONLY_OPTION_HELP);
   auto skipWikiLinksOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_SHORT,
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG,
@@ -604,7 +592,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
-    adminRelationsOnly = adminRelationsOnlyOp->is_set();
     hasGeometryAsWkt = hasGeometryAsWktOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();

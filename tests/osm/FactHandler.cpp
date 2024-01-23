@@ -708,13 +708,17 @@ TEST(OSM_FactHandler, relation) {
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_1 .\n"
-      "_:0_1 osm:id osmrel:1 .\n"
-      "_:0_1 osm:role \"foo\" .\n"
+      "_:0_1 osm:id osmway:1 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
       "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_2 .\n"
-      "_:0_2 osm:id osm:1 .\n"
-      "_:0_2 osm:role \"bar\" .\n"
-      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n",
+      "_:0_2 osm:id osmrel:1 .\n"
+      "_:0_2 osm:role \"foo\" .\n"
+      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_3 .\n"
+      "_:0_3 osm:id osm:1 .\n"
+      "_:0_3 osm:role \"bar\" .\n"
+      "_:0_3 osm2rdf:pos \"3\"^^xsd:integer .\n",
       buffer.str());
 
   // Cleanup
@@ -769,13 +773,17 @@ TEST(OSM_FactHandler, relationAddConvexHull) {
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_1 .\n"
-      "_:0_1 osm:id osmrel:1 .\n"
-      "_:0_1 osm:role \"foo\" .\n"
+      "_:0_1 osm:id osmway:1 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
       "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_2 .\n"
-      "_:0_2 osm:id osm:1 .\n"
-      "_:0_2 osm:role \"bar\" .\n"
-      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n",
+      "_:0_2 osm:id osmrel:1 .\n"
+      "_:0_2 osm:role \"foo\" .\n"
+      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_3 .\n"
+      "_:0_3 osm:id osm:1 .\n"
+      "_:0_3 osm:role \"bar\" .\n"
+      "_:0_3 osm2rdf:pos \"3\"^^xsd:integer .\n",
       buffer.str());
 
   // Cleanup
@@ -830,13 +838,17 @@ TEST(OSM_FactHandler, relationAddEnvelop) {
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_1 .\n"
-      "_:0_1 osm:id osmrel:1 .\n"
-      "_:0_1 osm:role \"foo\" .\n"
+      "_:0_1 osm:id osmway:1 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
       "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_2 .\n"
-      "_:0_2 osm:id osm:1 .\n"
-      "_:0_2 osm:role \"bar\" .\n"
-      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n",
+      "_:0_2 osm:id osmrel:1 .\n"
+      "_:0_2 osm:role \"foo\" .\n"
+      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_3 .\n"
+      "_:0_3 osm:id osm:1 .\n"
+      "_:0_3 osm:role \"bar\" .\n"
+      "_:0_3 osm2rdf:pos \"3\"^^xsd:integer .\n",
       buffer.str());
 
   // Cleanup
@@ -891,13 +903,17 @@ TEST(OSM_FactHandler, relationAddOrientedBoundingBox) {
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_1 .\n"
-      "_:0_1 osm:id osmrel:1 .\n"
-      "_:0_1 osm:role \"foo\" .\n"
+      "_:0_1 osm:id osmway:1 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
       "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_2 .\n"
-      "_:0_2 osm:id osm:1 .\n"
-      "_:0_2 osm:role \"bar\" .\n"
-      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n",
+      "_:0_2 osm:id osmrel:1 .\n"
+      "_:0_2 osm:role \"foo\" .\n"
+      "_:0_2 osm2rdf:pos \"2\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_3 .\n"
+      "_:0_3 osm:id osm:1 .\n"
+      "_:0_3 osm:role \"bar\" .\n"
+      "_:0_3 osm2rdf:pos \"3\"^^xsd:integer .\n",
       buffer.str());
 
   // Cleanup
@@ -985,6 +1001,10 @@ TEST(OSM_FactHandler, relationWithGeometry) {
       "_:0_0 osm:id osmnode:23 .\n"
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_1 .\n"
+      "_:0_1 osm:id osmway:55 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
+      "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osm2rdf:completeGeometry \"yes\" .\n",
@@ -1075,6 +1095,10 @@ TEST(OSM_FactHandler, relationWithGeometryAddConvexHull) {
       "_:0_0 osm:id osmnode:23 .\n"
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_1 .\n"
+      "_:0_1 osm:id osmway:55 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
+      "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.6 48.0,7.5 "
@@ -1168,6 +1192,10 @@ TEST(OSM_FactHandler, relationWithGeometryAddEnvelope) {
       "_:0_0 osm:id osmnode:23 .\n"
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_1 .\n"
+      "_:0_1 osm:id osmway:55 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
+      "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.6 "
@@ -1261,6 +1289,10 @@ TEST(OSM_FactHandler, relationWithGeometryAddOrientedBoundingBox) {
       "_:0_0 osm:id osmnode:23 .\n"
       "_:0_0 osm:role \"label\" .\n"
       "_:0_0 osm2rdf:pos \"0\"^^xsd:integer .\n"
+      "osmrel:42 osmrel:member _:0_1 .\n"
+      "_:0_1 osm:id osmway:55 .\n"
+      "_:0_1 osm:role \"outer\" .\n"
+      "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
       "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osm2rdfgeom:obb \"POLYGON((7.6 48.0,7.6 48.0,7.5 48.0,7.5 "

@@ -224,43 +224,6 @@ TEST(OSM_OsmiumHandler, noGeometricRelations) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_OsmiumHandler, adminRelationsOnly) {
-  // Capture std::cout
-  std::stringstream buffer;
-  std::streambuf* sbuf = std::cout.rdbuf();
-  std::cout.rdbuf(buffer.rdbuf());
-
-  osm2rdf::config::Config config;
-  config.output = "";
-  config.outputCompress = false;
-  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.adminRelationsOnly = true;
-  osm2rdf::util::Output output{config, config.output};
-  output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
-
-  addOsmiumItems(&oh);
-
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(1, oh.areasDumped());
-  ASSERT_EQ(1, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(0, oh.nodesDumped());
-  ASSERT_EQ(0, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(1, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(0, oh.waysDumped());
-  ASSERT_EQ(0, oh.wayGeometriesHandled());
-
-  // Cleanup
-  output.close();
-  std::cout.rdbuf(sbuf);
-}
-
-// ____________________________________________________________________________
 TEST(OSM_OsmiumHandler, noAreaFacts) {
   // Capture std::cout
   std::stringstream buffer;
