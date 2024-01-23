@@ -248,14 +248,6 @@ const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_LONG =
 const static inline std::string ADD_NODE_ORIENTED_BOUNDING_BOX_OPTION_HELP =
     "Add oriented-bounding-box to nodes";
 
-const static inline std::string ADD_RELATION_BORDER_MEMBERS_INFO =
-    "Adding relation border members";
-const static inline std::string ADD_RELATION_BORDER_MEMBERS_OPTION_SHORT = "";
-const static inline std::string ADD_RELATION_BORDER_MEMBERS_OPTION_LONG =
-    "add-relation-border-members";
-const static inline std::string ADD_RELATION_BORDER_MEMBERS_OPTION_HELP =
-    "Add relation border members (inner and outer)";
-
 const static inline std::string ADD_RELATION_CONVEX_HULL_INFO =
     "Adding relation convex hulls";
 const static inline std::string ADD_RELATION_CONVEX_HULL_OPTION_SHORT = "";

@@ -167,39 +167,36 @@ void osm2rdf::osm::FactHandler<W>::relation(
   size_t inRelPos = 0;
   for (const auto& member : relation.members()) {
     const std::string& role = member.role();
-    if (_config.addRelationBorderMembers ||
-        (role != "outer" && role != "inner")) {
-      const std::string& blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(
-          subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
-          blankNode);
+    const std::string& blankNode = _writer->generateBlankNode();
+    _writer->writeTriple(
+        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
+        blankNode);
 
-      std::string type;
-      switch (member.type()) {
-        case osm2rdf::osm::RelationMemberType::NODE:
-          type = NAMESPACE__OSM_NODE;
-          break;
-        case osm2rdf::osm::RelationMemberType::RELATION:
-          type = NAMESPACE__OSM_RELATION;
-          break;
-        case osm2rdf::osm::RelationMemberType::WAY:
-          type = NAMESPACE__OSM_WAY;
-          break;
-        default:
-          type = NAMESPACE__OSM;
-      }
-
-      _writer->writeTriple(blankNode,
-                           _writer->generateIRIUnsafe(NAMESPACE__OSM, "id"),
-                           _writer->generateIRI(type, member.id()));
-      _writer->writeTriple(blankNode,
-                           _writer->generateIRIUnsafe(NAMESPACE__OSM, "role"),
-                           _writer->generateLiteral(role, ""));
-      _writer->writeTriple(
-          blankNode, IRI__OSM2RDF__POS,
-          _writer->generateLiteralUnsafe(std::to_string(inRelPos++),
-                                         "^^" + IRI__XSD_INTEGER));
+    std::string type;
+    switch (member.type()) {
+      case osm2rdf::osm::RelationMemberType::NODE:
+        type = NAMESPACE__OSM_NODE;
+        break;
+      case osm2rdf::osm::RelationMemberType::RELATION:
+        type = NAMESPACE__OSM_RELATION;
+        break;
+      case osm2rdf::osm::RelationMemberType::WAY:
+        type = NAMESPACE__OSM_WAY;
+        break;
+      default:
+        type = NAMESPACE__OSM;
     }
+
+    _writer->writeTriple(blankNode,
+                         _writer->generateIRIUnsafe(NAMESPACE__OSM, "id"),
+                         _writer->generateIRI(type, member.id()));
+    _writer->writeTriple(blankNode,
+                         _writer->generateIRIUnsafe(NAMESPACE__OSM, "role"),
+                         _writer->generateLiteral(role, ""));
+    _writer->writeTriple(
+        blankNode, IRI__OSM2RDF__POS,
+        _writer->generateLiteralUnsafe(std::to_string(inRelPos++),
+                                       "^^" + IRI__XSD_INTEGER));
   }
 
 #if BOOST_VERSION >= 107800

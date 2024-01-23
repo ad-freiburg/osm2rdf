@@ -97,11 +97,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_RELATION_FACTS_INFO;
     } else {
-      if (addRelationBorderMembers) {
-        oss << "\n"
-            << prefix
-            << osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_INFO;
-      }
       if (addRelationConvexHull) {
         oss << "\n"
             << prefix
@@ -356,10 +351,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT,
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_HELP);
-  auto addRelationBorderMembersOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_LONG,
-      osm2rdf::config::constants::ADD_RELATION_BORDER_MEMBERS_OPTION_HELP);
 #if BOOST_VERSION >= 107800
   auto addRelationConvexHullOp =
       parser.add<popl::Switch, popl::Attribute::advanced>(
@@ -598,7 +589,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addAreaEnvelopeRatio = addAreaEnvelopeRatioOp->is_set();
     addAreaOrientedBoundingBox = addAreaOrientedBoundingBoxOp->is_set();
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
-    addRelationBorderMembers = addRelationBorderMembersOp->is_set();
 #if BOOST_VERSION >= 107800
     addRelationConvexHull = addRelationConvexHullOp->is_set();
     addRelationEnvelope = addRelationEnvelopeOp->is_set();

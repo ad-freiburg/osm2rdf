@@ -71,7 +71,6 @@ struct Config {
   bool addNodeConvexHull = false;
   bool addNodeEnvelope = false;
   bool addNodeOrientedBoundingBox = false;
-  bool addRelationBorderMembers = false;
   bool addRelationConvexHull = false;
   bool addRelationEnvelope = false;
   bool addRelationOrientedBoundingBox = false;
