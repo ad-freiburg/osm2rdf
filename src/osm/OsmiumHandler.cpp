@@ -175,9 +175,6 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   _areasSeen++;
-  if (_config.adminRelationsOnly && area.tags()["admin_level"] == nullptr) {
-    return;
-  }
   try {
     auto osmArea = osm2rdf::osm::Area(area);
 #pragma omp task
@@ -203,9 +200,6 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   _nodesSeen++;
-  if (_config.adminRelationsOnly) {
-    return;
-  }
   try {
     const auto& osmNode = osm2rdf::osm::Node(node);
     if (node.tags().empty()) {
@@ -240,9 +234,6 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
     const osmium::Relation& relation) {
   _relationsSeen++;
   if (relation.tags().empty()) {
-    return;
-  }
-  if (_config.adminRelationsOnly && relation.tags()["admin_level"] == nullptr) {
     return;
   }
   try {
@@ -288,9 +279,6 @@ template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   _waysSeen++;
   if (way.tags().empty()) {
-    return;
-  }
-  if (_config.adminRelationsOnly) {
     return;
   }
   try {

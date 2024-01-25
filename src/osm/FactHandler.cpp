@@ -90,35 +90,17 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
     writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, area.geom());
   }
 
-  if (_config.addAreaConvexHull) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
-  }
-  if (_config.addAreaEnvelope) {
-    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
-  }
-  if (_config.addAreaOrientedBoundingBox) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
-                       area.orientedBoundingBox());
-  }
+  writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
+  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
+  writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB, area.orientedBoundingBox());
 
-  if (_config.addSortMetadata) {
-    std::ostringstream tmp;
-    // Increase default precision as areas in regbez freiburg have a 0 area
-    // otherwise.
-    tmp << std::fixed << std::setprecision(AREA_PRECISION) << area.geomArea();
-    _writer->writeTriple(
-        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "area"),
-        _writer->generateLiteralUnsafe(tmp.str(), "^^" + IRI__XSD_DOUBLE));
-  }
-
-  if (_config.addAreaEnvelopeRatio) {
-    std::ostringstream tmp;
-    tmp << std::fixed << (area.geomArea() / area.envelopeArea());
-    _writer->writeTriple(
-        subj,
-        _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "area_envelope_ratio"),
-        _writer->generateLiteralUnsafe(tmp.str(), "^^" + IRI__XSD_DOUBLE));
-  }
+  std::ostringstream tmp;
+  // Increase default precision as areas in regbez freiburg have a 0 area
+  // otherwise.
+  tmp << std::fixed << std::setprecision(AREA_PRECISION) << area.geomArea();
+  _writer->writeTriple(
+      subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "area"),
+      _writer->generateLiteralUnsafe(tmp.str(), "^^" + IRI__XSD_DOUBLE));
 }
 
 // ____________________________________________________________________________
@@ -141,16 +123,9 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 
   writeTagList(subj, node.tags());
 
-  if (_config.addNodeConvexHull) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, node.convexHull());
-  }
-  if (_config.addNodeEnvelope) {
-    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, node.envelope());
-  }
-  if (_config.addNodeOrientedBoundingBox) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
-                       node.orientedBoundingBox());
-  }
+  writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, node.convexHull());
+  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, node.envelope());
+  writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB, node.orientedBoundingBox());
 }
 
 // ____________________________________________________________________________
@@ -167,39 +142,36 @@ void osm2rdf::osm::FactHandler<W>::relation(
   size_t inRelPos = 0;
   for (const auto& member : relation.members()) {
     const std::string& role = member.role();
-    if (_config.addRelationBorderMembers ||
-        (role != "outer" && role != "inner")) {
-      const std::string& blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(
-          subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
-          blankNode);
+    const std::string& blankNode = _writer->generateBlankNode();
+    _writer->writeTriple(
+        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
+        blankNode);
 
-      std::string type;
-      switch (member.type()) {
-        case osm2rdf::osm::RelationMemberType::NODE:
-          type = NAMESPACE__OSM_NODE;
-          break;
-        case osm2rdf::osm::RelationMemberType::RELATION:
-          type = NAMESPACE__OSM_RELATION;
-          break;
-        case osm2rdf::osm::RelationMemberType::WAY:
-          type = NAMESPACE__OSM_WAY;
-          break;
-        default:
-          type = NAMESPACE__OSM;
-      }
-
-      _writer->writeTriple(blankNode,
-                           _writer->generateIRIUnsafe(NAMESPACE__OSM, "id"),
-                           _writer->generateIRI(type, member.id()));
-      _writer->writeTriple(blankNode,
-                           _writer->generateIRIUnsafe(NAMESPACE__OSM, "role"),
-                           _writer->generateLiteral(role, ""));
-      _writer->writeTriple(
-          blankNode, IRI__OSM2RDF__POS,
-          _writer->generateLiteralUnsafe(std::to_string(inRelPos++),
-                                         "^^" + IRI__XSD_INTEGER));
+    std::string type;
+    switch (member.type()) {
+      case osm2rdf::osm::RelationMemberType::NODE:
+        type = NAMESPACE__OSM_NODE;
+        break;
+      case osm2rdf::osm::RelationMemberType::RELATION:
+        type = NAMESPACE__OSM_RELATION;
+        break;
+      case osm2rdf::osm::RelationMemberType::WAY:
+        type = NAMESPACE__OSM_WAY;
+        break;
+      default:
+        type = NAMESPACE__OSM;
     }
+
+    _writer->writeTriple(blankNode,
+                         _writer->generateIRIUnsafe(NAMESPACE__OSM, "id"),
+                         _writer->generateIRI(type, member.id()));
+    _writer->writeTriple(blankNode,
+                         _writer->generateIRIUnsafe(NAMESPACE__OSM, "role"),
+                         _writer->generateLiteral(role, ""));
+    _writer->writeTriple(
+        blankNode, IRI__OSM2RDF__POS,
+        _writer->generateLiteralUnsafe(std::to_string(inRelPos++),
+                                       "^^" + IRI__XSD_INTEGER));
   }
 
 #if BOOST_VERSION >= 107800
@@ -214,18 +186,12 @@ void osm2rdf::osm::FactHandler<W>::relation(
       writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, relation.geom());
     }
 
-    if (_config.addRelationConvexHull) {
-      writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
-                         relation.convexHull());
-    }
-    if (_config.addRelationEnvelope) {
-      writeBox(subj, osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE,
-               relation.envelope());
-    }
-    if (_config.addRelationOrientedBoundingBox) {
-      writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
-                         relation.orientedBoundingBox());
-    }
+    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
+                       relation.convexHull());
+    writeBox(subj, osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE,
+             relation.envelope());
+    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
+                       relation.orientedBoundingBox());
 
     _writer->writeTriple(
         subj, _writer->generateIRI(NAMESPACE__OSM2RDF, "completeGeometry"),
@@ -320,16 +286,9 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     }
   }
 
-  if (_config.addWayConvexHull) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
-  }
-  if (_config.addWayEnvelope) {
-    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
-  }
-
-  if (_config.addWayOrientedBoundingBox) {
-    writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());
-  }
+  writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
+  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
+  writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());
 
   if (_config.addWayMetadata) {
     _writer->writeTriple(subj, IRI__OSMWAY_IS_CLOSED,
@@ -344,13 +303,12 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                                        "^^" + IRI__XSD_INTEGER));
   }
 
-  if (_config.addSortMetadata) {
-    _writer->writeTriple(
-        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "length"),
-        _writer->generateLiteral(
-            std::to_string(boost::geometry::length(way.geom())),
-            "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE));
-  }
+
+  _writer->writeTriple(
+      subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "length"),
+      _writer->generateLiteral(
+          std::to_string(boost::geometry::length(way.geom())),
+          "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE));
 }
 
 // ____________________________________________________________________________

@@ -72,9 +72,9 @@ struct Area {
   id_t _id;
   // The OSM id
   id_t _objId;
-  bool _hasName;
-  osm2rdf::geometry::area_result_t _geomArea;
-  osm2rdf::geometry::area_result_t _envelopeArea;
+  bool _hasName = false;
+  osm2rdf::geometry::area_result_t _geomArea = 0;
+  osm2rdf::geometry::area_result_t _envelopeArea = 0;
   osm2rdf::geometry::Area _geom;
   osm2rdf::geometry::Box _envelope;
   osm2rdf::geometry::Polygon _convexHull;
