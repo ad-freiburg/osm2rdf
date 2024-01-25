@@ -54,7 +54,7 @@ class ProgressBar {
   // Time of last update.
   std::time_t _last;
   // Print to std::cerr or not.
-  bool _show;
+  bool _show = false;
 };
 
 }  // namespace osm2rdf::util
