@@ -57,7 +57,7 @@ osm2rdf::util::DirectedGraph<T> reduceDAG(
         result.addEdge(src, dst);
       }
     }
-#pragma omp critical
+#pragma omp critical(progressReduce)
     progressBar.update(entryCount++);
   }
   progressBar.done();
@@ -96,7 +96,7 @@ osm2rdf::util::DirectedGraph<T> reduceMaximalConnectedDAG(
         result.addEdge(src, dst);
       }
     }
-#pragma omp critical
+#pragma omp critical(progressReduceMax)
     progressBar.update(entryCount++);
   }
   progressBar.done();
