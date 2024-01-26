@@ -492,31 +492,59 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
       }
     }
     if (key == "start_date" || key == "end_date") {
-      const auto dashCount = std::count(value.begin(), value.end(), '-');
-      switch (dashCount) {
-        case 2:
-          _writer->writeTriple(
-              subj,
-              _writer->generateIRIUnsafe(
-                  DATASET_NAMESPACE[_config.sourceDataset], key),
-              _writer->generateLiteralUnsafe(value, "^^" + IRI__XSD_DATE));
-          break;
-        case 1:
-          _writer->writeTriple(
-              subj,
-              _writer->generateIRIUnsafe(
-                  DATASET_NAMESPACE[_config.sourceDataset], key),
-              _writer->generateLiteralUnsafe(value,
-                                             "^^" + IRI__XSD_YEAR_MONTH));
-          break;
-        case 0:
-          _writer->writeTriple(
-              subj,
-              _writer->generateIRIUnsafe(
-                  DATASET_NAMESPACE[_config.sourceDataset], key),
-              _writer->generateLiteralUnsafe(value, "^^" + IRI__XSD_YEAR));
-          break;
+      // Abort if non digit and not -
+      if(std::any_of(value.cbegin(), value.cend(), [](char c) { return isdigit(c) == 0 && c != '-'; })) {
+        continue;
       }
+
+      // Skip if empty
+      if (value.empty()) {
+        continue;
+      }
+      // Skip if only '-'
+      size_t minusCount = std::count(value.begin(), value.end(), '-');
+      if (minusCount == value.size()) {
+        continue;
+      }
+
+      std::vector<std::string> parts;
+      parts.reserve(minusCount + 1);
+      size_t last = 0;
+      size_t next;
+      for (size_t i = 0; i < (minusCount + 1); ++i) {
+        next = value.find('-', last);
+        parts.emplace_back(value.substr(last, next - last));
+        last = next + 1;
+      }
+
+      auto resultType = 0;
+      std::string newValue;
+      newValue.reserve(value.size());
+      std::ostringstream tmp;
+      tmp << std::setfill('0');
+      for (size_t i = 0; i < (minusCount + 1); ++i) {
+        if (i == 0 && parts[i].empty()) {
+          newValue += '-';
+          continue;
+        }
+        tmp << std::setw(resultType == 0 ? 4 : 2) << std::dec
+            << std::atoi(parts[i].c_str());
+        newValue += tmp.str().substr(0, resultType == 0 ? 4 : 2) + '-';
+        tmp.seekp(0);
+        resultType++;
+      }
+      if (resultType > 3) {
+        // Invalid length
+        continue;
+      }
+      std::string typeString[3] = {IRI__XSD_YEAR, IRI__XSD_YEAR_MONTH,
+                                   IRI__XSD_DATE};
+      _writer->writeTriple(subj,
+                           _writer->generateIRIUnsafe(
+                               DATASET_NAMESPACE[_config.sourceDataset], key),
+                           _writer->generateLiteralUnsafe(
+                               newValue.substr(0, newValue.size() - 1),
+                               "^^" + typeString[resultType - 1]));
     }
   }
   _writer->writeTriple(

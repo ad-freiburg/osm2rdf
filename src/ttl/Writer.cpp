@@ -146,7 +146,7 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__XSD_YEAR =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYear");
   osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMont");
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMonth");
 
   osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no", "");
   osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes", "");
