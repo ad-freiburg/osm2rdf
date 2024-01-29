@@ -50,7 +50,7 @@ endif()
 add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 # Basic optimization
-add_compile_options(-march=native -flto=auto)
+add_compile_options(-march=native -flto)
 # Enable fast-math
 add_compile_options(-ffast-math)
 
