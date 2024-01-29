@@ -674,6 +674,7 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
   // Setup temp dir and stats file
   std::filesystem::path tmpDir =
       config.getTempPath("TEST_TTL_WriterTTL", "writeStatisticJson");
+  std::filesystem::remove_all(tmpDir);
   ASSERT_FALSE(std::filesystem::exists(tmpDir));
   std::filesystem::create_directories(tmpDir);
   ASSERT_TRUE(std::filesystem::exists(tmpDir));
@@ -706,8 +707,8 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 12"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 17"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 16"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 21"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup
@@ -736,6 +737,7 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   // Setup temp dir and stats file
   std::filesystem::path tmpDir =
       config.getTempPath("TEST_TTL_WriterQLEVER", "writeStatisticJson");
+  std::filesystem::remove_all(tmpDir);
   ASSERT_FALSE(std::filesystem::exists(tmpDir));
   std::filesystem::create_directories(tmpDir);
   ASSERT_TRUE(std::filesystem::exists(tmpDir));
@@ -768,8 +770,8 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 12"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 17"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 16"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 21"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup

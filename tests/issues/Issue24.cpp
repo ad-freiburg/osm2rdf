@@ -115,8 +115,8 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:21 geo:hasGeometry osm2rdfgeom:wayarea_21 .\n"
-      "osm2rdfgeom:wayarea_21 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
+      "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 .\n"
+      "osm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
       "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdfgeom:convex_hull \"POLYGON(())\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
@@ -223,8 +223,8 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:relarea_10 .\n"
-      "osm2rdfgeom:relarea_10 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 .\n"
+      "osm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
       "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
       "osmrel:10 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
       "osmrel:10 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
@@ -273,8 +273,9 @@ TEST(Issue24, nodeHasGeometryAsWkt) {
 
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
-      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
+      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
@@ -323,9 +324,10 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
 
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
-      "osmnode:42 geo:hasGeometry osm2rdfgeom:node_42 .\n"
-      "osm2rdfgeom:node_42 geo:asWKT \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
+      "osmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\n"
+      "osm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
@@ -411,6 +413,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsWkt) {
 
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmrel:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_0 .\n"
       "_:0_0 osm:id osmnode:23 .\n"
@@ -507,6 +510,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
 
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmrel:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_0 .\n"
       "_:0_0 osm:id osmnode:23 .\n"
@@ -516,8 +520,8 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
       "_:0_1 osm:id osmway:55 .\n"
       "_:0_1 osm:role \"outer\" .\n"
       "_:0_1 osm2rdf:pos \"1\"^^xsd:integer .\n"
-      "osmrel:42 geo:hasGeometry osm2rdfgeom:relation_42 .\n"
-      "osm2rdfgeom:relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "osmrel:42 geo:hasGeometry osm2rdfgeom:osm_relation_42 .\n"
+      "osm2rdfgeom:osm_relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.6 48.0,7.5 "
       "48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
@@ -571,6 +575,7 @@ TEST(Issue24, wayHasGeometryAsWkt) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
@@ -625,6 +630,7 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
       "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "

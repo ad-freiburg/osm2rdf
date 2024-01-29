@@ -196,9 +196,10 @@ TEST(OSM_FactHandler, node) {
 
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
-      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmnode:42 osmkey:city \"Freiburg\" .\n"
       "osmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
+      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
@@ -251,6 +252,7 @@ TEST(OSM_FactHandler, relation) {
 
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmrel:42 osmkey:city \"Freiburg\" .\n"
       "osmrel:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_0 .\n"
@@ -350,6 +352,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
 
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmrel:42 osmkey:city \"Freiburg\" .\n"
       "osmrel:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_0 .\n"
@@ -415,6 +418,7 @@ TEST(OSM_FactHandler, way) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
@@ -473,6 +477,7 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -540,6 +545,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -604,6 +610,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -673,6 +680,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -748,6 +756,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
