@@ -36,6 +36,7 @@ template <typename T>
 osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
                                 osm2rdf::util::Output* output)
     : _config(config), _out(output) {
+  // Static prefixes
   _prefixes = {
       // well-known prefixes
       {osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL,
@@ -53,19 +54,30 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://osm2rdf.cs.uni-freiburg.de/rdf#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/geom#"},
+      // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
+      // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
       // osm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OSM,
        "https://www.openstreetmap.org/"},
-      // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
-      // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_META,
+       "https://www.openstreetmap.org/meta/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
+       "https://www.openstreetmap.org/wiki/Key:"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
        "https://www.openstreetmap.org/node/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
        "https://www.openstreetmap.org/relation/"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
-       "https://www.openstreetmap.org/wiki/Key:"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
-       "https://www.openstreetmap.org/way/"}};
+       "https://www.openstreetmap.org/way/"},
+      // ohm prefixes
+      {osm2rdf::ttl::constants::NAMESPACE__OHM,
+       "https://www.openhistoricalmap.org/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE,
+       "https://www.openhistoricalmap.org/node/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
+       "https://www.openhistoricalmap.org/relation/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_WAY,
+       "https://www.openhistoricalmap.org/way/"}};
 
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
@@ -76,14 +88,14 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
-  osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_area");
+  osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_nonarea");
-  osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
+  osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
@@ -96,6 +108,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "obb");
   osm2rdf::ttl::constants::IRI__OSM2RDF__POS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "pos");
+  osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "timestamp");
   osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
   osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =
@@ -119,6 +133,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__RDF_TYPE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__RDF, "type");
 
+  osm2rdf::ttl::constants::IRI__XSD_DATE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "date");
+  osm2rdf::ttl::constants::IRI__XSD_DATE_TIME =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "dateTime");
   osm2rdf::ttl::constants::IRI__XSD_DECIMAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "decimal");
   osm2rdf::ttl::constants::IRI__XSD_DOUBLE =
@@ -127,6 +145,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
   osm2rdf::ttl::constants::IRI__XSD_INTEGER =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
+  osm2rdf::ttl::constants::IRI__XSD_YEAR =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYear");
+  osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMonth");
 
   osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no", "");
   osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes", "");

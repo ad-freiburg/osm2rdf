@@ -94,6 +94,14 @@ const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
 const static inline std::string NO_FACTS_OPTION_HELP = "Do not dump facts";
 
+const static inline std::string SOURCE_DATASET_INFO =
+    "Source dataset";
+const static inline std::string SOURCE_DATASET_OPTION_SHORT = "";
+const static inline std::string SOURCE_DATASET_OPTION_LONG =
+    "source-dataset";
+const static inline std::string SOURCE_DATASET_OPTION_HELP =
+    "Source dataset, either 'OSM', or 'OHM'";
+
 const static inline std::string OSM2RDF_GEO_TRIPLES_INFO =
     "Writing mode of osm2rdf-style geometric triples";
 const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_SHORT = "";
@@ -262,8 +270,16 @@ const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT =
 const static inline std::string APPROX_SPATIAL_REL_OPTION_LONG =
     "approximate-spatial-relations";
 const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP = "Use "
-  "simplified inner/outer geometries for approximate calcuation of spatial "
-  "relations";
+    "simplified inner/outer geometries for approximate calculation of spatial "
+    "relations";
+
+const static inline std::string APPROX_CONTAINS_SLACK_INFO =
+    "Slack for approximate contains";
+const static inline std::string APPROX_CONTAINS_SLACK_OPTION_SHORT =
+    "";
+const static inline std::string APPROX_CONTAINS_SLACK_OPTION_LONG =
+    "approximate-contains-slack";
+const static inline std::string APPROX_CONTAINS_SLACK_OPTION_HELP = "";
 
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";

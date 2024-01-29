@@ -36,6 +36,11 @@ enum GeoTriplesMode {
   full = 2
 };
 
+enum SourceDataset {
+  OSM = 0,
+  OHM = 1
+};
+
 struct Config {
   // Select what to do
   std::string storeLocationsOnDisk;
@@ -53,6 +58,8 @@ struct Config {
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
 
+  SourceDataset sourceDataset = OSM;
+
   // the epsilon for the inner/outer douglas-peucker is based on the
   // circumference of a hypothetical circle. By dividing by ~pi, we base the
   // epsilon on 1/n of the radius of this hypothetical circle (n = 20 in this
@@ -60,6 +67,7 @@ struct Config {
   // "collapsed away" by the inner simplification, or added by the outer
   // simplification
   double simplifyGeometriesInnerOuter = 1 / (3.14 * 20);
+  double approxContainsSlack = 0.05;
   bool dontUseInnerOuterGeoms = false;
   bool approximateSpatialRels = false;
 

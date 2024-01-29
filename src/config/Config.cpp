@@ -32,19 +32,23 @@
 // ____________________________________________________________________________
 std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
   std::ostringstream oss;
+  std::string datasetStrings[2] = {"OSM", "OHM"};
   oss << prefix << osm2rdf::config::constants::HEADER;
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_IO;
   oss << "\n"
-      << prefix << osm2rdf::config::constants::INPUT_INFO << "         "
+      << prefix << osm2rdf::config::constants::INPUT_INFO << "          "
       << input;
   oss << "\n"
-      << prefix << osm2rdf::config::constants::OUTPUT_INFO << "        "
+      << prefix << osm2rdf::config::constants::SOURCE_DATASET_INFO << ": "
+      << (datasetStrings[sourceDataset]);
+  oss << "\n"
+      << prefix << osm2rdf::config::constants::OUTPUT_INFO << "         "
       << output;
   oss << "\n"
-      << prefix << osm2rdf::config::constants::OUTPUT_FORMAT_INFO << " "
+      << prefix << osm2rdf::config::constants::OUTPUT_FORMAT_INFO << "  "
       << outputFormat;
   oss << "\n"
-      << prefix << osm2rdf::config::constants::CACHE_INFO << "         "
+      << prefix << osm2rdf::config::constants::CACHE_INFO << "          "
       << cache;
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_FACTS;
   if (noFacts) {
@@ -121,6 +125,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
   oss << "\n"
       << prefix << osm2rdf::config::constants::OGC_GEO_TRIPLES_INFO << ": "
       << (modeStrings[ogcGeoTriplesMode]);
+
+  oss << "\n"
+      << prefix << osm2rdf::config::constants::APPROX_CONTAINS_SLACK_INFO
+      << ": " << approxContainsSlack;
 
   if (ogcGeoTriplesMode || osm2rdfGeoTriplesMode) {
      if (noAreaGeometricRelations) {
@@ -225,6 +233,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_SHORT,
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_HELP);
+
+  auto sourceDatasetOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::SOURCE_DATASET_OPTION_SHORT,
+          osm2rdf::config::constants::SOURCE_DATASET_OPTION_LONG,
+          osm2rdf::config::constants::SOURCE_DATASET_OPTION_HELP, "OSM");
 
   auto noAreaGeometricRelationsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
@@ -366,6 +380,13 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::CACHE_OPTION_LONG,
       osm2rdf::config::constants::CACHE_OPTION_HELP, cache);
 
+  auto approxContainsSlackOp =
+      parser.add<popl::Value<double>, popl::Attribute::expert>(
+          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_SHORT,
+          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_LONG,
+          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_HELP,
+          approxContainsSlack);
+
   try {
     parser.parse(argc, argv);
 
@@ -448,6 +469,25 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noRelationGeometricRelations |= noWaysOp->is_set();
     noWayFacts |= noWaysOp->is_set();
     noWayGeometricRelations |= noWaysOp->is_set();
+
+    // Dataset selection
+    if (sourceDatasetOp->is_set()) {
+      if (sourceDatasetOp->value() == "OSM") {
+        sourceDataset = OSM;
+        approxContainsSlack = 0.05;
+      } else if (sourceDatasetOp->value() == "OHM") {
+        sourceDataset = OHM;
+        approxContainsSlack = 0;
+      } else {
+        throw popl::invalid_option(
+            sourceDatasetOp.get(),
+            popl::invalid_option::Error::invalid_argument,
+            popl::OptionName::long_name, sourceDatasetOp->value(), "");
+      }
+    }
+    if (approxContainsSlackOp->is_set()) {
+      approxContainsSlack = approxContainsSlackOp->value();
+    }
 
     // Select amount to dump
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();

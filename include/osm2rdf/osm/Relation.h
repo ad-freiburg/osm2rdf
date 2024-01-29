@@ -41,6 +41,7 @@ class Relation {
   Relation();
   explicit Relation(const osmium::Relation& relation);
   [[nodiscard]] id_t id() const noexcept;
+  [[nodiscard]] std::time_t timestamp() const noexcept;
   [[nodiscard]] const std::vector<osm2rdf::osm::RelationMember>& members()
       const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
@@ -60,6 +61,7 @@ class Relation {
 
  protected:
   id_t _id;
+  std::time_t _timestamp;
   std::vector<osm2rdf::osm::RelationMember> _members;
   osm2rdf::osm::TagList _tags;
 #if BOOST_VERSION >= 107800
@@ -74,6 +76,7 @@ class Relation {
   template <class Archive>
   void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
     ar& boost::serialization::make_nvp("_id", _id);
+    ar& boost::serialization::make_nvp("_timestamp", _timestamp);
     ar& boost::serialization::make_nvp("_members", _members);
     ar& boost::serialization::make_nvp("_tags", _tags);
 #if BOOST_VERSION >= 107800

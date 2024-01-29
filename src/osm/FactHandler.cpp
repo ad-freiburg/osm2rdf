@@ -34,6 +34,8 @@
 
 using osm2rdf::osm::constants::AREA_PRECISION;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
+using osm2rdf::ttl::constants::DATASET_ID;
+using osm2rdf::ttl::constants::DATASET_NAMESPACE;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL;
@@ -45,6 +47,7 @@ using osm2rdf::ttl::constants::IRI__OSM_NODE;
 using osm2rdf::ttl::constants::IRI__OSM_RELATION;
 using osm2rdf::ttl::constants::IRI__OSM_TAG;
 using osm2rdf::ttl::constants::IRI__OSM_WAY;
+using osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP;
 using osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED;
 using osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE;
 using osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE;
@@ -52,9 +55,13 @@ using osm2rdf::ttl::constants::IRI__OSMWAY_NODE;
 using osm2rdf::ttl::constants::IRI__OSMWAY_NODE_COUNT;
 using osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT;
 using osm2rdf::ttl::constants::IRI__RDF_TYPE;
+using osm2rdf::ttl::constants::IRI__XSD_DATE;
+using osm2rdf::ttl::constants::IRI__XSD_DATE_TIME;
 using osm2rdf::ttl::constants::IRI__XSD_DECIMAL;
 using osm2rdf::ttl::constants::IRI__XSD_DOUBLE;
 using osm2rdf::ttl::constants::IRI__XSD_INTEGER;
+using osm2rdf::ttl::constants::IRI__XSD_YEAR;
+using osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH;
 using osm2rdf::ttl::constants::LITERAL__NO;
 using osm2rdf::ttl::constants::LITERAL__YES;
 using osm2rdf::ttl::constants::NAMESPACE__OSM;
@@ -65,6 +72,9 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY;
+using osm2rdf::ttl::constants::NODE_NAMESPACE;
+using osm2rdf::ttl::constants::RELATION_NAMESPACE;
+using osm2rdf::ttl::constants::WAY_NAMESPACE;
 
 // ____________________________________________________________________________
 template <typename W>
@@ -76,13 +86,15 @@ osm2rdf::osm::FactHandler<W>::FactHandler(const osm2rdf::config::Config& config,
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   const std::string& subj = _writer->generateIRI(
-      area.fromWay() ? NAMESPACE__OSM_WAY : NAMESPACE__OSM_RELATION,
+      area.fromWay() ? WAY_NAMESPACE[_config.sourceDataset]
+                     : RELATION_NAMESPACE[_config.sourceDataset],
       area.objId());
 
   if (!_config.hasGeometryAsWkt) {
     const std::string& geomObj = _writer->generateIRI(
-        NAMESPACE__OSM2RDF_GEOM, (area.fromWay() ? "wayarea_" : "relarea_") +
-                                     std::to_string(area.objId()));
+        NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] + "_" +
+                                     (area.fromWay() ? "way" : "rel") +
+                                     "area_" + std::to_string(area.objId()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, area.geom());
@@ -107,21 +119,23 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   const std::string& subj =
-      _writer->generateIRI(NAMESPACE__OSM_NODE, node.id());
+      _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset], node.id());
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
 
+  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, node.timestamp());
+  writeTagList(subj, node.tags());
+
   if (!_config.hasGeometryAsWkt) {
     const std::string& geomObj = _writer->generateIRI(
-        NAMESPACE__OSM2RDF_GEOM, "node_" + std::to_string(node.id()));
+        NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] + "_node_" +
+                                     std::to_string(node.id()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
   } else {
     writeBoostGeometry(subj, IRI__GEOSPARQL__HAS_GEOMETRY, node.geom());
   }
-
-  writeTagList(subj, node.tags());
 
   writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, node.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, node.envelope());
@@ -132,11 +146,12 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::relation(
     const osm2rdf::osm::Relation& relation) {
-  const std::string& subj =
-      _writer->generateIRI(NAMESPACE__OSM_RELATION, relation.id());
+  const std::string& subj = _writer->generateIRI(
+      RELATION_NAMESPACE[_config.sourceDataset], relation.id());
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_RELATION);
 
+  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, relation.timestamp());
   writeTagList(subj, relation.tags());
 
   size_t inRelPos = 0;
@@ -150,23 +165,25 @@ void osm2rdf::osm::FactHandler<W>::relation(
     std::string type;
     switch (member.type()) {
       case osm2rdf::osm::RelationMemberType::NODE:
-        type = NAMESPACE__OSM_NODE;
+        type = NODE_NAMESPACE[_config.sourceDataset];
         break;
       case osm2rdf::osm::RelationMemberType::RELATION:
-        type = NAMESPACE__OSM_RELATION;
+        type = RELATION_NAMESPACE[_config.sourceDataset];
         break;
       case osm2rdf::osm::RelationMemberType::WAY:
-        type = NAMESPACE__OSM_WAY;
+        type = WAY_NAMESPACE[_config.sourceDataset];
         break;
       default:
-        type = NAMESPACE__OSM;
+        type = DATASET_NAMESPACE[_config.sourceDataset];
     }
 
     _writer->writeTriple(blankNode,
-                         _writer->generateIRIUnsafe(NAMESPACE__OSM, "id"),
+                         _writer->generateIRIUnsafe(
+                             DATASET_NAMESPACE[_config.sourceDataset], "id"),
                          _writer->generateIRI(type, member.id()));
     _writer->writeTriple(blankNode,
-                         _writer->generateIRIUnsafe(NAMESPACE__OSM, "role"),
+                         _writer->generateIRIUnsafe(
+                             DATASET_NAMESPACE[_config.sourceDataset], "role"),
                          _writer->generateLiteral(role, ""));
     _writer->writeTriple(
         blankNode, IRI__OSM2RDF__POS,
@@ -178,7 +195,9 @@ void osm2rdf::osm::FactHandler<W>::relation(
   if (relation.hasGeometry() && !relation.isArea()) {
     if (!_config.hasGeometryAsWkt) {
       const std::string& geomObj = _writer->generateIRI(
-          NAMESPACE__OSM2RDF_GEOM, "relation_" + std::to_string(relation.id()));
+          NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
+                                       "_relation_" +
+                                       std::to_string(relation.id()));
 
       _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
       writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, relation.geom());
@@ -204,10 +223,12 @@ void osm2rdf::osm::FactHandler<W>::relation(
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
-  const std::string& subj = _writer->generateIRI(NAMESPACE__OSM_WAY, way.id());
+  const std::string& subj =
+      _writer->generateIRI(WAY_NAMESPACE[_config.sourceDataset], way.id());
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_WAY);
 
+  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, way.timestamp());
   writeTagList(subj, way.tags());
 
   if (_config.addWayNodeOrder) {
@@ -220,7 +241,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
       _writer->writeTriple(
           blankNode, osm2rdf::ttl::constants::IRI__OSMWAY_NODE,
-          _writer->generateIRI(NAMESPACE__OSM_NODE, node.id()));
+          _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
+                               node.id()));
 
       _writer->writeTriple(
           blankNode, IRI__OSM2RDF__POS,
@@ -228,14 +250,16 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                                          "^^" + IRI__XSD_INTEGER));
 
       if (_config.addWayNodeGeometry) {
-        const std::string& subj =
-            _writer->generateIRI(NAMESPACE__OSM_NODE, node.id());
+        const std::string& subj = _writer->generateIRI(
+            NODE_NAMESPACE[_config.sourceDataset], node.id());
 
         _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
 
         if (!_config.hasGeometryAsWkt) {
-          const std::string& geomObj = _writer->generateIRI(
-              NAMESPACE__OSM2RDF_GEOM, "node_" + std::to_string(node.id()));
+          const std::string& geomObj =
+              _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
+                                   DATASET_ID[_config.sourceDataset] +
+                                       "_node_" + std::to_string(node.id()));
 
           _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
           writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
@@ -247,7 +271,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
         _writer->writeTriple(
             lastBlankNode, IRI__OSMWAY_NEXT_NODE,
-            _writer->generateIRI(NAMESPACE__OSM_NODE, node.id()));
+            _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
+                                 node.id()));
         // Haversine distance
         const double distanceLat = (node.geom().y() - lastNode.geom().y()) *
                                    osm2rdf::osm::constants::DEGREE;
@@ -303,12 +328,11 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                                        "^^" + IRI__XSD_INTEGER));
   }
 
-
-  _writer->writeTriple(
-      subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "length"),
-      _writer->generateLiteral(
-          std::to_string(boost::geometry::length(way.geom())),
-          "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE));
+  _writer->writeTriple(subj,
+                       _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "length"),
+                       _writer->generateLiteral(
+                           std::to_string(boost::geometry::length(way.geom())),
+                           "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE));
 }
 
 // ____________________________________________________________________________
@@ -431,7 +455,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
         (key == "wikidata" || hasSuffix(key, ":wikidata"))) {
       // Only take first wikidata entry if ; is found
       std::string valueTmp = value;
-      auto end = valueTmp.find(';');
+      const auto end = valueTmp.find(';');
       if (end != std::string::npos) {
         valueTmp = valueTmp.erase(end);
       }
@@ -442,33 +466,99 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
           valueTmp.end());
 
       _writer->writeTriple(
-          subj, _writer->generateIRI(NAMESPACE__OSM, key),
+          subj,
+          _writer->generateIRI(DATASET_NAMESPACE[_config.sourceDataset], key),
           _writer->generateIRI(NAMESPACE__WIKIDATA_ENTITY, valueTmp));
       tagTripleCount++;
     }
     if (!_config.skipWikiLinks &&
         (key == "wikipedia" || hasSuffix(key, ":wikipedia"))) {
-      auto pos = value.find(':');
+      const auto pos = value.find(':');
       if (pos != std::string::npos) {
         const std::string& lang = value.substr(0, pos);
         const std::string& entry = value.substr(pos + 1);
         _writer->writeTriple(
-            subj, _writer->generateIRI(NAMESPACE__OSM, key),
+            subj,
+            _writer->generateIRI(DATASET_NAMESPACE[_config.sourceDataset], key),
             _writer->generateIRI("https://" + lang + ".wikipedia.org/wiki/",
                                  entry));
         tagTripleCount++;
       } else {
         _writer->writeTriple(
-            subj, _writer->generateIRI(NAMESPACE__OSM, key),
+            subj,
+            _writer->generateIRI(DATASET_NAMESPACE[_config.sourceDataset], key),
             _writer->generateIRI("https://www.wikipedia.org/wiki/", value));
         tagTripleCount++;
       }
+    }
+    if (key == "start_date" || key == "end_date") {
+      // Abort if non digit and not -
+      if(std::any_of(value.cbegin(), value.cend(), [](char c) { return isdigit(c) == 0 && c != '-'; })) {
+        continue;
+      }
+
+      // Skip if empty
+      if (value.empty()) {
+        continue;
+      }
+      // Skip if only '-'
+      size_t minusCount = std::count(value.begin(), value.end(), '-');
+      if (minusCount == value.size()) {
+        continue;
+      }
+
+      std::string newValue;
+      newValue.reserve(value.size());
+      std::ostringstream tmp;
+      tmp << std::setfill('0');
+
+      size_t last = 0;
+      size_t next;
+      auto resultType = 0;
+      for (size_t i = 0; i < (minusCount + 1); ++i) {
+        next = value.find('-', last);
+        if (i == 0 && next == 0) {
+          newValue += '-';
+          last = next + 1;
+          continue;
+        }
+        tmp << std::setw(resultType == 0 ? 4 : 2) << std::dec
+            << std::atoi(value.substr(last, next - last).c_str());
+        newValue += tmp.str().substr(0, resultType == 0 ? 4 : 2) + '-';
+        tmp.seekp(0);
+        resultType++;
+        last = next + 1;
+      }
+      if (resultType > 3) {
+        // Invalid length
+        continue;
+      }
+      std::string typeString[3] = {IRI__XSD_YEAR, IRI__XSD_YEAR_MONTH,
+                                   IRI__XSD_DATE};
+      _writer->writeTriple(subj,
+                           _writer->generateIRIUnsafe(
+                               DATASET_NAMESPACE[_config.sourceDataset], key),
+                           _writer->generateLiteralUnsafe(
+                               newValue.substr(0, newValue.size() - 1),
+                               "^^" + typeString[resultType - 1]));
     }
   }
   _writer->writeTriple(
       subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "facts"),
       _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
                                      "^^" + IRI__XSD_INTEGER));
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::FactHandler<W>::writeSecondsAsISO(const std::string& subj,
+                                                     const std::string& pred,
+                                                     const std::time_t& time) {
+  std::stringstream date;
+  date << std::put_time(std::gmtime(&time), "%Y-%m-%dT%X");
+  _writer->writeTriple(
+      subj, pred,
+      _writer->generateLiteralUnsafe(date.str(), "^^" + IRI__XSD_DATE_TIME));
 }
 
 // ____________________________________________________________________________

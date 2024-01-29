@@ -60,8 +60,6 @@ using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA;
-using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
-using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::util::currentTimeFormatted;
 using osm2rdf::util::DirectedGraph;
 
@@ -578,7 +576,6 @@ void GeometryHandler<W>::prepareDAG() {
 #pragma omp parallel for shared(                                               \
         tmpDirectedAreaGraph, std::cout, std::cerr,                            \
             osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
-            APPROX_CONTAINS_SLACK, \
             progressBar) reduction(+ : stats) default(none) schedule(dynamic)
 
     for (uint32_t i = 0; i < _spatialStorageArea.size(); i++) {
@@ -613,7 +610,7 @@ void GeometryHandler<W>::prepareDAG() {
         }
 
         // skip equal geometries
-        if (APPROX_CONTAINS_SLACK == 0) {
+        if (_config.approxContainsSlack == 0) {
           if (fabs(areaArea - entryArea) < 0.0001 * 0.0001) {
             continue;
           }
@@ -625,7 +622,7 @@ void GeometryHandler<W>::prepareDAG() {
         }
 
         GeomRelationInfo geomRelInf;
-        if (APPROX_CONTAINS_SLACK == 0) {
+        if (_config.approxContainsSlack == 0) {
           if (!areaInArea(entry, area, &geomRelInf, &stats)) {
             continue;
           }
@@ -650,9 +647,9 @@ void GeometryHandler<W>::prepareDAG() {
           }
         }
 
-        if (APPROX_CONTAINS_SLACK > 0 &&
+        if (_config.approxContainsSlack > 0 &&
             fabs(1.0 - areaArea / geomRelInf.intersectArea) <
-                APPROX_CONTAINS_SLACK) {
+                _config.approxContainsSlack) {
           continue;
         }
 
@@ -756,19 +753,15 @@ void GeometryHandler<W>::dumpNamedAreaRelations() {
 
   std::vector<DirectedGraph<uint32_t>::entry_t> vertices =
       _directedAreaGraph.getVertices();
-#pragma omp parallel for shared(                                         \
-        vertices, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,           \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,            \
-            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,              \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,         \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,     \
-            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,            \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,       \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,   \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS,            \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS, progressBar, \
-            entryCount) reduction(+ : intersectStats) default(none)      \
-    schedule(static)
+#pragma omp parallel for shared(                                       \
+        vertices, osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,      \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA,       \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,          \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,     \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            progressBar, entryCount)                                   \
+    reduction(+ : intersectStats) default(none) schedule(static)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto id = vertices[i];
     const auto& entry = _spatialStorageArea[id];
@@ -925,10 +918,10 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
               << std::endl;
   } else if (_numUnnamedAreas == 0) {
     std::cerr << std::endl;
-    std::cerr
-        << currentTimeFormatted() << " "
-        << "Skipping contains relation for unnamed areas ... no unnamed area"
-        << std::endl;
+    std::cerr << currentTimeFormatted() << " "
+              << "Skipping contains relation for unnamed areas ... "
+                 "no unnamed area"
+              << std::endl;
   } else {
     std::cerr << std::endl;
     std::cerr << currentTimeFormatted() << " "
@@ -945,17 +938,13 @@ void GeometryHandler<W>::dumpUnnamedAreaRelations() {
     GeomRelationStats intersectStats, containsStats;
     size_t entryCount = 0;
     progressBar.update(entryCount);
-#pragma omp parallel for shared(                                         \
-        osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                     \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,            \
-            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,            \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,   \
-            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,              \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,     \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS,            \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS, progressBar, \
-            entryCount, ia)                                              \
-    reduction(+ : intersectStats, containsStats) default(none)           \
+#pragma omp parallel for shared(                                       \
+        osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,              \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,            \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            progressBar, entryCount, ia)                               \
+    reduction(+ : intersectStats, containsStats) default(none)         \
     schedule(dynamic)
     for (size_t i = 0; i < _numUnnamedAreas; i++) {
       SpatialAreaValue entry;
@@ -1169,15 +1158,11 @@ void GeometryHandler<W>::dumpNodeRelations() {
     progressBar.update(entryCount);
 
 #pragma omp parallel for shared(                                            \
-        std::cout, osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,            \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,                    \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,               \
+        std::cout, osm2rdf::ttl::constants::NODE_NAMESPACE,                 \
             osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,                 \
             osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,        \
             osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,               \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,      \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS,               \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS,                 \
             osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,          \
             progressBar, ia, entryCount) reduction(+ : stats) default(none) \
     schedule(dynamic)
@@ -1187,7 +1172,9 @@ void GeometryHandler<W>::dumpNodeRelations() {
       ia >> node;
 
       const auto& nodeId = std::get<0>(node);
-      std::string nodeIRI = _writer->generateIRI(NAMESPACE__OSM_NODE, nodeId);
+      std::string nodeIRI = _writer->generateIRI(
+          osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
+          nodeId);
 
       // Set containing all areas we are inside of
       SkipSet skip;
@@ -1225,9 +1212,9 @@ void GeometryHandler<W>::dumpNodeRelations() {
           if (relations != _areaBorderWaysIndex.end()) {
             for (auto r : relations->second) {
               if (r.second) {
-                // way is inner geometry of this area relation, so if we
-                // encounter the enclosing area again for this way, we can
-                // be sure that we are not contained in it!
+                // way is inner geometry of this area relation, so if
+                // we encounter the enclosing area again for this way,
+                // we can be sure that we are not contained in it!
                 skipByContainedInInner.insert(r.first);
               }
             }
@@ -1350,18 +1337,15 @@ void GeometryHandler<W>::dumpWayRelations() {
     GeomRelationStats intersectStats, containsStats;
 
     progressBar.update(entryCount);
-#pragma omp parallel for shared(                                           \
-        std::cout, std::cerr, osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, \
-            osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,              \
-            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,              \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA,     \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,         \
-            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,                \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,       \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS,              \
-            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS, progressBar,   \
-            entryCount, ia)                                                \
-    reduction(+ : intersectStats, containsStats) default(none)             \
+#pragma omp parallel for shared(                                       \
+        std::cout, std::cerr, osm2rdf::ttl::constants::WAY_NAMESPACE,  \
+            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,          \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA, \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA,     \
+            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,            \
+            osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA,   \
+            progressBar, entryCount, ia)                               \
+    reduction(+ : intersectStats, containsStats) default(none)         \
     schedule(dynamic)
 
     for (size_t i = 0; i < _numWays; i++) {
@@ -1372,14 +1356,15 @@ void GeometryHandler<W>::dumpWayRelations() {
 
       const auto& wayId = std::get<1>(way);
 
-      // Check if an area computed from this way exists if yes we don't need to
-      // calculate any relation again.
+      // Check if an area computed from this way exists if yes we
+      // don't need to calculate any relation again.
       auto it = _spatialStorageAreaIndex.find(wayId * 2);
       if (it != _spatialStorageAreaIndex.end()) {
         continue;
       }
 
-      std::string wayIRI = _writer->generateIRI(NAMESPACE__OSM_WAY, wayId);
+      std::string wayIRI = _writer->generateIRI(
+          osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset], wayId);
 
       // Set containing all areas we are inside of
       SkipSet skipIntersects;
@@ -1508,9 +1493,10 @@ void GeometryHandler<W>::dumpWayRelations() {
             if (relations != _areaBorderWaysIndex.end()) {
               for (auto r : relations->second) {
                 if (r.second) {
-                  // way is inner geometry of this area relation, so if we
-                  // encounter the enclosing area again for this way, we can
-                  // be sure that we are not contained in it!
+                  // way is inner geometry of this area relation, so
+                  // if we encounter the enclosing area again for this
+                  // way, we can be sure that we are not contained in
+                  // it!
                   skipByContainedInInner.insert(r.first);
                 }
               }
@@ -1717,7 +1703,8 @@ bool GeometryHandler<W>::nodeInArea(const SpatialNodeValue& a,
   }
 
   if (!boost::geometry::covered_by(geomA, outerGeomB)) {
-    // if NOT covered by simplified out, we are definitely not contained
+    // if NOT covered by simplified out, we are definitely not
+    // contained
     stats->skippedByOuter();
     return false;
   }
@@ -1771,8 +1758,8 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
     return true;
   }
 
-  // if there is no full contained box, and no potentially contained, we
-  // surely do not intersect
+  // if there is no full contained box, and no potentially contained,
+  // we surely do not intersect
   if (geomRelInf->toCheck.empty()) {
     geomRelInf->intersects = RelInfoValue::NO;
     stats->skippedByBoxIdIntersect();
@@ -1885,16 +1872,16 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
   if (geomRelInf->fullContained < 0)
     boxIdIsect(wayBoxIds, areaBoxIds, geomRelInf);
 
-  // if we have at least one of A's boxes fully contained in B, we surely
-  // intersect
+  // if we have at least one of A's boxes fully contained in B, we
+  // surely intersect
   if (geomRelInf->fullContained > 0) {
     geomRelInf->intersects = RelInfoValue::YES;
     stats->skippedByBoxIdIntersect();
     return true;
   }
 
-  // if not, and if we also have no potential intersection box, we are not
-  // contained
+  // if not, and if we also have no potential intersection box, we are
+  // not contained
   if (geomRelInf->toCheck.empty()) {
     geomRelInf->intersects = RelInfoValue::NO;
     stats->skippedByBoxIdIntersect();
@@ -1964,7 +1951,8 @@ bool GeometryHandler<W>::wayIntersectsArea(const SpatialWayValue& a,
   }
 
   if (!intersects) {
-    // if does not intersect with envelope, we definitely don't intersect
+    // if does not intersect with envelope, we definitely don't
+    // intersect
     geomRelInf->intersects = RelInfoValue::NO;
     stats->skippedByBox();
     return false;
@@ -2056,8 +2044,8 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     return true;
   }
 
-  // the combined number of potential contains and sure contains is not
-  // equal to the number of A's boxes, so we cannot be contained
+  // the combined number of potential contains and sure contains is
+  // not equal to the number of A's boxes, so we cannot be contained
   if ((static_cast<int32_t>(geomRelInf->toCheck.size()) +
        geomRelInf->fullContained) != wayBoxIds[0].first) {
     geomRelInf->contained = RelInfoValue::NO;
@@ -2065,8 +2053,8 @@ bool GeometryHandler<W>::wayInArea(const SpatialWayValue& a,
     return false;
   }
 
-  // if the way is only in one box, and area cutouts are available, we can
-  // check against the corresponding cutout
+  // if the way is only in one box, and area cutouts are available, we
+  // can check against the corresponding cutout
   if (wayBoxIds[0].first == 1 && !areaCutouts.empty()) {
     const auto& cutout = areaCutouts.find(abs(wayBoxIds[1].first));
 
@@ -2184,7 +2172,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   const auto& areaGeom = std::get<2>(b);
   const auto& areaConvexHull = std::get<10>(b);
 
-  if (areaArea / entryArea <= 1.0 - APPROX_CONTAINS_SLACK) {
+  if (areaArea / entryArea <= 1.0 - _config.approxContainsSlack) {
     stats->skippedByAreaSize();
     return false;
   }
@@ -2221,7 +2209,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
     geomRelInf->intersectArea = boost::geometry::area(intersect);
     stats->skippedByBoxIdIntersectCutout();
     return fabs(1.0 - entryArea / geomRelInf->intersectArea) <
-           APPROX_CONTAINS_SLACK;
+           _config.approxContainsSlack;
   } else {
     if (!boost::geometry::is_empty(entryConvexHull) &&
         !boost::geometry::is_empty(areaConvexHull) &&
@@ -2251,7 +2239,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
     geomRelInf->intersectArea = boost::geometry::area(intersect);
     stats->fullCheck();
     return fabs(1.0 - entryArea / geomRelInf->intersectArea) <
-           APPROX_CONTAINS_SLACK;
+           _config.approxContainsSlack;
   }
 }
 
@@ -2310,7 +2298,8 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
   }
 
   // else, if the number of surely contained and potentially contained
-  // boxes is unequal the number of A's boxes, we are surely not contained
+  // boxes is unequal the number of A's boxes, we are surely not
+  // contained
   if ((static_cast<int32_t>(geomRelInf->toCheck.size()) +
        geomRelInf->fullContained) != boxIdsA[0].first) {
     geomRelInf->contained = RelInfoValue::NO;
@@ -2318,8 +2307,8 @@ bool GeometryHandler<W>::areaInArea(const SpatialAreaValue& a,
     return false;
   }
 
-  // if A is in only one box, we can check it against the corresponding
-  // cutout of B, if available
+  // if A is in only one box, we can check it against the
+  // corresponding cutout of B, if available
   if (boxIdsA[0].first == 1 && !cutoutsB.empty()) {
     const auto& cutout = cutoutsB.find(abs(boxIdsA[1].first));
 
@@ -2587,11 +2576,11 @@ template <typename W>
 std::string GeometryHandler<W>::areaNS(AreaFromType type) const {
   switch (type) {
     case AreaFromType::RELATION:
-      return osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
+      return osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset];
     case AreaFromType::WAY:
-      return osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
+      return osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset];
     default:
-      return osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
+      return osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset];
   }
 }
 
@@ -2622,8 +2611,8 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
       if (idsB[j].first > 0) {
         geomRelInf->fullContained++;
 
-        // we now know that we surely intersect. If we know already that
-        // we cannot be contained, return here
+        // we now know that we surely intersect. If we know already
+        // that we cannot be contained, return here
         if (noContained) {
           return;
         }
@@ -2642,8 +2631,8 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
       }
     } else if (abs(idsA[i].first) + ii < abs(idsB[j].first) + jj) {
       // if we already know that we intersect, we are now sure that we
-      // cannot be contained - it is irrelevant by how "much" we cannot be
-      // contained, so just return
+      // cannot be contained - it is irrelevant by how "much" we
+      // cannot be contained, so just return
       if (geomRelInf->fullContained > 0) {
         return;
       }
@@ -2795,8 +2784,8 @@ std::vector<SpatialAreaRefValue> GeometryHandler<W>::indexQryIntersect(
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::unique(std::vector<SpatialAreaRefValue>& refs) const {
-  // remove duplicates, may occur since we used multiple envelope queries
-  // to build the result!
+  // remove duplicates, may occur since we used multiple envelope
+  // queries to build the result!
   std::sort(refs.begin(), refs.end(),
             [](const auto& a, const auto& b) { return a.second < b.second; });
   auto last = std::unique(
@@ -2838,8 +2827,9 @@ uint8_t GeometryHandler<W>::borderContained(Way::id_t wayId,
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<uint32_t>& successors, const SkipSet& skipSet, const std::string& entryIRI,
-    const std::string& rel, const std::string& symmRel) {
+    const std::vector<uint32_t>& successors, const SkipSet& skipSet,
+    const std::string& entryIRI, const std::string& rel,
+    const std::string& symmRel) {
   // transitive closure
   for (const auto& succIdx : successors) {
     if (skipSet.find(succIdx) != skipSet.end()) {
@@ -2858,8 +2848,8 @@ void GeometryHandler<W>::writeTransitiveClosure(
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::writeTransitiveClosure(
-    const std::vector<uint32_t>& successors, const SkipSet& skipSet, const std::string& entryIRI,
-    const std::string& rel) {
+    const std::vector<uint32_t>& successors, const SkipSet& skipSet,
+    const std::string& entryIRI, const std::string& rel) {
   // transitive closure
   for (const auto& succIdx : successors) {
     if (skipSet.find(succIdx) != skipSet.end()) {

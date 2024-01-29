@@ -196,9 +196,10 @@ TEST(OSM_FactHandler, node) {
 
   ASSERT_EQ(
       "osmnode:42 rdf:type osm:node .\n"
-      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmnode:42 osmkey:city \"Freiburg\" .\n"
       "osmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
+      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
@@ -251,6 +252,7 @@ TEST(OSM_FactHandler, relation) {
 
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmrel:42 osmkey:city \"Freiburg\" .\n"
       "osmrel:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_0 .\n"
@@ -350,6 +352,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
 
   ASSERT_EQ(
       "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmrel:42 osmkey:city \"Freiburg\" .\n"
       "osmrel:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmrel:42 osmrel:member _:0_0 .\n"
@@ -415,6 +418,7 @@ TEST(OSM_FactHandler, way) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
@@ -473,6 +477,7 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -540,6 +545,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -604,6 +610,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -673,6 +680,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 osmway:node _:0_0 .\n"
@@ -748,6 +756,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 
   ASSERT_EQ(
       "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
       "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
@@ -1853,6 +1862,696 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
   ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
                                                 " " + object2 + " .\n"));
   ASSERT_THAT(printedData, ::testing::Not(::testing::HasSubstr(predicate3)));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "lorem";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::Not(::testing::HasSubstr("ear")));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-lo-r-em-";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::Not(::testing::HasSubstr("ear")));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-1111-22-33-44";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::Not(::testing::HasSubstr("ear")));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYear1) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "11";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      "0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYear2) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-11";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      "-0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYear3) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "1111";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYear4) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-1111";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "11-1";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      "0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-11-1";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      "-0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "1111-11";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-1111-11";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "11-1-1";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      "0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-11-1-1";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      "-0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "1111-11-11";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-1111-11-11";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+                                                " " + object2 + " .\n"));
 
   // Cleanup
   std::cout.rdbuf(sbuf);
