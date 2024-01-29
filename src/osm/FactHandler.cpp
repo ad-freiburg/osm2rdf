@@ -413,7 +413,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
       size_t end;
       size_t start = 0;
       while ((end = value.find(';', start)) != std::string::npos) {
-        const std::string& partialValue = value.substr(start, end);
+        const std::string& partialValue = value.substr(start, (end - start));
         writeTag(subj, osm2rdf::osm::Tag(key, partialValue));
         tagTripleCount++;
         start = end + 1;

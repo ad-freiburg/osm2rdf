@@ -1525,7 +1525,7 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeTagListRefMultiple) {
+TEST(OSM_FactHandler, writeTagListRefDouble) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -1547,11 +1547,9 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   const std::string tagValue = "B 3;B 294";
 
   const std::string subject = "subject";
-  const std::string predicate1 =
+  const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral("B 3", "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object2 = writer.generateLiteral("B 294", "");
 
   osm2rdf::osm::TagList tagList;
@@ -1562,10 +1560,58 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   output.close();
 
   const std::string printedData = buffer.str();
-  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate +
                                                 " " + object1 + " .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate +
                                                 " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListRefMultiple) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.hasGeometryAsWkt = true;
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.semicolonTagKeys.insert("ref");
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "ref";
+  const std::string tagValue = "B 3;B 294;K 4917";
+
+  const std::string subject = "subject";
+  const std::string predicate =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral("B 3", "");
+  const std::string object2 = writer.generateLiteral("B 294", "");
+  const std::string object3 = writer.generateLiteral("K 4917", "");
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate +
+                                                " " + object2 + " .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate +
+                                                " " + object3 + " .\n"));
 
   // Cleanup
   std::cout.rdbuf(sbuf);
