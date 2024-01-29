@@ -70,6 +70,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
        "https://www.openstreetmap.org/way/"},
       // ohm prefixes
+      {osm2rdf::ttl::constants::NAMESPACE__OHM,
+       "https://www.openhistoricalmap.org/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE,
        "https://www.openhistoricalmap.org/node/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
