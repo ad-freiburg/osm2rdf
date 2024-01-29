@@ -78,6 +78,7 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagList);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
   FRIEND_TEST(OSM_FactHandler, writeTagListRefSingle);
+  FRIEND_TEST(OSM_FactHandler, writeTagListRefDouble);
   FRIEND_TEST(OSM_FactHandler, writeTagListRefMultiple);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidataMultiple);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithLang);
