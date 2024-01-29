@@ -507,31 +507,27 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
         continue;
       }
 
-      std::vector<std::string> parts;
-      parts.reserve(minusCount + 1);
-      size_t last = 0;
-      size_t next;
-      for (size_t i = 0; i < (minusCount + 1); ++i) {
-        next = value.find('-', last);
-        parts.emplace_back(value.substr(last, next - last));
-        last = next + 1;
-      }
-
-      auto resultType = 0;
       std::string newValue;
       newValue.reserve(value.size());
       std::ostringstream tmp;
       tmp << std::setfill('0');
+
+      size_t last = 0;
+      size_t next;
+      auto resultType = 0;
       for (size_t i = 0; i < (minusCount + 1); ++i) {
-        if (i == 0 && parts[i].empty()) {
+        next = value.find('-', last);
+        if (i == 0 && next == 0) {
           newValue += '-';
+          last = next + 1;
           continue;
         }
         tmp << std::setw(resultType == 0 ? 4 : 2) << std::dec
-            << std::atoi(parts[i].c_str());
+            << std::atoi(value.substr(last, next - last).c_str());
         newValue += tmp.str().substr(0, resultType == 0 ? 4 : 2) + '-';
         tmp.seekp(0);
         resultType++;
+        last = next + 1;
       }
       if (resultType > 3) {
         // Invalid length
