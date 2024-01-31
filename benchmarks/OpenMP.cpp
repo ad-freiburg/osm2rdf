@@ -16,7 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#if defined(_OPENMP)
 #include <omp.h>
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -28,6 +30,7 @@
 
 typedef std::chrono::duration<double, std::milli> timingInfo;
 
+#if defined(_OPENMP)
 // ____________________________________________________________________________
 void run(size_t n, omp_sched_t st, int ss) {
   omp_set_schedule(st, ss);
@@ -97,9 +100,11 @@ void run(size_t n, omp_sched_t st, int ss) {
               << " ms" << std::endl;
   }
 }
+#endif
 
 // ____________________________________________________________________________
 int main() {
+#if defined(_OPENMP)
   std::vector<int> runs{117,    265,    567,    934,    1 << 4,
                         1 << 6, 1 << 8, 1 << 9, 1 << 10};
   std::sort(runs.begin(), runs.end());
@@ -130,5 +135,8 @@ int main() {
       run(n, omp_sched_guided, i);
     }
   }
+#else
+  std::cout << "OpenMP missing - skipping Benchmark" << std::endl;
+#endif
   return 0;
 }

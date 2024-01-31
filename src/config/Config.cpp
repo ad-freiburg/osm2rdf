@@ -24,7 +24,9 @@
 #include <string>
 
 #include "boost/version.hpp"
+#if defined(_OPENMP)
 #include "omp.h"
+#endif
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
 #include "popl.hpp"
