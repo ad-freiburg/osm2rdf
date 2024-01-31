@@ -79,7 +79,7 @@ find_package(Boost REQUIRED serialization)
 find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(OpenMP REQUIRED)
+find_package(OpenMP)
 # Disable installation of google stuff
 set(INSTALL_GMOCK OFF)
 set(INSTALL_GTEST OFF)

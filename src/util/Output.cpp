@@ -22,7 +22,9 @@
 
 #include "boost/iostreams/filter/bzip2.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
+#if defined(_OPENMP)
 #include "omp.h"
+#endif
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/util/Output.h"
 
