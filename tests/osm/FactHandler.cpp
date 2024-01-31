@@ -1651,8 +1651,8 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
@@ -1698,8 +1698,8 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
@@ -1746,8 +1746,8 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = "<https://de.wikipedia.org/wiki/" + value + ">";
 
   osm2rdf::osm::TagList tagList;
@@ -1792,8 +1792,8 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 =
       "<https://www.wikipedia.org/wiki/" + tagValue + ">";
 
@@ -2018,8 +2018,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       "0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
@@ -2065,8 +2065,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       "-0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
@@ -2112,8 +2112,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
@@ -2159,8 +2159,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
@@ -2206,8 +2206,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       "0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
@@ -2253,8 +2253,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       "-0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
@@ -2300,8 +2300,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
@@ -2347,8 +2347,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
@@ -2394,8 +2394,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       "0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
@@ -2441,8 +2441,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       "-0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
@@ -2488,8 +2488,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
@@ -2535,8 +2535,8 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
-  const std::string predicate2 =
-      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, tagKey);
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 

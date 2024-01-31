@@ -193,29 +193,31 @@ TEST(E2E, singleNodeWithTags) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr("osmnode:240092010 osmkey:wikidata \"Q2833\" .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "osmnode:240092010 osm:wikidata wd:Q2833 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmnode:240092010 osm2rdfkey:wikidata wd:Q2833 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmnode:240092010 osmkey:wikipedia "
                                    "\"de:Freiburg im Breisgau\" .\n"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osmnode:240092010 osm:wikipedia "
+          "osmnode:240092010 osm2rdfkey:wikipedia "
           "<https://de.wikipedia.org/wiki/Freiburg%20im%20Breisgau> .\n"));
 
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmnode:925950614 osmkey:brand:wikidata \"Q41171672\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmnode:925950614 osm:brand:wikidata wd:Q41171672 .\n"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osmnode:925950614 osm2rdfkey:brand:wikidata wd:Q41171672 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmnode:925950614 osmkey:brand:wikipedia "
                                    "\"en:Aldi\" .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmnode:925950614 osm:brand:wikipedia "
-                                   "<https://en.wikipedia.org/wiki/Aldi> .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osmnode:925950614 osm2rdfkey:brand:wikipedia "
+                               "<https://en.wikipedia.org/wiki/Aldi> .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -701,30 +703,24 @@ TEST(E2E, building51TTL) {
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -840,30 +836,24 @@ TEST(E2E, building51QLEVER) {
               ::testing::HasSubstr(
                   "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1103,34 +1093,27 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:4498466 ogc:sfContains osmway:98284318 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:4498466 ogc:sfIntersects osmway:98284318 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr(
-          "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:4498466 ogc:sfIntersects osmway:98284318 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::HasSubstr(
+                  "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

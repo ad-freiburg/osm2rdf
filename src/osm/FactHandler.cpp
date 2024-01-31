@@ -64,9 +64,10 @@ using osm2rdf::ttl::constants::IRI__XSD_YEAR;
 using osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH;
 using osm2rdf::ttl::constants::LITERAL__NO;
 using osm2rdf::ttl::constants::LITERAL__YES;
-using osm2rdf::ttl::constants::NAMESPACE__OSM;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM;
+using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META;
+using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_TAG;
@@ -467,7 +468,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
 
       _writer->writeTriple(
           subj,
-          _writer->generateIRI(DATASET_NAMESPACE[_config.sourceDataset], key),
+          _writer->generateIRI(NAMESPACE__OSM2RDF_TAG, key),
           _writer->generateIRI(NAMESPACE__WIKIDATA_ENTITY, valueTmp));
       tagTripleCount++;
     }
@@ -479,14 +480,14 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
         const std::string& entry = value.substr(pos + 1);
         _writer->writeTriple(
             subj,
-            _writer->generateIRI(DATASET_NAMESPACE[_config.sourceDataset], key),
+            _writer->generateIRI(NAMESPACE__OSM2RDF_TAG, key),
             _writer->generateIRI("https://" + lang + ".wikipedia.org/wiki/",
                                  entry));
         tagTripleCount++;
       } else {
         _writer->writeTriple(
             subj,
-            _writer->generateIRI(DATASET_NAMESPACE[_config.sourceDataset], key),
+            _writer->generateIRI(NAMESPACE__OSM2RDF_TAG, key),
             _writer->generateIRI("https://www.wikipedia.org/wiki/", value));
         tagTripleCount++;
       }
@@ -536,8 +537,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
       std::string typeString[3] = {IRI__XSD_YEAR, IRI__XSD_YEAR_MONTH,
                                    IRI__XSD_DATE};
       _writer->writeTriple(subj,
-                           _writer->generateIRIUnsafe(
-                               DATASET_NAMESPACE[_config.sourceDataset], key),
+                           _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF_TAG, key),
                            _writer->generateLiteralUnsafe(
                                newValue.substr(0, newValue.size() - 1),
                                "^^" + typeString[resultType - 1]));

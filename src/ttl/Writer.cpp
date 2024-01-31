@@ -56,6 +56,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://osm2rdf.cs.uni-freiburg.de/rdf#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/geom#"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG,
+       "https://osm2rdf.cs.uni-freiburg.de/rdf/key#"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
+       "https://osm2rdf.cs.uni-freiburg.de/rdf/meta#"},
       // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
       // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
       // osm prefixes
