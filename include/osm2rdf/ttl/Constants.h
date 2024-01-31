@@ -38,6 +38,9 @@ const static inline std::string NAMESPACE__OSM_META = "osmmeta";
 const static inline std::string NAMESPACE__OSM = "osm";
 const static inline std::string NAMESPACE__OSM2RDF = "osm2rdf";
 const static inline std::string NAMESPACE__OSM2RDF_GEOM = "osm2rdfgeom";
+const static inline std::string NAMESPACE__OSM2RDF_MEMBER = "osm2rdfmember";
+const static inline std::string NAMESPACE__OSM2RDF_META = "osm2rdfmeta";
+const static inline std::string NAMESPACE__OSM2RDF_TAG = "osm2rdfkey";
 const static inline std::string NAMESPACE__RDF = "rdf";
 const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
@@ -58,7 +61,9 @@ inline std::string IRI__OSM2RDF_INTERSECTS_AREA;
 inline std::string IRI__OSM2RDF_GEOM__CONVEX_HULL;
 inline std::string IRI__OSM2RDF_GEOM__ENVELOPE;
 inline std::string IRI__OSM2RDF_GEOM__OBB;
-inline std::string IRI__OSM2RDF__POS;
+inline std::string IRI__OSM2RDF_MEMBER__ID;
+inline std::string IRI__OSM2RDF_MEMBER__ROLE;
+inline std::string IRI__OSM2RDF_MEMBER__POS;
 inline std::string IRI__OSMMETA_TIMESTAMP;
 inline std::string IRI__OSMWAY_IS_CLOSED;
 inline std::string IRI__OSMWAY_NEXT_NODE;
@@ -87,9 +92,10 @@ inline std::string LITERAL__YES;
 
 // Arrays holding values depending on the used dataset
 inline std::string DATASET_ID[2] = {"osm", "ohm"};
-inline std::string DATASET_NAMESPACE[2] = {NAMESPACE__OSM, NAMESPACE__OHM};
-inline std::string NODE_NAMESPACE[2] = {NAMESPACE__OSM_NODE, NAMESPACE__OHM_NODE};
-inline std::string RELATION_NAMESPACE[2] = {NAMESPACE__OSM_RELATION, NAMESPACE__OHM_RELATION};
+inline std::string NODE_NAMESPACE[2] = {NAMESPACE__OSM_NODE,
+                                        NAMESPACE__OHM_NODE};
+inline std::string RELATION_NAMESPACE[2] = {NAMESPACE__OSM_RELATION,
+                                            NAMESPACE__OHM_RELATION};
 inline std::string WAY_NAMESPACE[2] = {NAMESPACE__OSM_WAY, NAMESPACE__OHM_WAY};
 
 }  // namespace osm2rdf::ttl::constants
