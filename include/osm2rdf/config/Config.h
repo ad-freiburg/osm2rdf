@@ -77,7 +77,6 @@ struct Config {
   bool addWayNodeGeometry = false;
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
-  bool hasGeometryAsWkt = false;
   bool skipWikiLinks = false;
 
   // Default settings for data

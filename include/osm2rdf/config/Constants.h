@@ -192,14 +192,6 @@ const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_LONG =
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_HELP =
     "Add linestrings for ways which form areas";
 
-const static inline std::string HASGEOMETRY_AS_WKT_INFO =
-    "Letting geo:hasGeometry point directly to WKT serialization literal";
-const static inline std::string HASGEOMETRY_AS_WKT_OPTION_SHORT = "";
-const static inline std::string HASGEOMETRY_AS_WKT_OPTION_LONG =
-    "hasgeometry-as-wkt";
-const static inline std::string HASGEOMETRY_AS_WKT_OPTION_HELP =
-    "Let geo:hasGeometry point directly to a WKT literal";
-
 const static inline std::string ADD_WAY_METADATA_INFO = "Adding way metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_METADATA_OPTION_LONG =

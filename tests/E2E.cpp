@@ -54,7 +54,6 @@ TEST(E2E, singleNode) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -120,7 +119,6 @@ TEST(E2E, singleNodeWithTags) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -174,7 +172,7 @@ TEST(E2E, singleNodeWithTags) {
               ::testing::HasSubstr("osmnode:925950614 rdf:type osm:node .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmnode:240092010 geo:hasGeometry \"POINT(7.8494005 "
+                  "osm2rdfgeom:osm_node_240092010 geo:asWKT \"POINT(7.8494005 "
                   "47.9960901)\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
@@ -237,7 +235,6 @@ TEST(E2E, singleWayWithTagsAndNodes) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -320,7 +317,7 @@ TEST(E2E, singleWayWithTagsAndNodes) {
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   // No nodes -> no real geometry
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("osmway:98284318 geo:hasGeometry "
+              ::testing::HasSubstr("osm2rdf:way_98284318 geo:asWKT "
                                    "\"LINESTRING()\"^^geo:wktLiteral .\n"));
 
   // Reset std::cerr and std::cout
@@ -341,7 +338,6 @@ TEST(E2E, osmWikiExample) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -411,9 +407,8 @@ TEST(E2E, osmWikiExample) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:26659127 osmkey:name \"Pastower Straße\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:26659127 geo:hasGeometry \"LINESTRING("));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osm2rdf:way_26659127 geo:asWKT \"LINESTRING("));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmrel:56688 rdf:type osm:relation .\n"));
   ASSERT_THAT(printedData,
@@ -437,7 +432,6 @@ TEST(E2E, building51NT) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -544,16 +538,17 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "<https://www.openstreetmap.org/way/98284318> "
-          "<http://www.opengis.net/ont/geosparql#hasGeometry> \"LINESTRING(7"));
+          "<https://osm2rdf.cs.uni-freiburg.de/rdf#way_98284318> "
+          "<http://www.opengis.net/ont/geosparql#asWKT> \"LINESTRING(7"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
           "7)\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(
-                               "<https://www.openstreetmap.org/way/98284318> "
-                               "<http://www.opengis.net/ont/"
-                               "geosparql#hasGeometry> \"MULTIPOLYGON(((7"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "<https://osm2rdf.cs.uni-freiburg.de/rdf/geom#osm_wayarea_98284318> "
+          "<http://www.opengis.net/ont/geosparql#asWKT> \"MULTIPOLYGON(((7"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
@@ -607,7 +602,6 @@ TEST(E2E, building51TTL) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -697,11 +691,12 @@ TEST(E2E, building51TTL) {
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
+      ::testing::HasSubstr("osm2rdf:way_98284318 geo:asWKT \"LINESTRING(7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("7)\"^^geo:wktLiteral .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
@@ -740,7 +735,6 @@ TEST(E2E, building51QLEVER) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -830,11 +824,12 @@ TEST(E2E, building51QLEVER) {
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
+      ::testing::HasSubstr("osm2rdf:way_98284318 geo:asWKT \"LINESTRING(7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("7)\"^^geo:wktLiteral .\n"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
@@ -873,7 +868,6 @@ TEST(E2E, tf) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -944,12 +938,12 @@ TEST(E2E, tf) {
                                "\"Albert-Ludwigs-Universität Freiburg\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
                                "osmway:4498466 osmkey:wheelchair \"yes\" .\n"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr(
+                               "osm2rdf:way_4498466 geo:asWKT \"LINESTRING(7"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:4498466 geo:hasGeometry \"LINESTRING(7"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:4498466 geo:hasGeometry \"MULTIPOLYGON(((7"));
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -969,7 +963,6 @@ TEST(E2E, building51inTF) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -1066,10 +1059,11 @@ TEST(E2E, building51inTF) {
                                    "\"maps4bw (LGL, www.lgl-bw.de)\" .\n"));
   ASSERT_THAT(
       printedData,
-      ::testing::HasSubstr("osmway:98284318 geo:hasGeometry \"LINESTRING(7"));
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "smway:98284318 geo:hasGeometry \"MULTIPOLYGON(((7"));
+      ::testing::HasSubstr("osm2rdf:way_98284318 geo:asWKT \"LINESTRING(7"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
@@ -1084,12 +1078,9 @@ TEST(E2E, building51inTF) {
                                "\"Albert-Ludwigs-Universität Freiburg\" .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(
                                "osmway:4498466 osmkey:wheelchair \"yes\" .\n"));
-  ASSERT_THAT(
-      printedData,
-      ::testing::HasSubstr("osmway:4498466 geo:hasGeometry \"LINESTRING(7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:4498466 geo:hasGeometry \"MULTIPOLYGON(((7"));
+                  "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:4498466 ogc:sfContains osmway:98284318 .\n"));

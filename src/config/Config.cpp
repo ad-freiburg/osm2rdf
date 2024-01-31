@@ -296,10 +296,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG,
       osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_HELP);
-  auto hasGeometryAsWktOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::HASGEOMETRY_AS_WKT_OPTION_SHORT,
-      osm2rdf::config::constants::HASGEOMETRY_AS_WKT_OPTION_LONG,
-      osm2rdf::config::constants::HASGEOMETRY_AS_WKT_OPTION_HELP);
   auto skipWikiLinksOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_SHORT,
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG,
@@ -497,7 +493,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
-    hasGeometryAsWkt = hasGeometryAsWktOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();
     simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();

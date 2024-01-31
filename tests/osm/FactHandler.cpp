@@ -54,7 +54,6 @@ TEST(OSM_FactHandler, areaFromWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -87,7 +86,9 @@ TEST(OSM_FactHandler, areaFromWay) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:21 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
+      "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 .\n"
+      "osm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
+      "7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -111,7 +112,6 @@ TEST(OSM_FactHandler, areaFromRelation) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -144,7 +144,9 @@ TEST(OSM_FactHandler, areaFromRelation) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry \"MULTIPOLYGON(((48.0 7.5,48.0 7.6,48.1 "
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 .\n"
+      "osm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
+      "7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
       "osmrel:10 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -168,7 +170,6 @@ TEST(OSM_FactHandler, node) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -199,7 +200,9 @@ TEST(OSM_FactHandler, node) {
       "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmnode:42 osmkey:city \"Freiburg\" .\n"
       "osmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
-      "osmnode:42 geo:hasGeometry \"POINT(7.5 48.0)\"^^geo:wktLiteral .\n"
+      "osmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\n"
+      "osm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48.0)\"^^geo:wktLiteral "
+      ".\n"
       "osmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
       "osmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
@@ -221,7 +224,6 @@ TEST(OSM_FactHandler, relation) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -283,7 +285,6 @@ TEST(OSM_FactHandler, relationWithGeometry) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -359,7 +360,8 @@ TEST(OSM_FactHandler, relationWithGeometry) {
       "_:0_1 osm2rdfmember:id osmway:55 .\n"
       "_:0_1 osm2rdfmember:role \"outer\" .\n"
       "_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\n"
-      "osmrel:42 geo:hasGeometry \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "osmrel:42 geo:hasGeometry osm2rdfgeom:osm_relation_42 .\n"
+      "osm2rdfgeom:osm_relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.6 48.0,7.5 "
       "48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
@@ -384,7 +386,6 @@ TEST(OSM_FactHandler, way) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -417,7 +418,8 @@ TEST(OSM_FactHandler, way) {
       "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
+      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -441,7 +443,6 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -480,13 +481,16 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
       "_:0_0 osmway:node osmnode:1 .\n"
       "_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\n"
       "osmnode:1 rdf:type osm:node .\n"
-      "osmnode:1 geo:hasGeometry \"POINT(48.0 7.5)\"^^geo:wktLiteral .\n"
+      "osmnode:1 geo:hasGeometry osm2rdfgeom:osm_node_1 .\n"
+      "osm2rdfgeom:osm_node_1 geo:asWKT \"POINT(48.0 7.5)\"^^geo:wktLiteral .\n"
       "osmway:42 osmway:node _:0_1 .\n"
       "_:0_1 osmway:node osmnode:2 .\n"
       "_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\n"
       "osmnode:2 rdf:type osm:node .\n"
-      "osmnode:2 geo:hasGeometry \"POINT(48.1 7.6)\"^^geo:wktLiteral .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "osmnode:2 geo:hasGeometry osm2rdfgeom:osm_node_2 .\n"
+      "osm2rdfgeom:osm_node_2 geo:asWKT \"POINT(48.1 7.6)\"^^geo:wktLiteral .\n"
+      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
+      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -510,7 +514,6 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -550,7 +553,8 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
       "osmway:42 osmway:node _:0_1 .\n"
       "_:0_1 osmway:node osmnode:2 .\n"
       "_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
+      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -574,7 +578,6 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -617,7 +620,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
       "_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\n"
       "_:0_0 osmway:next_node osmnode:2 .\n"
       "_:0_0 osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
+      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -641,7 +645,6 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -697,7 +700,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
       "_:0_3 osm2rdfmember:pos \"3\"^^xsd:integer .\n"
       "_:0_2 osmway:next_node osmnode:3 .\n"
       "_:0_2 osmway:next_node_distance \"11024.108103\"^^xsd:decimal .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 7.6,48.1 7.5,48.0 "
+      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
+      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 7.6,48.1 7.5,48.0 "
       "7.5)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.1 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -721,7 +725,6 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -755,7 +758,8 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
       "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry \"LINESTRING(48.0 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
+      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
@@ -782,7 +786,6 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -821,7 +824,6 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -867,7 +869,6 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -909,7 +910,6 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -952,7 +952,6 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -992,7 +991,6 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 2;
@@ -1032,7 +1030,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1070,7 +1067,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1107,7 +1103,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1144,7 +1139,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1182,7 +1176,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1220,7 +1213,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1258,7 +1250,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1296,7 +1287,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1334,7 +1324,6 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1371,7 +1360,6 @@ TEST(OSM_FactHandler, writeTag_KeyIRI) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1408,7 +1396,6 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1447,7 +1434,6 @@ TEST(OSM_FactHandler, writeTagList) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1497,7 +1483,6 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1538,7 +1523,6 @@ TEST(OSM_FactHandler, writeTagListRefDouble) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
@@ -1583,7 +1567,6 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
@@ -1631,7 +1614,6 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1678,7 +1660,6 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1725,7 +1706,6 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1772,7 +1752,6 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1819,7 +1798,6 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.skipWikiLinks = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -1872,7 +1850,6 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1914,7 +1891,6 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1956,7 +1932,6 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1998,7 +1973,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2045,7 +2019,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2092,7 +2065,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2139,7 +2111,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2186,7 +2157,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2233,7 +2203,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2280,7 +2249,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2327,7 +2295,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2374,7 +2341,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2421,7 +2387,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2468,7 +2433,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2515,7 +2479,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
