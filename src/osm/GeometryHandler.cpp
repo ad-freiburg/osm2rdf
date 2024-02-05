@@ -2591,6 +2591,8 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
                                     GeomRelationInfo* geomRelInf) const {
   geomRelInf->fullContained = 0;
 
+  if (idsA[0].first == 0 || idsB[0].first == 0) return;
+
   // shortcuts
   if (abs(idsA[1].first) > abs(idsB.back().first) + idsB.back().second) {
     return;
