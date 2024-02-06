@@ -634,7 +634,7 @@ void GeometryHandler<W>::prepareDAG() {
 
         if (areaFromType == AreaFromType::WAY) {
           // we are contained in an area derived from a way.
-          const auto& relations = _areaBorderWaysIndex.find(areaObjId);
+          auto relations = _areaBorderWaysIndex.find(areaObjId);
           if (relations != _areaBorderWaysIndex.end()) {
             for (auto r : relations->second) {
               if (r.second) {
@@ -2172,6 +2172,12 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   const auto& areaGeom = std::get<2>(b);
   const auto& areaConvexHull = std::get<10>(b);
 
+  assert(entryBoxIds.size() > 0);
+  assert(areaBoxIds.size() > 0);
+
+  if (entryBoxIds.front().first > 0) assert(entryBoxIds.size() > 1);
+  if (areaBoxIds.front().first > 0) assert(areaBoxIds.size() > 1);
+
   if (areaArea / entryArea <= 1.0 - _config.approxContainsSlack) {
     stats->skippedByAreaSize();
     return false;
@@ -2592,6 +2598,8 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
   geomRelInf->fullContained = 0;
 
   if (idsA[0].first == 0 || idsB[0].first == 0) return;
+
+  assert(idsA.size() > 1 && idsB.size() > 1);
 
   // shortcuts
   if (abs(idsA[1].first) > abs(idsB.back().first) + idsB.back().second) {
