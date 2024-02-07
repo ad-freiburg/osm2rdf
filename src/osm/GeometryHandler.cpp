@@ -325,7 +325,6 @@ bool GeometryHandler<W>::innerOuterDouglasPeucker(
 
   // L and R should be different points.
   if (L.get<0>() == R.get<0>() && L.get<1>() == R.get<1>()) {
-    std::cerr << "DOUGLAS PEUCKER FAIL!" << std::endl;
     // TODO: handle
     return false;
   }
