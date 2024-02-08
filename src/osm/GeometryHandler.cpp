@@ -2575,7 +2575,6 @@ BoxIdList GeometryHandler<W>::getBoxIds(
       std::floor((envelopes[0].max_corner().get<1>() + 90.0) / GRID_H) + 1;
 
   BoxIdList boxIds;
-  return boxIds;
 
   getBoxIds(area, inner, outer, envelopes, startX, endX, startY, endY,
             (endX - startX + 3) / 4, (endY - startY + 3) / 4, &boxIds, area,
