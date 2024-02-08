@@ -177,6 +177,23 @@ void GeometryHandler<W>::area(const Area& area) {
       pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom,
                      totPoints > MIN_CUTOUT_POINTS ? &cutouts : 0));
 
+  if (area.objId() == 1949881) {
+    std::cout << "Envelopes: ";
+    for (const auto& e : envelopes) std::cout << boost::geometry::wkt(e) << std::endl;
+
+    std::cout << "Inner: ";
+    std::cout << boost::geometry::wkt(innerGeom) << std::endl;
+
+    std::cout << "Outer: ";
+    std::cout << boost::geometry::wkt(outerGeom) << std::endl;
+
+    std::cout << "Convex hull: ";
+    std::cout << boost::geometry::wkt(convexHull) << std::endl;
+
+    std::cout << "Box IDs: ";
+    for (const auto& bt : boxIds) std::cout << "(" << bt.first << ", " << bt.second << ") " << std::endl;
+  }
+
 #pragma omp critical(areaDataInsert)
   {
     if (area.hasName()) {
@@ -2558,6 +2575,7 @@ BoxIdList GeometryHandler<W>::getBoxIds(
       std::floor((envelopes[0].max_corner().get<1>() + 90.0) / GRID_H) + 1;
 
   BoxIdList boxIds;
+  return boxIds;
 
   getBoxIds(area, inner, outer, envelopes, startX, endX, startY, endY,
             (endX - startX + 3) / 4, (endY - startY + 3) / 4, &boxIds, area,
