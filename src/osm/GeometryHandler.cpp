@@ -572,10 +572,10 @@ void GeometryHandler<W>::prepareDAG() {
 
     progressBar.update(entryCount);
 
-#pragma omp parallel for shared(                                               \
-        tmpDirectedAreaGraph, std::cout, std::cerr,                            \
-            osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
-            progressBar) reduction(+ : stats) default(none) schedule(dynamic)
+// #pragma omp parallel for shared(                                               \
+        // tmpDirectedAreaGraph, std::cout, std::cerr,                            \
+            // osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY, entryCount, \
+            // progressBar) reduction(+ : stats) default(none) schedule(dynamic)
 
     for (uint32_t i = 0; i < _spatialStorageArea.size(); i++) {
       const auto& entry = _spatialStorageArea[i];
@@ -590,6 +590,7 @@ void GeometryHandler<W>::prepareDAG() {
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
+        std::cout << std::get<3>(entry) << " vs " << std::get<3>(area) << std::endl;
         const auto& areaId = std::get<1>(area);
         const auto& areaObjId = std::get<3>(area);
         const auto& areaArea = std::get<4>(area);
