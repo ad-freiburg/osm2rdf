@@ -64,7 +64,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
 #endif  // BOOST_VERSION >= 107800
                 << ")" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
-                                               osmium::osm_entity_bits::object};
+                                               osmium::osm_entity_bits::all};
       {
         while (auto buf = reader.read()) {
           osmium::apply(buf, mp_manager,
@@ -81,6 +81,15 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
 #endif  // BOOST_VERSION >= 107800
       std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
                 << std::endl;
+
+      std::cerr << osm2rdf::util::currentTimeFormatted()
+                << "changesets found: " << countHandler.numChangesets() << "\n"
+                << osm2rdf::util::formattedTimeSpacer
+                << "nodes found: " << countHandler.numNodes() << "\n"
+                << osm2rdf::util::formattedTimeSpacer
+                << "relations found: " << countHandler.numRelations() << "\n"
+                << osm2rdf::util::formattedTimeSpacer
+                << "ways found: " << countHandler.numWays() << std::endl;
     }
 
     // store data
@@ -88,12 +97,15 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       std::cerr << std::endl;
       std::cerr << osm2rdf::util::currentTimeFormatted()
                 << "OSM Pass 2 ... (dump)" << std::endl;
-      osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object};
+      osmium::io::Reader reader{input_file, osmium::osm_entity_bits::all};
       osm2rdf::osm::LocationHandler* locationHandler =
           osm2rdf::osm::LocationHandler::create(_config);
       _relationHandler.setLocationHandler(locationHandler);
 
       size_t numTasks = 0;
+      if (!_config.noFacts && !_config.noChangesetFacts) {
+        numTasks += countHandler.numChangesets();
+      }
       if (!_config.noFacts && !_config.noNodeFacts) {
         numTasks += countHandler.numNodes();
       }
@@ -142,17 +154,20 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
                 << std::endl;
 
       std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "areas seen:" << _areasSeen << " dumped: " << _areasDumped
+                << "areas seen: " << _areasSeen << " dumped: " << _areasDumped
                 << " geometry: " << _areaGeometriesHandled << "\n"
                 << osm2rdf::util::formattedTimeSpacer
-                << "nodes seen:" << _nodesSeen << " dumped: " << _nodesDumped
+                << "changesets seen: " << _changesetsSeen
+                << " dumped: " << _changesetsDumped << "\n"
+                << osm2rdf::util::formattedTimeSpacer
+                << "nodes seen: " << _nodesSeen << " dumped: " << _nodesDumped
                 << " geometry: " << _nodeGeometriesHandled << "\n"
                 << osm2rdf::util::formattedTimeSpacer
                 << "relations seen:" << _relationsSeen
                 << " dumped: " << _relationsDumped
                 << " geometry: " << _relationGeometriesHandled << "\n"
                 << osm2rdf::util::formattedTimeSpacer
-                << "ways seen:" << _waysSeen << " dumped: " << _waysDumped
+                << "ways seen: " << _waysSeen << " dumped: " << _waysDumped
                 << " geometry: " << _wayGeometriesHandled << std::endl;
     }
 
@@ -193,6 +208,22 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
     }
   } catch (const osmium::invalid_location& e) {
     return;
+  }
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::OsmiumHandler<W>::changeset(
+    const osmium::Changeset& changeset) {
+  _changesetsSeen++;
+  auto osmChangeset = osm2rdf::osm::Changeset(changeset);
+#pragma omp task
+  {
+    if (!_config.noFacts && !_config.noChangesetFacts) {
+      _changesetsDumped++;
+#pragma omp task
+      { _factHandler.changeset(osmChangeset); };
+    }
   }
 }
 
