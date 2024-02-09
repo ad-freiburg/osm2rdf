@@ -177,7 +177,8 @@ void GeometryHandler<W>::area(const Area& area) {
       pack(getBoxIds(area.geom(), envelopes, innerGeom, outerGeom,
                      totPoints > MIN_CUTOUT_POINTS ? &cutouts : 0));
 
-  if (area.objId() == 1949881) {
+  if (area.objId() == 1949881 ||area.objId() == 5615030 ) {
+    std::cout << "=========== " << area.objId() << std::endl;
     std::cout << "Envelopes: ";
     for (const auto& e : envelopes) std::cout << boost::geometry::wkt(e) << std::endl;
 
@@ -190,8 +191,11 @@ void GeometryHandler<W>::area(const Area& area) {
     std::cout << "Convex hull: ";
     std::cout << boost::geometry::wkt(convexHull) << std::endl;
 
-    std::cout << "Box IDs: ";
-    for (const auto& bt : boxIds) std::cout << "(" << bt.first << ", " << bt.second << ") " << std::endl;
+    std::cout << "OBB: ";
+    std::cout << boost::geometry::wkt(area.orientedBoundingBox()) << std::endl;
+
+    std::cout << "Box IDs: (" << boxIds.size() << ")";
+    for (const auto& bt : boxIds) std::cout << "(" << bt.first << ", " << (int)bt.second << ") " << std::endl;
   }
 
 #pragma omp critical(areaDataInsert)
@@ -638,6 +642,7 @@ void GeometryHandler<W>::prepareDAG() {
           continue;
         }
 
+        std::cout << "K" << std::endl;
         GeomRelationInfo geomRelInf;
         if (_config.approxContainsSlack == 0) {
           if (!areaInArea(entry, area, &geomRelInf, &stats)) {
@@ -648,6 +653,8 @@ void GeometryHandler<W>::prepareDAG() {
             continue;
           }
         }
+
+        std::cout << "L" << std::endl;
 
         if (areaFromType == AreaFromType::WAY) {
           // we are contained in an area derived from a way.
@@ -664,6 +671,8 @@ void GeometryHandler<W>::prepareDAG() {
           }
         }
 
+        std::cout << "M" << std::endl;
+
         if (_config.approxContainsSlack > 0 &&
             fabs(1.0 - areaArea / geomRelInf.intersectArea) <
                 _config.approxContainsSlack) {
@@ -672,9 +681,13 @@ void GeometryHandler<W>::prepareDAG() {
 
 #pragma omp critical(addEdge)
         {
+          std::cout << "N" << std::endl;
           tmpDirectedAreaGraph.addEdge(i, areaRef.second);
+          std::cout << "O" << std::endl;
           const auto& successors = tmpDirectedAreaGraph.findSuccessors(i);
+          std::cout << "P" << std::endl;
           skip.insert(successors.begin(), successors.end());
+          std::cout << "Q" << std::endl;
         }
       }
 #pragma omp critical(progress)
@@ -2196,6 +2209,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   if (areaBoxIds.front().first > 0) assert(areaBoxIds.size() > 1);
 
   if (areaArea / entryArea <= 1.0 - _config.approxContainsSlack) {
+    std::cout << "A" << std::endl;
     stats->skippedByAreaSize();
     return false;
   }
@@ -2209,22 +2223,28 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   }
 
   if (!intersects) {
+    std::cout << "B" << std::endl;
     stats->skippedByBox();
     return false;
   }
 
-  if (geomRelInf->fullContained < 0)
+  if (geomRelInf->fullContained < 0) {
+    std::cout << "C" << std::endl;
     boxIdIsect(entryBoxIds, areaBoxIds, geomRelInf);
+  }
 
   if (geomRelInf->fullContained == 0 && geomRelInf->toCheck.empty()) {
+    std::cout << "D" << std::endl;
     stats->skippedByBoxIdIntersect();
     return false;
   } else if (geomRelInf->fullContained == entryBoxIds[0].first) {
+    std::cout << "E" << std::endl;
     stats->skippedByBoxIdIntersect();
     geomRelInf->intersectArea = entryArea;
     return true;
   } else if (entryBoxIds.front().first == 1 &&
              areaCutouts.find(abs(entryBoxIds[1].first)) != areaCutouts.end()) {
+    std::cout << "F" << std::endl;
     const auto& cutout = areaCutouts.find(abs(entryBoxIds[1].first));
     osm2rdf::geometry::Area intersect;
     boost::geometry::intersection(entryGeom, cutout->second, intersect);
@@ -2234,6 +2254,7 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
     return fabs(1.0 - entryArea / geomRelInf->intersectArea) <
            _config.approxContainsSlack;
   } else {
+    std::cout << "G" << std::endl;
     if (!boost::geometry::is_empty(entryConvexHull) &&
         !boost::geometry::is_empty(areaConvexHull) &&
         !boost::geometry::intersects(entryConvexHull, areaConvexHull)) {
@@ -2249,13 +2270,17 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
       return false;
     }
 
+    std::cout << "H" << std::endl;
+
     if (!boost::geometry::is_empty(entryConvexHull) &&
         boost::geometry::covered_by(entryConvexHull, areaGeom)) {
+      std::cout << "I" << std::endl;
       stats->skippedByConvexHull();
       geomRelInf->intersectArea = entryArea;
       return true;
     }
 
+    std::cout << "J" << std::endl;
     osm2rdf::geometry::Area intersect;
     boost::geometry::intersection(entryGeom, areaGeom, intersect);
 
@@ -2613,6 +2638,8 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
                                     const BoxIdList& idsB,
                                     GeomRelationInfo* geomRelInf) const {
   geomRelInf->fullContained = 0;
+
+  assert(idsA.size() > 0 && idsB.size() > 0);
 
   if (idsA[0].first == 0 || idsB[0].first == 0) return;
 
