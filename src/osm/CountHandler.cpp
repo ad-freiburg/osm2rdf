@@ -21,10 +21,16 @@
 #include <iostream>
 
 // ____________________________________________________________________________
-void osm2rdf::osm::CountHandler::prepare_for_lookup() {
-  _firstPassDone = true;
-}
+void osm2rdf::osm::CountHandler::prepare_for_lookup() { _firstPassDone = true; }
 
+// ----------------------------------------------------------------------------
+void osm2rdf::osm::CountHandler::changeset(
+    const osmium::Changeset& /*unused*/) {
+  if (_firstPassDone) {
+    return;
+  }
+  _numChangesets++;
+}
 // ____________________________________________________________________________
 void osm2rdf::osm::CountHandler::node(const osmium::Node& node){
   if (_firstPassDone || node.tags().empty())  {
@@ -49,10 +55,13 @@ void osm2rdf::osm::CountHandler::way(const osmium::Way& way) {
   _numWays++;
 }
 
-// ____________________________________________________________________________
-size_t osm2rdf::osm::CountHandler::numNodes() const {
-  return _numNodes;
+// ----------------------------------------------------------------------------
+size_t osm2rdf::osm::CountHandler::numChangesets() const {
+  return _numChangesets;
 }
+
+// ____________________________________________________________________________
+size_t osm2rdf::osm::CountHandler::numNodes() const { return _numNodes; }
 
 // ____________________________________________________________________________
 size_t osm2rdf::osm::CountHandler::numRelations() const {

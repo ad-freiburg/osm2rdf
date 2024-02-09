@@ -26,6 +26,13 @@
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "util/geo/Geo.h"
+#include "osm2rdf/osm/Area.h"
+#include "osm2rdf/osm/Box.h"
+#include "osm2rdf/osm/Changeset.h"
+#include "osm2rdf/osm/Node.h"
+#include "osm2rdf/osm/Relation.h"
+#include "osm2rdf/osm/Tag.h"
+#include "osm2rdf/osm/TagList.h"
 
 namespace osm2rdf::osm {
 
@@ -44,6 +51,7 @@ class FactHandler {
               osm2rdf::ttl::Writer<W>* writer);
   // Add data
   void area(const osm2rdf::osm::Area& area);
+  void changeset(const osm2rdf::osm::Changeset& changeset);
   void node(const osm2rdf::osm::Node& node);
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);

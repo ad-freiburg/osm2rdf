@@ -58,6 +58,9 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     if (noAreaFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_AREA_FACTS_INFO;
     }
+    if (noChangesetFacts) {
+      oss << "\n" << prefix << osm2rdf::config::constants::NO_CHANGESET_FACTS_INFO;
+    }
     if (noNodeFacts) {
       oss << "\n" << prefix << osm2rdf::config::constants::NO_NODE_FACTS_INFO;
     }
@@ -192,6 +195,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_AREA_OPTION_SHORT,
       osm2rdf::config::constants::NO_AREA_OPTION_LONG,
       osm2rdf::config::constants::NO_AREA_OPTION_HELP);
+  auto noChangesetsOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::NO_CHANGESET_OPTION_SHORT,
+      osm2rdf::config::constants::NO_CHANGESET_OPTION_LONG,
+      osm2rdf::config::constants::NO_CHANGESET_OPTION_HELP);
   auto noNodesOp = parser.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::NO_NODE_OPTION_SHORT,
       osm2rdf::config::constants::NO_NODE_OPTION_LONG,
@@ -213,6 +220,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_AREA_FACTS_OPTION_SHORT,
       osm2rdf::config::constants::NO_AREA_FACTS_OPTION_LONG,
       osm2rdf::config::constants::NO_AREA_FACTS_OPTION_HELP);
+  auto noChangesetFactsOp = parser.add<popl::Switch, popl::Attribute::expert>(
+      osm2rdf::config::constants::NO_CHANGESET_FACTS_OPTION_SHORT,
+      osm2rdf::config::constants::NO_CHANGESET_FACTS_OPTION_LONG,
+      osm2rdf::config::constants::NO_CHANGESET_FACTS_OPTION_HELP);
   auto noNodeFactsOp = parser.add<popl::Switch, popl::Attribute::expert>(
       osm2rdf::config::constants::NO_NODE_FACTS_OPTION_SHORT,
       osm2rdf::config::constants::NO_NODE_FACTS_OPTION_LONG,
@@ -392,6 +403,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     // Select types to dump
     noAreaFacts = noAreaFactsOp->is_set();
+    noChangesetFacts = noChangesetFactsOp->is_set();
     noNodeFacts = noNodeFactsOp->is_set();
     noRelationFacts = noRelationFactsOp->is_set();
     noWayFacts = noWayFactsOp->is_set();
@@ -418,6 +430,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();
+    noChangesetFacts |= noChangesetsOp->is_set();
     noNodeFacts |= noNodesOp->is_set();
     noNodeGeometricRelations |= noNodesOp->is_set();
     noRelationFacts |= noRelationsOp->is_set();

@@ -124,6 +124,15 @@ const static inline std::string NO_AREA_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_AREA_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump area geometric relations";
 
+const static inline std::string NO_CHANGESET_OPTION_SHORT = "";
+const static inline std::string NO_CHANGESET_OPTION_LONG = "no-changesets";
+const static inline std::string NO_CHANGESET_OPTION_HELP = "Ignore changesets";
+const static inline std::string NO_CHANGESET_FACTS_INFO = "Ignoring changeset facts";
+const static inline std::string NO_CHANGESET_FACTS_OPTION_SHORT = "";
+const static inline std::string NO_CHANGESET_FACTS_OPTION_LONG = "no-changeset-facts";
+const static inline std::string NO_CHANGESET_FACTS_OPTION_HELP =
+    "Do not dump changeset facts";
+
 const static inline std::string NO_NODE_OPTION_SHORT = "";
 const static inline std::string NO_NODE_OPTION_LONG = "no-nodes";
 const static inline std::string NO_NODE_OPTION_HELP = "Ignore nodes";

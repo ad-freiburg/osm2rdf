@@ -66,6 +66,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       // osm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OSM,
        "https://www.openstreetmap.org/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_CHANGESET,
+       "https://www.openstreetmap.org/changeset/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_META,
        "https://www.openstreetmap.org/meta/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
@@ -79,6 +81,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       // ohm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OHM,
        "https://www.openhistoricalmap.org/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_CHANGESET,
+       "https://www.openhistoricalmap.org/changeset/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE,
        "https://www.openhistoricalmap.org/node/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
@@ -147,6 +151,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "nodeCount");
   osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "uniqueNodeCount");
+  osm2rdf::ttl::constants::IRI__OSM_CHANGESET =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "changeset");
   osm2rdf::ttl::constants::IRI__OSM_NODE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "node");
   osm2rdf::ttl::constants::IRI__OSM_RELATION =

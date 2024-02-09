@@ -40,6 +40,7 @@ class OsmiumHandler : public osmium::handler::Handler {
                 osm2rdf::ttl::Writer<W>* writer);
   void handle();
   void area(const osmium::Area& area);
+  void changeset(const osmium::Changeset& changeset);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
@@ -47,6 +48,8 @@ class OsmiumHandler : public osmium::handler::Handler {
   [[nodiscard]] size_t areasSeen() const;
   [[nodiscard]] size_t areasDumped() const;
   [[nodiscard]] size_t areaGeometriesHandled() const;
+  [[nodiscard]] size_t changesetsSeen() const;
+  [[nodiscard]] size_t changesetsDumped() const;
   [[nodiscard]] size_t nodesSeen() const;
   [[nodiscard]] size_t nodesDumped() const;
   [[nodiscard]] size_t nodeGeometriesHandled() const;
@@ -66,6 +69,8 @@ class OsmiumHandler : public osmium::handler::Handler {
   size_t _areasSeen = 0;
   size_t _areasDumped = 0;
   size_t _areaGeometriesHandled = 0;
+  size_t _changesetsSeen = 0;
+  size_t _changesetsDumped = 0;
   size_t _nodesSeen = 0;
   size_t _nodesDumped = 0;
   size_t _nodeGeometriesHandled = 0;

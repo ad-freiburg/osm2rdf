@@ -48,6 +48,7 @@ struct Config {
 
   bool noFacts = false;
   bool noAreaFacts = false;
+  bool noChangesetFacts = false;
   bool noNodeFacts = false;
   bool noRelationFacts = false;
   bool noWayFacts = false;

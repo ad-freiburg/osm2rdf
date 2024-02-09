@@ -45,6 +45,7 @@ using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ROLE;
+using osm2rdf::ttl::constants::IRI__OSM_CHANGESET;
 using osm2rdf::ttl::constants::IRI__OSM_NODE;
 using osm2rdf::ttl::constants::IRI__OSM_RELATION;
 using osm2rdf::ttl::constants::IRI__OSM_TAG;
@@ -75,6 +76,7 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY;
+using osm2rdf::ttl::constants::CHANGESET_NAMESPACE;
 using osm2rdf::ttl::constants::NODE_NAMESPACE;
 using osm2rdf::ttl::constants::RELATION_NAMESPACE;
 using osm2rdf::ttl::constants::WAY_NAMESPACE;
@@ -120,6 +122,14 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   _writer->writeTriple(
       subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "area"),
       _writer->generateLiteralUnsafe(tmp.str(), "^^" + IRI__XSD_DOUBLE));
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::FactHandler<W>::changeset(const osm2rdf::osm::Changeset& changeset) {
+  const std::string& subj =
+      _writer->generateIRI(CHANGESET_NAMESPACE[_config.sourceDataset], changeset.id());
+  _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_CHANGESET);
 }
 
 // ____________________________________________________________________________

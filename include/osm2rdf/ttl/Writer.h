@@ -213,7 +213,6 @@ class Writer {
   uint64_t* _lineCount;
   // Number of parts.
   std::size_t _numOuts;
-
 };
 }  // namespace osm2rdf::ttl
 

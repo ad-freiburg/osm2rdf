@@ -16,34 +16,24 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef OSM2RDF_OSM_COUNTHANDLER_H
-#define OSM2RDF_OSM_COUNTHANDLER_H
+#ifndef OSM2RDF_OSM_CHANGESET_H_
+#define OSM2RDF_OSM_CHANGESET_H_
 
-#include "osm2rdf/config/Config.h"
-#include "osm2rdf/osm/LocationHandler.h"
+#include "osmium/osm/changeset.hpp"
 
 namespace osm2rdf::osm {
 
-class CountHandler : public osmium::handler::Handler {
+class Changeset {
  public:
-  void changeset(const osmium::Changeset& changeset);
-  void node(const osmium::Node& node);
-  void relation(const osmium::Relation& relation);
-  void way(const osmium::Way& way);
-  void prepare_for_lookup();
-
-  [[nodiscard]] size_t numChangesets() const;
-  [[nodiscard]] size_t numNodes() const;
-  [[nodiscard]] size_t numRelations() const;
-  [[nodiscard]] size_t numWays() const;
+  typedef uint32_t id_t;
+  Changeset();
+  explicit Changeset(const osmium::Changeset& changeset);
+  [[nodiscard]] id_t id() const noexcept;
 
  protected:
-  size_t _numChangesets = 0;
-  size_t _numNodes = 0;
-  size_t _numRelations = 0;
-  size_t _numWays = 0;
-  bool _firstPassDone = false;
+  id_t _id;
 };
-}
 
-#endif  // OSM2RDF_OSM_RELATIONHANDLER_H
+}  // namespace osm2rdf::osm
+
+#endif  // OSM2RDF_OSM_CHANGESET_H_

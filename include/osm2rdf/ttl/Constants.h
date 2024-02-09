@@ -25,11 +25,13 @@ namespace osm2rdf::ttl::constants {
 
 // Real constants
 const static inline std::string NAMESPACE__GEOSPARQL = "geo";
+const static inline std::string NAMESPACE__OHM_CHANGESET = "ohmchangeset";
 const static inline std::string NAMESPACE__OHM_NODE = "ohmnode";
 const static inline std::string NAMESPACE__OHM_RELATION = "ohmrel";
 const static inline std::string NAMESPACE__OHM_WAY = "ohmway";
 const static inline std::string NAMESPACE__OHM = "ohm";
 const static inline std::string NAMESPACE__OPENGIS = "ogc";
+const static inline std::string NAMESPACE__OSM_CHANGESET = "osmchangeset";
 const static inline std::string NAMESPACE__OSM_NODE = "osmnode";
 const static inline std::string NAMESPACE__OSM_RELATION = "osmrel";
 const static inline std::string NAMESPACE__OSM_TAG = "osmkey";
@@ -77,6 +79,7 @@ inline std::string IRI__OSMWAY_NEXT_NODE_DISTANCE;
 inline std::string IRI__OSMWAY_NODE;
 inline std::string IRI__OSMWAY_NODE_COUNT;
 inline std::string IRI__OSMWAY_UNIQUE_NODE_COUNT;
+inline std::string IRI__OSM_CHANGESET;
 inline std::string IRI__OSM_NODE;
 inline std::string IRI__OSM_RELATION;
 inline std::string IRI__OSM_TAG;
@@ -98,6 +101,8 @@ inline std::string LITERAL__YES;
 
 // Arrays holding values depending on the used dataset
 const static inline std::vector<std::string> DATASET_ID = {"osm", "ohm"};
+const static inline std::vector<std::string> CHANGESET_NAMESPACE = {
+    NAMESPACE__OSM_CHANGESET, NAMESPACE__OHM_CHANGESET};
 const static inline std::vector<std::string> NODE_NAMESPACE = {
     NAMESPACE__OSM_NODE, NAMESPACE__OHM_NODE};
 const static inline std::vector<std::string> RELATION_NAMESPACE = {
