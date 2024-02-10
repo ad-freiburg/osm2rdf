@@ -599,15 +599,19 @@ void GeometryHandler<W>::prepareDAG() {
             // progressBar) reduction(+ : stats) default(none) schedule(dynamic)
 
     for (uint32_t i = 0; i < _spatialStorageArea.size(); i++) {
+      std::cout << "R" << std::endl;
       const auto& entry = _spatialStorageArea[i];
       const auto& entryId = std::get<1>(entry);
       const auto& entryArea = std::get<4>(entry);
+      std::cout << std::get<3>(entry) << std::endl;
 
       // Set containing all areas we are inside of
       SkipSet skip;
       std::unordered_set<Area::id_t> skipByContainedInInner;
 
+      std::cout << "S" << std::endl;
       const auto& queryResult = indexQryCover(entry);
+      std::cout << "T" << std::endl;
 
       for (const auto& areaRef : queryResult) {
         const auto& area = _spatialStorageArea[areaRef.second];
