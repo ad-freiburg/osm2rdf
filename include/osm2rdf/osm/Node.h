@@ -37,7 +37,11 @@ class Node {
   explicit Node(const osmium::Node& node);
   explicit Node(const osmium::NodeRef& nodeRef);
   [[nodiscard]] id_t id() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::changeset_id_t changeset() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
+  [[nodiscard]] std::string user() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::version_t version() const noexcept;
+  [[nodiscard]] bool visible() const noexcept;
   [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
   [[nodiscard]] const osm2rdf::geometry::Location& geom() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
@@ -49,7 +53,11 @@ class Node {
 
  protected:
   id_t _id;
+  osm2rdf::osm::generic::changeset_id_t _changeset;
   std::time_t _timestamp;
+  std::string _user;
+  osm2rdf::osm::generic::version_t _version;
+  bool _visible;
   osm2rdf::geometry::Location _geom;
   osm2rdf::osm::TagList _tags;
 
@@ -57,9 +65,7 @@ class Node {
   template <class Archive>
   void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
     ar& boost::serialization::make_nvp("_id", _id);
-    ar& boost::serialization::make_nvp("_timestamp", _timestamp);
     ar& boost::serialization::make_nvp("_geom", _geom);
-    ar& boost::serialization::make_nvp("_tags", _tags);
   }
 };
 

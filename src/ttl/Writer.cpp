@@ -120,8 +120,16 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "role");
   osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "pos");
+  osm2rdf::ttl::constants::IRI__OSMMETA_CHANGESET =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "changeset");
   osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "timestamp");
+  osm2rdf::ttl::constants::IRI__OSMMETA_USER =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "user");
+  osm2rdf::ttl::constants::IRI__OSMMETA_VERSION =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "version");
+  osm2rdf::ttl::constants::IRI__OSMMETA_VISIBLE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "visible");
   osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
   osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =

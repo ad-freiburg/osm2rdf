@@ -28,6 +28,7 @@
 #include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/geometry/Relation.h"
 #include "osm2rdf/osm/Box.h"
+#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
@@ -41,7 +42,11 @@ class Relation {
   Relation();
   explicit Relation(const osmium::Relation& relation);
   [[nodiscard]] id_t id() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::changeset_id_t changeset() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
+  [[nodiscard]] std::string user() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::version_t version() const noexcept;
+  [[nodiscard]] bool visible() const noexcept;
   [[nodiscard]] const std::vector<osm2rdf::osm::RelationMember>& members()
       const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
@@ -61,9 +66,13 @@ class Relation {
 
  protected:
   id_t _id;
+  osm2rdf::osm::generic::changeset_id_t _changeset;
   std::time_t _timestamp;
-  std::vector<osm2rdf::osm::RelationMember> _members;
+  std::string _user;
+  osm2rdf::osm::generic::version_t _version;
+  bool _visible;
   osm2rdf::osm::TagList _tags;
+  std::vector<osm2rdf::osm::RelationMember> _members;
 #if BOOST_VERSION >= 107800
   osm2rdf::geometry::Box _envelope;
   osm2rdf::geometry::Relation _geom;
@@ -76,9 +85,7 @@ class Relation {
   template <class Archive>
   void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
     ar& boost::serialization::make_nvp("_id", _id);
-    ar& boost::serialization::make_nvp("_timestamp", _timestamp);
     ar& boost::serialization::make_nvp("_members", _members);
-    ar& boost::serialization::make_nvp("_tags", _tags);
 #if BOOST_VERSION >= 107800
     ar& boost::serialization::make_nvp("_envelope", _envelope);
     ar& boost::serialization::make_nvp("_geom", _geom);

@@ -373,8 +373,7 @@ TEST(OSM_Way, serializationBinary) {
                            osmium::builder::attr::_nodes({
                                {1, {48.0, 7.51}},
                                {2, {48.1, 7.61}},
-                           }),
-                           osmium::builder::attr::_tag("city", "Freiburg"));
+                           }));
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};
@@ -404,8 +403,7 @@ TEST(OSM_Way, serializationText) {
                            osmium::builder::attr::_nodes({
                                {1, {48.0, 7.51}},
                                {2, {48.1, 7.61}},
-                           }),
-                           osmium::builder::attr::_tag("city", "Freiburg"));
+                           }));
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};

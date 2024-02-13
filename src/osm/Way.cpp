@@ -42,6 +42,10 @@ osm2rdf::osm::Way::Way() {
 osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
   _timestamp = way.timestamp().seconds_since_epoch();
+  _changeset = way.changeset();
+  _user = way.user();
+  _version = way.version();
+  _visible = way.visible();
   _tags = osm2rdf::osm::convertTagList(way.tags());
   _nodes.reserve(way.nodes().size());
   _geom.reserve(way.nodes().size());
@@ -82,7 +86,23 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
 osm2rdf::osm::Way::id_t osm2rdf::osm::Way::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
+osm2rdf::osm::generic::changeset_id_t osm2rdf::osm::Way::changeset()
+    const noexcept {
+  return _changeset;
+}
+
+// ____________________________________________________________________________
 std::time_t osm2rdf::osm::Way::timestamp() const noexcept { return _timestamp; }
+
+// ____________________________________________________________________________
+std::string osm2rdf::osm::Way::user() const noexcept { return _user; }
+
+// ____________________________________________________________________________
+osm2rdf::osm::generic::version_t osm2rdf::osm::Way::version() const noexcept {
+  return _version;
+}
+// ____________________________________________________________________________
+bool osm2rdf::osm::Way::visible() const noexcept { return _visible; }
 
 // ____________________________________________________________________________
 const osm2rdf::osm::TagList& osm2rdf::osm::Way::tags() const noexcept {
