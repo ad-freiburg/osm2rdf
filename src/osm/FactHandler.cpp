@@ -48,7 +48,11 @@ using osm2rdf::ttl::constants::IRI__OSM_NODE;
 using osm2rdf::ttl::constants::IRI__OSM_RELATION;
 using osm2rdf::ttl::constants::IRI__OSM_TAG;
 using osm2rdf::ttl::constants::IRI__OSM_WAY;
+using osm2rdf::ttl::constants::IRI__OSMMETA_CHANGESET;
 using osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP;
+using osm2rdf::ttl::constants::IRI__OSMMETA_USER;
+using osm2rdf::ttl::constants::IRI__OSMMETA_VERSION;
+using osm2rdf::ttl::constants::IRI__OSMMETA_VISIBLE;
 using osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED;
 using osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE;
 using osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE;
@@ -120,8 +124,9 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
       _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset], node.id());
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
-
-  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, node.timestamp());
+  // Meta
+  writeMeta(subj, node);
+  // Tags
   writeTagList(subj, node.tags());
 
   const std::string& geomObj = _writer->generateIRI(
@@ -144,8 +149,9 @@ void osm2rdf::osm::FactHandler<W>::relation(
       RELATION_NAMESPACE[_config.sourceDataset], relation.id());
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_RELATION);
-
-  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, relation.timestamp());
+  // Meta
+  writeMeta(subj, relation);
+  // Tags
   writeTagList(subj, relation.tags());
 
   size_t inRelPos = 0;
@@ -213,8 +219,9 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       _writer->generateIRI(WAY_NAMESPACE[_config.sourceDataset], way.id());
 
   _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_WAY);
-
-  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, way.timestamp());
+  // Meta
+  writeMeta(subj, way);
+  // Tags
   writeTagList(subj, way.tags());
 
   if (_config.addWayNodeOrder) {
@@ -352,6 +359,27 @@ void osm2rdf::osm::FactHandler<W>::writeBox(const std::string& subj,
       << boost::geometry::wkt(box);
   _writer->writeTriple(subj, pred,
                        "\"" + tmp.str() + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+}
+
+// ____________________________________________________________________________
+template <typename W>
+template <typename T>
+void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
+                                             const T& object) {
+  _writer->writeTriple(
+      subj, IRI__OSMMETA_CHANGESET,
+      _writer->generateLiteral(std::to_string(object.changeset()),
+                               "^^" + IRI__XSD_INTEGER));
+  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, object.timestamp());
+  _writer->writeTriple(subj, IRI__OSMMETA_USER,
+                       _writer->generateLiteral(object.user(), ""));
+  _writer->writeTriple(
+      subj, IRI__OSMMETA_VERSION,
+      _writer->generateLiteral(std::to_string(object.version()),
+                               "^^" + IRI__XSD_INTEGER));
+  _writer->writeTriple(subj, IRI__OSMMETA_VISIBLE,
+                       object.visible() ? osm2rdf::ttl::constants::LITERAL__YES
+                                        : osm2rdf::ttl::constants::LITERAL__NO);
 }
 
 // ____________________________________________________________________________

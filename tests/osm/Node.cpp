@@ -167,8 +167,7 @@ TEST(OSM_Node, serializationBinary) {
                                       osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_node(
       osmiumBuffer, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
-      osmium::builder::attr::_tag("city", "Freiburg"));
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)));
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Node src{osmiumBuffer.get<osmium::Node>(0)};
@@ -196,8 +195,7 @@ TEST(OSM_Node, serializationText) {
                                       osmium::memory::Buffer::auto_grow::yes};
   osmium::builder::add_node(
       osmiumBuffer, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
-      osmium::builder::attr::_tag("city", "Freiburg"));
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)));
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Node src{osmiumBuffer.get<osmium::Node>(0)};
