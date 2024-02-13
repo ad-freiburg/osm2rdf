@@ -52,9 +52,10 @@ add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 # Optimization
 add_compile_options("$<$<CONFIG:Release>:-march=native>" "$<$<CONFIG:Release>:-flto=auto>" "$<$<CONFIG:Release>:-ffast-math>" "$<$<CONFIG:Release>:-Ofast>")
 
-add_compile_options("$<$<CONFIG:Debug>:-g>" "$<$<CONFIG:Debug>:-Og>" "$<$<CONFIG:Debug>:-fsanitize=address>")
+add_compile_options("$<$<CONFIG:Debug>:-g>" "$<$<CONFIG:Debug>:-Og>")
 
-add_link_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+# add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+# add_link_options("$<$<CONFIG:Debug>:-fsanitize=address>")
 
 # ----------------------------------------------------------------------------
 # External programs
