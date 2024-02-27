@@ -14,10 +14,9 @@ The produced triples include:
 
 1. One triple `<o> <key> <value> .` for each key-value pair (called "tag" in OSM) of each object.
 2. Two triples `<o> geo:hasGeometry <geom_o> . <geom_o> geo:asWKT <wkt> .` for the shape of each object (using [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) to represent the shape).
-   > Note: using the option `--hasgeometry-as-wkt` will attach the WKT literal directly to the object, i.e. `<o> geo:hasGeometry <wkt> .`
-4. One triple `<o1> ogc:sfContains <o2> .` for each pair of objects, where `<o1>` geometrically contains `<o2>`.
-5. One triple `<o1> ogc:sfIntersects <o2> .` for each pair of objects, where `<o1>` geometrically intersects `<o2>`.
-6. Triples for various other kinds of information (see `osm2rdf --help` for the many options of the tool).
+3. One triple `<o1> ogc:sfContains <o2> .` for each pair of objects, where `<o1>` geometrically contains `<o2>`.
+4. One triple `<o1> ogc:sfIntersects <o2> .` for each pair of objects, where `<o1>` geometrically intersects `<o2>`.
+5. Triples for various other kinds of information (see `osm2rdf --help` for the many options of the tool).
 
 For the complete OSM data, the tool takes around 15 hours on standard hardware and produces around 40 billion triples with a size of around 200 GB for the compressed TTL file. 
 
