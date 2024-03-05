@@ -324,7 +324,6 @@ bool GeometryHandler<W>::innerOuterDouglasPeucker(
 
   // L and R should be different points.
   if (L.get<0>() == R.get<0>() && L.get<1>() == R.get<1>()) {
-    std::cerr << "DOUGLAS PEUCKER FAIL!" << std::endl;
     // TODO: handle
     return false;
   }
@@ -633,7 +632,7 @@ void GeometryHandler<W>::prepareDAG() {
 
         if (areaFromType == AreaFromType::WAY) {
           // we are contained in an area derived from a way.
-          const auto& relations = _areaBorderWaysIndex.find(areaObjId);
+          auto relations = _areaBorderWaysIndex.find(areaObjId);
           if (relations != _areaBorderWaysIndex.end()) {
             for (auto r : relations->second) {
               if (r.second) {
@@ -2165,6 +2164,12 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
   const auto& areaGeom = std::get<2>(b);
   const auto& areaConvexHull = std::get<10>(b);
 
+  assert(entryBoxIds.size() > 0);
+  assert(areaBoxIds.size() > 0);
+
+  if (entryBoxIds.front().first > 0) assert(entryBoxIds.size() > 1);
+  if (areaBoxIds.front().first > 0) assert(areaBoxIds.size() > 1);
+
   if (areaArea / entryArea <= 1.0 - _config.approxContainsSlack) {
     stats->skippedByAreaSize();
     return false;
@@ -2183,8 +2188,9 @@ bool GeometryHandler<W>::areaInAreaApprox(const SpatialAreaValue& a,
     return false;
   }
 
-  if (geomRelInf->fullContained < 0)
+  if (geomRelInf->fullContained < 0) {
     boxIdIsect(entryBoxIds, areaBoxIds, geomRelInf);
+  }
 
   if (geomRelInf->fullContained == 0 && geomRelInf->toCheck.empty()) {
     stats->skippedByBoxIdIntersect();
@@ -2583,6 +2589,12 @@ void GeometryHandler<W>::boxIdIsect(const BoxIdList& idsA,
                                     const BoxIdList& idsB,
                                     GeomRelationInfo* geomRelInf) const {
   geomRelInf->fullContained = 0;
+
+  assert(idsA.size() > 0 && idsB.size() > 0);
+
+  if (idsA[0].first == 0 || idsB[0].first == 0) return;
+
+  assert(idsA.size() > 1 && idsB.size() > 1);
 
   // shortcuts
   if (abs(idsA[1].first) > abs(idsB.back().first) + idsB.back().second) {
