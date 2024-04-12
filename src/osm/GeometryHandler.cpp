@@ -18,8 +18,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/GeometryHandler.h"
-
 #include <unistd.h>
 
 #include <algorithm>
@@ -36,6 +34,7 @@
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osm2rdf/osm/FactHandler.h"
+#include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/DirectedAcyclicGraph.h"
@@ -1798,26 +1797,20 @@ bool GeometryHandler<W>::areaIntersectsArea(const SpatialAreaValue& a,
     return false;
   }
 
-  if (_config.dontUseInnerOuterGeoms || boost::geometry::is_empty(innerGeomB) ||
-      boost::geometry::is_empty(outerGeomB)) {
-    stats->fullCheck();
-    if (boost::geometry::intersects(geomA, geomB)) {
-      geomRelInf->intersects = RelInfoValue::YES;
-      return true;
-    } else {
-      geomRelInf->intersects = RelInfoValue::NO;
-      return false;
-    }
-  }
-
-  if (boost::geometry::intersects(innerGeomA, innerGeomB)) {
+  if (!_config.dontUseInnerOuterGeoms &&
+      !boost::geometry::is_empty(innerGeomA) &&
+      !boost::geometry::is_empty(innerGeomB) &&
+      boost::geometry::intersects(innerGeomA, innerGeomB)) {
     // if simplified inner intersect, we definitely intersect
     geomRelInf->intersects = RelInfoValue::YES;
     stats->skippedByInner();
     return true;
   }
 
-  if (!boost::geometry::intersects(outerGeomA, outerGeomB)) {
+  if (!_config.dontUseInnerOuterGeoms &&
+      !boost::geometry::is_empty(outerGeomA) &&
+      !boost::geometry::is_empty(outerGeomB) &&
+      !boost::geometry::intersects(outerGeomA, outerGeomB)) {
     // if NOT intersecting simplified outer, we are definitely NOT
     // intersecting
     geomRelInf->intersects = RelInfoValue::NO;
