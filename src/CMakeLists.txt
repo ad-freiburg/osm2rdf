@@ -36,7 +36,8 @@ target_link_libraries(osm2rdf_library PRIVATE
         Threads::Threads
         ${EXPAT_LIBRARIES}
         ${BZIP2_LIBRARIES}
-        ${ZLIB_LIBRARIES})
+        ${ZLIB_LIBRARIES}
+	)
 
 # Link OpenMP if found
 if (OpenMP_CXX_FOUND)
