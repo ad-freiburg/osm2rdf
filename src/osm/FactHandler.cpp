@@ -66,7 +66,6 @@ using osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH;
 using osm2rdf::ttl::constants::LITERAL__NO;
 using osm2rdf::ttl::constants::LITERAL__YES;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF;
-using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
@@ -93,9 +92,9 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
       area.objId());
 
   const std::string& geomObj = _writer->generateIRI(
-      NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] + "_" +
-                                   (area.fromWay() ? "way" : "rel") + "area_" +
-                                   std::to_string(area.objId()));
+      NAMESPACE__OSM2RDF, DATASET_ID[_config.sourceDataset] +
+                              (area.fromWay() ? "way" : "rel") + "area_" +
+                              std::to_string(area.objId()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
   writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, area.geom());
@@ -125,8 +124,8 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   writeTagList(subj, node.tags());
 
   const std::string& geomObj = _writer->generateIRI(
-      NAMESPACE__OSM2RDF_GEOM,
-      DATASET_ID[_config.sourceDataset] + "_node_" + std::to_string(node.id()));
+      NAMESPACE__OSM2RDF,
+      DATASET_ID[_config.sourceDataset] + "node_" + std::to_string(node.id()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
   writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
@@ -183,10 +182,9 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
 #if BOOST_VERSION >= 107800
   if (relation.hasGeometry() && !relation.isArea()) {
-    const std::string& geomObj =
-        _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
-                             DATASET_ID[_config.sourceDataset] + "_relation_" +
-                                 std::to_string(relation.id()));
+    const std::string& geomObj = _writer->generateIRI(
+        NAMESPACE__OSM2RDF, DATASET_ID[_config.sourceDataset] + "rel_" +
+                                std::to_string(relation.id()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, relation.geom());
@@ -242,8 +240,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
         _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
 
         const std::string& geomObj = _writer->generateIRI(
-            NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                         "_node_" + std::to_string(node.id()));
+            NAMESPACE__OSM2RDF, DATASET_ID[_config.sourceDataset] + "node_" +
+                                    std::to_string(node.id()));
 
         _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
         writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
@@ -282,7 +280,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
   if (_config.addAreaWayLinestrings || !way.isArea()) {
     const std::string& geomObj = _writer->generateIRI(
-        NAMESPACE__OSM2RDF, "way_" + std::to_string(way.id()));
+        NAMESPACE__OSM2RDF,
+        DATASET_ID[_config.sourceDataset] + "way_" + std::to_string(way.id()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, locations);

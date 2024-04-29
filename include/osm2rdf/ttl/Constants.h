@@ -37,7 +37,6 @@ const static inline std::string NAMESPACE__OSM_WAY = "osmway";
 const static inline std::string NAMESPACE__OSM_META = "osmmeta";
 const static inline std::string NAMESPACE__OSM = "osm";
 const static inline std::string NAMESPACE__OSM2RDF = "osm2rdf";
-const static inline std::string NAMESPACE__OSM2RDF_GEOM = "osm2rdfgeom";
 const static inline std::string NAMESPACE__OSM2RDF_MEMBER = "osm2rdfmember";
 const static inline std::string NAMESPACE__OSM2RDF_META = "osm2rdfmeta";
 const static inline std::string NAMESPACE__OSM2RDF_TAG = "osm2rdfkey";
