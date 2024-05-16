@@ -21,6 +21,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <time.h>
 
 #include "boost/geometry.hpp"
 #include "boost/version.hpp"
@@ -529,7 +530,10 @@ void osm2rdf::osm::FactHandler<W>::writeSecondsAsISO(const std::string& subj,
                                                      const std::string& pred,
                                                      const std::time_t& time) {
   std::stringstream date;
-  date << std::put_time(std::gmtime(&time), "%Y-%m-%dT%X");
+
+  struct tm t;
+  date << std::put_time(gmtime_r(&time, &t), "%Y-%m-%dT%X");
+
   _writer->writeTriple(
       subj, pred,
       _writer->generateLiteralUnsafe(date.str(), "^^" + IRI__XSD_DATE_TIME));
