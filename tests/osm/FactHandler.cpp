@@ -2515,4 +2515,34 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
   // Cleanup
   std::cout.rdbuf(sbuf);
 }
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeSecondsAsISO) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  dh.writeSecondsAsISO("s", "p", 1555936496);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr("s p \"2019-04-22T12:34:56\"^^xsd:dateTime .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
 }  // namespace osm2rdf::osm
