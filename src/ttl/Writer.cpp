@@ -54,8 +54,6 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       // own prefix
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF,
        "https://osm2rdf.cs.uni-freiburg.de/rdf#"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM,
-       "https://osm2rdf.cs.uni-freiburg.de/rdf/geom#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/key#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER,
@@ -109,11 +107,11 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_nonarea");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "convex_hull");
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "convex_hull");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "envelope");
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "envelope");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "obb");
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "obb");
   osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "id");
   osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ROLE =
