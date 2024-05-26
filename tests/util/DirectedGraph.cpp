@@ -18,6 +18,8 @@
 
 #include "osm2rdf/util/DirectedGraph.h"
 
+#include <algorithm>
+
 #include "gtest/gtest.h"
 
 namespace osm2rdf::util {

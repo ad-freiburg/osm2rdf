@@ -33,13 +33,23 @@
 template <typename T>
 void run(const osm2rdf::config::Config& config) {
   // Setup
-  // Input file reference
   osm2rdf::util::Output output{config, config.output};
   if (!output.open()) {
     std::cerr << "Error opening outputfile: " << config.output << std::endl;
     exit(1);
   }
-  osm2rdf::ttl::Writer<T> writer{config, &output};
+  osm2rdf::util::Output* spatialinputTriplesOutput;
+  if (config.writeSpatialinputTriples) {
+    spatialinputTriplesOutput =
+        new osm2rdf::util::Output(config, config.spatialinputTriplesPath);
+    if (!spatialinputTriplesOutput->open()) {
+      std::cerr << "Error opening spatialinput outputfile: "
+                << config.spatialinputTriplesPath << std::endl;
+      exit(1);
+    }
+  }
+
+  osm2rdf::ttl::Writer<T> writer{config, &output, spatialinputTriplesOutput};
   writer.writeHeader();
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
@@ -47,6 +57,9 @@ void run(const osm2rdf::config::Config& config) {
 
   // All work done, close output
   output.close();
+  if (config.writeSpatialinputTriples) {
+    spatialinputTriplesOutput->close();
+  }
 
   // Write final RDF statistics if requested
   if (config.writeRDFStatistics) {

@@ -95,7 +95,7 @@ namespace osm2rdf::ttl {
 template <typename T>
 class Writer {
  public:
-  Writer(const osm2rdf::config::Config& config, osm2rdf::util::Output* output);
+  Writer(const osm2rdf::config::Config& config, osm2rdf::util::Output* output, osm2rdf::util::Output* spatialinput);
   ~Writer();
 
   // Write statistic json into output.
@@ -107,6 +107,9 @@ class Writer {
   // Write a single RDF line. The contents of s, p, and o are not checked.
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o);
+
+  // Write a single TSV line. The contents of s, and o are not checked.
+  void writeTSV(const std::string& s, const std::string& o);
 
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.
@@ -205,6 +208,7 @@ class Writer {
 
   // Output
   osm2rdf::util::Output* _out;
+  osm2rdf::util::Output* _sitout;
 
   // Counter
   uint64_t* _blankNodeCount;

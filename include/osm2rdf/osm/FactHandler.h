@@ -47,6 +47,10 @@ class FactHandler {
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
+ protected:
+  template <typename G>
+  std::string boostGeometryToString(const G& g);
+
   template <typename G>
   void writeBoostGeometry(const std::string& s, const std::string& p,
                           const G& g);
@@ -55,7 +59,6 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2);
   FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
 
- protected:
   void writeBox(const std::string& s, const std::string& p,
                 const osm2rdf::geometry::Box& box);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);

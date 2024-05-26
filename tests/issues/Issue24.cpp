@@ -66,10 +66,10 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
       "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 .\n"
       "osm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
       "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osm2rdfgeom:convex_hull \"POLYGON(())\"^^geo:wktLiteral .\n"
+      "osmway:21 osm2rdfgeom:convex_hull \"POLYGON()\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmway:21 osm2rdfgeom:obb \"POLYGON(())\"^^geo:wktLiteral .\n"
+      "osmway:21 osm2rdfgeom:obb \"POLYGON()\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdf:area \"0.000000000000\"^^xsd:double .\n",
       buffer.str());
 

@@ -36,8 +36,9 @@
 // ____________________________________________________________________________
 template <typename T>
 osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
-                                osm2rdf::util::Output* output)
-    : _config(config), _out(output) {
+                                osm2rdf::util::Output* output,
+                                osm2rdf::util::Output* spatialtriplesOutput)
+    : _config(config), _out(output), _sitout(spatialtriplesOutput) {
   // Static prefixes
   _prefixes = {
       // well-known prefixes
@@ -360,6 +361,19 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
 #else
   _lineCount[0]++;
 #endif
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeTSV(const std::string& s,
+                                          const std::string& o) {
+  if (_sitout == nullptr) {
+    return;
+  }
+  _sitout->write(s);
+  _sitout->write('\t');
+  _sitout->write(o);
+  _sitout->writeNewLine();
 }
 
 // ____________________________________________________________________________

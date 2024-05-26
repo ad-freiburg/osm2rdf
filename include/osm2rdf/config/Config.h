@@ -89,6 +89,9 @@ struct Config {
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
+  bool writeSpatialinputTriples = false;
+  std::filesystem::path spatialinputTriplesPath;
+
   // Output modifiers
   uint16_t simplifyWKT = 250;
   double wktDeviation = 5;

@@ -19,9 +19,10 @@
 
 #include "osm2rdf/osm/FactHandler.h"
 
+#include <time.h>
+
 #include <iomanip>
 #include <iostream>
-#include <time.h>
 
 #include "boost/geometry.hpp"
 #include "boost/version.hpp"
@@ -94,12 +95,15 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
       area.objId());
 
   const std::string& geomObj = _writer->generateIRI(
-      NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] + "_" +
+      NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
                                    (area.fromWay() ? "way" : "rel") + "area_" +
                                    std::to_string(area.objId()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
-  writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, area.geom());
+  std::string geomStr = boostGeometryToString(area.geom());
+  _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
+                       "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+  if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
 
   writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
@@ -127,10 +131,13 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 
   const std::string& geomObj = _writer->generateIRI(
       NAMESPACE__OSM2RDF_GEOM,
-      DATASET_ID[_config.sourceDataset] + "_node_" + std::to_string(node.id()));
+      DATASET_ID[_config.sourceDataset] + "node_" + std::to_string(node.id()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
-  writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
+  std::string geomStr = boostGeometryToString(node.geom());
+  _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
+                       "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+  if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
 
   writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, node.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, node.envelope());
@@ -184,13 +191,15 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
 #if BOOST_VERSION >= 107800
   if (relation.hasGeometry() && !relation.isArea()) {
-    const std::string& geomObj =
-        _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
-                             DATASET_ID[_config.sourceDataset] + "_relation_" +
-                                 std::to_string(relation.id()));
+    const std::string& geomObj = _writer->generateIRI(
+        NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] + "rel_" +
+                                     std::to_string(relation.id()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
-    writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, relation.geom());
+    std::string geomStr = boostGeometryToString(relation.geom());
+    _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
+                         "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+    if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
 
     writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
                        relation.convexHull());
@@ -283,10 +292,13 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
   if (_config.addAreaWayLinestrings || !way.isArea()) {
     const std::string& geomObj = _writer->generateIRI(
-        NAMESPACE__OSM2RDF, "way_" + std::to_string(way.id()));
+        NAMESPACE__OSM2RDF,
+        DATASET_ID[_config.sourceDataset] + "way_" + std::to_string(way.id()));
 
-    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
-    writeBoostGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, locations);
+    std::string geomStr = boostGeometryToString(locations);
+    _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
+                         "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+    if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
   }
 
   writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
@@ -316,9 +328,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 template <typename G>
-void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& subj,
-                                                      const std::string& pred,
-                                                      const G& geom) {
+std::string osm2rdf::osm::FactHandler<W>::boostGeometryToString(const G& geom) {
   std::ostringstream tmp;
   tmp << std::fixed << std::setprecision(_config.wktPrecision);
   if (_config.simplifyWKT > 0 &&
@@ -338,8 +348,18 @@ void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& subj,
   } else {
     tmp << boost::geometry::wkt(geom);
   }
+  return tmp.str();
+}
+
+// ____________________________________________________________________________
+template <typename W>
+template <typename G>
+void osm2rdf::osm::FactHandler<W>::writeBoostGeometry(const std::string& subj,
+                                                      const std::string& pred,
+                                                      const G& geom) {
   _writer->writeTriple(subj, pred,
-                       "\"" + tmp.str() + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
+                       "\"" + boostGeometryToString(geom) + "\"^^" +
+                           IRI__GEOSPARQL__WKT_LITERAL);
 }
 
 // ____________________________________________________________________________

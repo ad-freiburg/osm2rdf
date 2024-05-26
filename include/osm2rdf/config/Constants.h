@@ -29,6 +29,7 @@ const static inline std::string BZIP2_EXTENSION = ".bz2";
 const static inline std::string STATS_EXTENSION = ".stats";
 const static inline std::string CONTAINS_STATS_EXTENSION = ".contains-stats";
 const static inline std::string JSON_EXTENSION = ".json";
+const static inline std::string TSV_EXTENSION = ".tsv";
 
 const static inline std::string HEADER = "Config";
 
@@ -94,11 +95,9 @@ const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
 const static inline std::string NO_FACTS_OPTION_HELP = "Do not dump facts";
 
-const static inline std::string SOURCE_DATASET_INFO =
-    "Source dataset";
+const static inline std::string SOURCE_DATASET_INFO = "Source dataset";
 const static inline std::string SOURCE_DATASET_OPTION_SHORT = "";
-const static inline std::string SOURCE_DATASET_OPTION_LONG =
-    "source-dataset";
+const static inline std::string SOURCE_DATASET_OPTION_LONG = "source-dataset";
 const static inline std::string SOURCE_DATASET_OPTION_HELP =
     "Source dataset, either 'OSM', or 'OHM'";
 
@@ -108,7 +107,8 @@ const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_SHORT = "";
 const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_LONG =
     "write-osm2rdf-geo-triples";
 const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_HELP =
-    "Writing of osm2rdf-style geometric triples, either 'full', 'reduced', or 'none'";
+    "Writing of osm2rdf-style geometric triples, either 'full', 'reduced', or "
+    "'none'";
 
 const static inline std::string OGC_GEO_TRIPLES_INFO =
     "Writing mode of OGC-style geometric triples";
@@ -116,7 +116,8 @@ const static inline std::string OGC_GEO_TRIPLES_OPTION_SHORT = "";
 const static inline std::string OGC_GEO_TRIPLES_OPTION_LONG =
     "write-ogc-geo-triples";
 const static inline std::string OGC_GEO_TRIPLES_OPTION_HELP =
-    "Writing of OGC-style geometric triples, either 'full', 'reduced', or 'none'";
+    "Writing of OGC-style geometric triples, either 'full', 'reduced', or "
+    "'none'";
 
 const static inline std::string NO_AREA_OPTION_SHORT = "";
 const static inline std::string NO_AREA_OPTION_LONG = "no-areas";
@@ -257,18 +258,17 @@ const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
 
 const static inline std::string APPROX_SPATIAL_REL_INFO =
     "Approximate spatial relations using inner/outer simplified geometries.";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT =
-    "";
+const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT = "";
 const static inline std::string APPROX_SPATIAL_REL_OPTION_LONG =
     "approximate-spatial-relations";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP = "Use "
+const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP =
+    "Use "
     "simplified inner/outer geometries for approximate calculation of spatial "
     "relations";
 
 const static inline std::string APPROX_CONTAINS_SLACK_INFO =
     "Slack for approximate contains";
-const static inline std::string APPROX_CONTAINS_SLACK_OPTION_SHORT =
-    "";
+const static inline std::string APPROX_CONTAINS_SLACK_OPTION_SHORT = "";
 const static inline std::string APPROX_CONTAINS_SLACK_OPTION_LONG =
     "approximate-contains-slack";
 const static inline std::string APPROX_CONTAINS_SLACK_OPTION_HELP = "";
@@ -324,6 +324,14 @@ const static inline std::string WRITE_RDF_STATISTICS_OPTION_LONG =
     "write-rdf-statistics";
 const static inline std::string WRITE_RDF_STATISTICS_OPTION_HELP =
     "Storing RDF statistics as .stats.json";
+
+const static inline std::string WRITE_SPATIALINPUT_TRIPLES_INFO =
+    "write spatialinput-triples.tsv";
+const static inline std::string WRITE_SPATIALINPUT_TRIPLES_OPTION_SHORT = "";
+const static inline std::string WRITE_SPATIALINPUT_TRIPLES_OPTION_LONG =
+    "spatialinput-triples";
+const static inline std::string WRITE_SPATIALINPUT_TRIPLES_OPTION_HELP =
+    "Write many geometries to .spatialinput-triples.tsv";
 
 }  // namespace osm2rdf::config::constants
 

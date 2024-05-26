@@ -133,7 +133,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       << ": " << approxContainsSlack;
 
   if (ogcGeoTriplesMode || osm2rdfGeoTriplesMode) {
-     if (noAreaGeometricRelations) {
+    if (noAreaGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
     }
@@ -175,6 +175,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
   if (outputKeepFiles) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_INFO;
+  }
+  if (writeSpatialinputTriples) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::WRITE_SPATIALINPUT_TRIPLES_INFO;
   }
 #if defined(_OPENMP)
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_OPENMP;
@@ -385,6 +390,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_HELP,
           approxContainsSlack);
 
+  auto writeSpatialinputTriplesOp =
+      parser.add<popl::Switch, popl::Attribute::advanced>(
+          osm2rdf::config::constants::WRITE_SPATIALINPUT_TRIPLES_OPTION_SHORT,
+          osm2rdf::config::constants::WRITE_SPATIALINPUT_TRIPLES_OPTION_LONG,
+          osm2rdf::config::constants::WRITE_SPATIALINPUT_TRIPLES_OPTION_HELP);
+
   try {
     parser.parse(argc, argv);
 
@@ -516,6 +527,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     writeRDFStatistics = writeRDFStatisticsOp->is_set();
 
+    writeSpatialinputTriples = writeSpatialinputTriplesOp->is_set();
+
     // Output
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
@@ -531,10 +544,20 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     rdfStatisticsPath += osm2rdf::config::constants::STATS_EXTENSION;
     rdfStatisticsPath += osm2rdf::config::constants::JSON_EXTENSION;
 
+    // Path for spatialinput triples
+    spatialinputTriplesPath = std::filesystem::path(output);
+    spatialinputTriplesPath += osm2rdf::config::constants::TSV_EXTENSION;
+
     // Mark compressed output
     if (outputCompress && !output.empty() &&
         output.extension() != osm2rdf::config::constants::BZIP2_EXTENSION) {
       output += osm2rdf::config::constants::BZIP2_EXTENSION;
+    }
+
+    // Mark spatialinput output
+    if (outputCompress && spatialinputTriplesPath.extension() !=
+                              osm2rdf::config::constants::BZIP2_EXTENSION) {
+      spatialinputTriplesPath += osm2rdf::config::constants::BZIP2_EXTENSION;
     }
 
     // osmium location cache

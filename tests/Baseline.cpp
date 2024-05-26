@@ -18,6 +18,8 @@
 
 #include "gtest/gtest.h"
 
+#include <algorithm>
+
 namespace osm2rdf {
 // Misc tests to ensure (external) library functions work as expected
 
