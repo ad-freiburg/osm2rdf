@@ -39,12 +39,12 @@ void run(const osm2rdf::config::Config& config) {
     exit(1);
   }
   osm2rdf::util::Output* spatialinputTriplesOutput;
-  if (config.writeSpatialinputTriples) {
+  if (config.writeSpatialjoinInput) {
     spatialinputTriplesOutput =
-        new osm2rdf::util::Output(config, config.spatialinputTriplesPath);
+        new osm2rdf::util::Output(config, config.spatialjoinInputPath);
     if (!spatialinputTriplesOutput->open()) {
       std::cerr << "Error opening spatialinput outputfile: "
-                << config.spatialinputTriplesPath << std::endl;
+                << config.spatialjoinInputPath << std::endl;
       exit(1);
     }
   }
@@ -57,7 +57,7 @@ void run(const osm2rdf::config::Config& config) {
 
   // All work done, close output
   output.close();
-  if (config.writeSpatialinputTriples) {
+  if (config.writeSpatialjoinInput) {
     spatialinputTriplesOutput->close();
   }
 

@@ -27,9 +27,10 @@ namespace osm2rdf::config::constants {
 
 const static inline std::string BZIP2_EXTENSION = ".bz2";
 const static inline std::string STATS_EXTENSION = ".stats";
-const static inline std::string CONTAINS_STATS_EXTENSION = ".contains-stats";
 const static inline std::string JSON_EXTENSION = ".json";
 const static inline std::string TSV_EXTENSION = ".tsv";
+const static inline std::string CONTAINS_STATS_EXTENSION = ".contains-stats";
+const static inline std::string SPATIALJOIN_INPUT_EXTENSION = ".spatialjoin-input";
 
 const static inline std::string HEADER = "Config";
 
@@ -325,13 +326,13 @@ const static inline std::string WRITE_RDF_STATISTICS_OPTION_LONG =
 const static inline std::string WRITE_RDF_STATISTICS_OPTION_HELP =
     "Storing RDF statistics as .stats.json";
 
-const static inline std::string WRITE_SPATIALINPUT_TRIPLES_INFO =
-    "write spatialinput-triples.tsv";
-const static inline std::string WRITE_SPATIALINPUT_TRIPLES_OPTION_SHORT = "";
-const static inline std::string WRITE_SPATIALINPUT_TRIPLES_OPTION_LONG =
-    "spatialinput-triples";
-const static inline std::string WRITE_SPATIALINPUT_TRIPLES_OPTION_HELP =
-    "Write many geometries to .spatialinput-triples.tsv";
+const static inline std::string WRITE_SPATIALJOIN_INPUT_INFO =
+    "write spatialjoin-input.tsv";
+const static inline std::string WRITE_SPATIALJOIN_INPUT_OPTION_SHORT = "";
+const static inline std::string WRITE_SPATIALJOIN_INPUT_OPTION_LONG =
+    "write-spatialjoin-input";
+const static inline std::string WRITE_SPATIALJOIN_INPUT_OPTION_HELP =
+    "Write many geometries to .spatialjoin-input.tsv.tsv";
 
 }  // namespace osm2rdf::config::constants
 

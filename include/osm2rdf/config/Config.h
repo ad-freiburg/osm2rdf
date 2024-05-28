@@ -89,8 +89,8 @@ struct Config {
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
-  bool writeSpatialinputTriples = false;
-  std::filesystem::path spatialinputTriplesPath;
+  bool writeSpatialjoinInput = false;
+  std::filesystem::path spatialjoinInputPath;
 
   // Output modifiers
   uint16_t simplifyWKT = 250;

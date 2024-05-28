@@ -103,7 +103,7 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   std::string geomStr = boostGeometryToString(area.geom());
   _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
                        "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
-  if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
+  if (_config.writeSpatialjoinInput) _writer->writeTSV(subj, geomStr);
 
   writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
@@ -137,7 +137,7 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   std::string geomStr = boostGeometryToString(node.geom());
   _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
                        "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
-  if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
+  if (_config.writeSpatialjoinInput) _writer->writeTSV(subj, geomStr);
 
   writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, node.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, node.envelope());
@@ -199,7 +199,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
     std::string geomStr = boostGeometryToString(relation.geom());
     _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
                          "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
-    if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
+    if (_config.writeSpatialjoinInput) _writer->writeTSV(subj, geomStr);
 
     writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
                        relation.convexHull());
@@ -298,7 +298,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     std::string geomStr = boostGeometryToString(locations);
     _writer->writeTriple(subj, IRI__GEOSPARQL__AS_WKT,
                          "\"" + geomStr + "\"^^" + IRI__GEOSPARQL__WKT_LITERAL);
-    if (_config.writeSpatialinputTriples) _writer->writeTSV(subj, geomStr);
+    if (_config.writeSpatialjoinInput) _writer->writeTSV(subj, geomStr);
   }
 
   writeBoostGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
