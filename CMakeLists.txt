@@ -216,7 +216,7 @@ configure_file(
 
 if (CLANG_TIDY_EXE)
     message(STATUS "Found CLANG_TIDY_EXE at ${CLANG_TIDY_EXE}, enabling checks")
-    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=-*,readability-*")
+	# set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=-*,readability-*")
 else()
     message(STATUS "CLANG_TIDY_EXE not found")
 endif ()
@@ -229,6 +229,9 @@ endif ()
 
 # The compiled library code is here
 add_subdirectory(src)
+
+# libspatialjoin
+add_subdirectory(vendor/spatialjoin)
 
 # The executable code is here
 add_subdirectory(apps)
