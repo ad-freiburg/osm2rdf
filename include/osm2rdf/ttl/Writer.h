@@ -107,6 +107,8 @@ class Writer {
   // Write a single RDF line. The contents of s, p, and o are not checked.
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o);
+  void writeTriple(const std::string& s, const std::string& p,
+                   const std::string& o, size_t part);
 
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.

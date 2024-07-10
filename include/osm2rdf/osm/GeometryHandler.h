@@ -39,8 +39,13 @@
 #include "osm2rdf/util/CacheFile.h"
 #include "osm2rdf/util/DirectedGraph.h"
 #include "osm2rdf/util/Output.h"
+#include "spatialjoin/Sweeper.h"
+#include "spatialjoin/WKTParse.h"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
+
+enum class AreaFromType { RELATION, WAY };
 
 template <typename W>
 class GeometryHandler {
@@ -61,6 +66,23 @@ class GeometryHandler {
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
+
+ private:
+  sj::Sweeper _sweeper;
+  std::vector<sj::WriteBatch> _parseBatches;
+
+  std::string areaNS(AreaFromType type) const;
+
+  static ::util::geo::I32Point transformPoint(
+      const osm2rdf::geometry::Location& loc);
+
+  static ::util::geo::I32Point fromBoost(
+      const osm2rdf::geometry::Location& loc);
+  static ::util::geo::I32Line fromBoost(const osm2rdf::geometry::Way& way);
+  static ::util::geo::I32MultiPolygon fromBoost(const osm2rdf::geometry::Area& area);
+
+  void writeRelCb(size_t t, const std::string& a, const std::string& b,
+                  const std::string& pred);
 };
 
 }  // namespace osm2rdf::osm

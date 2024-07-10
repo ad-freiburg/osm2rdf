@@ -303,7 +303,7 @@ void osm2rdf::util::Output::writeNewLine() {
 void osm2rdf::util::Output::writeNewLine(size_t part) {
   if (_toStdOut) {
     _outBufs[part].put('\n');
-    _outs[part] << _outBufs[part].rdbuf();
+    std::cout << _outBufs[part].str();
     std::stringstream().swap(_outBufs[part]);
   } else {
     _outs[part].put('\n');
@@ -358,7 +358,7 @@ void osm2rdf::util::Output::flush() {
 // ____________________________________________________________________________
 void osm2rdf::util::Output::flush(size_t part) {
   if (_toStdOut) {
-    _outs[part] << _outBufs[part].rdbuf();
+    _outs[part] << _outBufs[part].str();
     std::stringstream().swap(_outBufs[part]);
   }
   _outs[part].flush();

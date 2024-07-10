@@ -29,6 +29,9 @@ target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../
 # Add headers for spatialjoin
 target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../vendor/spatialjoin/src")
 
+# Add headers for util
+target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../vendor/spatialjoin/src/util")
+
 # We need this directory, and users of our library will need it too
 target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../include")
 

@@ -104,6 +104,17 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_nonarea");
   osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
+  osm2rdf::ttl::constants::IRI__OPENGIS_COVERS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCovers");
+  osm2rdf::ttl::constants::IRI__OPENGIS_TOUCHES =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfTouches");
+  osm2rdf::ttl::constants::IRI__OPENGIS_EQUALS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfEquals");
+  osm2rdf::ttl::constants::IRI__OPENGIS_CROSSES =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCrosses");
+  osm2rdf::ttl::constants::IRI__OPENGIS_OVERLAPS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfOverlaps");
+
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
@@ -360,6 +371,22 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
 #else
   _lineCount[0]++;
 #endif
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
+                                          const std::string& p,
+                                          const std::string& o, size_t part) {
+  _out->write(s, part);
+  _out->write(' ', part);
+  _out->write(p, part);
+  _out->write(' ', part);
+  _out->write(o, part);
+  _out->write(' ', part);
+  _out->write('.', part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
 }
 
 // ____________________________________________________________________________
