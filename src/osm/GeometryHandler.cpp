@@ -244,6 +244,8 @@ void GeometryHandler<W>::node(const Node& node) {
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::way(const Way& way) {
+  if (way.isArea()) return;  // skip way relations, will be handled by area()
+
   std::string id = _writer->generateIRI(
       osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset], way.id());
 
