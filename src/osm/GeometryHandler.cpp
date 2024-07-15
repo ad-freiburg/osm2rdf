@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 
+#include "osm2rdf/util/ProgressBar.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
@@ -80,8 +81,14 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                 [this](size_t t, const std::string& a, const std::string& b,
                        const std::string& pred) {
                   this->writeRelCb(t, a, b, pred);
-                }},
-               ".", ""),
+                },
+                {},
+								{},
+                [this](size_t progr) {
+                  this->progressCb(progr);
+                }
+                 },
+               config.cache, ""),
       _parseBatches(omp_get_max_threads()) {}
 
 // ___________________________________________________________________________
@@ -137,6 +144,12 @@ void GeometryHandler<W>::writeRelCb(size_t t, const std::string& a,
                                     const std::string& b,
                                     const std::string& pred) {
   _writer->writeTriple(a, pred, b, t);
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void GeometryHandler<W>::progressCb(size_t prog) {
+  _progressBar.update(prog);
 }
 
 // ____________________________________________________________________________
@@ -251,8 +264,12 @@ void GeometryHandler<W>::calculateRelations() {
     b = {};
   }
 
+  _progressBar = osm2rdf::util::ProgressBar{_sweeper.numElements(), true};
+
   _sweeper.flush();
   _sweeper.sweep();
+
+	_progressBar.done();
 }
 
 // ____________________________________________________________________________

@@ -17,13 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/OsmiumHandler.h"
-
 #include "boost/version.hpp"
 #include "osm2rdf/osm/CountHandler.h"
 #include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/osm/LocationHandler.h"
+#include "osm2rdf/osm/OsmiumHandler.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/util/ProgressBar.h"
 #include "osm2rdf/util/Time.h"
@@ -108,10 +107,10 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
         numTasks += countHandler.numRelations();
       }
       if (!_config.noFacts && !_config.noWayFacts) {
-        numTasks += countHandler.numWays();
+				numTasks += countHandler.numWays();
       }
       if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
-        numTasks += countHandler.numWays();
+				numTasks += countHandler.numWays();
       }
 
       _progressBar = osm2rdf::util::ProgressBar{numTasks, true};
@@ -224,6 +223,12 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
       };
     }
   } catch (const osmium::invalid_location& e) {
+    if (!_config.noFacts && !_config.noNodeFacts) {
+      _progressBar.update(_numTasksDone++);
+    }
+    if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
+      _progressBar.update(_numTasksDone++);
+    }
     return;
   }
 }
@@ -270,6 +275,14 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
     }
 #endif
   } catch (const osmium::invalid_location& e) {
+    if (!_config.noFacts && !_config.noRelationFacts) {
+      _progressBar.update(_numTasksDone++);
+    }
+
+    if (!_config.noGeometricRelations &&
+        !_config.noRelationGeometricRelations) {
+      _progressBar.update(_numTasksDone++);
+    }
     return;
   }
 }
@@ -303,6 +316,12 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
       };
     }
   } catch (const osmium::invalid_location& e) {
+    if (!_config.noFacts && !_config.noWayFacts) {
+      _progressBar.update(_numTasksDone++);
+    }
+    if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
+      _progressBar.update(_numTasksDone++);
+    }
     return;
   }
 }

@@ -26,24 +26,24 @@ void osm2rdf::osm::CountHandler::prepare_for_lookup() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::osm::CountHandler::node(const osmium::Node& /*unused*/){
-  if (_firstPassDone) {
+void osm2rdf::osm::CountHandler::node(const osmium::Node& node){
+  if (_firstPassDone || node.tags().empty())  {
     return;
   }
   _numNodes++;
 }
 
 // ____________________________________________________________________________
-void osm2rdf::osm::CountHandler::relation(const osmium::Relation& /*unused*/) {
-  if (_firstPassDone) {
+void osm2rdf::osm::CountHandler::relation(const osmium::Relation& rel) {
+  if (_firstPassDone || rel.tags().empty()) {
     return;
   }
   _numRelations++;
 }
 
 // ____________________________________________________________________________
-void osm2rdf::osm::CountHandler::way(const osmium::Way& /*unused*/) {
-  if (_firstPassDone) {
+void osm2rdf::osm::CountHandler::way(const osmium::Way& way) {
+  if (_firstPassDone || way.tags().empty()) {
     return;
   }
   _numWays++;

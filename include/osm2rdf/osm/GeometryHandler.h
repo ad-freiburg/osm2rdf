@@ -36,6 +36,7 @@
 #include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/ttl/Writer.h"
+#include "osm2rdf/util/ProgressBar.h"
 #include "osm2rdf/util/CacheFile.h"
 #include "osm2rdf/util/DirectedGraph.h"
 #include "osm2rdf/util/Output.h"
@@ -83,6 +84,9 @@ class GeometryHandler {
 
   void writeRelCb(size_t t, const std::string& a, const std::string& b,
                   const std::string& pred);
+  void progressCb(size_t progr);
+
+	osm2rdf::util::ProgressBar _progressBar;
 };
 
 }  // namespace osm2rdf::osm
