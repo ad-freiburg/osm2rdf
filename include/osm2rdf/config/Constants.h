@@ -102,21 +102,13 @@ const static inline std::string SOURCE_DATASET_OPTION_LONG =
 const static inline std::string SOURCE_DATASET_OPTION_HELP =
     "Source dataset, either 'OSM', or 'OHM'";
 
-const static inline std::string OSM2RDF_GEO_TRIPLES_INFO =
-    "Writing mode of osm2rdf-style geometric triples";
-const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_SHORT = "";
-const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_LONG =
-    "write-osm2rdf-geo-triples";
-const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_HELP =
-    "Writing of osm2rdf-style geometric triples, either 'full', 'reduced', or 'none'";
-
 const static inline std::string OGC_GEO_TRIPLES_INFO =
     "Writing mode of OGC-style geometric triples";
 const static inline std::string OGC_GEO_TRIPLES_OPTION_SHORT = "";
 const static inline std::string OGC_GEO_TRIPLES_OPTION_LONG =
     "write-ogc-geo-triples";
 const static inline std::string OGC_GEO_TRIPLES_OPTION_HELP =
-    "Writing of OGC-style geometric triples, either 'full', 'reduced', or 'none'";
+    "Writing of OGC-style geometric triples, either 'full', or 'none'";
 
 const static inline std::string NO_AREA_OPTION_SHORT = "";
 const static inline std::string NO_AREA_OPTION_LONG = "no-areas";

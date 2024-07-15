@@ -32,8 +32,7 @@ namespace osm2rdf::config {
 
 enum GeoTriplesMode {
   none = 0,
-  reduced = 1,
-  full = 2
+  full = 1
 };
 
 enum SourceDataset {
@@ -95,7 +94,6 @@ struct Config {
   uint16_t wktPrecision = 7;
 
   GeoTriplesMode ogcGeoTriplesMode = full;
-  GeoTriplesMode osm2rdfGeoTriplesMode = none;
 
   // Output, empty for stdout
   std::filesystem::path output;

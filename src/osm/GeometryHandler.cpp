@@ -264,9 +264,10 @@ void GeometryHandler<W>::calculateRelations() {
     b = {};
   }
 
+  _sweeper.flush();
+
   _progressBar = osm2rdf::util::ProgressBar{_sweeper.numElements(), true};
 
-  _sweeper.flush();
   _sweeper.sweep();
 
 	_progressBar.done();

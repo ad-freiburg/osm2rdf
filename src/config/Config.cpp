@@ -119,10 +119,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_CONTAINS;
-  std::string modeStrings[3] = {"none", "reduced", "full"};
-  oss << "\n"
-      << prefix << osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_INFO << ": "
-      << (modeStrings[osm2rdfGeoTriplesMode]);
+  std::string modeStrings[2] = {"none", "full"};
 
   oss << "\n"
       << prefix << osm2rdf::config::constants::OGC_GEO_TRIPLES_INFO << ": "
@@ -132,7 +129,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       << prefix << osm2rdf::config::constants::APPROX_CONTAINS_SLACK_INFO
       << ": " << approxContainsSlack;
 
-  if (ogcGeoTriplesMode || osm2rdfGeoTriplesMode) {
+  if (ogcGeoTriplesMode) {
      if (noAreaGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
@@ -267,12 +264,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_SHORT,
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_HELP, "full");
-
-  auto osm2rdfGeoTriplesModeOp =
-      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_OPTION_SHORT,
-          osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_OPTION_LONG,
-          osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_OPTION_HELP, "none");
 
   auto addAreaWayLinestringsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
@@ -429,8 +420,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     if (ogcGeoTriplesModeOp->is_set()) {
       if (ogcGeoTriplesModeOp->value() == "none") {
         ogcGeoTriplesMode = none;
-      } else if (ogcGeoTriplesModeOp->value() == "reduced") {
-        ogcGeoTriplesMode = reduced;
       } else if (ogcGeoTriplesModeOp->value() == "full") {
         ogcGeoTriplesMode = full;
       } else {
@@ -441,23 +430,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       }
     }
 
-    if (osm2rdfGeoTriplesModeOp->is_set()) {
-      if (osm2rdfGeoTriplesModeOp->value() == "none") {
-        osm2rdfGeoTriplesMode = none;
-      } else if (osm2rdfGeoTriplesModeOp->value() == "reduced") {
-        osm2rdfGeoTriplesMode = reduced;
-      } else if (osm2rdfGeoTriplesModeOp->value() == "full") {
-        osm2rdfGeoTriplesMode = full;
-      } else {
-        throw popl::invalid_option(
-            osm2rdfGeoTriplesModeOp.get(),
-            popl::invalid_option::Error::invalid_argument,
-            popl::OptionName::long_name, osm2rdfGeoTriplesModeOp->value(), "");
-      }
-    }
-
-    noGeometricRelations =
-        ogcGeoTriplesMode == none && osm2rdfGeoTriplesMode == none;
+    noGeometricRelations = ogcGeoTriplesMode == none;
 
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();
