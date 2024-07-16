@@ -27,7 +27,6 @@
 #include <utility>
 #include <vector>
 
-#include "osm2rdf/util/ProgressBar.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
@@ -35,6 +34,7 @@
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Writer.h"
+#include "osm2rdf/util/ProgressBar.h"
 #include "osm2rdf/util/Time.h"
 #include "spatialjoin/BoxIds.h"
 #include "spatialjoin/Sweeper.h"
@@ -59,36 +59,32 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                                     osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
       _writer(writer),
-      _sweeper({omp_get_max_threads() - 1,
-                omp_get_max_threads() - 1,
-                "",
-                osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,
-                osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,
-                osm2rdf::ttl::constants::IRI__OPENGIS_COVERS,
-                osm2rdf::ttl::constants::IRI__OPENGIS_TOUCHES,
-                osm2rdf::ttl::constants::IRI__OPENGIS_EQUALS,
-                osm2rdf::ttl::constants::IRI__OPENGIS_OVERLAPS,
-                osm2rdf::ttl::constants::IRI__OPENGIS_CROSSES,
-                "\n",
-                true,
-                true,
-                true,
-                true,
-                true,
-                true,
-                false,
-                false,
-                [this](size_t t, const std::string& a, const std::string& b,
-                       const std::string& pred) {
-                  this->writeRelCb(t, a, b, pred);
-                },
-                {},
-								{},
-                [this](size_t progr) {
-                  this->progressCb(progr);
-                }
-                 },
-               config.cache, ""),
+      _sweeper(
+          {omp_get_max_threads(),
+           omp_get_max_threads(),
+           "",
+           osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,
+           osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,
+           osm2rdf::ttl::constants::IRI__OPENGIS_COVERS,
+           osm2rdf::ttl::constants::IRI__OPENGIS_TOUCHES,
+           osm2rdf::ttl::constants::IRI__OPENGIS_EQUALS,
+           osm2rdf::ttl::constants::IRI__OPENGIS_OVERLAPS,
+           osm2rdf::ttl::constants::IRI__OPENGIS_CROSSES,
+           "\n",
+           true,
+           true,
+           true,
+           true,
+           true,
+           true,
+           false,
+           false,
+           [this](size_t t, const std::string& a, const std::string& b,
+                  const std::string& pred) { this->writeRelCb(t, a, b, pred); },
+           {},
+           {},
+           [this](size_t progr) { this->progressCb(progr); }},
+          config.cache, ""),
       _parseBatches(omp_get_max_threads()) {}
 
 // ___________________________________________________________________________
@@ -103,7 +99,7 @@ void GeometryHandler<W>::relation(const Relation& rel) {
 #if BOOST_VERSION >= 107800
   if (!rel.hasGeometry()) return;
 
-  std::string id = _writer->generateIRI(
+  const std::string id = _writer->generateIRI(
       osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset],
       rel.id());
 
@@ -203,7 +199,7 @@ template <typename W>
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::area(const Area& area) {
-  std::string id = _writer->generateIRI(
+  const std::string id = _writer->generateIRI(
       areaNS(area.fromWay() ? AreaFromType::WAY : AreaFromType::RELATION),
       area.objId());
 
@@ -272,7 +268,7 @@ void GeometryHandler<W>::calculateRelations() {
 
   _sweeper.sweep();
 
-	_progressBar.done();
+  _progressBar.done();
 }
 
 // ____________________________________________________________________________

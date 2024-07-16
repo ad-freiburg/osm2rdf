@@ -16,12 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <bzlib.h>
+
 #include <cmath>
+#include <cstring>
 #include <cstdio>
 #include <iostream>
+#include <thread>
+#include <cassert>
+#include <vector>
 
-#include "boost/iostreams/filter/bzip2.hpp"
-#include "boost/iostreams/filtering_stream.hpp"
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -33,9 +37,10 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
                               const std::string& prefix)
     : Output(config, prefix,
 #if defined(_OPENMP)
-             omp_get_max_threads()
+             std::max(std::thread::hardware_concurrency(),
+                      static_cast<unsigned int>(omp_get_max_threads()) + 1)
 #else
-             1
+             std::thread::hardware_concurrency() + 1
 #endif
       ) {
 }
@@ -48,6 +53,7 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
       _partCount(partCount),
       _numOuts(_partCount + 2),
       _partCountDigits(std::floor(std::log10(_numOuts)) + 1),
+      _outBuffers(_partCount + 2),
       _toStdOut(_config.output.empty()) {}
 
 // ____________________________________________________________________________
@@ -57,9 +63,24 @@ osm2rdf::util::Output::~Output() { close(); }
 bool osm2rdf::util::Output::open() {
   assert(_partCount > 0);
   assert(_numOuts == _partCount + 2);
-  _outs = new boost::iostreams::filtering_ostream[_numOuts];
-  _outFiles = new std::ofstream[_numOuts];
-  _outBufs = new std::stringstream[_numOuts];
+
+  _rawFiles.resize(_numOuts);
+  _files.resize(_numOuts);
+  _outBufPos.resize(_numOuts);
+
+  for (size_t i = 0; i < _partCount + 2; i++) {
+    if (i < _partCount) {
+      _rawFiles[i] = fopen(partFilename(i).c_str(), "w");
+    } else {
+      _rawFiles[i] = fopen(partFilename(_partCount - i - 1).c_str(), "w");
+    }
+    int err = 0;
+    _files[i] = BZ2_bzWriteOpen(&err, _rawFiles[i], 6, 0, 30);
+    if (err != BZ_OK) {
+      throw std::runtime_error("Could not open bzip file for writing.");
+    }
+    _outBuffers[i] = new unsigned char[BUFFER_S];
+  }
 
   // Prepare final output file
   if (!_toStdOut && _config.mergeOutput != OutputMergeMode::NONE) {
@@ -68,54 +89,6 @@ bool osm2rdf::util::Output::open() {
       std::cerr << "Can't open final output file: " << _prefix << std::endl;
       return false;
     }
-  }
-
-  // One part for each thread
-  for (size_t i = 0; i < _partCount; ++i) {
-    if (_config.outputCompress) {
-      _outs[i].push(boost::iostreams::bzip2_compressor{});
-    }
-    if (_toStdOut) {
-      _outs[i].push(std::cout);
-    } else {
-      _outFiles[i].open(partFilename(i),
-                        std::ofstream::out | std::ofstream::trunc);
-      if (!_outFiles[i].is_open()) {
-        std::cerr << "Can't open part file: " << partFilename(i) << std::endl;
-        return false;
-      }
-      _outs[i].push(_outFiles[i]);
-    }
-  }
-
-  // One for prefix
-  if (_config.outputCompress) {
-    _outs[_partCount].push(boost::iostreams::bzip2_compressor{});
-  }
-  if (_toStdOut) {
-    _outs[_partCount].push(std::cout);
-  } else {
-    _outFiles[_partCount].open(partFilename(-1));
-    if (!_outFiles[_partCount].is_open()) {
-      std::cerr << "Can't open prefix file: " << partFilename(-1) << std::endl;
-      return false;
-    }
-    _outs[_partCount].push(_outFiles[_partCount]);
-  }
-
-  // One for suffix
-  if (_config.outputCompress) {
-    _outs[_partCount + 1].push(boost::iostreams::bzip2_compressor{});
-  }
-  if (_toStdOut) {
-    _outs[_partCount + 1].push(std::cout);
-  } else {
-    _outFiles[_partCount + 1].open(partFilename(-2));
-    if (!_outFiles[_partCount + 1].is_open()) {
-      std::cerr << "Can't open suffix file: " << partFilename(-2) << std::endl;
-      return false;
-    }
-    _outs[_partCount + 1].push(_outFiles[_partCount + 1]);
   }
 
   _open = true;
@@ -136,22 +109,28 @@ void osm2rdf::util::Output::close(std::string_view prefix,
   write(prefix, _partCount);
   write(suffix, _partCount + 1);
 
-  for (size_t i = 0; i < _numOuts; ++i) {
-    _outs[i].pop();
-    if (_outFiles[i].is_open()) {
-      _outFiles[i].close();
+  if (_toStdOut) {
+    for (size_t i = 0; i < _numOuts; ++i) {
+      _outBuffers[i][_outBufPos[i]] = 0;
+      fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
+    }
+  } else {
+    for (size_t i = 0; i < _numOuts; ++i) {
+      int err = 0;
+      BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
+      if (err == BZ_IO_ERROR) {
+        BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
+        throw std::runtime_error("Could not write to file.");
+      }
+      BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
+      fclose(_rawFiles[i]);
     }
   }
-  delete[] _outFiles;
-  delete[] _outs;
-  delete[] _outBufs;
+
   _open = false;
 
   // Handle merging of files
   switch (_config.mergeOutput) {
-    case osm2rdf::util::OutputMergeMode::MERGE:
-      merge();
-      break;
     case osm2rdf::util::OutputMergeMode::CONCATENATE:
       concatenate();
       break;
@@ -232,65 +211,6 @@ void osm2rdf::util::Output::concatenate() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::merge() {
-  boost::iostreams::filtering_ostream out;
-  if (_config.outputCompress) {
-    out.push(boost::iostreams::bzip2_compressor{});
-  }
-  out.push(_outFile);
-
-  // Prefix
-  boost::iostreams::filtering_istream in;
-  std::string filename = partFilename(-1);
-  std::ifstream inFile{filename};
-  if (_config.outputCompress) {
-    in.push(boost::iostreams::bzip2_decompressor{});
-  }
-  if (!inFile.is_open() || !inFile.good()) {
-    std::cerr << "Error opening file: " << filename << std::endl;
-  }
-  in.push(inFile);
-  out << in.rdbuf();
-  in.pop();
-  inFile.close();
-  if (!_config.outputKeepFiles) {
-    std::filesystem::remove(filename);
-  }
-
-  // Content
-  for (size_t i = 0; i < _partCount; ++i) {
-    filename = partFilename(i);
-    inFile.open(filename);
-    if (!inFile.is_open() || !inFile.good()) {
-      std::cerr << "Error opening file: " << filename << std::endl;
-    }
-    in.push(inFile);
-    out << in.rdbuf();
-    in.pop();
-    inFile.close();
-    if (!_config.outputKeepFiles) {
-      std::filesystem::remove(filename);
-    }
-  }
-  // Suffix
-  filename = partFilename(-2);
-  inFile.open(filename);
-  if (!inFile.is_open() || !inFile.good()) {
-    std::cerr << "Error opening file: " << filename << std::endl;
-  }
-  in.push(inFile);
-  out << in.rdbuf();
-  in.pop();
-  inFile.close();
-  if (!_config.outputKeepFiles) {
-    std::filesystem::remove(filename);
-  }
-
-  out.flush();
-  out.pop();
-}
-
-// ____________________________________________________________________________
 void osm2rdf::util::Output::writeNewLine() {
 #if defined(_OPENMP)
   writeNewLine(omp_get_thread_num());
@@ -300,15 +220,7 @@ void osm2rdf::util::Output::writeNewLine() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::writeNewLine(size_t part) {
-  if (_toStdOut) {
-    _outBufs[part].put('\n');
-    std::cout << _outBufs[part].str();
-    std::stringstream().swap(_outBufs[part]);
-  } else {
-    _outs[part].put('\n');
-  }
-}
+void osm2rdf::util::Output::writeNewLine(size_t part) { write('\n', part); }
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(std::string_view strv) {
@@ -320,13 +232,28 @@ void osm2rdf::util::Output::write(std::string_view strv) {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::write(std::string_view strv, size_t part) {
+void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
   assert(part < _numOuts);
   if (_toStdOut) {
-    _outBufs[part].write(strv.data(), strv.size());
+    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
+      _outBuffers[t][_outBufPos[t]] = 0;
+      fputs(reinterpret_cast<const char*>(_outBuffers[t]), stdout);
+      _outBufPos[t] = 0;
+    }
   } else {
-    _outs[part].write(strv.data(), strv.size());
+    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
+      int err = 0;
+      BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
+      if (err == BZ_IO_ERROR) {
+        BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
+        throw std::runtime_error("Could not write to file.");
+      }
+      _outBufPos[t] = 0;
+    }
   }
+
+  memcpy(_outBuffers[t] + _outBufPos[t], strv.data(), strv.size());
+  _outBufPos[t] += strv.size();
 }
 
 // ____________________________________________________________________________
@@ -339,13 +266,28 @@ void osm2rdf::util::Output::write(const char c) {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::write(const char c, size_t part) {
+void osm2rdf::util::Output::write(const char c, size_t t) {
   assert(part < _numOuts);
   if (_toStdOut) {
-    _outBufs[part].put(c);
+    if (_outBufPos[t] + 1 >= BUFFER_S) {
+      _outBuffers[t][_outBufPos[t]] = 0;
+      fputs(reinterpret_cast<const char*>(_outBuffers[t]), stdout);
+      _outBufPos[t] = 0;
+    }
   } else {
-    _outs[part].put(c);
+    if (_outBufPos[t] + 1 >= BUFFER_S) {
+      int err = 0;
+      BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
+      if (err == BZ_IO_ERROR) {
+        BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
+        throw std::runtime_error("Could not write to file.");
+      }
+      _outBufPos[t] = 0;
+    }
   }
+
+  *(_outBuffers[t] + _outBufPos[t]) = c;
+  _outBufPos[t] += 1;
 }
 
 // ____________________________________________________________________________
@@ -356,10 +298,16 @@ void osm2rdf::util::Output::flush() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::flush(size_t part) {
+void osm2rdf::util::Output::flush(size_t i) {
   if (_toStdOut) {
-    _outs[part] << _outBufs[part].str();
-    std::stringstream().swap(_outBufs[part]);
+    _outBuffers[i][_outBufPos[i]] = 0;
+    fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
+  } else {
+    int err = 0;
+    BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
+    if (err == BZ_IO_ERROR) {
+      BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
+      throw std::runtime_error("Could not write to file.");
+    }
   }
-  _outs[part].flush();
 }

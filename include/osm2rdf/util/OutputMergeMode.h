@@ -21,7 +21,7 @@
 
 namespace osm2rdf::util {
 
-enum class OutputMergeMode : uint8_t { NONE, MERGE, CONCATENATE };
+enum class OutputMergeMode : uint8_t { NONE, CONCATENATE };
 
 }
 

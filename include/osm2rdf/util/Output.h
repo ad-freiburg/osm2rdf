@@ -19,10 +19,13 @@
 #ifndef OSM2RDF_UTIL_OUTPUT_H
 #define OSM2RDF_UTIL_OUTPUT_H
 
+#include <bzlib.h>
 #include <fstream>
+#include <vector>
 
-#include "boost/iostreams/filtering_stream.hpp"
 #include "osm2rdf/config/Config.h"
+
+static const size_t BUFFER_S = 1024 * 1024 * 10;
 
 namespace osm2rdf::util {
 
@@ -60,8 +63,6 @@ class Output {
   std::string partFilename(int part);
 
  protected:
-  // Closes and merges all parts, prepend given prefix and append given suffix.
-  void merge();
   // Closes and concatenates all parts without decompressing and recompressing
   // streams.
   void concatenate();
@@ -76,13 +77,16 @@ class Output {
   // Number of digits required for _partCount.
   std::size_t _partCountDigits;
   bool _open = false;
-  // Output streams
-  boost::iostreams::filtering_ostream* _outs;
-  std::ofstream* _outFiles;
   // Final output file
   std::ofstream _outFile;
 
   std::stringstream* _outBufs;
+
+  std::vector<unsigned char*> _outBuffers;
+
+  std::vector<FILE*> _rawFiles;
+  std::vector<BZFILE*> _files;
+  std::vector<size_t> _outBufPos;
 
   // true if output goes to stdout
   bool _toStdOut;

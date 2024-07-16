@@ -363,8 +363,7 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
   _out->write(p);
   _out->write(' ');
   _out->write(o);
-  _out->write(' ');
-  _out->write('.');
+  _out->write(" .");
   _out->writeNewLine();
 #if defined(_OPENMP)
   _lineCount[omp_get_thread_num()]++;
@@ -383,8 +382,7 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
   _out->write(p, part);
   _out->write(' ', part);
   _out->write(o, part);
-  _out->write(' ', part);
-  _out->write('.', part);
+  _out->write(" .", part);
   _out->writeNewLine(part);
   _lineCount[part]++;
 }
