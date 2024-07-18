@@ -797,12 +797,12 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2rdf::geometry::Way way;
-  way.push_back(osm2rdf::geometry::Location{0, 0});
-  way.push_back(osm2rdf::geometry::Location{0, 80});
-  way.push_back(osm2rdf::geometry::Location{0, 1000});
+  ::util::geo::DLine way;
+  way.push_back({0, 0});
+  way.push_back({0, 80});
+  way.push_back({0, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -838,16 +838,16 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2rdf::geometry::Way way;
-  way.push_back(osm2rdf::geometry::Location{0, 0});
+  ::util::geo::DLine way;
+  way.push_back({0, 0});
   // Small side is 0 -> remove all nodes except ends.
-  way.push_back(osm2rdf::geometry::Location{0, 80});
-  way.push_back(osm2rdf::geometry::Location{0, 160});
-  way.push_back(osm2rdf::geometry::Location{0, 240});
-  way.push_back(osm2rdf::geometry::Location{0, 500});
-  way.push_back(osm2rdf::geometry::Location{0, 1000});
+  way.push_back({0, 80});
+  way.push_back({0, 160});
+  way.push_back({0, 240});
+  way.push_back({0, 500});
+  way.push_back({0, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -883,12 +883,12 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2rdf::geometry::Way way;
-  way.push_back(osm2rdf::geometry::Location{0, 0});
-  way.push_back(osm2rdf::geometry::Location{0, 80});
-  way.push_back(osm2rdf::geometry::Location{100, 1000});
+  ::util::geo::DLine way;
+  way.push_back({0, 0});
+  way.push_back({0, 80});
+  way.push_back({100, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -924,13 +924,13 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2rdf::geometry::Way way;
-  way.push_back(osm2rdf::geometry::Location{0, 0});
+  ::util::geo::DLine way;
+  way.push_back({0, 0});
   // The node 0,80 will be removed...
-  way.push_back(osm2rdf::geometry::Location{0, 80});
-  way.push_back(osm2rdf::geometry::Location{100, 1000});
+  way.push_back({0, 80});
+  way.push_back({100, 1000});
 
-  dh.writeBoostGeometry(subject, predicate, way);
+  dh.writeGeometry(subject, predicate, way);
   output.flush();
   output.close();
 
@@ -963,9 +963,9 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2rdf::geometry::Box box;
-  box.min_corner() = osm2rdf::geometry::Location{50, 50};
-  box.max_corner() = osm2rdf::geometry::Location{200, 200};
+  ::util::geo::DBox box;
+  box.setLowerLeft({50, 50});
+  box.setUpperRight({200, 200});
 
   dh.writeBox(subject, predicate, box);
   output.flush();
@@ -1002,9 +1002,9 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
 
   const std::string subject = "subject";
   const std::string predicate = "predicate";
-  osm2rdf::geometry::Box box;
-  box.min_corner() = osm2rdf::geometry::Location{50, 50};
-  box.max_corner() = osm2rdf::geometry::Location{200, 200};
+  ::util::geo::DBox box;
+  box.setLowerLeft({50, 50});
+  box.setUpperRight({200, 200});
 
   dh.writeBox(subject, predicate, box);
   output.flush();

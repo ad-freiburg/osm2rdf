@@ -51,8 +51,6 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
 
   ASSERT_EQ(0, config.semicolonTagKeys.size());
 
-  ASSERT_FALSE(config.writeDAGDotFiles);
-
   ASSERT_FALSE(config.writeRDFStatistics);
 
   ASSERT_EQ(0, config.simplifyGeometries);
@@ -1020,17 +1018,6 @@ TEST(CONFIG_Config, getInfoWayGeomRelations) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO));
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoWriteDAGDotFiles) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  config.writeDAGDotFiles = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO));
 }
 
 // ____________________________________________________________________________

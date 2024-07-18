@@ -18,11 +18,6 @@
 
 #include "osm2rdf/osm/Node.h"
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -43,8 +38,8 @@ TEST(OSM_Node, FromNode) {
   const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
   ASSERT_EQ(42, n.id());
 
-  ASSERT_DOUBLE_EQ(7.51, n.geom().x());
-  ASSERT_DOUBLE_EQ(48.0, n.geom().y());
+  ASSERT_DOUBLE_EQ(7.51, n.geom().getX());
+  ASSERT_DOUBLE_EQ(48.0, n.geom().getY());
 
   ASSERT_EQ(0, n.tags().size());
 }
@@ -64,8 +59,8 @@ TEST(OSM_Node, FromNodeWithTags) {
   const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
   ASSERT_EQ(42, n.id());
 
-  ASSERT_DOUBLE_EQ(7.51, n.geom().x());
-  ASSERT_DOUBLE_EQ(48.0, n.geom().y());
+  ASSERT_DOUBLE_EQ(7.51, n.geom().getX());
+  ASSERT_DOUBLE_EQ(48.0, n.geom().getY());
 
   ASSERT_EQ(1, n.tags().size());
   ASSERT_EQ(0, n.tags().count("tag"));
@@ -155,64 +150,6 @@ TEST(OSM_Node, notEqualsOperator) {
   ASSERT_TRUE(o3 != o1);
   ASSERT_TRUE(o3 != o2);
   ASSERT_FALSE(o3 != o3);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Node, serializationBinary) {
-  std::stringstream boostBuffer;
-
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_node(
-      osmiumBuffer, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Node src{osmiumBuffer.get<osmium::Node>(0)};
-
-  osm2rdf::osm::Node dst;
-
-  // Store and load
-  boost::archive::binary_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::binary_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Node, serializationText) {
-  std::stringstream boostBuffer;
-
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_node(
-      osmiumBuffer, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Node src{osmiumBuffer.get<osmium::Node>(0)};
-
-  osm2rdf::osm::Node dst;
-
-  // Store and load
-  boost::archive::text_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::text_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
 }
 
 }  // namespace osm2rdf::osm

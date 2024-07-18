@@ -95,10 +95,10 @@ TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   o.open();
   // 4 parts + prefix + suffix
   ASSERT_EQ(parts + 2, countFilesInPath(config.output));
-  o.write("a");
-  o.write("b");
-  o.write("c");
-  o.write("d");
+  o.write("a", 0);
+  o.write("b", 0);
+  o.write("c", 0);
+  o.write("d", 0);
   o.flush();
   o.close();
 
@@ -127,10 +127,10 @@ TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
   size_t parts = 4;
   osm2rdf::util::Output o{config, "", parts};
   o.open();
-  o.write("a");
-  o.write("b");
-  o.write("c");
-  o.write("d");
+  o.write("a", 0);
+  o.write("b", 0);
+  o.write("c", 0);
+  o.write("d", 0);
   o.flush();
   o.close();
 
@@ -176,36 +176,6 @@ TEST(UTIL_OutputMergeMode, CONCATENATE) {
   config.output =
       config.getTempPath("TEST_UTIL_OutputMergeMode", "CONCATENATE");
   config.mergeOutput = OutputMergeMode::CONCATENATE;
-  ASSERT_FALSE(std::filesystem::exists(config.output));
-  std::filesystem::create_directories(config.output);
-  ASSERT_TRUE(std::filesystem::exists(config.output));
-  ASSERT_TRUE(std::filesystem::is_directory(config.output));
-  std::filesystem::path output{config.output};
-  output /= "file";
-
-  size_t parts = 4;
-  osm2rdf::util::Output o{config, output, parts};
-  ASSERT_EQ(0, countFilesInPath(config.output));
-  o.open();
-  // 4 parts + prefix + suffix + final file
-  ASSERT_EQ(parts + 3, countFilesInPath(config.output));
-  o.write("a", 0);
-  o.write("b", 1);
-  o.write("c", 2);
-  o.write("d", 3);
-  o.flush();
-  o.close();
-  ASSERT_EQ(1, countFilesInPath(config.output));
-
-  std::filesystem::remove_all(config.output);
-  ASSERT_FALSE(std::filesystem::exists(config.output));
-}
-
-// ____________________________________________________________________________
-TEST(UTIL_OutputMergeMode, MERGE) {
-  osm2rdf::config::Config config;
-  config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "MERGE");
-  config.mergeOutput = OutputMergeMode::MERGE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
   ASSERT_TRUE(std::filesystem::exists(config.output));
