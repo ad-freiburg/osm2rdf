@@ -23,15 +23,11 @@
 #include <utility>
 #include <vector>
 
-#include "boost/geometry/geometries/geometries.hpp"
-#include "boost/serialization/nvp.hpp"
-#include "osm2rdf/geometry/Area.h"
-#include "osm2rdf/geometry/Global.h"
-#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/osm/Box.h"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/box.hpp"
 #include "osmium/osm/types.hpp"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
 
@@ -46,17 +42,17 @@ struct Area {
   [[nodiscard]] id_t objId() const noexcept;
 
   // Return the geometry.
-  [[nodiscard]] const osm2rdf::geometry::Area& geom() const noexcept;
+  [[nodiscard]] const ::util::geo::DMultiPolygon& geom() const noexcept;
   // Return area of the geometry.
-  [[nodiscard]] osm2rdf::geometry::area_result_t geomArea() const noexcept;
+  [[nodiscard]] double geomArea() const noexcept;
   // Return the envelope.
-  [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
+  [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
   // Return the area of the envelope.
-  [[nodiscard]] osm2rdf::geometry::area_result_t envelopeArea() const noexcept;
+  [[nodiscard]] double envelopeArea() const noexcept;
   // Return the convex hull of the area.
-  [[nodiscard]] const osm2rdf::geometry::Polygon& convexHull() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
   // Return the oriented bounding box of the area.
-  [[nodiscard]] const osm2rdf::geometry::Polygon& orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox() const noexcept;
   // Return if this area is created from a way.
   [[nodiscard]] bool fromWay() const noexcept;
   // Return if this area has a name.
@@ -73,26 +69,12 @@ struct Area {
   // The OSM id
   id_t _objId;
   bool _hasName = false;
-  osm2rdf::geometry::area_result_t _geomArea = 0;
-  osm2rdf::geometry::area_result_t _envelopeArea = 0;
-  osm2rdf::geometry::Area _geom;
-  osm2rdf::geometry::Box _envelope;
-  osm2rdf::geometry::Polygon _convexHull;
-  osm2rdf::geometry::Polygon _obb;
-
-  friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
-    ar& boost::serialization::make_nvp("_id", _id);
-    ar& boost::serialization::make_nvp("_objId", _objId);
-    ar& boost::serialization::make_nvp("_hasName", _hasName);
-    ar& boost::serialization::make_nvp("_geomArea", _geomArea);
-    ar& boost::serialization::make_nvp("_envelopeArea", _envelopeArea);
-    ar& boost::serialization::make_nvp("_geom", _geom);
-    ar& boost::serialization::make_nvp("_envelope", _envelope);
-    ar& boost::serialization::make_nvp("_convexHull", _convexHull);
-    ar& boost::serialization::make_nvp("_obb", _obb);
-  }
+  double _geomArea = 0;
+  double _envelopeArea = 0;
+  ::util::geo::DMultiPolygon _geom;
+  ::util::geo::DBox _envelope;
+  ::util::geo::DPolygon _convexHull;
+  ::util::geo::DPolygon _obb;
 };
 
 }  // namespace osm2rdf::osm

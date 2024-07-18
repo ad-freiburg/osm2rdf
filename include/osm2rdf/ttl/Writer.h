@@ -79,7 +79,6 @@ static const int UTF8_BYTES_SHORT = 4;
 
 #include "gtest/gtest_prod.h"
 #include "osm2rdf/config/Config.h"
-#include "osm2rdf/geometry/Location.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"

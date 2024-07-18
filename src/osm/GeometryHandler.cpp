@@ -96,7 +96,6 @@ template <typename W>
 void GeometryHandler<W>::relation(const Relation& rel) {
   if (rel.isArea()) return;  // skip area relations, will be handled by area()
 
-#if BOOST_VERSION >= 107800
   if (!rel.hasGeometry()) return;
 
   const std::string id = _writer->generateIRI(
@@ -108,19 +107,19 @@ void GeometryHandler<W>::relation(const Relation& rel) {
   if (rel.geom().size() > 1) subId = 1;
 
   for (const auto& v : rel.geom()) {
-    if (v.which() == 0) {
-      _sweeper.add(fromBoost(boost::get<osm2rdf::geometry::Node>(v)), id, subId,
-                   false, _parseBatches[omp_get_thread_num()]);
+    if (v.getType() == 0) {
+      _sweeper.add(transform(v.getPoint()), id, subId, false,
+                   _parseBatches[omp_get_thread_num()]);
     }
 
-    if (v.which() == 1) {
-      _sweeper.add(fromBoost(boost::get<osm2rdf::geometry::Way>(v)), id, subId,
-                   false, _parseBatches[omp_get_thread_num()]);
+    if (v.getType() == 1) {
+      _sweeper.add(transform(v.getLine()), id, subId, false,
+                   _parseBatches[omp_get_thread_num()]);
     }
 
-    if (v.which() == 2) {
-      _sweeper.add(fromBoost(boost::get<osm2rdf::geometry::Area>(v)), id, subId,
-                   false, _parseBatches[omp_get_thread_num()]);
+    if (v.getType() == 4) {
+      _sweeper.add(transform(v.getMultiPolygon()), id, subId, false,
+                   _parseBatches[omp_get_thread_num()]);
     }
 
     subId++;
@@ -130,8 +129,6 @@ void GeometryHandler<W>::relation(const Relation& rel) {
     _sweeper.addBatch(_parseBatches[omp_get_thread_num()]);
     _parseBatches[omp_get_thread_num()] = {};
   }
-
-#endif
 }
 
 // ____________________________________________________________________________
@@ -150,21 +147,14 @@ void GeometryHandler<W>::progressCb(size_t prog) {
 
 // ____________________________________________________________________________
 template <typename W>
-::util::geo::I32Point GeometryHandler<W>::fromBoost(
-    const osm2rdf::geometry::Location& loc) {
-  return transformPoint(loc);
-}
-
-// ____________________________________________________________________________
-template <typename W>
-::util::geo::I32Line GeometryHandler<W>::fromBoost(
-    const osm2rdf::geometry::Way& way) {
+::util::geo::I32Line GeometryHandler<W>::transform(
+    const ::util::geo::DLine& way) {
   ::util::geo::I32Line l;
 
   l.reserve(way.size());
 
   for (const auto& loc : way) {
-    l.push_back(transformPoint(loc));
+    l.push_back(transform(loc));
   }
 
   return l;
@@ -172,23 +162,23 @@ template <typename W>
 
 // ____________________________________________________________________________
 template <typename W>
-::util::geo::I32MultiPolygon GeometryHandler<W>::fromBoost(
-    const osm2rdf::geometry::Area& area) {
+::util::geo::I32MultiPolygon GeometryHandler<W>::transform(
+    const ::util::geo::DMultiPolygon& area) {
   ::util::geo::I32MultiPolygon p(area.size());
 
   for (size_t i = 0; i < area.size(); i++) {
-    p[i].getOuter().reserve(area[i].outer().size());
+    p[i].getOuter().reserve(area[i].getOuter().size());
 
-    for (const auto& loc : area[i].outer()) {
-      p[i].getOuter().push_back(transformPoint(loc));
+    for (const auto& loc : area[i].getOuter()) {
+      p[i].getOuter().push_back(transform(loc));
     }
 
-    p[i].getInners().resize(area[i].inners().size());
+    p[i].getInners().resize(area[i].getInners().size());
 
-    for (size_t j = 0; j < area[i].inners().size(); j++) {
-      p[i].getInners()[j].reserve(area[i].inners()[j].size());
-      for (const auto& loc : area[i].inners()[j]) {
-        p[i].getInners()[j].push_back(transformPoint(loc));
+    for (size_t j = 0; j < area[i].getInners().size(); j++) {
+      p[i].getInners()[j].reserve(area[i].getInners()[j].size());
+      for (const auto& loc : area[i].getInners()[j]) {
+        p[i].getInners()[j].push_back(transform(loc));
       }
     }
   }
@@ -203,7 +193,7 @@ void GeometryHandler<W>::area(const Area& area) {
       areaNS(area.fromWay() ? AreaFromType::WAY : AreaFromType::RELATION),
       area.objId());
 
-  _sweeper.add(fromBoost(area.geom()), id, false,
+  _sweeper.add(transform(area.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
 
   if (_parseBatches[omp_get_thread_num()].size() > BATCH_SIZE) {
@@ -214,10 +204,10 @@ void GeometryHandler<W>::area(const Area& area) {
 
 // ____________________________________________________________________________
 template <typename W>
-::util::geo::I32Point GeometryHandler<W>::transformPoint(
-    const osm2rdf::geometry::Location& loc) {
+::util::geo::I32Point GeometryHandler<W>::transform(
+    const ::util::geo::Point<double>& loc) {
   auto point = ::util::geo::latLngToWebMerc(
-      ::util::geo::DPoint(loc.get<0>(), loc.get<1>()));  // locs are lon/lat
+      ::util::geo::DPoint(loc.getX(), loc.getY()));  // locs are lon/lat
   return ::util::geo::I32Point{point.getX() * PREC, point.getY() * PREC};
 }
 
@@ -228,7 +218,7 @@ void GeometryHandler<W>::node(const Node& node) {
       osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
       node.id());
 
-  _sweeper.add(fromBoost(node.geom()), id, false,
+  _sweeper.add(transform(node.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
 
   if (_parseBatches[omp_get_thread_num()].size() > BATCH_SIZE) {
@@ -245,7 +235,7 @@ void GeometryHandler<W>::way(const Way& way) {
   std::string id = _writer->generateIRI(
       osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset], way.id());
 
-  _sweeper.add(fromBoost(way.geom()), id, false,
+  _sweeper.add(transform(way.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
 
   if (_parseBatches[omp_get_thread_num()].size() > BATCH_SIZE) {

@@ -35,12 +35,9 @@ target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../
 # We need this directory, and users of our library will need it too
 target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../include")
 
-# This depends on (header only) boost (Boost::boost)
 target_link_libraries(osm2rdf_library PRIVATE
 	    libspatialjoin
 		util
-        Boost::boost
-        Boost::serialization
         Threads::Threads
         ${EXPAT_LIBRARIES}
         ${BZIP2_LIBRARIES}

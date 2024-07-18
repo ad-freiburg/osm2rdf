@@ -25,6 +25,7 @@
 #include "gtest/gtest_prod.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Writer.h"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
 
@@ -48,16 +49,12 @@ class FactHandler {
   void way(const osm2rdf::osm::Way& way);
 
   template <typename G>
-  void writeBoostGeometry(const std::string& s, const std::string& p,
+  void writeGeometry(const std::string& s, const std::string& p,
                           const G& g);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWay);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
 
  protected:
   void writeBox(const std::string& s, const std::string& p,
-                const osm2rdf::geometry::Box& box);
+                const ::util::geo::Box<double>& box);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
 

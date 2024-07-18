@@ -59,17 +59,6 @@ struct Config {
 
   SourceDataset sourceDataset = OSM;
 
-  // the epsilon for the inner/outer douglas-peucker is based on the
-  // circumference of a hypothetical circle. By dividing by ~pi, we base the
-  // epsilon on 1/n of the radius of this hypothetical circle (n = 20 in this
-  // case). Think of this is maximum portion of the radius that is
-  // "collapsed away" by the inner simplification, or added by the outer
-  // simplification
-  double simplifyGeometriesInnerOuter = 1 / (3.14 * 20);
-  double approxContainsSlack = 0.05;
-  bool dontUseInnerOuterGeoms = false;
-  bool approximateSpatialRels = false;
-
   // Select amount to dump
   bool addAreaWayLinestrings = false;
   bool addWayMetadata = false;
@@ -81,15 +70,12 @@ struct Config {
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
 
-  // Dot
-  bool writeDAGDotFiles = false;
-
   // Statistics
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
   // Output modifiers
-  uint16_t simplifyWKT = 250;
+  uint16_t simplifyWKT = 0;
   double wktDeviation = 5;
   uint16_t wktPrecision = 7;
 

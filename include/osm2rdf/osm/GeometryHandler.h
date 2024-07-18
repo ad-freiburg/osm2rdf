@@ -25,21 +25,14 @@
 #include <utility>
 #include <vector>
 
-#include "boost/archive/binary_oarchive.hpp"
-#include "boost/geometry/index/rtree.hpp"
-#include "boost/version.hpp"
 #include "gtest/gtest_prod.h"
 #include "osm2rdf/config/Config.h"
-#include "osm2rdf/geometry/Area.h"
-#include "osm2rdf/geometry/Location.h"
-#include "osm2rdf/geometry/Node.h"
-#include "osm2rdf/geometry/Way.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/ttl/Writer.h"
-#include "osm2rdf/util/ProgressBar.h"
 #include "osm2rdf/util/CacheFile.h"
 #include "osm2rdf/util/DirectedGraph.h"
 #include "osm2rdf/util/Output.h"
+#include "osm2rdf/util/ProgressBar.h"
 #include "spatialjoin/Sweeper.h"
 #include "spatialjoin/WKTParse.h"
 #include "util/geo/Geo.h"
@@ -74,19 +67,17 @@ class GeometryHandler {
 
   std::string areaNS(AreaFromType type) const;
 
-  static ::util::geo::I32Point transformPoint(
-      const osm2rdf::geometry::Location& loc);
+  static ::util::geo::I32Point transform(const ::util::geo::Point<double>& loc);
 
-  static ::util::geo::I32Point fromBoost(
-      const osm2rdf::geometry::Location& loc);
-  static ::util::geo::I32Line fromBoost(const osm2rdf::geometry::Way& way);
-  static ::util::geo::I32MultiPolygon fromBoost(const osm2rdf::geometry::Area& area);
+  static ::util::geo::I32Line transform(const ::util::geo::DLine& way);
+  static ::util::geo::I32MultiPolygon transform(
+      const ::util::geo::DMultiPolygon& area);
 
   void writeRelCb(size_t t, const std::string& a, const std::string& b,
                   const std::string& pred);
   void progressCb(size_t progr);
 
-	osm2rdf::util::ProgressBar _progressBar;
+  osm2rdf::util::ProgressBar _progressBar;
 };
 
 }  // namespace osm2rdf::osm

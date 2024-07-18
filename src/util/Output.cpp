@@ -18,12 +18,12 @@
 
 #include <bzlib.h>
 
+#include <cassert>
 #include <cmath>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <thread>
-#include <cassert>
 #include <vector>
 
 #if defined(_OPENMP)
@@ -51,9 +51,9 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
     : _config(config),
       _prefix(prefix),
       _partCount(partCount),
-      _numOuts(_partCount + 2),
+      _numOuts(_partCount),
       _partCountDigits(std::floor(std::log10(_numOuts)) + 1),
-      _outBuffers(_partCount + 2),
+      _outBuffers(_partCount),
       _toStdOut(_config.output.empty()) {}
 
 // ____________________________________________________________________________
@@ -62,22 +62,21 @@ osm2rdf::util::Output::~Output() { close(); }
 // ____________________________________________________________________________
 bool osm2rdf::util::Output::open() {
   assert(_partCount > 0);
-  assert(_numOuts == _partCount + 2);
+  assert(_numOuts == _partCount);
 
   _rawFiles.resize(_numOuts);
   _files.resize(_numOuts);
   _outBufPos.resize(_numOuts);
 
-  for (size_t i = 0; i < _partCount + 2; i++) {
-    if (i < _partCount) {
-      _rawFiles[i] = fopen(partFilename(i).c_str(), "w");
-    } else {
-      _rawFiles[i] = fopen(partFilename(_partCount - i - 1).c_str(), "w");
-    }
-    int err = 0;
-    _files[i] = BZ2_bzWriteOpen(&err, _rawFiles[i], 6, 0, 30);
-    if (err != BZ_OK) {
-      throw std::runtime_error("Could not open bzip file for writing.");
+  for (size_t i = 0; i < _partCount; i++) {
+    _rawFiles[i] = fopen(partFilename(i).c_str(), "w");
+
+    if (_config.outputCompress) {
+      int err = 0;
+      _files[i] = BZ2_bzWriteOpen(&err, _rawFiles[i], 6, 0, 30);
+      if (err != BZ_OK) {
+        throw std::runtime_error("Could not open bzip file for writing.");
+      }
     }
     _outBuffers[i] = new unsigned char[BUFFER_S];
   }
@@ -96,25 +95,17 @@ bool osm2rdf::util::Output::open() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::close() { close("", ""); }
-
-// ____________________________________________________________________________
-void osm2rdf::util::Output::close(std::string_view prefix,
-                                  std::string_view suffix) {
+void osm2rdf::util::Output::close() {
   if (!_open) {
     return;
   }
-
-  // Write prefix and suffix to file
-  write(prefix, _partCount);
-  write(suffix, _partCount + 1);
 
   if (_toStdOut) {
     for (size_t i = 0; i < _numOuts; ++i) {
       _outBuffers[i][_outBufPos[i]] = 0;
       fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
     }
-  } else {
+  } else if (_config.outputCompress) {
     for (size_t i = 0; i < _numOuts; ++i) {
       int err = 0;
       BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
@@ -123,6 +114,15 @@ void osm2rdf::util::Output::close(std::string_view prefix,
         throw std::runtime_error("Could not write to file.");
       }
       BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
+      fclose(_rawFiles[i]);
+    }
+  } else {
+    for (size_t i = 0; i < _numOuts; ++i) {
+      size_t r =
+          fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
+      if (r != _outBufPos[i]) {
+        throw std::runtime_error("Could not write to file.");
+      }
       fclose(_rawFiles[i]);
     }
   }
@@ -146,15 +146,10 @@ void osm2rdf::util::Output::close(std::string_view prefix,
 
 // ____________________________________________________________________________
 std::string osm2rdf::util::Output::partFilename(int part) {
-  assert(part >= -2);
-  assert(part < static_cast<int>(_partCount));
   std::ostringstream oss;
   oss << _prefix << ".part_" << std::setfill('0')
       << std::setw(_partCountDigits);
-  if (part == -2) {
-    part = static_cast<int>(_partCount);
-  }
-  oss << (part + 1);
+  oss << (part);
   return oss.str();
 }
 
@@ -169,23 +164,10 @@ void osm2rdf::util::Output::concatenate() {
     return;
   }
 
-  // Prefix
-  std::string filename = partFilename(-1);
-  std::ifstream inFilePrefix{filename,
-                             std::ifstream::in | std::ifstream::binary};
-  if (!inFilePrefix.is_open() || !inFilePrefix.good()) {
-    std::cerr << "Error opening file: " << filename << std::endl;
-  }
-  _outFile << inFilePrefix.rdbuf();
-  inFilePrefix.close();
-  if (!_config.outputKeepFiles) {
-    std::filesystem::remove(filename);
-  }
-
   // Content
   for (size_t i = 0; i < _partCount; ++i) {
-    filename = partFilename(i);
-    std::ifstream inFile{filename, std::ifstream::in | std::ifstream::binary};
+    std::string filename = partFilename(i);
+    std::ifstream inFile{filename, std::ifstream::binary};
     if (!inFile.is_open() || !inFile.good()) {
       std::cerr << "Error opening file: " << filename << std::endl;
     }
@@ -196,56 +178,36 @@ void osm2rdf::util::Output::concatenate() {
     }
   }
 
-  // Suffix
-  filename = partFilename(-2);
-  std::ifstream inFileSuffix{filename,
-                             std::ifstream::in | std::ifstream::binary};
-  if (!inFileSuffix.is_open() || !inFileSuffix.good()) {
-    std::cerr << "Error opening file: " << filename << std::endl;
-  }
-  _outFile << inFileSuffix.rdbuf();
-  inFileSuffix.close();
-  if (!_config.outputKeepFiles) {
-    std::filesystem::remove(filename);
-  }
-}
-
-// ____________________________________________________________________________
-void osm2rdf::util::Output::writeNewLine() {
-#if defined(_OPENMP)
-  writeNewLine(omp_get_thread_num());
-#else
-  writeNewLine(0);
-#endif
+  _outFile.flush();
 }
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::writeNewLine(size_t part) { write('\n', part); }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::write(std::string_view strv) {
-#if defined(_OPENMP)
-  write(strv, omp_get_thread_num());
-#else
-  write(strv, 0);
-#endif
-}
-
-// ____________________________________________________________________________
 void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
-  assert(part < _numOuts);
+  assert(t < _numOuts);
   if (_toStdOut) {
     if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
       _outBuffers[t][_outBufPos[t]] = 0;
       fputs(reinterpret_cast<const char*>(_outBuffers[t]), stdout);
       _outBufPos[t] = 0;
     }
-  } else {
+  } else if (_config.outputCompress) {
     if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
       int err = 0;
       BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
       if (err == BZ_IO_ERROR) {
         BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
+        throw std::runtime_error("Could not write to file.");
+      }
+      _outBufPos[t] = 0;
+    }
+  } else {
+    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
+      size_t r =
+          fwrite(_outBuffers[t], sizeof(char), _outBufPos[t], _rawFiles[t]);
+      if (r != _outBufPos[t]) {
         throw std::runtime_error("Could not write to file.");
       }
       _outBufPos[t] = 0;
@@ -257,29 +219,29 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::write(const char c) {
-#if defined(_OPENMP)
-  write(c, omp_get_thread_num());
-#else
-  write(c, 0);
-#endif
-}
-
-// ____________________________________________________________________________
 void osm2rdf::util::Output::write(const char c, size_t t) {
-  assert(part < _numOuts);
+  assert(t < _numOuts);
   if (_toStdOut) {
-    if (_outBufPos[t] + 1 >= BUFFER_S) {
+    if (_outBufPos[t] + 2 >= BUFFER_S) {
       _outBuffers[t][_outBufPos[t]] = 0;
       fputs(reinterpret_cast<const char*>(_outBuffers[t]), stdout);
       _outBufPos[t] = 0;
     }
-  } else {
-    if (_outBufPos[t] + 1 >= BUFFER_S) {
+  } else if (_config.outputCompress) {
+    if (_outBufPos[t] + 2 >= BUFFER_S) {
       int err = 0;
       BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
       if (err == BZ_IO_ERROR) {
         BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
+        throw std::runtime_error("Could not write to file.");
+      }
+      _outBufPos[t] = 0;
+    }
+  } else {
+    if (_outBufPos[t] + 2 >= BUFFER_S) {
+      size_t r =
+          fwrite(_outBuffers[t], sizeof(char), _outBufPos[t], _rawFiles[t]);
+      if (r != _outBufPos[t]) {
         throw std::runtime_error("Could not write to file.");
       }
       _outBufPos[t] = 0;
@@ -302,12 +264,19 @@ void osm2rdf::util::Output::flush(size_t i) {
   if (_toStdOut) {
     _outBuffers[i][_outBufPos[i]] = 0;
     fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
-  } else {
+  } else if (_config.outputCompress) {
     int err = 0;
     BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
     if (err == BZ_IO_ERROR) {
       BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
       throw std::runtime_error("Could not write to file.");
     }
+  } else {
+    size_t r =
+        fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
+    if (r != _outBufPos[i]) {
+      throw std::runtime_error("Could not write to file.");
+    }
   }
+  _outBufPos[i] = 0;
 }

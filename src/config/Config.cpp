@@ -23,7 +23,6 @@
 #include <iostream>
 #include <string>
 
-#include "boost/version.hpp"
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -125,10 +124,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       << prefix << osm2rdf::config::constants::OGC_GEO_TRIPLES_INFO << ": "
       << (modeStrings[ogcGeoTriplesMode]);
 
-  oss << "\n"
-      << prefix << osm2rdf::config::constants::APPROX_CONTAINS_SLACK_INFO
-      << ": " << approxContainsSlack;
-
   if (ogcGeoTriplesMode) {
      if (noAreaGeometricRelations) {
       oss << "\n"
@@ -154,10 +149,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
-  if (writeDAGDotFiles) {
-    oss << "\n"
-        << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
-  }
 
   if (!storeLocationsOnDisk.empty()) {
     oss << "\n"
@@ -305,20 +296,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_HELP,
           simplifyGeometries);
 
-  auto simplifyGeometriesInnerOuterOp = parser.add<popl::Value<double>,
-                                                   popl::Attribute::expert>(
-      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_SHORT,
-      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG,
-      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP,
-      simplifyGeometriesInnerOuter);
-  auto dontUseInnerOuterGeomsOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
-  auto approximateSpatialRelsOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_SHORT,
-      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_LONG,
-      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_HELP);
   auto simplifyWKTOp =
       parser.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
           osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
@@ -368,13 +345,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::CACHE_OPTION_SHORT,
       osm2rdf::config::constants::CACHE_OPTION_LONG,
       osm2rdf::config::constants::CACHE_OPTION_HELP, cache);
-
-  auto approxContainsSlackOp =
-      parser.add<popl::Value<double>, popl::Attribute::expert>(
-          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_SHORT,
-          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_LONG,
-          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_HELP,
-          approxContainsSlack);
 
   try {
     parser.parse(argc, argv);
@@ -445,19 +415,14 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     if (sourceDatasetOp->is_set()) {
       if (sourceDatasetOp->value() == "OSM") {
         sourceDataset = OSM;
-        approxContainsSlack = 0.05;
       } else if (sourceDatasetOp->value() == "OHM") {
         sourceDataset = OHM;
-        approxContainsSlack = 0;
       } else {
         throw popl::invalid_option(
             sourceDatasetOp.get(),
             popl::invalid_option::Error::invalid_argument,
             popl::OptionName::long_name, sourceDatasetOp->value(), "");
       }
-    }
-    if (approxContainsSlackOp->is_set()) {
-      approxContainsSlack = approxContainsSlackOp->value();
     }
 
     // Select amount to dump
@@ -468,9 +433,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();
-    simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();
-    dontUseInnerOuterGeoms = dontUseInnerOuterGeomsOp->value();
-    approximateSpatialRels = approximateSpatialRelsOp->value();
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
@@ -483,9 +445,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
         semicolonTagKeys.insert(semicolonTagKeysOp->value(i));
       }
     }
-
-    // Dot
-    writeDAGDotFiles = writeDotFilesOp->is_set();
 
     writeRDFStatistics = writeRDFStatisticsOp->is_set();
 

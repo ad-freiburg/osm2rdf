@@ -17,15 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/ttl/Writer.h"
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
 
-#include "boost/iostreams/filter/bzip2.hpp"
+#include "osm2rdf/ttl/Writer.h"
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -178,9 +177,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 
   // Prepare statistic variables
 #if defined(_OPENMP)
-  _numOuts = omp_get_max_threads();
+  _numOuts = std::max(std::thread::hardware_concurrency(),
+                      static_cast<unsigned int>(omp_get_max_threads()) + 1);
 #else
-  _numOuts = 1;
+  _numOuts = std::thread::hardware_concurrency() + 1;
 #endif
   _blankNodeCount = new uint64_t[_numOuts];
   _headerLines = new uint64_t[_numOuts];
@@ -251,12 +251,8 @@ void osm2rdf::ttl::Writer<T>::writeStatisticJson(
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
-    writeTriple("@prefix", prefix + ":", "<" + iriref + ">");
-#if defined(_OPENMP)
-    _headerLines[omp_get_thread_num()]++;
-#else
+    writeTriple("@prefix", prefix + ":", "<" + iriref + ">", 0);
     _headerLines[0]++;
-#endif
   }
 }
 
@@ -358,18 +354,22 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
-  _out->write(s);
-  _out->write(' ');
-  _out->write(p);
-  _out->write(' ');
-  _out->write(o);
-  _out->write(" .");
-  _out->writeNewLine();
+  size_t part = 0;
+
 #if defined(_OPENMP)
-  _lineCount[omp_get_thread_num()]++;
+  part = omp_get_thread_num();
 #else
-  _lineCount[0]++;
+  part = 0;
 #endif
+
+  _out->write(s, part);
+  _out->write(' ', part);
+  _out->write(p, part);
+  _out->write(' ', part);
+  _out->write(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
 }
 
 // ____________________________________________________________________________

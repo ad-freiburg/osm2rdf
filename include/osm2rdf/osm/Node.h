@@ -20,13 +20,10 @@
 #define OSM2RDF_OSM_NODE_H_
 
 #include "Generic.h"
-#include "boost/serialization/nvp.hpp"
-#include "osm2rdf/geometry/Box.h"
-#include "osm2rdf/geometry/Location.h"
-#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
 
@@ -38,11 +35,11 @@ class Node {
   explicit Node(const osmium::NodeRef& nodeRef);
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
-  [[nodiscard]] const osm2rdf::geometry::Location& geom() const noexcept;
+  [[nodiscard]] ::util::geo::Box<double> envelope() const noexcept;
+  [[nodiscard]] const ::util::geo::Point<double>& geom() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Polygon convexHull() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Polygon orientedBoundingBox() const noexcept;
+  [[nodiscard]] ::util::geo::Polygon<double> convexHull() const noexcept;
+  [[nodiscard]] ::util::geo::Polygon<double> orientedBoundingBox() const noexcept;
 
   bool operator==(const osm2rdf::osm::Node& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Node& other) const noexcept;
@@ -50,17 +47,8 @@ class Node {
  protected:
   id_t _id;
   std::time_t _timestamp;
-  osm2rdf::geometry::Location _geom;
+  ::util::geo::Point<double> _geom;
   osm2rdf::osm::TagList _tags;
-
-  friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
-    ar& boost::serialization::make_nvp("_id", _id);
-    ar& boost::serialization::make_nvp("_timestamp", _timestamp);
-    ar& boost::serialization::make_nvp("_geom", _geom);
-    ar& boost::serialization::make_nvp("_tags", _tags);
-  }
 };
 
 }  // namespace osm2rdf::osm

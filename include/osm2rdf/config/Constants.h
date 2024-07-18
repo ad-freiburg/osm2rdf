@@ -247,24 +247,6 @@ const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
     "Don't use inner/outer simplified geometries of areas for contains "
     "relation.";
 
-const static inline std::string APPROX_SPATIAL_REL_INFO =
-    "Approximate spatial relations using inner/outer simplified geometries.";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT =
-    "";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_LONG =
-    "approximate-spatial-relations";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP = "Use "
-    "simplified inner/outer geometries for approximate calculation of spatial "
-    "relations";
-
-const static inline std::string APPROX_CONTAINS_SLACK_INFO =
-    "Slack for approximate contains";
-const static inline std::string APPROX_CONTAINS_SLACK_OPTION_SHORT =
-    "";
-const static inline std::string APPROX_CONTAINS_SLACK_OPTION_LONG =
-    "approximate-contains-slack";
-const static inline std::string APPROX_CONTAINS_SLACK_OPTION_HELP = "";
-
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
 const static inline std::string SIMPLIFY_WKT_OPTION_LONG = "simplify-wkt";

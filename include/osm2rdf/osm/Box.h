@@ -19,31 +19,23 @@
 #ifndef OSM2RDF_OSM_BOX_H_
 #define OSM2RDF_OSM_BOX_H_
 
-#include "boost/serialization/nvp.hpp"
-#include "osm2rdf/geometry/Box.h"
-#include "osm2rdf/geometry/Polygon.h"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
 
 class Box {
  public:
   Box();
-  explicit Box(const osm2rdf::geometry::Box& box);
-  [[nodiscard]] osm2rdf::geometry::Box geom() const;
-  [[nodiscard]] osm2rdf::geometry::Polygon convexHull() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Polygon orientedBoundingBox() const noexcept;
+  explicit Box(const ::util::geo::DBox& box);
+  [[nodiscard]] ::util::geo::DBox geom() const;
+  [[nodiscard]] ::util::geo::DPolygon convexHull() const noexcept;
+  [[nodiscard]] ::util::geo::DPolygon orientedBoundingBox() const noexcept;
 
   bool operator==(const osm2rdf::osm::Box& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Box& other) const noexcept;
 
  protected:
-  osm2rdf::geometry::Box _geom{};
-
-  friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
-    ar& boost::serialization::make_nvp("_geom", _geom);
-  }
+  ::util::geo::DBox _geom{};
 };
 
 }  // namespace osm2rdf::osm
