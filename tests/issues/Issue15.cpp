@@ -42,9 +42,6 @@ TEST(Issue15, Relation_8291361_expected) {
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "../../tests/issues/issue15_osmrel_8291361.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};
@@ -142,9 +139,6 @@ TEST(Issue15, Way_201387026_expected) {
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "../../tests/issues/issue15_osmway_201387026.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};

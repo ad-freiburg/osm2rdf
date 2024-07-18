@@ -18,7 +18,6 @@
 
 #include "osm2rdf/osm/FactHandler.h"
 
-#include "boost/version.hpp"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2rdf/osm/Node.h"
@@ -275,7 +274,6 @@ TEST(OSM_FactHandler, relation) {
   std::cout.rdbuf(sbuf);
 }
 
-#if BOOST_VERSION >= 107800
 // ____________________________________________________________________________
 TEST(OSM_FactHandler, relationWithGeometry) {
   // Capture std::cout
@@ -375,7 +373,6 @@ TEST(OSM_FactHandler, relationWithGeometry) {
   // Cleanup
   std::cout.rdbuf(sbuf);
 }
-#endif  // BOOST_VERSION >= 107800
 
 // ____________________________________________________________________________
 TEST(OSM_FactHandler, way) {
@@ -778,7 +775,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWay) {
+TEST(OSM_FactHandler, writeGeometryWay) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -816,7 +813,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWay) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
+TEST(OSM_FactHandler, writeGeometryWaySimplify1) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -861,7 +858,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
+TEST(OSM_FactHandler, writeGeometryWaySimplify2) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();
@@ -902,7 +899,7 @@ TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2) {
 }
 
 // ____________________________________________________________________________
-TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3) {
+TEST(OSM_FactHandler, writeGeometryWaySimplify3) {
   // Capture std::cout
   std::stringstream buffer;
   std::streambuf* sbuf = std::cout.rdbuf();

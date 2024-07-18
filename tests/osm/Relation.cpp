@@ -18,11 +18,6 @@
 
 #include "osm2rdf/osm/Relation.h"
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"

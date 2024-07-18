@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "boost/version.hpp"
 #include "gtest/gtest.h"
 #include "osm2rdf/osm/FactHandler.h"
 #include "osmium/builder/attr.hpp"
@@ -185,7 +184,6 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   std::cout.rdbuf(sbuf);
 }
 
-#if BOOST_VERSION >= 107800
 // ____________________________________________________________________________
 TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   // Capture std::cout
@@ -282,7 +280,6 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   // Cleanup
   std::cout.rdbuf(sbuf);
 }
-#endif  // BOOST_VERSION >= 107800
 
 // ____________________________________________________________________________
 TEST(Issue24, wayHasGeometryAsGeoSPARQL) {

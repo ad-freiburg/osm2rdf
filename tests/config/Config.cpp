@@ -19,7 +19,6 @@
 
 #include "osm2rdf/config/Config.h"
 
-#include "boost/version.hpp"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2rdf/config/Constants.h"
