@@ -69,6 +69,8 @@ class GeometryHandler {
 
   static ::util::geo::I32Point transform(const ::util::geo::Point<double>& loc);
 
+  static ::util::geo::I32Box transform(const ::util::geo::Box<double>& box);
+
   static ::util::geo::I32Line transform(const ::util::geo::DLine& way);
   static ::util::geo::I32MultiPolygon transform(
       const ::util::geo::DMultiPolygon& area);

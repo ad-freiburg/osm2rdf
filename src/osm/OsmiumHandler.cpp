@@ -149,7 +149,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
     if (!_config.noGeometricRelations) {
       std::cerr << std::endl;
       std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "Calculating contains relation ..." << std::endl;
+                << "Calculating geometric relations ..." << std::endl;
       _geometryHandler.calculateRelations();
       std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
                 << std::endl;

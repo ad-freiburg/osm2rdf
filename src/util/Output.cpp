@@ -171,7 +171,9 @@ void osm2rdf::util::Output::concatenate() {
     if (!inFile.is_open() || !inFile.good()) {
       std::cerr << "Error opening file: " << filename << std::endl;
     }
-    _outFile << inFile.rdbuf();
+    if (inFile.peek() != std::ifstream::traits_type::eof()) {
+      _outFile << inFile.rdbuf();
+    }
     inFile.close();
     if (!_config.outputKeepFiles) {
       std::filesystem::remove(filename);

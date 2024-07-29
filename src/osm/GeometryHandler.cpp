@@ -106,19 +106,20 @@ void GeometryHandler<W>::relation(const Relation& rel) {
 
   if (rel.geom().size() > 1) subId = 1;
 
-  for (const auto& v : rel.geom()) {
-    if (v.getType() == 0) {
-      _sweeper.add(transform(v.getPoint()), id, subId, false,
+  for (const auto& m : rel.members()) {
+    if (m.type() == osm2rdf::osm::RelationMemberType::NODE) {
+      std::string pid = _writer->generateIRI(
+          osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
+          m.id());
+      _sweeper.add(pid, transform(rel.envelope()), id, subId, false,
                    _parseBatches[omp_get_thread_num()]);
     }
 
-    if (v.getType() == 1) {
-      _sweeper.add(transform(v.getLine()), id, subId, false,
-                   _parseBatches[omp_get_thread_num()]);
-    }
-
-    if (v.getType() == 4) {
-      _sweeper.add(transform(v.getMultiPolygon()), id, subId, false,
+    if (m.type() == osm2rdf::osm::RelationMemberType::WAY) {
+      std::string pid = _writer->generateIRI(
+          osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset],
+          m.id());
+      _sweeper.add(pid, transform(rel.envelope()), id, subId, false,
                    _parseBatches[omp_get_thread_num()]);
     }
 
@@ -143,6 +144,13 @@ void GeometryHandler<W>::writeRelCb(size_t t, const std::string& a,
 template <typename W>
 void GeometryHandler<W>::progressCb(size_t prog) {
   _progressBar.update(prog);
+}
+
+// ____________________________________________________________________________
+template <typename W>
+::util::geo::I32Box GeometryHandler<W>::transform(
+    const ::util::geo::DBox& box) {
+  return {transform(box.getLowerLeft()), transform(box.getUpperRight())};
 }
 
 // ____________________________________________________________________________
