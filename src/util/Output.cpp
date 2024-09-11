@@ -26,6 +26,8 @@
 #include <thread>
 #include <vector>
 
+#include "osm2rdf/util/Time.h"
+
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -51,8 +53,7 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
     : _config(config),
       _prefix(prefix),
       _partCount(partCount),
-      _numOuts(_partCount),
-      _partCountDigits(std::floor(std::log10(_numOuts)) + 1),
+      _partCountDigits(std::floor(std::log10(partCount)) + 1),
       _outBuffers(_partCount),
       _toStdOut(_config.output.empty()) {}
 
@@ -62,11 +63,10 @@ osm2rdf::util::Output::~Output() { close(); }
 // ____________________________________________________________________________
 bool osm2rdf::util::Output::open() {
   assert(_partCount > 0);
-  assert(_numOuts == _partCount);
 
-  _rawFiles.resize(_numOuts);
-  _files.resize(_numOuts);
-  _outBufPos.resize(_numOuts);
+  _rawFiles.resize(_partCount);
+  _files.resize(_partCount);
+  _outBufPos.resize(_partCount);
 
   for (size_t i = 0; i < _partCount; i++) {
     _rawFiles[i] = fopen(partFilename(i).c_str(), "w");
@@ -101,12 +101,12 @@ void osm2rdf::util::Output::close() {
   }
 
   if (_toStdOut) {
-    for (size_t i = 0; i < _numOuts; ++i) {
+    for (size_t i = 0; i < _partCount; ++i) {
       _outBuffers[i][_outBufPos[i]] = 0;
       fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
     }
   } else if (_config.outputCompress) {
-    for (size_t i = 0; i < _numOuts; ++i) {
+    for (size_t i = 0; i < _partCount; ++i) {
       int err = 0;
       BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
       if (err == BZ_IO_ERROR) {
@@ -117,7 +117,7 @@ void osm2rdf::util::Output::close() {
       fclose(_rawFiles[i]);
     }
   } else {
-    for (size_t i = 0; i < _numOuts; ++i) {
+    for (size_t i = 0; i < _partCount; ++i) {
       size_t r =
           fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
       if (r != _outBufPos[i]) {
@@ -188,7 +188,7 @@ void osm2rdf::util::Output::writeNewLine(size_t part) { write('\n', part); }
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
-  assert(t < _numOuts);
+  assert(t < _partCount);
   if (_toStdOut) {
     if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
       _outBuffers[t][_outBufPos[t]] = 0;
@@ -216,13 +216,26 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
     }
   }
 
+  if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "String to write: " << strv << std::endl;
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "String size: " << strv.size() << std::endl;
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "Buffer size: " << BUFFER_S << std::endl;
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "Buffer pos: " << _outBufPos[t] << std::endl;
+    throw std::runtime_error("Write buffer too small to write " +
+                             std::to_string(strv.size()) + " bytes");
+  }
+
   memcpy(_outBuffers[t] + _outBufPos[t], strv.data(), strv.size());
   _outBufPos[t] += strv.size();
 }
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(const char c, size_t t) {
-  assert(t < _numOuts);
+  assert(t < _partCount);
   if (_toStdOut) {
     if (_outBufPos[t] + 2 >= BUFFER_S) {
       _outBuffers[t][_outBufPos[t]] = 0;
@@ -256,7 +269,7 @@ void osm2rdf::util::Output::write(const char c, size_t t) {
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::flush() {
-  for (size_t i = 0; i < _numOuts; ++i) {
+  for (size_t i = 0; i < _partCount; ++i) {
     flush(i);
   }
 }
