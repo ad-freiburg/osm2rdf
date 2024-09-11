@@ -127,6 +127,10 @@ void osm2rdf::util::Output::close() {
     }
   }
 
+  for (size_t i = 0; i < _partCount; ++i) {
+    delete[] _outBuffers[i];
+  }
+
   _open = false;
 
   // Handle merging of files
