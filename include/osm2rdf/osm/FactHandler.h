@@ -61,6 +61,9 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
 
+  template <typename T>
+  void writeMeta(const std::string& s, const T& object);
+
   void writeTag(const std::string& s, const osm2rdf::osm::Tag& tag);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger);

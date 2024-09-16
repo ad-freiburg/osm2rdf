@@ -26,6 +26,9 @@
 
 namespace osm2rdf::osm::generic {
 
+typedef uint32_t changeset_id_t;
+typedef uint8_t version_t;
+
 // ____________________________________________________________________________
 inline osm2rdf::geometry::Polygon boxToPolygon(
     const osm2rdf::geometry::Box& box) {

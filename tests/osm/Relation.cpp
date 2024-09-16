@@ -223,8 +223,7 @@ TEST(OSM_Relation, serializationBinary) {
   osmium::builder::add_relation(
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
+      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"));
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Relation src{osmiumBuffer.get<osmium::Relation>(0)};
@@ -253,8 +252,7 @@ TEST(OSM_Relation, serializationText) {
   osmium::builder::add_relation(
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
+      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"));
 
   // Create osm2rdf object from osmium object
   const osm2rdf::osm::Relation src{osmiumBuffer.get<osmium::Relation>(0)};
