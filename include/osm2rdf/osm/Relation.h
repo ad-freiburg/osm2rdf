@@ -47,7 +47,9 @@ class Relation {
   [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
   [[nodiscard]] const ::util::geo::DCollection& geom() const noexcept;
   [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
-  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox()
+      const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
   void buildGeometry(osm2rdf::osm::RelationHandler& relationHandler);
 
   bool operator==(const osm2rdf::osm::Relation& other) const noexcept;

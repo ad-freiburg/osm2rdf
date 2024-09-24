@@ -41,21 +41,14 @@ struct Area {
   // OSM id.
   [[nodiscard]] id_t objId() const noexcept;
 
-  // Return the geometry.
   [[nodiscard]] const ::util::geo::DMultiPolygon& geom() const noexcept;
-  // Return area of the geometry.
   [[nodiscard]] double geomArea() const noexcept;
-  // Return the envelope.
   [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
-  // Return the area of the envelope.
   [[nodiscard]] double envelopeArea() const noexcept;
-  // Return the convex hull of the area.
   [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
-  // Return the oriented bounding box of the area.
   [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox() const noexcept;
-  // Return if this area is created from a way.
+  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
   [[nodiscard]] bool fromWay() const noexcept;
-  // Return if this area has a name.
   [[nodiscard]] bool hasName() const noexcept;
   // finalize geometries
   void finalize() noexcept;

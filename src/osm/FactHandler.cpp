@@ -17,6 +17,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/FactHandler.h"
+
 #include <time.h>
 
 #include <iomanip>
@@ -25,7 +27,6 @@
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
-#include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/Way.h"
@@ -35,6 +36,7 @@ using osm2rdf::osm::constants::AREA_PRECISION;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
 using osm2rdf::ttl::constants::DATASET_ID;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT;
+using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL;
@@ -99,6 +101,14 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
   writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, area.geom());
 
+  if (_config.addCentroids) {
+    const std::string& centroidObj =
+        _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
+                             DATASET_ID[_config.sourceDataset] +
+                                 "_area_centroid_" + std::to_string(area.id()));
+    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
+    writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, area.centroid());
+  }
   writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
   writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, area.orientedBoundingBox());
@@ -130,6 +140,14 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
   writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
 
+  if (_config.addCentroids) {
+    const std::string& centroidObj =
+        _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
+                             DATASET_ID[_config.sourceDataset] +
+                                 "_node_centroid_" + std::to_string(node.id()));
+    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
+    writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, node.centroid());
+  }
   writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, node.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, node.envelope());
   writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, node.orientedBoundingBox());
@@ -189,6 +207,14 @@ void osm2rdf::osm::FactHandler<W>::relation(
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, relation.geom());
 
+    if (_config.addCentroids) {
+      const std::string& centroidObj = _writer->generateIRI(
+          NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
+                                       "_relation_centroid_" +
+                                       std::to_string(relation.id()));
+      _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
+      writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, relation.centroid());
+    }
     writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, relation.convexHull());
     writeBox(subj, osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE,
              relation.envelope());
@@ -284,6 +310,14 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, way.geom());
   }
 
+  if (_config.addCentroids) {
+    const std::string& centroidObj =
+        _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
+                             DATASET_ID[_config.sourceDataset] +
+                                 "_way_centroid_" + std::to_string(way.id()));
+    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
+    writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, way.centroid());
+  }
   writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
   writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
   writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());

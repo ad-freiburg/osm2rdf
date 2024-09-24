@@ -106,6 +106,11 @@ const ::util::geo::DPolygon& osm2rdf::osm::Relation::orientedBoundingBox()
 }
 
 // ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Relation::centroid() const noexcept {
+  return ::util::geo::centroid(_geom);
+}
+
+// ____________________________________________________________________________
 void osm2rdf::osm::Relation::buildGeometry(
     osm2rdf::osm::RelationHandler& relationHandler) {
   _hasCompleteGeometry = true;

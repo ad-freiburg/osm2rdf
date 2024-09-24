@@ -35,11 +35,12 @@ class Node {
   explicit Node(const osmium::NodeRef& nodeRef);
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
-  [[nodiscard]] ::util::geo::Box<double> envelope() const noexcept;
-  [[nodiscard]] const ::util::geo::Point<double>& geom() const noexcept;
+  [[nodiscard]] const ::util::geo::DBox envelope() const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint& geom() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
-  [[nodiscard]] ::util::geo::Polygon<double> convexHull() const noexcept;
-  [[nodiscard]] ::util::geo::Polygon<double> orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon convexHull() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
 
   bool operator==(const osm2rdf::osm::Node& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Node& other) const noexcept;

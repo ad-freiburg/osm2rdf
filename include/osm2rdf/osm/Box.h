@@ -27,9 +27,10 @@ class Box {
  public:
   Box();
   explicit Box(const ::util::geo::DBox& box);
-  [[nodiscard]] ::util::geo::DBox geom() const;
-  [[nodiscard]] ::util::geo::DPolygon convexHull() const noexcept;
-  [[nodiscard]] ::util::geo::DPolygon orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DBox geom() const;
+  [[nodiscard]] const ::util::geo::DPolygon convexHull() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
 
   bool operator==(const osm2rdf::osm::Box& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Box& other) const noexcept;

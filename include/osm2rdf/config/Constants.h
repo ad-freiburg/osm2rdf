@@ -94,11 +94,9 @@ const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
 const static inline std::string NO_FACTS_OPTION_HELP = "Do not dump facts";
 
-const static inline std::string SOURCE_DATASET_INFO =
-    "Source dataset";
+const static inline std::string SOURCE_DATASET_INFO = "Source dataset";
 const static inline std::string SOURCE_DATASET_OPTION_SHORT = "";
-const static inline std::string SOURCE_DATASET_OPTION_LONG =
-    "source-dataset";
+const static inline std::string SOURCE_DATASET_OPTION_LONG = "source-dataset";
 const static inline std::string SOURCE_DATASET_OPTION_HELP =
     "Source dataset, either 'OSM', or 'OHM'";
 
@@ -183,6 +181,12 @@ const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_LONG =
     "add-area-way-linestrings";
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_HELP =
     "Add linestrings for ways which form areas";
+
+const static inline std::string ADD_CENTROIDS_INFO = "Add centroid information";
+const static inline std::string ADD_CENTROIDS_OPTION_SHORT = "";
+const static inline std::string ADD_CENTROIDS_OPTION_LONG = "add-hascentroid";
+const static inline std::string ADD_CENTROIDS_OPTION_HELP =
+    "Add geo:hasCentroid triples";
 
 const static inline std::string ADD_WAY_METADATA_INFO = "Adding way metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_SHORT = "";
@@ -282,14 +286,6 @@ const static inline std::string WKT_PRECISION_OPTION_SHORT = "";
 const static inline std::string WKT_PRECISION_OPTION_LONG = "wkt-precision";
 const static inline std::string WKT_PRECISION_OPTION_HELP =
     "Precision (number of decimal digits) for WKT coordinates";
-
-const static inline std::string WRITE_DAG_DOT_FILES_INFO =
-    "Storing DAG states as .dot files";
-const static inline std::string WRITE_DAG_DOT_FILES_OPTION_SHORT = "";
-const static inline std::string WRITE_DAG_DOT_FILES_OPTION_LONG =
-    "write-dag-dot-files";
-const static inline std::string WRITE_DAG_DOT_FILES_OPTION_HELP =
-    "Writes .dot files for DAG states";
 
 const static inline std::string WRITE_RDF_STATISTICS_INFO =
     "Storing RDF statistics as .stats.json";

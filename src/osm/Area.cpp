@@ -131,6 +131,11 @@ const ::util::geo::DPolygon& osm2rdf::osm::Area::orientedBoundingBox()
 }
 
 // ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Area::centroid() const noexcept {
+  return ::util::geo::centroid(_geom);
+}
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Area::operator==(
     const osm2rdf::osm::Area& other) const noexcept {
   return _id == other._id && _objId == other._objId &&

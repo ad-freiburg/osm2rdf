@@ -109,6 +109,11 @@ const ::util::geo::DPolygon& osm2rdf::osm::Way::orientedBoundingBox()
 }
 
 // ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Way::centroid() const noexcept {
+  return ::util::geo::centroid(_geom);
+}
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Way::closed() const noexcept {
   return _nodes.front().geom() == _nodes.back().geom();
 }

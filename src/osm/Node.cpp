@@ -18,10 +18,10 @@
 
 #include "osm2rdf/osm/Node.h"
 
-#include "util/geo/Geo.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
+#include "util/geo/Geo.h"
 
 // ____________________________________________________________________________
 osm2rdf::osm::Node::Node() {
@@ -33,7 +33,7 @@ osm2rdf::osm::Node::Node(const osmium::Node& node) {
   _id = node.positive_id();
   _timestamp = node.timestamp().seconds_since_epoch();
   const auto& loc = node.location();
-  _geom = util::geo::Point<double>{loc.lon(), loc.lat()};
+  _geom = ::util::geo::DPoint{loc.lon(), loc.lat()};
   _tags = osm2rdf::osm::convertTagList(node.tags());
 }
 
@@ -41,7 +41,7 @@ osm2rdf::osm::Node::Node(const osmium::Node& node) {
 osm2rdf::osm::Node::Node(const osmium::NodeRef& nodeRef) {
   _id = nodeRef.positive_ref();
   const auto& loc = nodeRef.location();
-  _geom = util::geo::Point<double>{loc.lon(), loc.lat()};
+  _geom = ::util::geo::DPoint{loc.lon(), loc.lat()};
 }
 
 // ____________________________________________________________________________
@@ -53,24 +53,29 @@ std::time_t osm2rdf::osm::Node::timestamp() const noexcept {
 }
 
 // ____________________________________________________________________________
-const ::util::geo::Point<double>& osm2rdf::osm::Node::geom() const noexcept {
+const ::util::geo::DPoint& osm2rdf::osm::Node::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-::util::geo::Box<double> osm2rdf::osm::Node::envelope() const noexcept {
-  return util::geo::getBoundingBox(_geom);
+const ::util::geo::DBox osm2rdf::osm::Node::envelope() const noexcept {
+  return ::util::geo::getBoundingBox(_geom);
 }
 
 // ____________________________________________________________________________
-::util::geo::Polygon<double> osm2rdf::osm::Node::convexHull() const noexcept {
-  return util::geo::convexHull(_geom);
+const ::util::geo::DPolygon osm2rdf::osm::Node::convexHull() const noexcept {
+  return ::util::geo::convexHull(_geom);
 }
 
 // ____________________________________________________________________________
-::util::geo::Polygon<double> osm2rdf::osm::Node::orientedBoundingBox()
+const ::util::geo::DPolygon osm2rdf::osm::Node::orientedBoundingBox()
     const noexcept {
   return convexHull();
+}
+
+// ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Node::centroid() const noexcept {
+  return _geom;
 }
 
 // ____________________________________________________________________________

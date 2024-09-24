@@ -87,14 +87,17 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://www.openhistoricalmap.org/way/"}};
 
   // Generate constants
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasCentroid");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_SERIALIZATION = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasSerialization");
-  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
+
   osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
   osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =

@@ -38,13 +38,12 @@ class Way {
   [[nodiscard]] std::time_t timestamp() const noexcept;
   [[nodiscard]] bool closed() const noexcept;
   [[nodiscard]] bool isArea() const noexcept;
-  [[nodiscard]] const ::util::geo::Box<double>& envelope() const noexcept;
-  [[nodiscard]] const ::util::geo::Line<double>& geom() const noexcept;
-  // Return the convex hull.
-  [[nodiscard]] const ::util::geo::Polygon<double>& convexHull() const noexcept;
-  // Return the oriented bounding box.
-  [[nodiscard]] const ::util::geo::Polygon<double>& orientedBoundingBox()
+  [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
+  [[nodiscard]] const ::util::geo::DLine& geom() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox()
       const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
   [[nodiscard]] const std::vector<osm2rdf::osm::Node>& nodes() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
 

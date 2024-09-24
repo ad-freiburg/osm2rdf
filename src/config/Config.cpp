@@ -125,7 +125,7 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       << (modeStrings[ogcGeoTriplesMode]);
 
   if (ogcGeoTriplesMode) {
-     if (noAreaGeometricRelations) {
+    if (noAreaGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
     }
@@ -256,6 +256,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_HELP, "full");
 
+  auto addCentroidsOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_CENTROIDS_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_CENTROIDS_OPTION_LONG,
+      osm2rdf::config::constants::ADD_CENTROIDS_OPTION_HELP);
+
   auto addAreaWayLinestringsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT,
@@ -312,11 +317,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WKT_PRECISION_OPTION_SHORT,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_HELP, wktPrecision);
-
-  auto writeDotFilesOp = parser.add<popl::Switch, popl::Attribute::expert>(
-      osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_SHORT,
-      osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_LONG,
-      osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_HELP);
 
   auto writeRDFStatisticsOp =
       parser.add<popl::Switch, popl::Attribute::advanced>(
@@ -427,6 +427,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     // Select amount to dump
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
+    addCentroids = addCentroidsOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
     addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
