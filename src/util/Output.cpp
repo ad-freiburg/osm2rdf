@@ -280,7 +280,11 @@ void osm2rdf::util::Output::write(const char c, size_t t) {
       BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
       if (err == BZ_IO_ERROR) {
         BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
-        throw std::runtime_error("Could not write to file.");
+        std::stringstream ss;
+        ss << "Could not write to bzip2 file '"
+           << partFilename(t) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
       }
       _outBufPos[t] = 0;
     }
@@ -289,7 +293,11 @@ void osm2rdf::util::Output::write(const char c, size_t t) {
       size_t r =
           fwrite(_outBuffers[t], sizeof(char), _outBufPos[t], _rawFiles[t]);
       if (r != _outBufPos[t]) {
-        throw std::runtime_error("Could not write to file.");
+        std::stringstream ss;
+        ss << "Could not write to file '"
+           << partFilename(t) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
       }
       _outBufPos[t] = 0;
     }
@@ -316,13 +324,21 @@ void osm2rdf::util::Output::flush(size_t i) {
     BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
     if (err == BZ_IO_ERROR) {
       BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
-      throw std::runtime_error("Could not write to file.");
+      std::stringstream ss;
+      ss << "Could not write to bzip2 file '"
+         << partFilename(i) << "':\n";
+      ss << strerror(errno) << std::endl;
+      throw std::runtime_error(ss.str());
     }
   } else {
     size_t r =
         fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
     if (r != _outBufPos[i]) {
-      throw std::runtime_error("Could not write to file.");
+      std::stringstream ss;
+      ss << "Could not write to file '"
+         << partFilename(i) << "':\n";
+      ss << strerror(errno) << std::endl;
+      throw std::runtime_error(ss.str());
     }
   }
   _outBufPos[i] = 0;
