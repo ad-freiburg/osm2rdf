@@ -71,11 +71,23 @@ bool osm2rdf::util::Output::open() {
   for (size_t i = 0; i < _partCount; i++) {
     _rawFiles[i] = fopen(partFilename(i).c_str(), "w");
 
+    if (_rawFiles[i] == NULL) {
+      std::stringstream ss;
+      ss << "Could not open file '" << partFilename(i)
+         << "' for writing:\n";
+      ss << strerror(errno) << std::endl;
+      throw std::runtime_error(ss.str());
+    }
+
     if (_config.outputCompress) {
       int err = 0;
       _files[i] = BZ2_bzWriteOpen(&err, _rawFiles[i], 6, 0, 30);
       if (err != BZ_OK) {
-        throw std::runtime_error("Could not open bzip file for writing.");
+        std::stringstream ss;
+        ss << "Could not open bzip2 file '" << partFilename(i)
+           << "' for writing:\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
       }
     }
     _outBuffers[i] = new unsigned char[BUFFER_S];
@@ -111,7 +123,11 @@ void osm2rdf::util::Output::close() {
       BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
       if (err == BZ_IO_ERROR) {
         BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
-        throw std::runtime_error("Could not write to file.");
+        std::stringstream ss;
+        ss << "Could not write to bzip2 file '"
+           << partFilename(i) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
       }
       BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
       fclose(_rawFiles[i]);
@@ -121,7 +137,11 @@ void osm2rdf::util::Output::close() {
       size_t r =
           fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
       if (r != _outBufPos[i]) {
-        throw std::runtime_error("Could not write to file.");
+        std::stringstream ss;
+        ss << "Could not write to file '"
+           << partFilename(i) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
       }
       fclose(_rawFiles[i]);
     }
@@ -205,7 +225,11 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
       BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
       if (err == BZ_IO_ERROR) {
         BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
-        throw std::runtime_error("Could not write to file.");
+        std::stringstream ss;
+        ss << "Could not write to bzip2 file '"
+           << partFilename(t) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
       }
       _outBufPos[t] = 0;
     }
@@ -214,7 +238,11 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
       size_t r =
           fwrite(_outBuffers[t], sizeof(char), _outBufPos[t], _rawFiles[t]);
       if (r != _outBufPos[t]) {
-        throw std::runtime_error("Could not write to file.");
+        std::stringstream ss;
+        ss << "Could not write to file '"
+           << partFilename(t) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
       }
       _outBufPos[t] = 0;
     }
