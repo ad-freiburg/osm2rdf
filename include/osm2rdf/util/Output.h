@@ -25,7 +25,7 @@
 
 #include "osm2rdf/config/Config.h"
 
-static const size_t BUFFER_S = 1024 * 1024 * 100;
+static const size_t BUFFER_S = 1024 * 1024 * 50;
 
 namespace osm2rdf::util {
 

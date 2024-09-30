@@ -81,7 +81,7 @@ bool osm2rdf::util::Output::open() {
 
     if (_config.outputCompress) {
       int err = 0;
-      _files[i] = BZ2_bzWriteOpen(&err, _rawFiles[i], 6, 0, 30);
+      _files[i] = BZ2_bzWriteOpen(&err, _rawFiles[i], 3, 0, 30);
       if (err != BZ_OK) {
         std::stringstream ss;
         ss << "Could not open bzip2 file '" << partFilename(i)
@@ -113,14 +113,18 @@ void osm2rdf::util::Output::close() {
   }
 
   if (_toStdOut) {
+#pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
       _outBuffers[i][_outBufPos[i]] = 0;
       fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
     }
   } else if (_config.outputCompress) {
+#pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
       int err = 0;
+      std::cerr << "compress start of " << _outBufPos[i] << " bytes " << std::endl;
       BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
+      std::cerr << "compress end" << std::endl;
       if (err == BZ_IO_ERROR) {
         BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
         std::stringstream ss;
@@ -133,6 +137,7 @@ void osm2rdf::util::Output::close() {
       fclose(_rawFiles[i]);
     }
   } else {
+#pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
       size_t r =
           fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
