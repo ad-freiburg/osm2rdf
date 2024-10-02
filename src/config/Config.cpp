@@ -288,6 +288,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG,
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_HELP);
 
+  auto auxGeoFilesOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::AUX_GEO_FILES_OPTION_SHORT,
+          osm2rdf::config::constants::AUX_GEO_FILES_OPTION_LONG,
+          osm2rdf::config::constants::AUX_GEO_FILES_OPTION_HELP);
+
   auto semicolonTagKeysOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
           osm2rdf::config::constants::SEMICOLON_TAG_KEYS_OPTION_SHORT,
@@ -444,6 +450,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     if (semicolonTagKeysOp->is_set()) {
       for (size_t i = 0; i < semicolonTagKeysOp->count(); ++i) {
         semicolonTagKeys.insert(semicolonTagKeysOp->value(i));
+      }
+    }
+    if (auxGeoFilesOp->is_set()) {
+      for (size_t i = 0; i < auxGeoFilesOp->count(); ++i) {
+        auxGeoFiles.push_back(auxGeoFilesOp->value(i));
       }
     }
 

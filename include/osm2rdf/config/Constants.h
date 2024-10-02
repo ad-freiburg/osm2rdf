@@ -280,6 +280,13 @@ const static inline std::string SEMICOLON_TAG_KEYS_OPTION_LONG =
     "split-tag-key-by-semicolon";
 const static inline std::string SEMICOLON_TAG_KEYS_OPTION_HELP = "";
 
+const static inline std::string AUX_GEO_FILES_INFO =
+    "Auxiliary geo files for computing spatial relations";
+const static inline std::string AUX_GEO_FILES_OPTION_SHORT = "";
+const static inline std::string AUX_GEO_FILES_OPTION_LONG =
+    "aux-geo-files";
+const static inline std::string AUX_GEO_FILES_OPTION_HELP = "";
+
 const static inline std::string WKT_PRECISION_INFO =
     "Dumping WKT with precision: ";
 const static inline std::string WKT_PRECISION_OPTION_SHORT = "";
