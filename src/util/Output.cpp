@@ -122,9 +122,7 @@ void osm2rdf::util::Output::close() {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
       int err = 0;
-      std::cerr << "compress start of " << _outBufPos[i] << " bytes " << std::endl;
       BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
-      std::cerr << "compress end" << std::endl;
       if (err == BZ_IO_ERROR) {
         BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
         std::stringstream ss;
