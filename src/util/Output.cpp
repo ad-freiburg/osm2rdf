@@ -116,7 +116,7 @@ void osm2rdf::util::Output::close() {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
       _outBuffers[i][_outBufPos[i]] = 0;
-      fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
+      std::cout << _outBuffers[i];
     }
   } else if (_config.outputCompress) {
 #pragma omp parallel for
@@ -219,7 +219,7 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
   if (_toStdOut) {
     if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
       _outBuffers[t][_outBufPos[t]] = 0;
-      fputs(reinterpret_cast<const char*>(_outBuffers[t]), stdout);
+      std::cout << _outBuffers[t];
       _outBufPos[t] = 0;
     }
   } else if (_config.outputCompress) {
@@ -274,7 +274,7 @@ void osm2rdf::util::Output::write(const char c, size_t t) {
   if (_toStdOut) {
     if (_outBufPos[t] + 2 >= BUFFER_S) {
       _outBuffers[t][_outBufPos[t]] = 0;
-      fputs(reinterpret_cast<const char*>(_outBuffers[t]), stdout);
+      std::cout << _outBuffers[t];
       _outBufPos[t] = 0;
     }
   } else if (_config.outputCompress) {
@@ -321,7 +321,7 @@ void osm2rdf::util::Output::flush() {
 void osm2rdf::util::Output::flush(size_t i) {
   if (_toStdOut) {
     _outBuffers[i][_outBufPos[i]] = 0;
-    fputs(reinterpret_cast<const char*>(_outBuffers[i]), stdout);
+    std::cout << _outBuffers[i];
   } else if (_config.outputCompress) {
     int err = 0;
     BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);

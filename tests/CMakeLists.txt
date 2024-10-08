@@ -42,14 +42,14 @@ macro(package_add_test TESTNAME)
     # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it
     gtest_discover_tests(${TESTNAME}
         # set a working directory so your project root so that you can find test data via paths relative to the project root
-        WORKING_DIRECTORY ${PROJECT_DIR}
-        PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
+		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+		PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     )
     set_target_properties(${TESTNAME} PROPERTIES FOLDER vendor)
     # register test for global build target
     add_dependencies(build_tests ${TESTNAME})
     add_dependencies(run_tests run_${TESTNAME})
-    add_custom_target(run_${TESTNAME} COMMAND ${TESTNAME} DEPENDS ${TESTNAME} WORKING_DIRECTORY "${PROJECT_DIR}")
+	add_custom_target(run_${TESTNAME} COMMAND ${TESTNAME} DEPENDS ${TESTNAME} WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 endmacro()
 
 add_custom_target(build_tests)
@@ -76,3 +76,7 @@ package_add_test(UTIL_DirectedAcyclicGraphTest util/DirectedAcyclicGraph.cpp)
 package_add_test(UTIL_OutputTest util/Output.cpp)
 package_add_test(UTIL_ProgressBarTest util/ProgressBar.cpp)
 package_add_test(UTIL_TimeTest util/Time.cpp)
+
+# copy test files to binary directory to make sure they can be found
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+

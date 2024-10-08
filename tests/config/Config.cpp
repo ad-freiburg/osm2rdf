@@ -53,7 +53,7 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.writeRDFStatistics);
 
   ASSERT_EQ(0, config.simplifyGeometries);
-  ASSERT_EQ(250, config.simplifyWKT);
+  ASSERT_EQ(0, config.simplifyWKT);
   ASSERT_EQ(5, config.wktDeviation);
   ASSERT_EQ(7, config.wktPrecision);
 
