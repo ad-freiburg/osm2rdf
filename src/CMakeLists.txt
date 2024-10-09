@@ -36,7 +36,7 @@ target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../
 target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../include")
 
 target_link_libraries(osm2rdf_library PRIVATE
-	    libspatialjoin
+	    spatialjoin-dev
 		util
         Threads::Threads
         ${EXPAT_LIBRARIES}

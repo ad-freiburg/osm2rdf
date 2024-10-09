@@ -37,14 +37,10 @@ TEST(UTIL_Output, partFilenameSingleDigit) {
       config.getTempPath("TEST_UTIL_Output", "partFilenameSingleDigit");
   osm2rdf::util::Output o{config, "test", 4};
   // Normal parts
-  ASSERT_EQ("test.part_1", o.partFilename(0));
-  ASSERT_EQ("test.part_2", o.partFilename(1));
-  ASSERT_EQ("test.part_3", o.partFilename(2));
-  ASSERT_EQ("test.part_4", o.partFilename(3));
-
-  // Handle prefix (-1) and suffix (-2) parts
-  ASSERT_EQ("test.part_0", o.partFilename(-1));
-  ASSERT_EQ("test.part_5", o.partFilename(-2));
+  ASSERT_EQ("test.part_0", o.partFilename(0));
+  ASSERT_EQ("test.part_1", o.partFilename(1));
+  ASSERT_EQ("test.part_2", o.partFilename(2));
+  ASSERT_EQ("test.part_3", o.partFilename(3));
 }
 
 // ____________________________________________________________________________
@@ -54,26 +50,22 @@ TEST(UTIL_Output, partFilenameMultipleDigits) {
       config.getTempPath("TEST_UTIL_Output", "partFilenameMultipleDigits");
   osm2rdf::util::Output o{config, "test", 16};
   // Normal parts
-  ASSERT_EQ("test.part_01", o.partFilename(0));
-  ASSERT_EQ("test.part_02", o.partFilename(1));
-  ASSERT_EQ("test.part_03", o.partFilename(2));
-  ASSERT_EQ("test.part_04", o.partFilename(3));
-  ASSERT_EQ("test.part_05", o.partFilename(4));
-  ASSERT_EQ("test.part_06", o.partFilename(5));
-  ASSERT_EQ("test.part_07", o.partFilename(6));
-  ASSERT_EQ("test.part_08", o.partFilename(7));
-  ASSERT_EQ("test.part_09", o.partFilename(8));
-  ASSERT_EQ("test.part_10", o.partFilename(9));
-  ASSERT_EQ("test.part_11", o.partFilename(10));
-  ASSERT_EQ("test.part_12", o.partFilename(11));
-  ASSERT_EQ("test.part_13", o.partFilename(12));
-  ASSERT_EQ("test.part_14", o.partFilename(13));
-  ASSERT_EQ("test.part_15", o.partFilename(14));
-  ASSERT_EQ("test.part_16", o.partFilename(15));
-
-  // Handle prefix (-1) and suffix (-2) parts
-  ASSERT_EQ("test.part_00", o.partFilename(-1));
-  ASSERT_EQ("test.part_17", o.partFilename(-2));
+  ASSERT_EQ("test.part_00", o.partFilename(0));
+  ASSERT_EQ("test.part_01", o.partFilename(1));
+  ASSERT_EQ("test.part_02", o.partFilename(2));
+  ASSERT_EQ("test.part_03", o.partFilename(3));
+  ASSERT_EQ("test.part_04", o.partFilename(4));
+  ASSERT_EQ("test.part_05", o.partFilename(5));
+  ASSERT_EQ("test.part_06", o.partFilename(6));
+  ASSERT_EQ("test.part_07", o.partFilename(7));
+  ASSERT_EQ("test.part_08", o.partFilename(8));
+  ASSERT_EQ("test.part_09", o.partFilename(9));
+  ASSERT_EQ("test.part_10", o.partFilename(10));
+  ASSERT_EQ("test.part_11", o.partFilename(11));
+  ASSERT_EQ("test.part_12", o.partFilename(12));
+  ASSERT_EQ("test.part_13", o.partFilename(13));
+  ASSERT_EQ("test.part_14", o.partFilename(14));
+  ASSERT_EQ("test.part_15", o.partFilename(15));
 }
 
 // ____________________________________________________________________________
@@ -81,6 +73,7 @@ TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_UTIL_Output", "WriteIntoCurrentPartFile");
+  std::filesystem::remove_all(config.output);
   config.mergeOutput = OutputMergeMode::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
@@ -93,8 +86,8 @@ TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   osm2rdf::util::Output o{config, output, parts};
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
-  // 4 parts + prefix + suffix
-  ASSERT_EQ(parts + 2, countFilesInPath(config.output));
+  // 4 parts
+  ASSERT_EQ(parts, countFilesInPath(config.output));
   o.write("a", 0);
   o.write("b", 0);
   o.write("c", 0);
@@ -144,6 +137,7 @@ TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
 TEST(UTIL_OutputMergeMode, NONE) {
   osm2rdf::config::Config config;
   config.output = config.getTempPath("TEST_UTIL_OutputMergeMode", "NONE");
+  std::filesystem::remove_all(config.output);
   config.mergeOutput = OutputMergeMode::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
@@ -157,14 +151,14 @@ TEST(UTIL_OutputMergeMode, NONE) {
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
   // 4 parts + prefix + suffix
-  ASSERT_EQ(parts + 2, countFilesInPath(config.output));
+  ASSERT_EQ(parts, countFilesInPath(config.output));
   o.write("a", 0);
   o.write("b", 1);
   o.write("c", 2);
   o.write("d", 3);
   o.flush();
   o.close();
-  ASSERT_EQ(6, countFilesInPath(config.output));
+  ASSERT_EQ(4, countFilesInPath(config.output));
 
   std::filesystem::remove_all(config.output);
   ASSERT_FALSE(std::filesystem::exists(config.output));
@@ -175,6 +169,7 @@ TEST(UTIL_OutputMergeMode, CONCATENATE) {
   osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_UTIL_OutputMergeMode", "CONCATENATE");
+  std::filesystem::remove_all(config.output);
   config.mergeOutput = OutputMergeMode::CONCATENATE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
@@ -188,7 +183,7 @@ TEST(UTIL_OutputMergeMode, CONCATENATE) {
   ASSERT_EQ(0, countFilesInPath(config.output));
   o.open();
   // 4 parts + prefix + suffix + final file
-  ASSERT_EQ(parts + 3, countFilesInPath(config.output));
+  ASSERT_EQ(parts + 1, countFilesInPath(config.output));
   o.write("a", 0);
   o.write("b", 1);
   o.write("c", 2);
