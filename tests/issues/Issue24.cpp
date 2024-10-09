@@ -33,6 +33,7 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -88,6 +89,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -143,6 +145,7 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -192,6 +195,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -284,6 +288,7 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 

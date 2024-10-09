@@ -53,6 +53,7 @@ TEST(OSM_FactHandler, areaFromWay) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -100,6 +101,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -147,6 +149,7 @@ TEST(OSM_FactHandler, node) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -188,6 +191,7 @@ TEST(OSM_FactHandler, relation) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -248,6 +252,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -326,6 +331,7 @@ TEST(OSM_FactHandler, way) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -370,6 +376,7 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addWayNodeGeometry = true;
@@ -414,6 +421,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addWayNodeOrder = true;
@@ -459,6 +467,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addWayNodeOrder = true;
@@ -505,6 +514,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addWayNodeOrder = true;
@@ -553,6 +563,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addWayMetadata = true;
@@ -614,6 +625,7 @@ TEST(OSM_FactHandler, writeGeometryWay) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -652,6 +664,7 @@ TEST(OSM_FactHandler, writeGeometryWaySimplify1) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.simplifyWKT = 2;
@@ -697,6 +710,7 @@ TEST(OSM_FactHandler, writeGeometryWaySimplify2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.simplifyWKT = 2;
@@ -738,6 +752,7 @@ TEST(OSM_FactHandler, writeGeometryWaySimplify3) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.simplifyWKT = 2;
@@ -780,6 +795,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -817,6 +833,7 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 2;
 
@@ -854,6 +871,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -891,6 +909,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -927,6 +946,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -963,6 +983,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1000,6 +1021,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1037,6 +1059,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1074,6 +1097,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1111,6 +1135,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1148,6 +1173,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1184,6 +1210,7 @@ TEST(OSM_FactHandler, writeTag_KeyIRI) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1220,6 +1247,7 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1258,6 +1286,7 @@ TEST(OSM_FactHandler, writeTagList) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1307,6 +1336,7 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1347,6 +1377,7 @@ TEST(OSM_FactHandler, writeTagListRefDouble) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
 
@@ -1391,6 +1422,7 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
 
@@ -1438,6 +1470,7 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1484,6 +1517,7 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1530,6 +1564,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1576,6 +1611,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1622,6 +1658,7 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.skipWikiLinks = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1674,6 +1711,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1715,6 +1753,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1756,6 +1795,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1797,6 +1837,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1843,6 +1884,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1889,6 +1931,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1935,6 +1978,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -1981,6 +2025,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -2027,6 +2072,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -2073,6 +2119,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -2119,6 +2166,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -2165,6 +2213,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -2211,6 +2260,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -2257,6 +2307,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
@@ -2303,6 +2354,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
   osm2rdf::config::Config config;
   config.output = "";
   config.outputCompress = false;
+  config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};
