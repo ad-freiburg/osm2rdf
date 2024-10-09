@@ -256,10 +256,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_HELP, "full");
 
-  auto addCentroidsOp = parser.add<popl::Switch, popl::Attribute::advanced>(
-      osm2rdf::config::constants::ADD_CENTROIDS_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_CENTROIDS_OPTION_LONG,
-      osm2rdf::config::constants::ADD_CENTROIDS_OPTION_HELP);
+  auto noAddCentroidsOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_SHORT,
+      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_LONG,
+      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_HELP);
 
   auto addAreaWayLinestringsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
@@ -427,7 +427,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     // Select amount to dump
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
-    addCentroids = addCentroidsOp->is_set();
+    addCentroids = !noAddCentroidsOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
     addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();

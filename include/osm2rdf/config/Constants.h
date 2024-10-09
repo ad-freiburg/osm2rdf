@@ -182,11 +182,12 @@ const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_LONG =
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_HELP =
     "Add linestrings for ways which form areas";
 
-const static inline std::string ADD_CENTROIDS_INFO = "Add centroid information";
-const static inline std::string ADD_CENTROIDS_OPTION_SHORT = "";
-const static inline std::string ADD_CENTROIDS_OPTION_LONG = "add-hascentroid";
-const static inline std::string ADD_CENTROIDS_OPTION_HELP =
-    "Add geo:hasCentroid triples";
+const static inline std::string NO_ADD_CENTROIDS_INFO =
+    "Do not add centroid information";
+const static inline std::string NO_ADD_CENTROIDS_OPTION_SHORT = "";
+const static inline std::string NO_ADD_CENTROIDS_OPTION_LONG = "no-hascentroid";
+const static inline std::string NO_ADD_CENTROIDS_OPTION_HELP =
+    "Don't add geo:hasCentroid triples";
 
 const static inline std::string ADD_WAY_METADATA_INFO = "Adding way metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_SHORT = "";
