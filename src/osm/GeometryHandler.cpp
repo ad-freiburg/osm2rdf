@@ -255,9 +255,45 @@ void GeometryHandler<W>::way(const Way& way) {
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::calculateRelations() {
+  // flush parse batches
   for (auto& b : _parseBatches) {
     _sweeper.addBatch(b);
     b = {};
+  }
+
+  // read optional auxiliary geo data
+  for (const auto& auxFile :_config.auxGeoFiles) {
+    if (auxFile.size() == 0) continue;
+    const static size_t CACHE_SIZE = 1024 * 1024 * 100;
+    unsigned char* buf = new unsigned char[CACHE_SIZE];
+
+    auto file = open(auxFile.c_str(), O_RDONLY);
+
+    if (file < 0) {
+      delete[] buf;
+      throw std::runtime_error("Could not read auxiliary geo file " + auxFile);
+    }
+
+    ::util::JobQueue<ParseBatch> jobs(1000);  // the WKT parse jobs
+    std::vector<std::thread> thrds(omp_get_max_threads());  // the parse workers
+    for (size_t i = 0; i < thrds.size(); i++)
+      thrds[i] = std::thread(&processQueue, &jobs, i, &_sweeper);
+
+    ssize_t len;
+    std::string dangling;
+    size_t gid = 0;
+
+    while ((len = ::util::readAll(file, buf, CACHE_SIZE)) > 0) {
+      parse(reinterpret_cast<char*>(buf), len, dangling, &gid, jobs, 0);
+    }
+
+    // end event
+    jobs.add({});
+
+    // wait for all parse workers to finish
+    for (auto& thr : thrds) thr.join();
+
+    delete[] buf;
   }
 
   _sweeper.flush();

@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/ttl/Format.h"
@@ -70,6 +71,9 @@ struct Config {
 
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
+
+  // Auxilary geo files
+  std::vector<std::string> auxGeoFiles;
 
   // Statistics
   bool writeRDFStatistics = false;
