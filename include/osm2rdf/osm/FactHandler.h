@@ -99,6 +99,7 @@ class FactHandler {
 
   void writeSecondsAsISO(const std::string& s, const std::string& p,
                          const std::time_t& t);
+  FRIEND_TEST(OSM_FactHandler, writeSecondsAsISO);
 
   bool hasSuffix(const std::string& s, const std::string& suffix) const;
 
