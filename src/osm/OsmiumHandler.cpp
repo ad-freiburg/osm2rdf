@@ -57,8 +57,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       std::cerr << std::endl;
       std::cerr << osm2rdf::util::currentTimeFormatted()
                 << "OSM Pass 1 ... (Count objects, Relations for areas"
-                << ", Relation members"
-                << ")" << std::endl;
+                << ", Relation members)" << std::endl;
       osmium::io::ReaderWithProgressBar reader{true, input_file,
                                                osmium::osm_entity_bits::object};
       {
