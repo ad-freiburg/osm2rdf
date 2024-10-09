@@ -19,7 +19,6 @@
 #ifndef OSM2RDF_OSM_NODE_H_
 #define OSM2RDF_OSM_NODE_H_
 
-#include "Generic.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"

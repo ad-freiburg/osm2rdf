@@ -21,7 +21,6 @@
 #include <iostream>
 #include <vector>
 
-#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"

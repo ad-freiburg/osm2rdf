@@ -18,8 +18,6 @@
 
 #include "osm2rdf/osm/Box.h"
 
-#include "osm2rdf/osm/Generic.h"
-
 // ____________________________________________________________________________
 osm2rdf::osm::Box::Box() = default;
 

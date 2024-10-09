@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "osm2rdf/osm/Box.h"
-#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osm2rdf/osm/Way.h"
