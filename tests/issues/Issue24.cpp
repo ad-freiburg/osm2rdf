@@ -63,13 +63,13 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 .\n"
-      "osm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
+      "osmway:21 geo:hasGeometry osm2rdf:osmwayarea_21 .\n"
+      "osm2rdf:osmwayarea_21 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
       "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmway:21 osm2rdfgeom:convex_hull \"POLYGON(())\"^^geo:wktLiteral .\n"
-      "osmway:21 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
+      "osmway:21 osm2rdf:convex_hull \"POLYGON()\"^^geo:wktLiteral .\n"
+      "osmway:21 osm2rdf:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmway:21 osm2rdfgeom:obb \"POLYGON(())\"^^geo:wktLiteral .\n"
+      "osmway:21 osm2rdf:obb \"POLYGON()\"^^geo:wktLiteral .\n"
       "osmway:21 osm2rdf:area \"0.000000000000\"^^xsd:double .\n",
       buffer.str());
 
@@ -117,14 +117,14 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 .\n"
-      "osm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
+      "osmrel:10 geo:hasGeometry osm2rdf:osmrelarea_10 .\n"
+      "osm2rdf:osmrelarea_10 geo:asWKT \"MULTIPOLYGON(((48.0 7.5,48.0 "
       "7.6,48.1 7.6,48.1 7.5,48.0 7.5)))\"^^geo:wktLiteral .\n"
-      "osmrel:10 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
+      "osmrel:10 osm2rdf:convex_hull \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmrel:10 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
+      "osmrel:10 osm2rdf:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmrel:10 osm2rdfgeom:obb \"POLYGON((48.0 7.6,48.1 7.6,48.1 7.5,48.0 "
+      "osmrel:10 osm2rdf:obb \"POLYGON((48.0 7.6,48.1 7.6,48.1 7.5,48.0 "
       "7.5,48.0 7.6))\"^^geo:wktLiteral .\n"
       "osmrel:10 osm2rdf:area \"0.010000000000\"^^xsd:double .\n",
       buffer.str());
@@ -170,14 +170,14 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
       "osmnode:42 rdf:type osm:node .\n"
       "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
-      "osmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\n"
-      "osm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48.0)\"^^geo:wktLiteral "
+      "osmnode:42 geo:hasGeometry osm2rdf:osmnode_42 .\n"
+      "osm2rdf:osmnode_42 geo:asWKT \"POINT(7.5 48.0)\"^^geo:wktLiteral "
       ".\n"
-      "osmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
+      "osmnode:42 osm2rdf:convex_hull \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
-      "osmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
+      "osmnode:42 osm2rdf:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
-      "osmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
+      "osmnode:42 osm2rdf:obb \"POLYGON((7.5 48.0,7.5 48.0,7.5 48.0,7.5 "
       "48.0,7.5 48.0))\"^^geo:wktLiteral .\n",
       buffer.str());
 
@@ -267,14 +267,14 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
       "_:0_1 osm2rdfmember:id osmway:55 .\n"
       "_:0_1 osm2rdfmember:role \"outer\" .\n"
       "_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\n"
-      "osmrel:42 geo:hasGeometry osm2rdfgeom:osm_relation_42 .\n"
-      "osm2rdfgeom:osm_relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "osmrel:42 geo:hasGeometry osm2rdf:osmrel_42 .\n"
+      "osm2rdf:osmrel_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48.0),LINESTRING(7.5 48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
-      "osmrel:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48.0,7.6 48.0,7.5 "
+      "osmrel:42 osm2rdf:convex_hull \"POLYGON((7.5 48.0,7.6 48.0,7.5 "
       "48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
-      "osmrel:42 osm2rdfgeom:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.6 "
+      "osmrel:42 osm2rdf:envelope \"POLYGON((7.5 48.0,7.5 48.0,7.6 "
       "48.0,7.6 48.0,7.5 48.0))\"^^geo:wktLiteral .\n"
-      "osmrel:42 osm2rdfgeom:obb \"POLYGON((7.6 48.0,7.6 48.0,7.5 48.0,7.5 "
+      "osmrel:42 osm2rdf:obb \"POLYGON((7.6 48.0,7.6 48.0,7.5 48.0,7.5 "
       "48.0,7.6 48.0))\"^^geo:wktLiteral .\n"
       "osmrel:42 osm2rdf:completeGeometry \"yes\" .\n",
       buffer.str());
@@ -323,14 +323,14 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
       "osmway:42 rdf:type osm:way .\n"
       "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
-      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdf:osmway_42 .\n"
+      "osm2rdf:osmway_42 geo:asWKT \"LINESTRING(48.0 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
-      "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
+      "osmway:42 osm2rdf:convex_hull \"POLYGON((48.0 7.5,48.1 7.6,48.0 "
       "7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmway:42 osm2rdfgeom:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
+      "osmway:42 osm2rdf:envelope \"POLYGON((48.0 7.5,48.0 7.6,48.1 "
       "7.6,48.1 7.5,48.0 7.5))\"^^geo:wktLiteral .\n"
-      "osmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48.0 7.5,48.0 "
+      "osmway:42 osm2rdf:obb \"POLYGON((48.1 7.6,48.1 7.6,48.0 7.5,48.0 "
       "7.5,48.1 7.6))\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n",
       buffer.str());
