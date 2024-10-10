@@ -49,8 +49,13 @@ endif()
 
 add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
+
 # Basic optimization
-add_compile_options(-march=native -flto=auto)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12)
+	add_compile_options(-flto=auto)
+endif()
+
+add_compile_options(-march=native)
 # Enable fast-math
 add_compile_options(-ffast-math)
 
