@@ -54,10 +54,10 @@ class Way {
   id_t _id;
   std::time_t _timestamp;
   std::vector<osm2rdf::osm::Node> _nodes;
-  ::util::geo::Line<double> _geom;
-  ::util::geo::Box<double> _envelope;
-  ::util::geo::Polygon<double> _convexHull;
-  ::util::geo::Polygon<double> _obb;
+  ::util::geo::DLine _geom;
+  ::util::geo::DBox _envelope;
+  ::util::geo::DPolygon _convexHull;
+  ::util::geo::DPolygon _obb;
   osm2rdf::osm::TagList _tags;
 };
 

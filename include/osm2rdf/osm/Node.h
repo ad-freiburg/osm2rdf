@@ -47,7 +47,7 @@ class Node {
  protected:
   id_t _id;
   std::time_t _timestamp;
-  ::util::geo::Point<double> _geom;
+  ::util::geo::DPoint _geom;
   osm2rdf::osm::TagList _tags;
 };
 

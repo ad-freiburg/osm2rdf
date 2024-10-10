@@ -213,7 +213,7 @@ void GeometryHandler<W>::area(const Area& area) {
 // ____________________________________________________________________________
 template <typename W>
 ::util::geo::I32Point GeometryHandler<W>::transform(
-    const ::util::geo::Point<double>& loc) {
+    const ::util::geo::DPoint& loc) {
   auto point = ::util::geo::latLngToWebMerc(
       ::util::geo::DPoint(loc.getX(), loc.getY()));  // locs are lon/lat
   return ::util::geo::I32Point{point.getX() * PREC, point.getY() * PREC};

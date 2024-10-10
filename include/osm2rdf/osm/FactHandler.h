@@ -54,7 +54,7 @@ class FactHandler {
 
  protected:
   void writeBox(const std::string& s, const std::string& p,
-                const ::util::geo::Box<double>& box);
+                const ::util::geo::DBox& box);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
 
