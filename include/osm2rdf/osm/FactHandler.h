@@ -92,10 +92,12 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth2);
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth3);
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth4);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth5);
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1);
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2);
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3);
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5);
 
   void writeSecondsAsISO(const std::string& s, const std::string& p,
                          const std::time_t& t);
