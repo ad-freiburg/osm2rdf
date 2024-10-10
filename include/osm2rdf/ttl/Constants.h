@@ -46,9 +46,10 @@ const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 
 // Generated constants (depending on output format)
-inline std::string IRI__GEOSPARQL__HAS_SERIALIZATION;
 inline std::string IRI__GEOSPARQL__AS_WKT;
+inline std::string IRI__GEOSPARQL__HAS_CENTROID;
 inline std::string IRI__GEOSPARQL__HAS_GEOMETRY;
+inline std::string IRI__GEOSPARQL__HAS_SERIALIZATION;
 inline std::string IRI__GEOSPARQL__WKT_LITERAL;
 
 inline std::string IRI__OPENGIS_CONTAINS;
@@ -57,6 +58,11 @@ inline std::string IRI__OSM2RDF_CONTAINS_AREA;
 inline std::string IRI__OPENGIS_INTERSECTS;
 inline std::string IRI__OSM2RDF_INTERSECTS_NON_AREA;
 inline std::string IRI__OSM2RDF_INTERSECTS_AREA;
+inline std::string IRI__OPENGIS_COVERS;
+inline std::string IRI__OPENGIS_TOUCHES;
+inline std::string IRI__OPENGIS_EQUALS;
+inline std::string IRI__OPENGIS_CROSSES;
+inline std::string IRI__OPENGIS_OVERLAPS;
 
 inline std::string IRI__OSM2RDF_GEOM__CONVEX_HULL;
 inline std::string IRI__OSM2RDF_GEOM__ENVELOPE;

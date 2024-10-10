@@ -21,8 +21,6 @@
 
 #include <string>
 
-#include "boost/serialization/access.hpp"
-#include "boost/serialization/nvp.hpp"
 #include "osmium/osm/relation.hpp"
 
 namespace osm2rdf::osm {
@@ -45,14 +43,6 @@ class RelationMember {
   id_t _id;
   std::string _role;
   osm2rdf::osm::RelationMemberType _type;
-
-  friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
-    ar& boost::serialization::make_nvp("_id", _id);
-    ar& boost::serialization::make_nvp("_role", _role);
-    ar& boost::serialization::make_nvp("_type", _type);
-  }
 };
 
 }  // namespace osm2rdf::osm

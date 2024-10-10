@@ -42,14 +42,14 @@ macro(package_add_test TESTNAME)
     # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it
     gtest_discover_tests(${TESTNAME}
         # set a working directory so your project root so that you can find test data via paths relative to the project root
-        WORKING_DIRECTORY ${PROJECT_DIR}
-        PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_DIR}"
+		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+		PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     )
     set_target_properties(${TESTNAME} PROPERTIES FOLDER vendor)
     # register test for global build target
     add_dependencies(build_tests ${TESTNAME})
     add_dependencies(run_tests run_${TESTNAME})
-    add_custom_target(run_${TESTNAME} COMMAND ${TESTNAME} DEPENDS ${TESTNAME} WORKING_DIRECTORY "${PROJECT_DIR}")
+	add_custom_target(run_${TESTNAME} COMMAND ${TESTNAME} DEPENDS ${TESTNAME} WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 endmacro()
 
 add_custom_target(build_tests)
@@ -57,24 +57,11 @@ add_custom_target(run_tests)
 package_add_test(BaselineTest Baseline.cpp)
 package_add_test(E2ETest E2E.cpp)
 package_add_test(CONFIG_ConfigTest config/Config.cpp)
-package_add_test(GEOMETRY_AreaTest geometry/Area.cpp)
-package_add_test(GEOMETRY_BoxTest geometry/Box.cpp)
-package_add_test(GEOMETRY_LinestringTest geometry/Linestring.cpp)
-package_add_test(GEOMETRY_LocationTest geometry/Location.cpp)
-package_add_test(GEOMETRY_MultiPolygonTest geometry/MultiPolygon.cpp)
-package_add_test(GEOMETRY_NodeTest geometry/Node.cpp)
-package_add_test(GEOMETRY_PolygonTest geometry/Polygon.cpp)
-package_add_test(GEOMETRY_RelationTest geometry/Relation.cpp)
-package_add_test(GEOMETRY_RingTest geometry/Ring.cpp)
-package_add_test(GEOMETRY_WayTest geometry/Way.cpp)
 package_add_test(ISSUES_15Test issues/Issue15.cpp)
 package_add_test(ISSUES_24Test issues/Issue24.cpp)
 package_add_test(ISSUES_28Test issues/Issue28.cpp)
 package_add_test(OSM_AreaTest osm/Area.cpp)
-package_add_test(OSM_BoxTest osm/Box.cpp)
 package_add_test(OSM_FactHandlerTest osm/FactHandler.cpp)
-package_add_test(OSM_GenericTest osm/Generic.cpp)
-package_add_test(OSM_GeometryHandlerTest osm/GeometryHandler.cpp)
 package_add_test(OSM_NodeTest osm/Node.cpp)
 package_add_test(OSM_OsmiumHandlerTest osm/OsmiumHandler.cpp)
 package_add_test(OSM_RelationTest osm/Relation.cpp)
@@ -89,3 +76,7 @@ package_add_test(UTIL_DirectedAcyclicGraphTest util/DirectedAcyclicGraph.cpp)
 package_add_test(UTIL_OutputTest util/Output.cpp)
 package_add_test(UTIL_ProgressBarTest util/ProgressBar.cpp)
 package_add_test(UTIL_TimeTest util/Time.cpp)
+
+# copy test files to binary directory to make sure they can be found
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+

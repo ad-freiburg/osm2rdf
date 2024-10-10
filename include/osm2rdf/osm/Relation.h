@@ -22,16 +22,12 @@
 #include <vector>
 
 #include "RelationHandler.h"
-#include "boost/serialization/nvp.hpp"
-#include "boost/serialization/vector.hpp"
-#include "boost/version.hpp"
-#include "osm2rdf/geometry/Polygon.h"
-#include "osm2rdf/geometry/Relation.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/relation.hpp"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
 
@@ -47,14 +43,14 @@ class Relation {
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
   [[nodiscard]] bool hasCompleteGeometry() const noexcept;
   [[nodiscard]] bool isArea() const noexcept;
-#if BOOST_VERSION >= 107800
   [[nodiscard]] bool hasGeometry() const noexcept;
-  [[nodiscard]] const osm2rdf::geometry::Box& envelope() const noexcept;
-  [[nodiscard]] const osm2rdf::geometry::Relation& geom() const noexcept;
-  [[nodiscard]] const osm2rdf::geometry::Polygon& convexHull() const noexcept;
-  [[nodiscard]] const osm2rdf::geometry::Polygon& orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
+  [[nodiscard]] const ::util::geo::DCollection& geom() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox()
+      const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
   void buildGeometry(osm2rdf::osm::RelationHandler& relationHandler);
-#endif  // BOOST_VERSION >= 107800
 
   bool operator==(const osm2rdf::osm::Relation& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Relation& other) const noexcept;
@@ -64,30 +60,11 @@ class Relation {
   std::time_t _timestamp;
   std::vector<osm2rdf::osm::RelationMember> _members;
   osm2rdf::osm::TagList _tags;
-#if BOOST_VERSION >= 107800
-  osm2rdf::geometry::Box _envelope;
-  osm2rdf::geometry::Relation _geom;
-  osm2rdf::geometry::Polygon _convexHull;
-  osm2rdf::geometry::Polygon _obb;
-#endif  // BOOST_VERSION >= 107800
+  ::util::geo::DBox _envelope;
+  ::util::geo::DCollection _geom;
+  ::util::geo::DPolygon _convexHull;
+  ::util::geo::DPolygon _obb;
   bool _hasCompleteGeometry;
-
-  friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
-    ar& boost::serialization::make_nvp("_id", _id);
-    ar& boost::serialization::make_nvp("_timestamp", _timestamp);
-    ar& boost::serialization::make_nvp("_members", _members);
-    ar& boost::serialization::make_nvp("_tags", _tags);
-#if BOOST_VERSION >= 107800
-    ar& boost::serialization::make_nvp("_envelope", _envelope);
-    ar& boost::serialization::make_nvp("_geom", _geom);
-    ar& boost::serialization::make_nvp("_convexHull", _envelope);
-    ar& boost::serialization::make_nvp("_obb", _geom);
-#endif  // BOOST_VERSION >= 107800
-    ar& boost::serialization::make_nvp("_hasCompleteGeometry",
-                                       _hasCompleteGeometry);
-  }
 };
 
 }  // namespace osm2rdf::osm

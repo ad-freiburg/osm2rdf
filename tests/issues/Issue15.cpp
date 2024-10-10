@@ -41,10 +41,7 @@ TEST(Issue15, Relation_8291361_expected) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmrel_8291361.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
+  config.input = "tests/issues/issue15_osmrel_8291361.xml";
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};
@@ -93,7 +90,7 @@ TEST(Issue15, Relation_8291361_failed) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmrel_8291361.xml";
+  config.input = "tests/issues/issue15_osmrel_8291361.xml";
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -141,10 +138,7 @@ TEST(Issue15, Way_201387026_expected) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
+  config.input = "tests/issues/issue15_osmway_201387026.xml";
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};
@@ -193,7 +187,7 @@ TEST(Issue15, Way_201387026_failed) {
   config.output = "";
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
+  config.input = "tests/issues/issue15_osmway_201387026.xml";
 
   osm2rdf::util::Output output{config, config.output};
   output.open();

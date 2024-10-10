@@ -17,15 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/ttl/Writer.h"
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
 
-#include "boost/iostreams/filter/bzip2.hpp"
+#include "osm2rdf/ttl/Writer.h"
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -88,14 +87,17 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://www.openhistoricalmap.org/way/"}};
 
   // Generate constants
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasCentroid");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_SERIALIZATION = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasSerialization");
-  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
+
   osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
   osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =
@@ -104,6 +106,17 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_nonarea");
   osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
+  osm2rdf::ttl::constants::IRI__OPENGIS_COVERS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCovers");
+  osm2rdf::ttl::constants::IRI__OPENGIS_TOUCHES =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfTouches");
+  osm2rdf::ttl::constants::IRI__OPENGIS_EQUALS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfEquals");
+  osm2rdf::ttl::constants::IRI__OPENGIS_CROSSES =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCrosses");
+  osm2rdf::ttl::constants::IRI__OPENGIS_OVERLAPS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfOverlaps");
+
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
@@ -167,9 +180,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 
   // Prepare statistic variables
 #if defined(_OPENMP)
-  _numOuts = omp_get_max_threads();
+  _numOuts = std::max(std::thread::hardware_concurrency(),
+                      static_cast<unsigned int>(omp_get_max_threads()) + 1);
 #else
-  _numOuts = 1;
+  _numOuts = std::thread::hardware_concurrency() + 1;
 #endif
   _blankNodeCount = new uint64_t[_numOuts];
   _headerLines = new uint64_t[_numOuts];
@@ -240,12 +254,8 @@ void osm2rdf::ttl::Writer<T>::writeStatisticJson(
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
-    writeTriple("@prefix", prefix + ":", "<" + iriref + ">");
-#if defined(_OPENMP)
-    _headerLines[omp_get_thread_num()]++;
-#else
+    writeTriple("@prefix", prefix + ":", "<" + iriref + ">", 0);
     _headerLines[0]++;
-#endif
   }
 }
 
@@ -347,19 +357,37 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
-  _out->write(s);
-  _out->write(' ');
-  _out->write(p);
-  _out->write(' ');
-  _out->write(o);
-  _out->write(' ');
-  _out->write('.');
-  _out->writeNewLine();
+  size_t part = 0;
+
 #if defined(_OPENMP)
-  _lineCount[omp_get_thread_num()]++;
+  part = omp_get_thread_num();
 #else
-  _lineCount[0]++;
+  part = 0;
 #endif
+
+  _out->write(s, part);
+  _out->write(' ', part);
+  _out->write(p, part);
+  _out->write(' ', part);
+  _out->write(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
+                                          const std::string& p,
+                                          const std::string& o, size_t part) {
+  _out->write(s, part);
+  _out->write(' ', part);
+  _out->write(p, part);
+  _out->write(' ', part);
+  _out->write(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
 }
 
 // ____________________________________________________________________________

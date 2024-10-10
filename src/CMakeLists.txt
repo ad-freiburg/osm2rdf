@@ -26,13 +26,18 @@ add_library(osm2rdf_library ${CPP_LIST} ${HEADER_LIST})
 # Add gtest header for FRIEND_TEST
 target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../vendor/google/googletest/googletest/include")
 
+# Add headers for spatialjoin
+target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../vendor/spatialjoin/src")
+
+# Add headers for util
+target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../vendor/spatialjoin/src/util")
+
 # We need this directory, and users of our library will need it too
 target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../include")
 
-# This depends on (header only) boost (Boost::boost)
 target_link_libraries(osm2rdf_library PRIVATE
-        Boost::boost
-        Boost::serialization
+	    spatialjoin-dev
+		util
         Threads::Threads
         ${EXPAT_LIBRARIES}
         ${BZIP2_LIBRARIES}

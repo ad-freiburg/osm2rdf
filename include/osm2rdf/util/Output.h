@@ -19,10 +19,13 @@
 #ifndef OSM2RDF_UTIL_OUTPUT_H
 #define OSM2RDF_UTIL_OUTPUT_H
 
+#include <bzlib.h>
 #include <fstream>
+#include <vector>
 
-#include "boost/iostreams/filtering_stream.hpp"
 #include "osm2rdf/config/Config.h"
+
+static const size_t BUFFER_S = 1024 * 1024 * 50;
 
 namespace osm2rdf::util {
 
@@ -36,20 +39,13 @@ class Output {
   bool open();
   // Close all output streams.
   void close();
-  void close(std::string_view prefix, std::string_view suffix);
 
-  // Write the given line into the correct part for the current (openmp) thread.
-  void write(std::string_view strv);
   // Write the given string view into the specified part.
   void write(std::string_view strv, size_t part); // Flush all part.
 
-  // Write the given char into the correct part for the current (openmp) thread.
-  void write(const char c);
   // Write the given char view into the specified part.
   void write(const char c, size_t part); // Flush all part.
 
-  // Write a newline, this will also flush outputs to std::out
-  void writeNewLine();
   // Write a newline into the specified part.
   void writeNewLine(size_t part);
 
@@ -60,8 +56,6 @@ class Output {
   std::string partFilename(int part);
 
  protected:
-  // Closes and merges all parts, prepend given prefix and append given suffix.
-  void merge();
   // Closes and concatenates all parts without decompressing and recompressing
   // streams.
   void concatenate();
@@ -76,13 +70,16 @@ class Output {
   // Number of digits required for _partCount.
   std::size_t _partCountDigits;
   bool _open = false;
-  // Output streams
-  boost::iostreams::filtering_ostream* _outs;
-  std::ofstream* _outFiles;
   // Final output file
   std::ofstream _outFile;
 
   std::stringstream* _outBufs;
+
+  std::vector<unsigned char*> _outBuffers;
+
+  std::vector<FILE*> _rawFiles;
+  std::vector<BZFILE*> _files;
+  std::vector<size_t> _outBufPos;
 
   // true if output goes to stdout
   bool _toStdOut;
