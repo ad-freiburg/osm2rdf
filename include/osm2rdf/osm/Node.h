@@ -19,13 +19,10 @@
 #ifndef OSM2RDF_OSM_NODE_H_
 #define OSM2RDF_OSM_NODE_H_
 
-#include "boost/serialization/nvp.hpp"
-#include "osm2rdf/geometry/Box.h"
-#include "osm2rdf/geometry/Location.h"
-#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
 
@@ -36,27 +33,22 @@ class Node {
   explicit Node(const osmium::Node& node);
   explicit Node(const osmium::NodeRef& nodeRef);
   [[nodiscard]] id_t id() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Box envelope() const noexcept;
-  [[nodiscard]] const osm2rdf::geometry::Location& geom() const noexcept;
+  [[nodiscard]] std::time_t timestamp() const noexcept;
+  [[nodiscard]] const ::util::geo::DBox envelope() const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint& geom() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Polygon convexHull() const noexcept;
-  [[nodiscard]] osm2rdf::geometry::Polygon orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon convexHull() const noexcept;
+  [[nodiscard]] const ::util::geo::DPolygon orientedBoundingBox() const noexcept;
+  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
 
   bool operator==(const osm2rdf::osm::Node& other) const noexcept;
   bool operator!=(const osm2rdf::osm::Node& other) const noexcept;
 
  protected:
   id_t _id;
-  osm2rdf::geometry::Location _geom;
+  std::time_t _timestamp;
+  ::util::geo::DPoint _geom;
   osm2rdf::osm::TagList _tags;
-
-  friend class boost::serialization::access;
-  template <class Archive>
-  void serialize(Archive& ar, [[maybe_unused]] const unsigned int version) {
-    ar& boost::serialization::make_nvp("_id", _id);
-    ar& boost::serialization::make_nvp("_geom", _geom);
-    ar& boost::serialization::make_nvp("_tags", _tags);
-  }
 };
 
 }  // namespace osm2rdf::osm

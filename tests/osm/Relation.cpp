@@ -18,11 +18,6 @@
 
 #include "osm2rdf/osm/Relation.h"
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -210,66 +205,6 @@ TEST(OSM_Relation, notEqualsOperator) {
   ASSERT_TRUE(o3 != o1);
   ASSERT_TRUE(o3 != o2);
   ASSERT_FALSE(o3 != o3);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Relation, serializationBinary) {
-  std::stringstream boostBuffer;
-
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_relation(
-      osmiumBuffer, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Relation src{osmiumBuffer.get<osmium::Relation>(0)};
-
-  osm2rdf::osm::Relation dst;
-
-  // Store and load
-  boost::archive::binary_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::binary_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Relation, serializationText) {
-  std::stringstream boostBuffer;
-
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_relation(
-      osmiumBuffer, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Relation src{osmiumBuffer.get<osmium::Relation>(0)};
-
-  osm2rdf::osm::Relation dst;
-
-  // Store and load
-  boost::archive::text_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::text_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
 }
 
 }  // namespace osm2rdf::osm

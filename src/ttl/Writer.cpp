@@ -17,16 +17,17 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/ttl/Writer.h"
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <thread>
 
-#include "boost/iostreams/filter/bzip2.hpp"
+#include "osm2rdf/ttl/Writer.h"
+#if defined(_OPENMP)
 #include "omp.h"
+#endif
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osmium/osm/item_type.hpp"
@@ -36,6 +37,7 @@ template <typename T>
 osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
                                 osm2rdf::util::Output* output)
     : _config(config), _out(output) {
+  // Static prefixes
   _prefixes = {
       // well-known prefixes
       {osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL,
@@ -53,37 +55,68 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://osm2rdf.cs.uni-freiburg.de/rdf#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/geom#"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG,
+       "https://osm2rdf.cs.uni-freiburg.de/rdf/key#"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER,
+       "https://osm2rdf.cs.uni-freiburg.de/rdf/member#"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
+       "https://osm2rdf.cs.uni-freiburg.de/rdf/meta#"},
+      // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
+      // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
       // osm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OSM,
        "https://www.openstreetmap.org/"},
-      // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
-      // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_META,
+       "https://www.openstreetmap.org/meta/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
+       "https://www.openstreetmap.org/wiki/Key:"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
        "https://www.openstreetmap.org/node/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
        "https://www.openstreetmap.org/relation/"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
-       "https://www.openstreetmap.org/wiki/Key:"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
-       "https://www.openstreetmap.org/way/"}};
+       "https://www.openstreetmap.org/way/"},
+      // ohm prefixes
+      {osm2rdf::ttl::constants::NAMESPACE__OHM,
+       "https://www.openhistoricalmap.org/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE,
+       "https://www.openhistoricalmap.org/node/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
+       "https://www.openhistoricalmap.org/relation/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_WAY,
+       "https://www.openhistoricalmap.org/way/"}};
 
   // Generate constants
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasCentroid");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_SERIALIZATION = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasSerialization");
-  osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
-  osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_area");
+
+  osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_nonarea");
-  osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
+  osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
+  osm2rdf::ttl::constants::IRI__OPENGIS_COVERS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCovers");
+  osm2rdf::ttl::constants::IRI__OPENGIS_TOUCHES =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfTouches");
+  osm2rdf::ttl::constants::IRI__OPENGIS_EQUALS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfEquals");
+  osm2rdf::ttl::constants::IRI__OPENGIS_CROSSES =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCrosses");
+  osm2rdf::ttl::constants::IRI__OPENGIS_OVERLAPS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfOverlaps");
+
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
   osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
@@ -94,8 +127,14 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "envelope");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "obb");
-  osm2rdf::ttl::constants::IRI__OSM2RDF__POS =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "pos");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "id");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ROLE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "role");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "pos");
+  osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "timestamp");
   osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
   osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =
@@ -119,6 +158,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__RDF_TYPE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__RDF, "type");
 
+  osm2rdf::ttl::constants::IRI__XSD_DATE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "date");
+  osm2rdf::ttl::constants::IRI__XSD_DATE_TIME =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "dateTime");
   osm2rdf::ttl::constants::IRI__XSD_DECIMAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "decimal");
   osm2rdf::ttl::constants::IRI__XSD_DOUBLE =
@@ -127,15 +170,20 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
   osm2rdf::ttl::constants::IRI__XSD_INTEGER =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
+  osm2rdf::ttl::constants::IRI__XSD_YEAR =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYear");
+  osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMonth");
 
   osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no", "");
   osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes", "");
 
   // Prepare statistic variables
 #if defined(_OPENMP)
-  _numOuts = omp_get_max_threads();
+  _numOuts = std::max(std::thread::hardware_concurrency(),
+                      static_cast<unsigned int>(omp_get_max_threads()) + 1);
 #else
-  _numOuts = 1;
+  _numOuts = std::thread::hardware_concurrency() + 1;
 #endif
   _blankNodeCount = new uint64_t[_numOuts];
   _headerLines = new uint64_t[_numOuts];
@@ -206,12 +254,8 @@ void osm2rdf::ttl::Writer<T>::writeStatisticJson(
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeHeader() {
   for (const auto& [prefix, iriref] : _prefixes) {
-    writeTriple("@prefix", prefix + ":", "<" + iriref + ">");
-#if defined(_OPENMP)
-    _headerLines[omp_get_thread_num()]++;
-#else
+    writeTriple("@prefix", prefix + ":", "<" + iriref + ">", 0);
     _headerLines[0]++;
-#endif
   }
 }
 
@@ -313,19 +357,37 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o) {
-  _out->write(s);
-  _out->write(' ');
-  _out->write(p);
-  _out->write(' ');
-  _out->write(o);
-  _out->write(' ');
-  _out->write('.');
-  _out->writeNewLine();
+  size_t part = 0;
+
 #if defined(_OPENMP)
-  _lineCount[omp_get_thread_num()]++;
+  part = omp_get_thread_num();
 #else
-  _lineCount[0]++;
+  part = 0;
 #endif
+
+  _out->write(s, part);
+  _out->write(' ', part);
+  _out->write(p, part);
+  _out->write(' ', part);
+  _out->write(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
+                                          const std::string& p,
+                                          const std::string& o, size_t part) {
+  _out->write(s, part);
+  _out->write(' ', part);
+  _out->write(p, part);
+  _out->write(' ', part);
+  _out->write(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
 }
 
 // ____________________________________________________________________________

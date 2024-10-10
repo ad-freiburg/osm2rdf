@@ -23,6 +23,7 @@
 #include <filesystem>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/ttl/Format.h"
@@ -32,8 +33,12 @@ namespace osm2rdf::config {
 
 enum GeoTriplesMode {
   none = 0,
-  reduced = 1,
-  full = 2
+  full = 1
+};
+
+enum SourceDataset {
+  OSM = 0,
+  OHM = 1
 };
 
 struct Config {
@@ -49,63 +54,37 @@ struct Config {
   bool noGeometricRelations = false;
   bool noAreaGeometricRelations = false;
   bool noNodeGeometricRelations = false;
+  bool noRelationGeometricRelations = false;
   bool noWayGeometricRelations = false;
   double simplifyGeometries = 0;
 
-  // the epsilon for the inner/outer douglas-peucker is based on the
-  // circumference of a hypothetical circle. By dividing by ~pi, we base the
-  // epsilon on 1/n of the radius of this hypothetical circle (n = 20 in this
-  // case). Think of this is maximum portion of the radius that is
-  // "collapsed away" by the inner simplification, or added by the outer
-  // simplification
-  double simplifyGeometriesInnerOuter = 1 / (3.14 * 20);
-  bool dontUseInnerOuterGeoms = false;
-  bool approximateSpatialRels = false;
+  SourceDataset sourceDataset = OSM;
 
   // Select amount to dump
-  bool addAreaConvexHull = false;
-  bool addAreaEnvelope = false;
-  bool addAreaOrientedBoundingBox = false;
   bool addAreaWayLinestrings = false;
-  bool addNodeConvexHull = false;
-  bool addNodeEnvelope = false;
-  bool addNodeOrientedBoundingBox = false;
-  bool addRelationBorderMembers = false;
-  bool addRelationConvexHull = false;
-  bool addRelationEnvelope = false;
-  bool addRelationOrientedBoundingBox = false;
-  bool addSortMetadata = true;
-  bool addWayConvexHull = false;
-  bool addWayEnvelope = false;
+  bool addCentroids = true;
   bool addWayMetadata = false;
   bool addWayNodeGeometry = false;
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
-  bool addWayOrientedBoundingBox = false;
-  bool adminRelationsOnly = false;
-  bool hasGeometryAsWkt = false;
   bool skipWikiLinks = false;
-
-  // Addition filters / data
-  bool addAreaEnvelopeRatio = false;
 
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
 
-  // Dot
-  bool writeDAGDotFiles = false;
+  // Auxilary geo files
+  std::vector<std::string> auxGeoFiles;
 
   // Statistics
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
   // Output modifiers
-  uint16_t simplifyWKT = 250;
+  uint16_t simplifyWKT = 0;
   double wktDeviation = 5;
   uint16_t wktPrecision = 7;
 
   GeoTriplesMode ogcGeoTriplesMode = full;
-  GeoTriplesMode osm2rdfGeoTriplesMode = none;
 
   // Output, empty for stdout
   std::filesystem::path output;

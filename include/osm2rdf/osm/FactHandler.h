@@ -25,8 +25,17 @@
 #include "gtest/gtest_prod.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Writer.h"
+#include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
+
+enum DateTimeType {
+  invalid = 0,
+  date_yyyy = 1,
+  date_yyyy_mm = 2,
+  date_yyyy_mm_dd = 3,
+  date_time = 4
+};
 
 template <typename W>
 class FactHandler {
@@ -40,17 +49,12 @@ class FactHandler {
   void way(const osm2rdf::osm::Way& way);
 
   template <typename G>
-  void writeBoostGeometry(const std::string& s, const std::string& p,
+  void writeGeometry(const std::string& s, const std::string& p,
                           const G& g);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWay);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify1);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify2);
-  FRIEND_TEST(OSM_FactHandler, writeBoostGeometryWaySimplify3);
 
  protected:
-
   void writeBox(const std::string& s, const std::string& p,
-                const osm2rdf::geometry::Box& box);
+                const ::util::geo::DBox& box);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
 
@@ -71,11 +75,31 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagList);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
   FRIEND_TEST(OSM_FactHandler, writeTagListRefSingle);
+  FRIEND_TEST(OSM_FactHandler, writeTagListRefDouble);
   FRIEND_TEST(OSM_FactHandler, writeTagListRefMultiple);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidataMultiple);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithLang);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang);
   FRIEND_TEST(OSM_FactHandler, writeTagListSkipWikiLinks);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateInvalid);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateInvalid2);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateInvalid3);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear1);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear2);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear3);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear4);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth1);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth2);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth3);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth4);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3);
+  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4);
+
+  void writeSecondsAsISO(const std::string& s, const std::string& p,
+                         const std::time_t& t);
+  FRIEND_TEST(OSM_FactHandler, writeSecondsAsISO);
 
   bool hasSuffix(const std::string& s, const std::string& suffix) const;
 

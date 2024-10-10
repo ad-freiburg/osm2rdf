@@ -30,8 +30,8 @@ TEST(TTL_WriterNT, resolvePrefix) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
-        w.resolvePrefix(osm2rdf::ttl::constants::NAMESPACE__OSM);
-    ASSERT_STREQ("https://www.openstreetmap.org/", res.c_str());
+        w.resolvePrefix(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL);
+    ASSERT_STREQ("http://www.opengis.net/ont/geosparql#", res.c_str());
   }
   {
     const std::string res =
@@ -46,8 +46,8 @@ TEST(TTL_WriterTTL, resolvePrefix) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
-        w.resolvePrefix(osm2rdf::ttl::constants::NAMESPACE__OSM);
-    ASSERT_STREQ("https://www.openstreetmap.org/", res.c_str());
+        w.resolvePrefix(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL);
+    ASSERT_STREQ("http://www.opengis.net/ont/geosparql#", res.c_str());
   }
   {
     const std::string res =
@@ -62,8 +62,8 @@ TEST(TTL_WriterQLEVER, resolvePrefix) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> w{config, nullptr};
   {
     const std::string res =
-        w.resolvePrefix(osm2rdf::ttl::constants::NAMESPACE__OSM);
-    ASSERT_STREQ("https://www.openstreetmap.org/", res.c_str());
+        w.resolvePrefix(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL);
+    ASSERT_STREQ("http://www.opengis.net/ont/geosparql#", res.c_str());
   }
   {
     const std::string res =
@@ -126,7 +126,6 @@ TEST(TTL_WriterNT, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -152,7 +151,6 @@ TEST(TTL_WriterTTL, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -180,7 +178,6 @@ TEST(TTL_WriterQLEVER, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -602,7 +599,6 @@ TEST(TTL_WriterNT, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -664,7 +660,6 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -674,6 +669,7 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
   // Setup temp dir and stats file
   std::filesystem::path tmpDir =
       config.getTempPath("TEST_TTL_WriterTTL", "writeStatisticJson");
+  std::filesystem::remove_all(tmpDir);
   ASSERT_FALSE(std::filesystem::exists(tmpDir));
   std::filesystem::create_directories(tmpDir);
   ASSERT_TRUE(std::filesystem::exists(tmpDir));
@@ -706,8 +702,8 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 12"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 17"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 20"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 25"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup
@@ -726,7 +722,6 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
@@ -736,6 +731,7 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   // Setup temp dir and stats file
   std::filesystem::path tmpDir =
       config.getTempPath("TEST_TTL_WriterQLEVER", "writeStatisticJson");
+  std::filesystem::remove_all(tmpDir);
   ASSERT_FALSE(std::filesystem::exists(tmpDir));
   std::filesystem::create_directories(tmpDir);
   ASSERT_TRUE(std::filesystem::exists(tmpDir));
@@ -768,8 +764,8 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 12"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 17"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 20"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 25"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup

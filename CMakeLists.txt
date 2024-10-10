@@ -50,36 +50,17 @@ endif()
 add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 # Basic optimization
-add_compile_options(-march=native -flto)
+add_compile_options(-march=native -flto=auto)
 # Enable fast-math
 add_compile_options(-ffast-math)
 
 # ----------------------------------------------------------------------------
-# External programs
-# ----------------------------------------------------------------------------
-find_program(
-        CLANG_TIDY_EXE
-        NAMES "clang-tidy"
-        DOC "Path to clang-tidy executable"
-)
-
-find_program(
-        CPPCHECK_EXE
-        NAMES "cppcheck"
-        DOC "Path to cppcheck executable"
-)
-
-# ----------------------------------------------------------------------------
 # Configure dependencies
 # ----------------------------------------------------------------------------
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost REQUIRED serialization)
 find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(ZLIB REQUIRED)
-find_package(OpenMP REQUIRED)
+find_package(OpenMP)
 # Disable installation of google stuff
 set(INSTALL_GMOCK OFF)
 set(INSTALL_GTEST OFF)
@@ -214,21 +195,11 @@ configure_file(
         "${PROJECT_SOURCE_DIR}/include/osm2rdf/Version.h"
 )
 
-if (CLANG_TIDY_EXE)
-    message(STATUS "Found CLANG_TIDY_EXE at ${CLANG_TIDY_EXE}, enabling checks")
-    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE};-checks=-*,readability-*")
-else()
-    message(STATUS "CLANG_TIDY_EXE not found")
-endif ()
-if (CPPCHECK_EXE)
-    message(STATUS "Found CPPCHECK_EXE at ${CPPCHECK_EXE}, enabling checks")
-    set(CMAKE_CXX_CPPCHECK "${CPPCHECK_EXE}")
-else()
-    message(STATUS "CPPCHECK_EXE not found")
-endif ()
-
 # The compiled library code is here
 add_subdirectory(src)
+
+# libspatialjoin
+add_subdirectory(vendor/spatialjoin)
 
 # The executable code is here
 add_subdirectory(apps)

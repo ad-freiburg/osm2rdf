@@ -79,7 +79,6 @@ static const int UTF8_BYTES_SHORT = 4;
 
 #include "gtest/gtest_prod.h"
 #include "osm2rdf/config/Config.h"
-#include "osm2rdf/geometry/Location.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"
@@ -107,6 +106,8 @@ class Writer {
   // Write a single RDF line. The contents of s, p, and o are not checked.
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o);
+  void writeTriple(const std::string& s, const std::string& p,
+                   const std::string& o, size_t part);
 
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.

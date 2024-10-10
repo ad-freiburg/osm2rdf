@@ -31,6 +31,7 @@ class ProgressBar {
   // Initializes a ProgressBar with given maxValue. If show equals false nothing
   // will be printed to std::cerr when update is called.
   ProgressBar(std::size_t maxValue, bool show);
+  ProgressBar() = default;
   // Updates the progress bar.
   void update(std::size_t count);
   // Marks progress bar as done (calling update with _maxValue).
@@ -53,7 +54,7 @@ class ProgressBar {
   // Time of last update.
   std::time_t _last;
   // Print to std::cerr or not.
-  bool _show;
+  bool _show = false;
 };
 
 }  // namespace osm2rdf::util

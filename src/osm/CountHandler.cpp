@@ -1,4 +1,4 @@
-// Copyright 2020, University of Freiburg
+// Copyright 2024, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>.
 
 // This file is part of osm2rdf.
@@ -16,40 +16,50 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/Box.h"
+#include "osm2rdf/osm/CountHandler.h"
+
+#include <iostream>
 
 // ____________________________________________________________________________
-osm2rdf::osm::Box::Box() = default;
-
-// ____________________________________________________________________________
-osm2rdf::osm::Box::Box(const ::util::geo::DBox& box) : _geom(box) {}
-
-// ____________________________________________________________________________
-const ::util::geo::DBox osm2rdf::osm::Box::geom() const { return _geom; }
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon osm2rdf::osm::Box::convexHull() const noexcept {
-  return ::util::geo::convexHull(_geom);
+void osm2rdf::osm::CountHandler::prepare_for_lookup() {
+  _firstPassDone = true;
 }
 
 // ____________________________________________________________________________
-const ::util::geo::DPolygon osm2rdf::osm::Box::orientedBoundingBox() const noexcept {
-    return convexHull();
+void osm2rdf::osm::CountHandler::node(const osmium::Node& node){
+  if (_firstPassDone || node.tags().empty())  {
+    return;
+  }
+  _numNodes++;
 }
 
 // ____________________________________________________________________________
-const ::util::geo::DPoint osm2rdf::osm::Box::centroid() const noexcept {
-  return ::util::geo::centroid(_geom);
+void osm2rdf::osm::CountHandler::relation(const osmium::Relation& rel) {
+  if (_firstPassDone || rel.tags().empty()) {
+    return;
+  }
+  _numRelations++;
 }
 
 // ____________________________________________________________________________
-bool osm2rdf::osm::Box::operator==(
-    const osm2rdf::osm::Box& other) const noexcept {
-  return _geom == other._geom;
+void osm2rdf::osm::CountHandler::way(const osmium::Way& way) {
+  if (_firstPassDone || way.tags().empty()) {
+    return;
+  }
+  _numWays++;
 }
 
 // ____________________________________________________________________________
-bool osm2rdf::osm::Box::operator!=(
-    const osm2rdf::osm::Box& other) const noexcept {
-  return !(*this == other);
+size_t osm2rdf::osm::CountHandler::numNodes() const {
+  return _numNodes;
+}
+
+// ____________________________________________________________________________
+size_t osm2rdf::osm::CountHandler::numRelations() const {
+  return _numRelations;
+}
+
+// ____________________________________________________________________________
+size_t osm2rdf::osm::CountHandler::numWays() const {
+  return _numWays;
 }

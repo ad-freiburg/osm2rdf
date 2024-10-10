@@ -24,6 +24,7 @@
 #include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Writer.h"
+#include "osm2rdf/util/ProgressBar.h"
 #include "osmium/handler.hpp"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/node.hpp"
@@ -61,6 +62,7 @@ class OsmiumHandler : public osmium::handler::Handler {
   osm2rdf::osm::FactHandler<W> _factHandler;
   osm2rdf::osm::GeometryHandler<W> _geometryHandler;
   osm2rdf::osm::RelationHandler _relationHandler;
+  osm2rdf::util::ProgressBar _progressBar;
   size_t _areasSeen = 0;
   size_t _areasDumped = 0;
   size_t _areaGeometriesHandled = 0;
@@ -73,6 +75,8 @@ class OsmiumHandler : public osmium::handler::Handler {
   size_t _waysSeen = 0;
   size_t _waysDumped = 0;
   size_t _wayGeometriesHandled = 0;
+
+  size_t _numTasksDone = 0;
 };
 }  // namespace osm2rdf::osm
 

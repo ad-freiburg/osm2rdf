@@ -39,13 +39,9 @@ TEST(Issue15, Relation_8291361_expected) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmrel_8291361.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
+  config.input = "tests/issues/issue15_osmrel_8291361.xml";
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};
@@ -69,9 +65,10 @@ TEST(Issue15, Relation_8291361_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmrel:8291361 geo:hasGeometry \"MULTIPOLYGON(((14"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_relarea_8291361 geo:asWKT \"MULTIPOLYGON(((14"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -91,10 +88,9 @@ TEST(Issue15, Relation_8291361_failed) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmrel_8291361.xml";
+  config.input = "tests/issues/issue15_osmrel_8291361.xml";
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -117,9 +113,10 @@ TEST(Issue15, Relation_8291361_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmrel:8291361 geo:hasGeometry \"MULTIPOLYGON(((14"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_relarea_8291361 geo:asWKT \"MULTIPOLYGON(((14"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -139,13 +136,9 @@ TEST(Issue15, Way_201387026_expected) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
+  config.input = "tests/issues/issue15_osmway_201387026.xml";
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};
@@ -169,9 +162,10 @@ TEST(Issue15, Way_201387026_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:201387026 geo:hasGeometry \"MULTIPOLYGON(((1"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"MULTIPOLYGON(((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -191,10 +185,9 @@ TEST(Issue15, Way_201387026_failed) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.hasGeometryAsWkt = true;
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
+  config.input = "tests/issues/issue15_osmway_201387026.xml";
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -217,9 +210,10 @@ TEST(Issue15, Way_201387026_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
-  ASSERT_THAT(printedData,
-              ::testing::HasSubstr(
-                  "osmway:201387026 geo:hasGeometry \"MULTIPOLYGON(((1"));
+  ASSERT_THAT(
+      printedData,
+      ::testing::HasSubstr(
+          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"MULTIPOLYGON(((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

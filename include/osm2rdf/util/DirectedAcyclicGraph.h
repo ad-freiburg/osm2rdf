@@ -41,10 +41,10 @@ osm2rdf::util::DirectedGraph<T> reduceDAG(
                                 entryCount) default(none)
   for (size_t i = 0; i < vertices.size(); i++) {
     const auto& src = vertices[i];
-    std::vector<T> possibleEdges(sourceDAG.getEdgesFast(src));
+    std::vector<T> possibleEdges(sourceDAG.findSuccessors(src));
     std::vector<T> edges;
-    for (const auto& dst : sourceDAG.getEdgesFast(src)) {
-      const auto& dstEdges = sourceDAG.findSuccessorsFast(dst);
+    for (const auto& dst : sourceDAG.findSuccessors(src)) {
+      const auto& dstEdges = sourceDAG.findSuccessors(dst);
       std::set_difference(possibleEdges.begin(), possibleEdges.end(),
                           dstEdges.begin(), dstEdges.end(),
                           std::back_inserter(edges));
@@ -57,7 +57,7 @@ osm2rdf::util::DirectedGraph<T> reduceDAG(
         result.addEdge(src, dst);
       }
     }
-#pragma omp critical(progress)
+#pragma omp critical(progressReduce)
     progressBar.update(entryCount++);
   }
   progressBar.done();
@@ -96,7 +96,7 @@ osm2rdf::util::DirectedGraph<T> reduceMaximalConnectedDAG(
         result.addEdge(src, dst);
       }
     }
-#pragma omp critical(progress)
+#pragma omp critical(progressReduceMax)
     progressBar.update(entryCount++);
   }
   progressBar.done();
