@@ -524,8 +524,20 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
           last = next + 1;
           continue;
         }
-        tmp << std::setw(resultType == 0 ? 4 : 2) << std::dec
-            << std::atoi(value.substr(last, next - last).c_str());
+        auto val = std::atoi(value.substr(last, next - last).c_str());
+
+        // basic validity checks according to ISO 8601
+        if (resultType == 1 && (val < 1 || val > 12)) {
+          resultType = 9;  // error
+          break;
+        }
+
+        if (resultType == 2 && (val < 1 || val > 31)) {
+          resultType = 9;  // error
+          break;
+        }
+
+        tmp << std::setw(resultType == 0 ? 4 : 2) << std::dec << val;
         newValue += tmp.str().substr(0, resultType == 0 ? 4 : 2) + '-';
         tmp.seekp(0);
         resultType++;

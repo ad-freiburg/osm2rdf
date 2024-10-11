@@ -85,7 +85,16 @@ TEST(OSM_FactHandler, areaFromWay) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 .\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area \"0.010000000000\"^^xsd:double .\n", buffer.str());
+      "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 "
+      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmway:21 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:envelope \"POLYGON((48 "
+      "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
+      "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area "
+      "\"0.010000000000\"^^xsd:double .\n",
+      buffer.str());
 
   // Cleanup
   std::cout.rdbuf(sbuf);
@@ -133,7 +142,16 @@ TEST(OSM_FactHandler, areaFromRelation) {
   output.close();
 
   ASSERT_EQ(
-"osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 .\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.010000000000\"^^xsd:double .\n", buffer.str());
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 "
+      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmrel:10 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 "
+      "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
+      "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area "
+      "\"0.010000000000\"^^xsd:double .\n",
+      buffer.str());
 
   // Cleanup
   std::cout.rdbuf(sbuf);
@@ -175,7 +193,16 @@ TEST(OSM_FactHandler, node) {
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmkey:city \"Freiburg\" .\nosmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\n", buffer.str());
+      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmkey:city "
+      "\"Freiburg\" .\nosmnode:42 osm2rdf:facts \"1\"^^xsd:integer "
+      ".\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 "
+      ".\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral "
+      ".\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 "
+      "48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope "
+      "\"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral "
+      ".\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\n",
+      buffer.str());
 
   // Cleanup
   std::cout.rdbuf(sbuf);
@@ -315,7 +342,24 @@ TEST(OSM_FactHandler, relationWithGeometry) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:42 rdf:type osm:relation .\nosmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmrel:42 osmkey:city \"Freiburg\" .\nosmrel:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmrel:42 osmrel:member _:0_0 .\n_:0_0 osm2rdfmember:id osmnode:23 .\n_:0_0 osm2rdfmember:role \"label\" .\n_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\nosmrel:42 osmrel:member _:0_1 .\n_:0_1 osm2rdfmember:id osmway:55 .\n_:0_1 osm2rdfmember:role \"outer\" .\n_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\nosmrel:42 geo:hasGeometry osm2rdfgeom:osm_relation_42 .\nosm2rdfgeom:osm_relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 48),LINESTRING(7.5 48,7.6 48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48,7.6 48,7.5 48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.6 48,7.6 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:obb \"POLYGON((7.5 48,7.5 48,7.6 48,7.6 48,7.5 48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdf:completeGeometry \"yes\" .\n", buffer.str());
+      "osmrel:42 rdf:type osm:relation .\nosmrel:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmrel:42 osmkey:city "
+      "\"Freiburg\" .\nosmrel:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmrel:42 "
+      "osmrel:member _:0_0 .\n_:0_0 osm2rdfmember:id osmnode:23 .\n_:0_0 "
+      "osm2rdfmember:role \"label\" .\n_:0_0 osm2rdfmember:pos "
+      "\"0\"^^xsd:integer .\nosmrel:42 osmrel:member _:0_1 .\n_:0_1 "
+      "osm2rdfmember:id osmway:55 .\n_:0_1 osm2rdfmember:role \"outer\" "
+      ".\n_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\nosmrel:42 "
+      "geo:hasGeometry osm2rdfgeom:osm_relation_42 "
+      ".\nosm2rdfgeom:osm_relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "48),LINESTRING(7.5 48,7.6 48))\"^^geo:wktLiteral .\nosmrel:42 "
+      "osm2rdfgeom:convex_hull \"POLYGON((7.5 48,7.6 48,7.5 "
+      "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:envelope \"POLYGON((7.5 "
+      "48,7.6 48,7.6 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\nosmrel:42 "
+      "osm2rdfgeom:obb \"POLYGON((7.5 48,7.5 48,7.6 48,7.6 48,7.5 "
+      "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdf:completeGeometry \"yes\" "
+      ".\n",
+      buffer.str());
 
   // Cleanup
   std::cout.rdbuf(sbuf);
@@ -359,7 +403,17 @@ TEST(OSM_FactHandler, way) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city \"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n",
+      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city "
+      "\"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 "
+      "geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT "
+      "\"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
+      "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 "
+      "7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
+      "\"0.141421\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -405,7 +459,27 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
   output.flush();
   output.close();
 
-  ASSERT_EQ("osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city \"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\nosmnode:1 rdf:type osm:node .\nosmnode:1 geo:hasGeometry osm2rdfgeom:osm_node_1 .\nosm2rdfgeom:osm_node_1 geo:asWKT \"POINT(48 7.5)\"^^geo:wktLiteral .\nosmway:42 osmway:node _:0_1 .\n_:0_1 osmway:node osmnode:2 .\n_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\nosmnode:2 rdf:type osm:node .\nosmnode:2 geo:hasGeometry osm2rdfgeom:osm_node_2 .\nosm2rdfgeom:osm_node_2 geo:asWKT \"POINT(48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n", buffer.str());
+  ASSERT_EQ(
+      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city "
+      "\"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 "
+      "osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 "
+      "osm2rdfmember:pos \"0\"^^xsd:integer .\nosmnode:1 rdf:type osm:node "
+      ".\nosmnode:1 geo:hasGeometry osm2rdfgeom:osm_node_1 "
+      ".\nosm2rdfgeom:osm_node_1 geo:asWKT \"POINT(48 7.5)\"^^geo:wktLiteral "
+      ".\nosmway:42 osmway:node _:0_1 .\n_:0_1 osmway:node osmnode:2 .\n_:0_1 "
+      "osm2rdfmember:pos \"1\"^^xsd:integer .\nosmnode:2 rdf:type osm:node "
+      ".\nosmnode:2 geo:hasGeometry osm2rdfgeom:osm_node_2 "
+      ".\nosm2rdfgeom:osm_node_2 geo:asWKT \"POINT(48.1 7.6)\"^^geo:wktLiteral "
+      ".\nosmway:42 geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT "
+      "\"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
+      "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 "
+      "7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
+      "\"0.141421\"^^xsd:double .\n",
+      buffer.str());
 
   // Cleanup
   std::cout.rdbuf(sbuf);
@@ -450,7 +524,20 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   output.close();
 
   ASSERT_EQ(
-"osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city \"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\nosmway:42 osmway:node _:0_1 .\n_:0_1 osmway:node osmnode:2 .\n_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n",
+      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city "
+      "\"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 "
+      "osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 "
+      "osm2rdfmember:pos \"0\"^^xsd:integer .\nosmway:42 osmway:node _:0_1 "
+      ".\n_:0_1 osmway:node osmnode:2 .\n_:0_1 osm2rdfmember:pos "
+      "\"1\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdf:way_42 "
+      ".\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull "
+      "\"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:obb \"POLYGON((48.1 "
+      "7.6,48.1 7.6,48 7.5,48 7.5,48.1 7.6))\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdf:length \"0.141421\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -497,7 +584,22 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city \"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\nosmway:42 osmway:node _:0_1 .\n_:0_1 osmway:node osmnode:2 .\n_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\n_:0_0 osmway:next_node osmnode:2 .\n_:0_0 osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\nosmway:42 geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n",
+      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city "
+      "\"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 "
+      "osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 "
+      "osm2rdfmember:pos \"0\"^^xsd:integer .\nosmway:42 osmway:node _:0_1 "
+      ".\n_:0_1 osmway:node osmnode:2 .\n_:0_1 osm2rdfmember:pos "
+      "\"1\"^^xsd:integer .\n_:0_0 osmway:next_node osmnode:2 .\n_:0_0 "
+      "osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\nosmway:42 "
+      "geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT "
+      "\"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
+      "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 "
+      "7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
+      "\"0.141421\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -547,7 +649,30 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city \"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\nosmway:42 osmway:node _:0_1 .\n_:0_1 osmway:node osmnode:2 .\n_:0_1 osm2rdfmember:pos \"1\"^^xsd:integer .\n_:0_0 osmway:next_node osmnode:2 .\n_:0_0 osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\nosmway:42 osmway:node _:0_2 .\n_:0_2 osmway:node osmnode:4 .\n_:0_2 osm2rdfmember:pos \"2\"^^xsd:integer .\n_:0_1 osmway:next_node osmnode:4 .\n_:0_1 osmway:next_node_distance \"11119.490351\"^^xsd:decimal .\nosmway:42 osmway:node _:0_3 .\n_:0_3 osmway:node osmnode:3 .\n_:0_3 osm2rdfmember:pos \"3\"^^xsd:integer .\n_:0_2 osmway:next_node osmnode:3 .\n_:0_2 osmway:next_node_distance \"11024.108103\"^^xsd:decimal .\nosmway:42 geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 7.6,48.1 7.5,48 7.5)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48.1 7.5,48 7.5,48.1 7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length \"0.341421\"^^xsd:double .\n", buffer.str());
+      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osmkey:city "
+      "\"Freiburg\" .\nosmway:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmway:42 "
+      "osmway:node _:0_0 .\n_:0_0 osmway:node osmnode:1 .\n_:0_0 "
+      "osm2rdfmember:pos \"0\"^^xsd:integer .\nosmway:42 osmway:node _:0_1 "
+      ".\n_:0_1 osmway:node osmnode:2 .\n_:0_1 osm2rdfmember:pos "
+      "\"1\"^^xsd:integer .\n_:0_0 osmway:next_node osmnode:2 .\n_:0_0 "
+      "osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\nosmway:42 "
+      "osmway:node _:0_2 .\n_:0_2 osmway:node osmnode:4 .\n_:0_2 "
+      "osm2rdfmember:pos \"2\"^^xsd:integer .\n_:0_1 osmway:next_node "
+      "osmnode:4 .\n_:0_1 osmway:next_node_distance "
+      "\"11119.490351\"^^xsd:decimal .\nosmway:42 osmway:node _:0_3 .\n_:0_3 "
+      "osmway:node osmnode:3 .\n_:0_3 osm2rdfmember:pos \"3\"^^xsd:integer "
+      ".\n_:0_2 osmway:next_node osmnode:3 .\n_:0_2 osmway:next_node_distance "
+      "\"11024.108103\"^^xsd:decimal .\nosmway:42 geo:hasGeometry "
+      "osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "7.6,48.1 7.5,48 7.5)\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48.1 7.5,48 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
+      "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
+      "osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48.1 7.5,48 7.5,48.1 "
+      "7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
+      "\"0.341421\"^^xsd:double .\n",
+      buffer.str());
 
   // Cleanup
   std::cout.rdbuf(sbuf);
@@ -2204,6 +2329,54 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonth5) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.addCentroids = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-1111-13";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::Not(::testing::HasSubstr(subject + " " + predicate2 +
+                                                  " " + object2 + " .\n")));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
   // Capture std::cout
   std::stringstream buffer;
@@ -2386,6 +2559,54 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
                                                 " " + object1 + " .\n"));
   ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate2 +
                                                 " " + object2 + " .\n"));
+
+  // Cleanup
+  std::cout.rdbuf(sbuf);
+}
+
+// ____________________________________________________________________________
+TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5) {
+  // Capture std::cout
+  std::stringstream buffer;
+  std::streambuf* sbuf = std::cout.rdbuf();
+  std::cout.rdbuf(buffer.rdbuf());
+
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.outputCompress = false;
+  config.addCentroids = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  const std::string tagKey = "start_date";
+  const std::string tagValue = "-1111-11-32";
+
+  const std::string subject = "subject";
+  const std::string predicate1 =
+      writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
+  const std::string object1 = writer.generateLiteral(tagValue, "");
+  const std::string predicate2 = writer.generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
+  const std::string object2 = writer.generateLiteral(
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+
+  osm2rdf::osm::TagList tagList;
+  tagList[tagKey] = tagValue;
+
+  dh.writeTagList(subject, tagList);
+  output.flush();
+  output.close();
+
+  const std::string printedData = buffer.str();
+  ASSERT_THAT(printedData, ::testing::HasSubstr(subject + " " + predicate1 +
+                                                " " + object1 + " .\n"));
+  ASSERT_THAT(printedData,
+              ::testing::Not(::testing::HasSubstr(subject + " " + predicate2 +
+                                                  " " + object2 + " .\n")));
 
   // Cleanup
   std::cout.rdbuf(sbuf);
