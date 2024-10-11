@@ -59,6 +59,11 @@ add_compile_options(-march=native)
 # Enable fast-math
 add_compile_options(-ffast-math)
 
+# Google benchmark has an unused variable (sigma_gn) in complexity.cc, which
+# clang detects and aborts. Don't treat unused variables as errors to make
+# clang builds possible.
+# add_compile_options(-Wno-error=unused-but-set-variable)
+
 # ----------------------------------------------------------------------------
 # Configure dependencies
 # ----------------------------------------------------------------------------
