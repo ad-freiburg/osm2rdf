@@ -23,12 +23,15 @@ cmake_minimum_required(VERSION 3.16...3.18)
 project(
         osm2rdf
         VERSION 0.2
-        DESCRIPTION "Convert osm to rdf"
+        DESCRIPTION "Convert OSM data to RDF"
         LANGUAGES CXX)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+include(CheckIPOSupported)
+check_ipo_supported(RESULT IPO_SUPPORTED OUTPUT error)
 
 # export compile commands to tools like clang
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -50,12 +53,8 @@ endif()
 add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 
-# Basic optimization
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12)
-	add_compile_options(-flto=auto)
-endif()
-
 add_compile_options(-march=native)
+
 # Enable fast-math
 add_compile_options(-ffast-math)
 
@@ -71,6 +70,7 @@ find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(OpenMP)
+
 # Disable installation of google stuff
 set(INSTALL_GMOCK OFF)
 set(INSTALL_GTEST OFF)
