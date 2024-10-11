@@ -310,17 +310,21 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, way.geom());
   }
 
-  if (_config.addCentroids) {
-    const std::string& centroidObj =
-        _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
-                             DATASET_ID[_config.sourceDataset] +
-                                 "_way_centroid_" + std::to_string(way.id()));
-    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
-    writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, way.centroid());
+  if (!way.isArea()) {
+    // only write these triples if the way is not an area, otherwise they
+    // are already written in the area handler
+    if (_config.addCentroids) {
+      const std::string& centroidObj =
+          _writer->generateIRI(NAMESPACE__OSM2RDF_GEOM,
+                               DATASET_ID[_config.sourceDataset] +
+                                   "_way_centroid_" + std::to_string(way.id()));
+      _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
+      writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, way.centroid());
+    }
+    writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
+    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
+    writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());
   }
-  writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
-  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
-  writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());
 
   if (_config.addWayMetadata) {
     _writer->writeTriple(subj, IRI__OSMWAY_IS_CLOSED,
