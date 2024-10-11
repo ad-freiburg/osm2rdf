@@ -21,3 +21,10 @@ target_link_libraries(osm2rdf PRIVATE osm2rdf_library)
 
 add_executable(osm2rdf-stats osm2rdf-stats.cpp)
 target_link_libraries(osm2rdf-stats PRIVATE osm2rdf_library)
+
+if (IPO_SUPPORTED)
+    message(STATUS "IPO / LTO enabled")
+    set_property(TARGET osm2rdf PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else ()
+    message(STATUS "IPO / LTO not supported: <${error}>")
+endif ()

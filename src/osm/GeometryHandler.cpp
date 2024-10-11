@@ -60,8 +60,8 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
     : _config(config),
       _writer(writer),
       _sweeper(
-          {omp_get_max_threads(),
-           omp_get_max_threads(),
+          {static_cast<size_t>(omp_get_max_threads()),
+           static_cast<size_t>(omp_get_max_threads()),
            "",
            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,
            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,
@@ -216,7 +216,7 @@ template <typename W>
     const ::util::geo::DPoint& loc) {
   auto point = ::util::geo::latLngToWebMerc(
       ::util::geo::DPoint(loc.getX(), loc.getY()));  // locs are lon/lat
-  return ::util::geo::I32Point{point.getX() * PREC, point.getY() * PREC};
+  return ::util::geo::I32Point{static_cast<int>(point.getX() * PREC), static_cast<int>(point.getY() * PREC)};
 }
 
 // ____________________________________________________________________________

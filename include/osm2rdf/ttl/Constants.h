@@ -97,12 +97,13 @@ inline std::string LITERAL__NO;
 inline std::string LITERAL__YES;
 
 // Arrays holding values depending on the used dataset
-inline std::string DATASET_ID[2] = {"osm", "ohm"};
-inline std::string NODE_NAMESPACE[2] = {NAMESPACE__OSM_NODE,
-                                        NAMESPACE__OHM_NODE};
-inline std::string RELATION_NAMESPACE[2] = {NAMESPACE__OSM_RELATION,
-                                            NAMESPACE__OHM_RELATION};
-inline std::string WAY_NAMESPACE[2] = {NAMESPACE__OSM_WAY, NAMESPACE__OHM_WAY};
+const static inline std::vector<std::string> DATASET_ID = {"osm", "ohm"};
+const static inline std::vector<std::string> NODE_NAMESPACE = {
+    NAMESPACE__OSM_NODE, NAMESPACE__OHM_NODE};
+const static inline std::vector<std::string> RELATION_NAMESPACE = {
+    NAMESPACE__OSM_RELATION, NAMESPACE__OHM_RELATION};
+const static inline std::vector<std::string> WAY_NAMESPACE = {
+    NAMESPACE__OSM_WAY, NAMESPACE__OHM_WAY};
 
 }  // namespace osm2rdf::ttl::constants
 
