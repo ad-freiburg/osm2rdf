@@ -665,12 +665,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
       ".\n_:0_2 osmway:next_node osmnode:3 .\n_:0_2 osmway:next_node_distance "
       "\"11024.108103\"^^xsd:decimal .\nosmway:42 geo:hasGeometry "
       "osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
-      "7.6,48.1 7.5,48 7.5)\"^^geo:wktLiteral .\nosmway:42 "
-      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48.1 7.5,48 "
-      "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
-      "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
-      "osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48.1 7.5,48 7.5,48.1 "
-      "7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
+      "7.6,48.1 7.5,48 7.5)\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
       "\"0.341421\"^^xsd:double .\n",
       buffer.str());
 
