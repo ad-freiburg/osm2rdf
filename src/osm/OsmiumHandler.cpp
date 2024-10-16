@@ -31,6 +31,10 @@
 #include "osmium/io/reader_with_progress_bar.hpp"
 #include "osmium/util/memory.hpp"
 
+#if defined(_OPENMP)
+#include "omp.h"
+#endif
+
 // ____________________________________________________________________________
 template <typename W>
 osm2rdf::osm::OsmiumHandler<W>::OsmiumHandler(
@@ -62,9 +66,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
                                                osmium::osm_entity_bits::object};
       {
         while (auto buf = reader.read()) {
-          osmium::apply(buf, mp_manager,
-                        _relationHandler,
-                        countHandler);
+          osmium::apply(buf, mp_manager, _relationHandler, countHandler);
         }
       }
       reader.close();
@@ -79,7 +81,15 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       std::cerr << std::endl;
       std::cerr << osm2rdf::util::currentTimeFormatted()
                 << "OSM Pass 2 ... (dump)" << std::endl;
-      osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object};
+      osmium::thread::Pool pool(std::max(_config.numThreads - 2, 1),
+                                osmium::thread::Pool::default_queue_size);
+
+#if defined(_OPENMP)
+  omp_set_num_threads(_config.numThreads);
+#endif
+
+      osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object,
+                                pool};
       osm2rdf::osm::LocationHandler* locationHandler =
           osm2rdf::osm::LocationHandler::create(_config);
       _relationHandler.setLocationHandler(locationHandler);
@@ -99,10 +109,10 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
         numTasks += countHandler.numRelations();
       }
       if (!_config.noFacts && !_config.noWayFacts) {
-				numTasks += countHandler.numWays();
+        numTasks += countHandler.numWays();
       }
       if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
-				numTasks += countHandler.numWays();
+        numTasks += countHandler.numWays();
       }
 
       _progressBar = osm2rdf::util::ProgressBar{numTasks, true};
@@ -114,8 +124,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
         {
           while (auto buf = reader.read()) {
             osmium::apply(
-                buf, *locationHandler,
-                _relationHandler,
+                buf, *locationHandler, _relationHandler,
                 mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
                   osmium::apply(buffer, *this);
                 }),

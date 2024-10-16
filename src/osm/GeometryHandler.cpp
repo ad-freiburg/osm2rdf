@@ -60,8 +60,8 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
     : _config(config),
       _writer(writer),
       _sweeper(
-          {static_cast<size_t>(omp_get_max_threads()),
-           static_cast<size_t>(omp_get_max_threads()),
+          {static_cast<size_t>(config.numThreads),
+           static_cast<size_t>(config.numThreads),
            "",
            osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS,
            osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS,
@@ -85,7 +85,7 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
            {},
            [this](size_t progr) { this->progressCb(progr); }},
           config.cache, ""),
-      _parseBatches(omp_get_max_threads()) {}
+      _parseBatches(config.numThreads) {}
 
 // ___________________________________________________________________________
 template <typename W>
@@ -275,7 +275,7 @@ void GeometryHandler<W>::calculateRelations() {
     }
 
     ::util::JobQueue<ParseBatch> jobs(1000);  // the WKT parse jobs
-    std::vector<std::thread> thrds(omp_get_max_threads());  // the parse workers
+    std::vector<std::thread> thrds(_config.numThreads);  // the parse workers
     for (size_t i = 0; i < thrds.size(); i++)
       thrds[i] = std::thread(&processQueue, &jobs, i, &_sweeper);
 

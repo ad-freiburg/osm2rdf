@@ -54,6 +54,8 @@ TEST(E2E, singleNode) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -119,6 +121,8 @@ TEST(E2E, singleNodeWithTags) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -235,6 +239,8 @@ TEST(E2E, singleWayWithTagsAndNodes) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -338,6 +344,8 @@ TEST(E2E, osmWikiExample) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -432,6 +440,8 @@ TEST(E2E, building51NT) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -599,6 +609,8 @@ TEST(E2E, building51TTL) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -729,6 +741,8 @@ TEST(E2E, building51QLEVER) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -859,6 +873,8 @@ TEST(E2E, tf) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -950,6 +966,8 @@ TEST(E2E, building51inTF) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;

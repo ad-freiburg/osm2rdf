@@ -179,12 +179,7 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes", "");
 
   // Prepare statistic variables
-#if defined(_OPENMP)
-  _numOuts = std::max(std::thread::hardware_concurrency(),
-                      static_cast<unsigned int>(omp_get_max_threads()) + 1);
-#else
-  _numOuts = std::thread::hardware_concurrency() + 1;
-#endif
+  _numOuts = config.numThreads + 1;
   _blankNodeCount = new uint64_t[_numOuts];
   _headerLines = new uint64_t[_numOuts];
   _lineCount = new uint64_t[_numOuts];
