@@ -24,6 +24,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <thread>
 
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/ttl/Format.h"
@@ -68,6 +69,8 @@ struct Config {
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
   bool skipWikiLinks = false;
+
+  int numThreads = std::thread::hardware_concurrency();
 
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
