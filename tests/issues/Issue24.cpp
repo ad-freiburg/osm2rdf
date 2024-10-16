@@ -32,6 +32,8 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -88,6 +90,8 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -144,6 +148,8 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -194,6 +200,8 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -287,6 +295,8 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
 
   osm2rdf::config::Config config;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
