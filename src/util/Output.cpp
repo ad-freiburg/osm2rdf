@@ -113,11 +113,7 @@ void osm2rdf::util::Output::close() {
   }
 
   if (_toStdOut) {
-#pragma omp parallel for
-    for (size_t i = 0; i < _partCount; ++i) {
-      _outBuffers[i][_outBufPos[i]] = 0;
-      std::cout << _outBuffers[i];
-    }
+    return;
   } else if (_config.outputCompress) {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
@@ -211,17 +207,21 @@ void osm2rdf::util::Output::concatenate() {
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::writeNewLine(size_t part) { write('\n', part); }
+void osm2rdf::util::Output::writeNewLine(size_t part) {
+  write('\n', part);
+
+  if (_toStdOut) {
+    _outBuffers[part][_outBufPos[part]] = 0;
+    std::cout << _outBuffers[part];
+    _outBufPos[part] = 0;
+  }
+}
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
   assert(t < _partCount);
   if (_toStdOut) {
-    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
-      _outBuffers[t][_outBufPos[t]] = 0;
-      std::cout << _outBuffers[t];
-      _outBufPos[t] = 0;
-    }
+    // on output to stdout, we only flush on newlines
   } else if (_config.outputCompress) {
     if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
       int err = 0;
@@ -272,11 +272,7 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
 void osm2rdf::util::Output::write(const char c, size_t t) {
   assert(t < _partCount);
   if (_toStdOut) {
-    if (_outBufPos[t] + 2 >= BUFFER_S) {
-      _outBuffers[t][_outBufPos[t]] = 0;
-      std::cout << _outBuffers[t];
-      _outBufPos[t] = 0;
-    }
+    // on output to stdout, we only flush on newlines
   } else if (_config.outputCompress) {
     if (_outBufPos[t] + 2 >= BUFFER_S) {
       int err = 0;
@@ -320,8 +316,7 @@ void osm2rdf::util::Output::flush() {
 // ____________________________________________________________________________
 void osm2rdf::util::Output::flush(size_t i) {
   if (_toStdOut) {
-    _outBuffers[i][_outBufPos[i]] = 0;
-    std::cout << _outBuffers[i];
+    // on output to stdout, we only flush on newlines
   } else if (_config.outputCompress) {
     int err = 0;
     BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);

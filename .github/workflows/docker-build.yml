@@ -12,8 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: End-to-end test (docker build)
+  build-bz2:
+    name: End-to-end test, BZ2 output (docker build)
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -21,7 +21,7 @@ jobs:
         dockerfile: [ Dockerfile]
 
     steps:
-      - name: Checkout the repository 
+      - name: Checkout the repository
         uses: actions/checkout@v3
         with:
           submodules: "recursive"
@@ -47,6 +47,94 @@ jobs:
           set -v
           cd osm-malta
           docker run -u $(id -u):$(id -g) -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "bzcat osm-malta.ttl.bz2 | IndexBuilderMain -F ttl -f - -i osm-malta"
+          docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash --name qlever adfreiburg/qlever -c "ServerMain -i /data/osm-malta -p 7000"
+          sleep 5
+          docker logs qlever
+          RESULT_JSON=$(curl http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }")
+          echo "${RESULT_JSON}"
+          NUM_GEOMS=$(echo "${RESULT_JSON}" | jq --exit-status --raw-output .results.bindings[0].count.value)
+          echo ${NUM_GEOMS} | numfmt --grouping
+          test ${NUM_GEOMS} -gt 100000
+
+  build-uncompressed:
+    name: End-to-end test, uncompressed output (docker build)
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [ Dockerfile]
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: Build the docker image
+        run: |
+          set -v
+          docker build -f ${{matrix.dockerfile}} -t osm2rdf .
+          docker run --rm osm2rdf --help
+
+      - name: Build TTL for Malta and check its validity
+        run: |
+          set -v
+          mkdir osm-malta && cd $_
+          curl -L -o osm-malta.pbf https://download.geofabrik.de/europe/malta-latest.osm.pbf
+          ls -l osm-malta.pbf
+          docker run --rm -v $(pwd):/data osm2rdf /data/osm-malta.pbf --output-no-compress -o /data/osm-malta.ttl
+          ls -l osm-malta.pbf osm-malta.ttl
+          docker run --rm -v $(pwd):/data stain/jena riot --validate /data/osm-malta.ttl
+
+      - name: Build QLever index and count the number of geometries
+        run: |
+          set -v
+          cd osm-malta
+          docker run -u $(id -u):$(id -g) -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "cat osm-malta.ttl | IndexBuilderMain -F ttl -f - -i osm-malta"
+          docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash --name qlever adfreiburg/qlever -c "ServerMain -i /data/osm-malta -p 7000"
+          sleep 5
+          docker logs qlever
+          RESULT_JSON=$(curl http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }")
+          echo "${RESULT_JSON}"
+          NUM_GEOMS=$(echo "${RESULT_JSON}" | jq --exit-status --raw-output .results.bindings[0].count.value)
+          echo ${NUM_GEOMS} | numfmt --grouping
+          test ${NUM_GEOMS} -gt 100000
+
+  build-stdout:
+    name: End-to-end test, output to stdout (docker build)
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [ Dockerfile]
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: Build the docker image
+        run: |
+          set -v
+          docker build -f ${{matrix.dockerfile}} -t osm2rdf .
+          docker run --rm osm2rdf --help
+
+      - name: Build TTL for Malta and check its validity
+        run: |
+          set -v
+          mkdir osm-malta && cd $_
+          curl -L -o osm-malta.pbf https://download.geofabrik.de/europe/malta-latest.osm.pbf
+          ls -l osm-malta.pbf
+          docker run --rm -v $(pwd):/data osm2rdf /data/osm-malta.pbf > /data/osm-malta.ttl
+          ls -l osm-malta.pbf osm-malta.ttl
+          docker run --rm -v $(pwd):/data stain/jena riot --validate /data/osm-malta.ttl
+
+      - name: Build QLever index and count the number of geometries
+        run: |
+          set -v
+          cd osm-malta
+          docker run -u $(id -u):$(id -g) -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "cat osm-malta.ttl | IndexBuilderMain -F ttl -f - -i osm-malta"
           docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash --name qlever adfreiburg/qlever -c "ServerMain -i /data/osm-malta -p 7000"
           sleep 5
           docker logs qlever
