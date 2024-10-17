@@ -183,7 +183,7 @@ TEST(OSM_OsmiumHandler, noFacts) {
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(0, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  ASSERT_EQ(2, oh.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -221,7 +221,7 @@ TEST(OSM_OsmiumHandler, noGeometricRelations) {
   ASSERT_EQ(2, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
+  ASSERT_EQ(2, oh.waysDumped());
   ASSERT_EQ(0, oh.wayGeometriesHandled());
 
   // Cleanup
@@ -260,8 +260,8 @@ TEST(OSM_OsmiumHandler, noAreaFacts) {
   ASSERT_EQ(2, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  ASSERT_EQ(2, oh.waysDumped());
+  ASSERT_EQ(2, oh.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -299,8 +299,8 @@ TEST(OSM_OsmiumHandler, noNodeFacts) {
   ASSERT_EQ(2, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  ASSERT_EQ(2, oh.waysDumped());
+  ASSERT_EQ(2, oh.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -338,8 +338,8 @@ TEST(OSM_OsmiumHandler, noRelationFacts) {
   ASSERT_EQ(0, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  ASSERT_EQ(2, oh.waysDumped());
+  ASSERT_EQ(2, oh.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -378,7 +378,7 @@ TEST(OSM_OsmiumHandler, noWayFacts) {
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
   ASSERT_EQ(0, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  ASSERT_EQ(2, oh.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -416,8 +416,8 @@ TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
   ASSERT_EQ(2, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  ASSERT_EQ(2, oh.waysDumped());
+  ASSERT_EQ(2, oh.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -455,8 +455,8 @@ TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
   ASSERT_EQ(2, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  ASSERT_EQ(2, oh.waysDumped());
+  ASSERT_EQ(2, oh.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -494,7 +494,7 @@ TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
   ASSERT_EQ(2, oh.relationsDumped());
   ASSERT_EQ(0, oh.relationGeometriesHandled());
   ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
+  ASSERT_EQ(2, oh.waysDumped());
   ASSERT_EQ(0, oh.wayGeometriesHandled());
 
   // Cleanup

@@ -65,7 +65,7 @@ TEST(Issue15, Relation_8291361_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("ways seen:47 dumped: 47 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
@@ -115,7 +115,7 @@ TEST(Issue15, Relation_8291361_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("ways seen:47 dumped: 47 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
