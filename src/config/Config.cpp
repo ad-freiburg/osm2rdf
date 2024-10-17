@@ -149,6 +149,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
+  oss << "\n"
+      << prefix << "Num Threads: " << numThreads;
 
   if (!storeLocationsOnDisk.empty()) {
     oss << "\n"
@@ -293,6 +295,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::AUX_GEO_FILES_OPTION_SHORT,
           osm2rdf::config::constants::AUX_GEO_FILES_OPTION_LONG,
           osm2rdf::config::constants::AUX_GEO_FILES_OPTION_HELP);
+
+  auto numThreadsOp =
+      parser.add<popl::Value<int>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::NUM_THREADS_OPTION_SHORT,
+          osm2rdf::config::constants::NUM_THREADS_OPTION_LONG,
+          osm2rdf::config::constants::NUM_THREADS_OPTION_HELP, numThreads);
 
   auto semicolonTagKeysOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
@@ -457,6 +465,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
         auxGeoFiles.push_back(auxGeoFilesOp->value(i));
       }
     }
+
+    if (numThreadsOp->is_set()) numThreads = numThreadsOp->value();
 
     writeRDFStatistics = writeRDFStatisticsOp->is_set();
 

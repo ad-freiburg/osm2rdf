@@ -39,6 +39,8 @@ TEST(Issue15, Relation_8291361_expected) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmrel_8291361.xml";
@@ -63,7 +65,7 @@ TEST(Issue15, Relation_8291361_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("ways seen:47 dumped: 47 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
@@ -88,6 +90,8 @@ TEST(Issue15, Relation_8291361_failed) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmrel_8291361.xml";
@@ -111,7 +115,7 @@ TEST(Issue15, Relation_8291361_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("ways seen:47 dumped: 47 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
@@ -136,6 +140,8 @@ TEST(Issue15, Way_201387026_expected) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmway_201387026.xml";
@@ -185,6 +191,8 @@ TEST(Issue15, Way_201387026_failed) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
   config.outputCompress = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmway_201387026.xml";

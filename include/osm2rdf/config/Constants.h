@@ -284,9 +284,15 @@ const static inline std::string SEMICOLON_TAG_KEYS_OPTION_HELP = "";
 const static inline std::string AUX_GEO_FILES_INFO =
     "Auxiliary geo files for computing spatial relations";
 const static inline std::string AUX_GEO_FILES_OPTION_SHORT = "";
-const static inline std::string AUX_GEO_FILES_OPTION_LONG =
-    "aux-geo-files";
-const static inline std::string AUX_GEO_FILES_OPTION_HELP = "";
+const static inline std::string AUX_GEO_FILES_OPTION_LONG = "aux-geo-files";
+const static inline std::string AUX_GEO_FILES_OPTION_HELP =
+    "Auxiliary geo files for computing spatial relations";
+
+const static inline std::string NUM_THREADS_INFO = "Number of threads to use";
+const static inline std::string NUM_THREADS_OPTION_SHORT = "";
+const static inline std::string NUM_THREADS_OPTION_LONG = "num-threads";
+const static inline std::string NUM_THREADS_OPTION_HELP =
+    "Number of threads to use";
 
 const static inline std::string WKT_PRECISION_INFO =
     "Dumping WKT with precision: ";

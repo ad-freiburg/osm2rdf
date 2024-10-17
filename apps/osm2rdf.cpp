@@ -29,6 +29,10 @@
 #include "osm2rdf/util/Ram.h"
 #include "osm2rdf/util/Time.h"
 
+#if defined(_OPENMP)
+#include "omp.h"
+#endif
+
 // ____________________________________________________________________________
 template <typename T>
 void run(const osm2rdf::config::Config& config) {
@@ -70,6 +74,10 @@ int main(int argc, char** argv) {
             << osm2rdf::util::ram::physPages() /
                    (osm2rdf::util::ram::GIGA * 1.0)
             << "G" << std::endl;
+
+#if defined(_OPENMP)
+  omp_set_num_threads(config.numThreads);
+#endif
 
   try {
     if (config.outputFormat == "qlever") {
