@@ -286,9 +286,6 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   _waysSeen++;
-  if (way.tags().empty()) {
-    return;
-  }
   try {
     const auto& osmWay = osm2rdf::osm::Way(way);
 
