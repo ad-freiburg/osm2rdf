@@ -39,7 +39,6 @@ class RelationHandler : public osmium::handler::Handler {
   osm2rdf::config::Config _config;
   osm2rdf::osm::LocationHandler* _locationHandler = nullptr;
   std::unordered_map<uint64_t, std::vector<uint64_t>> _ways;
-  std::unordered_map<uint64_t, std::vector<uint64_t>> _relations;
   bool _firstPassDone = false;
 };
 }

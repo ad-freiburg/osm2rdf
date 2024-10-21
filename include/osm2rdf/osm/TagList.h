@@ -20,13 +20,13 @@
 #define OSM2RDF_OSM_TAGLIST_H_
 
 #include <string>
-#include <unordered_map>
+#include <map>
 
 #include "osmium/tags/taglist.hpp"
 
 namespace osm2rdf::osm {
 
-typedef std::unordered_map<std::string, std::string> TagList;
+typedef std::map<std::string, std::string> TagList;
 
 // Convert an osmium::TagList into a osm2rdf::osm::TagList
 osm2rdf::osm::TagList convertTagList(const osmium::TagList& tagList);

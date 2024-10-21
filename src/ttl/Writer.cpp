@@ -21,8 +21,8 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include <vector>
 #include <thread>
+#include <vector>
 
 #include "osm2rdf/ttl/Writer.h"
 #if defined(_OPENMP)
@@ -89,8 +89,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "asWKT");
-  osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasCentroid");
+  osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasCentroid");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "hasGeometry");
   osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_SERIALIZATION = generateIRI(
@@ -261,12 +261,12 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::writeHeader() {}
 // ____________________________________________________________________________
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
-  int theadId = 0;
+  int threadId = 0;
 #if defined(_OPENMP)
-  theadId = omp_get_thread_num();
+  threadId = omp_get_thread_num();
 #endif
-  return "_:" + std::to_string(theadId) + "_" +
-         std::to_string(_blankNodeCount[theadId]++);
+  return "_:" + std::to_string(threadId) + "_" +
+         std::to_string(_blankNodeCount[threadId]++);
 }
 
 // ____________________________________________________________________________
@@ -360,14 +360,7 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
   part = 0;
 #endif
 
-  _out->write(s, part);
-  _out->write(' ', part);
-  _out->write(p, part);
-  _out->write(' ', part);
-  _out->write(o, part);
-  _out->write(" .", part);
-  _out->writeNewLine(part);
-  _lineCount[part]++;
+  writeTriple(s, p, o, part);
 }
 
 // ____________________________________________________________________________
@@ -380,6 +373,44 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
   _out->write(p, part);
   _out->write(' ', part);
   _out->write(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeLiteralTripleUnsafe(const std::string& s,
+                                                       const std::string& p,
+                                                       const std::string& a,
+                                                       const std::string& b) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#else
+  part = 0;
+#endif
+  writeLiteralTripleUnsafe(s, p, a, b, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeLiteralTripleUnsafe(const std::string& s,
+                                                       const std::string& p,
+                                                       const std::string& a,
+                                                       const std::string& b,
+                                                       size_t part) {
+  _out->write(s, part);
+  _out->write(' ', part);
+  _out->write(p, part);
+  _out->write(' ', part);
+
+  _out->write('"', part);
+  _out->write(a, part);
+  _out->write('"', part);
+  _out->write(b, part);
+
   _out->write(" .", part);
   _out->writeNewLine(part);
   _lineCount[part]++;
@@ -402,7 +433,13 @@ std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::formatIRI(
 template <>
 std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::formatIRIUnsafe(
     std::string_view p, std::string_view v) {
-  return formatIRI(p, v);
+  // NT:  [8]    IRIREF
+  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
+  auto prefix = _prefixes.find(std::string{p});
+  if (prefix != _prefixes.end()) {
+    return IRIREFUnsafe(prefix->second, v);
+  }
+  return IRIREFUnsafe(p, v);
 }
 
 // ____________________________________________________________________________
@@ -438,7 +475,7 @@ std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::formatIRIUnsafe(
   if (prefix != _prefixes.end()) {
     return PrefixedNameUnsafe(p, v);
   }
-  return IRIREF(p, v);
+  return IRIREFUnsafe(p, v);
 }
 
 // ____________________________________________________________________________
@@ -486,6 +523,17 @@ std::string osm2rdf::ttl::Writer<T>::IRIREF(std::string_view p,
   // TTL: [18]   IRIREF (same as NT)
   //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
   return "<" + encodeIRIREF(p) + encodeIRIREF(v) + ">";
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::IRIREFUnsafe(std::string_view p,
+                                                  std::string_view v) {
+  // NT:  [8]    IRIREF
+  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
+  // TTL: [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  return "<" + std::string(p) + std::string(v) + ">";
 }
 
 // ____________________________________________________________________________
