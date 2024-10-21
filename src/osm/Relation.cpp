@@ -117,7 +117,7 @@ void osm2rdf::osm::Relation::buildGeometry(
         _hasCompleteGeometry = false;
       }
 
-			::util::geo::DLine way;
+      ::util::geo::DLine way;
       way.reserve(nodeRefs.size());
       for (const auto& nodeRef : nodeRefs) {
         const auto& res = relationHandler.get_node_location(nodeRef);

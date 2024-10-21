@@ -87,7 +87,7 @@ void osm2rdf::osm::RelationHandler::way(const osmium::Way& way) {
   }
   if (_ways.find(way.positive_id()) != _ways.end()) {
     std::vector<uint64_t> ids;
-		ids.reserve(way.nodes().size());
+    ids.reserve(way.nodes().size());
     for (const auto& nodeRef : way.nodes()) {
       ids.push_back(nodeRef.positive_ref());
     }
