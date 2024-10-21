@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/RelationHandler.h"
-
 #include <iostream>
+
+#include "osm2rdf/osm/RelationHandler.h"
 
 // ____________________________________________________________________________
 osm2rdf::osm::RelationHandler::RelationHandler(
@@ -60,13 +60,18 @@ void osm2rdf::osm::RelationHandler::relation(const osmium::Relation& relation) {
   if (_firstPassDone) {
     return;
   }
+
+  // skip area relations completely
+  for (const auto& tag : relation.tags()) {
+    if (strcmp(tag.key(), "type") == 0 &&
+        (strcmp(tag.value(), "multipolygon") == 0 || strcmp(tag.value(), "boundary") == 0))
+      return;
+  }
+
   for (const auto& relationMember : relation.cmembers()) {
     switch (relationMember.type()) {
       case osmium::item_type::way:
         _ways[relationMember.positive_ref()] = {};
-        break;
-      case osmium::item_type::relation:
-        _relations[relationMember.positive_ref()] = {};
         break;
       default:
         break;

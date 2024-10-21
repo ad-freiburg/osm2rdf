@@ -109,6 +109,14 @@ class Writer {
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o, size_t part);
 
+  // Write a single RDF line with a literal. The contents of s, p, a and b are
+  // not checked.
+  void writeLiteralTripleUnsafe(const std::string& s, const std::string& p,
+                                const std::string& a, const std::string& b);
+  void writeLiteralTripleUnsafe(const std::string& s, const std::string& p,
+                                const std::string& a, const std::string& b,
+                                size_t part);
+
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.
   bool addPrefix(const std::string& prefix, std::string_view value);
@@ -156,6 +164,8 @@ class Writer {
   std::string IRIREF(std::string_view p, std::string_view v);
   FRIEND_TEST(WriterGrammarNT, RULE_8_IRIREF);
   FRIEND_TEST(WriterGrammarTTL, RULE_18_IRIREF);
+
+  std::string IRIREFUnsafe(std::string_view p, std::string_view v);
 
   std::string PrefixedNameUnsafe(std::string_view p, std::string_view v);
   std::string PrefixedName(std::string_view p, std::string_view v);
@@ -213,7 +223,6 @@ class Writer {
   uint64_t* _lineCount;
   // Number of parts.
   std::size_t _numOuts;
-
 };
 }  // namespace osm2rdf::ttl
 

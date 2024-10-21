@@ -29,7 +29,6 @@
 #include "osmium/area/multipolygon_manager.hpp"
 #include "osmium/io/any_input.hpp"
 #include "osmium/io/reader_with_progress_bar.hpp"
-#include "osmium/util/memory.hpp"
 
 #if defined(_OPENMP)
 #include "omp.h"
@@ -41,14 +40,29 @@ osm2rdf::osm::OsmiumHandler<W>::OsmiumHandler(
     const osm2rdf::config::Config& config, osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
       _factHandler(osm2rdf::osm::FactHandler<W>(config, writer)),
-      _geometryHandler(osm2rdf::osm::GeometryHandler<W>(config, writer)),
+      _ownGeometryHandler(config, writer),
+      _relationHandler(osm2rdf::osm::RelationHandler(config)) {
+  _geometryHandler = &_ownGeometryHandler;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+osm2rdf::osm::OsmiumHandler<W>::OsmiumHandler(
+    const osm2rdf::config::Config& config,
+    osm2rdf::osm::GeometryHandler<W>* geomHandler,
+    osm2rdf::ttl::Writer<W>* writer)
+    : _config(config),
+      _factHandler(osm2rdf::osm::FactHandler<W>(config, writer)),
+      _geometryHandler(geomHandler),
+      _ownGeometryHandler(config, writer),
       _relationHandler(osm2rdf::osm::RelationHandler(config)) {}
 
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::handle() {
-  osmium::io::File input_file{_config.input};
   {
+    osmium::io::File input_file{_config.input};
+
     // Do not create empty areas
     osmium::area::Assembler::config_type assembler_config;
     assembler_config.create_empty_areas = false;
@@ -85,7 +99,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
                                 osmium::thread::Pool::default_queue_size);
 
 #if defined(_OPENMP)
-  omp_set_num_threads(_config.numThreads);
+      omp_set_num_threads(_config.numThreads);
 #endif
 
       osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object,
@@ -153,19 +167,16 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
                 << "ways seen:" << _waysSeen << " dumped: " << _waysDumped
                 << " geometry: " << _wayGeometriesHandled << std::endl;
     }
+  }
 
-    if (!_config.noGeometricRelations) {
-      std::cerr << std::endl;
-      std::cerr << osm2rdf::util::currentTimeFormatted()
-                << "Calculating geometric relations ..." << std::endl;
-      _geometryHandler.calculateRelations();
-      std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
-                << std::endl;
-    }
-
-    osmium::MemoryUsage memory;
-    std::cerr << osm2rdf::util::formattedTimeSpacer
-              << "Memory used: " << memory.peak() << " MBytes" << std::endl;
+  if (_geometryHandler == &_ownGeometryHandler &&
+      !_config.noGeometricRelations) {
+    std::cerr << std::endl;
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "Calculating geometric relations ..." << std::endl;
+    _ownGeometryHandler.calculateRelations();
+    std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
+              << std::endl;
   }
 }
 
@@ -186,7 +197,7 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
       if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
         _areaGeometriesHandled++;
 #pragma omp task
-        { _geometryHandler.area(osmArea); };
+        { _geometryHandler->area(osmArea); };
       }
     }
   } catch (const osmium::invalid_location& e) {
@@ -216,7 +227,7 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
       _nodeGeometriesHandled++;
 #pragma omp task
       {
-        _geometryHandler.node(osmNode);
+        _geometryHandler->node(osmNode);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       };
@@ -237,18 +248,16 @@ template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::relation(
     const osmium::Relation& relation) {
   _relationsSeen++;
-  if (relation.tags().empty()) {
-    return;
-  }
   try {
     auto osmRelation = osm2rdf::osm::Relation(relation);
     // only task this away if we actually build the relation geometries,
     // otherwise this just adds multithreading overhead for nothing
 #pragma omp task
     {
-      if (_relationHandler.hasLocationHandler()) {
+      if (!osmRelation.isArea() && _relationHandler.hasLocationHandler()) {
         osmRelation.buildGeometry(_relationHandler);
       }
+
       if (!_config.noFacts && !_config.noRelationFacts) {
         _relationsDumped++;
 #pragma omp task
@@ -263,7 +272,7 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
           !_config.noRelationGeometricRelations) {
 #pragma omp task
         {
-          _geometryHandler.relation(osmRelation);
+          _geometryHandler->relation(osmRelation);
 #pragma omp critical(progress)
           _progressBar.update(_numTasksDone++);
         };
@@ -302,7 +311,7 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
       _wayGeometriesHandled++;
 #pragma omp task
       {
-        _geometryHandler.way(osmWay);
+        _geometryHandler->way(osmWay);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       };

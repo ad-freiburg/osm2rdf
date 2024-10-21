@@ -95,7 +95,7 @@ TEST(OSM_FactHandler, areaFromWay) {
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area "
-      "\"0.010000000000\"^^xsd:double .\n",
+      "\"0.01\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -154,7 +154,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area "
-      "\"0.010000000000\"^^xsd:double .\n",
+      "\"0.01\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
