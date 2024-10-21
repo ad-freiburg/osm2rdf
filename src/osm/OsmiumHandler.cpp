@@ -255,7 +255,7 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
 #pragma omp task
     {
       if (!osmRelation.isArea() && _relationHandler.hasLocationHandler()) {
-        osmRelation.buildGeometry(_relationHandler);
+				osmRelation.buildGeometry(_relationHandler);
       }
 
       if (!_config.noFacts && !_config.noRelationFacts) {
@@ -272,7 +272,7 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
           !_config.noRelationGeometricRelations) {
 #pragma omp task
         {
-          _geometryHandler->relation(osmRelation);
+					_geometryHandler->relation(osmRelation);
 #pragma omp critical(progress)
           _progressBar.update(_numTasksDone++);
         };
@@ -302,7 +302,7 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
       _waysDumped++;
 #pragma omp task
       {
-        _factHandler.way(osmWay);
+				_factHandler.way(osmWay);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       };
@@ -311,7 +311,7 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
       _wayGeometriesHandled++;
 #pragma omp task
       {
-        _geometryHandler->way(osmWay);
+				_geometryHandler->way(osmWay);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       };

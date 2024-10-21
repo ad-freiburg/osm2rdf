@@ -563,10 +563,10 @@ template <typename W>
 void osm2rdf::osm::FactHandler<W>::writeSecondsAsISO(const std::string& subj,
                                                      const std::string& pred,
                                                      const std::time_t& time) {
-  char out[100];
+  char out[50];
 
   struct tm t;
-  strftime(out, 100, "%Y-%m-%dT%X", gmtime_r(&time, &t));
+  strftime(out, 50, "%Y-%m-%dT%X", gmtime_r(&time, &t));
 
   _writer->writeLiteralTripleUnsafe(subj, pred, out, "^^" + IRI__XSD_DATE_TIME);
 }

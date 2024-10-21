@@ -16,11 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/Relation.h"
-
 #include <iostream>
 #include <vector>
 
+#include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
@@ -37,7 +36,7 @@ osm2rdf::osm::Relation::Relation() {
 osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
   _id = relation.positive_id();
   _timestamp = relation.timestamp().seconds_since_epoch();
-  _tags = osm2rdf::osm::convertTagList(relation.tags());
+  _tags = std::move(osm2rdf::osm::convertTagList(relation.tags()));
   _members.reserve(relation.cmembers().size());
   for (const auto& member : relation.cmembers()) {
     _members.emplace_back(member);
@@ -81,14 +80,12 @@ bool osm2rdf::osm::Relation::hasGeometry() const noexcept {
 }
 
 // ____________________________________________________________________________
-const ::util::geo::DCollection& osm2rdf::osm::Relation::geom()
-    const noexcept {
+const ::util::geo::DCollection& osm2rdf::osm::Relation::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-const ::util::geo::DBox& osm2rdf::osm::Relation::envelope()
-    const noexcept {
+const ::util::geo::DBox& osm2rdf::osm::Relation::envelope() const noexcept {
   return _envelope;
 }
 
@@ -114,48 +111,45 @@ void osm2rdf::osm::Relation::buildGeometry(
     osm2rdf::osm::RelationHandler& relationHandler) {
   _hasCompleteGeometry = true;
   for (const auto& member : _members) {
-    osmium::Location res;
-    ::util::geo::DLine way;
-    std::vector<uint64_t> nodeRefs;
-    switch (member.type()) {
-      case RelationMemberType::WAY:
-        nodeRefs = relationHandler.get_noderefs_of_way(member.id());
-        if (nodeRefs.empty()) {
-          _hasCompleteGeometry = false;
-          break;
-        }
-        for (const auto& nodeRef : nodeRefs) {
-          res = relationHandler.get_node_location(nodeRef);
-          if (res.valid()) {
-            way.push_back({res.lon(), res.lat()});
-          } else {
-            _hasCompleteGeometry = false;
-          }
-        }
-        _geom.push_back(way);
-        break;
-      case RelationMemberType::NODE:
-        res = relationHandler.get_node_location(member.id());
+    if (member.type() == RelationMemberType::WAY) {
+      const auto& nodeRefs = relationHandler.get_noderefs_of_way(member.id());
+      if (nodeRefs.empty()) {
+        _hasCompleteGeometry = false;
+      }
+
+			::util::geo::DLine way;
+      way.reserve(nodeRefs.size());
+      for (const auto& nodeRef : nodeRefs) {
+        const auto& res = relationHandler.get_node_location(nodeRef);
         if (res.valid()) {
-          _geom.push_back(::util::geo::DPoint{res.lon(), res.lat()});
+          way.push_back({res.lon(), res.lat()});
         } else {
           _hasCompleteGeometry = false;
         }
-        break;
-      case RelationMemberType::RELATION:
-        // Mark relations containing relations as incomplete for now.
+      }
+
+      if (way.size() > 0) _geom.push_back(way);
+    } else if (member.type() == RelationMemberType::NODE) {
+      const auto& res = relationHandler.get_node_location(member.id());
+      if (res.valid()) {
+        _geom.push_back(::util::geo::DPoint{res.lon(), res.lat()});
+      } else {
         _hasCompleteGeometry = false;
-        break;
-      default:
-        break;
+      }
+    } else if (member.type() == RelationMemberType::RELATION) {
+      // Mark relations containing relations as incomplete for now.
+      _hasCompleteGeometry = false;
     }
   }
-  if (!_geom.empty()) {
+
+  if (_hasCompleteGeometry && !_geom.empty()) {
     _envelope = ::util::geo::getBoundingBox(_geom);
     _convexHull = ::util::geo::convexHull(_geom);
     _obb = ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
   } else {
     _envelope = {{0, 0}, {0, 0}};
+    _convexHull = ::util::geo::convexHull(_envelope);
+    _obb = ::util::geo::convexHull(_envelope);
   }
 }
 
@@ -166,10 +160,8 @@ bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::operator==(const Relation& other) const noexcept {
-  return _id == other._id &&
-         _envelope == other._envelope &&
-         _members == other._members &&
-         _geom == other._geom &&
+  return _id == other._id && _envelope == other._envelope &&
+         _members == other._members && _geom == other._geom &&
          _tags == other._tags;
 }
 

@@ -34,7 +34,7 @@ osm2rdf::osm::Way::Way() {
 osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
   _timestamp = way.timestamp().seconds_since_epoch();
-  _tags = osm2rdf::osm::convertTagList(way.tags());
+  _tags = std::move(osm2rdf::osm::convertTagList(way.tags()));
   _nodes.reserve(way.nodes().size());
   _geom.reserve(way.nodes().size());
 
