@@ -302,7 +302,7 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
       _waysDumped++;
 #pragma omp task
       {
-        _factHandler.way(osmWay);
+       _factHandler.way(osmWay);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       };

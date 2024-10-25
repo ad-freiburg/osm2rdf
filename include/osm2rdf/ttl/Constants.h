@@ -70,6 +70,7 @@ inline std::string IRI__OSM2RDF_GEOM__OBB;
 inline std::string IRI__OSM2RDF_MEMBER__ID;
 inline std::string IRI__OSM2RDF_MEMBER__ROLE;
 inline std::string IRI__OSM2RDF_MEMBER__POS;
+inline std::string IRI__OSM2RDF__LENGTH;
 inline std::string IRI__OSMMETA_TIMESTAMP;
 inline std::string IRI__OSMWAY_IS_CLOSED;
 inline std::string IRI__OSMWAY_NEXT_NODE;

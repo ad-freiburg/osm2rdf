@@ -44,6 +44,7 @@ using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ROLE;
+using osm2rdf::ttl::constants::IRI__OSM2RDF__LENGTH;
 using osm2rdf::ttl::constants::IRI__OSM_NODE;
 using osm2rdf::ttl::constants::IRI__OSM_RELATION;
 using osm2rdf::ttl::constants::IRI__OSM_TAG;
@@ -189,7 +190,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
     _writer->writeTriple(blankNode, IRI__OSM2RDF_MEMBER__ID,
                          _writer->generateIRI(type, member.id()));
     _writer->writeTriple(blankNode, IRI__OSM2RDF_MEMBER__ROLE,
-                         _writer->generateLiteral(role, ""));
+                         _writer->generateLiteral(role));
     _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSM2RDF_MEMBER__POS,
                                       std::to_string(inRelPos++),
                                       "^^" + IRI__XSD_INTEGER);
@@ -334,7 +335,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   }
 
   _writer->writeLiteralTripleUnsafe(
-      subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "length"),
+      subj, IRI__OSM2RDF__LENGTH,
       std::to_string(::util::geo::len(way.geom())),
       "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE);
 }
@@ -384,7 +385,6 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
   const std::string& key = tag.first;
   const std::string& value = tag.second;
   if (key == "admin_level") {
-    std::string objectValue;
     std::string rTrimmed;
 
     // right trim, left trim is done by strtoll
@@ -398,27 +398,32 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
 
     // if integer, dump as xsd:integer
     if (firstNonMatched != rTrimmed.c_str() && (*firstNonMatched) == 0) {
-      objectValue = _writer->generateLiteralUnsafe(std::to_string(lvl),
-                                                   "^^" + IRI__XSD_INTEGER);
+      _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key,
+                           _writer->generateLiteralUnsafe(std::to_string(lvl),
+                                                   "^^" + IRI__XSD_INTEGER));
     } else {
-      objectValue = _writer->generateLiteral(value, "");
+      _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key,
+                           value);
     }
-
-    _writer->writeTriple(subj, _writer->generateIRI(NAMESPACE__OSM_TAG, key),
-                         objectValue);
   } else {
     try {
-      _writer->writeTriple(subj, _writer->generateIRI(NAMESPACE__OSM_TAG, key),
-                           _writer->generateLiteral(value, ""));
+      _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key,
+                           value);
     } catch (const std::domain_error&) {
       const std::string& blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(subj, IRI__OSM_TAG, blankNode);
+
+      // NOTE: if a domain_error occured, it occured during the writing of the predicate,
+      // and we already wrote the subject above.
+      // Simple start again with an empty subject.
+      _writer->writeTriple("\b", IRI__OSM_TAG, blankNode);
+
+
       _writer->writeTriple(blankNode,
                            _writer->generateIRI(NAMESPACE__OSM_TAG, "key"),
-                           _writer->generateLiteral(key, ""));
+                           _writer->generateLiteral(key));
       _writer->writeTriple(blankNode,
                            _writer->generateIRI(NAMESPACE__OSM_TAG, "value"),
-                           _writer->generateLiteral(value, ""));
+                           _writer->generateLiteral(value));
     }
   }
 }

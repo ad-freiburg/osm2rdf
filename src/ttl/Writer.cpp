@@ -125,6 +125,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "convex_hull");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "envelope");
+  osm2rdf::ttl::constants::IRI__OSM2RDF__LENGTH =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "length");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "obb");
   osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID =
@@ -175,8 +177,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMonth");
 
-  osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no", "");
-  osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes", "");
+  osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no");
+  osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes");
 
   // Prepare statistic variables
   _numOuts = config.numThreads + 1;
@@ -271,6 +273,37 @@ std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
 
 // ____________________________________________________________________________
 template <typename T>
+void osm2rdf::ttl::Writer<T>::writeIRI(std::string_view p,
+                                                 uint64_t v, size_t part) {
+  writeIRIUnsafe(p, std::to_string(v), part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeIRIUnsafe(std::string_view p,
+                                                       std::string_view v, size_t part) {
+  writeFormattedIRIUnsafe(p, v, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeIRI(std::string_view p,
+                                                 std::string_view v, size_t part) {
+  if (v.size() > 0 && (std::isspace(v[0] || std::isspace(v.back())))) {
+    // trims whitespace
+    auto begin = std::find_if(v.begin(), v.end(),
+                              [](int c) { return std::isspace(c) == 0; });
+    auto end = std::find_if(v.rbegin(), v.rend(),
+                            [](int c) { return std::isspace(c) == 0; });
+    writeFormattedIRI(
+        p, v.substr(begin - v.begin(), std::distance(begin, end.base())), part);
+  }
+
+  writeFormattedIRI(p, v, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateIRI(std::string_view p,
                                                  uint64_t v) {
   return generateIRIUnsafe(p, std::to_string(v));
@@ -287,14 +320,17 @@ std::string osm2rdf::ttl::Writer<T>::generateIRIUnsafe(std::string_view p,
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateIRI(std::string_view p,
                                                  std::string_view v) {
-  // trims whitespace
-  auto begin = std::find_if(v.begin(), v.end(),
+  if (v.size() > 0 && std::isspace(v[0] || std::isspace(v.back()))) {
+    // trims whitespace
+    auto begin = std::find_if(v.begin(), v.end(),
+                              [](int c) { return std::isspace(c) == 0; });
+    auto end = std::find_if(v.rbegin(), v.rend(),
                             [](int c) { return std::isspace(c) == 0; });
-  auto end = std::find_if(v.rbegin(), v.rend(),
-                          [](int c) { return std::isspace(c) == 0; });
-  // Trim strings
-  return formatIRI(
-      p, v.substr(begin - v.begin(), std::distance(begin, end.base())));
+    return formatIRI(
+        p, v.substr(begin - v.begin(), std::distance(begin, end.base())));
+  }
+
+  return formatIRI(p, v);
 }
 
 // ____________________________________________________________________________
@@ -327,9 +363,54 @@ std::string osm2rdf::ttl::Writer<T>::generateLangTag(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v,
-                                                     std::string_view s) {
-  return STRING_LITERAL_QUOTE(v) + std::string(s);
+void osm2rdf::ttl::Writer<T>::writeLiteral(std::string_view v, size_t part) {
+  // NT:  [9]   STRING_LITERAL_QUOTE
+  //      https://www.w3.org/TR/n-triples/#grammar-production-STRING_LITERAL_QUOTE
+  // TTL: [22]  STRING_LITERAL_QUOTE
+  //      https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
+  _out->write('"', part);
+  for (const auto c : v) {
+    switch (c) {
+      case '\"':  // #x22
+        _out->write("\\\"", part);
+        break;
+      case '\\':  // #x5C
+        _out->write("\\\\", part);
+        break;
+      case '\n':  // #x0A
+        _out->write("\\n", part);
+        break;
+      case '\r':  // #x0D
+        _out->write("\\r", part);
+        break;
+      default:
+        _out->write(c, part);
+    }
+  }
+  _out->write('"', part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeLiteralUnsafe(std::string_view v,
+                                                           std::string_view s, size_t part) {
+  // only put literal in quotes
+  _out->write('"', part);
+  _out->write(v, part);
+  _out->write('"', part);
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v) {
+  return STRING_LITERAL_QUOTE(v);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v, std::string_view s) {
+  return STRING_LITERAL_QUOTE(v) + std::string{s};
 }
 
 // ____________________________________________________________________________
@@ -345,6 +426,39 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
   ret += s;
 
   return ret;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeIRILiteralTriple(const std::string& s,
+                                          const std::string& p, const std::string& v,
+                                          const std::string& o) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#else
+  part = 0;
+#endif
+
+  writeIRILiteralTriple(s, p, v, o, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeIRILiteralTriple(const std::string& s,
+                                          const std::string& p, const std::string& v,
+                                          const std::string& o, size_t part) {
+  if (s != "\b") {
+    _out->write(s, part);
+    _out->write(' ', part);
+  }
+  writeIRI(p, v, part);
+  _out->write(' ', part);
+  writeLiteral(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
 }
 
 // ____________________________________________________________________________
@@ -368,8 +482,10 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o, size_t part) {
-  _out->write(s, part);
-  _out->write(' ', part);
+  if (s != "\b") {
+    _out->write(s, part);
+    _out->write(' ', part);
+  }
   _out->write(p, part);
   _out->write(' ', part);
   _out->write(o, part);
@@ -542,7 +658,7 @@ std::string osm2rdf::ttl::Writer<T>::PrefixedName(std::string_view p,
                                                   std::string_view v) {
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-  return encodePN_PREFIX(p) + ":" + encodePN_LOCAL(v);
+  return std::string{p} + ":" + encodePN_LOCAL(v);
 }
 
 // ____________________________________________________________________________
@@ -552,6 +668,40 @@ std::string osm2rdf::ttl::Writer<T>::PrefixedNameUnsafe(std::string_view p,
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
   return std::string(p) + ":" + std::string(v);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writePrefixedName(std::string_view p,
+                                                  std::string_view v, size_t part) {
+  // TTL: [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  _out->write(p, part);
+  _out->write(':', part);
+
+  // check if v is well-behaved, if not, call encodePN_LOCAL, otherwise write
+  // string_view directly without any additional copying
+  for (size_t pos = 0; pos < v.size(); ++pos) {
+    if (!(v[pos] == ':' || v[pos] == '_' ||
+        ( v[pos] >= 'A' && v[pos] <= 'Z') ||
+        (v[pos] >= 'a' && v[pos] <= 'z') ||
+        (v[pos] >= '0' && v[pos] <= '9'))) {
+      _out->write(encodePN_LOCAL(v), part);
+      return;
+    }
+  }
+  _out->write(v, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writePrefixedNameUnsafe(std::string_view p,
+                                                        std::string_view v, size_t part) {
+  // TTL: [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  _out->write(p, part);
+  _out->write(':', part);
+  _out->write(v, part);
 }
 
 // ____________________________________________________________________________
@@ -947,6 +1097,110 @@ std::string osm2rdf::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
     pos += length - 1;
   }
   return tmp;
+}
+
+// ____________________________________________________________________________
+template <>
+void osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::writeFormattedIRI(
+    std::string_view p, std::string_view v, size_t part) {
+  // NT:  [8]    IRIREF
+  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
+  auto prefix = _prefixes.find(std::string{p});
+  if (prefix != _prefixes.end()) {
+    _out->write(IRIREF(prefix->second, v), part);
+    return;
+  }
+  _out->write(IRIREF(p, v), part);
+}
+
+// ____________________________________________________________________________
+template <>
+void osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::writeFormattedIRIUnsafe(
+    std::string_view p, std::string_view v, size_t part) {
+  // NT:  [8]    IRIREF
+  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
+  auto prefix = _prefixes.find(std::string{p});
+  if (prefix != _prefixes.end()) {
+    _out->write(IRIREFUnsafe(prefix->second, v), part);
+    return;
+  }
+  _out->write(IRIREFUnsafe(p, v), part);
+}
+
+// ____________________________________________________________________________
+template <>
+void osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::writeFormattedIRIUnsafe(
+    std::string_view p, std::string_view v, size_t part) {
+  // TTL: [135s] iri
+  //      https://www.w3.org/TR/turtle/#grammar-production-iri
+  //      [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  //      [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  auto prefix = _prefixes.find(std::string{p});
+  // If known prefix -> PrefixedName
+  if (prefix != _prefixes.end()) {
+    writePrefixedNameUnsafe(p, v, part);
+    return;
+  }
+  _out->write(IRIREF(p, v), part);
+}
+
+// ____________________________________________________________________________
+template <>
+void osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::writeFormattedIRIUnsafe(
+    std::string_view p, std::string_view v, size_t part) {
+  // TTL: [135s] iri
+  //      https://www.w3.org/TR/turtle/#grammar-production-iri
+  //      [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  //      [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  auto prefix = _prefixes.find(std::string{p});
+  // If known prefix -> PrefixedName
+  if (prefix != _prefixes.end()) {
+    writePrefixedNameUnsafe(p, v, part);
+    return;
+  }
+  _out->write(IRIREFUnsafe(p, v), part);
+}
+
+// ____________________________________________________________________________
+template <>
+void osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::writeFormattedIRI(
+    std::string_view p, std::string_view v, size_t part) {
+  // TTL: [135s] iri
+  //      https://www.w3.org/TR/turtle/#grammar-production-iri
+  //      [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  //      [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  auto prefix = _prefixes.find(std::string{p});
+  // If known prefix -> PrefixedName
+  if (prefix != _prefixes.end()) {
+    writePrefixedName(p, v, part);
+    return;
+  }
+  _out->write(IRIREF(p, v), part);
+}
+
+// ____________________________________________________________________________
+template <>
+void osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::writeFormattedIRI(
+    std::string_view p, std::string_view v, size_t part) {
+  // TTL: [135s] iri
+  //      https://www.w3.org/TR/turtle/#grammar-production-iri
+  //      [18]   IRIREF (same as NT)
+  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
+  //      [136s] PrefixedName
+  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
+  auto prefix = _prefixes.find(std::string{p});
+  // If known prefix -> PrefixedName
+  if (prefix != _prefixes.end()) {
+    writePrefixedName(p, v, part);
+    return;
+  }
+  _out->write(IRIREF(p, v), part);
 }
 
 // ____________________________________________________________________________

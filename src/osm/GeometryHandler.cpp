@@ -216,7 +216,8 @@ template <typename W>
     const ::util::geo::DPoint& loc) {
   auto point = ::util::geo::latLngToWebMerc(
       ::util::geo::DPoint(loc.getX(), loc.getY()));  // locs are lon/lat
-  return ::util::geo::I32Point{static_cast<int>(point.getX() * PREC), static_cast<int>(point.getY() * PREC)};
+  return ::util::geo::I32Point{static_cast<int>(point.getX() * PREC),
+                               static_cast<int>(point.getY() * PREC)};
 }
 
 // ____________________________________________________________________________
@@ -262,7 +263,7 @@ void GeometryHandler<W>::calculateRelations() {
   }
 
   // read optional auxiliary geo data
-  for (const auto& auxFile :_config.auxGeoFiles) {
+  for (const auto& auxFile : _config.auxGeoFiles) {
     if (auxFile.size() == 0) continue;
     const static size_t CACHE_SIZE = 1024 * 1024 * 100;
     unsigned char* buf = new unsigned char[CACHE_SIZE];
@@ -274,7 +275,7 @@ void GeometryHandler<W>::calculateRelations() {
       throw std::runtime_error("Could not read auxiliary geo file " + auxFile);
     }
 
-    ::util::JobQueue<ParseBatch> jobs(1000);  // the WKT parse jobs
+    ::util::JobQueue<ParseBatch> jobs(1000);             // the WKT parse jobs
     std::vector<std::thread> thrds(_config.numThreads);  // the parse workers
     for (size_t i = 0; i < thrds.size(); i++)
       thrds[i] = std::thread(&processQueue, &jobs, i, &_sweeper);
