@@ -1437,7 +1437,7 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   const std::string subject = "subject";
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected = subject +
-                               " osm:tag _:0_0 .\n"
+                               " osmkey:tag _:0_0 .\n"
                                "_:0_0 osmkey:key \"" +
                                tagKey +
                                "\" .\n"
