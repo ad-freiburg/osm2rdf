@@ -36,6 +36,7 @@ osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
   if (maxValue == 0) {
     _countWidth = 1;
   }
+  _show = false;
   _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2;
 }
 

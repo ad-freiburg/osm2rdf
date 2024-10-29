@@ -26,7 +26,7 @@
 
 namespace osm2rdf::osm {
 
-typedef std::map<std::string, std::string> TagList;
+typedef std::vector<std::pair<std::string, std::string>> TagList;
 
 // Convert an osmium::TagList into a osm2rdf::osm::TagList
 osm2rdf::osm::TagList convertTagList(const osmium::TagList& tagList);

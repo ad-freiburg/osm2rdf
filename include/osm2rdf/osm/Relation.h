@@ -65,6 +65,7 @@ class Relation {
   ::util::geo::DPolygon _convexHull;
   ::util::geo::DPolygon _obb;
   bool _hasCompleteGeometry;
+  bool _isArea;
 };
 
 }  // namespace osm2rdf::osm

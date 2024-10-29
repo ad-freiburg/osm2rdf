@@ -45,6 +45,7 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
       _partCount(partCount),
       _partCountDigits(std::floor(std::log10(partCount)) + 1),
       _outBuffers(_partCount),
+      _lines(_partCount),
       _toStdOut(_config.output.empty()) {}
 
 // ____________________________________________________________________________
@@ -199,7 +200,10 @@ void osm2rdf::util::Output::concatenate() {
 // ____________________________________________________________________________
 void osm2rdf::util::Output::writeNewLine(size_t part) {
   write('\n', part);
-  if (_toStdOut) flush(part);
+  _lines[part]++;
+  if (_toStdOut) {
+    if (_lines[part] > 50) flush(part);
+  }
 }
 
 // ____________________________________________________________________________
@@ -309,6 +313,7 @@ void osm2rdf::util::Output::flush() {
 // ____________________________________________________________________________
 void osm2rdf::util::Output::flush(size_t i) {
   if (_toStdOut) {
+    _lines[i] = 0;
     _outBuffers[i][_outBufPos[i]] = '\0';
     std::cout << reinterpret_cast<const char*>(_outBuffers[i]);
   } else if (_config.outputCompress) {

@@ -25,11 +25,12 @@
 osm2rdf::osm::TagList osm2rdf::osm::convertTagList(
     const osmium::TagList& tagList) {
   osm2rdf::osm::TagList result;
+  result.reserve(tagList.size());
 
   for (const auto& tag : tagList) {
     std::string key{tag.key()};
     std::replace(key.begin(), key.end(), ' ', '_');
-    result[std::move(key)] = tag.value();
+    result.push_back({key, tag.value()});
   }
   return result;
 }

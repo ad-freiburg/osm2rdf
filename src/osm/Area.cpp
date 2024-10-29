@@ -44,7 +44,6 @@ void osm2rdf::osm::Area::finalize() noexcept {
 osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
   _objId = static_cast<osm2rdf::osm::Area::id_t>(area.orig_id());
-  _hasName = (area.tags()["name"] != nullptr);
 
   double lonMin = std::numeric_limits<double>::infinity();
   double latMin = std::numeric_limits<double>::infinity();
@@ -139,7 +138,7 @@ const ::util::geo::DPoint osm2rdf::osm::Area::centroid() const noexcept {
 bool osm2rdf::osm::Area::operator==(
     const osm2rdf::osm::Area& other) const noexcept {
   return _id == other._id && _objId == other._objId &&
-         _hasName == other._hasName && _geomArea == other._geomArea &&
+         _geomArea == other._geomArea &&
          _envelopeArea == other._envelopeArea && _envelope == other._envelope &&
          _geom == other._geom;
 }
@@ -149,9 +148,6 @@ bool osm2rdf::osm::Area::operator!=(
     const osm2rdf::osm::Area& other) const noexcept {
   return !(*this == other);
 }
-
-// ____________________________________________________________________________
-bool osm2rdf::osm::Area::hasName() const noexcept { return _hasName; }
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Area::fromWay() const noexcept {

@@ -159,6 +159,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "way");
   osm2rdf::ttl::constants::IRI__RDF_TYPE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__RDF, "type");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_FACTS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "facts");
 
   osm2rdf::ttl::constants::IRI__XSD_DATE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "date");
@@ -573,7 +575,7 @@ std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::formatIRIUnsafe(
   if (prefix != _prefixes.end()) {
     return PrefixedNameUnsafe(p, v);
   }
-  return IRIREF(p, v);
+  return IRIREFUnsafe(p, v);
 }
 
 // ____________________________________________________________________________
@@ -1143,7 +1145,7 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::writeFormattedIRIUnsafe(
     writePrefixedNameUnsafe(p, v, part);
     return;
   }
-  _out->write(IRIREF(p, v), part);
+  _out->write(IRIREFUnsafe(p, v), part);
 }
 
 // ____________________________________________________________________________

@@ -42,6 +42,10 @@ osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
     _members.emplace_back(member);
   }
   _hasCompleteGeometry = false;
+
+  auto typeTag = relation.tags()["type"];
+  _isArea = typeTag != nullptr && (strcmp(typeTag, "multipolygon") == 0 ||
+                                   strcmp(typeTag, "boundary") == 0);
 }
 
 // ____________________________________________________________________________
@@ -60,13 +64,7 @@ const osm2rdf::osm::TagList& osm2rdf::osm::Relation::tags() const noexcept {
 }
 
 // ____________________________________________________________________________
-bool osm2rdf::osm::Relation::isArea() const noexcept {
-  const auto& typeTag = _tags.find("type");
-  if (typeTag != _tags.end()) {
-    return typeTag->second == "multipolygon" || typeTag->second == "boundary";
-  }
-  return false;
-}
+bool osm2rdf::osm::Relation::isArea() const noexcept { return _isArea; }
 
 // ____________________________________________________________________________
 const std::vector<osm2rdf::osm::RelationMember>&

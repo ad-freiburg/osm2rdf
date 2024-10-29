@@ -58,27 +58,6 @@ const ::util::geo::DPoint& osm2rdf::osm::Node::geom() const noexcept {
 }
 
 // ____________________________________________________________________________
-const ::util::geo::DBox osm2rdf::osm::Node::envelope() const noexcept {
-  return ::util::geo::getBoundingBox(_geom);
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon osm2rdf::osm::Node::convexHull() const noexcept {
-  return ::util::geo::convexHull(_geom);
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon osm2rdf::osm::Node::orientedBoundingBox()
-    const noexcept {
-  return convexHull();
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPoint osm2rdf::osm::Node::centroid() const noexcept {
-  return _geom;
-}
-
-// ____________________________________________________________________________
 const osm2rdf::osm::TagList& osm2rdf::osm::Node::tags() const noexcept {
   return _tags;
 }

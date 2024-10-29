@@ -76,6 +76,7 @@ inline std::string IRI__OSMWAY_IS_CLOSED;
 inline std::string IRI__OSMWAY_NEXT_NODE;
 inline std::string IRI__OSMWAY_NEXT_NODE_DISTANCE;
 inline std::string IRI__OSMWAY_NODE;
+inline std::string IRI__OSM2RDF_FACTS;
 inline std::string IRI__OSMWAY_NODE_COUNT;
 inline std::string IRI__OSMWAY_UNIQUE_NODE_COUNT;
 inline std::string IRI__OSM_NODE;

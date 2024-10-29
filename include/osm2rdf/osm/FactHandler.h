@@ -58,6 +58,8 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
 
+  void writeTag(const std::string& s, const osmium::Tag& tag);
+
   void writeTag(const std::string& s, const osm2rdf::osm::Tag& tag);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger);
@@ -72,6 +74,7 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
 
   void writeTagList(const std::string& s, const osm2rdf::osm::TagList& tags);
+  void writeTagList(const std::string& s, const osmium::TagList& tags);
   FRIEND_TEST(OSM_FactHandler, writeTagList);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
   FRIEND_TEST(OSM_FactHandler, writeTagListRefSingle);
