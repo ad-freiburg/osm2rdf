@@ -78,9 +78,8 @@ TEST(OSM_Way, FromWayWithTags) {
   ASSERT_FALSE(w.closed());
 
   ASSERT_EQ(1, w.tags().size());
-  ASSERT_EQ(0, w.tags().count("tag"));
-  ASSERT_EQ(1, w.tags().count("city"));
-  ASSERT_STREQ("Freiburg", w.tags().at("city").c_str());
+  ASSERT_EQ("city", w.tags()[0].first);
+  ASSERT_EQ("Freiburg", w.tags()[0].second);
 
   ASSERT_EQ(2, w.nodes().size());
   ASSERT_EQ(1, w.nodes().at(0).id());
@@ -236,7 +235,8 @@ TEST(OSM_Way, isAreaTrueForTriangle) {
                            }));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+  w.finalize();
   ASSERT_TRUE(w.closed());
 
   ASSERT_TRUE(w.isArea());

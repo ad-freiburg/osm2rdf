@@ -571,7 +571,7 @@ TEST(E2E, building51NT) {
       printedData,
       ::testing::HasSubstr(
           "<https://osm2rdf.cs.uni-freiburg.de/rdf/geom#osm_wayarea_98284318> "
-          "<http://www.opengis.net/ont/geosparql#asWKT> \"MULTIPOLYGON(((7"));
+          "<http://www.opengis.net/ont/geosparql#asWKT> \"POLYGON((7"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
@@ -722,7 +722,7 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
@@ -858,8 +858,8 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(")))\"^^geo:wktLiteral .\n"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
@@ -972,7 +972,7 @@ TEST(E2E, tf) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"POLYGON((7"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -1093,7 +1093,7 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
@@ -1110,7 +1110,7 @@ TEST(E2E, building51inTF) {
                                "osmway:4498466 osmkey:wheelchair \"yes\" .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
+                  "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:4498466 ogc:sfCovers osmway:98284318 .\n"));

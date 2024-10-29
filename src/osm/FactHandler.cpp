@@ -155,13 +155,13 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
     writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, node.geom());
   }
 
-  const auto& hullWKT = ::util::geo::getWKT(::util::geo::DPolygon{{node.geom(), node.geom()},{}}, _config.wktPrecision);
+  const auto& hullWKT = ::util::geo::getWKT(::util::geo::DPolygon{{node.geom()},{}}, _config.wktPrecision);
 
   _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, hullWKT,
       "^^" + IRI__GEOSPARQL__WKT_LITERAL);
+  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, ::util::geo::DBox{node.geom(), node.geom()});
   _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__OBB, hullWKT,
       "^^" + IRI__GEOSPARQL__WKT_LITERAL);
-  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, ::util::geo::DBox{node.geom(), node.geom()});
 }
 
 // ____________________________________________________________________________
@@ -392,54 +392,6 @@ void osm2rdf::osm::FactHandler<W>::writeBox(
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
-                                            const osmium::Tag& tag) {
-  const std::string& key = tag.key();
-  const std::string& value = tag.value();
-  if (key == "admin_level") {
-    std::string rTrimmed;
-
-    // right trim, left trim is done by strtoll
-    auto end = std::find_if(value.rbegin(), value.rend(),
-                            [](int c) { return std::isspace(c) == 0; });
-    rTrimmed = value.substr(0, end.base() - value.begin());
-
-    char* firstNonMatched;
-    int64_t lvl = strtoll(rTrimmed.c_str(), &firstNonMatched,
-                          osm2rdf::osm::constants::BASE10_BASE);
-
-    // if integer, dump as xsd:integer
-    if (firstNonMatched != rTrimmed.c_str() && (*firstNonMatched) == 0) {
-      _writer->writeIRILiteralTriple(
-          subj, NAMESPACE__OSM_TAG, key,
-          _writer->generateLiteralUnsafe(std::to_string(lvl),
-                                         "^^" + IRI__XSD_INTEGER));
-    } else {
-      _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key, value);
-    }
-  } else {
-    try {
-      _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key, value);
-    } catch (const std::domain_error&) {
-      const std::string& blankNode = _writer->generateBlankNode();
-
-      // NOTE: if a domain_error occured, it occured during the writing of the
-      // predicate, and we already wrote the subject above. Simple start again
-      // with an empty subject.
-      _writer->writeTriple("\b", IRI__OSM_TAG, blankNode);
-
-      _writer->writeTriple(blankNode,
-                           _writer->generateIRI(NAMESPACE__OSM_TAG, "key"),
-                           _writer->generateLiteral(key));
-      _writer->writeTriple(blankNode,
-                           _writer->generateIRI(NAMESPACE__OSM_TAG, "value"),
-                           _writer->generateLiteral(value));
-    }
-  }
-}
-
-// ____________________________________________________________________________
-template <typename W>
-void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
                                             const osm2rdf::osm::Tag& tag) {
   const std::string& key = tag.first;
   const std::string& value = tag.second;
@@ -457,23 +409,22 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
 
     // if integer, dump as xsd:integer
     if (firstNonMatched != rTrimmed.c_str() && (*firstNonMatched) == 0) {
-      _writer->writeIRILiteralTriple(
-          subj, NAMESPACE__OSM_TAG, key,
+      _writer->writeTriple(
+          subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_TAG, key),
           _writer->generateLiteralUnsafe(std::to_string(lvl),
                                          "^^" + IRI__XSD_INTEGER));
     } else {
-      _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key, value);
+      _writer->writeUnsafeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key, value);
     }
   } else {
-    try {
+			auto check =_writer->checkPN_LOCAL(key);
+		if (check == 0) {
+      _writer->writeUnsafeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key, value);
+    } else if (check == 1) {
       _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key, value);
-    } catch (const std::domain_error&) {
+    } else {
       const std::string& blankNode = _writer->generateBlankNode();
-
-      // NOTE: if a domain_error occured, it occured during the writing of the
-      // predicate, and we already wrote the subject above. Simple start again
-      // with an empty subject.
-      _writer->writeTriple("\b", IRI__OSM_TAG, blankNode);
+      _writer->writeTriple(subj, IRI__OSM_TAG, blankNode);
 
       _writer->writeTriple(blankNode,
                            _writer->generateIRI(NAMESPACE__OSM_TAG, "key"),
@@ -483,145 +434,6 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
                            _writer->generateLiteral(value));
     }
   }
-}
-
-// ____________________________________________________________________________
-template <typename W>
-void osm2rdf::osm::FactHandler<W>::writeTagList(const std::string& subj,
-                                                const osmium::TagList& tags) {
-
-  size_t tagTripleCount = 0;
-  for (const auto& tag : tags) {
-    const std::string& key = tag.key();
-    const std::string& value = tag.value();
-    // Special handling for ref tag splitting. Maybe generalize this...
-    if (_config.semicolonTagKeys.find(key) != _config.semicolonTagKeys.end() &&
-        value.find(';') != std::string::npos) {
-      size_t end;
-      size_t start = 0;
-      while ((end = value.find(';', start)) != std::string::npos) {
-        const std::string& partialValue = value.substr(start, (end - start));
-        writeTag(subj, osm2rdf::osm::Tag(key, partialValue));
-        tagTripleCount++;
-        start = end + 1;
-      };
-      const std::string& partialValue = value.substr(start, value.size());
-      writeTag(subj, osm2rdf::osm::Tag(key, partialValue));
-      tagTripleCount++;
-    } else {
-      writeTag(subj, tag);
-      tagTripleCount++;
-    }
-
-    // Handling for wiki tags
-    if (!_config.skipWikiLinks &&
-        (key == "wikidata" || hasSuffix(key, ":wikidata"))) {
-      // Only take first wikidata entry if ; is found
-      std::string valueTmp = value;
-      const auto end = valueTmp.find(';');
-      if (end != std::string::npos) {
-        valueTmp = valueTmp.erase(end);
-      }
-      // Remove all but Q and digits to ensure Qdddddd format
-      valueTmp.erase(
-          remove_if(valueTmp.begin(), valueTmp.end(),
-                    [](char chr) { return (chr != 'Q' && isdigit(chr) == 0); }),
-          valueTmp.end());
-
-
-
-      _writer->writeTriple(
-          subj, _writer->generateIRI(NAMESPACE__OSM2RDF_TAG, key),
-          _writer->generateIRI(NAMESPACE__WIKIDATA_ENTITY, valueTmp));
-      tagTripleCount++;
-    }
-    if (!_config.skipWikiLinks &&
-        (key == "wikipedia" || hasSuffix(key, ":wikipedia"))) {
-      const auto pos = value.find(':');
-      if (pos != std::string::npos) {
-        const std::string& lang = value.substr(0, pos);
-        const std::string& entry = value.substr(pos + 1);
-        _writer->writeTriple(
-            subj, _writer->generateIRI(NAMESPACE__OSM2RDF_TAG, key),
-            _writer->generateIRI("https://" + lang + ".wikipedia.org/wiki/",
-                                 entry));
-        tagTripleCount++;
-      } else {
-        _writer->writeTriple(
-            subj, _writer->generateIRI(NAMESPACE__OSM2RDF_TAG, key),
-            _writer->generateIRI("https://www.wikipedia.org/wiki/", value));
-        tagTripleCount++;
-      }
-    }
-    if (key == "start_date" || key == "end_date") {
-      // Abort if non digit and not -
-      if (std::any_of(value.cbegin(), value.cend(),
-                      [](char c) { return isdigit(c) == 0 && c != '-'; })) {
-        continue;
-      }
-
-      // Skip if empty
-      if (value.empty()) {
-        continue;
-      }
-      // Skip if only '-'
-      size_t minusCount = std::count(value.begin(), value.end(), '-');
-      if (minusCount == value.size()) {
-        continue;
-      }
-
-      std::string newValue;
-      newValue.reserve(value.size());
-      std::ostringstream tmp;
-      tmp << std::setfill('0');
-
-      size_t last = 0;
-      size_t next;
-      auto resultType = 0;
-      for (size_t i = 0; i < (minusCount + 1); ++i) {
-        next = value.find('-', last);
-        if (i == 0 && next == 0) {
-          newValue += '-';
-          last = next + 1;
-          continue;
-        }
-        auto val = std::atoi(value.substr(last, next - last).c_str());
-
-        // basic validity checks according to ISO 8601
-        if (resultType == 1 && (val < 1 || val > 12)) {
-          resultType = 9;  // error
-          break;
-        }
-
-        if (resultType == 2 && (val < 1 || val > 31)) {
-          resultType = 9;  // error
-          break;
-        }
-
-        tmp << std::setw(resultType == 0 ? 4 : 2) << std::dec << val;
-        newValue += tmp.str().substr(0, resultType == 0 ? 4 : 2) + '-';
-        tmp.seekp(0);
-        resultType++;
-        last = next + 1;
-      }
-      if (resultType > 3) {
-        // Invalid length
-        continue;
-      }
-      std::string typeString[3] = {IRI__XSD_YEAR, IRI__XSD_YEAR_MONTH,
-                                   IRI__XSD_DATE};
-      _writer->writeTriple(
-          subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF_TAG, key),
-          _writer->generateLiteralUnsafe(
-              newValue.substr(0, newValue.size() - 1),
-              "^^" + typeString[resultType - 1]));
-    }
-  }
-
-  _writer->writeTriple(
-      subj, osm2rdf::ttl::constants::IRI__OSM2RDF_FACTS,
-      _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
-                                     "^^" + IRI__XSD_INTEGER));
 }
 
 // ____________________________________________________________________________

@@ -159,6 +159,7 @@ TEST(TTL_WriterTTL, writeHeader) {
 
   w.writeHeader();
 
+  output.flush();
   output.close();
 
   ASSERT_THAT(buffer.str(),
@@ -186,6 +187,7 @@ TEST(TTL_WriterQLEVER, writeHeader) {
 
   w.writeHeader();
 
+  output.flush();
   output.close();
 
   ASSERT_THAT(buffer.str(),

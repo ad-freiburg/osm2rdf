@@ -88,8 +88,8 @@ TEST(OSM_FactHandler, areaFromWay) {
 
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 "
-      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmway:21 "
+      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
@@ -147,8 +147,8 @@ TEST(OSM_FactHandler, areaFromRelation) {
 
   ASSERT_EQ(
       "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 "
-      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmrel:10 "
+      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
@@ -408,7 +408,8 @@ TEST(OSM_FactHandler, way) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -467,7 +468,8 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -533,7 +535,8 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -595,7 +598,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -662,7 +666,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -727,7 +732,8 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -1437,7 +1443,7 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   const std::string subject = "subject";
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected = subject +
-                               " osmkey:tag _:0_0 .\n"
+                               " osm:tag _:0_0 .\n"
                                "_:0_0 osmkey:key \"" +
                                tagKey +
                                "\" .\n"
@@ -1487,8 +1493,8 @@ TEST(OSM_FactHandler, writeTagList) {
   const std::string object2 = writer.generateLiteral(tag2Value, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tag1Key] = tag1Value;
-  tagList[tag2Key] = tag2Value;
+  tagList.push_back({tag1Key, tag1Value});
+  tagList.push_back({tag2Key, tag2Value});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1533,7 +1539,7 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1578,7 +1584,7 @@ TEST(OSM_FactHandler, writeTagListRefDouble) {
   const std::string object2 = writer.generateLiteral("B 294", "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1626,7 +1632,7 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   const std::string object3 = writer.generateLiteral("K 4917", "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1677,7 +1683,7 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1726,7 +1732,7 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1775,7 +1781,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   const std::string object2 = "<https://de.wikipedia.org/wiki/" + value + ">";
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1824,7 +1830,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
       "<https://www.wikipedia.org/wiki/" + tagValue + ">";
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1877,8 +1883,8 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tag1Key);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tag1Key] = tag1Value;
-  tagList[tag2Key] = tag2Value;
+  tagList.push_back({tag1Key, tag1Value});
+  tagList.push_back({tag2Key, tag2Value});
 
   dh.writeTagList("subject", tagList);
   output.flush();
@@ -1924,7 +1930,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1968,7 +1974,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2012,7 +2018,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2060,7 +2066,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
       "0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2109,7 +2115,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
       "-0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2158,7 +2164,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2207,7 +2213,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2256,7 +2262,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
       "0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2305,7 +2311,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
       "-0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2354,7 +2360,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2403,7 +2409,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2452,7 +2458,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth5) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2502,7 +2508,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
       "0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2551,7 +2557,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
       "-0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2600,7 +2606,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2649,7 +2655,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2698,7 +2704,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();

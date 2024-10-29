@@ -90,10 +90,8 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       omp_set_num_threads(_config.numThreads);
 #endif
 
-      osmium::io::ReaderWithProgressBar reader{
-          true, input_file, osmium::osm_entity_bits::object, pool};
-      // osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object,
-      // pool};
+      osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object,
+                                pool};
       osm2rdf::osm::LocationHandler* locationHandler =
           osm2rdf::osm::LocationHandler::create(_config);
       _relationHandler.setLocationHandler(locationHandler);
@@ -127,7 +125,12 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
 #pragma omp single
         {
           while (auto buf = reader.read()) {
-            osmium::apply(buf, mp_manager, *locationHandler, *this);
+            osmium::apply(
+                buf, *locationHandler, _relationHandler,
+                mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
+                  osmium::apply(buffer, *this);
+                }),
+                *this);
           }
         }
       }
@@ -160,13 +163,13 @@ template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   _areasSeen++;
   try {
-      auto osmArea = osm2rdf::osm::Area(area);
+    auto osmArea = osm2rdf::osm::Area(area);
 #pragma omp task
     {
       osmArea.finalize();
       if (!_config.noFacts && !_config.noAreaFacts) {
         _areasDumped++;
-        _factHandler.area(osmArea);
+        _factHandler->area(osmArea);
       }
       if (!_config.noGeometricRelations && !_config.noAreaGeometricRelations) {
         _areaGeometriesHandled++;
@@ -192,7 +195,7 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
     {
       if (!_config.noFacts && !_config.noNodeFacts) {
         _nodesDumped++;
-        _factHandler.node(osmNode);
+        _factHandler->node(osmNode);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       }
@@ -231,7 +234,7 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
 
       if (!_config.noFacts && !_config.noRelationFacts) {
         _relationsDumped++;
-        _factHandler.relation(osmRelation);
+        _factHandler->relation(osmRelation);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       }
@@ -270,7 +273,7 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
         if (!osmWay.isArea()) {  // avoid double calculation of OBB and hull
           osmWay.finalize();
         }
-        _factHandler.way(osmWay);
+        _factHandler->way(osmWay);
 #pragma omp critical(progress)
         _progressBar.update(_numTasksDone++);
       }

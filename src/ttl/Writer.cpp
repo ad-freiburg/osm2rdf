@@ -275,22 +275,22 @@ std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeIRI(std::string_view p,
-                                                 uint64_t v, size_t part) {
+void osm2rdf::ttl::Writer<T>::writeIRI(std::string_view p, uint64_t v,
+                                       size_t part) {
   writeIRIUnsafe(p, std::to_string(v), part);
 }
 
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeIRIUnsafe(std::string_view p,
-                                                       std::string_view v, size_t part) {
+                                             std::string_view v, size_t part) {
   writeFormattedIRIUnsafe(p, v, part);
 }
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeIRI(std::string_view p,
-                                                 std::string_view v, size_t part) {
+void osm2rdf::ttl::Writer<T>::writeIRI(std::string_view p, std::string_view v,
+                                       size_t part) {
   if (v.size() > 0 && (std::isspace(v[0] || std::isspace(v.back())))) {
     // trims whitespace
     auto begin = std::find_if(v.begin(), v.end(),
@@ -395,7 +395,8 @@ void osm2rdf::ttl::Writer<T>::writeLiteral(std::string_view v, size_t part) {
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeLiteralUnsafe(std::string_view v,
-                                                           std::string_view s, size_t part) {
+                                                 std::string_view s,
+                                                 size_t part) {
   // only put literal in quotes
   _out->write('"', part);
   _out->write(v, part);
@@ -411,7 +412,8 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v, std::string_view s) {
+std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v,
+                                                     std::string_view s) {
   return STRING_LITERAL_QUOTE(v) + std::string{s};
 }
 
@@ -432,9 +434,43 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
 
 // ____________________________________________________________________________
 template <typename T>
+void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
+    const std::string& s, const std::string& p, const std::string& v,
+    const std::string& o) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#else
+  part = 0;
+#endif
+
+  writeUnsafeIRILiteralTriple(s, p, v, o, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(const std::string& s,
+                                                          const std::string& p,
+                                                          const std::string& v,
+                                                          const std::string& o,
+                                                          size_t part) {
+  _out->write(s, part);
+  _out->write(' ', part);
+  writeIRIUnsafe(p, v, part);
+  _out->write(' ', part);
+  writeLiteral(o, part);
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
 void osm2rdf::ttl::Writer<T>::writeIRILiteralTriple(const std::string& s,
-                                          const std::string& p, const std::string& v,
-                                          const std::string& o) {
+                                                    const std::string& p,
+                                                    const std::string& v,
+                                                    const std::string& o) {
   size_t part = 0;
 
 #if defined(_OPENMP)
@@ -449,12 +485,12 @@ void osm2rdf::ttl::Writer<T>::writeIRILiteralTriple(const std::string& s,
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeIRILiteralTriple(const std::string& s,
-                                          const std::string& p, const std::string& v,
-                                          const std::string& o, size_t part) {
-  if (s != "\b") {
-    _out->write(s, part);
-    _out->write(' ', part);
-  }
+                                                    const std::string& p,
+                                                    const std::string& v,
+                                                    const std::string& o,
+                                                    size_t part) {
+  _out->write(s, part);
+  _out->write(' ', part);
   writeIRI(p, v, part);
   _out->write(' ', part);
   writeLiteral(o, part);
@@ -484,10 +520,8 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
                                           const std::string& p,
                                           const std::string& o, size_t part) {
-  if (s != "\b") {
-    _out->write(s, part);
-    _out->write(' ', part);
-  }
+  _out->write(s, part);
+  _out->write(' ', part);
   _out->write(p, part);
   _out->write(' ', part);
   _out->write(o, part);
@@ -675,7 +709,8 @@ std::string osm2rdf::ttl::Writer<T>::PrefixedNameUnsafe(std::string_view p,
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writePrefixedName(std::string_view p,
-                                                  std::string_view v, size_t part) {
+                                                std::string_view v,
+                                                size_t part) {
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
   _out->write(p, part);
@@ -684,10 +719,9 @@ void osm2rdf::ttl::Writer<T>::writePrefixedName(std::string_view p,
   // check if v is well-behaved, if not, call encodePN_LOCAL, otherwise write
   // string_view directly without any additional copying
   for (size_t pos = 0; pos < v.size(); ++pos) {
-    if (!(v[pos] == ':' || v[pos] == '_' ||
-        ( v[pos] >= 'A' && v[pos] <= 'Z') ||
-        (v[pos] >= 'a' && v[pos] <= 'z') ||
-        (v[pos] >= '0' && v[pos] <= '9'))) {
+    if (!(v[pos] == ':' || v[pos] == '_' || (v[pos] >= 'A' && v[pos] <= 'Z') ||
+          (v[pos] >= 'a' && v[pos] <= 'z') ||
+          (v[pos] >= '0' && v[pos] <= '9'))) {
       _out->write(encodePN_LOCAL(v), part);
       return;
     }
@@ -698,7 +732,8 @@ void osm2rdf::ttl::Writer<T>::writePrefixedName(std::string_view p,
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writePrefixedNameUnsafe(std::string_view p,
-                                                        std::string_view v, size_t part) {
+                                                      std::string_view v,
+                                                      size_t part) {
   // TTL: [136s] PrefixedName
   //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
   _out->write(p, part);
@@ -1011,6 +1046,90 @@ std::string osm2rdf::ttl::Writer<T>::encodePN_PREFIX(std::string_view s) {
 
 // ____________________________________________________________________________
 template <typename T>
+int8_t osm2rdf::ttl::Writer<T>::checkPN_LOCAL(std::string_view s) {
+  int ret = 0;  // 0 = ok, 1 = encode, 2 = invalid
+
+  // TTL: [168s] PN_LOCAL
+  //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
+  for (size_t pos = 0; pos < s.size(); ++pos) {
+    // PN_LOCAL      ::= (PN_CHARS_U | ':' | [0-9] | PLX)
+    //                   ((PN_CHARS | '.' | ':' | PLX)*
+    //                   (PN_CHARS | ':' | PLX))?
+    //
+    // PN_CHARS_U    ::= PN_CHARS_BASE | '_'
+    //
+    // PN_CHARS      ::= PN_CHARS_U | '-' | [0-9] | #x00B7 | [#x0300-#x036F] |
+    //                   [#x203F-#x2040]
+    //
+    // PN_CHARS_BASE ::= [A-Z] | [a-z] | [#x00C0-#x00D6] | [#x00D8-#x00F6] |
+    //                   [#x00F8-#x02FF] | [#x0370-#x037D] | [#x037F-#x1FFF] |
+    //                   [#x200C-#x200D] | [#x2070-#x218F] | [#x2C00-#x2FEF] |
+    //                   [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] |
+    //                   [#x10000-#xEFFFF]
+    //
+    // PLX           ::= PERCENT | PN_LOCAL_ESC
+    //
+    // PERCENT       ::= '%' HEX HEX
+    //
+    // HEX           ::= [0-9] | [A-F] | [a-f]
+    //
+    // PN_LOCAL_ESC  ::= '\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | "'" |
+    //                        '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' |
+    //                        '?' | '#' | '@' | '%')
+
+    auto currentChar = s[pos];
+    // _, :, A-Z, a-z, and 0-9 always allowed:
+    if (currentChar == ':' || currentChar == '_' ||
+        (currentChar >= 'A' && currentChar <= 'Z') ||
+        (currentChar >= 'a' && currentChar <= 'z') ||
+        (currentChar >= '0' && currentChar <= '9')) {
+      continue;
+    }
+    // First and last char is never .
+    if (currentChar == '.' && pos > 0 && pos < s.size() - 1) {
+      continue;
+    }
+    // First char is never -
+    if (currentChar == '-' && pos > 0) {
+      continue;
+    }
+    // Handle PN_LOCAL_ESC
+    if (currentChar == '!' || (currentChar >= '#' && currentChar <= '/') ||
+        currentChar == ';' || currentChar == '=' || currentChar == '?' ||
+        currentChar == '@' || currentChar == '~') {
+      ret = std::max(ret, 1);
+      continue;
+    }
+    // Percent encoding has 2 HEX slots -> use for rest of ascii 0x00 - 0x7F
+    if (currentChar >= 0x00) {
+      ret = std::max(ret, 1);
+      continue;
+    }
+    uint8_t length = utf8Length(currentChar);
+    std::string_view sub = s.substr(pos, length);
+    uint32_t c = utf8Codepoint(sub);
+    // Handle allowed Codepoints for CHARS_U
+    if ((c >= k0xC0 && c <= k0xD6) || (c >= k0xD8 && c <= k0xF6) ||
+        (c >= k0xF8 && c <= k0x2FF) || (c >= k0x370 && c <= k0x37D) ||
+        (c >= k0x37F && c <= k0x1FFF) || (c >= k0x200C && c <= k0x200D) ||
+        (c >= k0x2070 && c <= k0x218F) || (c >= k0x2C00 && c <= k0x2FEF) ||
+        (c >= k0x3001 && c <= k0xD7FF) || (c >= k0xF900 && c <= k0xFDCF) ||
+        (c >= k0xFDF0 && c <= k0xFFFD) || (c >= k0x10000 && c <= k0xEFFFF)) {
+      ret = std::max(ret, 1);
+    } else if (pos > 0 && (c == k0xB7 || (c >= k0x300 && c <= k0x36F) ||
+                           (c >= k0x203F && c <= k0x2040))) {
+      ret = std::max(ret, 1);
+    } else {
+      ret = 2;
+    }
+    // Shift new pos according to utf8-bytecount
+    pos += length - 1;
+  }
+  return ret;
+}
+
+// ____________________________________________________________________________
+template <typename T>
 std::string osm2rdf::ttl::Writer<T>::encodePN_LOCAL(std::string_view s) {
   // TTL: [168s] PN_LOCAL
   //      https://www.w3.org/TR/turtle/#grammar-production-PN_LOCAL
@@ -1150,8 +1269,10 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::writeFormattedIRIUnsafe(
 
 // ____________________________________________________________________________
 template <>
-void osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::writeFormattedIRIUnsafe(
-    std::string_view p, std::string_view v, size_t part) {
+void osm2rdf::ttl::Writer<
+    osm2rdf::ttl::format::QLEVER>::writeFormattedIRIUnsafe(std::string_view p,
+                                                           std::string_view v,
+                                                           size_t part) {
   // TTL: [135s] iri
   //      https://www.w3.org/TR/turtle/#grammar-production-iri
   //      [18]   IRIREF (same as NT)

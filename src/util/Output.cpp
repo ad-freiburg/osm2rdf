@@ -104,7 +104,11 @@ void osm2rdf::util::Output::close() {
   }
 
   if (_toStdOut) {
-    // nothing to do
+    for (size_t i = 0; i < _partCount; ++i) {
+      _lines[i] = 0;
+      _outBuffers[i][_outBufPos[i]] = '\0';
+      std::cout << reinterpret_cast<const char*>(_outBuffers[i]);
+    }
   } else if (_config.outputCompress) {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {

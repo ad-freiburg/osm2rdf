@@ -67,8 +67,8 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
 
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 "
-      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral "
+      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral "
       ".\nosmway:21 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,"
       "48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
@@ -125,8 +125,8 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
 
   ASSERT_EQ(
       "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 "
-      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmrel:10 "
+      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,"
       "48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope "
       "\"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
@@ -318,7 +318,8 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
                            }));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();

@@ -39,7 +39,7 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _geom.reserve(way.nodes().size());
 
   auto areaTag = way.tags()["area"];
-  _hasAreaTag = areaTag != nullptr && strcmp(areaTag, "no") != 0;
+  _hasAreaTag = areaTag == nullptr || strcmp(areaTag, "no") != 0;
 
   double lonMin = std::numeric_limits<double>::infinity();
   double latMin = std::numeric_limits<double>::infinity();

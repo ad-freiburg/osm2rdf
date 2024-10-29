@@ -56,9 +56,8 @@ TEST(OSM_Relation, FromRelationWithTags) {
   ASSERT_EQ(42, r.id());
 
   ASSERT_EQ(1, r.tags().size());
-  ASSERT_EQ(0, r.tags().count("tag"));
-  ASSERT_EQ(1, r.tags().count("city"));
-  ASSERT_STREQ("Freiburg", r.tags().at("city").c_str());
+  ASSERT_STREQ("city", r.tags()[0].first.c_str());
+  ASSERT_STREQ("Freiburg", r.tags()[0].second.c_str());
 
   ASSERT_EQ(0, r.members().size());
 }
@@ -106,9 +105,8 @@ TEST(OSM_Relation, FromRelationWithMembersAndTags) {
   ASSERT_EQ(42, r.id());
 
   ASSERT_EQ(1, r.tags().size());
-  ASSERT_EQ(0, r.tags().count("tag"));
-  ASSERT_EQ(1, r.tags().count("city"));
-  ASSERT_STREQ("Freiburg", r.tags().at("city").c_str());
+  ASSERT_STREQ("city", r.tags()[0].first.c_str());
+  ASSERT_STREQ("Freiburg", r.tags()[0].second.c_str());
 
   ASSERT_EQ(2, r.members().size());
   ASSERT_EQ(osm2rdf::osm::RelationMemberType::NODE, r.members().at(0).type());

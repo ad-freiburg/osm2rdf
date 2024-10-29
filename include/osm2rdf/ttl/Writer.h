@@ -109,10 +109,17 @@ class Writer {
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o, size_t part);
 
-  void writeIRILiteralTriple(const std::string& s, const std::string& p, const std::string& v,
-                   const std::string& o);
-  void writeIRILiteralTriple(const std::string& s, const std::string& p, const std::string& v,
-                   const std::string& o, size_t part);
+  void writeIRILiteralTriple(const std::string& s, const std::string& p,
+                             const std::string& v, const std::string& o);
+  void writeIRILiteralTriple(const std::string& s, const std::string& p,
+                             const std::string& v, const std::string& o,
+                             size_t part);
+
+  void writeUnsafeIRILiteralTriple(const std::string& s, const std::string& p,
+                                   const std::string& v, const std::string& o);
+  void writeUnsafeIRILiteralTriple(const std::string& s, const std::string& p,
+                                   const std::string& v, const std::string& o,
+                                   size_t part);
 
   // Write a single RDF line with a literal. The contents of s, p, a and b are
   // not checked.
@@ -173,7 +180,8 @@ class Writer {
   std::string formatIRIUnsafe(std::string_view p, std::string_view v);
 
   void writeFormattedIRI(std::string_view p, std::string_view v, size_t part);
-  void writeFormattedIRIUnsafe(std::string_view p, std::string_view v, size_t part);
+  void writeFormattedIRIUnsafe(std::string_view p, std::string_view v,
+                               size_t part);
 
   std::string STRING_LITERAL_QUOTE(std::string_view s);
   FRIEND_TEST(WriterGrammarNT, RULE_9_STRING_LITERAL_QUOTE);
@@ -192,7 +200,8 @@ class Writer {
   std::string PrefixedName(std::string_view p, std::string_view v);
   FRIEND_TEST(WriterGrammarTTL, RULE_136s_PREFIXEDNAME);
 
-  void writePrefixedNameUnsafe(std::string_view p, std::string_view v, size_t part);
+  void writePrefixedNameUnsafe(std::string_view p, std::string_view v,
+                               size_t part);
   void writePrefixedName(std::string_view p, std::string_view v, size_t part);
 
   std::string encodeIRIREF(std::string_view s);
@@ -208,6 +217,8 @@ class Writer {
 
   std::string encodePN_LOCAL(std::string_view s);
   FRIEND_TEST(WriterGrammarTTL, RULE_168s_PN_LOCAL);
+
+  int8_t checkPN_LOCAL(std::string_view s);
 
   std::string encodePN_PREFIX(std::string_view s);
   FRIEND_TEST(WriterGrammarTTL, RULE_167s_PN_PREFIX);

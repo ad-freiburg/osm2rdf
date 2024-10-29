@@ -63,9 +63,8 @@ TEST(OSM_Node, FromNodeWithTags) {
   ASSERT_DOUBLE_EQ(48.0, n.geom().getY());
 
   ASSERT_EQ(1, n.tags().size());
-  ASSERT_EQ(0, n.tags().count("tag"));
-  ASSERT_EQ(1, n.tags().count("city"));
-  ASSERT_STREQ("Freiburg", n.tags().at("city").c_str());
+  ASSERT_STREQ("city", n.tags()[0].first.c_str());
+  ASSERT_STREQ("Freiburg", n.tags()[0].second.c_str());
 }
 
 // ____________________________________________________________________________
