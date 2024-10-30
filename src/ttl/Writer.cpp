@@ -256,6 +256,7 @@ void osm2rdf::ttl::Writer<T>::writeHeader() {
     writeTriple("@prefix", prefix + ":", "<" + iriref + ">", 0);
     _headerLines[0]++;
   }
+  flush();
 }
 
 // ____________________________________________________________________________
