@@ -183,7 +183,7 @@ TEST(TTL_WriterQLEVER, writeHeader) {
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, &output};
 
   w.writeHeader();
 
@@ -237,7 +237,7 @@ TEST(TTL_WriterTTL, generateBlankNode) {
 // ____________________________________________________________________________
 TEST(TTL_WriterQLEVER, generateBlankNode) {
   osm2rdf::config::Config config;
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, nullptr};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res = w.generateBlankNode();
     ASSERT_STREQ("_:0_0", res.c_str());
@@ -316,7 +316,7 @@ TEST(TTL_WriterTTL, generateIRI_ID) {
 // ____________________________________________________________________________
 TEST(TTL_WriterQLEVER, generateIRI_ID) {
   osm2rdf::config::Config config;
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, nullptr};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res =
         w.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, 23);
@@ -401,7 +401,7 @@ TEST(TTL_WriterTTL, generateIRI_String) {
 // ____________________________________________________________________________
 TEST(TTL_WriterQLEVER, generateIRI_String) {
   osm2rdf::config::Config config;
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, nullptr};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
   {
     const std::string res =
         w.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_NODE, "a");
@@ -728,7 +728,7 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, &output};
 
   // Setup temp dir and stats file
   std::filesystem::path tmpDir =

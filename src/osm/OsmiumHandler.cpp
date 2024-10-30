@@ -371,3 +371,4 @@ size_t osm2rdf::osm::OsmiumHandler<W>::wayGeometriesHandled() const {
 // ____________________________________________________________________________
 template class osm2rdf::osm::OsmiumHandler<osm2rdf::ttl::format::NT>;
 template class osm2rdf::osm::OsmiumHandler<osm2rdf::ttl::format::TTL>;
+template class osm2rdf::osm::OsmiumHandler<osm2rdf::ttl::format::QLEVER>;

@@ -598,3 +598,4 @@ bool osm2rdf::osm::FactHandler<W>::hasSuffix(const std::string& subj,
 // ____________________________________________________________________________
 template class osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT>;
 template class osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL>;
+template class osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER>;

@@ -91,7 +91,7 @@ struct Config {
 
   // Output, empty for stdout
   std::filesystem::path output;
-  std::string outputFormat = "ttl";
+  std::string outputFormat = "qlever";
   osm2rdf::util::OutputMergeMode mergeOutput =
       osm2rdf::util::OutputMergeMode::CONCATENATE;
   bool outputCompress = true;
