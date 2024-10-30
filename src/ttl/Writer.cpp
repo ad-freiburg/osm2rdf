@@ -614,43 +614,7 @@ std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::formatIRIUnsafe(
 
 // ____________________________________________________________________________
 template <>
-std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::formatIRIUnsafe(
-    std::string_view p, std::string_view v) {
-  // TTL: [135s] iri
-  //      https://www.w3.org/TR/turtle/#grammar-production-iri
-  //      [18]   IRIREF (same as NT)
-  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  //      [136s] PrefixedName
-  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-  auto prefix = _prefixes.find(std::string{p});
-  // If known prefix -> PrefixedName
-  if (prefix != _prefixes.end()) {
-    return PrefixedNameUnsafe(p, v);
-  }
-  return IRIREFUnsafe(p, v);
-}
-
-// ____________________________________________________________________________
-template <>
 std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::formatIRI(
-    std::string_view p, std::string_view v) {
-  // TTL: [135s] iri
-  //      https://www.w3.org/TR/turtle/#grammar-production-iri
-  //      [18]   IRIREF (same as NT)
-  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  //      [136s] PrefixedName
-  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-  auto prefix = _prefixes.find(std::string{p});
-  // If known prefix -> PrefixedName
-  if (prefix != _prefixes.end()) {
-    return PrefixedName(p, v);
-  }
-  return IRIREF(p, v);
-}
-
-// ____________________________________________________________________________
-template <>
-std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::formatIRI(
     std::string_view p, std::string_view v) {
   // TTL: [135s] iri
   //      https://www.w3.org/TR/turtle/#grammar-production-iri
@@ -908,33 +872,6 @@ std::string osm2rdf::ttl::Writer<T>::encodeIRIREF(std::string_view s) {
       continue;
     }
     uint8_t length = utf8Length(c);
-    tmp += s.substr(pos, length);
-    pos += length - 1;
-  }
-  return tmp;
-}
-
-// ____________________________________________________________________________
-template <>
-std::string osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::encodeIRIREF(
-    std::string_view s) {
-  // NT:  [8]   IRIREF
-  //      https://www.w3.org/TR/n-triples/#grammar-production-IRIREF
-  // TTL: [18]  IRIREF
-  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  std::string tmp;
-  tmp.reserve(s.size() * 2);
-  for (size_t pos = 0; pos < s.size(); ++pos) {
-    uint8_t length = utf8Length(s[pos]);
-    // Force non-allowed chars to PERCENT
-    if (length == k1Byte) {
-      if ((s[pos] >= 0x00 && s[pos] <= ' ') || s[pos] == '<' || s[pos] == '>' ||
-          s[pos] == '{' || s[pos] == '}' || s[pos] == '\"' || s[pos] == '|' ||
-          s[pos] == '^' || s[pos] == '`' || s[pos] == '\\') {
-        tmp += encodePERCENT(s.substr(pos, 1));
-        continue;
-      }
-    }
     tmp += s.substr(pos, length);
     pos += length - 1;
   }
@@ -1269,47 +1206,7 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::writeFormattedIRIUnsafe(
 
 // ____________________________________________________________________________
 template <>
-void osm2rdf::ttl::Writer<
-    osm2rdf::ttl::format::QLEVER>::writeFormattedIRIUnsafe(std::string_view p,
-                                                           std::string_view v,
-                                                           size_t part) {
-  // TTL: [135s] iri
-  //      https://www.w3.org/TR/turtle/#grammar-production-iri
-  //      [18]   IRIREF (same as NT)
-  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  //      [136s] PrefixedName
-  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-  auto prefix = _prefixes.find(std::string{p});
-  // If known prefix -> PrefixedName
-  if (prefix != _prefixes.end()) {
-    writePrefixedNameUnsafe(p, v, part);
-    return;
-  }
-  _out->write(IRIREFUnsafe(p, v), part);
-}
-
-// ____________________________________________________________________________
-template <>
 void osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>::writeFormattedIRI(
-    std::string_view p, std::string_view v, size_t part) {
-  // TTL: [135s] iri
-  //      https://www.w3.org/TR/turtle/#grammar-production-iri
-  //      [18]   IRIREF (same as NT)
-  //      https://www.w3.org/TR/turtle/#grammar-production-IRIREF
-  //      [136s] PrefixedName
-  //      https://www.w3.org/TR/turtle/#grammar-production-PrefixedName
-  auto prefix = _prefixes.find(std::string{p});
-  // If known prefix -> PrefixedName
-  if (prefix != _prefixes.end()) {
-    writePrefixedName(p, v, part);
-    return;
-  }
-  _out->write(IRIREF(p, v), part);
-}
-
-// ____________________________________________________________________________
-template <>
-void osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::writeFormattedIRI(
     std::string_view p, std::string_view v, size_t part) {
   // TTL: [135s] iri
   //      https://www.w3.org/TR/turtle/#grammar-production-iri
@@ -1329,4 +1226,3 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::writeFormattedIRI(
 // ____________________________________________________________________________
 template class osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>;
 template class osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL>;
-template class osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>;

@@ -100,9 +100,7 @@ int main(int argc, char** argv) {
 #endif
 
   try {
-    if (config.outputFormat == "qlever") {
-      run<osm2rdf::ttl::format::QLEVER>(config);
-    } else if (config.outputFormat == "nt") {
+    if (config.outputFormat == "nt") {
       run<osm2rdf::ttl::format::NT>(config);
     } else if (config.outputFormat == "ttl") {
       run<osm2rdf::ttl::format::TTL>(config);

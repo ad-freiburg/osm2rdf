@@ -65,7 +65,7 @@ const static inline std::string OUTPUT_FORMAT_INFO = "Output format:";
 const static inline std::string OUTPUT_FORMAT_OPTION_SHORT = "";
 const static inline std::string OUTPUT_FORMAT_OPTION_LONG = "output-format";
 const static inline std::string OUTPUT_FORMAT_OPTION_HELP =
-    "Output format, valid values: nt, ttl, qlever";
+    "Output format, valid values: nt, ttl";
 
 const static inline std::string OUTPUT_KEEP_FILES_OPTION_SHORT = "";
 const static inline std::string OUTPUT_KEEP_FILES_OPTION_LONG =

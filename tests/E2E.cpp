@@ -73,11 +73,11 @@ TEST(E2E, singleNode) {
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
-  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
@@ -154,11 +154,11 @@ TEST(E2E, singleNodeWithTags) {
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
-  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
@@ -275,11 +275,11 @@ TEST(E2E, singleWayWithTagsAndNodes) {
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
-  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
@@ -795,11 +795,11 @@ TEST(E2E, building51QLEVER) {
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
-  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
@@ -931,11 +931,11 @@ TEST(E2E, tf) {
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
-  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
@@ -1031,11 +1031,11 @@ TEST(E2E, building51inTF) {
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
-  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
-  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
 
   osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();

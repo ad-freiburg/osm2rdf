@@ -322,4 +322,3 @@ std::string GeometryHandler<W>::areaNS(AreaFromType type) const {
 // ____________________________________________________________________________
 template class osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT>;
 template class osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL>;
-template class osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER>;
