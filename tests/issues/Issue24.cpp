@@ -245,7 +245,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
 
   osm2rdf::osm::RelationHandler rh = osm2rdf::osm::RelationHandler(config);
   osm2rdf::osm::LocationHandler* lh =
-      osm2rdf::osm::LocationHandler::create(config);
+      osm2rdf::osm::LocationHandler::create(config, 0, 0);
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
   rh.relation(osmiumBuffer1.get<osmium::Relation>(0));

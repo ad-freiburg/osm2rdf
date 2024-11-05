@@ -44,7 +44,7 @@ enum SourceDataset {
 
 struct Config {
   // Select what to do
-  std::string storeLocationsOnDisk;
+  std::string storeLocations;
 
   bool noFacts = false;
   bool noAreaFacts = false;

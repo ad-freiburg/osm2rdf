@@ -152,10 +152,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
   oss << "\n"
       << prefix << "Num Threads: " << numThreads;
 
-  if (!storeLocationsOnDisk.empty()) {
+  if (!storeLocations.empty()) {
     oss << "\n"
-        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO
-        << " " << storeLocationsOnDisk;
+        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_INFO
+        << " " << storeLocations;
   }
 
   if (writeRDFStatistics) {
@@ -182,11 +182,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
                                osm2rdf::config::constants::HELP_OPTION_LONG,
                                osm2rdf::config::constants::HELP_OPTION_HELP);
 
-  auto storeLocationsOnDiskOp =
-      parser.add<popl::Implicit<std::string>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG,
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_HELP, "sparse");
+  auto storeLocationsOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::STORE_LOCATIONS_SHORT,
+          osm2rdf::config::constants::STORE_LOCATIONS_LONG,
+          osm2rdf::config::constants::STORE_LOCATIONS_HELP, "mem-flex");
 
   auto noAreasOp = parser.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::NO_AREA_OPTION_SHORT,
@@ -386,8 +386,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     noFacts = noFactsOp->is_set();
 
-    if (storeLocationsOnDiskOp->is_set()) {
-      storeLocationsOnDisk = storeLocationsOnDiskOp->value();
+    if (storeLocationsOp->is_set()) {
+      storeLocations = storeLocationsOp->value();
     }
 
     // Select types to dump

@@ -27,6 +27,8 @@ void osm2rdf::osm::CountHandler::prepare_for_lookup() {
 
 // ____________________________________________________________________________
 void osm2rdf::osm::CountHandler::node(const osmium::Node& node){
+  if (node.id() < _minId) _minId = node.id();
+  if (node.id() > _maxId) _maxId = node.id();
   if (_firstPassDone || node.tags().empty())  {
     return;
   }

@@ -93,7 +93,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object,
                                 pool};
       osm2rdf::osm::LocationHandler* locationHandler =
-          osm2rdf::osm::LocationHandler::create(_config);
+          osm2rdf::osm::LocationHandler::create(_config, countHandler.minNodeId(), countHandler.maxNodeId());
       _relationHandler.setLocationHandler(locationHandler);
 
       size_t numTasks = 0;

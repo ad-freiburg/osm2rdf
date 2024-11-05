@@ -249,7 +249,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, way.timestamp());
   writeTagList(subj, way.tags());
 
-  if (_config.addWayNodeOrder) {
+  if (_config.addWayNodeOrder && way.nodes().size()) {
     size_t wayOrder = 0;
     std::string lastBlankNode;
     auto lastNode = way.nodes().front();

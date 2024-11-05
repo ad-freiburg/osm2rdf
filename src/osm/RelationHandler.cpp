@@ -51,8 +51,25 @@ osmium::Location osm2rdf::osm::RelationHandler::get_node_location(
 
 // ____________________________________________________________________________
 std::vector<uint64_t> osm2rdf::osm::RelationHandler::get_noderefs_of_way(
-    const uint64_t wayId) {
-  return _ways[wayId];
+    const uint32_t wayId) {
+  std::vector<uint64_t> ret;
+  ret.reserve(_ways[wayId].size());
+
+  for (size_t i = 0; i < _ways[wayId].size(); i++) {
+    if (_ways[wayId][i] >> 31 == 0) {
+      ret.push_back(_ways[wayId][i]);
+    } else {
+      uint64_t fullId;
+
+      fullId = static_cast<uint64_t>(_ways[wayId][i] << 1 >> 1) << 32;
+      fullId += _ways[wayId][i + 1];
+
+      ret.push_back(fullId);
+      i++;
+    }
+  }
+
+  return ret;
 }
 
 // ____________________________________________________________________________
@@ -70,12 +87,12 @@ void osm2rdf::osm::RelationHandler::relation(const osmium::Relation& relation) {
   }
 
   for (const auto& relationMember : relation.cmembers()) {
-    switch (relationMember.type()) {
-      case osmium::item_type::way:
-        _ways[relationMember.positive_ref()] = {};
-        break;
-      default:
-        break;
+    if (relationMember.type() == osmium::item_type::way) {
+      if (relationMember.positive_ref() >
+          std::numeric_limits<uint32_t>::max()) {
+        throw std::out_of_range("Way ID is too large");
+      }
+      _ways[relationMember.positive_ref()] = {};
     }
   }
 }
@@ -85,12 +102,33 @@ void osm2rdf::osm::RelationHandler::way(const osmium::Way& way) {
   if (!_firstPassDone) {
     return;
   }
+
+  if (way.positive_id() > std::numeric_limits<uint32_t>::max()) {
+    throw std::out_of_range("Way ID is too large");
+  }
+
   if (_ways.find(way.positive_id()) != _ways.end()) {
-    std::vector<uint64_t> ids;
-    ids.reserve(way.nodes().size());
+    std::vector<uint32_t> compressed;
+    compressed.reserve(way.nodes().size() / 2);
+
     for (const auto& nodeRef : way.nodes()) {
-      ids.push_back(nodeRef.positive_ref());
+      size_t nid = nodeRef.positive_ref();
+      if (nid <= std::numeric_limits<int32_t>::max()) {
+        // handle normally
+        compressed.push_back(nid);
+      } else if (nid <=
+                 (static_cast<size_t>(std::numeric_limits<int64_t>::max()))) {
+        // handle with continuation
+        int32_t lower = nid << 32 >> 32;
+        int32_t upper = nid >> 32;
+        upper = upper | (1 << 31);
+        compressed.push_back(upper);
+        compressed.push_back(lower);
+      } else {
+        throw std::out_of_range("Node ID is too large");
+      }
     }
-    _ways[way.positive_id()] = std::move(ids);
+
+    _ways[way.positive_id()] = std::move(compressed);
   }
 }
