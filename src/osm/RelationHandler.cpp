@@ -50,19 +50,19 @@ osmium::Location osm2rdf::osm::RelationHandler::get_node_location(
 }
 
 // ____________________________________________________________________________
-std::vector<uint64_t> osm2rdf::osm::RelationHandler::get_noderefs_of_way(
-    const uint32_t wayId) {
+std::vector<uint64_t> osm2rdf::osm::RelationHandler::getNodeRefs(
+    const std::vector<uint32_t>& refs) const {
   std::vector<uint64_t> ret;
-  ret.reserve(_ways[wayId].size());
+  ret.reserve(refs.size());
 
-  for (size_t i = 0; i < _ways[wayId].size(); i++) {
-    if (_ways[wayId][i] >> 31 == 0) {
-      ret.push_back(_ways[wayId][i]);
+  for (size_t i = 0; i < refs.size(); i++) {
+    if (refs[i] >> 31 == 0) {
+      ret.push_back(refs[i]);
     } else {
       uint64_t fullId;
 
-      fullId = static_cast<uint64_t>(_ways[wayId][i] << 1 >> 1) << 32;
-      fullId += _ways[wayId][i + 1];
+      fullId = static_cast<uint64_t>(refs[i] << 1 >> 1) << 32;
+      fullId += refs[i + 1];
 
       ret.push_back(fullId);
       i++;
@@ -70,6 +70,16 @@ std::vector<uint64_t> osm2rdf::osm::RelationHandler::get_noderefs_of_way(
   }
 
   return ret;
+}
+
+// ____________________________________________________________________________
+std::vector<uint64_t> osm2rdf::osm::RelationHandler::get_noderefs_of_way(
+    const uint64_t wayId) {
+  if (wayId > std::numeric_limits<uint32_t>::max()) {
+    return getNodeRefs(_ways64[wayId]);
+  } else {
+    return getNodeRefs(_ways32[wayId]);
+  }
 }
 
 // ____________________________________________________________________________
@@ -90,11 +100,39 @@ void osm2rdf::osm::RelationHandler::relation(const osmium::Relation& relation) {
     if (relationMember.type() == osmium::item_type::way) {
       if (relationMember.positive_ref() >
           std::numeric_limits<uint32_t>::max()) {
-        throw std::out_of_range("Way ID is too large");
+        _ways64[relationMember.positive_ref()] = {};
+      } else {
+        _ways32[relationMember.positive_ref()] = {};
       }
-      _ways[relationMember.positive_ref()] = {};
     }
   }
+}
+
+// ____________________________________________________________________________
+std::vector<uint32_t> osm2rdf::osm::RelationHandler::getCompressedIDs(
+    const osmium::Way& way) const {
+  std::vector<uint32_t> compressed;
+  compressed.reserve(way.nodes().size() / 2);
+
+  for (const auto& nodeRef : way.nodes()) {
+    size_t nid = nodeRef.positive_ref();
+    if (nid <= std::numeric_limits<int32_t>::max()) {
+      // handle normally
+      compressed.push_back(nid);
+    } else if (nid <=
+               (static_cast<size_t>(std::numeric_limits<int64_t>::max()))) {
+      // handle with continuation
+      int32_t lower = nid << 32 >> 32;
+      int32_t upper = nid >> 32;
+      upper = upper | (1 << 31);
+      compressed.push_back(upper);
+      compressed.push_back(lower);
+    } else {
+      throw std::out_of_range("Node ID is too large");
+    }
+  }
+
+  return compressed;
 }
 
 // ____________________________________________________________________________
@@ -104,31 +142,12 @@ void osm2rdf::osm::RelationHandler::way(const osmium::Way& way) {
   }
 
   if (way.positive_id() > std::numeric_limits<uint32_t>::max()) {
-    throw std::out_of_range("Way ID is too large");
-  }
-
-  if (_ways.find(way.positive_id()) != _ways.end()) {
-    std::vector<uint32_t> compressed;
-    compressed.reserve(way.nodes().size() / 2);
-
-    for (const auto& nodeRef : way.nodes()) {
-      size_t nid = nodeRef.positive_ref();
-      if (nid <= std::numeric_limits<int32_t>::max()) {
-        // handle normally
-        compressed.push_back(nid);
-      } else if (nid <=
-                 (static_cast<size_t>(std::numeric_limits<int64_t>::max()))) {
-        // handle with continuation
-        int32_t lower = nid << 32 >> 32;
-        int32_t upper = nid >> 32;
-        upper = upper | (1 << 31);
-        compressed.push_back(upper);
-        compressed.push_back(lower);
-      } else {
-        throw std::out_of_range("Node ID is too large");
-      }
+    if (_ways64.find(way.positive_id()) != _ways64.end()) {
+      _ways64[way.positive_id()] = std::move(getCompressedIDs(way));
     }
-
-    _ways[way.positive_id()] = std::move(compressed);
+  } else {
+    if (_ways32.find(way.positive_id()) != _ways32.end()) {
+      _ways32[way.positive_id()] = std::move(getCompressedIDs(way));
+    }
   }
 }

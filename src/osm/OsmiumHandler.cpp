@@ -93,7 +93,8 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       osmium::io::Reader reader{input_file, osmium::osm_entity_bits::object,
                                 pool};
       osm2rdf::osm::LocationHandler* locationHandler =
-          osm2rdf::osm::LocationHandler::create(_config, countHandler.minNodeId(), countHandler.maxNodeId());
+          osm2rdf::osm::LocationHandler::create(
+              _config, countHandler.minNodeId(), countHandler.maxNodeId());
       _relationHandler.setLocationHandler(locationHandler);
 
       size_t numTasks = 0;
@@ -104,17 +105,17 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
         numTasks += countHandler.numNodes();
       }
       if (!_config.noFacts && !_config.noRelationFacts) {
-				numTasks += countHandler.numRelations();
+        numTasks += countHandler.numRelations();
       }
       if (!_config.noGeometricRelations &&
           !_config.noRelationGeometricRelations) {
-				numTasks += countHandler.numRelations();
+        numTasks += countHandler.numRelations();
       }
       if (!_config.noFacts && !_config.noWayFacts) {
-				numTasks += countHandler.numWays();
+        numTasks += countHandler.numWays();
       }
       if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
-				numTasks += countHandler.numWays();
+        numTasks += countHandler.numWays();
       }
 
       _progressBar = osm2rdf::util::ProgressBar{numTasks, true};
@@ -194,16 +195,20 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
 #pragma omp task
     {
       if (!_config.noFacts && !_config.noNodeFacts) {
-        _nodesDumped++;
         _factHandler->node(osmNode);
 #pragma omp critical(progress)
-        _progressBar.update(_numTasksDone++);
+        {
+          _nodesDumped++;
+          _progressBar.update(_numTasksDone++);
+        }
       }
       if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
-        _nodeGeometriesHandled++;
         _geometryHandler->node(osmNode);
 #pragma omp critical(progress)
-        _progressBar.update(_numTasksDone++);
+        {
+          _nodeGeometriesHandled++;
+          _progressBar.update(_numTasksDone++);
+        }
       }
     };
   } catch (const osmium::invalid_location& e) {
@@ -233,27 +238,29 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
       }
 
       if (!_config.noFacts && !_config.noRelationFacts) {
-        _relationsDumped++;
         _factHandler->relation(osmRelation);
 #pragma omp critical(progress)
-				_progressBar.update(_numTasksDone++);
+        {
+          _relationsDumped++;
+          _progressBar.update(_numTasksDone++);
+        }
       }
 
       if (!_config.noGeometricRelations &&
           !_config.noRelationGeometricRelations) {
         _geometryHandler->relation(osmRelation);
 #pragma omp critical(progress)
-				_progressBar.update(_numTasksDone++);
+        _progressBar.update(_numTasksDone++);
       }
     }
   } catch (const osmium::invalid_location& e) {
     if (!_config.noFacts && !_config.noRelationFacts) {
-			_progressBar.update(_numTasksDone++);
+      _progressBar.update(_numTasksDone++);
     }
 
     if (!_config.noGeometricRelations &&
         !_config.noRelationGeometricRelations) {
-			_progressBar.update(_numTasksDone++);
+      _progressBar.update(_numTasksDone++);
     }
     return;
   }
@@ -269,28 +276,32 @@ void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
 #pragma omp task
     {
       if (!_config.noFacts && !_config.noWayFacts) {
-        _waysDumped++;
         if (!osmWay.isArea()) {  // avoid double calculation of OBB and hull
           osmWay.finalize();
         }
         _factHandler->way(osmWay);
 #pragma omp critical(progress)
-				_progressBar.update(_numTasksDone++);
+        {
+          _waysDumped++;
+          _progressBar.update(_numTasksDone++);
+        }
       }
 
       if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
-        _wayGeometriesHandled++;
         _geometryHandler->way(osmWay);
 #pragma omp critical(progress)
-				_progressBar.update(_numTasksDone++);
+        {
+          _wayGeometriesHandled++;
+          _progressBar.update(_numTasksDone++);
+        }
       }
     }
   } catch (const osmium::invalid_location& e) {
     if (!_config.noFacts && !_config.noWayFacts) {
-			_progressBar.update(_numTasksDone++);
+      _progressBar.update(_numTasksDone++);
     }
     if (!_config.noGeometricRelations && !_config.noWayGeometricRelations) {
-			_progressBar.update(_numTasksDone++);
+      _progressBar.update(_numTasksDone++);
     }
     return;
   }
