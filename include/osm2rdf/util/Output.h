@@ -20,6 +20,7 @@
 #define OSM2RDF_UTIL_OUTPUT_H
 
 #include <bzlib.h>
+#include <zlib.h>
 #include <fstream>
 #include <vector>
 
@@ -79,6 +80,7 @@ class Output {
 
   std::vector<FILE*> _rawFiles;
   std::vector<BZFILE*> _files;
+  std::vector<gzFile> _gzFiles;
   std::vector<size_t> _outBufPos;
 
   std::vector<size_t> _lines;

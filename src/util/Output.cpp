@@ -17,6 +17,7 @@
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <bzlib.h>
+#include <zlib.h>
 
 #include <cassert>
 #include <cmath>
@@ -30,6 +31,10 @@
 
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/util/Output.h"
+
+using osm2rdf::config::BZ2;
+using osm2rdf::config::GZ;
+using osm2rdf::config::NONE;
 
 // ____________________________________________________________________________
 osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
@@ -56,26 +61,40 @@ bool osm2rdf::util::Output::open() {
   assert(_partCount > 0);
 
   _rawFiles.resize(_partCount);
+  _gzFiles.resize(_partCount);
   _files.resize(_partCount);
   _outBufPos.resize(_partCount);
 
   for (size_t i = 0; i < _partCount; i++) {
-    _rawFiles[i] = fopen(partFilename(i).c_str(), "w");
+    if (_config.outputCompress == BZ2 || _config.outputCompress == NONE) {
+      _rawFiles[i] = fopen(partFilename(i).c_str(), "w");
 
-    if (_rawFiles[i] == NULL) {
-      std::stringstream ss;
-      ss << "Could not open file '" << partFilename(i)
-         << "' for writing:\n";
-      ss << strerror(errno) << std::endl;
-      throw std::runtime_error(ss.str());
+      if (_rawFiles[i] == NULL) {
+        std::stringstream ss;
+        ss << "Could not open file '" << partFilename(i)
+           << "' for writing:\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
+      }
     }
 
-    if (_config.outputCompress) {
+    if (_config.outputCompress == BZ2) {
       int err = 0;
       _files[i] = BZ2_bzWriteOpen(&err, _rawFiles[i], 3, 0, 30);
       if (err != BZ_OK) {
         std::stringstream ss;
         ss << "Could not open bzip2 file '" << partFilename(i)
+           << "' for writing:\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
+      }
+    }
+
+    if (_config.outputCompress == GZ) {
+      _gzFiles[i] = gzopen(partFilename(i).c_str(), "w");
+      if (_gzFiles[i] == Z_NULL) {
+        std::stringstream ss;
+        ss << "Could not open gz file '" << partFilename(i)
            << "' for writing:\n";
         ss << strerror(errno) << std::endl;
         throw std::runtime_error(ss.str());
@@ -109,7 +128,7 @@ void osm2rdf::util::Output::close() {
       _outBuffers[i][_outBufPos[i]] = '\0';
       std::cout << reinterpret_cast<const char*>(_outBuffers[i]);
     }
-  } else if (_config.outputCompress) {
+  } else if (_config.outputCompress == BZ2) {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
       int err = 0;
@@ -124,6 +143,20 @@ void osm2rdf::util::Output::close() {
       }
       BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
       fclose(_rawFiles[i]);
+    }
+  } else if (_config.outputCompress == GZ) {
+#pragma omp parallel for
+    for (size_t i = 0; i < _partCount; ++i) {
+      int r = gzwrite(_gzFiles[i], _outBuffers[i], _outBufPos[i]);
+      if (r != (int)_outBufPos[i]) {
+        gzclose(_gzFiles[i]);
+        std::stringstream ss;
+        ss << "Could not write to gz file '"
+           << partFilename(i) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
+      }
+      gzclose(_gzFiles[i]);
     }
   } else {
 #pragma omp parallel for
@@ -215,7 +248,7 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
   assert(t < _partCount);
   if (_toStdOut) {
     // on output to stdout, we only flush on newlines
-  } else if (_config.outputCompress) {
+  } else if (_config.outputCompress == BZ2) {
     if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
       int err = 0;
       BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
@@ -223,6 +256,19 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
         BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
         std::stringstream ss;
         ss << "Could not write to bzip2 file '"
+           << partFilename(t) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
+      }
+      _outBufPos[t] = 0;
+    }
+  } else if (_config.outputCompress == GZ) {
+    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
+      int r = gzwrite(_gzFiles[t], _outBuffers[t], _outBufPos[t]);
+      if (r != (int)_outBufPos[t]) {
+        gzclose(_gzFiles[t]);
+        std::stringstream ss;
+        ss << "Could not write to gz file '"
            << partFilename(t) << "':\n";
         ss << strerror(errno) << std::endl;
         throw std::runtime_error(ss.str());
@@ -266,7 +312,7 @@ void osm2rdf::util::Output::write(const char c, size_t t) {
   assert(t < _partCount);
   if (_toStdOut) {
     // on output to stdout, we only flush on newlines
-  } else if (_config.outputCompress) {
+  } else if (_config.outputCompress == BZ2) {
     if (_outBufPos[t] + 2 >= BUFFER_S) {
       int err = 0;
       BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
@@ -274,6 +320,19 @@ void osm2rdf::util::Output::write(const char c, size_t t) {
         BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
         std::stringstream ss;
         ss << "Could not write to bzip2 file '"
+           << partFilename(t) << "':\n";
+        ss << strerror(errno) << std::endl;
+        throw std::runtime_error(ss.str());
+      }
+      _outBufPos[t] = 0;
+    }
+  } else if (_config.outputCompress == GZ) {
+    if (_outBufPos[t] + 2 >= BUFFER_S) {
+      int r = gzwrite(_gzFiles[t], _outBuffers[t], _outBufPos[t]);
+      if (r != (int)_outBufPos[t]) {
+        gzclose(_gzFiles[t]);
+        std::stringstream ss;
+        ss << "Could not write to gz file '"
            << partFilename(t) << "':\n";
         ss << strerror(errno) << std::endl;
         throw std::runtime_error(ss.str());
@@ -320,13 +379,23 @@ void osm2rdf::util::Output::flush(size_t i) {
     _lines[i] = 0;
     _outBuffers[i][_outBufPos[i]] = '\0';
     std::cout << reinterpret_cast<const char*>(_outBuffers[i]);
-  } else if (_config.outputCompress) {
+  } else if (_config.outputCompress == BZ2) {
     int err = 0;
     BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
     if (err == BZ_IO_ERROR) {
       BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
       std::stringstream ss;
       ss << "Could not write to bzip2 file '"
+         << partFilename(i) << "':\n";
+      ss << strerror(errno) << std::endl;
+      throw std::runtime_error(ss.str());
+    }
+  } else if (_config.outputCompress == GZ) {
+    int r = gzwrite(_gzFiles[i], _outBuffers[i], _outBufPos[i]);
+    if (r != (int)_outBufPos[i]) {
+          gzclose(_gzFiles[i]);
+      std::stringstream ss;
+      ss << "Could not write to gz file '"
          << partFilename(i) << "':\n";
       ss << strerror(errno) << std::endl;
       throw std::runtime_error(ss.str());

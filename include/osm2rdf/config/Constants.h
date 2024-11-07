@@ -26,6 +26,7 @@
 namespace osm2rdf::config::constants {
 
 const static inline std::string BZIP2_EXTENSION = ".bz2";
+const static inline std::string GZ_EXTENSION = ".gz";
 const static inline std::string STATS_EXTENSION = ".stats";
 const static inline std::string CONTAINS_STATS_EXTENSION = ".contains-stats";
 const static inline std::string JSON_EXTENSION = ".json";
@@ -75,11 +76,11 @@ const static inline std::string OUTPUT_KEEP_FILES_OPTION_HELP =
 const static inline std::string OUTPUT_KEEP_FILES_OPTION_INFO =
     "Keeping temporary output files";
 
-const static inline std::string OUTPUT_NO_COMPRESS_OPTION_SHORT = "";
-const static inline std::string OUTPUT_NO_COMPRESS_OPTION_LONG =
-    "output-no-compress";
-const static inline std::string OUTPUT_NO_COMPRESS_OPTION_HELP =
-    "Do not compress output";
+const static inline std::string OUTPUT_COMPRESS_OPTION_SHORT = "";
+const static inline std::string OUTPUT_COMPRESS_OPTION_LONG =
+    "output-compression";
+const static inline std::string OUTPUT_COMPRESS_OPTION_HELP =
+    "Output file compression, valid values: none, bz2, gz2";
 
 const static inline std::string STORE_LOCATIONS_INFO =
     "Storing locations osmium locations:";
