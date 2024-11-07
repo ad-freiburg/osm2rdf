@@ -116,7 +116,7 @@ TEST(UTIL_Output, WriteIntoCurrentPartStdOut) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = OutputMergeMode::NONE;
 
   size_t parts = 4;

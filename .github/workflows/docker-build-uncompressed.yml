@@ -38,7 +38,7 @@ jobs:
           mkdir osm-malta && cd $_
           curl -L -o osm-malta.pbf https://download.geofabrik.de/europe/malta-latest.osm.pbf
           ls -l osm-malta.pbf
-          docker run --rm -v $(pwd):/data osm2rdf /data/osm-malta.pbf --output-no-compress -o /data/osm-malta.ttl
+          docker run --rm -v $(pwd):/data osm2rdf /data/osm-malta.pbf --output-compression none -o /data/osm-malta.ttl
           ls -l osm-malta.pbf osm-malta.ttl
           docker run --rm -v $(pwd):/data stain/jena riot --validate /data/osm-malta.ttl
 
