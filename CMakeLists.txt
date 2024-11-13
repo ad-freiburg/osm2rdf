@@ -78,7 +78,7 @@ set(INSTALL_GMOCK OFF)
 set(INSTALL_GTEST OFF)
 set(BENCHMARK_ENABLE_INSTALL OFF)
 
-# find_package(Git QUIET)
+find_package(Git QUIET)
 if (GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
 	# Update submodules as needed
 	option(GIT_SUBMODULE "Check submodules during build" ON)
