@@ -89,7 +89,7 @@ TEST(E2E, singleNode) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -415,7 +415,7 @@ TEST(E2E, osmWikiExample) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:4 dumped: 1 geometry: 1\n"));
+              ::testing::HasSubstr("nodes seen:4 dumped: 4 geometry: 4\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -503,7 +503,7 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:19 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:19 dumped: 19 geometry: 19\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -676,7 +676,7 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:19 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:19 dumped: 19 geometry: 19\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -812,7 +812,7 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:19 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:19 dumped: 19 geometry: 19\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -947,7 +947,7 @@ TEST(E2E, tf) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:45 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:45 dumped: 45 geometry: 45\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -1048,7 +1048,7 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:2 dumped: 2 geometry: 2\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:64 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:64 dumped: 64 geometry: 64\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,

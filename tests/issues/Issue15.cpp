@@ -64,7 +64,7 @@ TEST(Issue15, Relation_8291361_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:2 dumped: 2 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:207 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:207 dumped: 207 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -117,7 +117,7 @@ TEST(Issue15, Relation_8291361_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:2 dumped: 2 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:207 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:207 dumped: 207 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -171,7 +171,7 @@ TEST(Issue15, Way_201387026_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1498 dumped: 2 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1498 dumped: 1498 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -224,7 +224,7 @@ TEST(Issue15, Way_201387026_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1498 dumped: 2 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1498 dumped: 1498 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,

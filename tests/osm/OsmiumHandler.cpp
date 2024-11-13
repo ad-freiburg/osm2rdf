@@ -183,7 +183,7 @@ TEST(OSM_OsmiumHandler, noFacts) {
   ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
   ASSERT_EQ(0, osmiumHandler.nodesDumped());
-  ASSERT_EQ(1, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(0, osmiumHandler.relationsDumped());
   ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
@@ -224,7 +224,7 @@ TEST(OSM_OsmiumHandler, noGeometricRelations) {
   ASSERT_EQ(2, osmiumHandler.areasDumped());
   ASSERT_EQ(0, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
-  ASSERT_EQ(1, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
   ASSERT_EQ(0, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(3, osmiumHandler.relationsDumped());
@@ -266,8 +266,8 @@ TEST(OSM_OsmiumHandler, noAreaFacts) {
   ASSERT_EQ(0, osmiumHandler.areasDumped());
   ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
-  ASSERT_EQ(1, osmiumHandler.nodesDumped());
-  ASSERT_EQ(1, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(3, osmiumHandler.relationsDumped());
   ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
@@ -309,7 +309,7 @@ TEST(OSM_OsmiumHandler, noNodeFacts) {
   ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
   ASSERT_EQ(0, osmiumHandler.nodesDumped());
-  ASSERT_EQ(1, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(3, osmiumHandler.relationsDumped());
   ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
@@ -350,8 +350,8 @@ TEST(OSM_OsmiumHandler, noRelationFacts) {
   ASSERT_EQ(2, osmiumHandler.areasDumped());
   ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
-  ASSERT_EQ(1, osmiumHandler.nodesDumped());
-  ASSERT_EQ(1, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(0, osmiumHandler.relationsDumped());
   ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
@@ -392,8 +392,8 @@ TEST(OSM_OsmiumHandler, noWayFacts) {
   ASSERT_EQ(2, osmiumHandler.areasDumped());
   ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
-  ASSERT_EQ(1, osmiumHandler.nodesDumped());
-  ASSERT_EQ(1, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(3, osmiumHandler.relationsDumped());
   ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
@@ -434,8 +434,8 @@ TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
   ASSERT_EQ(2, osmiumHandler.areasDumped());
   ASSERT_EQ(0, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
-  ASSERT_EQ(1, osmiumHandler.nodesDumped());
-  ASSERT_EQ(1, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(3, osmiumHandler.relationsDumped());
   ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
@@ -476,7 +476,7 @@ TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
   ASSERT_EQ(2, osmiumHandler.areasDumped());
   ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
-  ASSERT_EQ(1, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
   ASSERT_EQ(0, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(3, osmiumHandler.relationsDumped());
@@ -518,8 +518,8 @@ TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
   ASSERT_EQ(2, osmiumHandler.areasDumped());
   ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
   ASSERT_EQ(2, osmiumHandler.nodesSeen());
-  ASSERT_EQ(1, osmiumHandler.nodesDumped());
-  ASSERT_EQ(1, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
   ASSERT_EQ(3, osmiumHandler.relationsSeen());
   ASSERT_EQ(3, osmiumHandler.relationsDumped());
   ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
@@ -830,7 +830,7 @@ TEST(OSM_OsmiumHandler, handleSingleNode) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -915,7 +915,7 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:4 dumped: 1 geometry: 1\n"));
+              ::testing::HasSubstr("nodes seen:4 dumped: 4 geometry: 4\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
