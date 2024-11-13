@@ -27,6 +27,8 @@ void osm2rdf::osm::CountHandler::prepare_for_lookup() {
 
 // ____________________________________________________________________________
 void osm2rdf::osm::CountHandler::node(const osmium::Node& node){
+  if (node.positive_id() < _minId) _minId = node.positive_id();
+  if (node.positive_id() > _maxId) _maxId = node.positive_id();
   if (_firstPassDone || node.tags().empty())  {
     return;
   }
@@ -34,16 +36,16 @@ void osm2rdf::osm::CountHandler::node(const osmium::Node& node){
 }
 
 // ____________________________________________________________________________
-void osm2rdf::osm::CountHandler::relation(const osmium::Relation& rel) {
-  if (_firstPassDone || rel.tags().empty()) {
+void osm2rdf::osm::CountHandler::relation(const osmium::Relation&) {
+  if (_firstPassDone) {
     return;
   }
   _numRelations++;
 }
 
 // ____________________________________________________________________________
-void osm2rdf::osm::CountHandler::way(const osmium::Way& way) {
-  if (_firstPassDone || way.tags().empty()) {
+void osm2rdf::osm::CountHandler::way(const osmium::Way&) {
+  if (_firstPassDone) {
     return;
   }
   _numWays++;

@@ -109,6 +109,26 @@ class Writer {
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o, size_t part);
 
+  void writeIRILiteralTriple(const std::string& s, const std::string& p,
+                             const std::string& v, const std::string& o);
+  void writeIRILiteralTriple(const std::string& s, const std::string& p,
+                             const std::string& v, const std::string& o,
+                             size_t part);
+
+  void writeUnsafeIRILiteralTriple(const std::string& s, const std::string& p,
+                                   const std::string& v, const std::string& o);
+  void writeUnsafeIRILiteralTriple(const std::string& s, const std::string& p,
+                                   const std::string& v, const std::string& o,
+                                   size_t part);
+
+  // Write a single RDF line with a literal. The contents of s, p, a and b are
+  // not checked.
+  void writeLiteralTripleUnsafe(const std::string& s, const std::string& p,
+                                const std::string& a, const std::string& b);
+  void writeLiteralTripleUnsafe(const std::string& s, const std::string& p,
+                                const std::string& a, const std::string& b,
+                                size_t part);
+
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.
   bool addPrefix(const std::string& prefix, std::string_view value);
@@ -119,7 +139,7 @@ class Writer {
   // generateBlankNode creates a new unique identifier for a blank node.
   std::string generateBlankNode();
 
-  // generateIRI creates a IRI from given prefix p and string value v.
+  // Creates a IRI from given prefix p and string value v.
   // Assumes that both p and v are "safe", that is, they can be used
   // directly in the TTL
   std::string generateIRIUnsafe(std::string_view p, std::string_view v);
@@ -129,15 +149,28 @@ class Writer {
   // generateIRI creates a IRI from given prefix p and string value v.
   std::string generateIRI(std::string_view p, std::string_view v);
 
+  // Writes an IRI from given prefix p and string value v.
+  // Assumes that both p and v are "safe", that is, they can be used
+  // directly in the TTL
+  void writeIRIUnsafe(std::string_view p, std::string_view v, size_t part);
+
+  // Writes  a IRI from given prefix p and ID value v.
+  void writeIRI(std::string_view p, uint64_t v, size_t part);
+  // Writes a IRI from given prefix p and string value v.
+  void writeIRI(std::string_view p, std::string_view v, size_t part);
+
   // generateLangTag creates a LangTag from the given string.
   std::string generateLangTag(std::string_view s);
   // generateLangTag creates a Literal from the given string value v.
-  // If suffix s is not empty, it will be appended as is.
   std::string generateLiteral(std::string_view v, std::string_view s);
+  std::string generateLiteral(std::string_view v);
 
   // Assumes that both p and v are "safe", that is, they can be used
   // directly in the TTL
   std::string generateLiteralUnsafe(std::string_view v, std::string_view s);
+
+  void writeLiteral(std::string_view v, size_t part);
+  void writeLiteralUnsafe(std::string_view v, std::string_view s, size_t part);
 
   // -------------------------------------------------------------------------
   // Following functions are used by the ones above. These functions implement
@@ -145,6 +178,10 @@ class Writer {
   // -------------------------------------------------------------------------
   std::string formatIRI(std::string_view p, std::string_view v);
   std::string formatIRIUnsafe(std::string_view p, std::string_view v);
+
+  void writeFormattedIRI(std::string_view p, std::string_view v, size_t part);
+  void writeFormattedIRIUnsafe(std::string_view p, std::string_view v,
+                               size_t part);
 
   std::string STRING_LITERAL_QUOTE(std::string_view s);
   FRIEND_TEST(WriterGrammarNT, RULE_9_STRING_LITERAL_QUOTE);
@@ -157,9 +194,15 @@ class Writer {
   FRIEND_TEST(WriterGrammarNT, RULE_8_IRIREF);
   FRIEND_TEST(WriterGrammarTTL, RULE_18_IRIREF);
 
+  std::string IRIREFUnsafe(std::string_view p, std::string_view v);
+
   std::string PrefixedNameUnsafe(std::string_view p, std::string_view v);
   std::string PrefixedName(std::string_view p, std::string_view v);
   FRIEND_TEST(WriterGrammarTTL, RULE_136s_PREFIXEDNAME);
+
+  void writePrefixedNameUnsafe(std::string_view p, std::string_view v,
+                               size_t part);
+  void writePrefixedName(std::string_view p, std::string_view v, size_t part);
 
   std::string encodeIRIREF(std::string_view s);
   FRIEND_TEST(WriterGrammarNT, RULE_8_IRIREF_CONVERT);
@@ -174,6 +217,8 @@ class Writer {
 
   std::string encodePN_LOCAL(std::string_view s);
   FRIEND_TEST(WriterGrammarTTL, RULE_168s_PN_LOCAL);
+
+  int8_t checkPN_LOCAL(std::string_view s);
 
   std::string encodePN_PREFIX(std::string_view s);
   FRIEND_TEST(WriterGrammarTTL, RULE_167s_PN_PREFIX);
@@ -213,7 +258,6 @@ class Writer {
   uint64_t* _lineCount;
   // Number of parts.
   std::size_t _numOuts;
-
 };
 }  // namespace osm2rdf::ttl
 

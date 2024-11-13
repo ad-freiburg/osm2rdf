@@ -37,6 +37,12 @@ enum GeoTriplesMode {
   full = 1
 };
 
+enum CompressFormat {
+  NONE = 0,
+  BZ2 = 1,
+  GZ = 2,
+};
+
 enum SourceDataset {
   OSM = 0,
   OHM = 1
@@ -44,7 +50,7 @@ enum SourceDataset {
 
 struct Config {
   // Select what to do
-  std::string storeLocationsOnDisk;
+  std::string storeLocations;
 
   bool noFacts = false;
   bool noAreaFacts = false;
@@ -94,7 +100,7 @@ struct Config {
   std::string outputFormat = "qlever";
   osm2rdf::util::OutputMergeMode mergeOutput =
       osm2rdf::util::OutputMergeMode::CONCATENATE;
-  bool outputCompress = true;
+  CompressFormat outputCompress = BZ2;
   bool outputKeepFiles = false;
 
   // osmium location cache

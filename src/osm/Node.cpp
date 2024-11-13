@@ -34,7 +34,7 @@ osm2rdf::osm::Node::Node(const osmium::Node& node) {
   _timestamp = node.timestamp().seconds_since_epoch();
   const auto& loc = node.location();
   _geom = ::util::geo::DPoint{loc.lon(), loc.lat()};
-  _tags = osm2rdf::osm::convertTagList(node.tags());
+  _tags = std::move(osm2rdf::osm::convertTagList(node.tags()));
 }
 
 // ____________________________________________________________________________
@@ -54,27 +54,6 @@ std::time_t osm2rdf::osm::Node::timestamp() const noexcept {
 
 // ____________________________________________________________________________
 const ::util::geo::DPoint& osm2rdf::osm::Node::geom() const noexcept {
-  return _geom;
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DBox osm2rdf::osm::Node::envelope() const noexcept {
-  return ::util::geo::getBoundingBox(_geom);
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon osm2rdf::osm::Node::convexHull() const noexcept {
-  return ::util::geo::convexHull(_geom);
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon osm2rdf::osm::Node::orientedBoundingBox()
-    const noexcept {
-  return convexHull();
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPoint osm2rdf::osm::Node::centroid() const noexcept {
   return _geom;
 }
 

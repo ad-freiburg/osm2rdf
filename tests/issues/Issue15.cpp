@@ -41,7 +41,7 @@ TEST(Issue15, Relation_8291361_expected) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmrel_8291361.xml";
   config.simplifyWKT = 0;
@@ -51,7 +51,10 @@ TEST(Issue15, Relation_8291361_expected) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -92,7 +95,7 @@ TEST(Issue15, Relation_8291361_failed) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmrel_8291361.xml";
 
@@ -101,7 +104,10 @@ TEST(Issue15, Relation_8291361_failed) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -142,7 +148,7 @@ TEST(Issue15, Way_201387026_expected) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmway_201387026.xml";
   config.simplifyWKT = 0;
@@ -152,7 +158,10 @@ TEST(Issue15, Way_201387026_expected) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -171,7 +180,7 @@ TEST(Issue15, Way_201387026_expected) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"MULTIPOLYGON(((1"));
+          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"POLYGON((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -193,7 +202,7 @@ TEST(Issue15, Way_201387026_failed) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.input = "tests/issues/issue15_osmway_201387026.xml";
 
@@ -202,7 +211,10 @@ TEST(Issue15, Way_201387026_failed) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -221,7 +233,7 @@ TEST(Issue15, Way_201387026_failed) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"MULTIPOLYGON(((1"));
+          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"POLYGON((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

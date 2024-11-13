@@ -152,10 +152,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
   oss << "\n"
       << prefix << "Num Threads: " << numThreads;
 
-  if (!storeLocationsOnDisk.empty()) {
+  if (!storeLocations.empty()) {
     oss << "\n"
-        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO
-        << " " << storeLocationsOnDisk;
+        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_INFO
+        << " " << storeLocations;
   }
 
   if (writeRDFStatistics) {
@@ -182,11 +182,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
                                osm2rdf::config::constants::HELP_OPTION_LONG,
                                osm2rdf::config::constants::HELP_OPTION_HELP);
 
-  auto storeLocationsOnDiskOp =
-      parser.add<popl::Implicit<std::string>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG,
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_HELP, "sparse");
+  auto storeLocationsOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::STORE_LOCATIONS_SHORT,
+          osm2rdf::config::constants::STORE_LOCATIONS_LONG,
+          osm2rdf::config::constants::STORE_LOCATIONS_HELP, "mem-flex");
 
   auto noAreasOp = parser.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::NO_AREA_OPTION_SHORT,
@@ -351,10 +351,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_SHORT,
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_LONG,
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_HELP);
-  auto outputNoCompressOp = parser.add<popl::Switch, popl::Attribute::advanced>(
-      osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_SHORT,
-      osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_LONG,
-      osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_HELP);
+  auto outputCompressOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::OUTPUT_COMPRESS_OPTION_SHORT,
+          osm2rdf::config::constants::OUTPUT_COMPRESS_OPTION_LONG,
+          osm2rdf::config::constants::OUTPUT_COMPRESS_OPTION_HELP, "bz2");
   auto cacheOp = parser.add<popl::Value<std::string>>(
       osm2rdf::config::constants::CACHE_OPTION_SHORT,
       osm2rdf::config::constants::CACHE_OPTION_LONG,
@@ -386,8 +387,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     noFacts = noFactsOp->is_set();
 
-    if (storeLocationsOnDiskOp->is_set()) {
-      storeLocationsOnDisk = storeLocationsOnDiskOp->value();
+    if (storeLocationsOp->is_set()) {
+      storeLocations = storeLocationsOp->value();
     }
 
     // Select types to dump
@@ -473,10 +474,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Output
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
-    outputCompress = !outputNoCompressOp->is_set();
+    outputCompress = outputCompressOp->value() == "none" ? NONE : (outputCompressOp->value() == "gz" ? GZ : BZ2);
     outputKeepFiles = outputKeepFilesOp->is_set();
     if (output.empty()) {
-      outputCompress = false;
+      outputCompress = NONE;
       mergeOutput = util::OutputMergeMode::NONE;
     }
 
@@ -486,9 +487,14 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     rdfStatisticsPath += osm2rdf::config::constants::JSON_EXTENSION;
 
     // Mark compressed output
-    if (outputCompress && !output.empty() &&
+    if (outputCompress == BZ2 && !output.empty() &&
         output.extension() != osm2rdf::config::constants::BZIP2_EXTENSION) {
       output += osm2rdf::config::constants::BZIP2_EXTENSION;
+    }
+
+    if (outputCompress == GZ && !output.empty() &&
+        output.extension() != osm2rdf::config::constants::GZ_EXTENSION) {
+      output += osm2rdf::config::constants::GZ_EXTENSION;
     }
 
     // osmium location cache

@@ -31,7 +31,7 @@ namespace osm2rdf::config {
 void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noFacts);
   ASSERT_FALSE(config.noGeometricRelations);
-  ASSERT_TRUE(config.storeLocationsOnDisk.empty());
+  ASSERT_TRUE(config.storeLocations.empty());
 
   ASSERT_FALSE(config.noAreaFacts);
   ASSERT_FALSE(config.noNodeFacts);
@@ -335,53 +335,37 @@ TEST(CONFIG_Config, fromArgsNoFactsLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongImplicit) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-
-  const auto arg =
-      "--" + osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("sparse", config.storeLocationsOnDisk);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongSparse) {
+TEST(CONFIG_Config, fromArgsStoreLocationsLongSparse) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg = "--" +
-                   osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG +
+                   osm2rdf::config::constants::STORE_LOCATIONS_LONG +
                    "=sparse";
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("sparse", config.storeLocationsOnDisk);
+  ASSERT_EQ("sparse", config.storeLocations);
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongDense) {
+TEST(CONFIG_Config, fromArgsStoreLocationsLongDense) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg = "--" +
-                   osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG +
+                   osm2rdf::config::constants::STORE_LOCATIONS_LONG +
                    "=dense";
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("dense", config.storeLocationsOnDisk);
+  ASSERT_EQ("dense", config.storeLocations);
 }
 
 // ____________________________________________________________________________

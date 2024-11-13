@@ -37,7 +37,8 @@ template <typename W>
 class OsmiumHandler : public osmium::handler::Handler {
  public:
   OsmiumHandler(const osm2rdf::config::Config& config,
-                osm2rdf::ttl::Writer<W>* writer);
+                osm2rdf::osm::FactHandler<W>* factHandler,
+                osm2rdf::osm::GeometryHandler<W>* geomHandler);
   void handle();
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
@@ -59,8 +60,9 @@ class OsmiumHandler : public osmium::handler::Handler {
 
  protected:
   osm2rdf::config::Config _config;
-  osm2rdf::osm::FactHandler<W> _factHandler;
-  osm2rdf::osm::GeometryHandler<W> _geometryHandler;
+  osm2rdf::osm::FactHandler<W>* _factHandler;
+  osm2rdf::osm::GeometryHandler<W>* _geometryHandler;
+
   osm2rdf::osm::RelationHandler _relationHandler;
   osm2rdf::util::ProgressBar _progressBar;
   size_t _areasSeen = 0;

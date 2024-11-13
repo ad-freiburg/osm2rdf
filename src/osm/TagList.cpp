@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include <algorithm>
 #include "osm2rdf/osm/TagList.h"
 
 #include "osmium/tags/taglist.hpp"
@@ -24,17 +25,12 @@
 osm2rdf::osm::TagList osm2rdf::osm::convertTagList(
     const osmium::TagList& tagList) {
   osm2rdf::osm::TagList result;
+  result.reserve(tagList.size());
 
   for (const auto& tag : tagList) {
     std::string key{tag.key()};
-    for (size_t pos = 0; pos < key.size(); ++pos) {
-      switch (key[pos]) {
-        case ' ':
-          key[pos] = '_';
-          break;
-      }
-    }
-    result[key] = tag.value();
+    std::replace(key.begin(), key.end(), ' ', '_');
+    result.push_back({key, tag.value()});
   }
   return result;
 }

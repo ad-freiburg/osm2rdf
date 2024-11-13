@@ -33,6 +33,7 @@ class Way {
  public:
   typedef uint32_t id_t;
   Way();
+  void finalize();
   explicit Way(const osmium::Way& way);
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
@@ -59,6 +60,7 @@ class Way {
   ::util::geo::DPolygon _convexHull;
   ::util::geo::DPolygon _obb;
   osm2rdf::osm::TagList _tags;
+  bool _hasAreaTag;
 };
 
 }  // namespace osm2rdf::osm

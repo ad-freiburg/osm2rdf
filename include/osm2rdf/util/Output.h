@@ -20,12 +20,13 @@
 #define OSM2RDF_UTIL_OUTPUT_H
 
 #include <bzlib.h>
+#include <zlib.h>
 #include <fstream>
 #include <vector>
 
 #include "osm2rdf/config/Config.h"
 
-static const size_t BUFFER_S = 1024 * 1024 * 50;
+static const size_t BUFFER_S = 1024 * 1024 * 100;
 
 namespace osm2rdf::util {
 
@@ -79,7 +80,10 @@ class Output {
 
   std::vector<FILE*> _rawFiles;
   std::vector<BZFILE*> _files;
+  std::vector<gzFile> _gzFiles;
   std::vector<size_t> _outBufPos;
+
+  std::vector<size_t> _lines;
 
   // true if output goes to stdout
   bool _toStdOut;

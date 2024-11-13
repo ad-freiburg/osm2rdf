@@ -35,7 +35,7 @@ TEST(Issue28, OpenReadonlyOutputFile) {
   config.output =
       config.getTempPath("TEST_ISSUES_Issue28", "OpenReadonlyOutputFile");
   config.mergeOutput = OutputMergeMode::CONCATENATE;
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
   ASSERT_TRUE(std::filesystem::exists(config.output));
@@ -69,7 +69,7 @@ TEST(Issue28, OutputfileTruncatedOnOpenConcatenate) {
   config.output = config.getTempPath("TEST_ISSUES_Issue28",
                                      "OutputfileTruncatedOnOpenConcatenate");
   config.mergeOutput = OutputMergeMode::CONCATENATE;
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.outputKeepFiles = true;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);

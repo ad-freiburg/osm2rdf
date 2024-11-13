@@ -56,7 +56,7 @@ TEST(E2E, singleNode) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -76,7 +76,10 @@ TEST(E2E, singleNode) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -123,7 +126,7 @@ TEST(E2E, singleNodeWithTags) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -154,7 +157,10 @@ TEST(E2E, singleNodeWithTags) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -241,7 +247,7 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -272,7 +278,10 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -346,7 +355,7 @@ TEST(E2E, osmWikiExample) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -393,7 +402,10 @@ TEST(E2E, osmWikiExample) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -442,7 +454,7 @@ TEST(E2E, building51NT) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -477,8 +489,12 @@ TEST(E2E, building51NT) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -555,7 +571,7 @@ TEST(E2E, building51NT) {
       printedData,
       ::testing::HasSubstr(
           "<https://osm2rdf.cs.uni-freiburg.de/rdf/geom#osm_wayarea_98284318> "
-          "<http://www.opengis.net/ont/geosparql#asWKT> \"MULTIPOLYGON(((7"));
+          "<http://www.opengis.net/ont/geosparql#asWKT> \"POLYGON((7"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
@@ -611,7 +627,7 @@ TEST(E2E, building51TTL) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -646,8 +662,12 @@ TEST(E2E, building51TTL) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -702,7 +722,7 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData, ::testing::HasSubstr("))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
@@ -743,7 +763,7 @@ TEST(E2E, building51QLEVER) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -778,8 +798,12 @@ TEST(E2E, building51QLEVER) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -834,8 +858,8 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr(")))\"^^geo:wktLiteral .\n"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
@@ -875,7 +899,7 @@ TEST(E2E, tf) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -910,7 +934,10 @@ TEST(E2E, tf) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -945,7 +972,7 @@ TEST(E2E, tf) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"POLYGON((7"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -968,7 +995,7 @@ TEST(E2E, building51inTF) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1007,8 +1034,12 @@ TEST(E2E, building51inTF) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -1062,7 +1093,7 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
@@ -1079,7 +1110,7 @@ TEST(E2E, building51inTF) {
                                "osmway:4498466 osmkey:wheelchair \"yes\" .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
+                  "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:4498466 ogc:sfCovers osmway:98284318 .\n"));

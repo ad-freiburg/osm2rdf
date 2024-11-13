@@ -54,7 +54,7 @@ TEST(OSM_FactHandler, areaFromWay) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -88,14 +88,14 @@ TEST(OSM_FactHandler, areaFromWay) {
 
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 "
-      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmway:21 "
+      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area "
-      "\"0.010000000000\"^^xsd:double .\n",
+      "\"0.01\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -113,7 +113,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -147,14 +147,14 @@ TEST(OSM_FactHandler, areaFromRelation) {
 
   ASSERT_EQ(
       "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 "
-      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"MULTIPOLYGON(((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5)))\"^^geo:wktLiteral .\nosmrel:10 "
+      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area "
-      "\"0.010000000000\"^^xsd:double .\n",
+      "\"0.01\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -172,7 +172,7 @@ TEST(OSM_FactHandler, node) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -225,7 +225,7 @@ TEST(OSM_FactHandler, relation) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -278,6 +278,91 @@ TEST(OSM_FactHandler, relation) {
 }
 
 // ____________________________________________________________________________
+TEST(OSM_FactHandler, relationHandler) {
+  osm2rdf::config::Config config;
+  config.output = "";
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
+  config.addCentroids = false;
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.wktPrecision = 1;
+
+  osm2rdf::util::Output output{config, config.output};
+  output.open();
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
+  osm2rdf::osm::FactHandler dh{config, &writer};
+
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer4{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer5{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::memory::Buffer osmiumBuffer6{initial_buffer_size,
+                                       osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_relation(
+      osmiumBuffer1, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_member(osmium::item_type::way, 55, "test"),
+      osmium::builder::attr::_member(osmium::item_type::way, 56, "test2"),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_node(
+      osmiumBuffer2, osmium::builder::attr::_id(1),
+      osmium::builder::attr::_location(osmium::Location(7.52, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer3, osmium::builder::attr::_id(2),
+      osmium::builder::attr::_location(osmium::Location(7.61, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer4, osmium::builder::attr::_id(23),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  // 64 bit IDs
+  osmium::builder::add_node(
+      osmiumBuffer3, osmium::builder::attr::_id(17179869184),
+      osmium::builder::attr::_location(osmium::Location(7.61, 48.0)));
+  osmium::builder::add_node(
+      osmiumBuffer4, osmium::builder::attr::_id(9223372036854775807),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag("city", "Freiburg"));
+
+  osmium::builder::add_way(osmiumBuffer5, osmium::builder::attr::_id(55),
+                           osmium::builder::attr::_nodes({
+                               {1, {48.0, 7.52}},
+                               {2, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+  osmium::builder::add_way(osmiumBuffer6, osmium::builder::attr::_id(56),
+                           osmium::builder::attr::_nodes({
+                               {17179869184, {48.0, 7.52}},
+                               {9223372036854775807, {48.1, 7.61}},
+                           }),
+                           osmium::builder::attr::_tag("city", "Freiburg"));
+
+  RelationHandler rh = RelationHandler(config);
+  rh.relation(osmiumBuffer1.get<osmium::Relation>(0));
+  rh.prepare_for_lookup();
+  rh.way(osmiumBuffer5.get<osmium::Way>(0));
+  rh.way(osmiumBuffer6.get<osmium::Way>(0));
+
+  auto a = std::vector<uint64_t>{1, 2};
+  auto b = rh.get_noderefs_of_way(55);
+
+  ASSERT_EQ(a, b);
+
+  auto c = std::vector<uint64_t>{17179869184, 9223372036854775807};
+  auto d = rh.get_noderefs_of_way(56);
+
+  ASSERT_EQ(c, d);
+}
+
+// ____________________________________________________________________________
 TEST(OSM_FactHandler, relationWithGeometry) {
   // Capture std::cout
   std::stringstream buffer;
@@ -288,7 +373,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -333,7 +418,7 @@ TEST(OSM_FactHandler, relationWithGeometry) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   RelationHandler rh = RelationHandler(config);
-  LocationHandler* lh = LocationHandler::create(config);
+  LocationHandler* lh = LocationHandler::create(config, 0, 0);
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Relation r{osmiumBuffer1.get<osmium::Relation>(0)};
   rh.relation(osmiumBuffer1.get<osmium::Relation>(0));
@@ -386,7 +471,7 @@ TEST(OSM_FactHandler, way) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -408,7 +493,8 @@ TEST(OSM_FactHandler, way) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -443,7 +529,7 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -467,7 +553,8 @@ TEST(OSM_FactHandler, wayAddWayNodeGeoemtry) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -510,7 +597,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -533,7 +620,8 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -571,7 +659,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -595,7 +683,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -635,7 +724,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -662,7 +751,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -704,7 +794,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -727,7 +817,8 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
                            osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
+  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -768,7 +859,7 @@ TEST(OSM_FactHandler, writeGeometryWay) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -809,7 +900,7 @@ TEST(OSM_FactHandler, writeGeometryWaySimplify1) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -857,7 +948,7 @@ TEST(OSM_FactHandler, writeGeometryWaySimplify2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -901,7 +992,7 @@ TEST(OSM_FactHandler, writeGeometryWaySimplify3) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -946,7 +1037,7 @@ TEST(OSM_FactHandler, writeBoxPrecision1) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
@@ -986,7 +1077,7 @@ TEST(OSM_FactHandler, writeBoxPrecision2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 2;
@@ -1026,7 +1117,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1066,7 +1157,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1105,7 +1196,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1144,7 +1235,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1184,7 +1275,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1224,7 +1315,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1264,7 +1355,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1304,7 +1395,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1344,7 +1435,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1383,7 +1474,7 @@ TEST(OSM_FactHandler, writeTag_KeyIRI) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1422,7 +1513,7 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1463,7 +1554,7 @@ TEST(OSM_FactHandler, writeTagList) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1487,8 +1578,8 @@ TEST(OSM_FactHandler, writeTagList) {
   const std::string object2 = writer.generateLiteral(tag2Value, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tag1Key] = tag1Value;
-  tagList[tag2Key] = tag2Value;
+  tagList.push_back({tag1Key, tag1Value});
+  tagList.push_back({tag2Key, tag2Value});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1515,7 +1606,7 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1533,7 +1624,7 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1558,7 +1649,7 @@ TEST(OSM_FactHandler, writeTagListRefDouble) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
@@ -1578,7 +1669,7 @@ TEST(OSM_FactHandler, writeTagListRefDouble) {
   const std::string object2 = writer.generateLiteral("B 294", "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1605,7 +1696,7 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.semicolonTagKeys.insert("ref");
@@ -1626,7 +1717,7 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   const std::string object3 = writer.generateLiteral("K 4917", "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1655,7 +1746,7 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1677,7 +1768,7 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1704,7 +1795,7 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1726,7 +1817,7 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1753,7 +1844,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1775,7 +1866,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
   const std::string object2 = "<https://de.wikipedia.org/wiki/" + value + ">";
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1802,7 +1893,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1824,7 +1915,7 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
       "<https://www.wikipedia.org/wiki/" + tagValue + ">";
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1851,7 +1942,7 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.skipWikiLinks = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
@@ -1877,8 +1968,8 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tag1Key);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tag1Key] = tag1Value;
-  tagList[tag2Key] = tag2Value;
+  tagList.push_back({tag1Key, tag1Value});
+  tagList.push_back({tag2Key, tag2Value});
 
   dh.writeTagList("subject", tagList);
   output.flush();
@@ -1906,7 +1997,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1924,7 +2015,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1950,7 +2041,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -1968,7 +2059,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -1994,7 +2085,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2012,7 +2103,7 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2038,7 +2129,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2060,7 +2151,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
       "0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2087,7 +2178,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2109,7 +2200,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
       "-0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2136,7 +2227,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2158,7 +2249,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2185,7 +2276,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2207,7 +2298,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2234,7 +2325,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2256,7 +2347,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
       "0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2283,7 +2374,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2305,7 +2396,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
       "-0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2332,7 +2423,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2354,7 +2445,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2381,7 +2472,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2403,7 +2494,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2430,7 +2521,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth5) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2452,7 +2543,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth5) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2480,7 +2571,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2502,7 +2593,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
       "0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2529,7 +2620,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2551,7 +2642,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
       "-0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2578,7 +2669,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2600,7 +2691,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2627,7 +2718,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2649,7 +2740,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2676,7 +2767,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -2698,7 +2789,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5) {
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
 
   osm2rdf::osm::TagList tagList;
-  tagList[tagKey] = tagValue;
+  tagList.push_back({tagKey, tagValue});
 
   dh.writeTagList(subject, tagList);
   output.flush();
@@ -2726,7 +2817,7 @@ TEST(OSM_FactHandler, writeSecondsAsISO) {
   config.output = "";
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   osm2rdf::util::Output output{config, config.output};

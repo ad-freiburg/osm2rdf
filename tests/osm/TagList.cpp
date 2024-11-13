@@ -33,7 +33,6 @@ TEST(OSM_TagList, convertTagList) {
   osmium::builder::add_node(
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
-      osmium::builder::attr::_tag("city", "Freiburg"),
       osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
@@ -41,7 +40,8 @@ TEST(OSM_TagList, convertTagList) {
       osm2rdf::osm::convertTagList(osmiumBuffer.get<osmium::Node>(0).tags());
 
   ASSERT_EQ(1, tl.size());
-  ASSERT_EQ("Freiburg", tl["city"]);
+  ASSERT_EQ("city", tl[0].first);
+  ASSERT_EQ("Freiburg", tl[0].second);
 }
 
 // ____________________________________________________________________________
@@ -61,8 +61,10 @@ TEST(OSM_TagList, convertTagListWithSpaceInKey) {
       osm2rdf::osm::convertTagList(osmiumBuffer.get<osmium::Node>(0).tags());
 
   ASSERT_EQ(2, tl.size());
-  ASSERT_EQ("Freiburg", tl["city_name"]);
-  ASSERT_EQ("Freiburg", tl["name_of_city"]);
+  ASSERT_EQ("city_name", tl[0].first);
+  ASSERT_EQ("Freiburg", tl[0].second);
+  ASSERT_EQ("name_of_city", tl[1].first);
+  ASSERT_EQ("Freiburg", tl[1].second);
 }
 
 }  // namespace osm2rdf::osm

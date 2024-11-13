@@ -34,9 +34,12 @@ osm2rdf::osm::Way::Way() {
 osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _id = way.positive_id();
   _timestamp = way.timestamp().seconds_since_epoch();
-  _tags = osm2rdf::osm::convertTagList(way.tags());
+  _tags = std::move(osm2rdf::osm::convertTagList(way.tags()));
   _nodes.reserve(way.nodes().size());
   _geom.reserve(way.nodes().size());
+
+  auto areaTag = way.tags()["area"];
+  _hasAreaTag = areaTag == nullptr || strcmp(areaTag, "no") != 0;
 
   double lonMin = std::numeric_limits<double>::infinity();
   double latMin = std::numeric_limits<double>::infinity();
@@ -65,6 +68,10 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
     }
   }
   _envelope = {{lonMin, latMin}, {lonMax, latMax}};
+}
+
+// ____________________________________________________________________________
+void osm2rdf::osm::Way::finalize() {
   _convexHull = ::util::geo::convexHull(_geom);
   _obb = ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
 }
@@ -126,13 +133,7 @@ bool osm2rdf::osm::Way::isArea() const noexcept {
   if (!closed()) {
     return false;
   }
-  const auto& areaTag = _tags.find("area");
-  if (areaTag != _tags.end()) {
-    if (areaTag->second == "no") {
-      return false;
-    }
-  }
-  return true;
+  return _hasAreaTag;
 }
 
 // ____________________________________________________________________________
