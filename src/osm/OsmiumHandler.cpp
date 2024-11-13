@@ -186,9 +186,6 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   _nodesSeen++;
-  if (node.tags().empty()) {
-    return;
-  }
 
   try {
     const auto& osmNode = osm2rdf::osm::Node(node);

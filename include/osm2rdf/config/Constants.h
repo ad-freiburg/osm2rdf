@@ -197,14 +197,6 @@ const static inline std::string ADD_WAY_METADATA_OPTION_LONG =
 const static inline std::string ADD_WAY_METADATA_OPTION_HELP =
     "Add information about the way structure";
 
-const static inline std::string ADD_WAY_NODE_GEOMETRY_INFO =
-    "Adding way member geometries";
-const static inline std::string ADD_WAY_NODE_GEOMETRY_OPTION_SHORT = "";
-const static inline std::string ADD_WAY_NODE_GEOMETRY_OPTION_LONG =
-    "add-way-node-geometry";
-const static inline std::string ADD_WAY_NODE_GEOMETRY_OPTION_HELP =
-    "Add explicit geometry for every node member";
-
 const static inline std::string ADD_WAY_NODE_ORDER_INFO =
     "Adding way node order";
 const static inline std::string ADD_WAY_NODE_ORDER_OPTION_SHORT = "";

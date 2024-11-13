@@ -72,10 +72,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_WAY_METADATA_INFO;
       }
-      if (addWayNodeGeometry) {
-        oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_INFO;
-      }
       if (addWayNodeOrder) {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_WAY_NODE_ORDER_INFO;
@@ -273,10 +269,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_HELP);
-  auto addWayNodeGeometryOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG,
-      osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_HELP);
   auto addWayNodeOrderOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG,
@@ -444,7 +436,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
     addCentroids = !noAddCentroidsOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
-    addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
@@ -453,7 +444,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
 
-    addWayNodeOrder |= addWayNodeGeometry;
     addWayNodeOrder |= addWayNodeSpatialMetadata;
 
     if (semicolonTagKeysOp->is_set()) {
