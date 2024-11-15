@@ -42,7 +42,6 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noWayGeometricRelations);
 
   ASSERT_FALSE(config.addAreaWayLinestrings);
-  ASSERT_FALSE(config.addWayNodeGeometry);
   ASSERT_FALSE(config.addWayNodeOrder);
   ASSERT_FALSE(config.addWayNodeSpatialMetadata);
   ASSERT_FALSE(config.addWayMetadata);
@@ -579,22 +578,6 @@ TEST(CONFIG_Config, fromArgsAddWayMetadataLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsAddWayNodeGeomentryLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-  const auto arg =
-      "--" + osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.addWayNodeGeometry);
-}
-
-// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsAddWayNodeOrderLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -888,17 +871,6 @@ TEST(CONFIG_Config, getInfoAddWayMetadata) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::ADD_WAY_METADATA_INFO));
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoAddWayNodeGeometry) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  config.addWayNodeGeometry = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_INFO));
 }
 
 // ____________________________________________________________________________

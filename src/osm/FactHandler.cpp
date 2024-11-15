@@ -266,20 +266,6 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                                         std::to_string(wayOrder++),
                                         "^^" + IRI__XSD_INTEGER);
 
-      if (_config.addWayNodeGeometry) {
-        const std::string& subj = _writer->generateIRI(
-            NODE_NAMESPACE[_config.sourceDataset], node.id());
-
-        _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
-
-        const std::string& geomObj = _writer->generateIRIUnsafe(
-            NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                         "_node_" + std::to_string(node.id()));
-
-        _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
-        writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
-      }
-
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
         _writer->writeTriple(
             lastBlankNode, IRI__OSMWAY_NEXT_NODE,
