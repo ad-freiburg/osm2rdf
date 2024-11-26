@@ -199,6 +199,14 @@ const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_LONG =
 const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_HELP =
     "Do not output untagged relations";
 
+const static inline std::string NO_UNTAGGED_AREAS_INFO =
+    "Do not output untagged areas";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_LONG =
+    "no-untagged-areas";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_HELP =
+    "Do not output untagged areas";
+
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_INFO =
     "Adding linestrings for ways which form areas";
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT = "";

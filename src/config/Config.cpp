@@ -99,6 +99,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_INFO;
     }
+    if (!addUntaggedAreas) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_AREAS_INFO;
+    }
     if (simplifyWKT > 0) {
       oss << "\n" << prefix << osm2rdf::config::constants::SIMPLIFY_WKT_INFO;
       oss << "\n"
@@ -294,6 +298,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_LONG,
           osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_HELP);
 
+  auto noUntaggedAreasOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_HELP);
+
   auto addWayMetadataOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
@@ -475,6 +485,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addUntaggedNodes = !noUntaggedNodesOp->is_set();
     addUntaggedWays = !noUntaggedWaysOp->is_set();
     addUntaggedRelations = !noUntaggedRelationsOp->is_set();
+    addUntaggedAreas = !noUntaggedAreasOp->is_set();
 
     addWayNodeOrder |= addWayNodeSpatialMetadata;
 
