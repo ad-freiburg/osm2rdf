@@ -247,6 +247,9 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
           !_config.noRelationGeometricRelations) {
         _geometryHandler->relation(osmRelation);
 #pragma omp critical(progress)
+        if (osmRelation.isArea() || osmRelation.hasGeometry()) {
+          _relationGeometriesHandled++;
+        }
         _progressBar.update(_numTasksDone++);
       }
     }
