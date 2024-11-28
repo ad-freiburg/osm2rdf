@@ -17,11 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/config/Config.h"
-
 #include <filesystem>
 #include <iostream>
 #include <string>
+
+#include "osm2rdf/config/Config.h"
 
 #if defined(_OPENMP)
 #include "omp.h"
@@ -87,6 +87,22 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
             << osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_INFO;
       }
     }
+    if (!addUntaggedNodes) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_NODES_INFO;
+    }
+    if (!addUntaggedWays) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_WAYS_INFO;
+    }
+    if (!addUntaggedRelations) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_INFO;
+    }
+    if (!addUntaggedAreas) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_AREAS_INFO;
+    }
     if (simplifyWKT > 0) {
       oss << "\n" << prefix << osm2rdf::config::constants::SIMPLIFY_WKT_INFO;
       oss << "\n"
@@ -145,13 +161,12 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
-  oss << "\n"
-      << prefix << "Num Threads: " << numThreads;
+  oss << "\n" << prefix << "Num Threads: " << numThreads;
 
   if (!storeLocations.empty()) {
     oss << "\n"
-        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_INFO
-        << " " << storeLocations;
+        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_INFO << " "
+        << storeLocations;
   }
 
   if (writeRDFStatistics) {
@@ -265,6 +280,30 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_HELP);
 
+  auto noUntaggedNodesOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_HELP);
+
+  auto noUntaggedWaysOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_HELP);
+
+  auto noUntaggedRelationsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_HELP);
+
+  auto noUntaggedAreasOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_HELP);
+
   auto addWayMetadataOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
@@ -288,11 +327,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::AUX_GEO_FILES_OPTION_LONG,
           osm2rdf::config::constants::AUX_GEO_FILES_OPTION_HELP);
 
-  auto numThreadsOp =
-      parser.add<popl::Value<int>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::NUM_THREADS_OPTION_SHORT,
-          osm2rdf::config::constants::NUM_THREADS_OPTION_LONG,
-          osm2rdf::config::constants::NUM_THREADS_OPTION_HELP, numThreads);
+  auto numThreadsOp = parser.add<popl::Value<int>, popl::Attribute::advanced>(
+      osm2rdf::config::constants::NUM_THREADS_OPTION_SHORT,
+      osm2rdf::config::constants::NUM_THREADS_OPTION_LONG,
+      osm2rdf::config::constants::NUM_THREADS_OPTION_HELP, numThreads);
 
   auto semicolonTagKeysOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
@@ -444,6 +482,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
 
+    addUntaggedNodes = !noUntaggedNodesOp->is_set();
+    addUntaggedWays = !noUntaggedWaysOp->is_set();
+    addUntaggedRelations = !noUntaggedRelationsOp->is_set();
+    addUntaggedAreas = !noUntaggedAreasOp->is_set();
+
     addWayNodeOrder |= addWayNodeSpatialMetadata;
 
     if (semicolonTagKeysOp->is_set()) {
@@ -464,7 +507,9 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Output
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
-    outputCompress = outputCompressOp->value() == "none" ? NONE : (outputCompressOp->value() == "gz" ? GZ : BZ2);
+    outputCompress = outputCompressOp->value() == "none"
+                         ? NONE
+                         : (outputCompressOp->value() == "gz" ? GZ : BZ2);
     outputKeepFiles = outputKeepFilesOp->is_set();
     if (output.empty()) {
       outputCompress = NONE;
