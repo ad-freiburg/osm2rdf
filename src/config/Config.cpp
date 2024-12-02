@@ -507,9 +507,19 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Output
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
-    outputCompress = outputCompressOp->value() == "none"
-                         ? NONE
-                         : (outputCompressOp->value() == "gz" ? GZ : BZ2);
+    if (outputCompressOp->value() == "none") {
+      outputCompress = NONE;
+    } else if (outputCompressOp->value() == "gz") {
+      outputCompress = GZ;
+    } else if (outputCompressOp->value() == "bz2") {
+      outputCompress = BZ2;
+    } else {
+        throw popl::invalid_option(
+            outputCompressOp.get(),
+            popl::invalid_option::Error::invalid_argument,
+            popl::OptionName::long_name, outputCompressOp->value(), "");
+    }
+
     outputKeepFiles = outputKeepFilesOp->is_set();
     if (output.empty()) {
       outputCompress = NONE;
