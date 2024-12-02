@@ -80,7 +80,7 @@ const static inline std::string OUTPUT_COMPRESS_OPTION_SHORT = "";
 const static inline std::string OUTPUT_COMPRESS_OPTION_LONG =
     "output-compression";
 const static inline std::string OUTPUT_COMPRESS_OPTION_HELP =
-    "Output file compression, valid values: none, bz2, gz2";
+    "Output file compression, valid values: none, bz2, gz";
 
 const static inline std::string STORE_LOCATIONS_INFO =
     "Storing locations osmium locations:";
