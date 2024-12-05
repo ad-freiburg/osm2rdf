@@ -47,10 +47,11 @@ void run(const osm2rdf::config::Config& config) {
   osm2rdf::ttl::Writer<T> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::FactHandler<T> factHandler(config, &writer);
   osm2rdf::osm::GeometryHandler<T> geomHandler(config, &writer);
 
   {
+    osm2rdf::osm::FactHandler<T> factHandler(config, &writer);
+
     osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler,
                                               &geomHandler};
     osmiumHandler.handle();
