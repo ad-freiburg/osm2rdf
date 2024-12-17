@@ -175,6 +175,14 @@ const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump way geometric relations";
 
+const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_INFO =
+    "Do not compute spatial relations involving untagged nodes";
+const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG =
+    "no-untagged-nodes-geometric-relations";
+const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_OPTION_HELP =
+    "Do not compute spatial relations involving untagged nodes";
+
 const static inline std::string NO_UNTAGGED_NODES_INFO =
     "Do not output untagged nodes";
 const static inline std::string NO_UNTAGGED_NODES_OPTION_SHORT = "";
