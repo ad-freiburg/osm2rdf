@@ -238,13 +238,11 @@ std::string GeometryHandler<W>::getFullID(const std::string& strid) {
   }
 
   if (strid[0] == 3) {
-    return _writer->generateIRI(
-        areaNS(AreaFromType::WAY), id);
+    return _writer->generateIRI(areaNS(AreaFromType::WAY), id);
   }
 
   if (strid[0] == 4) {
-    return _writer->generateIRI(
-        areaNS(AreaFromType::RELATION), id);
+    return _writer->generateIRI(areaNS(AreaFromType::RELATION), id);
   }
 
   if (strid[0] == 5) {
@@ -262,14 +260,16 @@ std::string GeometryHandler<W>::getSweeperId(uint64_t oid, char type) {
   int a = 0;
   uint64_t tmp;
 
-  while ((tmp = (oid & (0xFFLL << (a * 8))))) {
+  while ((oid >> (a * 8))) {
+    tmp = (oid & (0xFFLL << (a * 8)));
     id[8 - a] = tmp >> (a * 8);
     a++;
   }
 
   id[8 - a] = type;
 
-  return reinterpret_cast<char*>(id + (8 - a));
+  return std::string{reinterpret_cast<char*>(id + (8 - a)),
+                     static_cast<size_t>(a + 1)};
 }
 
 // ____________________________________________________________________________
