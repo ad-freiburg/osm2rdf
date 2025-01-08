@@ -17,13 +17,12 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/config/Config.h"
-
 #include <filesystem>
 #include <iostream>
 #include <string>
 
-#include "boost/version.hpp"
+#include "osm2rdf/config/Config.h"
+
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -73,10 +72,6 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_WAY_METADATA_INFO;
       }
-      if (addWayNodeGeometry) {
-        oss << "\n"
-            << prefix << osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_INFO;
-      }
       if (addWayNodeOrder) {
         oss << "\n"
             << prefix << osm2rdf::config::constants::ADD_WAY_NODE_ORDER_INFO;
@@ -91,6 +86,22 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
             << prefix
             << osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_INFO;
       }
+    }
+    if (!addUntaggedNodes) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_NODES_INFO;
+    }
+    if (!addUntaggedWays) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_WAYS_INFO;
+    }
+    if (!addUntaggedRelations) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_INFO;
+    }
+    if (!addUntaggedAreas) {
+      oss << "\n"
+          << prefix << osm2rdf::config::constants::NO_UNTAGGED_AREAS_INFO;
     }
     if (simplifyWKT > 0) {
       oss << "\n" << prefix << osm2rdf::config::constants::SIMPLIFY_WKT_INFO;
@@ -119,21 +130,14 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_CONTAINS;
-  std::string modeStrings[3] = {"none", "reduced", "full"};
-  oss << "\n"
-      << prefix << osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_INFO << ": "
-      << (modeStrings[osm2rdfGeoTriplesMode]);
+  std::string modeStrings[2] = {"none", "full"};
 
   oss << "\n"
       << prefix << osm2rdf::config::constants::OGC_GEO_TRIPLES_INFO << ": "
       << (modeStrings[ogcGeoTriplesMode]);
 
-  oss << "\n"
-      << prefix << osm2rdf::config::constants::APPROX_CONTAINS_SLACK_INFO
-      << ": " << approxContainsSlack;
-
-  if (ogcGeoTriplesMode || osm2rdfGeoTriplesMode) {
-     if (noAreaGeometricRelations) {
+  if (ogcGeoTriplesMode) {
+    if (noAreaGeometricRelations) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO;
     }
@@ -157,15 +161,12 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     }
   }
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
-  if (writeDAGDotFiles) {
-    oss << "\n"
-        << prefix << osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO;
-  }
+  oss << "\n" << prefix << "Num Threads: " << numThreads;
 
-  if (!storeLocationsOnDisk.empty()) {
+  if (!storeLocations.empty()) {
     oss << "\n"
-        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_INFO
-        << " " << storeLocationsOnDisk;
+        << prefix << osm2rdf::config::constants::STORE_LOCATIONS_INFO << " "
+        << storeLocations;
   }
 
   if (writeRDFStatistics) {
@@ -192,11 +193,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
                                osm2rdf::config::constants::HELP_OPTION_LONG,
                                osm2rdf::config::constants::HELP_OPTION_HELP);
 
-  auto storeLocationsOnDiskOp =
-      parser.add<popl::Implicit<std::string>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_SHORT,
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG,
-          osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_HELP, "sparse");
+  auto storeLocationsOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::STORE_LOCATIONS_SHORT,
+          osm2rdf::config::constants::STORE_LOCATIONS_LONG,
+          osm2rdf::config::constants::STORE_LOCATIONS_HELP, "mem-flex");
 
   auto noAreasOp = parser.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::NO_AREA_OPTION_SHORT,
@@ -268,11 +269,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_HELP, "full");
 
-  auto osm2rdfGeoTriplesModeOp =
-      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
-          osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_OPTION_SHORT,
-          osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_OPTION_LONG,
-          osm2rdf::config::constants::OSM2RDF_GEO_TRIPLES_OPTION_HELP, "none");
+  auto noAddCentroidsOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_SHORT,
+      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_LONG,
+      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_HELP);
 
   auto addAreaWayLinestringsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
@@ -280,14 +280,34 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_HELP);
 
+  auto noUntaggedNodesOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_HELP);
+
+  auto noUntaggedWaysOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_HELP);
+
+  auto noUntaggedRelationsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_HELP);
+
+  auto noUntaggedAreasOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_SHORT,
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_LONG,
+          osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_HELP);
+
   auto addWayMetadataOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_HELP);
-  auto addWayNodeGeometryOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_SHORT,
-      osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG,
-      osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_HELP);
   auto addWayNodeOrderOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG,
@@ -300,6 +320,17 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_SHORT,
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG,
       osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_HELP);
+
+  auto auxGeoFilesOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::AUX_GEO_FILES_OPTION_SHORT,
+          osm2rdf::config::constants::AUX_GEO_FILES_OPTION_LONG,
+          osm2rdf::config::constants::AUX_GEO_FILES_OPTION_HELP);
+
+  auto numThreadsOp = parser.add<popl::Value<int>, popl::Attribute::advanced>(
+      osm2rdf::config::constants::NUM_THREADS_OPTION_SHORT,
+      osm2rdf::config::constants::NUM_THREADS_OPTION_LONG,
+      osm2rdf::config::constants::NUM_THREADS_OPTION_HELP, numThreads);
 
   auto semicolonTagKeysOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
@@ -314,20 +345,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_HELP,
           simplifyGeometries);
 
-  auto simplifyGeometriesInnerOuterOp = parser.add<popl::Value<double>,
-                                                   popl::Attribute::expert>(
-      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_SHORT,
-      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_LONG,
-      osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_INNER_OUTER_OPTION_HELP,
-      simplifyGeometriesInnerOuter);
-  auto dontUseInnerOuterGeomsOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_SHORT,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_LONG,
-      osm2rdf::config::constants::DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP);
-  auto approximateSpatialRelsOp = parser.add<popl::Switch>(
-      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_SHORT,
-      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_LONG,
-      osm2rdf::config::constants::APPROX_SPATIAL_REL_OPTION_HELP);
   auto simplifyWKTOp =
       parser.add<popl::Value<uint16_t>, popl::Attribute::advanced>(
           osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_SHORT,
@@ -344,11 +361,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WKT_PRECISION_OPTION_SHORT,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_HELP, wktPrecision);
-
-  auto writeDotFilesOp = parser.add<popl::Switch, popl::Attribute::expert>(
-      osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_SHORT,
-      osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_LONG,
-      osm2rdf::config::constants::WRITE_DAG_DOT_FILES_OPTION_HELP);
 
   auto writeRDFStatisticsOp =
       parser.add<popl::Switch, popl::Attribute::advanced>(
@@ -369,21 +381,15 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_SHORT,
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_LONG,
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_HELP);
-  auto outputNoCompressOp = parser.add<popl::Switch, popl::Attribute::advanced>(
-      osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_SHORT,
-      osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_LONG,
-      osm2rdf::config::constants::OUTPUT_NO_COMPRESS_OPTION_HELP);
+  auto outputCompressOp =
+      parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
+          osm2rdf::config::constants::OUTPUT_COMPRESS_OPTION_SHORT,
+          osm2rdf::config::constants::OUTPUT_COMPRESS_OPTION_LONG,
+          osm2rdf::config::constants::OUTPUT_COMPRESS_OPTION_HELP, "bz2");
   auto cacheOp = parser.add<popl::Value<std::string>>(
       osm2rdf::config::constants::CACHE_OPTION_SHORT,
       osm2rdf::config::constants::CACHE_OPTION_LONG,
       osm2rdf::config::constants::CACHE_OPTION_HELP, cache);
-
-  auto approxContainsSlackOp =
-      parser.add<popl::Value<double>, popl::Attribute::expert>(
-          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_SHORT,
-          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_LONG,
-          osm2rdf::config::constants::APPROX_CONTAINS_SLACK_OPTION_HELP,
-          approxContainsSlack);
 
   try {
     parser.parse(argc, argv);
@@ -411,8 +417,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     // Skip passes
     noFacts = noFactsOp->is_set();
 
-    if (storeLocationsOnDiskOp->is_set()) {
-      storeLocationsOnDisk = storeLocationsOnDiskOp->value();
+    if (storeLocationsOp->is_set()) {
+      storeLocations = storeLocationsOp->value();
     }
 
     // Select types to dump
@@ -429,8 +435,6 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     if (ogcGeoTriplesModeOp->is_set()) {
       if (ogcGeoTriplesModeOp->value() == "none") {
         ogcGeoTriplesMode = none;
-      } else if (ogcGeoTriplesModeOp->value() == "reduced") {
-        ogcGeoTriplesMode = reduced;
       } else if (ogcGeoTriplesModeOp->value() == "full") {
         ogcGeoTriplesMode = full;
       } else {
@@ -441,23 +445,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       }
     }
 
-    if (osm2rdfGeoTriplesModeOp->is_set()) {
-      if (osm2rdfGeoTriplesModeOp->value() == "none") {
-        osm2rdfGeoTriplesMode = none;
-      } else if (osm2rdfGeoTriplesModeOp->value() == "reduced") {
-        osm2rdfGeoTriplesMode = reduced;
-      } else if (osm2rdfGeoTriplesModeOp->value() == "full") {
-        osm2rdfGeoTriplesMode = full;
-      } else {
-        throw popl::invalid_option(
-            osm2rdfGeoTriplesModeOp.get(),
-            popl::invalid_option::Error::invalid_argument,
-            popl::OptionName::long_name, osm2rdfGeoTriplesModeOp->value(), "");
-      }
-    }
-
-    noGeometricRelations =
-        ogcGeoTriplesMode == none && osm2rdfGeoTriplesMode == none;
+    noGeometricRelations = ogcGeoTriplesMode == none;
 
     noAreaFacts |= noAreasOp->is_set();
     noAreaGeometricRelations |= noAreasOp->is_set();
@@ -472,10 +460,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     if (sourceDatasetOp->is_set()) {
       if (sourceDatasetOp->value() == "OSM") {
         sourceDataset = OSM;
-        approxContainsSlack = 0.05;
       } else if (sourceDatasetOp->value() == "OHM") {
         sourceDataset = OHM;
-        approxContainsSlack = 0;
       } else {
         throw popl::invalid_option(
             sourceDatasetOp.get(),
@@ -483,26 +469,24 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
             popl::OptionName::long_name, sourceDatasetOp->value(), "");
       }
     }
-    if (approxContainsSlackOp->is_set()) {
-      approxContainsSlack = approxContainsSlackOp->value();
-    }
 
     // Select amount to dump
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
+    addCentroids = !noAddCentroidsOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
-    addWayNodeGeometry = addWayNodeGeometryOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
     simplifyGeometries = simplifyGeometriesOp->value();
-    simplifyGeometriesInnerOuter = simplifyGeometriesInnerOuterOp->value();
-    dontUseInnerOuterGeoms = dontUseInnerOuterGeomsOp->value();
-    approximateSpatialRels = approximateSpatialRelsOp->value();
     simplifyWKT = simplifyWKTOp->value();
     wktDeviation = wktDeviationOp->value();
     wktPrecision = wktPrecisionOp->value();
 
-    addWayNodeOrder |= addWayNodeGeometry;
+    addUntaggedNodes = !noUntaggedNodesOp->is_set();
+    addUntaggedWays = !noUntaggedWaysOp->is_set();
+    addUntaggedRelations = !noUntaggedRelationsOp->is_set();
+    addUntaggedAreas = !noUntaggedAreasOp->is_set();
+
     addWayNodeOrder |= addWayNodeSpatialMetadata;
 
     if (semicolonTagKeysOp->is_set()) {
@@ -510,19 +494,35 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
         semicolonTagKeys.insert(semicolonTagKeysOp->value(i));
       }
     }
+    if (auxGeoFilesOp->is_set()) {
+      for (size_t i = 0; i < auxGeoFilesOp->count(); ++i) {
+        auxGeoFiles.push_back(auxGeoFilesOp->value(i));
+      }
+    }
 
-    // Dot
-    writeDAGDotFiles = writeDotFilesOp->is_set();
+    if (numThreadsOp->is_set()) numThreads = numThreadsOp->value();
 
     writeRDFStatistics = writeRDFStatisticsOp->is_set();
 
     // Output
     output = outputOp->value();
     outputFormat = outputFormatOp->value();
-    outputCompress = !outputNoCompressOp->is_set();
+    if (outputCompressOp->value() == "none") {
+      outputCompress = NONE;
+    } else if (outputCompressOp->value() == "gz") {
+      outputCompress = GZ;
+    } else if (outputCompressOp->value() == "bz2") {
+      outputCompress = BZ2;
+    } else {
+        throw popl::invalid_option(
+            outputCompressOp.get(),
+            popl::invalid_option::Error::invalid_argument,
+            popl::OptionName::long_name, outputCompressOp->value(), "");
+    }
+
     outputKeepFiles = outputKeepFilesOp->is_set();
     if (output.empty()) {
-      outputCompress = false;
+      outputCompress = NONE;
       mergeOutput = util::OutputMergeMode::NONE;
     }
 
@@ -532,9 +532,14 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     rdfStatisticsPath += osm2rdf::config::constants::JSON_EXTENSION;
 
     // Mark compressed output
-    if (outputCompress && !output.empty() &&
+    if (outputCompress == BZ2 && !output.empty() &&
         output.extension() != osm2rdf::config::constants::BZIP2_EXTENSION) {
       output += osm2rdf::config::constants::BZIP2_EXTENSION;
+    }
+
+    if (outputCompress == GZ && !output.empty() &&
+        output.extension() != osm2rdf::config::constants::GZ_EXTENSION) {
+      output += osm2rdf::config::constants::GZ_EXTENSION;
     }
 
     // osmium location cache

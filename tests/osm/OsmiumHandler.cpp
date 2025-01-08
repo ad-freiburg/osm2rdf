@@ -124,25 +124,30 @@ TEST(OSM_OsmiumHandler, constructor) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  ASSERT_EQ(0, oh.areasSeen());
-  ASSERT_EQ(0, oh.areasDumped());
-  ASSERT_EQ(0, oh.areaGeometriesHandled());
-  ASSERT_EQ(0, oh.nodesSeen());
-  ASSERT_EQ(0, oh.nodesDumped());
-  ASSERT_EQ(0, oh.nodeGeometriesHandled());
-  ASSERT_EQ(0, oh.relationsSeen());
-  ASSERT_EQ(0, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(0, oh.waysSeen());
-  ASSERT_EQ(0, oh.waysDumped());
-  ASSERT_EQ(0, oh.wayGeometriesHandled());
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
+
+  ASSERT_EQ(0, osmiumHandler.areasSeen());
+  ASSERT_EQ(0, osmiumHandler.areasDumped());
+  ASSERT_EQ(0, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(0, osmiumHandler.nodesSeen());
+  ASSERT_EQ(0, osmiumHandler.nodesDumped());
+  ASSERT_EQ(0, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(0, osmiumHandler.relationsSeen());
+  ASSERT_EQ(0, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(0, osmiumHandler.waysSeen());
+  ASSERT_EQ(0, osmiumHandler.waysDumped());
+  ASSERT_EQ(0, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -158,28 +163,33 @@ TEST(OSM_OsmiumHandler, noFacts) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noFacts = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(0, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(0, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(0, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(0, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(0, osmiumHandler.areasDumped());
+  ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(0, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(0, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(0, osmiumHandler.waysDumped());
+  ASSERT_EQ(2, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -195,28 +205,33 @@ TEST(OSM_OsmiumHandler, noGeometricRelations) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noGeometricRelations = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(0, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(0, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(0, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(2, osmiumHandler.areasDumped());
+  ASSERT_EQ(0, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(0, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(3, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(2, osmiumHandler.waysDumped());
+  ASSERT_EQ(0, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -232,28 +247,33 @@ TEST(OSM_OsmiumHandler, noAreaFacts) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noAreaFacts = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(0, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(0, osmiumHandler.areasDumped());
+  ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(3, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(2, osmiumHandler.waysDumped());
+  ASSERT_EQ(2, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -269,28 +289,33 @@ TEST(OSM_OsmiumHandler, noNodeFacts) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noNodeFacts = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(0, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(2, osmiumHandler.areasDumped());
+  ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(0, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(3, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(2, osmiumHandler.waysDumped());
+  ASSERT_EQ(2, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -306,28 +331,33 @@ TEST(OSM_OsmiumHandler, noRelationFacts) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noRelationFacts = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(0, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(2, osmiumHandler.areasDumped());
+  ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(0, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(2, osmiumHandler.waysDumped());
+  ASSERT_EQ(2, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -343,28 +373,33 @@ TEST(OSM_OsmiumHandler, noWayFacts) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noWayFacts = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(0, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(2, osmiumHandler.areasDumped());
+  ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(3, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(0, osmiumHandler.waysDumped());
+  ASSERT_EQ(2, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -380,28 +415,33 @@ TEST(OSM_OsmiumHandler, noAreaGeometricRelations) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noAreaGeometricRelations = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(0, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(2, osmiumHandler.areasDumped());
+  ASSERT_EQ(0, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(3, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(2, osmiumHandler.waysDumped());
+  ASSERT_EQ(2, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -417,28 +457,33 @@ TEST(OSM_OsmiumHandler, noNodeGeometricRelations) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noNodeGeometricRelations = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(0, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(1, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(2, osmiumHandler.areasDumped());
+  ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(0, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(3, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(2, osmiumHandler.waysDumped());
+  ASSERT_EQ(2, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -454,28 +499,33 @@ TEST(OSM_OsmiumHandler, noWayGeometricRelations) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.noWayGeometricRelations = true;
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
-  osm2rdf::osm::OsmiumHandler oh{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
 
-  addOsmiumItems(&oh);
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
 
-  ASSERT_EQ(2, oh.areasSeen());
-  ASSERT_EQ(2, oh.areasDumped());
-  ASSERT_EQ(2, oh.areaGeometriesHandled());
-  ASSERT_EQ(2, oh.nodesSeen());
-  ASSERT_EQ(1, oh.nodesDumped());
-  ASSERT_EQ(1, oh.nodeGeometriesHandled());
-  ASSERT_EQ(3, oh.relationsSeen());
-  ASSERT_EQ(2, oh.relationsDumped());
-  ASSERT_EQ(0, oh.relationGeometriesHandled());
-  ASSERT_EQ(2, oh.waysSeen());
-  ASSERT_EQ(1, oh.waysDumped());
-  ASSERT_EQ(0, oh.wayGeometriesHandled());
+  addOsmiumItems(&osmiumHandler);
+
+  ASSERT_EQ(2, osmiumHandler.areasSeen());
+  ASSERT_EQ(2, osmiumHandler.areasDumped());
+  ASSERT_EQ(2, osmiumHandler.areaGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.nodesSeen());
+  ASSERT_EQ(2, osmiumHandler.nodesDumped());
+  ASSERT_EQ(2, osmiumHandler.nodeGeometriesHandled());
+  ASSERT_EQ(3, osmiumHandler.relationsSeen());
+  ASSERT_EQ(3, osmiumHandler.relationsDumped());
+  ASSERT_EQ(0, osmiumHandler.relationGeometriesHandled());
+  ASSERT_EQ(2, osmiumHandler.waysSeen());
+  ASSERT_EQ(2, osmiumHandler.waysDumped());
+  ASSERT_EQ(0, osmiumHandler.wayGeometriesHandled());
 
   // Cleanup
   output.close();
@@ -494,7 +544,9 @@ TEST(OSM_OsmiumHandler, handleEmptyPBF) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -504,7 +556,10 @@ TEST(OSM_OsmiumHandler, handleEmptyPBF) {
   osm2rdf::util::Output output{config, config.output};
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   ASSERT_THROW(osmiumHandler.handle(), osmium::pbf_error);
 
   // Reset std::cerr and std::cout
@@ -525,7 +580,9 @@ TEST(OSM_OsmiumHandler, handleEmptyOSM) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -535,7 +592,10 @@ TEST(OSM_OsmiumHandler, handleEmptyOSM) {
   osm2rdf::util::Output output{config, config.output};
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   ASSERT_THROW(osmiumHandler.handle(), osmium::xml_error);
 
   // Reset std::cerr and std::cout
@@ -556,7 +616,9 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2OSM) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -566,7 +628,10 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2OSM) {
   osm2rdf::util::Output output{config, config.output};
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
 
   // Reset std::cerr and std::cout
@@ -587,7 +652,9 @@ TEST(OSM_OsmiumHandler, handleEmptyOPL) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -597,7 +664,10 @@ TEST(OSM_OsmiumHandler, handleEmptyOPL) {
   osm2rdf::util::Output output{config, config.output};
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   // Reset std::cerr and std::cout
@@ -618,7 +688,9 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2OPL) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -628,7 +700,10 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2OPL) {
   osm2rdf::util::Output output{config, config.output};
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
 
   // Reset std::cerr and std::cout
@@ -649,7 +724,9 @@ TEST(OSM_OsmiumHandler, handleEmptyO5M) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -659,7 +736,10 @@ TEST(OSM_OsmiumHandler, handleEmptyO5M) {
   osm2rdf::util::Output output{config, config.output};
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   ASSERT_THROW(osmiumHandler.handle(), osmium::o5m_error);
 
   // Reset std::cerr and std::cout
@@ -680,7 +760,9 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2O5M) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -690,7 +772,10 @@ TEST(OSM_OsmiumHandler, handleEmptyBzip2O5M) {
   osm2rdf::util::Output output{config, config.output};
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   ASSERT_THROW(osmiumHandler.handle(), osmium::bzip2_error);
 
   // Reset std::cerr and std::cout
@@ -711,7 +796,9 @@ TEST(OSM_OsmiumHandler, handleSingleNode) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -730,7 +817,10 @@ TEST(OSM_OsmiumHandler, handleSingleNode) {
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -740,7 +830,7 @@ TEST(OSM_OsmiumHandler, handleSingleNode) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -764,7 +854,9 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -810,7 +902,10 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -820,7 +915,7 @@ TEST(OSM_OsmiumHandler, handleOSMWikiExample) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:4 dumped: 1 geometry: 1\n"));
+              ::testing::HasSubstr("nodes seen:4 dumped: 4 geometry: 4\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,

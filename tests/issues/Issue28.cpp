@@ -34,8 +34,8 @@ TEST(Issue28, OpenReadonlyOutputFile) {
   osm2rdf::config::Config config;
   config.output =
       config.getTempPath("TEST_ISSUES_Issue28", "OpenReadonlyOutputFile");
-  config.mergeOutput = OutputMergeMode::MERGE;
-  config.outputCompress = false;
+  config.mergeOutput = OutputMergeMode::CONCATENATE;
+  config.outputCompress = osm2rdf::config::NONE;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
   ASSERT_TRUE(std::filesystem::exists(config.output));
@@ -69,7 +69,7 @@ TEST(Issue28, OutputfileTruncatedOnOpenConcatenate) {
   config.output = config.getTempPath("TEST_ISSUES_Issue28",
                                      "OutputfileTruncatedOnOpenConcatenate");
   config.mergeOutput = OutputMergeMode::CONCATENATE;
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.outputKeepFiles = true;
   ASSERT_FALSE(std::filesystem::exists(config.output));
   std::filesystem::create_directories(config.output);
@@ -87,7 +87,7 @@ TEST(Issue28, OutputfileTruncatedOnOpenConcatenate) {
   o.write("c", 2);
   o.write("d", 3);
   o.flush();
-  o.close("p", "s");
+  o.close();
 
   // Check content
   {
@@ -96,7 +96,7 @@ TEST(Issue28, OutputfileTruncatedOnOpenConcatenate) {
     ASSERT_TRUE(resultFile.is_open());
     ASSERT_TRUE(resultFile.good());
     resultBuffer << resultFile.rdbuf();
-    ASSERT_EQ("pabcds", resultBuffer.str());
+    ASSERT_EQ("abcd", resultBuffer.str());
     resultFile.close();
     resultBuffer.clear();
   }
@@ -120,7 +120,7 @@ TEST(Issue28, OutputfileTruncatedOnOpenConcatenate) {
   o.write("x", 1);
   o.write("w", 0);
   o.flush();
-  o.close("p", "s");
+  o.close();
 
   // Check new content
   {
@@ -129,82 +129,7 @@ TEST(Issue28, OutputfileTruncatedOnOpenConcatenate) {
     ASSERT_TRUE(resultFile.is_open());
     ASSERT_TRUE(resultFile.good());
     resultBuffer << resultFile.rdbuf();
-    ASSERT_EQ("pwxyzs", resultBuffer.str());
-    resultFile.close();
-    resultBuffer.clear();
-  }
-
-  std::filesystem::remove_all(config.output);
-  ASSERT_FALSE(std::filesystem::exists(config.output));
-}
-
-// ____________________________________________________________________________
-TEST(Issue28, OutputfileTruncatedOnOpenMerge) {
-  osm2rdf::config::Config config;
-  config.output = config.getTempPath("TEST_ISSUES_Issue28",
-                                     "OutputfileTruncatedOnOpenMerge");
-  config.mergeOutput = OutputMergeMode::MERGE;
-  config.outputCompress = false;
-  config.outputKeepFiles = true;
-  ASSERT_FALSE(std::filesystem::exists(config.output));
-  std::filesystem::create_directories(config.output);
-  ASSERT_TRUE(std::filesystem::exists(config.output));
-  ASSERT_TRUE(std::filesystem::is_directory(config.output));
-  std::filesystem::path output{config.output};
-  output /= "file";
-
-  size_t parts = 4;
-  osm2rdf::util::Output o{config, output, parts};
-  o.open();
-  // Write content
-  o.write("a", 0);
-  o.write("b", 1);
-  o.write("c", 2);
-  o.write("d", 3);
-  o.flush();
-  o.close("p", "s");
-
-  // Check content
-  {
-    std::stringstream resultBuffer;
-    std::ifstream resultFile(output);
-    ASSERT_TRUE(resultFile.is_open());
-    ASSERT_TRUE(resultFile.good());
-    resultBuffer << resultFile.rdbuf();
-    ASSERT_EQ("pabcds", resultBuffer.str());
-    resultFile.close();
-    resultBuffer.clear();
-  }
-
-  // Reopen file for writing -> this clears the file.
-  o.open();
-  {
-    std::stringstream resultBuffer;
-    std::ifstream resultFile(output);
-    ASSERT_TRUE(resultFile.is_open());
-    ASSERT_TRUE(resultFile.good());
-    resultBuffer << resultFile.rdbuf();
-    ASSERT_EQ("", resultBuffer.str());
-    resultFile.close();
-    resultBuffer.clear();
-  }
-
-  // Write new content
-  o.write("z", 3);
-  o.write("y", 2);
-  o.write("x", 1);
-  o.write("w", 0);
-  o.flush();
-  o.close("p", "s");
-
-  // Check new content
-  {
-    std::stringstream resultBuffer;
-    std::ifstream resultFile(output);
-    ASSERT_TRUE(resultFile.is_open());
-    ASSERT_TRUE(resultFile.good());
-    resultBuffer << resultFile.rdbuf();
-    ASSERT_EQ("pwxyzs", resultBuffer.str());
+    ASSERT_EQ("wxyz", resultBuffer.str());
     resultFile.close();
     resultBuffer.clear();
   }

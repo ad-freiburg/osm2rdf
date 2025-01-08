@@ -18,11 +18,6 @@
 
 #include "osm2rdf/osm/TagList.h"
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -38,7 +33,6 @@ TEST(OSM_TagList, convertTagList) {
   osmium::builder::add_node(
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
-      osmium::builder::attr::_tag("city", "Freiburg"),
       osmium::builder::attr::_tag("city", "Freiburg"));
 
   // Create osm2rdf object from osmium object
@@ -46,7 +40,8 @@ TEST(OSM_TagList, convertTagList) {
       osm2rdf::osm::convertTagList(osmiumBuffer.get<osmium::Node>(0).tags());
 
   ASSERT_EQ(1, tl.size());
-  ASSERT_EQ("Freiburg", tl["city"]);
+  ASSERT_EQ("city", tl[0].first);
+  ASSERT_EQ("Freiburg", tl[0].second);
 }
 
 // ____________________________________________________________________________
@@ -66,49 +61,10 @@ TEST(OSM_TagList, convertTagListWithSpaceInKey) {
       osm2rdf::osm::convertTagList(osmiumBuffer.get<osmium::Node>(0).tags());
 
   ASSERT_EQ(2, tl.size());
-  ASSERT_EQ("Freiburg", tl["city_name"]);
-  ASSERT_EQ("Freiburg", tl["name_of_city"]);
+  ASSERT_EQ("city_name", tl[0].first);
+  ASSERT_EQ("Freiburg", tl[0].second);
+  ASSERT_EQ("name_of_city", tl[1].first);
+  ASSERT_EQ("Freiburg", tl[1].second);
 }
 
-// ____________________________________________________________________________
-TEST(OSM_TagList, serializationBinary) {
-  std::stringstream boostBuffer;
-
-  osm2rdf::osm::TagList src;
-  src["abc"] = "xyz";
-  src["def"] = "42";
-
-  osm2rdf::osm::TagList dst;
-
-  // Store and load
-  boost::archive::binary_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::binary_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_TagList, serializationText) {
-  std::stringstream boostBuffer;
-
-  osm2rdf::osm::TagList src;
-  src["abc"] = "xyz";
-  src["def"] = "42";
-
-  osm2rdf::osm::TagList dst;
-
-  // Store and load
-  boost::archive::text_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::text_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
-}
 }  // namespace osm2rdf::osm

@@ -126,7 +126,7 @@ TEST(TTL_WriterNT, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -151,7 +151,7 @@ TEST(TTL_WriterTTL, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -159,6 +159,7 @@ TEST(TTL_WriterTTL, writeHeader) {
 
   w.writeHeader();
 
+  output.flush();
   output.close();
 
   ASSERT_THAT(buffer.str(),
@@ -178,7 +179,7 @@ TEST(TTL_WriterQLEVER, writeHeader) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -186,6 +187,7 @@ TEST(TTL_WriterQLEVER, writeHeader) {
 
   w.writeHeader();
 
+  output.flush();
   output.close();
 
   ASSERT_THAT(buffer.str(),
@@ -599,7 +601,7 @@ TEST(TTL_WriterNT, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -660,7 +662,7 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -722,7 +724,7 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = util::OutputMergeMode::NONE;
   osm2rdf::util::Output output{config, config.output};
   output.open();

@@ -1,0 +1,57 @@
+name: End-to-end test, uncompressed output (docker build)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  merge_group:
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: End-to-end test, uncompressed output (docker build)
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        dockerfile: [ Dockerfile]
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+
+      - name: Build the docker image
+        run: |
+          set -v
+          docker build -f ${{matrix.dockerfile}} -t osm2rdf .
+          docker run --rm osm2rdf --help
+
+      - name: Build TTL for Liechtenstein and check its validity
+        run: |
+          set -v
+          mkdir osm-liechtenstein && cd $_
+          curl -L -o osm-liechtenstein.pbf https://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf
+          ls -l osm-liechtenstein.pbf
+          docker run --rm -v $(pwd):/data osm2rdf /data/osm-liechtenstein.pbf --output-compression none -o /data/osm-liechtenstein.ttl
+          ls -l osm-liechtenstein.pbf osm-liechtenstein.ttl
+          docker run --rm -v $(pwd):/data stain/jena riot --validate /data/osm-liechtenstein.ttl
+
+      - name: Build QLever index and count the number of geometries
+        run: |
+          set -v
+          cd osm-liechtenstein
+          docker run -u $(id -u):$(id -g) -v $(pwd):/data -w /data --entrypoint bash adfreiburg/qlever -c "cat osm-liechtenstein.ttl | IndexBuilderMain -F ttl -f - -i osm-liechtenstein"
+          docker run -d -p 7000:7000 -v $(pwd):/data -w /data --entrypoint bash --name qlever adfreiburg/qlever -c "ServerMain -i /data/osm-liechtenstein -p 7000"
+          sleep 5
+          docker logs qlever
+          RESULT_JSON=$(curl http://localhost:7000 --data-urlencode "query=PREFIX geo: <http://www.opengis.net/ont/geosparql#> SELECT (COUNT(?geometry) AS ?count) WHERE { ?osm_id geo:hasGeometry ?geometry }")
+          echo "${RESULT_JSON}"
+          NUM_GEOMS=$(echo "${RESULT_JSON}" | jq --exit-status --raw-output .results.bindings[0].count.value)
+          echo ${NUM_GEOMS} | numfmt --grouping
+          test ${NUM_GEOMS} -gt 100000

@@ -23,6 +23,8 @@
 #include <filesystem>
 #include <string>
 #include <unordered_set>
+#include <vector>
+#include <thread>
 
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/ttl/Format.h"
@@ -32,8 +34,13 @@ namespace osm2rdf::config {
 
 enum GeoTriplesMode {
   none = 0,
-  reduced = 1,
-  full = 2
+  full = 1
+};
+
+enum CompressFormat {
+  NONE = 0,
+  BZ2 = 1,
+  GZ = 2,
 };
 
 enum SourceDataset {
@@ -43,7 +50,7 @@ enum SourceDataset {
 
 struct Config {
   // Select what to do
-  std::string storeLocationsOnDisk;
+  std::string storeLocations;
 
   bool noFacts = false;
   bool noAreaFacts = false;
@@ -60,49 +67,44 @@ struct Config {
 
   SourceDataset sourceDataset = OSM;
 
-  // the epsilon for the inner/outer douglas-peucker is based on the
-  // circumference of a hypothetical circle. By dividing by ~pi, we base the
-  // epsilon on 1/n of the radius of this hypothetical circle (n = 20 in this
-  // case). Think of this is maximum portion of the radius that is
-  // "collapsed away" by the inner simplification, or added by the outer
-  // simplification
-  double simplifyGeometriesInnerOuter = 1 / (3.14 * 20);
-  double approxContainsSlack = 0.05;
-  bool dontUseInnerOuterGeoms = false;
-  bool approximateSpatialRels = false;
-
   // Select amount to dump
   bool addAreaWayLinestrings = false;
+  bool addCentroids = true;
   bool addWayMetadata = false;
-  bool addWayNodeGeometry = false;
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
   bool skipWikiLinks = false;
 
+  bool addUntaggedNodes = true;
+  bool addUntaggedWays = true;
+  bool addUntaggedRelations = true;
+  bool addUntaggedAreas = true;
+
+  int numThreads = std::thread::hardware_concurrency();
+
   // Default settings for data
   std::unordered_set<std::string> semicolonTagKeys;
 
-  // Dot
-  bool writeDAGDotFiles = false;
+  // Auxilary geo files
+  std::vector<std::string> auxGeoFiles;
 
   // Statistics
   bool writeRDFStatistics = false;
   std::filesystem::path rdfStatisticsPath;
 
   // Output modifiers
-  uint16_t simplifyWKT = 250;
+  uint16_t simplifyWKT = 0;
   double wktDeviation = 5;
   uint16_t wktPrecision = 7;
 
   GeoTriplesMode ogcGeoTriplesMode = full;
-  GeoTriplesMode osm2rdfGeoTriplesMode = none;
 
   // Output, empty for stdout
   std::filesystem::path output;
   std::string outputFormat = "qlever";
   osm2rdf::util::OutputMergeMode mergeOutput =
       osm2rdf::util::OutputMergeMode::CONCATENATE;
-  bool outputCompress = true;
+  CompressFormat outputCompress = BZ2;
   bool outputKeepFiles = false;
 
   // osmium location cache

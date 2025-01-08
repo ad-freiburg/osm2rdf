@@ -20,17 +20,11 @@
 #include <iostream>
 #include <limits>
 
-#include "boost/geometry.hpp"
-#include "osm2rdf/geometry/Area.h"
-#include "osm2rdf/geometry/Box.h"
-#include "osm2rdf/geometry/Global.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
-#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/Node.h"
 #include "osmium/osm/area.hpp"
-
-using osm2rdf::geometry::Location;
+#include "util/geo/Geo.h"
 
 // ____________________________________________________________________________
 osm2rdf::osm::Area::Area() {
@@ -40,24 +34,16 @@ osm2rdf::osm::Area::Area() {
 
 // ____________________________________________________________________________
 void osm2rdf::osm::Area::finalize() noexcept {
-  // Correct possibly invalid geometry...
-  boost::geometry::correct(_geom);
-  boost::geometry::unique(_geom);
-  _geomArea = boost::geometry::area(_geom);
-  _envelopeArea = boost::geometry::area(_envelope);
-  boost::geometry::convex_hull(_geom, _convexHull);
-  _obb = osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
-  assert(_geomArea > 0);
-  assert(_envelopeArea > 0);
-  assert(boost::geometry::area(_convexHull) > 0);
-  assert(boost::geometry::area(_obb) > 0);
+  _geomArea = ::util::geo::area(_geom);
+  _envelopeArea = ::util::geo::area(_envelope);
+  _convexHull = ::util::geo::convexHull(_geom);
+  _obb = ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
 }
 
 // ____________________________________________________________________________
 osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
   _id = area.positive_id();
   _objId = static_cast<osm2rdf::osm::Area::id_t>(area.orig_id());
-  _hasName = (area.tags()["name"] != nullptr);
 
   double lonMin = std::numeric_limits<double>::infinity();
   double latMin = std::numeric_limits<double>::infinity();
@@ -66,10 +52,9 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
 
   const auto& outerRings = area.outer_rings();
   _geom.resize(outerRings.size());
-  // int and not size_t as boost uses int internal
   int oCount = 0;
   for (const auto& oring : outerRings) {
-    _geom[oCount].outer().reserve(oring.size());
+    _geom[oCount].getOuter().reserve(oring.size());
     for (const auto& nodeRef : oring) {
       if (nodeRef.lon() < lonMin) {
         lonMin = nodeRef.lon();
@@ -87,26 +72,24 @@ osm2rdf::osm::Area::Area(const osmium::Area& area) : Area() {
         latMax = nodeRef.lat();
       }
 
-      boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()},
-                              -1, oCount);
+      _geom[oCount].getOuter().push_back({nodeRef.lon(), nodeRef.lat()});
     }
 
     const auto& innerRings = area.inner_rings(oring);
-    _geom[oCount].inners().resize(innerRings.size());
-    // int and not size_t as boost uses int internal
+    _geom[oCount].getInners().resize(innerRings.size());
     int iCount = 0;
     for (const auto& iring : innerRings) {
-      _geom[oCount].inners()[iCount].reserve(iring.size());
+      _geom[oCount].getInners()[iCount].reserve(iring.size());
       for (const auto& nodeRef : iring) {
-        boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()},
-                                iCount, oCount);
+        _geom[oCount].getInners()[iCount].push_back(
+            {nodeRef.lon(), nodeRef.lat()});
       }
       iCount++;
     }
     oCount++;
   }
 
-  _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
+  _envelope = ::util::geo::DBox({lonMin, latMin}, {lonMax, latMax});
 }
 
 // ____________________________________________________________________________
@@ -118,41 +101,44 @@ osm2rdf::osm::Area::id_t osm2rdf::osm::Area::objId() const noexcept {
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Area& osm2rdf::osm::Area::geom() const noexcept {
+const ::util::geo::DMultiPolygon& osm2rdf::osm::Area::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Box& osm2rdf::osm::Area::envelope() const noexcept {
+const ::util::geo::DBox& osm2rdf::osm::Area::envelope() const noexcept {
   return _envelope;
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::area_result_t osm2rdf::osm::Area::geomArea() const noexcept {
-  return _geomArea;
-}
+double osm2rdf::osm::Area::geomArea() const noexcept { return _geomArea; }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::area_result_t osm2rdf::osm::Area::envelopeArea()
-    const noexcept {
+double osm2rdf::osm::Area::envelopeArea() const noexcept {
   return _envelopeArea;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Area::convexHull() const noexcept {
-    return _convexHull;
+const ::util::geo::DPolygon& osm2rdf::osm::Area::convexHull() const noexcept {
+  return _convexHull;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Area::orientedBoundingBox() const noexcept {
+const ::util::geo::DPolygon& osm2rdf::osm::Area::orientedBoundingBox()
+    const noexcept {
   return _obb;
+}
+
+// ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Area::centroid() const noexcept {
+  return ::util::geo::centroid(_geom);
 }
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Area::operator==(
     const osm2rdf::osm::Area& other) const noexcept {
   return _id == other._id && _objId == other._objId &&
-         _hasName == other._hasName && _geomArea == other._geomArea &&
+         _geomArea == other._geomArea &&
          _envelopeArea == other._envelopeArea && _envelope == other._envelope &&
          _geom == other._geom;
 }
@@ -162,10 +148,6 @@ bool osm2rdf::osm::Area::operator!=(
     const osm2rdf::osm::Area& other) const noexcept {
   return !(*this == other);
 }
-
-
-// ____________________________________________________________________________
-bool osm2rdf::osm::Area::hasName() const noexcept { return _hasName; }
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Area::fromWay() const noexcept {

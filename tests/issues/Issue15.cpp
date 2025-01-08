@@ -39,12 +39,11 @@ TEST(Issue15, Relation_8291361_expected) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmrel_8291361.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
+  config.input = "tests/issues/issue15_osmrel_8291361.xml";
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};
@@ -52,7 +51,10 @@ TEST(Issue15, Relation_8291361_expected) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -62,11 +64,11 @@ TEST(Issue15, Relation_8291361_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:2 dumped: 2 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:207 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:207 dumped: 207 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("ways seen:47 dumped: 47 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
@@ -91,16 +93,21 @@ TEST(Issue15, Relation_8291361_failed) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmrel_8291361.xml";
+  config.input = "tests/issues/issue15_osmrel_8291361.xml";
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -110,11 +117,11 @@ TEST(Issue15, Relation_8291361_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:2 dumped: 2 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:207 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:207 dumped: 207 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("ways seen:47 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("ways seen:47 dumped: 47 geometry: 0\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
@@ -139,12 +146,11 @@ TEST(Issue15, Way_201387026_expected) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
-  // Problem in FactHandler::writeBoostGeometry
-  // assert(!boost::geometry::is_empty(geom));
-  // Disabling simplifyWKT to ensure error does not trigger
+  config.input = "tests/issues/issue15_osmway_201387026.xml";
   config.simplifyWKT = 0;
 
   osm2rdf::util::Output output{config, config.output};
@@ -152,7 +158,10 @@ TEST(Issue15, Way_201387026_expected) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -162,7 +171,7 @@ TEST(Issue15, Way_201387026_expected) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1498 dumped: 2 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1498 dumped: 1498 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -171,7 +180,7 @@ TEST(Issue15, Way_201387026_expected) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"MULTIPOLYGON(((1"));
+          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"POLYGON((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -191,16 +200,21 @@ TEST(Issue15, Way_201387026_failed) {
   osm2rdf::config::Config config;
   config.noGeometricRelations = true;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
-  config.input = "../../tests/issues/issue15_osmway_201387026.xml";
+  config.input = "tests/issues/issue15_osmway_201387026.xml";
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -210,7 +224,7 @@ TEST(Issue15, Way_201387026_failed) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1498 dumped: 2 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1498 dumped: 1498 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -219,7 +233,7 @@ TEST(Issue15, Way_201387026_failed) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"MULTIPOLYGON(((1"));
+          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"POLYGON((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

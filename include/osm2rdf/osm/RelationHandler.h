@@ -35,11 +35,15 @@ class RelationHandler : public osmium::handler::Handler {
   osmium::Location get_node_location(const uint64_t nodeId) const;
   std::vector<uint64_t> get_noderefs_of_way(const uint64_t wayId);
 
+ private:
+  std::vector<uint32_t> getCompressedIDs(const osmium::Way& way) const;
+  std::vector<uint64_t> getNodeRefs(const std::vector<uint32_t>& refs) const;
+
  protected:
   osm2rdf::config::Config _config;
   osm2rdf::osm::LocationHandler* _locationHandler = nullptr;
-  std::unordered_map<uint64_t, std::vector<uint64_t>> _ways;
-  std::unordered_map<uint64_t, std::vector<uint64_t>> _relations;
+  std::unordered_map<uint32_t, std::vector<uint32_t>> _ways32;
+  std::unordered_map<uint64_t, std::vector<uint32_t>> _ways64;
   bool _firstPassDone = false;
 };
 }

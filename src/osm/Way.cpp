@@ -17,21 +17,13 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/geometry/Way.h"
-
 #include <vector>
 
-#include "boost/geometry.hpp"
-#include "osm2rdf/geometry/Box.h"
-#include "osm2rdf/geometry/Polygon.h"
 #include "osm2rdf/osm/Box.h"
-#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osm2rdf/osm/Way.h"
 #include "osmium/osm/way.hpp"
-
-using osm2rdf::geometry::Location;
 
 // ____________________________________________________________________________
 osm2rdf::osm::Way::Way() {
@@ -46,9 +38,12 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _user = way.user();
   _version = way.version();
   _visible = way.visible();
-  _tags = osm2rdf::osm::convertTagList(way.tags());
+  _tags = std::move(osm2rdf::osm::convertTagList(way.tags()));
   _nodes.reserve(way.nodes().size());
   _geom.reserve(way.nodes().size());
+
+  auto areaTag = way.tags()["area"];
+  _hasAreaTag = areaTag == nullptr || strcmp(areaTag, "no") != 0;
 
   double lonMin = std::numeric_limits<double>::infinity();
   double latMin = std::numeric_limits<double>::infinity();
@@ -71,15 +66,18 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
 
     _nodes.emplace_back(nodeRef);
 
-    // implicit boost::geometry::unique
-    if (_geom.empty() || (nodeRef.lon() != _geom.back().get<0>() ||
-                          nodeRef.lat() != _geom.back().get<1>())) {
-      boost::geometry::append(_geom, Location{nodeRef.lon(), nodeRef.lat()});
+    if (_geom.empty() || (nodeRef.lon() != _geom.back().getX() ||
+                          nodeRef.lat() != _geom.back().getY())) {
+      _geom.push_back({nodeRef.lon(), nodeRef.lat()});
     }
   }
-  _envelope = osm2rdf::geometry::Box({lonMin, latMin}, {lonMax, latMax});
-  boost::geometry::convex_hull(_geom, _convexHull);
-  _obb = osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
+  _envelope = {{lonMin, latMin}, {lonMax, latMax}};
+}
+
+// ____________________________________________________________________________
+void osm2rdf::osm::Way::finalize() {
+  _convexHull = ::util::geo::convexHull(_geom);
+  _obb = ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
 }
 
 // ____________________________________________________________________________
@@ -116,30 +114,34 @@ const std::vector<osm2rdf::osm::Node>& osm2rdf::osm::Way::nodes()
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Way& osm2rdf::osm::Way::geom() const noexcept {
+const ::util::geo::DLine& osm2rdf::osm::Way::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Box& osm2rdf::osm::Way::envelope() const noexcept {
+const ::util::geo::DBox& osm2rdf::osm::Way::envelope() const noexcept {
   return _envelope;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::convexHull()
-    const noexcept {
+const ::util::geo::DPolygon& osm2rdf::osm::Way::convexHull() const noexcept {
   return _convexHull;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Way::orientedBoundingBox()
+const ::util::geo::DPolygon& osm2rdf::osm::Way::orientedBoundingBox()
     const noexcept {
   return _obb;
 }
 
 // ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Way::centroid() const noexcept {
+  return ::util::geo::centroid(_geom);
+}
+
+// ____________________________________________________________________________
 bool osm2rdf::osm::Way::closed() const noexcept {
-  return boost::geometry::equals(_nodes.front().geom(), _nodes.back().geom());
+  return _nodes.front().geom() == _nodes.back().geom();
 }
 
 // ____________________________________________________________________________
@@ -151,13 +153,7 @@ bool osm2rdf::osm::Way::isArea() const noexcept {
   if (!closed()) {
     return false;
   }
-  const auto& areaTag = _tags.find("area");
-  if (areaTag != _tags.end()) {
-    if (areaTag->second == "no") {
-      return false;
-    }
-  }
-  return true;
+  return _hasAreaTag;
 }
 
 // ____________________________________________________________________________

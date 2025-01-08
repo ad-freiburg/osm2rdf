@@ -18,11 +18,6 @@
 
 #include "osm2rdf/osm/Way.h"
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -53,15 +48,15 @@ TEST(OSM_Way, FromWay) {
   ASSERT_EQ(2, w.nodes().at(1).id());
 
   ASSERT_EQ(2, w.geom().size());
-  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).x());
-  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).y());
-  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).x());
-  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).y());
+  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
+  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).getY());
+  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).getX());
+  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
 
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().min_corner().x());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().min_corner().y());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().max_corner().x());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
+  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
+  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
+  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
+  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -83,24 +78,23 @@ TEST(OSM_Way, FromWayWithTags) {
   ASSERT_FALSE(w.closed());
 
   ASSERT_EQ(1, w.tags().size());
-  ASSERT_EQ(0, w.tags().count("tag"));
-  ASSERT_EQ(1, w.tags().count("city"));
-  ASSERT_STREQ("Freiburg", w.tags().at("city").c_str());
+  ASSERT_EQ("city", w.tags()[0].first);
+  ASSERT_EQ("Freiburg", w.tags()[0].second);
 
   ASSERT_EQ(2, w.nodes().size());
   ASSERT_EQ(1, w.nodes().at(0).id());
   ASSERT_EQ(2, w.nodes().at(1).id());
 
   ASSERT_EQ(2, w.geom().size());
-  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).x());
-  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).y());
-  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).x());
-  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).y());
+  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
+  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).getY());
+  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).getX());
+  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
 
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().min_corner().x());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().min_corner().y());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().max_corner().x());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
+  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
+  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
+  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
+  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -129,17 +123,17 @@ TEST(OSM_Way, FromClosedWay) {
   ASSERT_EQ(1, w.nodes().at(2).id());
 
   ASSERT_EQ(3, w.geom().size());
-  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).x());
-  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).y());
-  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).x());
-  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).y());
-  ASSERT_DOUBLE_EQ(48.0, w.geom().at(2).x());
-  ASSERT_DOUBLE_EQ(7.51, w.geom().at(2).y());
+  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
+  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).getY());
+  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).getX());
+  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
+  ASSERT_DOUBLE_EQ(48.0, w.geom().at(2).getX());
+  ASSERT_DOUBLE_EQ(7.51, w.geom().at(2).getY());
 
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().min_corner().x());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().min_corner().y());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().max_corner().x());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
+  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
+  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
+  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
+  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -172,17 +166,17 @@ TEST(OSM_Way, FromClosedWayWithDuplicateNodes) {
   ASSERT_EQ(1, w.nodes().at(4).id());
 
   ASSERT_EQ(3, w.geom().size());
-  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).x());
-  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).y());
-  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).x());
-  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).y());
-  ASSERT_DOUBLE_EQ(48.0, w.geom().at(2).x());
-  ASSERT_DOUBLE_EQ(7.51, w.geom().at(2).y());
+  ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
+  ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).getY());
+  ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).getX());
+  ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
+  ASSERT_DOUBLE_EQ(48.0, w.geom().at(2).getX());
+  ASSERT_DOUBLE_EQ(7.51, w.geom().at(2).getY());
 
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().min_corner().x());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().min_corner().y());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().max_corner().x());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().max_corner().y());
+  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
+  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
+  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
+  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -241,7 +235,8 @@ TEST(OSM_Way, isAreaTrueForTriangle) {
                            }));
 
   // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+  osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
+  w.finalize();
   ASSERT_TRUE(w.closed());
 
   ASSERT_TRUE(w.isArea());
@@ -359,66 +354,6 @@ TEST(OSM_Way, notEqualsOperator) {
   ASSERT_TRUE(o3 != o1);
   ASSERT_TRUE(o3 != o2);
   ASSERT_FALSE(o3 != o3);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Way, serializationBinary) {
-  std::stringstream boostBuffer;
-
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.51}},
-                               {2, {48.1, 7.61}},
-                           }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};
-
-  osm2rdf::osm::Way dst;
-
-  // Store and load
-  boost::archive::binary_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::binary_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Way, serializationText) {
-  std::stringstream boostBuffer;
-
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(osmiumBuffer, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.51}},
-                               {2, {48.1, 7.61}},
-                           }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way src{osmiumBuffer.get<osmium::Way>(0)};
-
-  osm2rdf::osm::Way dst;
-
-  // Store and load
-  boost::archive::text_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::text_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
 }
 
 }  // namespace osm2rdf::osm

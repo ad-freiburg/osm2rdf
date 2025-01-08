@@ -19,7 +19,6 @@
 
 #include "osm2rdf/config/Config.h"
 
-#include "boost/version.hpp"
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2rdf/config/Constants.h"
@@ -32,7 +31,7 @@ namespace osm2rdf::config {
 void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noFacts);
   ASSERT_FALSE(config.noGeometricRelations);
-  ASSERT_TRUE(config.storeLocationsOnDisk.empty());
+  ASSERT_TRUE(config.storeLocations.empty());
 
   ASSERT_FALSE(config.noAreaFacts);
   ASSERT_FALSE(config.noNodeFacts);
@@ -43,7 +42,6 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noWayGeometricRelations);
 
   ASSERT_FALSE(config.addAreaWayLinestrings);
-  ASSERT_FALSE(config.addWayNodeGeometry);
   ASSERT_FALSE(config.addWayNodeOrder);
   ASSERT_FALSE(config.addWayNodeSpatialMetadata);
   ASSERT_FALSE(config.addWayMetadata);
@@ -51,12 +49,10 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
 
   ASSERT_EQ(0, config.semicolonTagKeys.size());
 
-  ASSERT_FALSE(config.writeDAGDotFiles);
-
   ASSERT_FALSE(config.writeRDFStatistics);
 
   ASSERT_EQ(0, config.simplifyGeometries);
-  ASSERT_EQ(250, config.simplifyWKT);
+  ASSERT_EQ(0, config.simplifyWKT);
   ASSERT_EQ(5, config.wktDeviation);
   ASSERT_EQ(7, config.wktPrecision);
 
@@ -338,53 +334,37 @@ TEST(CONFIG_Config, fromArgsNoFactsLong) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongImplicit) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-
-  const auto arg =
-      "--" + osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("sparse", config.storeLocationsOnDisk);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongSparse) {
+TEST(CONFIG_Config, fromArgsStoreLocationsLongSparse) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg = "--" +
-                   osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG +
+                   osm2rdf::config::constants::STORE_LOCATIONS_LONG +
                    "=sparse";
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("sparse", config.storeLocationsOnDisk);
+  ASSERT_EQ("sparse", config.storeLocations);
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsStoreLocationsOnDiskLongDense) {
+TEST(CONFIG_Config, fromArgsStoreLocationsLongDense) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg = "--" +
-                   osm2rdf::config::constants::STORE_LOCATIONS_ON_DISK_LONG +
+                   osm2rdf::config::constants::STORE_LOCATIONS_LONG +
                    "=dense";
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_EQ("dense", config.storeLocationsOnDisk);
+  ASSERT_EQ("dense", config.storeLocations);
 }
 
 // ____________________________________________________________________________
@@ -595,22 +575,6 @@ TEST(CONFIG_Config, fromArgsAddWayMetadataLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.addWayMetadata);
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, fromArgsAddWayNodeGeomentryLong) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-
-  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
-  const auto arg =
-      "--" + osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_OPTION_LONG;
-  const int argc = 3;
-  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
-                      const_cast<char*>("/tmp/dummyInput")};
-  config.fromArgs(argc, argv);
-  ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.addWayNodeGeometry);
 }
 
 // ____________________________________________________________________________
@@ -910,17 +874,6 @@ TEST(CONFIG_Config, getInfoAddWayMetadata) {
 }
 
 // ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoAddWayNodeGeometry) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  config.addWayNodeGeometry = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::ADD_WAY_NODE_GEOMETRY_INFO));
-}
-
-// ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -1020,17 +973,6 @@ TEST(CONFIG_Config, getInfoWayGeomRelations) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO));
-}
-
-// ____________________________________________________________________________
-TEST(CONFIG_Config, getInfoWriteDAGDotFiles) {
-  osm2rdf::config::Config config;
-  assertDefaultConfig(config);
-  config.writeDAGDotFiles = true;
-
-  const std::string res = config.getInfo("");
-  ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::WRITE_DAG_DOT_FILES_INFO));
 }
 
 // ____________________________________________________________________________

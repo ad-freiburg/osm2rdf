@@ -247,9 +247,7 @@ TEST(TTL_WriterGrammarTTL, RULE_136s_PREFIXEDNAME) {
   ASSERT_EQ("prefix:\\.bc", w.PrefixedName("prefix", ".bc"));
   ASSERT_EQ("prefix:a.c", w.PrefixedName("prefix", "a.c"));
   ASSERT_EQ("prefix:ab\\.", w.PrefixedName("prefix", "ab."));
-  ASSERT_THROW(w.PrefixedName(".refix", ".bc"), std::domain_error);
   ASSERT_EQ("pref.x:\\.bc", w.PrefixedName("pref.x", ".bc"));
-  ASSERT_THROW(w.PrefixedName("prefi.", ".bc"), std::domain_error);
 }
 
 // ____________________________________________________________________________

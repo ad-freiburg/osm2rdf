@@ -16,18 +16,15 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "osm2rdf/osm/Relation.h"
-
 #include <iostream>
 #include <vector>
 
-#include "boost/geometry.hpp"
-#include "boost/version.hpp"
-#include "osm2rdf/osm/Generic.h"
+#include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/relation.hpp"
+#include "util/geo/Geo.h"
 
 // ____________________________________________________________________________
 osm2rdf::osm::Relation::Relation() {
@@ -43,12 +40,16 @@ osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
   _user = relation.user();
   _version = relation.version();
   _visible = relation.visible();
-  _tags = osm2rdf::osm::convertTagList(relation.tags());
+  _tags = std::move(osm2rdf::osm::convertTagList(relation.tags()));
   _members.reserve(relation.cmembers().size());
   for (const auto& member : relation.cmembers()) {
     _members.emplace_back(member);
   }
   _hasCompleteGeometry = false;
+
+  auto typeTag = relation.tags()["type"];
+  _isArea = typeTag != nullptr && (strcmp(typeTag, "multipolygon") == 0 ||
+                                   strcmp(typeTag, "boundary") == 0);
 }
 
 // ____________________________________________________________________________
@@ -87,13 +88,7 @@ const osm2rdf::osm::TagList& osm2rdf::osm::Relation::tags() const noexcept {
 }
 
 // ____________________________________________________________________________
-bool osm2rdf::osm::Relation::isArea() const noexcept {
-  const auto& typeTag = _tags.find("type");
-  if (typeTag != _tags.end()) {
-    return typeTag->second == "multipolygon" || typeTag->second == "boundary";
-  }
-  return false;
-}
+bool osm2rdf::osm::Relation::isArea() const noexcept { return _isArea; }
 
 // ____________________________________________________________________________
 const std::vector<osm2rdf::osm::RelationMember>&
@@ -101,34 +96,36 @@ osm2rdf::osm::Relation::members() const noexcept {
   return _members;
 }
 
-#if BOOST_VERSION >= 107800
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::hasGeometry() const noexcept {
   return !(_geom.empty());
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Relation& osm2rdf::osm::Relation::geom()
-    const noexcept {
+const ::util::geo::DCollection& osm2rdf::osm::Relation::geom() const noexcept {
   return _geom;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Box& osm2rdf::osm::Relation::envelope()
-    const noexcept {
+const ::util::geo::DBox& osm2rdf::osm::Relation::envelope() const noexcept {
   return _envelope;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::convexHull()
+const ::util::geo::DPolygon& osm2rdf::osm::Relation::convexHull()
     const noexcept {
   return _convexHull;
 }
 
 // ____________________________________________________________________________
-const osm2rdf::geometry::Polygon& osm2rdf::osm::Relation::orientedBoundingBox()
+const ::util::geo::DPolygon& osm2rdf::osm::Relation::orientedBoundingBox()
     const noexcept {
   return _obb;
+}
+
+// ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Relation::centroid() const noexcept {
+  return ::util::geo::centroid(_geom);
 }
 
 // ____________________________________________________________________________
@@ -136,56 +133,47 @@ void osm2rdf::osm::Relation::buildGeometry(
     osm2rdf::osm::RelationHandler& relationHandler) {
   _hasCompleteGeometry = true;
   for (const auto& member : _members) {
-    osmium::Location res;
-    osm2rdf::geometry::Way way;
-    std::vector<uint64_t> nodeRefs;
-    switch (member.type()) {
-      case RelationMemberType::WAY:
-        nodeRefs = relationHandler.get_noderefs_of_way(member.id());
-        if (nodeRefs.empty()) {
-          _hasCompleteGeometry = false;
-          break;
-        }
-        for (const auto& nodeRef : nodeRefs) {
-          res = relationHandler.get_node_location(nodeRef);
-          if (res.valid()) {
-            boost::geometry::append(
-                way, osm2rdf::geometry::Node{res.lon(), res.lat()});
-          } else {
-            _hasCompleteGeometry = false;
-          }
-        }
-        boost::geometry::traits::emplace_back<geometry::Relation>::apply(
-            _geom, std::move(way));
-        break;
-      case RelationMemberType::NODE:
-        res = relationHandler.get_node_location(member.id());
+    if (member.type() == RelationMemberType::WAY) {
+      const auto& nodeRefs = relationHandler.get_noderefs_of_way(member.id());
+      if (nodeRefs.empty()) {
+        _hasCompleteGeometry = false;
+      }
+
+      ::util::geo::DLine way;
+      way.reserve(nodeRefs.size());
+      for (const auto& nodeRef : nodeRefs) {
+        const auto& res = relationHandler.get_node_location(nodeRef);
         if (res.valid()) {
-          boost::geometry::traits::emplace_back<geometry::Relation>::apply(
-              _geom, osm2rdf::geometry::Node{res.lon(), res.lat()});
+          way.push_back({res.lon(), res.lat()});
         } else {
           _hasCompleteGeometry = false;
         }
-        break;
-      case RelationMemberType::RELATION:
-        // Mark relations containing relations as incomplete for now.
+      }
+
+      if (way.size() > 0) _geom.push_back(way);
+    } else if (member.type() == RelationMemberType::NODE) {
+      const auto& res = relationHandler.get_node_location(member.id());
+      if (res.valid()) {
+        _geom.push_back(::util::geo::DPoint{res.lon(), res.lat()});
+      } else {
         _hasCompleteGeometry = false;
-        break;
-      default:
-        break;
+      }
+    } else if (member.type() == RelationMemberType::RELATION) {
+      // Mark relations containing relations as incomplete for now.
+      _hasCompleteGeometry = false;
     }
   }
-  if (!_geom.empty()) {
-    boost::geometry::envelope(_geom, _envelope);
-    boost::geometry::convex_hull(_geom, _convexHull);
-    _obb =
-        osm2rdf::osm::generic::orientedBoundingBoxFromConvexHull(_convexHull);
+
+  if (_hasCompleteGeometry && !_geom.empty()) {
+    _envelope = ::util::geo::getBoundingBox(_geom);
+    _convexHull = ::util::geo::convexHull(_geom);
+    _obb = ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
   } else {
-    _envelope.min_corner() = geometry::Location{0, 0};
-    _envelope.max_corner() = geometry::Location{0, 0};
+    _envelope = {{0, 0}, {0, 0}};
+    _convexHull = ::util::geo::convexHull(_envelope);
+    _obb = ::util::geo::convexHull(_envelope);
   }
 }
-#endif  // BOOST_VERSION >= 107800
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
@@ -194,14 +182,8 @@ bool osm2rdf::osm::Relation::hasCompleteGeometry() const noexcept {
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Relation::operator==(const Relation& other) const noexcept {
-  return _id == other._id &&
-#if BOOST_VERSION >= 107800
-         _envelope == other._envelope &&
-#endif  // BOOST_VERSION >= 107800
-         _members == other._members &&
-#if BOOST_VERSION >= 107800
-         _geom == other._geom &&
-#endif  // BOOST_VERSION >= 107800
+  return _id == other._id && _envelope == other._envelope &&
+         _members == other._members && _geom == other._geom &&
          _tags == other._tags;
 }
 

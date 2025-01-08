@@ -20,18 +20,13 @@
 #define OSM2RDF_OSM_TAGLIST_H_
 
 #include <string>
-#include <unordered_map>
+#include <map>
 
-#include "boost/version.hpp"
-#if BOOST_VERSION >= 107400 && BOOST_VERSION < 107500
-#include "boost/serialization/library_version_type.hpp"
-#endif
-#include "boost/serialization/unordered_map.hpp"
 #include "osmium/tags/taglist.hpp"
 
 namespace osm2rdf::osm {
 
-typedef std::unordered_map<std::string, std::string> TagList;
+typedef std::vector<std::pair<std::string, std::string>> TagList;
 
 // Convert an osmium::TagList into a osm2rdf::osm::TagList
 osm2rdf::osm::TagList convertTagList(const osmium::TagList& tagList);

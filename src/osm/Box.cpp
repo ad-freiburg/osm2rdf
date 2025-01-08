@@ -18,27 +18,28 @@
 
 #include "osm2rdf/osm/Box.h"
 
-#include "osm2rdf/geometry/Box.h"
-#include "osm2rdf/geometry/Polygon.h"
-#include "osm2rdf/osm/Generic.h"
-
 // ____________________________________________________________________________
 osm2rdf::osm::Box::Box() = default;
 
 // ____________________________________________________________________________
-osm2rdf::osm::Box::Box(const osm2rdf::geometry::Box& box) : _geom(box) {}
+osm2rdf::osm::Box::Box(const ::util::geo::DBox& box) : _geom(box) {}
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Box osm2rdf::osm::Box::geom() const { return _geom; }
+const ::util::geo::DBox osm2rdf::osm::Box::geom() const { return _geom; }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Polygon osm2rdf::osm::Box::convexHull() const noexcept {
-  return osm2rdf::osm::generic::boxToPolygon(_geom);
+const ::util::geo::DPolygon osm2rdf::osm::Box::convexHull() const noexcept {
+  return ::util::geo::convexHull(_geom);
 }
 
 // ____________________________________________________________________________
-osm2rdf::geometry::Polygon osm2rdf::osm::Box::orientedBoundingBox() const noexcept {
+const ::util::geo::DPolygon osm2rdf::osm::Box::orientedBoundingBox() const noexcept {
     return convexHull();
+}
+
+// ____________________________________________________________________________
+const ::util::geo::DPoint osm2rdf::osm::Box::centroid() const noexcept {
+  return ::util::geo::centroid(_geom);
 }
 
 // ____________________________________________________________________________

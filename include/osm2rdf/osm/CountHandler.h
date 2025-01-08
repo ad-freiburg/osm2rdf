@@ -26,6 +26,7 @@ namespace osm2rdf::osm {
 
 class CountHandler : public osmium::handler::Handler {
  public:
+  CountHandler(const osm2rdf::config::Config& config) : _config(config) {};
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
   void way(const osmium::Way& way);
@@ -35,11 +36,18 @@ class CountHandler : public osmium::handler::Handler {
   size_t numRelations() const;
   size_t numWays() const;
 
+  size_t minNodeId() const { return _minId; };
+  size_t maxNodeId() const { return _maxId; };
+
  protected:
   size_t _numNodes = 0;
   size_t _numRelations = 0;
   size_t _numWays = 0;
   bool _firstPassDone = false;
+  size_t _minId = std::numeric_limits<size_t>::max();
+  size_t _maxId = 0;
+
+  osm2rdf::config::Config _config;
 };
 }
 

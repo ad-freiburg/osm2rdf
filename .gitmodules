@@ -14,3 +14,6 @@
 [submodule "vendor/google/benchmark"]
 	path = vendor/google/benchmark
 	url = https://github.com/google/benchmark.git
+[submodule "vendor/spatialjoin"]
+	path = vendor/spatialjoin
+	url = https://github.com/ad-freiburg/spatialjoin.git

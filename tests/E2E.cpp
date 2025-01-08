@@ -54,7 +54,9 @@ TEST(E2E, singleNode) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -74,7 +76,10 @@ TEST(E2E, singleNode) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -84,7 +89,7 @@ TEST(E2E, singleNode) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:1 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -119,7 +124,9 @@ TEST(E2E, singleNodeWithTags) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -150,7 +157,10 @@ TEST(E2E, singleNodeWithTags) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -235,7 +245,9 @@ TEST(E2E, singleWayWithTagsAndNodes) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -266,7 +278,10 @@ TEST(E2E, singleWayWithTagsAndNodes) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -338,7 +353,9 @@ TEST(E2E, osmWikiExample) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
   // Create empty input file
@@ -385,7 +402,10 @@ TEST(E2E, osmWikiExample) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -395,7 +415,7 @@ TEST(E2E, osmWikiExample) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:4 dumped: 1 geometry: 1\n"));
+              ::testing::HasSubstr("nodes seen:4 dumped: 4 geometry: 4\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
   ASSERT_THAT(printedState,
@@ -432,7 +452,9 @@ TEST(E2E, building51NT) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -441,9 +463,9 @@ TEST(E2E, building51NT) {
   std::ofstream inputFile(config.input);
 
   std::vector<std::filesystem::path> nodes =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "n");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "n");
   std::vector<std::filesystem::path> ways =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "w");
   std::sort(nodes.begin(), nodes.end(),
             [](const auto& a, const auto& b) -> bool {
               return a.filename().string() < b.filename().string();
@@ -467,8 +489,12 @@ TEST(E2E, building51NT) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::NT> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::NT> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -477,14 +503,11 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:19 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:19 dumped: 19 geometry: 19\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
-  ASSERT_THAT(
-      printedState,
-      ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(
       printedData,
@@ -548,11 +571,11 @@ TEST(E2E, building51NT) {
       printedData,
       ::testing::HasSubstr(
           "<https://osm2rdf.cs.uni-freiburg.de/rdf/geom#osm_wayarea_98284318> "
-          "<http://www.opengis.net/ont/geosparql#asWKT> \"MULTIPOLYGON(((7"));
+          "<http://www.opengis.net/ont/geosparql#asWKT> \"POLYGON((7"));
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "0)))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
+          "))\"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
@@ -561,7 +584,7 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#sfContains> "
+                  "<http://www.opengis.net/rdf#sfCovers> "
                   "<https://www.openstreetmap.org/node/2110601105> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
@@ -571,7 +594,7 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#sfContains> "
+                  "<http://www.opengis.net/rdf#sfCovers> "
                   "<https://www.openstreetmap.org/node/2110601134> .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
@@ -581,7 +604,7 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "<https://www.openstreetmap.org/way/98284318> "
-                  "<http://www.opengis.net/rdf#sfContains> "
+                  "<http://www.opengis.net/rdf#sfCovers> "
                   "<https://www.openstreetmap.org/node/5190342871> .\n"));
 
   // Reset std::cerr and std::cout
@@ -602,7 +625,9 @@ TEST(E2E, building51TTL) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -611,9 +636,9 @@ TEST(E2E, building51TTL) {
   std::ofstream inputFile(config.input);
 
   std::vector<std::filesystem::path> nodes =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "n");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "n");
   std::vector<std::filesystem::path> ways =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "w");
   std::sort(nodes.begin(), nodes.end(),
             [](const auto& a, const auto& b) -> bool {
               return a.filename().string() < b.filename().string();
@@ -637,8 +662,12 @@ TEST(E2E, building51TTL) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::TTL> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::TTL> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -647,14 +676,11 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:19 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:19 dumped: 19 geometry: 19\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
-  ASSERT_THAT(
-      printedState,
-      ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
@@ -696,26 +722,26 @@ TEST(E2E, building51TTL) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -735,7 +761,9 @@ TEST(E2E, building51QLEVER) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -744,9 +772,9 @@ TEST(E2E, building51QLEVER) {
   std::ofstream inputFile(config.input);
 
   std::vector<std::filesystem::path> nodes =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "n");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "n");
   std::vector<std::filesystem::path> ways =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "w");
   std::sort(nodes.begin(), nodes.end(),
             [](const auto& a, const auto& b) -> bool {
               return a.filename().string() < b.filename().string();
@@ -770,8 +798,12 @@ TEST(E2E, building51QLEVER) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -780,14 +812,11 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:19 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:19 dumped: 19 geometry: 19\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
-  ASSERT_THAT(
-      printedState,
-      ::testing::HasSubstr("Contains relations for 3 nodes in 1 areas ...\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
@@ -829,26 +858,26 @@ TEST(E2E, building51QLEVER) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
-  ASSERT_THAT(printedData, ::testing::HasSubstr("0)))\"^^geo:wktLiteral .\n"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
+  ASSERT_THAT(printedData, ::testing::HasSubstr("))\"^^geo:wktLiteral .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -868,7 +897,9 @@ TEST(E2E, tf) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -877,9 +908,9 @@ TEST(E2E, tf) {
   std::ofstream inputFile(config.input);
 
   std::vector<std::filesystem::path> nodes =
-      getFilesWithPrefixFromPath("../../tests/e2e/tf", "n");
+      getFilesWithPrefixFromPath("tests/e2e/tf", "n");
   std::vector<std::filesystem::path> ways =
-      getFilesWithPrefixFromPath("../../tests/e2e/tf", "w");
+      getFilesWithPrefixFromPath("tests/e2e/tf", "w");
   std::sort(nodes.begin(), nodes.end(),
             [](const auto& a, const auto& b) -> bool {
               return a.filename().string() < b.filename().string();
@@ -903,7 +934,10 @@ TEST(E2E, tf) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
 
   output.flush();
@@ -913,16 +947,11 @@ TEST(E2E, tf) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:45 dumped: 0 geometry: 0\n"));
+              ::testing::HasSubstr("nodes seen:45 dumped: 45 geometry: 45\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr(
-                  "Skipping contains relation for nodes ... no nodes\n"));
-  ASSERT_THAT(printedState,
-              ::testing::HasSubstr("decided 0 (0.000%) by DAG\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
@@ -943,7 +972,7 @@ TEST(E2E, tf) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"POLYGON((7"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -953,6 +982,7 @@ TEST(E2E, tf) {
 
 // ____________________________________________________________________________
 TEST(E2E, building51inTF) {
+
   // Capture std::cerr and std::cout
   std::stringstream cerrBuffer;
   std::stringstream coutBuffer;
@@ -963,7 +993,9 @@ TEST(E2E, building51inTF) {
 
   osm2rdf::config::Config config;
   config.output = "";
-  config.outputCompress = false;
+  config.numThreads = 1;  // set to one to avoid concurrency issues with the
+                          // stringstream read buffer
+  config.outputCompress = osm2rdf::config::NONE;
   config.addAreaWayLinestrings = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
 
@@ -972,12 +1004,12 @@ TEST(E2E, building51inTF) {
   std::ofstream inputFile(config.input);
 
   std::vector<std::filesystem::path> nodes =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "n");
-  const auto& tempNodes = getFilesWithPrefixFromPath("../../tests/e2e/tf", "n");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "n");
+  const auto& tempNodes = getFilesWithPrefixFromPath("tests/e2e/tf", "n");
   nodes.insert(nodes.end(), tempNodes.begin(), tempNodes.end());
   std::vector<std::filesystem::path> ways =
-      getFilesWithPrefixFromPath("../../tests/e2e/building_51", "w");
-  const auto& tempWays = getFilesWithPrefixFromPath("../../tests/e2e/tf", "w");
+      getFilesWithPrefixFromPath("tests/e2e/building_51", "w");
+  const auto& tempWays = getFilesWithPrefixFromPath("tests/e2e/tf", "w");
   ways.insert(ways.end(), tempWays.begin(), tempWays.end());
   std::sort(nodes.begin(), nodes.end(),
             [](const auto& a, const auto& b) -> bool {
@@ -1002,8 +1034,12 @@ TEST(E2E, building51inTF) {
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
+  osm2rdf::osm::FactHandler<osm2rdf::ttl::format::QLEVER> factHandler(config, &writer);
+  osm2rdf::osm::GeometryHandler<osm2rdf::ttl::format::QLEVER> geomHandler(config, &writer);
+
+  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler, &geomHandler};
   osmiumHandler.handle();
+  geomHandler.calculateRelations();
 
   output.flush();
   output.close();
@@ -1012,17 +1048,11 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("areas seen:2 dumped: 2 geometry: 2\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("nodes seen:64 dumped: 3 geometry: 3\n"));
+              ::testing::HasSubstr("nodes seen:64 dumped: 64 geometry: 64\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("relations seen:0 dumped: 0 geometry: 0\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:2 dumped: 2 geometry: 2\n"));
-  ASSERT_THAT(
-      printedState,
-      ::testing::HasSubstr("Contains relations for 3 nodes in 2 areas ...\n"));
-  ASSERT_THAT(
-      printedState,
-      ::testing::HasSubstr("Contains relations for 2 ways in 2 areas ...\n"));
   const auto printedData = coutBuffer.str();
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:98284318 rdf:type osm:way .\n"));
@@ -1063,7 +1093,7 @@ TEST(E2E, building51inTF) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"MULTIPOLYGON(((7"));
+          "osm2rdfgeom:osm_wayarea_98284318 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmway:4498466 rdf:type osm:way .\n"));
   ASSERT_THAT(printedData,
@@ -1080,10 +1110,10 @@ TEST(E2E, building51inTF) {
                                "osmway:4498466 osmkey:wheelchair \"yes\" .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"MULTIPOLYGON(((7"));
+                  "osm2rdfgeom:osm_wayarea_4498466 geo:asWKT \"POLYGON((7"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:4498466 ogc:sfContains osmway:98284318 .\n"));
+                  "osmway:4498466 ogc:sfCovers osmway:98284318 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:4498466 ogc:sfIntersects osmway:98284318 .\n"));
@@ -1092,19 +1122,19 @@ TEST(E2E, building51inTF) {
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:2110601105 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:2110601105 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:2110601134 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:2110601134 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
                   "osmway:98284318 ogc:sfIntersects osmnode:5190342871 .\n"));
   ASSERT_THAT(printedData,
               ::testing::HasSubstr(
-                  "osmway:98284318 ogc:sfContains osmnode:5190342871 .\n"));
+                  "osmway:98284318 ogc:sfCovers osmnode:5190342871 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

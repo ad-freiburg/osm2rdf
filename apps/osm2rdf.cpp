@@ -28,6 +28,11 @@
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/Ram.h"
 #include "osm2rdf/util/Time.h"
+#include "osmium/util/memory.hpp"
+
+#if defined(_OPENMP)
+#include "omp.h"
+#endif
 
 // ____________________________________________________________________________
 template <typename T>
@@ -42,8 +47,28 @@ void run(const osm2rdf::config::Config& config) {
   osm2rdf::ttl::Writer<T> writer{config, &output};
   writer.writeHeader();
 
-  osm2rdf::osm::OsmiumHandler osmiumHandler{config, &writer};
-  osmiumHandler.handle();
+  osm2rdf::osm::GeometryHandler<T> geomHandler(config, &writer);
+
+  {
+    osm2rdf::osm::FactHandler<T> factHandler(config, &writer);
+
+    osm2rdf::osm::OsmiumHandler osmiumHandler{config, &factHandler,
+                                              &geomHandler};
+    osmiumHandler.handle();
+  }
+
+  if (!config.noGeometricRelations) {
+    std::cerr << std::endl;
+    std::cerr << osm2rdf::util::currentTimeFormatted()
+              << "Calculating geometric relations ..." << std::endl;
+    geomHandler.calculateRelations();
+    std::cerr << osm2rdf::util::currentTimeFormatted() << "... done"
+              << std::endl;
+  }
+
+  osmium::MemoryUsage memory;
+  std::cerr << osm2rdf::util::formattedTimeSpacer
+            << "Memory used: " << memory.peak() << " MBytes" << std::endl;
 
   // All work done, close output
   output.close();
@@ -70,6 +95,10 @@ int main(int argc, char** argv) {
             << osm2rdf::util::ram::physPages() /
                    (osm2rdf::util::ram::GIGA * 1.0)
             << "G" << std::endl;
+
+#if defined(_OPENMP)
+  omp_set_num_threads(config.numThreads);
+#endif
 
   try {
     if (config.outputFormat == "qlever") {

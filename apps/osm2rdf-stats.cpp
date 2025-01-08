@@ -64,7 +64,7 @@ class OsmiumIdHandler : public osmium::handler::Handler {
       osmium::io::ReaderWithProgressBar reader{true, input_file,
                                                osmium::osm_entity_bits::object};
       osm2rdf::osm::LocationHandler* locationHandler =
-          osm2rdf::osm::LocationHandler::create(_config);
+          osm2rdf::osm::LocationHandler::create(_config, 0, 0);
       while (true) {
         osmium::memory::Buffer buf = reader.read();
         if (!buf) {

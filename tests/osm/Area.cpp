@@ -18,11 +18,6 @@
 
 #include "osm2rdf/osm/Area.h"
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 #include "gtest/gtest.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -51,10 +46,10 @@ TEST(OSM_Area, FromAreaVirtualWay) {
   ASSERT_EQ(21, a.objId());
   ASSERT_TRUE(a.fromWay());
   ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
-  ASSERT_NEAR(48.0, a.envelope().min_corner().x(), 0.01);
-  ASSERT_NEAR(7.51, a.envelope().min_corner().y(), 0.01);
-  ASSERT_NEAR(48.1, a.envelope().max_corner().x(), 0.01);
-  ASSERT_NEAR(7.61, a.envelope().max_corner().y(), 0.01);
+  ASSERT_NEAR(48.0, a.envelope().getLowerLeft().getX(), 0.01);
+  ASSERT_NEAR(7.51, a.envelope().getLowerLeft().getY(), 0.01);
+  ASSERT_NEAR(48.1, a.envelope().getUpperRight().getX(), 0.01);
+  ASSERT_NEAR(7.61, a.envelope().getUpperRight().getY(), 0.01);
 }
 
 // ____________________________________________________________________________
@@ -79,10 +74,10 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
   ASSERT_EQ(21, a.objId());
   ASSERT_FALSE(a.fromWay());
   ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
-  ASSERT_NEAR(48.0, a.envelope().min_corner().x(), 0.01);
-  ASSERT_NEAR(7.51, a.envelope().min_corner().y(), 0.01);
-  ASSERT_NEAR(48.1, a.envelope().max_corner().x(), 0.01);
-  ASSERT_NEAR(7.61, a.envelope().max_corner().y(), 0.01);
+  ASSERT_NEAR(48.0, a.envelope().getLowerLeft().getX(), 0.01);
+  ASSERT_NEAR(7.51, a.envelope().getLowerLeft().getY(), 0.01);
+  ASSERT_NEAR(48.1, a.envelope().getUpperRight().getX(), 0.01);
+  ASSERT_NEAR(7.61, a.envelope().getUpperRight().getY(), 0.01);
 }
 
 // ____________________________________________________________________________
@@ -110,10 +105,10 @@ TEST(OSM_Area, BoundaryWithAdminLevel) {
   ASSERT_EQ(21, a.objId());
   ASSERT_FALSE(a.fromWay());
   ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
-  ASSERT_NEAR(48.0, a.envelope().min_corner().x(), 0.01);
-  ASSERT_NEAR(7.51, a.envelope().min_corner().y(), 0.01);
-  ASSERT_NEAR(48.1, a.envelope().max_corner().x(), 0.01);
-  ASSERT_NEAR(7.61, a.envelope().max_corner().y(), 0.01);
+  ASSERT_NEAR(48.0, a.envelope().getLowerLeft().getX(), 0.01);
+  ASSERT_NEAR(7.51, a.envelope().getLowerLeft().getY(), 0.01);
+  ASSERT_NEAR(48.1, a.envelope().getUpperRight().getX(), 0.01);
+  ASSERT_NEAR(7.61, a.envelope().getUpperRight().getY(), 0.01);
 }
 
 // ____________________________________________________________________________
@@ -214,70 +209,6 @@ TEST(OSM_Area, notEqualsOperator) {
   ASSERT_TRUE(o3 != o1);
   ASSERT_TRUE(o3 != o2);
   ASSERT_FALSE(o3 != o3);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Area, serializationBinary) {
-  std::stringstream boostBuffer;
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.61}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area src{osmiumBuffer.get<osmium::Area>(0)};
-
-  osm2rdf::osm::Area dst;
-
-  // Store and load
-  boost::archive::binary_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::binary_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Area, serializationText) {
-  std::stringstream boostBuffer;
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
-                                      osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_area(osmiumBuffer, osmium::builder::attr::_id(42),
-                            osmium::builder::attr::_outer_ring({
-                                {1, {48.0, 7.51}},
-                                {2, {48.0, 7.61}},
-                                {3, {48.1, 7.61}},
-                                {4, {48.1, 7.51}},
-                                {1, {48.0, 7.51}},
-                            }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Area src{osmiumBuffer.get<osmium::Area>(0)};
-
-  osm2rdf::osm::Area dst;
-
-  // Store and load
-  boost::archive::text_oarchive oa(boostBuffer);
-  oa << src;
-  // std::cerr << boostBuffer.str() << std::endl;
-  boost::archive::text_iarchive ia(boostBuffer);
-  ia >> dst;
-
-  // Compare
-  ASSERT_TRUE(src == dst);
 }
 
 }  // namespace osm2rdf::osm

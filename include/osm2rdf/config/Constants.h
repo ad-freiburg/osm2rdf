@@ -26,6 +26,7 @@
 namespace osm2rdf::config::constants {
 
 const static inline std::string BZIP2_EXTENSION = ".bz2";
+const static inline std::string GZ_EXTENSION = ".gz";
 const static inline std::string STATS_EXTENSION = ".stats";
 const static inline std::string CONTAINS_STATS_EXTENSION = ".contains-stats";
 const static inline std::string JSON_EXTENSION = ".json";
@@ -75,40 +76,30 @@ const static inline std::string OUTPUT_KEEP_FILES_OPTION_HELP =
 const static inline std::string OUTPUT_KEEP_FILES_OPTION_INFO =
     "Keeping temporary output files";
 
-const static inline std::string OUTPUT_NO_COMPRESS_OPTION_SHORT = "";
-const static inline std::string OUTPUT_NO_COMPRESS_OPTION_LONG =
-    "output-no-compress";
-const static inline std::string OUTPUT_NO_COMPRESS_OPTION_HELP =
-    "Do not compress output";
+const static inline std::string OUTPUT_COMPRESS_OPTION_SHORT = "";
+const static inline std::string OUTPUT_COMPRESS_OPTION_LONG =
+    "output-compression";
+const static inline std::string OUTPUT_COMPRESS_OPTION_HELP =
+    "Output file compression, valid values: none, bz2, gz";
 
-const static inline std::string STORE_LOCATIONS_ON_DISK_INFO =
-    "Storing locations osmium locations on disk:";
-const static inline std::string STORE_LOCATIONS_ON_DISK_SHORT = "";
-const static inline std::string STORE_LOCATIONS_ON_DISK_LONG =
-    "store-locations-on-disk";
-const static inline std::string STORE_LOCATIONS_ON_DISK_HELP =
-    "Store locations on disk, optional valid values: sparse (default), dense";
+const static inline std::string STORE_LOCATIONS_INFO =
+    "Storing locations osmium locations:";
+const static inline std::string STORE_LOCATIONS_SHORT = "";
+const static inline std::string STORE_LOCATIONS_LONG = "store-locations";
+const static inline std::string STORE_LOCATIONS_HELP =
+    "Method used to store locations, valid values: mem-flex (default), "
+    "mem-dense, disk-sparse, disk-dense ";
 
 const static inline std::string NO_FACTS_INFO = "Not dumping facts";
 const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
 const static inline std::string NO_FACTS_OPTION_HELP = "Do not dump facts";
 
-const static inline std::string SOURCE_DATASET_INFO =
-    "Source dataset";
+const static inline std::string SOURCE_DATASET_INFO = "Source dataset";
 const static inline std::string SOURCE_DATASET_OPTION_SHORT = "";
-const static inline std::string SOURCE_DATASET_OPTION_LONG =
-    "source-dataset";
+const static inline std::string SOURCE_DATASET_OPTION_LONG = "source-dataset";
 const static inline std::string SOURCE_DATASET_OPTION_HELP =
     "Source dataset, either 'OSM', or 'OHM'";
-
-const static inline std::string OSM2RDF_GEO_TRIPLES_INFO =
-    "Writing mode of osm2rdf-style geometric triples";
-const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_SHORT = "";
-const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_LONG =
-    "write-osm2rdf-geo-triples";
-const static inline std::string OSM2RDF_GEO_TRIPLES_OPTION_HELP =
-    "Writing of osm2rdf-style geometric triples, either 'full', 'reduced', or 'none'";
 
 const static inline std::string OGC_GEO_TRIPLES_INFO =
     "Writing mode of OGC-style geometric triples";
@@ -116,7 +107,7 @@ const static inline std::string OGC_GEO_TRIPLES_OPTION_SHORT = "";
 const static inline std::string OGC_GEO_TRIPLES_OPTION_LONG =
     "write-ogc-geo-triples";
 const static inline std::string OGC_GEO_TRIPLES_OPTION_HELP =
-    "Writing of OGC-style geometric triples, either 'full', 'reduced', or 'none'";
+    "Writing of OGC-style geometric triples, either 'full', or 'none'";
 
 const static inline std::string NO_AREA_OPTION_SHORT = "";
 const static inline std::string NO_AREA_OPTION_LONG = "no-areas";
@@ -184,6 +175,38 @@ const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump way geometric relations";
 
+const static inline std::string NO_UNTAGGED_NODES_INFO =
+    "Do not output untagged nodes";
+const static inline std::string NO_UNTAGGED_NODES_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_NODES_OPTION_LONG =
+    "no-untagged-nodes";
+const static inline std::string NO_UNTAGGED_NODES_OPTION_HELP =
+    "Do not output untagged nodes";
+
+const static inline std::string NO_UNTAGGED_WAYS_INFO =
+    "Do not output untagged ways";
+const static inline std::string NO_UNTAGGED_WAYS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_WAYS_OPTION_LONG =
+    "no-untagged-ways";
+const static inline std::string NO_UNTAGGED_WAYS_OPTION_HELP =
+    "Do not output untagged ways";
+
+const static inline std::string NO_UNTAGGED_RELATIONS_INFO =
+    "Do not output untagged relations";
+const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_LONG =
+    "no-untagged-relations";
+const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_HELP =
+    "Do not output untagged relations";
+
+const static inline std::string NO_UNTAGGED_AREAS_INFO =
+    "Do not output untagged areas";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_LONG =
+    "no-untagged-areas";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_HELP =
+    "Do not output untagged areas";
+
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_INFO =
     "Adding linestrings for ways which form areas";
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_SHORT = "";
@@ -192,20 +215,19 @@ const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_LONG =
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_HELP =
     "Add linestrings for ways which form areas";
 
+const static inline std::string NO_ADD_CENTROIDS_INFO =
+    "Do not add centroid information";
+const static inline std::string NO_ADD_CENTROIDS_OPTION_SHORT = "";
+const static inline std::string NO_ADD_CENTROIDS_OPTION_LONG = "no-hascentroid";
+const static inline std::string NO_ADD_CENTROIDS_OPTION_HELP =
+    "Don't add geo:hasCentroid triples";
+
 const static inline std::string ADD_WAY_METADATA_INFO = "Adding way metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_SHORT = "";
 const static inline std::string ADD_WAY_METADATA_OPTION_LONG =
     "add-way-metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_HELP =
     "Add information about the way structure";
-
-const static inline std::string ADD_WAY_NODE_GEOMETRY_INFO =
-    "Adding way member geometries";
-const static inline std::string ADD_WAY_NODE_GEOMETRY_OPTION_SHORT = "";
-const static inline std::string ADD_WAY_NODE_GEOMETRY_OPTION_LONG =
-    "add-way-node-geometry";
-const static inline std::string ADD_WAY_NODE_GEOMETRY_OPTION_HELP =
-    "Add explicit geometry for every node member";
 
 const static inline std::string ADD_WAY_NODE_ORDER_INFO =
     "Adding way node order";
@@ -255,24 +277,6 @@ const static inline std::string DONT_USE_INNER_OUTER_GEOMETRIES_OPTION_HELP =
     "Don't use inner/outer simplified geometries of areas for contains "
     "relation.";
 
-const static inline std::string APPROX_SPATIAL_REL_INFO =
-    "Approximate spatial relations using inner/outer simplified geometries.";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_SHORT =
-    "";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_LONG =
-    "approximate-spatial-relations";
-const static inline std::string APPROX_SPATIAL_REL_OPTION_HELP = "Use "
-    "simplified inner/outer geometries for approximate calculation of spatial "
-    "relations";
-
-const static inline std::string APPROX_CONTAINS_SLACK_INFO =
-    "Slack for approximate contains";
-const static inline std::string APPROX_CONTAINS_SLACK_OPTION_SHORT =
-    "";
-const static inline std::string APPROX_CONTAINS_SLACK_OPTION_LONG =
-    "approximate-contains-slack";
-const static inline std::string APPROX_CONTAINS_SLACK_OPTION_HELP = "";
-
 const static inline std::string SIMPLIFY_WKT_INFO = "Simplifying WKT";
 const static inline std::string SIMPLIFY_WKT_OPTION_SHORT = "s";
 const static inline std::string SIMPLIFY_WKT_OPTION_LONG = "simplify-wkt";
@@ -302,20 +306,25 @@ const static inline std::string SEMICOLON_TAG_KEYS_OPTION_LONG =
     "split-tag-key-by-semicolon";
 const static inline std::string SEMICOLON_TAG_KEYS_OPTION_HELP = "";
 
+const static inline std::string AUX_GEO_FILES_INFO =
+    "Auxiliary geo files for computing spatial relations";
+const static inline std::string AUX_GEO_FILES_OPTION_SHORT = "";
+const static inline std::string AUX_GEO_FILES_OPTION_LONG = "aux-geo-files";
+const static inline std::string AUX_GEO_FILES_OPTION_HELP =
+    "Auxiliary geo files for computing spatial relations";
+
+const static inline std::string NUM_THREADS_INFO = "Number of threads to use";
+const static inline std::string NUM_THREADS_OPTION_SHORT = "";
+const static inline std::string NUM_THREADS_OPTION_LONG = "num-threads";
+const static inline std::string NUM_THREADS_OPTION_HELP =
+    "Number of threads to use";
+
 const static inline std::string WKT_PRECISION_INFO =
     "Dumping WKT with precision: ";
 const static inline std::string WKT_PRECISION_OPTION_SHORT = "";
 const static inline std::string WKT_PRECISION_OPTION_LONG = "wkt-precision";
 const static inline std::string WKT_PRECISION_OPTION_HELP =
     "Precision (number of decimal digits) for WKT coordinates";
-
-const static inline std::string WRITE_DAG_DOT_FILES_INFO =
-    "Storing DAG states as .dot files";
-const static inline std::string WRITE_DAG_DOT_FILES_OPTION_SHORT = "";
-const static inline std::string WRITE_DAG_DOT_FILES_OPTION_LONG =
-    "write-dag-dot-files";
-const static inline std::string WRITE_DAG_DOT_FILES_OPTION_HELP =
-    "Writes .dot files for DAG states";
 
 const static inline std::string WRITE_RDF_STATISTICS_INFO =
     "Storing RDF statistics as .stats.json";
