@@ -528,7 +528,8 @@ TEST(OSM_FactHandler, way) {
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\n"
-      "osmway:42 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\n"
+      "osmway:42 osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 "
+      "7.6,48 7.5))\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 "
       "7.5,48.1 7.6))\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n",
