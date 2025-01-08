@@ -390,17 +390,22 @@ template <typename W>
 template <typename T>
 void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
                                              const T& object) {
-  _writer->writeTriple(
-      subj, IRI__OSMMETA_CHANGESET,
-      _writer->generateLiteralUnsafe(std::to_string(object.changeset()),
-                               "^^" + IRI__XSD_INTEGER));
-  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, object.timestamp());
-  _writer->writeTriple(subj, IRI__OSMMETA_USER,
-                       _writer->generateLiteral(object.user(), ""));
+  if (object.changeset() != 0) {
+    _writer->writeTriple(
+        subj, IRI__OSMMETA_CHANGESET,
+        _writer->generateLiteralUnsafe(std::to_string(object.changeset()),
+                                 "^^" + IRI__XSD_INTEGER));
+  }
+    if (!object.user().empty()) {
+    writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, object.timestamp());
+    _writer->writeTriple(subj, IRI__OSMMETA_USER,
+                         _writer->generateLiteral(object.user(), ""));
+  }
   _writer->writeTriple(
       subj, IRI__OSMMETA_VERSION,
       _writer->generateLiteralUnsafe(std::to_string(object.version()),
                                "^^" + IRI__XSD_INTEGER));
+
   _writer->writeTriple(subj, IRI__OSMMETA_VISIBLE,
                        object.visible() ? osm2rdf::ttl::constants::LITERAL__YES
                                         : osm2rdf::ttl::constants::LITERAL__NO);
