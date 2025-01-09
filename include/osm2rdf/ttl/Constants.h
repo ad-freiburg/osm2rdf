@@ -96,11 +96,12 @@ inline std::string IRI__XSD_DECIMAL;
 inline std::string IRI__XSD_DOUBLE;
 inline std::string IRI__XSD_FLOAT;
 inline std::string IRI__XSD_INTEGER;
+inline std::string IRI__XSD_BOOLEAN;
 inline std::string IRI__XSD_YEAR;
 inline std::string IRI__XSD_YEAR_MONTH;
 
-inline std::string LITERAL__NO;
-inline std::string LITERAL__YES;
+inline std::string LITERAL__FALSE;
+inline std::string LITERAL__TRUE;
 
 // Arrays holding values depending on the used dataset
 const static inline std::vector<std::string> DATASET_ID = {"osm", "ohm"};

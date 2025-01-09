@@ -69,8 +69,8 @@ using osm2rdf::ttl::constants::IRI__XSD_DOUBLE;
 using osm2rdf::ttl::constants::IRI__XSD_INTEGER;
 using osm2rdf::ttl::constants::IRI__XSD_YEAR;
 using osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH;
-using osm2rdf::ttl::constants::LITERAL__NO;
-using osm2rdf::ttl::constants::LITERAL__YES;
+using osm2rdf::ttl::constants::LITERAL__FALSE;
+using osm2rdf::ttl::constants::LITERAL__TRUE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META;
@@ -242,8 +242,9 @@ void osm2rdf::osm::FactHandler<W>::relation(
     _writer->writeTriple(
         subj,
         _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "completeGeometry"),
-        relation.hasCompleteGeometry() ? osm2rdf::ttl::constants::LITERAL__YES
-                                       : osm2rdf::ttl::constants::LITERAL__NO);
+        relation.hasCompleteGeometry()
+            ? osm2rdf::ttl::constants::LITERAL__TRUE
+            : osm2rdf::ttl::constants::LITERAL__FALSE);
   }
 }
 
@@ -333,7 +334,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
   if (_config.addWayMetadata) {
     _writer->writeTriple(subj, IRI__OSMWAY_IS_CLOSED,
-                         way.closed() ? LITERAL__YES : LITERAL__NO);
+                         way.closed() ? LITERAL__TRUE : LITERAL__FALSE);
     _writer->writeLiteralTripleUnsafe(subj, IRI__OSMWAY_NODE_COUNT,
                                       std::to_string(way.nodes().size()),
                                       "^^" + IRI__XSD_INTEGER);
@@ -390,25 +391,34 @@ template <typename W>
 template <typename T>
 void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
                                              const T& object) {
+  // avoid writing empty changeset IDs, drop entire triple
   if (object.changeset() != 0) {
     _writer->writeTriple(
         subj, IRI__OSMMETA_CHANGESET,
         _writer->generateLiteralUnsafe(std::to_string(object.changeset()),
-                                 "^^" + IRI__XSD_INTEGER));
+                                       "^^" + IRI__XSD_INTEGER));
   }
-    if (!object.user().empty()) {
-    writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, object.timestamp());
+
+  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, object.timestamp());
+
+  // avoid writing empty users, drop entire triple
+  if (!object.user().empty()) {
     _writer->writeTriple(subj, IRI__OSMMETA_USER,
                          _writer->generateLiteral(object.user(), ""));
   }
+
   _writer->writeTriple(
       subj, IRI__OSMMETA_VERSION,
       _writer->generateLiteralUnsafe(std::to_string(object.version()),
-                               "^^" + IRI__XSD_INTEGER));
+                                     "^^" + IRI__XSD_INTEGER));
 
-  _writer->writeTriple(subj, IRI__OSMMETA_VISIBLE,
-                       object.visible() ? osm2rdf::ttl::constants::LITERAL__YES
-                                        : osm2rdf::ttl::constants::LITERAL__NO);
+  // only write visibility of it is false
+  if (!object.visible()) {
+    _writer->writeTriple(subj, IRI__OSMMETA_VISIBLE,
+                         object.visible()
+                             ? osm2rdf::ttl::constants::LITERAL__TRUE
+                             : osm2rdf::ttl::constants::LITERAL__FALSE);
+  }
 }
 
 // ____________________________________________________________________________

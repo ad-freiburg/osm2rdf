@@ -182,13 +182,17 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
   osm2rdf::ttl::constants::IRI__XSD_INTEGER =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
+  osm2rdf::ttl::constants::IRI__XSD_BOOLEAN =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "boolean");
   osm2rdf::ttl::constants::IRI__XSD_YEAR =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYear");
   osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMonth");
 
-  osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no");
-  osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes");
+  osm2rdf::ttl::constants::LITERAL__FALSE =
+      generateLiteral("false", "^^" + osm2rdf::ttl::constants::IRI__XSD_BOOLEAN);
+  osm2rdf::ttl::constants::LITERAL__TRUE =
+      generateLiteral("true", "^^" + osm2rdf::ttl::constants::IRI__XSD_BOOLEAN);
 
   // Prepare statistic variables
   _numOuts = config.numThreads + 1;
