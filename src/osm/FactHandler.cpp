@@ -391,6 +391,8 @@ template <typename W>
 template <typename T>
 void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
                                              const T& object) {
+  if (!_config.addOsmMetadata) return;
+
   // avoid writing empty changeset IDs, drop entire triple
   if (object.changeset() != 0) {
     _writer->writeTriple(
