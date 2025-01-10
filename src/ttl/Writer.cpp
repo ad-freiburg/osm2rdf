@@ -88,7 +88,12 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
        "https://www.openhistoricalmap.org/relation/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_WAY,
-       "https://www.openhistoricalmap.org/way/"}};
+       "https://www.openhistoricalmap.org/way/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_USER,
+       "https://www.openhistoricalmap.org/user/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_CHANGESET,
+       "https://www.openhistoricalmap.org/changeset/"},
+  };
 
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
