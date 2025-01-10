@@ -28,7 +28,6 @@ const static inline std::string NAMESPACE__GEOSPARQL = "geo";
 const static inline std::string NAMESPACE__OHM_NODE = "ohmnode";
 const static inline std::string NAMESPACE__OHM_RELATION = "ohmrel";
 const static inline std::string NAMESPACE__OHM_WAY = "ohmway";
-const static inline std::string NAMESPACE__OHM_USER = "ohmuser";
 const static inline std::string NAMESPACE__OHM_CHANGESET = "ohmchangeset";
 const static inline std::string NAMESPACE__OHM = "ohm";
 const static inline std::string NAMESPACE__OPENGIS = "ogc";
@@ -36,7 +35,6 @@ const static inline std::string NAMESPACE__OSM_NODE = "osmnode";
 const static inline std::string NAMESPACE__OSM_RELATION = "osmrel";
 const static inline std::string NAMESPACE__OSM_TAG = "osmkey";
 const static inline std::string NAMESPACE__OSM_WAY = "osmway";
-const static inline std::string NAMESPACE__OSM_USER = "osmuser";
 const static inline std::string NAMESPACE__OSM_CHANGESET = "osmchangeset";
 const static inline std::string NAMESPACE__OSM_META = "osmmeta";
 const static inline std::string NAMESPACE__OSM = "osm";
@@ -120,8 +118,6 @@ const static inline std::vector<std::string> WAY_NAMESPACE = {
     NAMESPACE__OSM_WAY, NAMESPACE__OHM_WAY};
 const static inline std::vector<std::string> CHANGESET_NAMESPACE = {
     NAMESPACE__OSM_CHANGESET, NAMESPACE__OHM_CHANGESET};
-const static inline std::vector<std::string> USER_NAMESPACE = {
-    NAMESPACE__OSM_USER, NAMESPACE__OHM_USER};
 
 }  // namespace osm2rdf::ttl::constants
 

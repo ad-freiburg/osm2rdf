@@ -86,7 +86,6 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY;
 using osm2rdf::ttl::constants::NODE_NAMESPACE;
 using osm2rdf::ttl::constants::RELATION_NAMESPACE;
-using osm2rdf::ttl::constants::USER_NAMESPACE;
 using osm2rdf::ttl::constants::WAY_NAMESPACE;
 
 // ____________________________________________________________________________
@@ -410,10 +409,8 @@ void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
 
   // avoid writing empty users, drop entire triple
   if (!object.user().empty()) {
-    _writer->writeTriple(
-        subj, IRI__OSMMETA_USER,
-        _writer->generateIRI(USER_NAMESPACE[_config.sourceDataset],
-                             object.user()));
+    _writer->writeTriple(subj, IRI__OSMMETA_USER,
+                         _writer->generateLiteral(object.user(), ""));
   }
 
   // avoid writing empty user IDs, drop entire triple

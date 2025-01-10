@@ -704,8 +704,8 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 24"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 29"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 22"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 27"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup
@@ -766,8 +766,8 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 24"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 29"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 22"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 27"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup
