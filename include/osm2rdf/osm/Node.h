@@ -37,6 +37,7 @@ class Node {
   [[nodiscard]] osm2rdf::osm::generic::changeset_id_t changeset() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
   [[nodiscard]] std::string user() const noexcept;
+  [[nodiscard]] id_t uid() const noexcept;
   [[nodiscard]] osm2rdf::osm::generic::version_t version() const noexcept;
   [[nodiscard]] bool visible() const noexcept;
   [[nodiscard]] const ::util::geo::DBox envelope() const noexcept;
@@ -51,6 +52,7 @@ class Node {
   osm2rdf::osm::generic::changeset_id_t _changeset;
   std::time_t _timestamp;
   std::string _user;
+  id_t _uid;
   osm2rdf::osm::generic::version_t _version;
   bool _visible;
   ::util::geo::DPoint _geom;

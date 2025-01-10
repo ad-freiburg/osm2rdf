@@ -33,6 +33,7 @@
 
 using osm2rdf::osm::constants::AREA_PRECISION;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
+using osm2rdf::ttl::constants::CHANGESET_NAMESPACE;
 using osm2rdf::ttl::constants::DATASET_ID;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID;
@@ -46,12 +47,15 @@ using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ROLE;
+using osm2rdf::ttl::constants::IRI__OSM_CHANGESET;
 using osm2rdf::ttl::constants::IRI__OSM_NODE;
 using osm2rdf::ttl::constants::IRI__OSM_RELATION;
 using osm2rdf::ttl::constants::IRI__OSM_TAG;
+using osm2rdf::ttl::constants::IRI__OSM_USER;
 using osm2rdf::ttl::constants::IRI__OSM_WAY;
 using osm2rdf::ttl::constants::IRI__OSMMETA_CHANGESET;
 using osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP;
+using osm2rdf::ttl::constants::IRI__OSMMETA_UID;
 using osm2rdf::ttl::constants::IRI__OSMMETA_USER;
 using osm2rdf::ttl::constants::IRI__OSMMETA_VERSION;
 using osm2rdf::ttl::constants::IRI__OSMMETA_VISIBLE;
@@ -82,6 +86,7 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY;
 using osm2rdf::ttl::constants::NODE_NAMESPACE;
 using osm2rdf::ttl::constants::RELATION_NAMESPACE;
+using osm2rdf::ttl::constants::USER_NAMESPACE;
 using osm2rdf::ttl::constants::WAY_NAMESPACE;
 
 // ____________________________________________________________________________
@@ -397,16 +402,25 @@ void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
   if (object.changeset() != 0) {
     _writer->writeTriple(
         subj, IRI__OSMMETA_CHANGESET,
-        _writer->generateLiteralUnsafe(std::to_string(object.changeset()),
-                                       "^^" + IRI__XSD_INTEGER));
+        _writer->generateIRI(CHANGESET_NAMESPACE[_config.sourceDataset],
+                             object.changeset()));
   }
 
   writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, object.timestamp());
 
   // avoid writing empty users, drop entire triple
   if (!object.user().empty()) {
-    _writer->writeTriple(subj, IRI__OSMMETA_USER,
-                         _writer->generateLiteral(object.user(), ""));
+    _writer->writeTriple(
+        subj, IRI__OSMMETA_USER,
+        _writer->generateIRI(USER_NAMESPACE[_config.sourceDataset],
+                             object.user()));
+  }
+
+  // avoid writing empty user IDs, drop entire triple
+  if (object.uid() != 0) {
+    _writer->writeTriple(subj, IRI__OSMMETA_UID,
+                         _writer->generateLiteral(std::to_string(object.uid()),
+                                                  "^^" + IRI__XSD_INTEGER));
   }
 
   _writer->writeTriple(

@@ -36,6 +36,7 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _timestamp = way.timestamp().seconds_since_epoch();
   _changeset = way.changeset();
   _user = way.user();
+  _uid = way.uid();
   _version = way.version();
   _visible = way.visible();
   _tags = std::move(osm2rdf::osm::convertTagList(way.tags()));
@@ -94,6 +95,9 @@ std::time_t osm2rdf::osm::Way::timestamp() const noexcept { return _timestamp; }
 
 // ____________________________________________________________________________
 std::string osm2rdf::osm::Way::user() const noexcept { return _user; }
+
+// ____________________________________________________________________________
+id_t osm2rdf::osm::Way::uid() const noexcept { return _uid; }
 
 // ____________________________________________________________________________
 osm2rdf::osm::generic::version_t osm2rdf::osm::Way::version() const noexcept {

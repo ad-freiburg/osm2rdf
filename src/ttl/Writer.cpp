@@ -76,6 +76,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://www.openstreetmap.org/relation/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
        "https://www.openstreetmap.org/way/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_USER,
+       "https://www.openstreetmap.org/user/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_CHANGESET,
+       "https://www.openstreetmap.org/changeset/"},
       // ohm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OHM,
        "https://www.openhistoricalmap.org/"},
@@ -141,6 +145,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "timestamp");
   osm2rdf::ttl::constants::IRI__OSMMETA_USER =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "user");
+  osm2rdf::ttl::constants::IRI__OSMMETA_UID =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "uid");
   osm2rdf::ttl::constants::IRI__OSMMETA_VERSION =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "version");
   osm2rdf::ttl::constants::IRI__OSMMETA_VISIBLE =
@@ -159,6 +165,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "uniqueNodeCount");
   osm2rdf::ttl::constants::IRI__OSM_NODE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "node");
+  osm2rdf::ttl::constants::IRI__OSM_USER =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "user");
+  osm2rdf::ttl::constants::IRI__OSM_CHANGESET =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "changeset");
   osm2rdf::ttl::constants::IRI__OSM_RELATION =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "relation");
   osm2rdf::ttl::constants::IRI__OSM_TAG =

@@ -38,6 +38,7 @@ osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
   _timestamp = relation.timestamp().seconds_since_epoch();
   _changeset = relation.changeset();
   _user = relation.user();
+  _uid = relation.uid();
   _version = relation.version();
   _visible = relation.visible();
   _tags = std::move(osm2rdf::osm::convertTagList(relation.tags()));
@@ -70,6 +71,9 @@ std::time_t osm2rdf::osm::Relation::timestamp() const noexcept {
 
 // ____________________________________________________________________________
 std::string osm2rdf::osm::Relation::user() const noexcept { return _user; }
+
+// ____________________________________________________________________________
+id_t osm2rdf::osm::Relation::uid() const noexcept { return _uid; }
 
 // ____________________________________________________________________________
 osm2rdf::osm::generic::version_t osm2rdf::osm::Relation::version()
