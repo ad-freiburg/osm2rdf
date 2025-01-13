@@ -74,6 +74,7 @@ struct Config {
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
   bool skipWikiLinks = false;
+  bool addOsmMetadata = true;
 
   bool addUntaggedNodes = true;
   bool addUntaggedWays = true;
