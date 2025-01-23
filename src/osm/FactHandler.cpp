@@ -209,7 +209,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
     const std::string& role = member.role();
     const std::string& blankNode = _writer->generateBlankNode();
     _writer->writeTriple(
-        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
+        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member_ref"),
         blankNode);
 
     _writer->writeTriple(blankNode, IRI__OSM2RDF_MEMBER__ID,
@@ -273,13 +273,13 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       _writer->writeTriple(subj, IRI__OSMWAY_NODE, blankNode);
 
       _writer->writeTriple(
-          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY_NODE,
+          blankNode, osm2rdf::ttl::constants::IRI__OSM2RDF_WAYNODE__ID,
           _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
                                node.id()));
 
-      _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSM2RDF_MEMBER__POS,
-                                        std::to_string(wayOrder++),
-                                        "^^" + IRI__XSD_INTEGER);
+      _writer->writeLiteralTripleUnsafe(
+          blankNode, osm2rdf::ttl::constants::IRI__OSM2RDF_WAYNODE__POS,
+          std::to_string(wayOrder++), "^^" + IRI__XSD_INTEGER);
 
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
         _writer->writeTriple(
