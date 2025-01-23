@@ -245,7 +245,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
     _writer->writeTriple(
         subj,
-        _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "completeGeometry"),
+        _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "hasCompleteGeometry"),
         relation.hasCompleteGeometry()
             ? osm2rdf::ttl::constants::LITERAL__TRUE
             : osm2rdf::ttl::constants::LITERAL__FALSE);
