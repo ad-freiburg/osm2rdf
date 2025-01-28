@@ -209,7 +209,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
     const std::string& role = member.role();
     const std::string& blankNode = _writer->generateBlankNode();
     _writer->writeTriple(
-        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member_ref"),
+        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
         blankNode);
 
     _writer->writeTriple(blankNode, IRI__OSM2RDF_MEMBER__ID,

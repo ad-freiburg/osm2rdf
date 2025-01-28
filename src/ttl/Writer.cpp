@@ -139,9 +139,9 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, "member_pos");
   osm2rdf::ttl::constants::IRI__OSM2RDF_WAYNODE__POS =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "node_pos");
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "member_pos");
   osm2rdf::ttl::constants::IRI__OSM2RDF_WAYNODE__ID =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "node_id");
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "member_id");
   osm2rdf::ttl::constants::IRI__OSMMETA_CHANGESET =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "changeset");
   osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP =
@@ -161,9 +161,7 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "next_node_distance");
   osm2rdf::ttl::constants::IRI__OSMWAY_NODE =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "node_ref");
-  osm2rdf::ttl::constants::IRI__OSMWAY_NODE_ID =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "node_id");
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "member");
   osm2rdf::ttl::constants::IRI__OSMWAY_NODE_COUNT =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "nodeCount");
   osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT = generateIRI(
