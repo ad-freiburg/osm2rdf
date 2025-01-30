@@ -76,6 +76,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://www.openstreetmap.org/relation/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
        "https://www.openstreetmap.org/way/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_CHANGESET,
+       "https://www.openstreetmap.org/changeset/"},
       // ohm prefixes
       {osm2rdf::ttl::constants::NAMESPACE__OHM,
        "https://www.openhistoricalmap.org/"},
@@ -84,7 +86,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
        "https://www.openhistoricalmap.org/relation/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_WAY,
-       "https://www.openhistoricalmap.org/way/"}};
+       "https://www.openhistoricalmap.org/way/"},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_CHANGESET,
+       "https://www.openhistoricalmap.org/changeset/"},
+  };
 
   // Generate constants
   osm2rdf::ttl::constants::IRI__GEOSPARQL__AS_WKT =
@@ -135,8 +140,18 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "role");
   osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "pos");
+  osm2rdf::ttl::constants::IRI__OSMMETA_CHANGESET =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "changeset");
   osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "timestamp");
+  osm2rdf::ttl::constants::IRI__OSMMETA_USER =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "user");
+  osm2rdf::ttl::constants::IRI__OSMMETA_UID =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "uid");
+  osm2rdf::ttl::constants::IRI__OSMMETA_VERSION =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "version");
+  osm2rdf::ttl::constants::IRI__OSMMETA_VISIBLE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "visible");
   osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
   osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =
@@ -151,6 +166,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "uniqueNodeCount");
   osm2rdf::ttl::constants::IRI__OSM_NODE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "node");
+  osm2rdf::ttl::constants::IRI__OSM_CHANGESET =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "changeset");
   osm2rdf::ttl::constants::IRI__OSM_RELATION =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "relation");
   osm2rdf::ttl::constants::IRI__OSM_TAG =
@@ -174,13 +191,17 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
   osm2rdf::ttl::constants::IRI__XSD_INTEGER =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
+  osm2rdf::ttl::constants::IRI__XSD_BOOLEAN =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "boolean");
   osm2rdf::ttl::constants::IRI__XSD_YEAR =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYear");
   osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMonth");
 
-  osm2rdf::ttl::constants::LITERAL__NO = generateLiteral("no");
-  osm2rdf::ttl::constants::LITERAL__YES = generateLiteral("yes");
+  osm2rdf::ttl::constants::LITERAL__FALSE =
+      generateLiteral("false", "^^" + osm2rdf::ttl::constants::IRI__XSD_BOOLEAN);
+  osm2rdf::ttl::constants::LITERAL__TRUE =
+      generateLiteral("true", "^^" + osm2rdf::ttl::constants::IRI__XSD_BOOLEAN);
 
   // Prepare statistic variables
   _numOuts = config.numThreads + 1;
