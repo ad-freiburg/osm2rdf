@@ -1081,7 +1081,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1199,7 +1199,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1239,7 +1239,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1279,7 +1279,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1319,7 +1319,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1359,7 +1359,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
-      "5", "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      "5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
   dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
@@ -1520,7 +1520,7 @@ TEST(OSM_FactHandler, writeTagList) {
   const std::string predicate1 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tag1Key);
   const std::string object1 = writer.generateLiteral(
-      tag1Value, "^^" + osm2rdf::ttl::constants::IRI__XSD_INTEGER);
+      tag1Value, "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
   const std::string predicate2 =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tag2Key);
   const std::string object2 = writer.generateLiteral(tag2Value, "");
@@ -2096,7 +2096,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      "0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+      "0011", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2145,7 +2145,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      "-0011", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+      "-0011", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2194,7 +2194,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2243,7 +2243,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2292,7 +2292,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      "0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+      "0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2341,7 +2341,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      "-0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+      "-0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2390,7 +2390,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2439,7 +2439,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2488,7 +2488,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth5) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2538,7 +2538,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      "0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+      "0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2587,7 +2587,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      "-0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+      "-0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2636,7 +2636,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2685,7 +2685,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
@@ -2734,7 +2734,7 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5) {
   const std::string predicate2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = writer.generateLiteral(
-      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD_DATE);
+      tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
   osm2rdf::osm::TagList tagList;
   tagList.push_back({tagKey, tagValue});
