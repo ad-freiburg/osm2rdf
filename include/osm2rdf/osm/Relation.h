@@ -23,6 +23,7 @@
 
 #include "RelationHandler.h"
 #include "osm2rdf/osm/Box.h"
+#include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/RelationHandler.h"
 #include "osm2rdf/osm/RelationMember.h"
 #include "osm2rdf/osm/TagList.h"
@@ -37,7 +38,12 @@ class Relation {
   Relation();
   explicit Relation(const osmium::Relation& relation);
   [[nodiscard]] id_t id() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::changeset_id_t changeset() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
+  [[nodiscard]] std::string user() const noexcept;
+  [[nodiscard]] id_t uid() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::version_t version() const noexcept;
+  [[nodiscard]] bool visible() const noexcept;
   [[nodiscard]] const std::vector<osm2rdf::osm::RelationMember>& members()
       const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
@@ -57,7 +63,12 @@ class Relation {
 
  protected:
   id_t _id;
+  osm2rdf::osm::generic::changeset_id_t _changeset;
   std::time_t _timestamp;
+  std::string _user;
+  id_t _uid;
+  osm2rdf::osm::generic::version_t _version;
+  bool _visible;
   std::vector<osm2rdf::osm::RelationMember> _members;
   osm2rdf::osm::TagList _tags;
   ::util::geo::DBox _envelope;

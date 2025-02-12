@@ -90,6 +90,14 @@ const static inline std::string STORE_LOCATIONS_HELP =
     "Method used to store locations, valid values: mem-flex (default), "
     "mem-dense, disk-sparse, disk-dense ";
 
+const static inline std::string NO_OSM_METADATA_INFO =
+    "Not outputting OSM metadata";
+const static inline std::string NO_OSM_METADATA_OPTION_SHORT = "";
+const static inline std::string NO_OSM_METADATA_OPTION_LONG = "no-osm-metadata";
+const static inline std::string NO_OSM_METADATA_OPTION_HELP =
+    "Do not output OSM metadata (user, timestamp, changeset, visibility and "
+    "version)";
+
 const static inline std::string NO_FACTS_INFO = "Not dumping facts";
 const static inline std::string NO_FACTS_OPTION_SHORT = "";
 const static inline std::string NO_FACTS_OPTION_LONG = "no-facts";
