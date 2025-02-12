@@ -25,6 +25,7 @@
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/way.hpp"
+#include "osm2rdf/osm/Generic.h"
 #include "util/geo/Geo.h"
 
 namespace osm2rdf::osm {
@@ -36,7 +37,12 @@ class Way {
   void finalize();
   explicit Way(const osmium::Way& way);
   [[nodiscard]] id_t id() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::changeset_id_t changeset() const noexcept;
   [[nodiscard]] std::time_t timestamp() const noexcept;
+  [[nodiscard]] std::string user() const noexcept;
+  [[nodiscard]] id_t uid() const noexcept;
+  [[nodiscard]] osm2rdf::osm::generic::version_t version() const noexcept;
+  [[nodiscard]] bool visible() const noexcept;
   [[nodiscard]] bool closed() const noexcept;
   [[nodiscard]] bool isArea() const noexcept;
   [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
@@ -53,7 +59,12 @@ class Way {
 
  protected:
   id_t _id;
+  osm2rdf::osm::generic::changeset_id_t _changeset;
   std::time_t _timestamp;
+  std::string _user;
+  id_t _uid;
+  osm2rdf::osm::generic::version_t _version;
+  bool _visible;
   std::vector<osm2rdf::osm::Node> _nodes;
   ::util::geo::DLine _geom;
   ::util::geo::DBox _envelope;

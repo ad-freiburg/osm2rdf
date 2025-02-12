@@ -312,6 +312,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_LONG,
       osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_HELP);
 
+  auto noOsmMetadataOp = parser.add<popl::Switch>(
+      osm2rdf::config::constants::NO_OSM_METADATA_OPTION_SHORT,
+      osm2rdf::config::constants::NO_OSM_METADATA_OPTION_LONG,
+      osm2rdf::config::constants::NO_OSM_METADATA_OPTION_HELP);
   auto addWayMetadataOp = parser.add<popl::Switch>(
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_SHORT,
       osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
@@ -482,6 +486,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
     addCentroids = !noAddCentroidsOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
+    addOsmMetadata = !noOsmMetadataOp->is_set();
     addWayNodeOrder = addWayNodeOrderOp->is_set();
     addWayNodeSpatialMetadata = addWayNodeSpatialMetadataOp->is_set();
     skipWikiLinks = skipWikiLinksOp->is_set();
