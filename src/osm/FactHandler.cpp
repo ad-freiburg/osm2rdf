@@ -40,39 +40,39 @@ using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_CENTROID;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__HAS_GEOMETRY;
 using osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL;
 using osm2rdf::ttl::constants::IRI__OSM2RDF__LENGTH;
-using osm2rdf::ttl::constants::IRI__OSM2RDF_FACTS;
+using osm2rdf::ttl::constants::IRI__OSM2RDF__FACTS;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE;
 using osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB;
-using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID;
-using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS;
-using osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ROLE;
-using osm2rdf::ttl::constants::IRI__OSM_CHANGESET;
-using osm2rdf::ttl::constants::IRI__OSM_NODE;
-using osm2rdf::ttl::constants::IRI__OSM_RELATION;
-using osm2rdf::ttl::constants::IRI__OSM_TAG;
-using osm2rdf::ttl::constants::IRI__OSM_USER;
-using osm2rdf::ttl::constants::IRI__OSM_WAY;
-using osm2rdf::ttl::constants::IRI__OSMMETA_CHANGESET;
-using osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP;
-using osm2rdf::ttl::constants::IRI__OSMMETA_UID;
-using osm2rdf::ttl::constants::IRI__OSMMETA_USER;
-using osm2rdf::ttl::constants::IRI__OSMMETA_VERSION;
-using osm2rdf::ttl::constants::IRI__OSMMETA_VISIBLE;
-using osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED;
-using osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE;
-using osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE;
-using osm2rdf::ttl::constants::IRI__OSMWAY_NODE;
-using osm2rdf::ttl::constants::IRI__OSMWAY_NODE_COUNT;
-using osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT;
-using osm2rdf::ttl::constants::IRI__RDF_TYPE;
-using osm2rdf::ttl::constants::IRI__XSD_DATE;
-using osm2rdf::ttl::constants::IRI__XSD_DATE_TIME;
-using osm2rdf::ttl::constants::IRI__XSD_DECIMAL;
-using osm2rdf::ttl::constants::IRI__XSD_DOUBLE;
-using osm2rdf::ttl::constants::IRI__XSD_INTEGER;
-using osm2rdf::ttl::constants::IRI__XSD_YEAR;
-using osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH;
+using osm2rdf::ttl::constants::IRI__OSMREL__MEMBER_ID;
+using osm2rdf::ttl::constants::IRI__OSMREL__MEMBER_POS;
+using osm2rdf::ttl::constants::IRI__OSMREL__MEMBER_ROLE;
+using osm2rdf::ttl::constants::IRI__OSM__CHANGESET;
+using osm2rdf::ttl::constants::IRI__OSM__NODE;
+using osm2rdf::ttl::constants::IRI__OSM__RELATION;
+using osm2rdf::ttl::constants::IRI__OSM__TAG;
+using osm2rdf::ttl::constants::IRI__OSM__USER;
+using osm2rdf::ttl::constants::IRI__OSM__WAY;
+using osm2rdf::ttl::constants::IRI__OSMMETA__CHANGESET;
+using osm2rdf::ttl::constants::IRI__OSMMETA__TIMESTAMP;
+using osm2rdf::ttl::constants::IRI__OSMMETA__UID;
+using osm2rdf::ttl::constants::IRI__OSMMETA__USER;
+using osm2rdf::ttl::constants::IRI__OSMMETA__VERSION;
+using osm2rdf::ttl::constants::IRI__OSMMETA__VISIBLE;
+using osm2rdf::ttl::constants::IRI__OSMWAY__IS_CLOSED;
+using osm2rdf::ttl::constants::IRI__OSMWAY__NEXT_NODE;
+using osm2rdf::ttl::constants::IRI__OSMWAY__NEXT_NODE_DISTANCE;
+using osm2rdf::ttl::constants::IRI__OSMWAY__NODE;
+using osm2rdf::ttl::constants::IRI__OSMWAY__NODE_COUNT;
+using osm2rdf::ttl::constants::IRI__OSMWAY__UNIQUE_NODE_COUNT;
+using osm2rdf::ttl::constants::IRI__RDF__TYPE;
+using osm2rdf::ttl::constants::IRI__XSD__DATE;
+using osm2rdf::ttl::constants::IRI__XSD__DATE_TIME;
+using osm2rdf::ttl::constants::IRI__XSD__DECIMAL;
+using osm2rdf::ttl::constants::IRI__XSD__DOUBLE;
+using osm2rdf::ttl::constants::IRI__XSD__INTEGER;
+using osm2rdf::ttl::constants::IRI__XSD__YEAR;
+using osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH;
 using osm2rdf::ttl::constants::LITERAL__FALSE;
 using osm2rdf::ttl::constants::LITERAL__TRUE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF;
@@ -132,7 +132,7 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   _writer->writeLiteralTripleUnsafe(
       subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "area"),
       ::util::formatFloat(area.geomArea(), AREA_PRECISION),
-      "^^" + IRI__XSD_DOUBLE);
+      "^^" + IRI__XSD__DOUBLE);
 }
 
 // ____________________________________________________________________________
@@ -141,7 +141,7 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   const std::string& subj =
       _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset], node.id());
 
-  _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_NODE);
+  _writer->writeTriple(subj, IRI__RDF__TYPE, IRI__OSM__NODE);
   // Meta
   writeMeta(subj, node);
 
@@ -183,7 +183,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
   const std::string& subj = _writer->generateIRI(
       RELATION_NAMESPACE[_config.sourceDataset], relation.id());
 
-  _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_RELATION);
+  _writer->writeTriple(subj, IRI__RDF__TYPE, IRI__OSM__RELATION);
   // Meta
   writeMeta(subj, relation);
   // Tags
@@ -212,13 +212,13 @@ void osm2rdf::osm::FactHandler<W>::relation(
         subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
         blankNode);
 
-    _writer->writeTriple(blankNode, IRI__OSM2RDF_MEMBER__ID,
+    _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ID,
                          _writer->generateIRI(type, member.id()));
-    _writer->writeTriple(blankNode, IRI__OSM2RDF_MEMBER__ROLE,
+    _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ROLE,
                          _writer->generateLiteral(role));
-    _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSM2RDF_MEMBER__POS,
+    _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSMREL__MEMBER_POS,
                                       std::to_string(inRelPos++),
-                                      "^^" + IRI__XSD_INTEGER);
+                                      "^^" + IRI__XSD__INTEGER);
   }
 
   if (relation.hasGeometry()) {
@@ -245,7 +245,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
     _writer->writeTriple(
         subj,
-        _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "completeGeometry"),
+        _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "hasCompleteGeometry"),
         relation.hasCompleteGeometry()
             ? osm2rdf::ttl::constants::LITERAL__TRUE
             : osm2rdf::ttl::constants::LITERAL__FALSE);
@@ -258,7 +258,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   const std::string& subj =
       _writer->generateIRI(WAY_NAMESPACE[_config.sourceDataset], way.id());
 
-  _writer->writeTriple(subj, IRI__RDF_TYPE, IRI__OSM_WAY);
+  _writer->writeTriple(subj, IRI__RDF__TYPE, IRI__OSM__WAY);
   // Meta
   writeMeta(subj, way);
   // Tags
@@ -270,20 +270,20 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     auto lastNode = way.nodes().front();
     for (const auto& node : way.nodes()) {
       const std::string& blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(subj, IRI__OSMWAY_NODE, blankNode);
+      _writer->writeTriple(subj, IRI__OSMWAY__NODE, blankNode);
 
       _writer->writeTriple(
-          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY_NODE,
+          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
           _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
                                node.id()));
 
-      _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSM2RDF_MEMBER__POS,
-                                        std::to_string(wayOrder++),
-                                        "^^" + IRI__XSD_INTEGER);
+      _writer->writeLiteralTripleUnsafe(
+          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_POS,
+          std::to_string(wayOrder++), "^^" + IRI__XSD__INTEGER);
 
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
         _writer->writeTriple(
-            lastBlankNode, IRI__OSMWAY_NEXT_NODE,
+            lastBlankNode, IRI__OSMWAY__NEXT_NODE,
             _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
                                  node.id()));
         // Haversine distance
@@ -302,8 +302,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                                 osm2rdf::osm::constants::METERS_IN_KM * 2 *
                                 asin(sqrt(haversine));
         _writer->writeLiteralTripleUnsafe(
-            lastBlankNode, IRI__OSMWAY_NEXT_NODE_DISTANCE,
-            std::to_string(distance), "^^" + IRI__XSD_DECIMAL);
+            lastBlankNode, IRI__OSMWAY__NEXT_NODE_DISTANCE,
+            std::to_string(distance), "^^" + IRI__XSD__DECIMAL);
       }
       lastBlankNode = blankNode;
       lastNode = node;
@@ -337,19 +337,19 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   }
 
   if (_config.addWayMetadata) {
-    _writer->writeTriple(subj, IRI__OSMWAY_IS_CLOSED,
+    _writer->writeTriple(subj, IRI__OSMWAY__IS_CLOSED,
                          way.closed() ? LITERAL__TRUE : LITERAL__FALSE);
-    _writer->writeLiteralTripleUnsafe(subj, IRI__OSMWAY_NODE_COUNT,
+    _writer->writeLiteralTripleUnsafe(subj, IRI__OSMWAY__NODE_COUNT,
                                       std::to_string(way.nodes().size()),
-                                      "^^" + IRI__XSD_INTEGER);
-    _writer->writeLiteralTripleUnsafe(subj, IRI__OSMWAY_UNIQUE_NODE_COUNT,
+                                      "^^" + IRI__XSD__INTEGER);
+    _writer->writeLiteralTripleUnsafe(subj, IRI__OSMWAY__UNIQUE_NODE_COUNT,
                                       std::to_string(numUniquePoints),
-                                      "^^" + IRI__XSD_INTEGER);
+                                      "^^" + IRI__XSD__INTEGER);
   }
 
   _writer->writeLiteralTripleUnsafe(
       subj, IRI__OSM2RDF__LENGTH, std::to_string(::util::geo::len(way.geom())),
-      "^^" + osm2rdf::ttl::constants::IRI__XSD_DOUBLE);
+      "^^" + osm2rdf::ttl::constants::IRI__XSD__DOUBLE);
 }
 
 // ____________________________________________________________________________
@@ -400,34 +400,34 @@ void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
   // avoid writing empty changeset IDs, drop entire triple
   if (object.changeset() != 0) {
     _writer->writeTriple(
-        subj, IRI__OSMMETA_CHANGESET,
+        subj, IRI__OSMMETA__CHANGESET,
         _writer->generateIRI(CHANGESET_NAMESPACE[_config.sourceDataset],
                              object.changeset()));
   }
 
-  writeSecondsAsISO(subj, IRI__OSMMETA_TIMESTAMP, object.timestamp());
+  writeSecondsAsISO(subj, IRI__OSMMETA__TIMESTAMP, object.timestamp());
 
   // avoid writing empty users, drop entire triple
   if (!object.user().empty()) {
-    _writer->writeTriple(subj, IRI__OSMMETA_USER,
+    _writer->writeTriple(subj, IRI__OSMMETA__USER,
                          _writer->generateLiteral(object.user(), ""));
   }
 
   // avoid writing empty user IDs, drop entire triple
   if (object.uid() != 0) {
-    _writer->writeTriple(subj, IRI__OSMMETA_UID,
+    _writer->writeTriple(subj, IRI__OSMMETA__UID,
                          _writer->generateLiteral(std::to_string(object.uid()),
-                                                  "^^" + IRI__XSD_INTEGER));
+                                                  "^^" + IRI__XSD__INTEGER));
   }
 
   _writer->writeTriple(
-      subj, IRI__OSMMETA_VERSION,
+      subj, IRI__OSMMETA__VERSION,
       _writer->generateLiteralUnsafe(std::to_string(object.version()),
-                                     "^^" + IRI__XSD_INTEGER));
+                                     "^^" + IRI__XSD__INTEGER));
 
   // only write visibility of it is false
   if (!object.visible()) {
-    _writer->writeTriple(subj, IRI__OSMMETA_VISIBLE,
+    _writer->writeTriple(subj, IRI__OSMMETA__VISIBLE,
                          object.visible()
                              ? osm2rdf::ttl::constants::LITERAL__TRUE
                              : osm2rdf::ttl::constants::LITERAL__FALSE);
@@ -457,7 +457,7 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
       _writer->writeTriple(subj,
                            _writer->generateIRIUnsafe(NAMESPACE__OSM_TAG, key),
                            _writer->generateLiteralUnsafe(
-                               std::to_string(lvl), "^^" + IRI__XSD_INTEGER));
+                               std::to_string(lvl), "^^" + IRI__XSD__INTEGER));
     } else {
       _writer->writeUnsafeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key,
                                            value);
@@ -471,7 +471,7 @@ void osm2rdf::osm::FactHandler<W>::writeTag(const std::string& subj,
       _writer->writeIRILiteralTriple(subj, NAMESPACE__OSM_TAG, key, value);
     } else {
       const std::string& blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(subj, IRI__OSM_TAG, blankNode);
+      _writer->writeTriple(subj, IRI__OSM__TAG, blankNode);
 
       _writer->writeTriple(blankNode,
                            _writer->generateIRI(NAMESPACE__OSM_TAG, "key"),
@@ -603,8 +603,8 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
         // Invalid length
         continue;
       }
-      std::string typeString[3] = {IRI__XSD_YEAR, IRI__XSD_YEAR_MONTH,
-                                   IRI__XSD_DATE};
+      std::string typeString[3] = {IRI__XSD__YEAR, IRI__XSD__YEAR_MONTH,
+                                   IRI__XSD__DATE};
       _writer->writeTriple(
           subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF_TAG, key),
           _writer->generateLiteralUnsafe(
@@ -615,7 +615,7 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
   _writer->writeTriple(
       subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "facts"),
       _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
-                                     "^^" + IRI__XSD_INTEGER));
+                                     "^^" + IRI__XSD__INTEGER));
 }
 
 // ____________________________________________________________________________
@@ -628,7 +628,7 @@ void osm2rdf::osm::FactHandler<W>::writeSecondsAsISO(const std::string& subj,
   struct tm t;
   strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
 
-  _writer->writeLiteralTripleUnsafe(subj, pred, out, "^^" + IRI__XSD_DATE_TIME);
+  _writer->writeLiteralTripleUnsafe(subj, pred, out, "^^" + IRI__XSD__DATE_TIME);
 }
 
 // ____________________________________________________________________________
