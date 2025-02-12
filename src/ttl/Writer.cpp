@@ -57,8 +57,6 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/geom#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/key#"},
-      {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER,
-       "https://osm2rdf.cs.uni-freiburg.de/rdf/member#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/meta#"},
       // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
@@ -103,29 +101,21 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__GEOSPARQL__WKT_LITERAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__GEOSPARQL, "wktLiteral");
 
-  osm2rdf::ttl::constants::IRI__OPENGIS_CONTAINS =
+  osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfContains");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_AREA =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_area");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_CONTAINS_NON_AREA = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "contains_nonarea");
-  osm2rdf::ttl::constants::IRI__OPENGIS_INTERSECTS =
+  osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfIntersects");
-  osm2rdf::ttl::constants::IRI__OPENGIS_COVERS =
+  osm2rdf::ttl::constants::IRI__OPENGIS__COVERS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCovers");
-  osm2rdf::ttl::constants::IRI__OPENGIS_TOUCHES =
+  osm2rdf::ttl::constants::IRI__OPENGIS__TOUCHES =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfTouches");
-  osm2rdf::ttl::constants::IRI__OPENGIS_EQUALS =
+  osm2rdf::ttl::constants::IRI__OPENGIS__EQUALS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfEquals");
-  osm2rdf::ttl::constants::IRI__OPENGIS_CROSSES =
+  osm2rdf::ttl::constants::IRI__OPENGIS__CROSSES =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfCrosses");
-  osm2rdf::ttl::constants::IRI__OPENGIS_OVERLAPS =
+  osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfOverlaps");
 
-  osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_AREA = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_area");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_INTERSECTS_NON_AREA = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "intersects_nonarea");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "convex_hull");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE =
@@ -134,74 +124,78 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "length");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__OBB =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "obb");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ID =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "id");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__ROLE =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "role");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_MEMBER__POS =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_MEMBER, "pos");
-  osm2rdf::ttl::constants::IRI__OSMMETA_CHANGESET =
+  osm2rdf::ttl::constants::IRI__OSMREL__MEMBER_ID = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, "member_id");
+  osm2rdf::ttl::constants::IRI__OSMREL__MEMBER_ROLE = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, "member_role");
+  osm2rdf::ttl::constants::IRI__OSMREL__MEMBER_POS = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION, "member_pos");
+  osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_POS =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "member_pos");
+  osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "member_id");
+  osm2rdf::ttl::constants::IRI__OSMMETA__CHANGESET =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "changeset");
-  osm2rdf::ttl::constants::IRI__OSMMETA_TIMESTAMP =
+  osm2rdf::ttl::constants::IRI__OSMMETA__TIMESTAMP =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "timestamp");
-  osm2rdf::ttl::constants::IRI__OSMMETA_USER =
+  osm2rdf::ttl::constants::IRI__OSMMETA__USER =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "user");
-  osm2rdf::ttl::constants::IRI__OSMMETA_UID =
+  osm2rdf::ttl::constants::IRI__OSMMETA__UID =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "uid");
-  osm2rdf::ttl::constants::IRI__OSMMETA_VERSION =
+  osm2rdf::ttl::constants::IRI__OSMMETA__VERSION =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "version");
-  osm2rdf::ttl::constants::IRI__OSMMETA_VISIBLE =
+  osm2rdf::ttl::constants::IRI__OSMMETA__VISIBLE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_META, "visible");
-  osm2rdf::ttl::constants::IRI__OSMWAY_IS_CLOSED =
+  osm2rdf::ttl::constants::IRI__OSMWAY__IS_CLOSED =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "is_closed");
-  osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE =
+  osm2rdf::ttl::constants::IRI__OSMWAY__NEXT_NODE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "next_node");
-  osm2rdf::ttl::constants::IRI__OSMWAY_NEXT_NODE_DISTANCE = generateIRI(
+  osm2rdf::ttl::constants::IRI__OSMWAY__NEXT_NODE_DISTANCE = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "next_node_distance");
-  osm2rdf::ttl::constants::IRI__OSMWAY_NODE =
-      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "node");
-  osm2rdf::ttl::constants::IRI__OSMWAY_NODE_COUNT =
+  osm2rdf::ttl::constants::IRI__OSMWAY__NODE =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "member");
+  osm2rdf::ttl::constants::IRI__OSMWAY__NODE_COUNT =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "nodeCount");
-  osm2rdf::ttl::constants::IRI__OSMWAY_UNIQUE_NODE_COUNT = generateIRI(
+  osm2rdf::ttl::constants::IRI__OSMWAY__UNIQUE_NODE_COUNT = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM_WAY, "uniqueNodeCount");
-  osm2rdf::ttl::constants::IRI__OSM_NODE =
+  osm2rdf::ttl::constants::IRI__OSM__NODE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "node");
-  osm2rdf::ttl::constants::IRI__OSM_CHANGESET =
+  osm2rdf::ttl::constants::IRI__OSM__CHANGESET =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "changeset");
-  osm2rdf::ttl::constants::IRI__OSM_RELATION =
+  osm2rdf::ttl::constants::IRI__OSM__RELATION =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "relation");
-  osm2rdf::ttl::constants::IRI__OSM_TAG =
+  osm2rdf::ttl::constants::IRI__OSM__TAG =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "tag");
-  osm2rdf::ttl::constants::IRI__OSM_WAY =
+  osm2rdf::ttl::constants::IRI__OSM__WAY =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM, "way");
-  osm2rdf::ttl::constants::IRI__RDF_TYPE =
+  osm2rdf::ttl::constants::IRI__RDF__TYPE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__RDF, "type");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_FACTS =
+  osm2rdf::ttl::constants::IRI__OSM2RDF__FACTS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF, "facts");
 
-  osm2rdf::ttl::constants::IRI__XSD_DATE =
+  osm2rdf::ttl::constants::IRI__XSD__DATE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "date");
-  osm2rdf::ttl::constants::IRI__XSD_DATE_TIME =
+  osm2rdf::ttl::constants::IRI__XSD__DATE_TIME =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "dateTime");
-  osm2rdf::ttl::constants::IRI__XSD_DECIMAL =
+  osm2rdf::ttl::constants::IRI__XSD__DECIMAL =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "decimal");
-  osm2rdf::ttl::constants::IRI__XSD_DOUBLE =
+  osm2rdf::ttl::constants::IRI__XSD__DOUBLE =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "double");
-  osm2rdf::ttl::constants::IRI__XSD_FLOAT =
+  osm2rdf::ttl::constants::IRI__XSD__FLOAT =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "float");
-  osm2rdf::ttl::constants::IRI__XSD_INTEGER =
+  osm2rdf::ttl::constants::IRI__XSD__INTEGER =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "integer");
-  osm2rdf::ttl::constants::IRI__XSD_BOOLEAN =
+  osm2rdf::ttl::constants::IRI__XSD__BOOLEAN =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "boolean");
-  osm2rdf::ttl::constants::IRI__XSD_YEAR =
+  osm2rdf::ttl::constants::IRI__XSD__YEAR =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYear");
-  osm2rdf::ttl::constants::IRI__XSD_YEAR_MONTH =
+  osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__XML_SCHEMA, "gYearMonth");
 
-  osm2rdf::ttl::constants::LITERAL__FALSE =
-      generateLiteral("false", "^^" + osm2rdf::ttl::constants::IRI__XSD_BOOLEAN);
+  osm2rdf::ttl::constants::LITERAL__FALSE = generateLiteral(
+      "false", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
   osm2rdf::ttl::constants::LITERAL__TRUE =
-      generateLiteral("true", "^^" + osm2rdf::ttl::constants::IRI__XSD_BOOLEAN);
+      generateLiteral("true", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
 
   // Prepare statistic variables
   _numOuts = config.numThreads + 1;
