@@ -21,7 +21,7 @@ DOCKER:=$(shell which podman || which wharfer || which docker)
 osm2rdf: build
 	cmake --build build --target osm2rdf
 
-all: compile checkstyle test benchmark
+all: compile checkstyle test
 
 clean:
 	rm -rf build
@@ -39,9 +39,6 @@ checkstyle:
 
 test: build
 	cmake --build build --target run_tests
-
-benchmark: build
-	cmake --build build --target run_benchmarks
 
 install: compile
 	cmake --install build
