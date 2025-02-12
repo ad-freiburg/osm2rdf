@@ -60,11 +60,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined
 # Enable fast-math
 add_compile_options(-ffast-math)
 
-# Google benchmark has an unused variable (sigma_gn) in complexity.cc, which
-# clang detects and aborts. Don't treat unused variables as errors to make
-# clang builds possible.
-# add_compile_options(-Wno-error=unused-but-set-variable)
-
 # ----------------------------------------------------------------------------
 # Configure dependencies
 # ----------------------------------------------------------------------------
@@ -76,7 +71,6 @@ find_package(OpenMP)
 # Disable installation of google stuff
 set(INSTALL_GMOCK OFF)
 set(INSTALL_GTEST OFF)
-set(BENCHMARK_ENABLE_INSTALL OFF)
 
 find_package(Git QUIET)
 if (GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
@@ -135,11 +129,6 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         enable_testing()
         include(GoogleTest)
         add_subdirectory(tests)
-    endif ()
-    option(PACKAGE_BENCHMARKS "Build the benchmarks" ON)
-    if (PACKAGE_BENCHMARKS)
-        enable_testing()
-        add_subdirectory(benchmarks)
     endif ()
 endif ()
 
