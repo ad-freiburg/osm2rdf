@@ -71,7 +71,7 @@ struct Config {
   bool addAreaWayLinestrings = false;
   bool addCentroids = true;
   bool addWayMetadata = false;
-  bool addWayNodeOrder = false;
+  bool addMemberTriples = true;
   bool addWayNodeSpatialMetadata = false;
   bool skipWikiLinks = false;
   bool addOsmMetadata = true;

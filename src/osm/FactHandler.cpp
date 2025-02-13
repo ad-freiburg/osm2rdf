@@ -189,36 +189,38 @@ void osm2rdf::osm::FactHandler<W>::relation(
   // Tags
   writeTagList(subj, relation.tags());
 
-  size_t inRelPos = 0;
-  for (const auto& member : relation.members()) {
-    std::string type;
-    switch (member.type()) {
-      case osm2rdf::osm::RelationMemberType::NODE:
-        type = NODE_NAMESPACE[_config.sourceDataset];
-        break;
-      case osm2rdf::osm::RelationMemberType::RELATION:
-        type = RELATION_NAMESPACE[_config.sourceDataset];
-        break;
-      case osm2rdf::osm::RelationMemberType::WAY:
-        type = WAY_NAMESPACE[_config.sourceDataset];
-        break;
-      default:
-        continue;
+  if (_config.addMemberTriples && relation.members().size()) {
+    size_t inRelPos = 0;
+    for (const auto& member : relation.members()) {
+      std::string type;
+      switch (member.type()) {
+        case osm2rdf::osm::RelationMemberType::NODE:
+          type = NODE_NAMESPACE[_config.sourceDataset];
+          break;
+        case osm2rdf::osm::RelationMemberType::RELATION:
+          type = RELATION_NAMESPACE[_config.sourceDataset];
+          break;
+        case osm2rdf::osm::RelationMemberType::WAY:
+          type = WAY_NAMESPACE[_config.sourceDataset];
+          break;
+        default:
+          continue;
+      }
+
+      const std::string& role = member.role();
+      const std::string& blankNode = _writer->generateBlankNode();
+      _writer->writeTriple(
+          subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
+          blankNode);
+
+      _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ID,
+                           _writer->generateIRI(type, member.id()));
+      _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ROLE,
+                           _writer->generateLiteral(role));
+      _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSMREL__MEMBER_POS,
+                                        std::to_string(inRelPos++),
+                                        "^^" + IRI__XSD__INTEGER);
     }
-
-    const std::string& role = member.role();
-    const std::string& blankNode = _writer->generateBlankNode();
-    _writer->writeTriple(
-        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
-        blankNode);
-
-    _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ID,
-                         _writer->generateIRI(type, member.id()));
-    _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ROLE,
-                         _writer->generateLiteral(role));
-    _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSMREL__MEMBER_POS,
-                                      std::to_string(inRelPos++),
-                                      "^^" + IRI__XSD__INTEGER);
   }
 
   if (relation.hasGeometry()) {
@@ -264,7 +266,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   // Tags
   writeTagList(subj, way.tags());
 
-  if (_config.addWayNodeOrder && way.nodes().size()) {
+  if (_config.addMemberTriples && way.nodes().size()) {
     size_t wayOrder = 0;
     std::string lastBlankNode;
     auto lastNode = way.nodes().front();

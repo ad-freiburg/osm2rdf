@@ -183,13 +183,13 @@ const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump way geometric relations";
 
-const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_INFO =
-    "Do not compute spatial relations involving untagged nodes";
-const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_OPTION_SHORT = "";
-const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG =
-    "no-untagged-nodes-geometric-relations";
-const static inline std::string NO_UNTAGGED_NODES_SPATIAL_RELS_OPTION_HELP =
-    "Do not compute spatial relations involving untagged nodes";
+const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_INFO =
+    "Compute spatial relations involving untagged nodes";
+const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_OPTION_SHORT = "";
+const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG =
+    "add-untagged-nodes-geometric-relations";
+const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_OPTION_HELP =
+    "Compute spatial relations involving untagged nodes";
 
 const static inline std::string NO_UNTAGGED_NODES_INFO =
     "Do not output untagged nodes";
@@ -245,13 +245,13 @@ const static inline std::string ADD_WAY_METADATA_OPTION_LONG =
 const static inline std::string ADD_WAY_METADATA_OPTION_HELP =
     "Add information about the way structure";
 
-const static inline std::string ADD_WAY_NODE_ORDER_INFO =
-    "Adding way node order";
-const static inline std::string ADD_WAY_NODE_ORDER_OPTION_SHORT = "";
-const static inline std::string ADD_WAY_NODE_ORDER_OPTION_LONG =
-    "add-way-node-order";
-const static inline std::string ADD_WAY_NODE_ORDER_OPTION_HELP =
-    "Add information about the node members in ways";
+const static inline std::string NO_MEMBER_TRIPLES_INFO =
+    "Do not write member triples for relations and ways";
+const static inline std::string NO_MEMBER_TRIPLES_OPTION_SHORT = "";
+const static inline std::string NO_MEMBER_TRIPLES_OPTION_LONG =
+    "no-member-triples";
+const static inline std::string NO_MEMBER_TRIPLES_OPTION_HELP =
+    "Do not write member triples for relations and ways";
 
 const static inline std::string ADD_WAY_NODE_SPATIAL_METADATA_INFO =
     "Adding way metadata";
