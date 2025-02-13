@@ -1,4 +1,4 @@
-name: Docker build and publish
+name: docker-publish
 
 on:
   push:
@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  docker:
+  docker-publish:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
