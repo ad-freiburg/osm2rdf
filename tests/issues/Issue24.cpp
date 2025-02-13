@@ -176,10 +176,12 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp "
-      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osm2rdf:facts "
-      "\"0\"^^xsd:integer .\nosmnode:42 geo:hasGeometry "
-      "osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT "
+      "osmnode:42 rdf:type osm:node .\n"
+      "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
+      "osmnode:42 osmmeta:version \"0\"^^xsd:integer .\n"
+      "osmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
+      "osmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\n"
+      "osm2rdfgeom:osm_node_42 geo:asWKT "
       "\"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull "
       "\"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 "
       "osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 "
@@ -264,13 +266,15 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:42 rdf:type osm:relation .\nosmrel:42 osmmeta:timestamp "
-      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmrel:42 osm2rdf:facts "
+      "osmrel:42 rdf:type osm:relation .\n"
+      "osmrel:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
+      "osmrel:42 osmmeta:version \"0\"^^xsd:integer .\n"
+      "osmrel:42 osm2rdf:facts "
       "\"0\"^^xsd:integer .\nosmrel:42 osmrel:member _:0_0 .\n_:0_0 "
-      "osm2rdfmember:id osmnode:23 .\n_:0_0 osm2rdfmember:role \"label\" "
-      ".\n_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\nosmrel:42 "
-      "osmrel:member _:0_1 .\n_:0_1 osm2rdfmember:id osmway:55 .\n_:0_1 "
-      "osm2rdfmember:role \"outer\" .\n_:0_1 osm2rdfmember:pos "
+      "osmrel:member_id osmnode:23 .\n_:0_0 osmrel:member_role \"label\" "
+      ".\n_:0_0 osmrel:member_pos \"0\"^^xsd:integer .\nosmrel:42 "
+      "osmrel:member _:0_1 .\n_:0_1 osmrel:member_id osmway:55 .\n_:0_1 "
+      "osmrel:member_role \"outer\" .\n_:0_1 osmrel:member_pos "
       "\"1\"^^xsd:integer .\nosmrel:42 geo:hasGeometry "
       "osm2rdfgeom:osm_relation_42 .\nosm2rdfgeom:osm_relation_42 geo:asWKT "
       "\"GEOMETRYCOLLECTION(POINT(7.5 48),LINESTRING(7.5 48,7.6 "
@@ -279,7 +283,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
       "osm2rdfgeom:envelope \"POLYGON((7.5 48,7.6 48,7.6 48,7.5 48,7.5 "
       "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:obb \"POLYGON((7.5 48,"
       "7.5 48,7.6 48,7.6 48,7.5 48))\"^^geo:wktLiteral .\nosmrel:42 "
-      "osm2rdf:completeGeometry \"yes\" .\n",
+      "osm2rdf:hasCompleteGeometry \"true\"^^xsd:boolean .\n",
       buffer.str());
 
   // Cleanup
@@ -326,8 +330,10 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:42 rdf:type osm:way .\nosmway:42 osmmeta:timestamp "
-      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmway:42 osm2rdf:facts "
+      "osmway:42 rdf:type osm:way .\n"
+      "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
+      "osmway:42 osmmeta:version \"0\"^^xsd:integer .\n"
+      "osmway:42 osm2rdf:facts "
       "\"0\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdf:way_42 "
       ".\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull "

@@ -36,6 +36,11 @@ osm2rdf::osm::Relation::Relation() {
 osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
   _id = relation.positive_id();
   _timestamp = relation.timestamp().seconds_since_epoch();
+  _changeset = relation.changeset();
+  _user = relation.user();
+  _uid = relation.uid();
+  _version = relation.version();
+  _visible = relation.visible();
   _tags = std::move(osm2rdf::osm::convertTagList(relation.tags()));
   _members.reserve(relation.cmembers().size());
   for (const auto& member : relation.cmembers()) {
@@ -54,8 +59,31 @@ osm2rdf::osm::Relation::id_t osm2rdf::osm::Relation::id() const noexcept {
 }
 
 // ____________________________________________________________________________
+osm2rdf::osm::generic::changeset_id_t osm2rdf::osm::Relation::changeset()
+    const noexcept {
+  return _changeset;
+}
+
+// ____________________________________________________________________________
 std::time_t osm2rdf::osm::Relation::timestamp() const noexcept {
   return _timestamp;
+}
+
+// ____________________________________________________________________________
+std::string osm2rdf::osm::Relation::user() const noexcept { return _user; }
+
+// ____________________________________________________________________________
+id_t osm2rdf::osm::Relation::uid() const noexcept { return _uid; }
+
+// ____________________________________________________________________________
+osm2rdf::osm::generic::version_t osm2rdf::osm::Relation::version()
+    const noexcept {
+  return _version;
+}
+// ____________________________________________________________________________
+bool osm2rdf::osm::Relation::visible()
+    const noexcept {
+  return _visible;
 }
 
 // ____________________________________________________________________________

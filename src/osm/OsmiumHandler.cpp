@@ -56,7 +56,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
     assembler_config.create_empty_areas = false;
     osmium::area::MultipolygonManager<osmium::area::Assembler> mp_manager{
         assembler_config};
-    osm2rdf::osm::CountHandler countHandler;
+    osm2rdf::osm::CountHandler countHandler(_config);
 
     // read relations for areas
     {
@@ -163,6 +163,11 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
   _areasSeen++;
+
+  if (!_config.addUntaggedAreas && area.tags().empty()) {
+    return;
+  }
+
   try {
     auto osmArea = osm2rdf::osm::Area(area);
 #pragma omp task
@@ -186,6 +191,10 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
   _nodesSeen++;
+
+  if (!_config.addUntaggedNodes && node.tags().empty()) {
+    return;
+  }
 
   try {
     const auto& osmNode = osm2rdf::osm::Node(node);
@@ -224,6 +233,11 @@ template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::relation(
     const osmium::Relation& relation) {
   _relationsSeen++;
+
+  if (!_config.addUntaggedRelations && relation.tags().empty()) {
+    return;
+  }
+
   try {
     // only task this away if we actually build the relation geometries,
     // otherwise this just adds multithreading overhead for nothing
@@ -270,6 +284,11 @@ void osm2rdf::osm::OsmiumHandler<W>::relation(
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::way(const osmium::Way& way) {
   _waysSeen++;
+
+  if (!_config.addUntaggedWays && way.tags().empty()) {
+    return;
+  }
+
   try {
     auto osmWay = osm2rdf::osm::Way(way);
 

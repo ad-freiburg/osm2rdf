@@ -74,6 +74,12 @@ struct Config {
   bool addWayNodeOrder = false;
   bool addWayNodeSpatialMetadata = false;
   bool skipWikiLinks = false;
+  bool addOsmMetadata = true;
+
+  bool addUntaggedNodes = true;
+  bool addUntaggedWays = true;
+  bool addUntaggedRelations = true;
+  bool addUntaggedAreas = true;
 
   int numThreads = std::thread::hardware_concurrency();
 

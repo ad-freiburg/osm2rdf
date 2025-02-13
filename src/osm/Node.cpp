@@ -17,7 +17,6 @@
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "osm2rdf/osm/Node.h"
-
 #include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/node_ref.hpp"
@@ -32,6 +31,11 @@ osm2rdf::osm::Node::Node() {
 osm2rdf::osm::Node::Node(const osmium::Node& node) {
   _id = node.positive_id();
   _timestamp = node.timestamp().seconds_since_epoch();
+  _changeset = node.changeset();
+  _user = node.user();
+  _uid = node.uid();
+  _version = node.version();
+  _visible = node.visible();
   const auto& loc = node.location();
   _geom = ::util::geo::DPoint{loc.lon(), loc.lat()};
   _tags = std::move(osm2rdf::osm::convertTagList(node.tags()));
@@ -48,9 +52,30 @@ osm2rdf::osm::Node::Node(const osmium::NodeRef& nodeRef) {
 osm2rdf::osm::Node::id_t osm2rdf::osm::Node::id() const noexcept { return _id; }
 
 // ____________________________________________________________________________
+osm2rdf::osm::generic::changeset_id_t osm2rdf::osm::Node::changeset()
+    const noexcept {
+  return _changeset;
+}
+
+// ____________________________________________________________________________
 std::time_t osm2rdf::osm::Node::timestamp() const noexcept {
   return _timestamp;
 }
+
+// ____________________________________________________________________________
+std::string osm2rdf::osm::Node::user() const noexcept { return _user; }
+
+// ____________________________________________________________________________
+osm2rdf::osm::Node::id_t osm2rdf::osm::Node::uid() const noexcept {
+  return _uid;
+}
+
+// ____________________________________________________________________________
+osm2rdf::osm::generic::version_t osm2rdf::osm::Node::version() const noexcept {
+  return _version;
+}
+// ____________________________________________________________________________
+bool osm2rdf::osm::Node::visible() const noexcept { return _visible; }
 
 // ____________________________________________________________________________
 const ::util::geo::DPoint& osm2rdf::osm::Node::geom() const noexcept {

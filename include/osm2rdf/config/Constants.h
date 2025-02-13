@@ -80,7 +80,7 @@ const static inline std::string OUTPUT_COMPRESS_OPTION_SHORT = "";
 const static inline std::string OUTPUT_COMPRESS_OPTION_LONG =
     "output-compression";
 const static inline std::string OUTPUT_COMPRESS_OPTION_HELP =
-    "Output file compression, valid values: none, bz2, gz2";
+    "Output file compression, valid values: none, bz2, gz";
 
 const static inline std::string STORE_LOCATIONS_INFO =
     "Storing locations osmium locations:";
@@ -89,6 +89,14 @@ const static inline std::string STORE_LOCATIONS_LONG = "store-locations";
 const static inline std::string STORE_LOCATIONS_HELP =
     "Method used to store locations, valid values: mem-flex (default), "
     "mem-dense, disk-sparse, disk-dense ";
+
+const static inline std::string NO_OSM_METADATA_INFO =
+    "Not outputting OSM metadata";
+const static inline std::string NO_OSM_METADATA_OPTION_SHORT = "";
+const static inline std::string NO_OSM_METADATA_OPTION_LONG = "no-osm-metadata";
+const static inline std::string NO_OSM_METADATA_OPTION_HELP =
+    "Do not output OSM metadata (user, timestamp, changeset, visibility and "
+    "version)";
 
 const static inline std::string NO_FACTS_INFO = "Not dumping facts";
 const static inline std::string NO_FACTS_OPTION_SHORT = "";
@@ -174,6 +182,38 @@ const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_LONG =
     "no-way-geometric-relations";
 const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump way geometric relations";
+
+const static inline std::string NO_UNTAGGED_NODES_INFO =
+    "Do not output untagged nodes";
+const static inline std::string NO_UNTAGGED_NODES_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_NODES_OPTION_LONG =
+    "no-untagged-nodes";
+const static inline std::string NO_UNTAGGED_NODES_OPTION_HELP =
+    "Do not output untagged nodes";
+
+const static inline std::string NO_UNTAGGED_WAYS_INFO =
+    "Do not output untagged ways";
+const static inline std::string NO_UNTAGGED_WAYS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_WAYS_OPTION_LONG =
+    "no-untagged-ways";
+const static inline std::string NO_UNTAGGED_WAYS_OPTION_HELP =
+    "Do not output untagged ways";
+
+const static inline std::string NO_UNTAGGED_RELATIONS_INFO =
+    "Do not output untagged relations";
+const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_LONG =
+    "no-untagged-relations";
+const static inline std::string NO_UNTAGGED_RELATIONS_OPTION_HELP =
+    "Do not output untagged relations";
+
+const static inline std::string NO_UNTAGGED_AREAS_INFO =
+    "Do not output untagged areas";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_SHORT = "";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_LONG =
+    "no-untagged-areas";
+const static inline std::string NO_UNTAGGED_AREAS_OPTION_HELP =
+    "Do not output untagged areas";
 
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_INFO =
     "Adding linestrings for ways which form areas";
