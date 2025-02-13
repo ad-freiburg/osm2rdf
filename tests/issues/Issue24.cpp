@@ -271,10 +271,10 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
       "osmrel:42 osmmeta:version \"0\"^^xsd:integer .\n"
       "osmrel:42 osm2rdf:facts "
       "\"0\"^^xsd:integer .\nosmrel:42 osmrel:member _:0_0 .\n_:0_0 "
-      "osm2rdfmember:id osmnode:23 .\n_:0_0 osm2rdfmember:role \"label\" "
-      ".\n_:0_0 osm2rdfmember:pos \"0\"^^xsd:integer .\nosmrel:42 "
-      "osmrel:member _:0_1 .\n_:0_1 osm2rdfmember:id osmway:55 .\n_:0_1 "
-      "osm2rdfmember:role \"outer\" .\n_:0_1 osm2rdfmember:pos "
+      "osmrel:member_id osmnode:23 .\n_:0_0 osmrel:member_role \"label\" "
+      ".\n_:0_0 osmrel:member_pos \"0\"^^xsd:integer .\nosmrel:42 "
+      "osmrel:member _:0_1 .\n_:0_1 osmrel:member_id osmway:55 .\n_:0_1 "
+      "osmrel:member_role \"outer\" .\n_:0_1 osmrel:member_pos "
       "\"1\"^^xsd:integer .\nosmrel:42 geo:hasGeometry "
       "osm2rdfgeom:osm_relation_42 .\nosm2rdfgeom:osm_relation_42 geo:asWKT "
       "\"GEOMETRYCOLLECTION(POINT(7.5 48),LINESTRING(7.5 48,7.6 "
@@ -283,7 +283,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
       "osm2rdfgeom:envelope \"POLYGON((7.5 48,7.6 48,7.6 48,7.5 48,7.5 "
       "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:obb \"POLYGON((7.5 48,"
       "7.5 48,7.6 48,7.6 48,7.5 48))\"^^geo:wktLiteral .\nosmrel:42 "
-      "osm2rdf:completeGeometry \"true\"^^xsd:boolean .\n",
+      "osm2rdf:hasCompleteGeometry \"true\"^^xsd:boolean .\n",
       buffer.str());
 
   // Cleanup

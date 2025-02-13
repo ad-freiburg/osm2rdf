@@ -38,6 +38,8 @@ macro(package_add_test TESTNAME)
     target_compile_features(${TESTNAME} PRIVATE cxx_std_17)
     target_link_libraries(${TESTNAME} gtest gmock gtest_main)
     target_link_libraries(${TESTNAME} osm2rdf_library)
+    target_link_libraries(${TESTNAME} pb_util)
+    target_link_libraries(${TESTNAME} spatialjoin-dev)
     # gtest_discover_tests replaces gtest_add_tests,
     # see https://cmake.org/cmake/help/v3.10/module/GoogleTest.html for more options to pass to it
     gtest_discover_tests(${TESTNAME}
