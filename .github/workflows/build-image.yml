@@ -29,6 +29,9 @@ jobs:
       - name: Get short SHA
         id: sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get PR number
+        id: pr
+        run: echo "pr_num=$(git log --format=%s -n 1 | sed -nr 's/.*\(\#([0-9]+)\)/\1/p')" >> $GITHUB_OUTPUT
       - name: Generate image metadata
         id: meta
         uses: docker/metadata-action@v5
@@ -49,7 +52,7 @@ jobs:
           # see e.g. https://stackoverflow.com/questions/27643017/do-i-need-to-manually-tag-latest-when-pushing-to-docker-public-repository
           tags: >
             adfreiburg/osm2rdf:latest,
-            adfreiburg/osm2rdf:${{ github.ref_name }},
+            adfreiburg/osm2rdf:${{ github.ref_name == 'master' && format('pr-{0}', steps.pr.outputs.pr_num) || github.ref_name }},
             adfreiburg/osm2rdf:commit-${{ steps.sha.outputs.sha_short }},
 
           # Set annotations and labels that conform to the OpenContainers
