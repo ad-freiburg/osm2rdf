@@ -418,7 +418,7 @@ TEST(E2E, osmWikiExample) {
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("nodes seen:4 dumped: 4 geometry: 4\n"));
   ASSERT_THAT(printedState,
-              ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 0\n"));
+              ::testing::HasSubstr("relations seen:1 dumped: 1 geometry: 1\n"));
   ASSERT_THAT(printedState,
               ::testing::HasSubstr("ways seen:1 dumped: 1 geometry: 1\n"));
   const auto printedData = coutBuffer.str();
