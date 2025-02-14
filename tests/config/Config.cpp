@@ -42,7 +42,7 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
   ASSERT_FALSE(config.noWayGeometricRelations);
 
   ASSERT_FALSE(config.addAreaWayLinestrings);
-  ASSERT_FALSE(config.addWayNodeOrder);
+  ASSERT_TRUE(config.addMemberTriples);
   ASSERT_FALSE(config.addWayNodeSpatialMetadata);
   ASSERT_FALSE(config.addWayMetadata);
   ASSERT_FALSE(config.skipWikiLinks);
@@ -584,13 +584,13 @@ TEST(CONFIG_Config, fromArgsAddWayNodeOrderLong) {
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
   const auto arg =
-      "--" + osm2rdf::config::constants::ADD_WAY_NODE_ORDER_OPTION_LONG;
+      "--" + osm2rdf::config::constants::NO_MEMBER_TRIPLES_OPTION_LONG;
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
-  ASSERT_TRUE(config.addWayNodeOrder);
+  ASSERT_TRUE(!config.addMemberTriples);
 }
 
 // ____________________________________________________________________________
@@ -608,7 +608,7 @@ TEST(CONFIG_Config, fromArgsAddWayNodeSpatialMetadataLong) {
   config.fromArgs(argc, argv);
   ASSERT_EQ("", config.output.string());
   ASSERT_TRUE(config.addWayNodeSpatialMetadata);
-  ASSERT_TRUE(config.addWayNodeOrder);
+  ASSERT_TRUE(config.addMemberTriples);
 }
 
 // ____________________________________________________________________________
@@ -877,11 +877,11 @@ TEST(CONFIG_Config, getInfoAddWayMetadata) {
 TEST(CONFIG_Config, getInfoAddWayNodeOrder) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
-  config.addWayNodeOrder = true;
+  config.addMemberTriples = false;
 
   const std::string res = config.getInfo("");
   ASSERT_THAT(res, ::testing::HasSubstr(
-                       osm2rdf::config::constants::ADD_WAY_NODE_ORDER_INFO));
+                       osm2rdf::config::constants::NO_MEMBER_TRIPLES_INFO));
 }
 
 // ____________________________________________________________________________

@@ -480,6 +480,7 @@ TEST(OSM_FactHandler, way) {
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addMemberTriples = false;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -542,7 +543,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
-  config.addWayNodeOrder = true;
+  config.addMemberTriples = true;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -606,7 +607,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
-  config.addWayNodeOrder = true;
+  config.addMemberTriples = true;
   config.addWayNodeSpatialMetadata = true;
 
   osm2rdf::util::Output output{config, config.output};
@@ -673,7 +674,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
-  config.addWayNodeOrder = true;
+  config.addMemberTriples = true;
   config.addWayNodeSpatialMetadata = true;
   config.addAreaWayLinestrings = true;
 
@@ -746,6 +747,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addWayMetadata = true;
+  config.addMemberTriples = false;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();

@@ -305,6 +305,7 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
   config.addCentroids = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
+  config.addMemberTriples = false;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
