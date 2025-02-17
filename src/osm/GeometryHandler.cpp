@@ -62,6 +62,7 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
       _sweeper(
           {static_cast<size_t>(config.numThreads),
            static_cast<size_t>(config.numThreads),
+           10000,
            "",
            osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS,
            osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS,
@@ -98,9 +99,7 @@ void GeometryHandler<W>::relation(const Relation& rel) {
 
   if (!rel.hasGeometry()) return;
 
-  const std::string id = _writer->generateIRI(
-      osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset],
-      rel.id());
+  std::string id = getSweeperId(rel.id(), 5);
 
   size_t subId = 0;
 
@@ -137,7 +136,7 @@ template <typename W>
 void GeometryHandler<W>::writeRelCb(size_t t, const std::string& a,
                                     const std::string& b,
                                     const std::string& pred) {
-  _writer->writeTriple(a, pred, b, t);
+  _writer->writeTriple(getFullID(a), pred, getFullID(b), t);
 }
 
 // ____________________________________________________________________________
@@ -197,9 +196,7 @@ template <typename W>
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::area(const Area& area) {
-  const std::string id = _writer->generateIRI(
-      areaNS(area.fromWay() ? AreaFromType::WAY : AreaFromType::RELATION),
-      area.objId());
+  std::string id = getSweeperId(area.objId(), area.fromWay() ? 3 : 4);
 
   _sweeper.add(transform(area.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
@@ -222,10 +219,64 @@ template <typename W>
 
 // ____________________________________________________________________________
 template <typename W>
+std::string GeometryHandler<W>::getFullID(const std::string& strid) {
+  uint64_t id = 0;
+
+  for (size_t i = strid.size() - 1; i > 0; i--) {
+    id |=
+        static_cast<uint64_t>(reinterpret_cast<const unsigned char&>(strid[i]))
+        << (8 * (strid.size() - 1 - i));
+  }
+
+  if (strid[0] == 1) {
+    return _writer->generateIRI(
+        osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset], id);
+  }
+
+  if (strid[0] == 2) {
+    return _writer->generateIRI(
+        osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset], id);
+  }
+
+  if (strid[0] == 3) {
+    return _writer->generateIRI(areaNS(AreaFromType::WAY), id);
+  }
+
+  if (strid[0] == 4) {
+    return _writer->generateIRI(areaNS(AreaFromType::RELATION), id);
+  }
+
+  if (strid[0] == 5) {
+    return _writer->generateIRI(
+        osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset], id);
+  }
+
+  return strid;
+}
+
+// ____________________________________________________________________________
+template <typename W>
+std::string GeometryHandler<W>::getSweeperId(uint64_t oid, char type) {
+  unsigned char id[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int a = 0;
+  uint64_t tmp;
+
+  while ((oid >> (a * 8))) {
+    tmp = (oid & (0xFFLL << (a * 8)));
+    id[8 - a] = tmp >> (a * 8);
+    a++;
+  }
+
+  id[8 - a] = type;
+
+  return std::string{reinterpret_cast<char*>(id + (8 - a)),
+                     static_cast<size_t>(a + 1)};
+}
+
+// ____________________________________________________________________________
+template <typename W>
 void GeometryHandler<W>::node(const Node& node) {
-  std::string id = _writer->generateIRI(
-      osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
-      node.id());
+  std::string id = getSweeperId(node.id(), 1);
 
   _sweeper.add(transform(node.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
@@ -241,8 +292,7 @@ template <typename W>
 void GeometryHandler<W>::way(const Way& way) {
   if (way.isArea()) return;  // skip way relations, will be handled by area()
 
-  std::string id = _writer->generateIRI(
-      osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset], way.id());
+  std::string id = getSweeperId(way.id(), 2);
 
   _sweeper.add(transform(way.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
@@ -275,10 +325,10 @@ void GeometryHandler<W>::calculateRelations() {
       throw std::runtime_error("Could not read auxiliary geo file " + auxFile);
     }
 
-    ::util::JobQueue<ParseBatch> jobs(1000);             // the WKT parse jobs
+    ::util::JobQueue<sj::ParseBatch> jobs(1000);             // the WKT parse jobs
     std::vector<std::thread> thrds(_config.numThreads);  // the parse workers
     for (size_t i = 0; i < thrds.size(); i++)
-      thrds[i] = std::thread(&processQueue, &jobs, i, &_sweeper);
+      thrds[i] = std::thread(&sj::processQueue, &jobs, i, &_sweeper);
 
     ssize_t len;
     std::string dangling;

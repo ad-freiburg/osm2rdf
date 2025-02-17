@@ -79,6 +79,9 @@ class GeometryHandler {
                   const std::string& pred);
   void progressCb(size_t progr);
 
+  std::string getSweeperId(uint64_t oid, char type);
+  std::string getFullID(const std::string& id);
+
   osm2rdf::util::ProgressBar _progressBar;
 };
 

@@ -81,6 +81,8 @@ struct Config {
   bool addUntaggedRelations = true;
   bool addUntaggedAreas = true;
 
+  bool addSpatialRelsForUntaggedNodes = true;
+
   int numThreads = std::thread::hardware_concurrency();
 
   // Default settings for data
