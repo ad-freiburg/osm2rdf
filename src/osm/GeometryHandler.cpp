@@ -62,6 +62,7 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
       _sweeper(
           {static_cast<size_t>(config.numThreads),
            static_cast<size_t>(config.numThreads),
+           10000,
            "",
            osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS,
            osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS,
@@ -275,17 +276,17 @@ void GeometryHandler<W>::calculateRelations() {
       throw std::runtime_error("Could not read auxiliary geo file " + auxFile);
     }
 
-    ::util::JobQueue<ParseBatch> jobs(1000);             // the WKT parse jobs
+    ::util::JobQueue<sj::ParseBatch> jobs(1000);             // the WKT parse jobs
     std::vector<std::thread> thrds(_config.numThreads);  // the parse workers
     for (size_t i = 0; i < thrds.size(); i++)
-      thrds[i] = std::thread(&processQueue, &jobs, i, &_sweeper);
+      thrds[i] = std::thread(&sj::processQueue, &jobs, i, &_sweeper);
 
     ssize_t len;
     std::string dangling;
     size_t gid = 0;
 
     while ((len = ::util::readAll(file, buf, CACHE_SIZE)) > 0) {
-      parse(reinterpret_cast<char*>(buf), len, dangling, &gid, jobs, 0);
+      sj::parse(reinterpret_cast<char*>(buf), len, dangling, &gid, jobs, 0);
     }
 
     // end event
