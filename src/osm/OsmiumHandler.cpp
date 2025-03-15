@@ -208,7 +208,8 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
           _progressBar.update(_numTasksDone++);
         }
       }
-      if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations) {
+      if (!_config.noGeometricRelations && !_config.noNodeGeometricRelations &&
+          (!osmNode.tags().empty() || _config.addSpatialRelsForUntaggedNodes)) {
         _geometryHandler->node(osmNode);
 #pragma omp critical(progress)
         {

@@ -357,6 +357,7 @@ TEST(E2E, osmWikiExample) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+  config.addMemberTriples = true;
 
   // Create empty input file
   config.input = config.getTempPath("E2E", "osmWikiExample.osm");
@@ -432,7 +433,7 @@ TEST(E2E, osmWikiExample) {
   ASSERT_THAT(printedData,
               ::testing::HasSubstr("osmrel:56688 rdf:type osm:relation .\n"));
   ASSERT_THAT(printedData,
-              ::testing::HasSubstr("_2 osmrel:member_id osmway:26659127 .\n"));
+              ::testing::HasSubstr(" osmrel:member_id osmway:26659127 .\n"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
