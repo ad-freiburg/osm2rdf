@@ -253,6 +253,60 @@ TEST(TTL_WriterQLEVER, generateBlankNode) {
 }
 
 // ____________________________________________________________________________
+TEST(TTL_WriterQLEVER, generateSkolem) {
+  osm2rdf::config::Config config;
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
+  {
+    const std::string res = w.generateSkolem("1");
+    ASSERT_STREQ("genid:1", res.c_str());
+  }
+  {
+    const std::string res = w.generateSkolem("2");
+    ASSERT_STREQ("genid:2", res.c_str());
+  }
+  {
+    const std::string res = w.generateSkolem("3");
+    ASSERT_STREQ("genid:3", res.c_str());
+  }
+}
+
+// ____________________________________________________________________________
+TEST(TTL_WriterQLEVER, generateSkolemForRelationMember) {
+  osm2rdf::config::Config config;
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
+  {
+    const std::string res = w.generateSkolemForRelationMember(1, 2, "n");
+    ASSERT_STREQ("genid:r1n2", res.c_str());
+  }
+  {
+    const std::string res = w.generateSkolemForRelationMember(1, 2, "w");
+    ASSERT_STREQ("genid:r1w2", res.c_str());
+  }
+  {
+    const std::string res = w.generateSkolemForRelationMember(1, 2, "r");
+    ASSERT_STREQ("genid:r1r2", res.c_str());
+  }
+}
+
+// ____________________________________________________________________________
+TEST(TTL_WriterQLEVER, generateSkolemForWayMember) {
+  osm2rdf::config::Config config;
+  osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
+  {
+    const std::string res = w.generateSkolemForWayMember(1, 1);
+    ASSERT_STREQ("genid:w1n1", res.c_str());
+  }
+  {
+    const std::string res = w.generateSkolemForWayMember(2, 3);
+    ASSERT_STREQ("genid:w2n3", res.c_str());
+  }
+  {
+    const std::string res = w.generateSkolemForWayMember(3, 5);
+    ASSERT_STREQ("genid:w3n5", res.c_str());
+  }
+}
+
+// ____________________________________________________________________________
 TEST(TTL_WriterNT, generateIRI_ID) {
   osm2rdf::config::Config config;
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT> w{config, nullptr};
@@ -704,8 +758,8 @@ TEST(TTL_WriterTTL, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 21"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 26"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 22"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 27"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup
@@ -766,8 +820,8 @@ TEST(TTL_WriterQLEVER, writeStatisticJson) {
   statsBuffer << statsIFStream.rdbuf();
 
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"blankNodes\": 3"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 21"));
-  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 26"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"header\": 22"));
+  ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"lines\": 27"));
   ASSERT_THAT(statsBuffer.str(), ::testing::HasSubstr("\"triples\": 5"));
 
   // Cleanup
