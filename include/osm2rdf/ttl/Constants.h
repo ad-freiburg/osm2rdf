@@ -45,6 +45,7 @@ const static inline std::string NAMESPACE__OSM2RDF_TAG = "osm2rdfkey";
 const static inline std::string NAMESPACE__RDF = "rdf";
 const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
+const static inline std::string NAMESPACE__GENID = "genid";
 
 // Generated constants (depending on output format)
 inline std::string IRI__GEOSPARQL__AS_WKT;

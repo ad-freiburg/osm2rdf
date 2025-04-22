@@ -59,6 +59,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/key#"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
        "https://osm2rdf.cs.uni-freiburg.de/rdf/meta#"},
+      {osm2rdf::ttl::constants::NAMESPACE__GENID,
+       "http://osm2rdf.cs.uni-freiburg.de/.well-known/genid/"},
       // https://wiki.openstreetmap.org/wiki/Sophox#How_OSM_data_is_stored
       // https://github.com/Sophox/sophox/blob/master/osm2rdf/osmutils.py#L35-L39
       // osm prefixes
@@ -287,6 +289,33 @@ std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
 #endif
   return "_:" + std::to_string(threadId) + "_" +
          std::to_string(_blankNodeCount[threadId]++);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateSkolem(const std::string& id) {
+  return generateIRIUnsafe(osm2rdf::ttl::constants::NAMESPACE__GENID, id);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateSkolemForRelationMember(
+    const uint64_t& relationId,
+    const uint64_t& memberId,
+    const std::string& memberType) {
+  const std::string skolemId = "r" + std::to_string(relationId) +
+                               memberType + std::to_string(memberId);
+  return generateSkolem(skolemId);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateSkolemForWayMember(
+    const uint64_t& wayId,
+    const uint64_t& nodeId) {
+  const std::string skolemId = "w" + std::to_string(wayId) +
+                               "n" + std::to_string(nodeId);
+  return generateSkolem(skolemId);
 }
 
 // ____________________________________________________________________________

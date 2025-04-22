@@ -139,6 +139,22 @@ class Writer {
   // generateBlankNode creates a new unique identifier for a blank node.
   std::string generateBlankNode();
 
+  // generateSkolem creates a unique identifier for an osm object member.
+  std::string generateSkolem(const std::string& id);
+
+  // generateSkolemForRelationMember creates a unique identifier for a member of
+  // a relation by combining the id of the relation and member with a letter
+  // indicating the object type ('r', 'w', or 'n').
+  std::string generateSkolemForRelationMember(const uint64_t& relation,
+                                              const uint64_t& member,
+                                              const std::string& memberType);
+
+  // generateSkolemForWayMember creates a unique identifier for a member of
+  // a way by combining the id of the way and member with a letter
+  // indicating the object type ('r', 'w', or 'n').
+  std::string generateSkolemForWayMember(const uint64_t& wayId,
+                                         const uint64_t& nodeId);
+
   // Creates a IRI from given prefix p and string value v.
   // Assumes that both p and v are "safe", that is, they can be used
   // directly in the TTL
