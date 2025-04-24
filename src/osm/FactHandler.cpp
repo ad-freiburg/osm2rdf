@@ -209,9 +209,9 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
       const std::string& role = member.role();
       const std::string memberIRI = _config.noBlankNodes
-                                ? _writer->generateSkolemForRelationMember(relation.id(),
-                                                                           member.id(),
-                                                                           type)
+                                ? _writer->generateSkolemForRelationMember(
+                                    relation.id(), member.id(),
+                                    type, inRelPos)
                                 : _writer->generateBlankNode();
 
       _writer->writeTriple(
@@ -277,7 +277,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     auto lastNode = way.nodes().front();
     for (const auto& node : way.nodes()) {
       const std::string memberIRI = _config.noBlankNodes
-                                ? _writer->generateSkolemForWayMember(way.id(), node.id())
+                                ? _writer->generateSkolemForWayMember(
+                                    way.id(), node.id(), wayOrder)
                                 : _writer->generateBlankNode();
 
       _writer->writeTriple(subj, IRI__OSMWAY__NODE, memberIRI);

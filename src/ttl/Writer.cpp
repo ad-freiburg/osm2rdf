@@ -302,9 +302,13 @@ template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateSkolemForRelationMember(
     const uint64_t& relationId,
     const uint64_t& memberId,
-    const std::string& memberType) {
+    const std::string& memberType,
+    const size_t& relPos) {
   const std::string skolemId = "r" + std::to_string(relationId) +
-                               memberType + std::to_string(memberId);
+                               //Extract the first relevant char to determine
+                               //the type of the osm/ohm object
+                               memberType.at(3) + std::to_string(memberId) +
+                               "p" + std::to_string(relPos);
   return generateSkolem(skolemId);
 }
 
@@ -312,9 +316,11 @@ std::string osm2rdf::ttl::Writer<T>::generateSkolemForRelationMember(
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateSkolemForWayMember(
     const uint64_t& wayId,
-    const uint64_t& nodeId) {
+    const uint64_t& nodeId,
+    const size_t& relPos) {
   const std::string skolemId = "w" + std::to_string(wayId) +
-                               "n" + std::to_string(nodeId);
+                               "n" + std::to_string(nodeId) +
+                               "p" + std::to_string(relPos);
   return generateSkolem(skolemId);
 }
 
