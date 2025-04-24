@@ -83,6 +83,8 @@ struct Config {
 
   bool addSpatialRelsForUntaggedNodes = true;
 
+  bool noBlankNodes = false;
+
   int numThreads = std::thread::hardware_concurrency();
 
   // Default settings for data
