@@ -275,16 +275,16 @@ TEST(TTL_WriterQLEVER, generateSkolemForRelationMember) {
   osm2rdf::config::Config config;
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
   {
-    const std::string res = w.generateSkolemForRelationMember(1, 2, "n");
-    ASSERT_STREQ("genid:r1n2", res.c_str());
+    const std::string res = w.generateSkolemForRelationMember(1, 2, "osmnode", 3);
+    ASSERT_STREQ("genid:r1n2p3", res.c_str());
   }
   {
-    const std::string res = w.generateSkolemForRelationMember(1, 2, "w");
-    ASSERT_STREQ("genid:r1w2", res.c_str());
+    const std::string res = w.generateSkolemForRelationMember(1, 2, "osmway", 3);
+    ASSERT_STREQ("genid:r1w2p3", res.c_str());
   }
   {
-    const std::string res = w.generateSkolemForRelationMember(1, 2, "r");
-    ASSERT_STREQ("genid:r1r2", res.c_str());
+    const std::string res = w.generateSkolemForRelationMember(1, 2, "ohmnode", 3);
+    ASSERT_STREQ("genid:r1n2p3", res.c_str());
   }
 }
 
@@ -293,16 +293,16 @@ TEST(TTL_WriterQLEVER, generateSkolemForWayMember) {
   osm2rdf::config::Config config;
   osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER> w{config, nullptr};
   {
-    const std::string res = w.generateSkolemForWayMember(1, 1);
-    ASSERT_STREQ("genid:w1n1", res.c_str());
+    const std::string res = w.generateSkolemForWayMember(1, 1, 1);
+    ASSERT_STREQ("genid:w1n1p1", res.c_str());
   }
   {
-    const std::string res = w.generateSkolemForWayMember(2, 3);
-    ASSERT_STREQ("genid:w2n3", res.c_str());
+    const std::string res = w.generateSkolemForWayMember(2, 3, 4);
+    ASSERT_STREQ("genid:w2n3p4", res.c_str());
   }
   {
-    const std::string res = w.generateSkolemForWayMember(3, 5);
-    ASSERT_STREQ("genid:w3n5", res.c_str());
+    const std::string res = w.generateSkolemForWayMember(3, 5, 7);
+    ASSERT_STREQ("genid:w3n5p7", res.c_str());
   }
 }
 
