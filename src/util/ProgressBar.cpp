@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 // ____________________________________________________________________________
 osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
@@ -37,6 +38,12 @@ osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
     _countWidth = 1;
   }
   _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2;
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::ProgressBar::update(std::size_t count, char phase) {
+  _phase = phase;
+  update(count);
 }
 
 // ____________________________________________________________________________
@@ -79,12 +86,19 @@ void osm2rdf::util::ProgressBar::update(std::size_t count) {
   // Add percentage display %
   std::cerr << ' ' << std::setw(3) << std::right << percent << "%";
 
-  // Add absolute progress [x/y]
-  std::cerr << " [" << std::setw(_countWidth) << std::right << count << "/"
-            << _maxValue << "]\r";
-
   // Update last update time
   _last = std::time(nullptr);
+
+  // Add absolute progress [x/y]
+  std::cerr << " [" << std::setw(_countWidth) << std::right << count << "/"
+            << _maxValue << "]";
+
+  // Add phase
+  if (_phase) std::cerr << " [" << _phase << "]";
+  else std::cerr << "    ";
+
+  std::cerr << "\r";
+
 }
 
 // ____________________________________________________________________________
