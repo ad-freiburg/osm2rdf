@@ -17,6 +17,7 @@
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "osm2rdf/util/ProgressBar.h"
+#include "osm2rdf/util/Time.h"
 
 #include <cassert>
 #include <chrono>
@@ -37,7 +38,7 @@ osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
   if (maxValue == 0) {
     _countWidth = 1;
   }
-  _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2;
+  _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2 - 4 - 20;
 }
 
 // ____________________________________________________________________________
@@ -66,6 +67,10 @@ void osm2rdf::util::ProgressBar::update(std::size_t count) {
   // Store new values.
   _percent = percent;
   _oldValue = count;
+
+  // Add time
+  std::cerr << osm2rdf::util::currentTimeFormatted();
+
   // Open progress bar part with [ ...
   std::cerr << '[';
   // ... add = to indicate done parts ...
