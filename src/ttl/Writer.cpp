@@ -28,9 +28,9 @@
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
+#include "osm2rdf/Version.h"
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Constants.h"
-#include "osm2rdf/Version.h"
 #include "osm2rdf/util/Time.h"
 #include "osmium/osm/item_type.hpp"
 
@@ -298,15 +298,11 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   // Write dump time to metadata.
   const auto n = std::chrono::system_clock::now();
   const time_t time = std::chrono::system_clock::to_time_t(n);
-  char out[25];
-  struct tm t;
-  strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
-  writeLiteralTripleUnsafe(
+  writeSecondsAsISO(
       osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO,
       generateIRIUnsafe(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
-                        "dateDumped"),
-      out, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE_TIME);
-
+                             "dateDumped"),
+      time);
 
   // Write used osm2rdf options to metadata.
   writeOptionTriple(osm2rdf::config::constants::NO_AREA_FACTS_OPTION_LONG,
@@ -318,14 +314,14 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeOptionTriple(osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
                     generateBooleanLiteral(_config.noWayFacts));
 
-  writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO,
+  writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
                     generateBooleanLiteral(_config.noAreaGeometricRelations));
-  writeOptionTriple(osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_INFO,
+  writeOptionTriple(osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
                     generateBooleanLiteral(_config.noNodeGeometricRelations));
   writeOptionTriple(
-      osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_INFO,
+      osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_LONG,
       generateBooleanLiteral(_config.noRelationGeometricRelations));
-  writeOptionTriple(osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO,
+  writeOptionTriple(osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
                     generateBooleanLiteral(_config.noWayGeometricRelations));
 
   writeOptionTriple(
@@ -356,12 +352,12 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
                     generateBooleanLiteral(_config.simplifyGeometries));
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.simplifyWKT)));
+                    generateLiteral(std::to_string(_config.simplifyWKT) + "^^" + constants::IRI__XSD__INTEGER));
   writeOptionTriple(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
-      generateLiteral(std::to_string(_config.wktDeviation)));
+      generateLiteral(std::to_string(_config.wktDeviation) + "^^" + constants::IRI__XSD__DOUBLE));
   writeOptionTriple(osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.wktPrecision)));
+                    generateLiteral(std::to_string(_config.wktPrecision) + "^^" + constants::IRI__XSD__INTEGER));
 
   writeOptionTriple(
       osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
