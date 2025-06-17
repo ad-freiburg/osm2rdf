@@ -30,6 +30,8 @@
 #endif
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/ttl/Constants.h"
+#include "osm2rdf/Version.h"
+#include "osm2rdf/util/Time.h"
 #include "osmium/osm/item_type.hpp"
 
 // ____________________________________________________________________________
@@ -116,6 +118,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfOverlaps");
 
+  osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "info");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_META__OPTION = generateIRI(
+      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "option");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "convex_hull");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE =
@@ -280,6 +286,110 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::NT>::writeHeader() {}
 
 // ____________________________________________________________________________
 template <typename T>
+void osm2rdf::ttl::Writer<T>::writeMetadata() {
+  // Write osm2rdf version to metadata.
+  writeTriple(osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO,
+            generateIRIUnsafe(
+                osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "version"),
+            generateLiteral(osm2rdf::version::GIT_INFO, ""));
+
+  // Write dump time to metadata.
+  const auto n = std::chrono::system_clock::now();
+  const time_t time = std::chrono::system_clock::to_time_t(n);
+  char out[25];
+  struct tm t;
+  strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
+  writeLiteralTripleUnsafe(
+      osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO,
+      generateIRIUnsafe(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
+                        "dateDumped"),
+      out, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE_TIME);
+
+
+  // Write used osm2rdf options to metadata.
+  writeOptionTriple(osm2rdf::config::constants::NO_AREA_FACTS_OPTION_LONG,
+                    generateBooleanLiteral(_config.noAreaFacts));
+  writeOptionTriple(osm2rdf::config::constants::NO_NODE_FACTS_OPTION_LONG,
+                    generateBooleanLiteral(_config.noNodeFacts));
+  writeOptionTriple(osm2rdf::config::constants::NO_RELATION_FACTS_OPTION_LONG,
+                    generateBooleanLiteral(_config.noRelationFacts));
+  writeOptionTriple(osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
+                    generateBooleanLiteral(_config.noWayFacts));
+
+  writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO,
+                    generateBooleanLiteral(_config.noAreaGeometricRelations));
+  writeOptionTriple(osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_INFO,
+                    generateBooleanLiteral(_config.noNodeGeometricRelations));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_INFO,
+      generateBooleanLiteral(_config.noRelationGeometricRelations));
+  writeOptionTriple(osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO,
+                    generateBooleanLiteral(_config.noWayGeometricRelations));
+
+  writeOptionTriple(
+      osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
+      generateLiteral(_config.ogcGeoTriplesMode == config::none ? "none"
+                                                                : "full"));
+
+  writeOptionTriple(
+      osm2rdf::config::constants::SOURCE_DATASET_OPTION_LONG,
+      generateLiteral(_config.sourceDataset == config::OSM ? "OSM" : "OHM"));
+
+  writeOptionTriple(
+      osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
+      generateBooleanLiteral(_config.addAreaWayLinestrings));
+  writeOptionTriple(osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_LONG,
+                    generateBooleanLiteral(_config.addCentroids));
+  writeOptionTriple(osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
+                    generateBooleanLiteral(_config.addWayMetadata));
+  writeOptionTriple(osm2rdf::config::constants::NO_OSM_METADATA_OPTION_LONG,
+                    generateBooleanLiteral(_config.addOsmMetadata));
+  writeOptionTriple(osm2rdf::config::constants::NO_MEMBER_TRIPLES_OPTION_LONG,
+                    generateBooleanLiteral(_config.addMemberTriples));
+  writeOptionTriple(
+      osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG,
+      generateBooleanLiteral(_config.addWayNodeSpatialMetadata));
+  writeOptionTriple(osm2rdf::config::constants::SKIP_WIKI_LINKS_OPTION_LONG,
+                    generateBooleanLiteral(_config.skipWikiLinks));
+  writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
+                    generateBooleanLiteral(_config.simplifyGeometries));
+  writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
+                    generateLiteral(std::to_string(_config.simplifyWKT)));
+  writeOptionTriple(
+      osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
+      generateLiteral(std::to_string(_config.wktDeviation)));
+  writeOptionTriple(osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
+                    generateLiteral(std::to_string(_config.wktPrecision)));
+
+  writeOptionTriple(
+      osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
+      generateBooleanLiteral(_config.addSpatialRelsForUntaggedNodes));
+
+  writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_LONG,
+                    generateBooleanLiteral(_config.addUntaggedNodes));
+  writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_LONG,
+                    generateBooleanLiteral(_config.addUntaggedWays));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_LONG,
+      generateBooleanLiteral(_config.addUntaggedRelations));
+  writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_LONG,
+                    generateBooleanLiteral(_config.addUntaggedAreas));
+
+  _out->flush();
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeOptionTriple(const std::string& optionName,
+                                                const std::string& value) {
+  writeTriple(osm2rdf::ttl::constants::IRI__OSM2RDF_META__OPTION,
+              generateIRIUnsafe(
+                  osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, optionName),
+              value);
+}
+
+// ____________________________________________________________________________
+template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateBlankNode() {
   int threadId = 0;
 #if defined(_OPENMP)
@@ -424,6 +534,13 @@ void osm2rdf::ttl::Writer<T>::writeLiteralUnsafe(std::string_view v,
 template <typename T>
 std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v) {
   return STRING_LITERAL_QUOTE(v);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+std::string osm2rdf::ttl::Writer<T>::generateBooleanLiteral(const bool &b) {
+  return b ? generateLiteral(constants::LITERAL__TRUE) :
+             generateLiteral(constants::LITERAL__FALSE);
 }
 
 // ____________________________________________________________________________
@@ -1340,6 +1457,20 @@ void osm2rdf::ttl::Writer<osm2rdf::ttl::format::QLEVER>::writeFormattedIRI(
     return;
   }
   _out->write(IRIREF(p, v), part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeSecondsAsISO(const std::string& subj,
+                                                const std::string& pred,
+                                                const std::time_t& time) {
+  char out[25];
+
+  struct tm t;
+  strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
+
+  writeLiteralTripleUnsafe(
+      subj, pred, out, "^^" + constants::IRI__XSD__DATE_TIME);
 }
 
 // ____________________________________________________________________________

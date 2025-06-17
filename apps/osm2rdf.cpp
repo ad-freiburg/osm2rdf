@@ -46,6 +46,7 @@ void run(const osm2rdf::config::Config& config) {
   }
   osm2rdf::ttl::Writer<T> writer{config, &output};
   writer.writeHeader();
+  writer.writeMetadata();
 
   osm2rdf::osm::GeometryHandler<T> geomHandler(config, &writer);
 
