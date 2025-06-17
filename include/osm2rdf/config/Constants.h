@@ -342,6 +342,13 @@ const static inline std::string WKT_PRECISION_OPTION_LONG = "wkt-precision";
 const static inline std::string WKT_PRECISION_OPTION_HELP =
     "Precision (number of decimal digits) for WKT coordinates";
 
+const static inline std::string BLANK_NODES_INFO =
+    "Blank nodes are masked";
+const static inline std::string BLANK_NODES_OPTION_SHORT = "";
+const static inline std::string BLANK_NODES_OPTION_LONG = "no-blank-nodes";
+const static inline std::string BLANK_NODES_OPTION_HELP =
+    "Avoid blank nodes by using a unique identifier for each member";
+
 const static inline std::string WRITE_RDF_STATISTICS_INFO =
     "Storing RDF statistics as .stats.json";
 const static inline std::string WRITE_RDF_STATISTICS_OPTION_SHORT = "";
