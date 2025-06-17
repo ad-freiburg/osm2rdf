@@ -316,12 +316,12 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeOptionTriple(osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
                     generateBooleanLiteral(_config.noWayFacts));
 
-  writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_INFO,
+  writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
                     generateBooleanLiteral(_config.noAreaGeometricRelations));
-  writeOptionTriple(osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_INFO,
+  writeOptionTriple(osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
                     generateBooleanLiteral(_config.noNodeGeometricRelations));
   writeOptionTriple(
-      osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_INFO,
+      osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_LONG,
       generateBooleanLiteral(_config.noRelationGeometricRelations));
   writeOptionTriple(osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_INFO,
                     generateBooleanLiteral(_config.noWayGeometricRelations));
@@ -354,12 +354,12 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
                     generateBooleanLiteral(_config.simplifyGeometries));
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.simplifyWKT)));
+                    generateLiteral(std::to_string(_config.simplifyWKT) + "^^" + constants::IRI__XSD__INTEGER));
   writeOptionTriple(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
-      generateLiteral(std::to_string(_config.wktDeviation)));
+      generateLiteral(std::to_string(_config.wktDeviation) + "^^" + constants::IRI__XSD__DOUBLE));
   writeOptionTriple(osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.wktPrecision)));
+                    generateLiteral(std::to_string(_config.wktPrecision) + "^^" + constants::IRI__XSD__INTEGER));
 
   writeOptionTriple(
       osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
