@@ -367,6 +367,9 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
       osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
       generateBooleanLiteral(_config.addSpatialRelsForUntaggedNodes));
 
+  writeOptionTriple(osm2rdf::config::constants::BLANK_NODES_OPTION_LONG,
+                    generateBooleanLiteral(_config.noBlankNodes));
+
   writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_LONG,
                     generateBooleanLiteral(_config.addUntaggedNodes));
   writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_LONG,
