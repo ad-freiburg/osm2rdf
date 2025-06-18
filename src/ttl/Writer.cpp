@@ -337,13 +337,13 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
       osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
       generateBooleanLiteral(_config.addAreaWayLinestrings));
   writeOptionTriple(osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_LONG,
-                    generateBooleanLiteral(_config.addCentroids));
+                    generateBooleanLiteral(!_config.addCentroids));
   writeOptionTriple(osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
                     generateBooleanLiteral(_config.addWayMetadata));
   writeOptionTriple(osm2rdf::config::constants::NO_OSM_METADATA_OPTION_LONG,
-                    generateBooleanLiteral(_config.addOsmMetadata));
+                    generateBooleanLiteral(!_config.addOsmMetadata));
   writeOptionTriple(osm2rdf::config::constants::NO_MEMBER_TRIPLES_OPTION_LONG,
-                    generateBooleanLiteral(_config.addMemberTriples));
+                    generateBooleanLiteral(!_config.addMemberTriples));
   writeOptionTriple(
       osm2rdf::config::constants::ADD_WAY_NODE_SPATIAL_METADATA_OPTION_LONG,
       generateBooleanLiteral(_config.addWayNodeSpatialMetadata));
@@ -367,14 +367,14 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
                     generateBooleanLiteral(_config.noBlankNodes));
 
   writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_LONG,
-                    generateBooleanLiteral(_config.addUntaggedNodes));
+                    generateBooleanLiteral(!_config.addUntaggedNodes));
   writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_LONG,
-                    generateBooleanLiteral(_config.addUntaggedWays));
+                    generateBooleanLiteral(!_config.addUntaggedWays));
   writeOptionTriple(
       osm2rdf::config::constants::NO_UNTAGGED_RELATIONS_OPTION_LONG,
-      generateBooleanLiteral(_config.addUntaggedRelations));
+      generateBooleanLiteral(!_config.addUntaggedRelations));
   writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_LONG,
-                    generateBooleanLiteral(_config.addUntaggedAreas));
+                    generateBooleanLiteral(!_config.addUntaggedAreas));
 
   _out->flush();
 }
