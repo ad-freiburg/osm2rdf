@@ -353,7 +353,7 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
                     generateLiteral(std::to_string(_config.simplifyWKT), "^^" + constants::IRI__XSD__INTEGER));
   writeOptionTriple(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
-      generateLiteral(std::to_string(_config.wktDeviation) + "^^" + constants::IRI__XSD__DOUBLE));
+      generateLiteral(std::to_string(_config.wktDeviation), "^^" + constants::IRI__XSD__DOUBLE));
   writeOptionTriple(osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
                     generateLiteral(std::to_string(_config.wktPrecision), "^^" + constants::IRI__XSD__INTEGER));
 
