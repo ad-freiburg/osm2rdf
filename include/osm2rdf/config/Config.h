@@ -69,7 +69,10 @@ struct Config {
 
   // Select amount to dump
   bool addAreaWayLinestrings = false;
-  bool addCentroids = true;
+  bool addCentroid = false;
+  bool addEnvelope = false;
+  bool addObb = false;
+  bool addConvexHull = false;
   bool addWayMetadata = false;
   bool addMemberTriples = true;
   bool addWayNodeSpatialMetadata = false;
