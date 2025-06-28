@@ -183,6 +183,16 @@ const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump way geometric relations";
 
+const static inline std::string ADD_ZERO_FACT_NUMBER_INFO =
+  "Also output osm2rdf:fact triples with fact number 0";
+const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_SHORT = "";
+const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_LONG =
+  "add-zero-fact-number-triples";
+const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_HELP =
+  "Also output osm2rdf:fact triples with fact number 0, that is, "
+  "for untagged nodes, ways, relations and areas";
+
+
 const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_INFO =
     "Compute spatial relations involving untagged nodes";
 const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_OPTION_SHORT = "";

@@ -242,6 +242,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_HELP);
 
+  auto addZeroFactNumberOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_SHORT,
+          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
+          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_HELP);
+
   auto sourceDatasetOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
           osm2rdf::config::constants::SOURCE_DATASET_OPTION_SHORT,
@@ -453,6 +459,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noNodeFacts = noNodeFactsOp->is_set();
     noRelationFacts = noRelationFactsOp->is_set();
     noWayFacts = noWayFactsOp->is_set();
+    addZeroFactNumber = addZeroFactNumberOp->is_set();
 
     noAreaGeometricRelations = noAreaGeometricRelationsOp->is_set();
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();

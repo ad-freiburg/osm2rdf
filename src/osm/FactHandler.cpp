@@ -642,10 +642,12 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
               "^^" + typeString[resultType - 1]));
     }
   }
-  _writer->writeTriple(
-      subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "facts"),
-      _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
-                                     "^^" + IRI__XSD__INTEGER));
+  if (tagTripleCount > 0 || _config.addZeroFactNumber) {
+    _writer->writeTriple(
+        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "facts"),
+        _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
+                                       "^^" + IRI__XSD__INTEGER));
+  }
 }
 
 // ____________________________________________________________________________

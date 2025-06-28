@@ -57,6 +57,7 @@ struct Config {
   bool noNodeFacts = false;
   bool noRelationFacts = false;
   bool noWayFacts = false;
+  bool addZeroFactNumber = false;
 
   bool noGeometricRelations = false;
   bool noAreaGeometricRelations = false;
