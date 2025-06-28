@@ -187,7 +187,7 @@ const static inline std::string ADD_ZERO_FACT_NUMBER_INFO =
   "Also output osm2rdf:fact triples with fact number 0";
 const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_SHORT = "";
 const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_LONG =
-  "add-zero-fact-number-triples";
+  "add-zero-fact-number";
 const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_HELP =
   "Also output osm2rdf:fact triples with fact number 0, that is, "
   "for untagged nodes, ways, relations and areas";

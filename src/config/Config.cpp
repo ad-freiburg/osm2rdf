@@ -280,7 +280,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_HELP, "full");
 
-  auto addCentroidsOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+  auto addCentroidOp = parser.add<popl::Switch, popl::Attribute::advanced>(
       osm2rdf::config::constants::ADD_CENTROID_OPTION_SHORT,
       osm2rdf::config::constants::ADD_CENTROID_OPTION_LONG,
       osm2rdf::config::constants::ADD_CENTROID_OPTION_HELP);
@@ -506,7 +506,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     // Select amount to dump
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
-    addCentroid = addCentroidsOp->is_set();
+    addCentroid = addCentroidOp->is_set();
     addEnvelope = addEnvelopeOp->is_set();
     addObb = addObbOp->is_set();
     addConvexHull = addConvexHullOp->is_set();
