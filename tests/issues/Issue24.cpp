@@ -35,7 +35,7 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -93,7 +93,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -151,7 +151,7 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -205,7 +205,7 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -302,7 +302,7 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addMemberTriples = false;
