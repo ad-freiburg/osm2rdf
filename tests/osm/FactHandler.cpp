@@ -56,6 +56,10 @@ TEST(OSM_FactHandler, areaFromWay) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -115,6 +119,10 @@ TEST(OSM_FactHandler, areaFromRelation) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -174,6 +182,10 @@ TEST(OSM_FactHandler, node) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -199,17 +211,7 @@ TEST(OSM_FactHandler, node) {
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\n"
-      "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
-      "osmnode:42 osmmeta:version \"0\"^^xsd:integer .\n"
-      "osmnode:42 osmkey:city \"Freiburg\" .\n"
-      "osmnode:42 osm2rdf:facts \"1\"^^xsd:integer "
-      ".\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 "
-      ".\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral "
-      ".\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 "
-      "48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope "
-      "\"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral "
-      ".\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\n",
+      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version \"0\"^^xsd:integer .\nosmnode:42 osmkey:city \"Freiburg\" .\nosmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -378,6 +380,10 @@ TEST(OSM_FactHandler, relationWithGeometry) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -481,6 +487,10 @@ TEST(OSM_FactHandler, way) {
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addMemberTriples = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
@@ -541,6 +551,10 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addMemberTriples = true;
@@ -605,6 +619,10 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addMemberTriples = true;
@@ -744,6 +762,10 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addWayMetadata = true;

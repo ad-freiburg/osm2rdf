@@ -123,14 +123,17 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
     writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, area.centroid());
   }
+
+  if (_config.addConvexHull) {
+    writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
+  }
+
   if (_config.addEnvelope) {
     writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
   }
+
   if (_config.addObb) {
     writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, area.orientedBoundingBox());
-  }
-  if (_config.addConvexHull) {
-    writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
   }
 
   // Increase default precision as areas in regbez freiburg have a 0 area
@@ -170,10 +173,6 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
     writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, node.geom());
   }
 
-  if (_config.addEnvelope) {
-    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE,
-             ::util::geo::DBox{node.geom(), node.geom()});
-  }
   if (_config.addObb || _config.addConvexHull) {
     const auto& hullWKT = ::util::geo::getWKT(
         ::util::geo::DPolygon{{node.geom()}, {}}, _config.wktPrecision);
@@ -187,6 +186,11 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
           subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, hullWKT,
           "^^" + IRI__GEOSPARQL__WKT_LITERAL);
     }
+  }
+
+  if (_config.addEnvelope) {
+    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE,
+             ::util::geo::DBox{node.geom(), node.geom()});
   }
 }
 
@@ -254,17 +258,20 @@ void osm2rdf::osm::FactHandler<W>::relation(
       _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
       writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, relation.centroid());
     }
+
+    if (_config.addConvexHull) {
+      writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
+                    relation.convexHull());
+    }
+
     if (_config.addEnvelope) {
       writeBox(subj, osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE,
                relation.envelope());
     }
+
     if (_config.addObb) {
       writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
                     relation.orientedBoundingBox());
-    }
-    if (_config.addConvexHull) {
-      writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
-                    relation.convexHull());
     }
 
     _writer->writeTriple(
@@ -355,14 +362,17 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
       writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, way.centroid());
     }
+
+    if (_config.addConvexHull) {
+      writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
+    }
+
     if (_config.addEnvelope) {
       writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
     }
+
     if (_config.addObb) {
       writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());
-    }
-    if (_config.addConvexHull) {
-      writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
     }
   }
 
