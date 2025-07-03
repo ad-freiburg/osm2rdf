@@ -45,7 +45,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          target: runtime
           platforms: linux/amd64,linux/arm64
           push: true
           # We have to explicitly add the "osm2rdf:latest" tag for it to work correctly,
