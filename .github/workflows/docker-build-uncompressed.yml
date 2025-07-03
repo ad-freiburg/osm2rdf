@@ -3,9 +3,9 @@ name: End-to-end test, uncompressed output (docker build)
 on:
   push:
     branches: [ master ]
-#  pull_request:
-#    branches: [ master ]
-#  merge_group:
+  pull_request:
+    branches: [ master ]
+  merge_group:
 
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
