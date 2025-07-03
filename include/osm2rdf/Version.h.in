@@ -21,7 +21,7 @@
 
 namespace osm2rdf::version {
 
-const char* GIT_INFO = "@VERSION_GIT_FULL@";
+inline const char* GIT_INFO = "@VERSION_GIT_FULL@";
 
 }  // namespace osm2rdf::version
 

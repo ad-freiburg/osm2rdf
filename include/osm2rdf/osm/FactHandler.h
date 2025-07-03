@@ -102,10 +102,6 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4);
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5);
 
-  void writeSecondsAsISO(const std::string& s, const std::string& p,
-                         const std::time_t& t);
-  FRIEND_TEST(OSM_FactHandler, writeSecondsAsISO);
-
   bool hasSuffix(const std::string& s, const std::string& suffix) const;
 
   const osm2rdf::config::Config _config;

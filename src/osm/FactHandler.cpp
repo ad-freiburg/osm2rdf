@@ -445,7 +445,7 @@ void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
                              object.changeset()));
   }
 
-  writeSecondsAsISO(subj, IRI__OSMMETA__TIMESTAMP, object.timestamp());
+  _writer->writeSecondsAsISO(subj, IRI__OSMMETA__TIMESTAMP, object.timestamp());
 
   // avoid writing empty users, drop entire triple
   if (!object.user().empty()) {
@@ -658,19 +658,6 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
         _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
                                        "^^" + IRI__XSD__INTEGER));
   }
-}
-
-// ____________________________________________________________________________
-template <typename W>
-void osm2rdf::osm::FactHandler<W>::writeSecondsAsISO(const std::string& subj,
-                                                     const std::string& pred,
-                                                     const std::time_t& time) {
-  char out[25];
-
-  struct tm t;
-  strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
-
-  _writer->writeLiteralTripleUnsafe(subj, pred, out, "^^" + IRI__XSD__DATE_TIME);
 }
 
 // ____________________________________________________________________________

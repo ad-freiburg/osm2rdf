@@ -65,6 +65,8 @@ inline std::string IRI__OPENGIS__EQUALS;
 inline std::string IRI__OPENGIS__CROSSES;
 inline std::string IRI__OPENGIS__OVERLAPS;
 
+inline std::string IRI__OSM2RDF_META__INFO;
+inline std::string IRI__OSM2RDF_META__OPTION;
 inline std::string IRI__OSM2RDF_GEOM__CONVEX_HULL;
 inline std::string IRI__OSM2RDF_GEOM__ENVELOPE;
 inline std::string IRI__OSM2RDF_GEOM__OBB;

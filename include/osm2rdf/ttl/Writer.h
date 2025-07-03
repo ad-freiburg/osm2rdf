@@ -103,6 +103,13 @@ class Writer {
   // Write the header (does nothing for NT)
   void writeHeader();
 
+  // Write metadata about used osm2rdf options, version, and dump date.
+  void writeMetadata();
+
+  // Write a triple for osm2rdf options in osm2rdf-meta-option namespace.
+  void writeOptionTriple(const std::string& optionName,
+                         const std::string& value);
+
   // Write a single RDF line. The contents of s, p, and o are not checked.
   void writeTriple(const std::string& s, const std::string& p,
                    const std::string& o);
@@ -164,6 +171,7 @@ class Writer {
   // generateLangTag creates a Literal from the given string value v.
   std::string generateLiteral(std::string_view v, std::string_view s);
   std::string generateLiteral(std::string_view v);
+  std::string generateBooleanLiteral(const bool &b);
 
   // Assumes that both p and v are "safe", that is, they can be used
   // directly in the TTL
@@ -171,6 +179,10 @@ class Writer {
 
   void writeLiteral(std::string_view v, size_t part);
   void writeLiteralUnsafe(std::string_view v, std::string_view s, size_t part);
+
+  void writeSecondsAsISO(const std::string& subj, const std::string& pred,
+                         const std::time_t& time);
+  FRIEND_TEST(TTL_Writer, writeSecondsAsISO);
 
   // -------------------------------------------------------------------------
   // Following functions are used by the ones above. These functions implement
