@@ -311,6 +311,8 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
                     generateBooleanLiteral(_config.noRelationFacts));
   writeOptionTriple(osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
                     generateBooleanLiteral(_config.noWayFacts));
+  writeOptionTriple(osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
+                    generateBooleanLiteral(_config.addZeroFactNumber));
 
   writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
                     generateBooleanLiteral(_config.noAreaGeometricRelations));
@@ -334,8 +336,15 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeOptionTriple(
       osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
       generateBooleanLiteral(_config.addAreaWayLinestrings));
-  writeOptionTriple(osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_LONG,
-                    generateBooleanLiteral(!_config.addCentroids));
+  writeOptionTriple(osm2rdf::config::constants::ADD_CENTROID_OPTION_LONG,
+                    generateBooleanLiteral(_config.addCentroid));
+  writeOptionTriple(osm2rdf::config::constants::ADD_ENVELOPE_OPTION_LONG,
+                    generateBooleanLiteral(_config.addEnvelope));
+  writeOptionTriple(osm2rdf::config::constants::ADD_OBB_OPTION_LONG,
+                    generateBooleanLiteral(_config.addObb));
+  writeOptionTriple(osm2rdf::config::constants::ADD_CONVEX_HULL_OPTION_LONG,
+                    generateBooleanLiteral(_config.addConvexHull));
+
   writeOptionTriple(osm2rdf::config::constants::ADD_WAY_METADATA_OPTION_LONG,
                     generateBooleanLiteral(_config.addWayMetadata));
   writeOptionTriple(osm2rdf::config::constants::NO_OSM_METADATA_OPTION_LONG,
