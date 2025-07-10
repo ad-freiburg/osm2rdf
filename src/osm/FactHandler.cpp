@@ -115,7 +115,7 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, area.geom());
   }
 
-  if (_config.addCentroids) {
+  if (_config.addCentroid) {
     const std::string& centroidObj = _writer->generateIRIUnsafe(
         NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
                                      "_area_centroid_" +
@@ -123,9 +123,18 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
     writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, area.centroid());
   }
-  writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
-  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
-  writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, area.orientedBoundingBox());
+
+  if (_config.addConvexHull) {
+    writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, area.convexHull());
+  }
+
+  if (_config.addEnvelope) {
+    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, area.envelope());
+  }
+
+  if (_config.addObb) {
+    writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, area.orientedBoundingBox());
+  }
 
   // Increase default precision as areas in regbez freiburg have a 0 area
   // otherwise.
@@ -155,7 +164,7 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
   writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
 
-  if (_config.addCentroids) {
+  if (_config.addCentroid) {
     const std::string& centroidObj = _writer->generateIRIUnsafe(
         NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
                                      "_node_centroid_" +
@@ -164,16 +173,25 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
     writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, node.geom());
   }
 
-  const auto& hullWKT = ::util::geo::getWKT(
-      ::util::geo::DPolygon{{node.geom()}, {}}, _config.wktPrecision);
+  if (_config.addObb || _config.addConvexHull) {
+    const auto& hullWKT = ::util::geo::getWKT(
+        ::util::geo::DPolygon{{node.geom()}, {}}, _config.wktPrecision);
+    if (_config.addObb) {
+      _writer->writeLiteralTripleUnsafe(
+          subj, IRI__OSM2RDF_GEOM__OBB, hullWKT,
+          "^^" + IRI__GEOSPARQL__WKT_LITERAL);
+    }
+    if (_config.addConvexHull) {
+      _writer->writeLiteralTripleUnsafe(
+          subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, hullWKT,
+          "^^" + IRI__GEOSPARQL__WKT_LITERAL);
+    }
+  }
 
-  _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
-                                    hullWKT,
-                                    "^^" + IRI__GEOSPARQL__WKT_LITERAL);
-  writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE,
-           ::util::geo::DBox{node.geom(), node.geom()});
-  _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__OBB, hullWKT,
-                                    "^^" + IRI__GEOSPARQL__WKT_LITERAL);
+  if (_config.addEnvelope) {
+    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE,
+             ::util::geo::DBox{node.geom(), node.geom()});
+  }
 }
 
 // ____________________________________________________________________________
@@ -237,7 +255,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, relation.geom());
 
-    if (_config.addCentroids) {
+    if (_config.addCentroid) {
       const std::string& centroidObj = _writer->generateIRIUnsafe(
           NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
                                        "_relation_centroid_" +
@@ -245,10 +263,21 @@ void osm2rdf::osm::FactHandler<W>::relation(
       _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
       writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, relation.centroid());
     }
-    writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, relation.convexHull());
-    writeBox(subj, osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE,
-             relation.envelope());
-    writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, relation.orientedBoundingBox());
+
+    if (_config.addConvexHull) {
+      writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
+                    relation.convexHull());
+    }
+
+    if (_config.addEnvelope) {
+      writeBox(subj, osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE,
+               relation.envelope());
+    }
+
+    if (_config.addObb) {
+      writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB,
+                    relation.orientedBoundingBox());
+    }
 
     _writer->writeTriple(
         subj,
@@ -334,7 +363,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   if (!way.isArea()) {
     // only write these triples if the way is not an area, otherwise they
     // are already written in the area handler
-    if (_config.addCentroids) {
+    if (_config.addCentroid) {
       const std::string& centroidObj = _writer->generateIRIUnsafe(
           NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
                                        "_way_centroid_" +
@@ -342,9 +371,18 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
       writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, way.centroid());
     }
-    writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
-    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
-    writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());
+
+    if (_config.addConvexHull) {
+      writeGeometry(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL, way.convexHull());
+    }
+
+    if (_config.addEnvelope) {
+      writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, way.envelope());
+    }
+
+    if (_config.addObb) {
+      writeGeometry(subj, IRI__OSM2RDF_GEOM__OBB, way.orientedBoundingBox());
+    }
   }
 
   if (_config.addWayMetadata) {
@@ -623,10 +661,12 @@ void osm2rdf::osm::FactHandler<W>::writeTagList(
               "^^" + typeString[resultType - 1]));
     }
   }
-  _writer->writeTriple(
-      subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "facts"),
-      _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
-                                     "^^" + IRI__XSD__INTEGER));
+  if (tagTripleCount > 0 || _config.addZeroFactNumber) {
+    _writer->writeTriple(
+        subj, _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "facts"),
+        _writer->generateLiteralUnsafe(std::to_string(tagTripleCount),
+                                       "^^" + IRI__XSD__INTEGER));
+  }
 }
 
 // ____________________________________________________________________________

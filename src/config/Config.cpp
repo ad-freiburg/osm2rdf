@@ -248,6 +248,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_HELP);
 
+  auto addZeroFactNumberOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_SHORT,
+          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
+          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_HELP);
+
   auto sourceDatasetOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
           osm2rdf::config::constants::SOURCE_DATASET_OPTION_SHORT,
@@ -280,10 +286,25 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
           osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_HELP, "full");
 
-  auto noAddCentroidsOp = parser.add<popl::Switch, popl::Attribute::advanced>(
-      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_SHORT,
-      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_LONG,
-      osm2rdf::config::constants::NO_ADD_CENTROIDS_OPTION_HELP);
+  auto addCentroidOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_CENTROID_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_CENTROID_OPTION_LONG,
+      osm2rdf::config::constants::ADD_CENTROID_OPTION_HELP);
+
+  auto addEnvelopeOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_ENVELOPE_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_ENVELOPE_OPTION_LONG,
+      osm2rdf::config::constants::ADD_ENVELOPE_OPTION_HELP);
+
+  auto addObbOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_OBB_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_OBB_OPTION_LONG,
+      osm2rdf::config::constants::ADD_OBB_OPTION_HELP);
+
+  auto addConvexHullOp = parser.add<popl::Switch, popl::Attribute::advanced>(
+      osm2rdf::config::constants::ADD_CONVEX_HULL_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_CONVEX_HULL_OPTION_LONG,
+      osm2rdf::config::constants::ADD_CONVEX_HULL_OPTION_HELP);
 
   auto addAreaWayLinestringsOp =
       parser.add<popl::Switch, popl::Attribute::expert>(
@@ -450,6 +471,7 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noNodeFacts = noNodeFactsOp->is_set();
     noRelationFacts = noRelationFactsOp->is_set();
     noWayFacts = noWayFactsOp->is_set();
+    addZeroFactNumber = addZeroFactNumberOp->is_set();
 
     noAreaGeometricRelations = noAreaGeometricRelationsOp->is_set();
     noNodeGeometricRelations = noNodeGeometricRelationsOp->is_set();
@@ -496,7 +518,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
 
     // Select amount to dump
     addAreaWayLinestrings = addAreaWayLinestringsOp->is_set();
-    addCentroids = !noAddCentroidsOp->is_set();
+    addCentroid = addCentroidOp->is_set();
+    addEnvelope = addEnvelopeOp->is_set();
+    addObb = addObbOp->is_set();
+    addConvexHull = addConvexHullOp->is_set();
     addWayMetadata = addWayMetadataOp->is_set();
     addOsmMetadata = !noOsmMetadataOp->is_set();
     addMemberTriples = !noMemberTriplesOp->is_set();

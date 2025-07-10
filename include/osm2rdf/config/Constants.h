@@ -183,6 +183,16 @@ const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_LONG =
 const static inline std::string NO_WAY_GEOM_RELATIONS_OPTION_HELP =
     "Do not dump way geometric relations";
 
+const static inline std::string ADD_ZERO_FACT_NUMBER_INFO =
+  "Also output osm2rdf:fact triples with fact number 0";
+const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_SHORT = "";
+const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_LONG =
+  "add-zero-fact-number";
+const static inline std::string ADD_ZERO_FACT_NUMBER_OPTION_HELP =
+  "Also output osm2rdf:fact triples with fact number 0, that is, "
+  "for untagged nodes, ways, relations and areas";
+
+
 const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_INFO =
     "Compute spatial relations involving untagged nodes";
 const static inline std::string UNTAGGED_NODES_SPATIAL_RELS_OPTION_SHORT = "";
@@ -231,12 +241,34 @@ const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_LONG =
 const static inline std::string ADD_AREA_WAY_LINESTRINGS_OPTION_HELP =
     "Add linestrings for ways which form areas";
 
-const static inline std::string NO_ADD_CENTROIDS_INFO =
-    "Do not add centroid information";
-const static inline std::string NO_ADD_CENTROIDS_OPTION_SHORT = "";
-const static inline std::string NO_ADD_CENTROIDS_OPTION_LONG = "no-hascentroid";
-const static inline std::string NO_ADD_CENTROIDS_OPTION_HELP =
-    "Don't add geo:hasCentroid triples";
+const static inline std::string ADD_CENTROID_INFO =
+    "Adding a geo:hasCentroid triple for each geometry";
+const static inline std::string ADD_CENTROID_OPTION_SHORT = "";
+const static inline std::string ADD_CENTROID_OPTION_LONG = "add-hascentroid";
+const static inline std::string ADD_CENTROID_OPTION_HELP =
+    "Add a geo:hasCentroid triple for each geometry";
+
+const static inline std::string ADD_ENVELOPE_INFO =
+  "Adding a geo:hasEnvelope triple for each geometry";
+const static inline std::string ADD_ENVELOPE_OPTION_SHORT = "";
+const static inline std::string ADD_ENVELOPE_OPTION_LONG = "add-hasenvelope";
+const static inline std::string ADD_ENVELOPE_OPTION_HELP =
+    "Add a geo:hasEnvelope triple for each geometry";
+
+const static inline std::string ADD_OBB_INFO =
+  "Adding a geo:hasObb triple for each geometry";
+const static inline std::string ADD_OBB_OPTION_SHORT = "";
+const static inline std::string ADD_OBB_OPTION_LONG = "add-hasobb";
+const static inline std::string ADD_OBB_OPTION_HELP =
+    "Add a geo:hasObb triple for each geometry";
+
+const static inline std::string ADD_CONVEX_HULL_INFO =
+  "Adding a geo:hasConvexHull triple for each geometry";
+const static inline std::string ADD_CONVEX_HULL_OPTION_SHORT = "";
+const static inline std::string ADD_CONVEX_HULL_OPTION_LONG =
+    "add-hasconvexhull";
+const static inline std::string ADD_CONVEX_HULL_OPTION_HELP =
+  "Add a geo:hasConvexHull triple for each geometry";
 
 const static inline std::string ADD_WAY_METADATA_INFO = "Adding way metadata";
 const static inline std::string ADD_WAY_METADATA_OPTION_SHORT = "";
