@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build:
     name: End-to-end test, stdout output (docker build)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:

@@ -35,7 +35,10 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -93,7 +96,10 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
+  config.addEnvelope = false;
+  config.addConvexHull = false;
+  config.addObb = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -124,15 +130,8 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 "
-      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
-      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,"
-      "48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope "
-      "\"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
-      "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:obb \"POLYGON((48 7.5,"
-      "48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
-      "osm2rdf:area \"0.01\"^^xsd:double .\n",
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 .\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double .\n"
+      ,
       buffer.str());
 
   // Cleanup
@@ -151,7 +150,11 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -176,17 +179,7 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\n"
-      "osmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
-      "osmnode:42 osmmeta:version \"0\"^^xsd:integer .\n"
-      "osmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\n"
-      "osmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\n"
-      "osm2rdfgeom:osm_node_42 geo:asWKT "
-      "\"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull "
-      "\"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 "
-      "osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 "
-      "48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 "
-      "48))\"^^geo:wktLiteral .\n",
+      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version \"0\"^^xsd:integer .\nosmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -205,7 +198,11 @@ TEST(Issue24, relationWithGeometryHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -302,10 +299,15 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
   config.numThreads = 1;  // set to one to avoid concurrency issues with the
                           // stringstream read buffer
   config.outputCompress = osm2rdf::config::NONE;
-  config.addCentroids = false;
+  config.addCentroid = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
   config.addMemberTriples = false;
+
+  config.addEnvelope = true;
+  config.addConvexHull = true;
+  config.addObb = true;
+  config.addZeroFactNumber = true;
 
   osm2rdf::util::Output output{config, config.output};
   output.open();
