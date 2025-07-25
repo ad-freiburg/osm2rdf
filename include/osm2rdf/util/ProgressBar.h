@@ -23,6 +23,7 @@ static const int k100Percent = 100;
 static const int kTerminalWidth = 80;
 #include <cstdio>
 #include <ctime>
+#include <string>
 
 namespace osm2rdf::util {
 
@@ -34,6 +35,10 @@ class ProgressBar {
   ProgressBar() = default;
   // Updates the progress bar.
   void update(std::size_t count);
+
+  // Updates the progress bar, sets a phase.
+  void update(std::size_t count, char phase);
+
   // Marks progress bar as done (calling update with _maxValue).
   void done();
 
@@ -55,6 +60,8 @@ class ProgressBar {
   std::time_t _last;
   // Print to std::cerr or not.
   bool _show = false;
+
+  char _phase = 0;
 };
 
 }  // namespace osm2rdf::util
