@@ -146,8 +146,9 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
-  const std::string& subj =
+void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node, bool untagged) {
+  const std::string& subj = untagged ?
+      _writer->generateIRIUnsafe(_config.iriPrefixForUntaggedNodes, std::to_string(node.id())) :
       _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset], node.id());
 
   _writer->writeTriple(subj, IRI__RDF__TYPE, IRI__OSM__NODE);

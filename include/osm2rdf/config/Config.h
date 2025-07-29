@@ -27,6 +27,7 @@
 #include <thread>
 
 #include "osm2rdf/config/Constants.h"
+#include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Format.h"
 #include "osm2rdf/util/OutputMergeMode.h"
 
@@ -86,6 +87,8 @@ struct Config {
   bool addUntaggedAreas = true;
 
   bool addSpatialRelsForUntaggedNodes = true;
+
+  std::string iriPrefixForUntaggedNodes = osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_UNTAGGED;
 
   int numThreads = std::thread::hardware_concurrency();
 

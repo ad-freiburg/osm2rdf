@@ -44,7 +44,7 @@ class FactHandler {
               osm2rdf::ttl::Writer<W>* writer);
   // Add data
   void area(const osm2rdf::osm::Area& area);
-  void node(const osm2rdf::osm::Node& node);
+  void node(const osm2rdf::osm::Node& node, bool untagged = false);
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
