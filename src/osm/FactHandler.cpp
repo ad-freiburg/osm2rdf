@@ -80,6 +80,8 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
+using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_TAGGED;
+using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_UNTAGGED;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
@@ -148,8 +150,8 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node, bool untagged) {
   const std::string& subj = untagged ?
-      _writer->generateIRIUnsafe(_config.iriPrefixForUntaggedNodes, std::to_string(node.id())) :
-      _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset], node.id());
+      _writer->generateIRI(NAMESPACE__OSM_NODE_UNTAGGED, node.id()) :
+      _writer->generateIRI(NAMESPACE__OSM_NODE_TAGGED, node.id());
 
   _writer->writeTriple(subj, IRI__RDF__TYPE, IRI__OSM__NODE);
   // Meta

@@ -32,6 +32,7 @@ const static inline std::string NAMESPACE__OHM_CHANGESET = "ohmchangeset";
 const static inline std::string NAMESPACE__OHM = "ohm";
 const static inline std::string NAMESPACE__OPENGIS = "ogc";
 const static inline std::string NAMESPACE__OSM_NODE = "osmnode";
+const static inline std::string NAMESPACE__OSM_NODE_TAGGED = "osmnode_tagged";
 const static inline std::string NAMESPACE__OSM_NODE_UNTAGGED = "osmnode_untagged";
 const static inline std::string NAMESPACE__OSM_RELATION = "osmrel";
 const static inline std::string NAMESPACE__OSM_TAG = "osmkey";
