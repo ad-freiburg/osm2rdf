@@ -160,7 +160,9 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node, bool unt
 
   const std::string& geomObj = _writer->generateIRIUnsafe(
       NAMESPACE__OSM2RDF_GEOM,
-      DATASET_ID[_config.sourceDataset] + "_node_" + std::to_string(node.id()));
+      DATASET_ID[_config.sourceDataset] +
+      (untagged ? "_node_untagged_" : "_node_tagged_") +
+      std::to_string(node.id()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
   writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
