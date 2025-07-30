@@ -26,6 +26,7 @@
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osm2rdf/osm/FactHandler.h"
+#include "osm2rdf/osm/LocationHandler.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/Way.h"
@@ -94,7 +95,13 @@ using osm2rdf::ttl::constants::WAY_NAMESPACE;
 template <typename W>
 osm2rdf::osm::FactHandler<W>::FactHandler(const osm2rdf::config::Config& config,
                                           osm2rdf::ttl::Writer<W>* writer)
-    : _config(config), _writer(writer) {}
+    : _config(config), _writer(writer), _locationHandler(nullptr) {}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::FactHandler<W>::setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler) {
+    _locationHandler = locationHandler;
+}
 
 // ____________________________________________________________________________
 template <typename W>
@@ -218,7 +225,11 @@ void osm2rdf::osm::FactHandler<W>::relation(
       std::string type;
       switch (member.type()) {
         case osm2rdf::osm::RelationMemberType::NODE:
-          type = NODE_NAMESPACE[_config.sourceDataset];
+          if (_locationHandler && _locationHandler->get_node_is_tagged(member.id())) {
+            type = NAMESPACE__OSM_NODE_TAGGED;
+          } else {
+            type = NAMESPACE__OSM_NODE_UNTAGGED;
+          }
           break;
         case osm2rdf::osm::RelationMemberType::RELATION:
           type = RELATION_NAMESPACE[_config.sourceDataset];
@@ -308,10 +319,16 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       const std::string& blankNode = _writer->generateBlankNode();
       _writer->writeTriple(subj, IRI__OSMWAY__NODE, blankNode);
 
+      std::string nodeNamespace;
+      if (_locationHandler && _locationHandler->get_node_is_tagged(node.id())) {
+        nodeNamespace = NAMESPACE__OSM_NODE_TAGGED;
+      } else {
+        nodeNamespace = NAMESPACE__OSM_NODE_UNTAGGED;
+      }
+
       _writer->writeTriple(
           blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
-          _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
-                               node.id()));
+          _writer->generateIRI(nodeNamespace, node.id()));
 
       _writer->writeLiteralTripleUnsafe(
           blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_POS,
@@ -320,8 +337,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
         _writer->writeTriple(
             lastBlankNode, IRI__OSMWAY__NEXT_NODE,
-            _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
-                                 node.id()));
+            _writer->generateIRI(nodeNamespace, node.id()));
         // Haversine distance
         const double distanceLat =
             (node.geom().getY() - lastNode.geom().getY()) *

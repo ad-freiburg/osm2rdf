@@ -42,6 +42,8 @@ class LocationHandler : public osmium::handler::Handler {
   virtual void way(osmium::Way& way) = 0;
   [[nodiscard]] virtual osmium::Location get_node_location(
       const osmium::object_id_type id) const = 0;
+  [[nodiscard]] virtual bool get_node_is_tagged(
+      const osmium::object_id_type id) const = 0;
   // Helper creating the correct instance.
   static LocationHandler* create(const osm2rdf::config::Config& config,
                                  size_t nodeIdMin, size_t nodeIdMax);
@@ -55,6 +57,8 @@ class LocationHandlerImpl : public LocationHandler {
   void node(const osmium::Node& node);
   void way(osmium::Way& way);
   [[nodiscard]] osmium::Location get_node_location(
+      const osmium::object_id_type nodeId) const;
+  [[nodiscard]] bool get_node_is_tagged(
       const osmium::object_id_type nodeId) const;
 
  protected:
@@ -72,6 +76,8 @@ class LocationHandlerImpl<osmium::index::map::SparseFileArray<
   void node(const osmium::Node& node);
   void way(osmium::Way& way);
   [[nodiscard]] osmium::Location get_node_location(
+      const osmium::object_id_type nodeId) const;
+  [[nodiscard]] bool get_node_is_tagged(
       const osmium::object_id_type nodeId) const;
 
  protected:
@@ -95,6 +101,8 @@ class LocationHandlerImpl<osmium::index::map::DenseFileArray<
   void way(osmium::Way& way);
   [[nodiscard]] osmium::Location get_node_location(
       const osmium::object_id_type nodeId) const;
+  [[nodiscard]] bool get_node_is_tagged(
+      const osmium::object_id_type nodeId) const;
 
  protected:
   osm2rdf::util::CacheFile _cacheFile;
@@ -116,6 +124,8 @@ class LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
   void node(const osmium::Node& node);
   void way(osmium::Way& way);
   [[nodiscard]] osmium::Location get_node_location(
+      const osmium::object_id_type nodeId) const;
+  [[nodiscard]] bool get_node_is_tagged(
       const osmium::object_id_type nodeId) const;
 
  protected:

@@ -55,7 +55,26 @@ osmium::Location osm2rdf::osm::LocationHandlerImpl<T>::get_node_location(
 
 // ____________________________________________________________________________
 template <typename T>
+bool osm2rdf::osm::LocationHandlerImpl<T>::get_node_is_tagged(
+    const osmium::object_id_type nodeId) const {
+  try {
+    return _index.get(nodeId).is_tagged();
+  } catch (const osmium::not_found&) {
+    return false;
+  }
+}
+
+// ____________________________________________________________________________
+template <typename T>
 void osm2rdf::osm::LocationHandlerImpl<T>::node(const osmium::Node& node) {
+  // Modify the node's location directly to include tag information
+  osmium::Location loc = node.location();
+  loc.set_tagged(!node.tags().empty());
+  
+  // Temporarily modify the const node's location (safe because we're not changing data, just adding metadata)
+  const_cast<osmium::Node&>(node).set_location(loc);
+  
+  // Now pass the node to the handler with the tagged location
   _handler.node(node);
 }
 
@@ -68,7 +87,7 @@ void osm2rdf::osm::LocationHandlerImpl<T>::way(osmium::Way& way) {
 // ____________________________________________________________________________
 template <typename T>
 osm2rdf::osm::LocationHandlerImpl<T>::LocationHandlerImpl(
-    const osm2rdf::config::Config& /*unused*/, size_t, size_t)
+    const osm2rdf::config::Config& config, size_t nodeIdMin, size_t nodeIdMax)
     : _handler(_index) {
   _handler.ignore_errors();
 }
@@ -76,7 +95,7 @@ osm2rdf::osm::LocationHandlerImpl<T>::LocationHandlerImpl(
 // ____________________________________________________________________________
 osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type, osmium::Location>>::
-    LocationHandlerImpl(const osm2rdf::config::Config& config, size_t, size_t)
+    LocationHandlerImpl(const osm2rdf::config::Config& config, size_t nodeIdMin, size_t nodeIdMax)
     : _cacheFile(config.getTempPath("osmium", "n2l.sparse.cache")),
       _index(_cacheFile.fileDescriptor()),
       _handler(_index) {
@@ -92,9 +111,29 @@ osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
 }
 
 // ____________________________________________________________________________
+bool
+osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
+    osmium::unsigned_object_id_type, osmium::Location>>::
+    get_node_is_tagged(const osmium::object_id_type nodeId) const {
+  try {
+    return _index.get(nodeId).is_tagged();
+  } catch (const osmium::not_found&) {
+    return false;
+  }
+}
+
+// ____________________________________________________________________________
 void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type,
     osmium::Location>>::node(const osmium::Node& node) {
+  // Modify the node's location directly to include tag information
+  osmium::Location loc = node.location();
+  loc.set_tagged(!node.tags().empty());
+  
+  // Temporarily modify the const node's location (safe because we're not changing data, just adding metadata)
+  const_cast<osmium::Node&>(node).set_location(loc);
+  
+  // Now pass the node to the handler with the tagged location
   _handler.node(node);
 }
 
@@ -107,7 +146,7 @@ void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
 // ____________________________________________________________________________
 osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
     osmium::unsigned_object_id_type, osmium::Location>>::
-    LocationHandlerImpl(const osm2rdf::config::Config& config, size_t, size_t)
+    LocationHandlerImpl(const osm2rdf::config::Config& config, size_t nodeIdMin, size_t nodeIdMax)
     : _cacheFile(config.getTempPath("osmium", "n2l.dense.cache")),
       _index(_cacheFile.fileDescriptor()),
       _handler(_index) {
@@ -118,6 +157,14 @@ osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
 void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
     osmium::unsigned_object_id_type,
     osmium::Location>>::node(const osmium::Node& node) {
+  // Modify the node's location directly to include tag information
+  osmium::Location loc = node.location();
+  loc.set_tagged(!node.tags().empty());
+  
+  // Temporarily modify the const node's location (safe because we're not changing data, just adding metadata)
+  const_cast<osmium::Node&>(node).set_location(loc);
+  
+  // Now pass the node to the handler with the tagged location
   _handler.node(node);
 }
 
@@ -136,6 +183,18 @@ osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
 }
 
 // ____________________________________________________________________________
+bool
+osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
+    osmium::unsigned_object_id_type, osmium::Location>>::
+    get_node_is_tagged(const osmium::object_id_type nodeId) const {
+  try {
+    return _index.get(nodeId).is_tagged();
+  } catch (const osmium::not_found&) {
+    return false;
+  }
+}
+
+// ____________________________________________________________________________
 osm2rdf::osm::LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
     osmium::unsigned_object_id_type, osmium::Location>>::
     LocationHandlerImpl(const osm2rdf::config::Config&, size_t nodeIdMin,
@@ -148,6 +207,14 @@ osm2rdf::osm::LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
 void osm2rdf::osm::LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
     osmium::unsigned_object_id_type,
     osmium::Location>>::node(const osmium::Node& node) {
+  // Modify the node's location directly to include tag information
+  osmium::Location loc = node.location();
+  loc.set_tagged(!node.tags().empty());
+  
+  // Temporarily modify the const node's location (safe because we're not changing data, just adding metadata)
+  const_cast<osmium::Node&>(node).set_location(loc);
+  
+  // Now pass the node to the handler with the tagged location
   _handler.node(node);
 }
 
@@ -162,4 +229,15 @@ osmium::Location osm2rdf::osm::LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
     osmium::unsigned_object_id_type, osmium::Location>>::
     get_node_location(const osmium::object_id_type nodeId) const {
   return _handler.get_node_location(nodeId);
+}
+
+// ____________________________________________________________________________
+bool osm2rdf::osm::LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
+    osmium::unsigned_object_id_type, osmium::Location>>::
+    get_node_is_tagged(const osmium::object_id_type nodeId) const {
+  try {
+    return _index.get(nodeId).is_tagged();
+  } catch (const osmium::not_found&) {
+    return false;
+  }
 }

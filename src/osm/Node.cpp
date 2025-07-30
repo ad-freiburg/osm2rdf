@@ -25,6 +25,7 @@
 // ____________________________________________________________________________
 osm2rdf::osm::Node::Node() {
   _id = std::numeric_limits<osm2rdf::osm::Node::id_t>::max();
+  _isTagged = false;
 }
 
 // ____________________________________________________________________________
@@ -36,6 +37,7 @@ osm2rdf::osm::Node::Node(const osmium::Node& node) {
   _uid = node.uid();
   _version = node.version();
   _visible = node.visible();
+  _isTagged = !node.tags().empty();
   const auto& loc = node.location();
   _geom = ::util::geo::DPoint{loc.lon(), loc.lat()};
   _tags = std::move(osm2rdf::osm::convertTagList(node.tags()));
@@ -44,6 +46,7 @@ osm2rdf::osm::Node::Node(const osmium::Node& node) {
 // ____________________________________________________________________________
 osm2rdf::osm::Node::Node(const osmium::NodeRef& nodeRef) {
   _id = nodeRef.positive_ref();
+  _isTagged = false;  // NodeRefs don't contain tag information
   const auto& loc = nodeRef.location();
   _geom = ::util::geo::DPoint{loc.lon(), loc.lat()};
 }
@@ -76,6 +79,9 @@ osm2rdf::osm::generic::version_t osm2rdf::osm::Node::version() const noexcept {
 }
 // ____________________________________________________________________________
 bool osm2rdf::osm::Node::visible() const noexcept { return _visible; }
+
+// ____________________________________________________________________________
+bool osm2rdf::osm::Node::isTagged() const noexcept { return _isTagged; }
 
 // ____________________________________________________________________________
 const ::util::geo::DPoint& osm2rdf::osm::Node::geom() const noexcept {

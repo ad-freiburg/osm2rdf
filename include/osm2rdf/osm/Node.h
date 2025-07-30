@@ -40,6 +40,7 @@ class Node {
   [[nodiscard]] id_t uid() const noexcept;
   [[nodiscard]] osm2rdf::osm::generic::version_t version() const noexcept;
   [[nodiscard]] bool visible() const noexcept;
+  [[nodiscard]] bool isTagged() const noexcept;
   [[nodiscard]] const ::util::geo::DBox envelope() const noexcept;
   [[nodiscard]] const ::util::geo::DPoint& geom() const noexcept;
   [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
@@ -55,6 +56,7 @@ class Node {
   id_t _uid;
   osm2rdf::osm::generic::version_t _version;
   bool _visible;
+  bool _isTagged;
   ::util::geo::DPoint _geom;
   osm2rdf::osm::TagList _tags;
 };
