@@ -17,14 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/ttl/Writer.h"
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
-
-#include "osm2rdf/ttl/Writer.h"
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -122,10 +122,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfOverlaps");
 
-  osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "info");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_META__OPTION = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "option");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "info");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_META__OPTION =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "option");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "convex_hull");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE =
@@ -204,8 +204,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 
   osm2rdf::ttl::constants::LITERAL__FALSE = generateLiteral(
       "false", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
-  osm2rdf::ttl::constants::LITERAL__TRUE =
-      generateLiteral("true", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
+  osm2rdf::ttl::constants::LITERAL__TRUE = generateLiteral(
+      "true", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
 
   // Prepare statistic variables
   _numOuts = config.numThreads + 1;
@@ -293,9 +293,9 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeMetadata() {
   // Write osm2rdf version to metadata.
   writeTriple(osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO,
-            generateIRIUnsafe(
-                osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "version"),
-            generateLiteral(osm2rdf::version::GIT_INFO, ""));
+              generateIRIUnsafe(
+                  osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "version"),
+              generateLiteral(osm2rdf::version::GIT_INFO, ""));
 
   // Write dump time to metadata.
   const auto n = std::chrono::system_clock::now();
@@ -303,7 +303,7 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeSecondsAsISO(
       osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO,
       generateIRIUnsafe(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
-                             "dateDumped"),
+                        "dateDumped"),
       time);
 
   // Write used osm2rdf options to metadata.
@@ -315,18 +315,22 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
                     generateBooleanLiteral(_config.noRelationFacts));
   writeOptionTriple(osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
                     generateBooleanLiteral(_config.noWayFacts));
-  writeOptionTriple(osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
-                    generateBooleanLiteral(_config.addZeroFactNumber));
+  writeOptionTriple(
+      osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
+      generateBooleanLiteral(_config.addZeroFactNumber));
 
-  writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
-                    generateBooleanLiteral(_config.noAreaGeometricRelations));
-  writeOptionTriple(osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
-                    generateBooleanLiteral(_config.noNodeGeometricRelations));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
+      generateBooleanLiteral(_config.noAreaGeometricRelations));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
+      generateBooleanLiteral(_config.noNodeGeometricRelations));
   writeOptionTriple(
       osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_LONG,
       generateBooleanLiteral(_config.noRelationGeometricRelations));
-  writeOptionTriple(osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
-                    generateBooleanLiteral(_config.noWayGeometricRelations));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
+      generateBooleanLiteral(_config.noWayGeometricRelations));
 
   writeOptionTriple(
       osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
@@ -363,12 +367,15 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
                     generateBooleanLiteral(_config.simplifyGeometries));
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.simplifyWKT), "^^" + constants::IRI__XSD__INTEGER));
+                    generateLiteral(std::to_string(_config.simplifyWKT),
+                                    "^^" + constants::IRI__XSD__INTEGER));
   writeOptionTriple(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
-      generateLiteral(std::to_string(_config.wktDeviation), "^^" + constants::IRI__XSD__DOUBLE));
+      generateLiteral(std::to_string(_config.wktDeviation),
+                      "^^" + constants::IRI__XSD__DOUBLE));
   writeOptionTriple(osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.wktPrecision), "^^" + constants::IRI__XSD__INTEGER));
+                    generateLiteral(std::to_string(_config.wktPrecision),
+                                    "^^" + constants::IRI__XSD__INTEGER));
 
   writeOptionTriple(
       osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
@@ -547,7 +554,7 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2rdf::ttl::Writer<T>::generateBooleanLiteral(const bool &b) {
+std::string osm2rdf::ttl::Writer<T>::generateBooleanLiteral(const bool& b) {
   return b ? constants::LITERAL__TRUE : constants::LITERAL__FALSE;
 }
 
@@ -1477,8 +1484,8 @@ void osm2rdf::ttl::Writer<T>::writeSecondsAsISO(const std::string& subj,
   struct tm t;
   strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
 
-  writeLiteralTripleUnsafe(
-      subj, pred, out, "^^" + constants::IRI__XSD__DATE_TIME);
+  writeLiteralTripleUnsafe(subj, pred, out,
+                           "^^" + constants::IRI__XSD__DATE_TIME);
 }
 
 // ____________________________________________________________________________

@@ -47,7 +47,7 @@ class FactHandler {
   void setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler);
   // Add data
   void area(const osm2rdf::osm::Area& area);
-  void node(const osm2rdf::osm::Node& node, bool untagged = false);
+  void node(const osm2rdf::osm::Node& node);
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 

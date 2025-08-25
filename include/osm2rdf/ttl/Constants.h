@@ -50,7 +50,7 @@ const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 
 // IRI Prefixes
 const static inline std::string IRI_PREFIX__OSM_NODE_TAGGED = "https://www.openstreetmap.org/node/";
-const static inline std::string IRI_PREFIX__OSM_NODE_UNTAGGED = "http://www.openstreetmap.org/node/";
+const static inline std::string IRI_PREFIX__OSM_NODE_UNTAGGED = "https://www.openstreetmap.org/node/";
 
 // Generated constants (depending on output format)
 inline std::string IRI__GEOSPARQL__AS_WKT;

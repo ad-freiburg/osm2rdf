@@ -202,7 +202,7 @@ void osm2rdf::osm::OsmiumHandler<W>::node(const osmium::Node& node) {
 #pragma omp task
     {
       if (!_config.noFacts && !_config.noNodeFacts) {
-        _factHandler->node(osmNode, osmNode.tags().empty());
+        _factHandler->node(osmNode);
 #pragma omp critical(progress)
         {
           _nodesDumped++;
