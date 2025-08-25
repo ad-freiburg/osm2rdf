@@ -1,6 +1,6 @@
 [submodule "vendor/osmcode/libosmium"]
 	path = vendor/osmcode/libosmium
-	url = https://github.com/ad-freiburg/libosmium.git
+	url = https://github.com/osmcode/libosmium.git
 [submodule "vendor/mapbox/protozero"]
 	path = vendor/mapbox/protozero
 	url = https://github.com/mapbox/protozero.git
