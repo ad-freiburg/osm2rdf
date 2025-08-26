@@ -57,9 +57,6 @@ add_compile_options(-march=native)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined")
 
-# Enable fast-math
-add_compile_options(-ffast-math)
-
 # ----------------------------------------------------------------------------
 # Configure dependencies
 # ----------------------------------------------------------------------------
