@@ -16,9 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/FactHandler.h"
+
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "osm2rdf/osm/FactHandler.h"
 #include "osm2rdf/osm/Node.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
@@ -92,14 +93,14 @@ TEST(OSM_FactHandler, areaFromWay) {
 
   ASSERT_EQ(
       "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 "
-      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"POLYGON((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
-      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
+      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 "
+      "7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
       "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
-      "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
-      "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area "
-      "\"0.01\"^^xsd:double .\n",
+      "osm2rdfgeom:obb \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area \"0.01\"^^xsd:double "
+      ".\n",
       buffer.str());
 
   // Cleanup
@@ -155,14 +156,14 @@ TEST(OSM_FactHandler, areaFromRelation) {
 
   ASSERT_EQ(
       "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 "
-      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
-      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
-      "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
+      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 "
+      "7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
+      "osm2rdfgeom:convex_hull \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
-      "osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
-      "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area "
-      "\"0.01\"^^xsd:double .\n",
+      "osm2rdfgeom:obb \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
+      "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double "
+      ".\n",
       buffer.str());
 
   // Cleanup
@@ -211,7 +212,16 @@ TEST(OSM_FactHandler, node) {
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version \"0\"^^xsd:integer .\nosmnode:42 osmkey:city \"Freiburg\" .\nosmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
+      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version "
+      "\"0\"^^xsd:integer .\nosmnode:42 osmkey:city \"Freiburg\" .\nosmnode:42 "
+      "osm2rdf:facts \"1\"^^xsd:integer .\nosmnode:42 geo:hasGeometry "
+      "osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT "
+      "\"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb "
+      "\"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 "
+      "osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral "
+      ".\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 "
+      "48,7.5 48))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -463,7 +473,8 @@ TEST(OSM_FactHandler, relationWithGeometry) {
       "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:envelope \"POLYGON((7.5 "
       "48,7.6 48,7.6 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\nosmrel:42 "
       "osm2rdfgeom:obb \"POLYGON((7.5 48,7.5 48,7.6 48,7.6 48,7.5 "
-      "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdf:hasCompleteGeometry \"true\"^^xsd:boolean "
+      "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdf:hasCompleteGeometry "
+      "\"true\"^^xsd:boolean "
       ".\n",
       buffer.str());
 
@@ -737,7 +748,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
       "osmway:member_pos \"2\"^^xsd:integer .\n_:0_1 osmway:next_node "
       "osmnode:4 .\n_:0_1 osmway:next_node_distance "
       "\"11119.490351\"^^xsd:decimal .\nosmway:42 osmway:member _:0_3 .\n_:0_3 "
-      "osmway:member_id osmnode:3 .\n_:0_3 osmway:member_pos \"3\"^^xsd:integer "
+      "osmway:member_id osmnode:3 .\n_:0_3 osmway:member_pos "
+      "\"3\"^^xsd:integer "
       ".\n_:0_2 osmway:next_node osmnode:3 .\n_:0_2 osmway:next_node_distance "
       "\"11024.108103\"^^xsd:decimal .\nosmway:42 geo:hasGeometry "
       "osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
