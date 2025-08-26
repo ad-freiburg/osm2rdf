@@ -40,7 +40,7 @@ osm2rdf::osm::Node::Node(const osmium::Node& node) {
   _isTagged = !node.tags().empty();
   const auto& loc = node.location();
   _geom = ::util::geo::DPoint{loc.lon(), loc.lat()};
-  _tags = std::move(osm2rdf::osm::convertTagList(node.tags()));
+  _tags = osm2rdf::osm::convertTagList(node.tags());
 }
 
 // ____________________________________________________________________________
