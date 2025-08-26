@@ -18,6 +18,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/GeometryHandler.h"
+
 #include <unistd.h>
 
 #include <algorithm>
@@ -31,7 +33,6 @@
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osm2rdf/osm/FactHandler.h"
-#include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/ProgressBar.h"
@@ -62,7 +63,7 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
       _sweeper(
           {static_cast<size_t>(config.numThreads),
            static_cast<size_t>(config.numThreads),
-           10000,
+           300 * 1000 * 1000,
            "",
            osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS,
            osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS,
@@ -74,18 +75,19 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
            "\n",
            true,
            true,
-           true,
-           true,
+           false,
            true,
            true,
            false,
            false,
            -1,
+           false,
            [this](size_t t, const std::string& a, const std::string& b,
                   const std::string& pred) { this->writeRelCb(t, a, b, pred); },
            {},
            {},
-           [this](size_t progr) { this->progressCb(progr); }, {}},
+           [this](size_t progr) { this->progressCb(progr); },
+           {}},
           config.cache, ""),
       _parseBatches(config.numThreads) {}
 
