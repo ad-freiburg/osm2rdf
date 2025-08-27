@@ -63,7 +63,7 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
       _sweeper(
           {static_cast<size_t>(config.numThreads),
            static_cast<size_t>(config.numThreads),
-           300 * 1000 * 1000,
+           300 * 1000 * 1000 * 5,
            "",
            osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS,
            osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS,
