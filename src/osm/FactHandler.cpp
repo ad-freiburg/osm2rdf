@@ -104,8 +104,8 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 
   const std::string& geomObj = _writer->generateIRIUnsafe(
       NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] + "_" +
-                                   (area.fromWay() ? "way" : "rel") + "area_" +
-                                   std::to_string(area.objId()));
+                           (area.fromWay() ? "way" : "relation") + "area_" +
+                           std::to_string(area.objId()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
 
@@ -345,7 +345,7 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
   if (_config.addAreaWayLinestrings || !way.isArea()) {
     const std::string& geomObj = _writer->generateIRIUnsafe(
-        NAMESPACE__OSM2RDF, "way_" + std::to_string(way.id()));
+        NAMESPACE__OSM2RDF_GEOM, "way_" + std::to_string(way.id()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, way.geom());
