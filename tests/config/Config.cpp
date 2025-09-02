@@ -341,9 +341,8 @@ TEST(CONFIG_Config, fromArgsStoreLocationsLongSparse) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" +
-                   osm2rdf::config::constants::STORE_LOCATIONS_LONG +
-                   "=sparse";
+  const auto arg =
+      "--" + osm2rdf::config::constants::STORE_LOCATIONS_LONG + "=sparse";
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -358,9 +357,8 @@ TEST(CONFIG_Config, fromArgsStoreLocationsLongDense) {
   assertDefaultConfig(config);
   osm2rdf::util::CacheFile cf("/tmp/dummyInput");
 
-  const auto arg = "--" +
-                   osm2rdf::config::constants::STORE_LOCATIONS_LONG +
-                   "=dense";
+  const auto arg =
+      "--" + osm2rdf::config::constants::STORE_LOCATIONS_LONG + "=dense";
   const int argc = 3;
   char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
                       const_cast<char*>("/tmp/dummyInput")};
@@ -793,7 +791,8 @@ TEST(CONFIG_Config, getInfoHasSections) {
   ASSERT_THAT(res,
               ::testing::HasSubstr(osm2rdf::config::constants::SECTION_FACTS));
   ASSERT_THAT(
-      res, ::testing::HasSubstr(osm2rdf::config::constants::SECTION_CONTAINS));
+      res, ::testing::HasSubstr(
+               osm2rdf::config::constants::SECTION_SPATIAL_RELATION_TRIPLES));
   ASSERT_THAT(res, ::testing::HasSubstr(
                        osm2rdf::config::constants::SECTION_MISCELLANEOUS));
 }

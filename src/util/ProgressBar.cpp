@@ -17,6 +17,7 @@
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "osm2rdf/util/ProgressBar.h"
+#include "osm2rdf/util/Time.h"
 
 #include <cassert>
 #include <chrono>
@@ -24,6 +25,7 @@
 #include <cstdio>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 // ____________________________________________________________________________
 osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
@@ -36,7 +38,13 @@ osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
   if (maxValue == 0) {
     _countWidth = 1;
   }
-  _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2;
+  _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2 - 4 - 20;
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::ProgressBar::update(std::size_t count, char phase) {
+  _phase = phase;
+  update(count);
 }
 
 // ____________________________________________________________________________
@@ -59,6 +67,10 @@ void osm2rdf::util::ProgressBar::update(std::size_t count) {
   // Store new values.
   _percent = percent;
   _oldValue = count;
+
+  // Add time
+  std::cerr << osm2rdf::util::currentTimeFormatted();
+
   // Open progress bar part with [ ...
   std::cerr << '[';
   // ... add = to indicate done parts ...
@@ -79,12 +91,19 @@ void osm2rdf::util::ProgressBar::update(std::size_t count) {
   // Add percentage display %
   std::cerr << ' ' << std::setw(3) << std::right << percent << "%";
 
-  // Add absolute progress [x/y]
-  std::cerr << " [" << std::setw(_countWidth) << std::right << count << "/"
-            << _maxValue << "]\r";
-
   // Update last update time
   _last = std::time(nullptr);
+
+  // Add absolute progress [x/y]
+  std::cerr << " [" << std::setw(_countWidth) << std::right << count << "/"
+            << _maxValue << "]";
+
+  // Add phase
+  if (_phase) std::cerr << " [" << _phase << "]";
+  else std::cerr << "    ";
+
+  std::cerr << "\r";
+
 }
 
 // ____________________________________________________________________________

@@ -80,11 +80,12 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
            true,
            false,
            false,
+           -1,
            [this](size_t t, const std::string& a, const std::string& b,
                   const std::string& pred) { this->writeRelCb(t, a, b, pred); },
            {},
            {},
-           [this](size_t progr) { this->progressCb(progr); }},
+           [this](size_t progr) { this->progressCb(progr); }, {}},
           config.cache, ""),
       _parseBatches(config.numThreads) {}
 
@@ -276,24 +277,15 @@ void GeometryHandler<W>::calculateRelations() {
       throw std::runtime_error("Could not read auxiliary geo file " + auxFile);
     }
 
-    ::util::JobQueue<sj::ParseBatch> jobs(1000);             // the WKT parse jobs
-    std::vector<std::thread> thrds(_config.numThreads);  // the parse workers
-    for (size_t i = 0; i < thrds.size(); i++)
-      thrds[i] = std::thread(&sj::processQueue, &jobs, i, &_sweeper);
+    sj::WKTParser parser(&_sweeper, _config.numThreads);
 
     ssize_t len;
-    std::string dangling;
-    size_t gid = 0;
 
     while ((len = ::util::readAll(file, buf, CACHE_SIZE)) > 0) {
-      sj::parse(reinterpret_cast<char*>(buf), len, dangling, &gid, jobs, 0);
+      parser.parse(reinterpret_cast<char*>(buf), len, 0);
     }
 
-    // end event
-    jobs.add({});
-
-    // wait for all parse workers to finish
-    for (auto& thr : thrds) thr.join();
+    parser.done();
 
     delete[] buf;
   }

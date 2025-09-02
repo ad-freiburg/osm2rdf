@@ -17,11 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/config/Config.h"
+
 #include <filesystem>
 #include <iostream>
 #include <string>
-
-#include "osm2rdf/config/Config.h"
 
 #if defined(_OPENMP)
 #include "omp.h"
@@ -134,7 +134,8 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
       }
     }
   }
-  oss << "\n" << prefix << osm2rdf::config::constants::SECTION_CONTAINS;
+  oss << "\n"
+      << prefix << osm2rdf::config::constants::SECTION_SPATIAL_RELATION_TRIPLES;
   std::string modeStrings[2] = {"none", "full"};
 
   oss << "\n"
@@ -248,11 +249,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
       osm2rdf::config::constants::NO_WAY_FACTS_OPTION_HELP);
 
-  auto addZeroFactNumberOp =
-      parser.add<popl::Switch, popl::Attribute::expert>(
-          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_SHORT,
-          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
-          osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_HELP);
+  auto addZeroFactNumberOp = parser.add<popl::Switch, popl::Attribute::expert>(
+      osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_SHORT,
+      osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
+      osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_HELP);
 
   auto sourceDatasetOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
@@ -312,11 +312,11 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_LONG,
           osm2rdf::config::constants::ADD_AREA_WAY_LINESTRINGS_OPTION_HELP);
 
-  auto untaggedNodesSpatialRelsOp = parser.add<popl::Switch,
-                                                 popl::Attribute::expert>(
-      osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_SHORT,
-      osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
-      osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_HELP);
+  auto untaggedNodesSpatialRelsOp =
+      parser.add<popl::Switch, popl::Attribute::expert>(
+          osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_SHORT,
+          osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
+          osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_HELP);
 
   auto noUntaggedNodesOp = parser.add<popl::Switch, popl::Attribute::expert>(
       osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_SHORT,

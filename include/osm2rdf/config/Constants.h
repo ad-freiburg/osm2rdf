@@ -38,8 +38,8 @@ const static inline std::string SECTION_IO =
     SECTION_MARKER + " I/O " + SECTION_MARKER;
 const static inline std::string SECTION_FACTS =
     SECTION_MARKER + " Facts " + SECTION_MARKER;
-const static inline std::string SECTION_CONTAINS =
-    SECTION_MARKER + " Contains " + SECTION_MARKER;
+const static inline std::string SECTION_SPATIAL_RELATION_TRIPLES =
+    SECTION_MARKER + " Spatial relations " + SECTION_MARKER;
 const static inline std::string SECTION_MISCELLANEOUS =
     SECTION_MARKER + " Miscellaneous " + SECTION_MARKER;
 const static inline std::string SECTION_OPENMP =
