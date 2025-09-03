@@ -285,12 +285,9 @@ namespace osm2rdf::osm {
 
     public:
 
-        // this value is used for a coordinate to mark it as undefined
-        // MSVC doesn't declare std::numeric_limits<int32_t>::max() as
-        // constexpr, so we hard code this for the time being.
-        // undefined_coordinate = std::numeric_limits<int32_t>::max();
         enum {
-            undefined_coordinate = 2147483647
+            undefined_x_coordinate = 2147483647,
+            undefined_y_coordinate = 1247483647
         };
 
         static int32_t double_to_fix(const double c) noexcept {
@@ -305,8 +302,8 @@ namespace osm2rdf::osm {
          * Create undefined Location.
          */
         explicit constexpr Location() noexcept :
-            m_x(undefined_coordinate),
-            m_y(undefined_coordinate) {
+            m_x(undefined_x_coordinate),
+            m_y(undefined_y_coordinate + Y_SHIFT) {
         }
 
         /**
@@ -314,7 +311,7 @@ namespace osm2rdf::osm {
          */
         constexpr Location(const osmium::Location& b) noexcept :
             m_x(b.x()),
-            m_y(b.y() + Y_SHIFT) {
+            m_y(b.y() == osmium::Location::undefined_coordinate ? undefined_y_coordinate : b.y() + Y_SHIFT) {
         }
 
         /**
@@ -354,7 +351,7 @@ namespace osm2rdf::osm {
          *             have all slightly different meanings.
          */
         explicit constexpr operator bool() const noexcept {
-            return m_x != undefined_coordinate && m_y != undefined_coordinate;
+            return m_x != undefined_x_coordinate && y() != undefined_y_coordinate;
         }
 
         /**
@@ -376,7 +373,7 @@ namespace osm2rdf::osm {
          * See also is_undefined() and is_valid().
          */
         constexpr bool is_defined() const noexcept {
-            return m_x != undefined_coordinate || y() != undefined_coordinate;
+            return m_x != undefined_x_coordinate || y() != undefined_y_coordinate;
         }
 
         /**
@@ -385,7 +382,7 @@ namespace osm2rdf::osm {
          * See also is_defined() and is_valid().
          */
         constexpr bool is_undefined() const noexcept {
-            return m_x == undefined_coordinate && y() == undefined_coordinate;
+            return m_x == undefined_x_coordinate && y() == undefined_y_coordinate;
         }
 
         constexpr int32_t x() const noexcept {
@@ -393,7 +390,7 @@ namespace osm2rdf::osm {
         }
 
         constexpr int32_t y() const noexcept {
-            return (m_y & ~TAG_BIT) - 900000000;
+            return (m_y & ~TAG_BIT) - Y_SHIFT;
         }
 
         Location& set_x(const int32_t x) noexcept {
@@ -410,7 +407,7 @@ namespace osm2rdf::osm {
          * Convert this osm2rdf::osm::Location to an osmium::Location
          */
         operator osmium::Location() const noexcept {
-            return {x(), y()};
+            return {x(), y() == undefined_y_coordinate ? osmium::Location::undefined_coordinate : y()};
         }
 
         /**
@@ -460,14 +457,14 @@ namespace osm2rdf::osm {
             if (!valid()) {
                 throw osm2rdf::osm::invalid_location{"invalid location"};
             }
-            return fix_to_double((m_y & ~TAG_BIT) - Y_SHIFT);
+            return fix_to_double(y());
         }
 
         /**
          * Get latitude without checking the validity.
          */
         double lat_without_check() const noexcept {
-            return fix_to_double((m_y & ~TAG_BIT) - Y_SHIFT);
+            return fix_to_double(y());
         }
 
         Location& set_lon(double lon) noexcept {
@@ -496,7 +493,7 @@ namespace osm2rdf::osm {
             if (**data != '\0') {
                 throw invalid_location{std::string{"characters after coordinate: '"} + *data + "'"};
             }
-            m_y = value + Y_SHIFT;
+            set_lon(value);
             return *this;
         }
 
@@ -506,7 +503,7 @@ namespace osm2rdf::osm {
         }
 
         Location& set_lat_partial(const char** str) {
-            m_y = detail::string_to_location_coordinate(str) + Y_SHIFT;
+            set_y(detail::string_to_location_coordinate(str));
             return *this;
         }
 
