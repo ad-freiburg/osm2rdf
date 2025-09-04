@@ -18,6 +18,8 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/GeometryHandler.h"
+
 #include <unistd.h>
 
 #include <algorithm>
@@ -31,7 +33,6 @@
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osm2rdf/osm/FactHandler.h"
-#include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/ProgressBar.h"
@@ -85,7 +86,8 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                   const std::string& pred) { this->writeRelCb(t, a, b, pred); },
            {},
            {},
-           [this](size_t progr) { this->progressCb(progr); }, {}},
+           [this](size_t progr) { this->progressCb(progr); },
+           {}},
           config.cache, ""),
       _parseBatches(config.numThreads) {}
 
@@ -224,13 +226,14 @@ template <typename W>
 
 // ____________________________________________________________________________
 template <typename W>
-void GeometryHandler<W>::node(const Node& node) {
+void GeometryHandler<W>::node(const osmium::Node& node) {
   std::string id = _writer->generateIRI(
       osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
       node.id());
 
-  _sweeper.add(transform(node.geom()), id, false,
-               _parseBatches[omp_get_thread_num()]);
+  _sweeper.add(transform(::util::geo::DPoint{node.location().lon(),
+                                             node.location().lat()}),
+               id, false, _parseBatches[omp_get_thread_num()]);
 
   if (_parseBatches[omp_get_thread_num()].size() > BATCH_SIZE) {
     _sweeper.addBatch(_parseBatches[omp_get_thread_num()]);

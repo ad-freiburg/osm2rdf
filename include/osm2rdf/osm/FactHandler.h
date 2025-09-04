@@ -45,6 +45,7 @@ class FactHandler {
   // Add data
   void area(const osm2rdf::osm::Area& area);
   void node(const osm2rdf::osm::Node& node);
+  void node(const osmium::Node& node);
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
@@ -61,7 +62,7 @@ class FactHandler {
   template <typename T>
   void writeMeta(const std::string& s, const T& object);
 
-  void writeTag(const std::string& s, const osm2rdf::osm::Tag& tag);
+  void writeTag(const std::string& s, const char* key, const char* val);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2);
@@ -73,6 +74,8 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyIRI);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
+
+  void writeTagList(const std::string& s, const osmium::TagList& tags);
 
   void writeTagList(const std::string& s, const osm2rdf::osm::TagList& tags);
   FRIEND_TEST(OSM_FactHandler, writeTagList);

@@ -25,6 +25,7 @@ template <typename TId, typename TValue>
 osm2rdf::osm::DenseMemIndex<TId, TValue>::DenseMemIndex(size_t minNodeId,
                                                         size_t maxNodeId)
     : _offset(minNodeId), _index(maxNodeId - minNodeId + 1) {
+      std::cerr << minNodeId << " " << maxNodeId << std::endl;
 }
 
 // ____________________________________________________________________________

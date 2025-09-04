@@ -30,7 +30,7 @@ osm2rdf::osm::TagList osm2rdf::osm::convertTagList(
   for (const auto& tag : tagList) {
     std::string key{tag.key()};
     std::replace(key.begin(), key.end(), ' ', '_');
-    result.push_back({key, tag.value()});
+    result.push_back({tag.key(), tag.value()});
   }
   return result;
 }

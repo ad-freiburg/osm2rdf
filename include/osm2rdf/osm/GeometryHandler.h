@@ -50,7 +50,7 @@ class GeometryHandler {
 
   // Add data
   void area(const osm2rdf::osm::Area& area);
-  void node(const osm2rdf::osm::Node& node);
+  void node(const osmium::Node& node);
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 

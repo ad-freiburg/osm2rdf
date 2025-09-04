@@ -29,6 +29,9 @@
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/relation.hpp"
+#include "osmium/io/any_input.hpp"
+#include "osmium/area/multipolygon_manager.hpp"
+#include "osmium/area/assembler.hpp"
 #include "osmium/osm/way.hpp"
 
 namespace osm2rdf::osm {
@@ -43,7 +46,7 @@ class OsmiumHandler : public osmium::handler::Handler {
   void area(const osmium::Area& area);
   void node(const osmium::Node& node);
   void relation(const osmium::Relation& relation);
-  void way(const osmium::Way& way);
+  void way(osmium::Way& way);
 
   [[nodiscard]] size_t areasSeen() const;
   [[nodiscard]] size_t areasDumped() const;
@@ -62,6 +65,7 @@ class OsmiumHandler : public osmium::handler::Handler {
   osm2rdf::config::Config _config;
   osm2rdf::osm::FactHandler<W>* _factHandler;
   osm2rdf::osm::GeometryHandler<W>* _geometryHandler;
+  osm2rdf::osm::LocationHandler* _locationHandler;
 
   osm2rdf::osm::RelationHandler _relationHandler;
   osm2rdf::util::ProgressBar _progressBar;
@@ -79,6 +83,9 @@ class OsmiumHandler : public osmium::handler::Handler {
   size_t _wayGeometriesHandled = 0;
 
   size_t _numTasksDone = 0;
+ private:
+  void handleBuffers(std::vector<osmium::memory::Buffer>& buffers, size_t len, std::vector<osmium::memory::Buffer>& areaBuffers, size_t& ai, osmium::area::MultipolygonManager<osmium::area::Assembler>& mp_manager);
+  void handleAreaBuffers(std::vector<osmium::memory::Buffer>& areaBuffers, size_t len);
 };
 }  // namespace osm2rdf::osm
 
