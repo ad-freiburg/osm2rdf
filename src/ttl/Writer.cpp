@@ -578,8 +578,6 @@ void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
 
   writeUnsafeIRILiteralTriple(s, p, v, o, part);
@@ -645,8 +643,6 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
 
   writeTriple(s, p, o, part);
@@ -677,8 +673,6 @@ void osm2rdf::ttl::Writer<T>::writeLiteralTripleUnsafe(const std::string& s,
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
   writeLiteralTripleUnsafe(s, p, a, b, part);
 }

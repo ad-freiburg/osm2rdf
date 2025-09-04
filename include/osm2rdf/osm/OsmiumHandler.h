@@ -25,13 +25,13 @@
 #include "osm2rdf/osm/GeometryHandler.h"
 #include "osm2rdf/ttl/Writer.h"
 #include "osm2rdf/util/ProgressBar.h"
+#include "osmium/area/assembler.hpp"
+#include "osmium/area/multipolygon_manager.hpp"
 #include "osmium/handler.hpp"
+#include "osmium/io/any_input.hpp"
 #include "osmium/osm/area.hpp"
 #include "osmium/osm/node.hpp"
 #include "osmium/osm/relation.hpp"
-#include "osmium/io/any_input.hpp"
-#include "osmium/area/multipolygon_manager.hpp"
-#include "osmium/area/assembler.hpp"
 #include "osmium/osm/way.hpp"
 
 namespace osm2rdf::osm {
@@ -69,23 +69,28 @@ class OsmiumHandler : public osmium::handler::Handler {
 
   osm2rdf::osm::RelationHandler _relationHandler;
   osm2rdf::util::ProgressBar _progressBar;
-  size_t _areasSeen = 0;
-  size_t _areasDumped = 0;
-  size_t _areaGeometriesHandled = 0;
-  size_t _nodesSeen = 0;
-  size_t _nodesDumped = 0;
-  size_t _nodeGeometriesHandled = 0;
-  size_t _relationsSeen = 0;
-  size_t _relationsDumped = 0;
-  size_t _relationGeometriesHandled = 0;
-  size_t _waysSeen = 0;
-  size_t _waysDumped = 0;
-  size_t _wayGeometriesHandled = 0;
+  std::atomic<size_t> _areasSeen = 0;
+  std::atomic<size_t> _areasDumped = 0;
+  std::atomic<size_t> _areaGeometriesHandled = 0;
+  std::atomic<size_t> _nodesSeen = 0;
+  std::atomic<size_t> _nodesDumped = 0;
+  std::atomic<size_t> _nodeGeometriesHandled = 0;
+  std::atomic<size_t> _relationsSeen = 0;
+  std::atomic<size_t> _relationsDumped = 0;
+  std::atomic<size_t> _relationGeometriesHandled = 0;
+  std::atomic<size_t> _waysSeen = 0;
+  std::atomic<size_t> _waysDumped = 0;
+  std::atomic<size_t> _wayGeometriesHandled = 0;
 
-  size_t _numTasksDone = 0;
+  std::atomic<size_t> _numTasksDone = 0;
+
  private:
-  void handleBuffers(std::vector<osmium::memory::Buffer>& buffers, size_t len, std::vector<osmium::memory::Buffer>& areaBuffers, size_t& ai, osmium::area::MultipolygonManager<osmium::area::Assembler>& mp_manager);
-  void handleAreaBuffers(std::vector<osmium::memory::Buffer>& areaBuffers, size_t len);
+  void handleBuffers(
+      std::vector<osmium::memory::Buffer>& buffers, size_t len,
+      std::vector<osmium::memory::Buffer>& areaBuffers, size_t& ai,
+      osmium::area::MultipolygonManager<osmium::area::Assembler>& mp_manager);
+  void handleAreaBuffers(std::vector<osmium::memory::Buffer>& areaBuffers,
+                         size_t len);
 };
 }  // namespace osm2rdf::osm
 

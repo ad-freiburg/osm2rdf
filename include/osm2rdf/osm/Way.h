@@ -45,33 +45,12 @@ class Way {
   [[nodiscard]] bool visible() const noexcept;
   [[nodiscard]] bool closed() const noexcept;
   [[nodiscard]] bool isArea() const noexcept;
-  [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
-  [[nodiscard]] const ::util::geo::DLine& geom() const noexcept;
-  [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
-  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox()
-      const noexcept;
-  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
-  [[nodiscard]] const std::vector<osm2rdf::osm::Node>& nodes() const noexcept;
-  [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
-
-  bool operator==(const osm2rdf::osm::Way& other) const noexcept;
-  bool operator!=(const osm2rdf::osm::Way& other) const noexcept;
+  [[nodiscard]] const ::util::geo::DLine geom() const noexcept;
+  [[nodiscard]] const osmium::WayNodeList& nodes() const noexcept;
+  [[nodiscard]] const osmium::TagList& tags() const noexcept;
 
  protected:
-  id_t _id;
-  osm2rdf::osm::generic::changeset_id_t _changeset;
-  std::time_t _timestamp;
-  std::string _user;
-  id_t _uid;
-  osm2rdf::osm::generic::version_t _version;
-  bool _visible;
-  std::vector<osm2rdf::osm::Node> _nodes;
-  ::util::geo::DLine _geom;
-  ::util::geo::DBox _envelope;
-  ::util::geo::DPolygon _convexHull;
-  ::util::geo::DPolygon _obb;
-  osm2rdf::osm::TagList _tags;
-  bool _hasAreaTag;
+  const osmium::Way* _w = 0;
 };
 
 }  // namespace osm2rdf::osm

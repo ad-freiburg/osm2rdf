@@ -27,148 +27,74 @@
 
 // ____________________________________________________________________________
 osm2rdf::osm::Way::Way() {
-  _id = std::numeric_limits<osm2rdf::osm::Way::id_t>::max();
 }
 
 // ____________________________________________________________________________
-osm2rdf::osm::Way::Way(const osmium::Way& way) {
-  _id = way.positive_id();
-  _timestamp = way.timestamp().seconds_since_epoch();
-  _changeset = way.changeset();
-  _user = way.user();
-  _uid = way.uid();
-  _version = way.version();
-  _visible = way.visible();
-  _tags = std::move(osm2rdf::osm::convertTagList(way.tags()));
-  _nodes.reserve(way.nodes().size());
-  _geom.reserve(way.nodes().size());
-
-  auto areaTag = way.tags()["area"];
-  _hasAreaTag = areaTag == nullptr || strcmp(areaTag, "no") != 0;
-
-  double lonMin = std::numeric_limits<double>::infinity();
-  double latMin = std::numeric_limits<double>::infinity();
-  double lonMax = -std::numeric_limits<double>::infinity();
-  double latMax = -std::numeric_limits<double>::infinity();
-
-  for (const auto& nodeRef : way.nodes()) {
-    if (nodeRef.lon() < lonMin) {
-      lonMin = nodeRef.lon();
-    }
-    if (nodeRef.lat() < latMin) {
-      latMin = nodeRef.lat();
-    }
-    if (nodeRef.lon() > lonMax) {
-      lonMax = nodeRef.lon();
-    }
-    if (nodeRef.lat() > latMax) {
-      latMax = nodeRef.lat();
-    }
-
-    _nodes.emplace_back(nodeRef);
-
-    if (_geom.empty() || (nodeRef.lon() != _geom.back().getX() ||
-                          nodeRef.lat() != _geom.back().getY())) {
-      _geom.push_back({nodeRef.lon(), nodeRef.lat()});
-    }
-  }
-  _envelope = {{lonMin, latMin}, {lonMax, latMax}};
-}
+osm2rdf::osm::Way::Way(const osmium::Way& way) : _w(&way) {}
 
 // ____________________________________________________________________________
-void osm2rdf::osm::Way::finalize() {
-  _convexHull = ::util::geo::convexHull(_geom);
-  _obb = ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
-}
-
-// ____________________________________________________________________________
-osm2rdf::osm::Way::id_t osm2rdf::osm::Way::id() const noexcept { return _id; }
+osm2rdf::osm::Way::id_t osm2rdf::osm::Way::id() const noexcept {
+ if (!_w) return std::numeric_limits<osm2rdf::osm::Way::id_t>::max();
+ return _w->id(); }
 
 // ____________________________________________________________________________
 osm2rdf::osm::generic::changeset_id_t osm2rdf::osm::Way::changeset()
     const noexcept {
-  return _changeset;
+  return _w->changeset();
 }
 
 // ____________________________________________________________________________
-std::time_t osm2rdf::osm::Way::timestamp() const noexcept { return _timestamp; }
+std::time_t osm2rdf::osm::Way::timestamp() const noexcept { return _w->timestamp().seconds_since_epoch(); }
 
 // ____________________________________________________________________________
-std::string osm2rdf::osm::Way::user() const noexcept { return _user; }
+std::string osm2rdf::osm::Way::user() const noexcept { return _w->user(); }
 
 // ____________________________________________________________________________
-id_t osm2rdf::osm::Way::uid() const noexcept { return _uid; }
+id_t osm2rdf::osm::Way::uid() const noexcept { return _w->uid(); }
 
 // ____________________________________________________________________________
 osm2rdf::osm::generic::version_t osm2rdf::osm::Way::version() const noexcept {
-  return _version;
+  return _w->version();
 }
 // ____________________________________________________________________________
-bool osm2rdf::osm::Way::visible() const noexcept { return _visible; }
+bool osm2rdf::osm::Way::visible() const noexcept { return _w->visible(); }
 
 // ____________________________________________________________________________
-const osm2rdf::osm::TagList& osm2rdf::osm::Way::tags() const noexcept {
-  return _tags;
+const osmium::TagList& osm2rdf::osm::Way::tags() const noexcept {
+  return _w->tags();
 }
 
 // ____________________________________________________________________________
-const std::vector<osm2rdf::osm::Node>& osm2rdf::osm::Way::nodes()
+const osmium::WayNodeList& osm2rdf::osm::Way::nodes()
     const noexcept {
-  return _nodes;
+  return _w->nodes();
 }
 
 // ____________________________________________________________________________
-const ::util::geo::DLine& osm2rdf::osm::Way::geom() const noexcept {
-  return _geom;
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DBox& osm2rdf::osm::Way::envelope() const noexcept {
-  return _envelope;
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon& osm2rdf::osm::Way::convexHull() const noexcept {
-  return _convexHull;
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon& osm2rdf::osm::Way::orientedBoundingBox()
-    const noexcept {
-  return _obb;
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPoint osm2rdf::osm::Way::centroid() const noexcept {
-  return ::util::geo::centroid(_geom);
+const ::util::geo::DLine osm2rdf::osm::Way::geom() const noexcept {
+  ::util::geo::DLine ret;
+  for (const auto& nodeRef : _w->nodes()) {
+    if (ret.empty() || (nodeRef.lon() != ret.back().getX() ||
+                          nodeRef.lat() != ret.back().getY())) {
+      ret.push_back({nodeRef.lon(), nodeRef.lat()}); }
+  }
+  return ret;
 }
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Way::closed() const noexcept {
-  return _nodes.front().geom() == _nodes.back().geom();
+  return _w->nodes().size() > 0 && _w->nodes().front().lon() == _w->nodes().back().lon() && _w->nodes().front().lat() == _w->nodes().back().lat();
 }
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Way::isArea() const noexcept {
   // See libosmium/include/osmium/area/multipolygon_manager.hpp:154
-  if (_nodes.size() < 4) {
+  if (_w->nodes().size() < 4) {
     return false;
   }
   if (!closed()) {
     return false;
   }
-  return _hasAreaTag;
-}
-
-// ____________________________________________________________________________
-bool osm2rdf::osm::Way::operator==(
-    const osm2rdf::osm::Way& other) const noexcept {
-  return _id == other._id && _envelope == other._envelope &&
-         _nodes == other._nodes && _geom == other._geom && _tags == other._tags;
-}
-
-// ____________________________________________________________________________
-bool osm2rdf::osm::Way::operator!=(
-    const osm2rdf::osm::Way& other) const noexcept {
-  return !(*this == other);
+  auto areaTag = _w->tags()["area"];
+  return areaTag == nullptr || strcmp(areaTag, "no") != 0;
 }

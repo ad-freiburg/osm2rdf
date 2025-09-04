@@ -65,8 +65,14 @@ add_compile_options(-ffast-math)
 # ----------------------------------------------------------------------------
 find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
-find_package(ZLIB REQUIRED)
+#find_package(ZLIB REQUIRED)
 find_package(OpenMP)
+
+# zlib-ng
+option(ZLIB_COMPAT ON)
+option(WITH_GTEST OFF)
+option(ZLIB_ENABLE_TESTS OFF)
+add_subdirectory(vendor/zlib-ng/zlib-ng)
 
 # Disable installation of google stuff
 set(INSTALL_GMOCK OFF)
