@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
-#include <iostream>
-
 #include "osm2rdf/osm/CountHandler.h"
+
+#include <iostream>
 
 // ____________________________________________________________________________
 void osm2rdf::osm::CountHandler::prepare_for_lookup() { _firstPassDone = true; }
@@ -39,6 +39,7 @@ void osm2rdf::osm::CountHandler::relation(const osmium::Relation& rel) {
     return;
   }
   _numRelations++;
+  _weightedNumRelations += rel.members().size() * 2;
 }
 
 // ____________________________________________________________________________
@@ -47,6 +48,7 @@ void osm2rdf::osm::CountHandler::way(const osmium::Way& way) {
     return;
   }
   _numWays++;
+  _weightedNumWays += way.nodes().size();
 }
 
 // ____________________________________________________________________________
@@ -58,4 +60,14 @@ size_t osm2rdf::osm::CountHandler::numRelations() const {
 }
 
 // ____________________________________________________________________________
+size_t osm2rdf::osm::CountHandler::weightedNumRelations() const {
+  return _weightedNumRelations;
+}
+
+// ____________________________________________________________________________
 size_t osm2rdf::osm::CountHandler::numWays() const { return _numWays; }
+
+// ____________________________________________________________________________
+size_t osm2rdf::osm::CountHandler::weightedNumWays() const {
+  return _weightedNumWays;
+}

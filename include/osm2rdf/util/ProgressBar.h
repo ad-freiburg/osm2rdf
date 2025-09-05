@@ -50,8 +50,6 @@ class ProgressBar {
   std::size_t _maxValue;
   // Current absolute value.
   std::size_t _oldValue;
-  // Number of digits required for _maxValue.
-  std::size_t _countWidth;
   // Width of whole progress bar.
   std::size_t _width;
   // Current percent value.

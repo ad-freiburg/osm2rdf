@@ -35,6 +35,8 @@ class CountHandler : public osmium::handler::Handler {
   size_t numNodes() const;
   size_t numRelations() const;
   size_t numWays() const;
+  size_t weightedNumWays() const;
+  size_t weightedNumRelations() const;
 
   size_t minNodeId() const { return _minId; };
   size_t maxNodeId() const { return _maxId; };
@@ -43,6 +45,8 @@ class CountHandler : public osmium::handler::Handler {
   size_t _numNodes = 0;
   size_t _numRelations = 0;
   size_t _numWays = 0;
+  size_t _weightedNumWays = 0;
+  size_t _weightedNumRelations = 0;
   bool _firstPassDone = false;
   size_t _minId = std::numeric_limits<size_t>::max();
   size_t _maxId = 0;

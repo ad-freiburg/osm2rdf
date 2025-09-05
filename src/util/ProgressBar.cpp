@@ -30,15 +30,11 @@
 // ____________________________________________________________________________
 osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
     : _maxValue(maxValue),
-      _countWidth(std::floor(std::log10(maxValue)) + 1),
       _percent(k100Percent + 1),
       _last(std::time(nullptr)),
       _show(show) {
   // Handle special case of 0 elements
-  if (maxValue == 0) {
-    _countWidth = 1;
-  }
-  _width = kTerminalWidth - _countWidth * 2 - 4 - 5 - 2 - 4 - 20;
+  _width = kTerminalWidth - - 4 - 5 - 2 - 4 - 20;
 }
 
 // ____________________________________________________________________________
@@ -94,10 +90,6 @@ void osm2rdf::util::ProgressBar::update(std::size_t count) {
   // Update last update time
   _last = std::time(nullptr);
 
-  // Add absolute progress [x/y]
-  std::cerr << " [" << std::setw(_countWidth) << std::right << count << "/"
-            << _maxValue << "]";
-
   // Add phase
   if (_phase) std::cerr << " [" << _phase << "]";
   else std::cerr << "    ";
@@ -113,9 +105,4 @@ void osm2rdf::util::ProgressBar::done() {
   }
   update(_maxValue);
   std::cerr << std::endl;
-}
-
-// ____________________________________________________________________________
-std::size_t osm2rdf::util::ProgressBar::countWidth() const {
-  return _countWidth;
 }

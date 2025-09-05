@@ -26,12 +26,11 @@
 
 #include "osm2rdf/config/Config.h"
 
-static const size_t BUFFER_S = 1024 * 1024 * 10;
+static const size_t BUFFER_S = 1024 * 1024 * 30;
 
 namespace osm2rdf::util {
 
-class Output {
- public:
+class Output { public:
   Output(const osm2rdf::config::Config& config, const std::string& prefix);
   Output(const osm2rdf::config::Config& config, const std::string& prefix,
          size_t partCount);
@@ -60,6 +59,8 @@ class Output {
   // Closes and concatenates all parts without decompressing and recompressing
   // streams.
   void concatenate();
+
+  void writeToFile(unsigned char* from, size_t len, size_t t);
   // Config instance.
   const osm2rdf::config::Config _config;
   // Prefix for all filenames.

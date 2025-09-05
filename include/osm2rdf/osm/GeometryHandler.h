@@ -75,6 +75,9 @@ class GeometryHandler {
   static ::util::geo::I32MultiPolygon transform(
       const ::util::geo::DMultiPolygon& area);
 
+  std::string getSweeperId(uint64_t oid, char type);
+  std::string getFullID(const std::string& id);
+
   void writeRelCb(size_t t, const std::string& a, const std::string& b,
                   const std::string& pred);
   void progressCb(size_t progr);
