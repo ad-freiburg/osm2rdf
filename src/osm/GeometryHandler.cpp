@@ -139,7 +139,7 @@ template <typename W>
 void GeometryHandler<W>::writeRelCb(size_t t, const std::string& a,
                                     const std::string& b,
                                     const std::string& pred) {
-  _writer->writeTriple(getFullID(a), pred, getFullId(b), t);
+  _writer->writeTriple(getFullID(a), pred, getFullID(b), t);
 }
 
 // ____________________________________________________________________________
@@ -223,7 +223,7 @@ template <typename W>
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::node(const osmium::Node& node) {
-  std::string id = getSweeperId(node.id(), 1);_
+  std::string id = getSweeperId(node.id(), 1);
   _sweeper.add(transform(::util::geo::DPoint{node.location().lon(),
                                              node.location().lat()}),
                id, false, _parseBatches[omp_get_thread_num()]);

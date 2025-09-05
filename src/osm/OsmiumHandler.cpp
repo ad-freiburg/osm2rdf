@@ -140,33 +140,13 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       osmium::io::Reader dumpReader{input_file, osmium::osm_entity_bits::object,
                                     osmium::io::read_meta::yes};
 
-      std::vector<osmium::memory::Buffer> buffers(10000);
-      size_t i = 0;
-
-      std::vector<osmium::memory::Buffer> areaBuffs(10000);
-      size_t ai = 0;
-
 #pragma omp parallel
       {
 #pragma omp single
         {
           while (auto buf = dumpReader.read()) {
-            buffers[i] = std::move(buf);
-            i++;
-            if (i == buffers.size()) {
-              handleBuffers(buffers, i, areaBuffs, ai, mp_manager);
-              i = 0;
-            }
+						handleBuffers(buf, mp_manager);
           }
-        }
-      }
-
-#pragma omp parallel
-      {
-#pragma omp single
-        {
-          handleBuffers(buffers, i, areaBuffs, ai, mp_manager);
-          handleAreaBuffers(areaBuffs, ai);
         }
       }
 
@@ -223,41 +203,30 @@ void osm2rdf::osm::OsmiumHandler<W>::area(const osmium::Area& area) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::handleBuffers(
-    std::vector<osmium::memory::Buffer>& buffers, size_t len,
-    std::vector<osmium::memory::Buffer>& areaBuffs, size_t& areaBufferPos,
+    osmium::memory::Buffer& buffer,
     osmium::area::MultipolygonManager<osmium::area::Assembler>& mp_manager) {
   // handlers which do not care about the order in which the
   // elements are given to them
-  for (size_t j = 0; j < len; j++) {
     const auto buff =
-        std::make_shared<osmium::memory::Buffer>(std::move(buffers[j]));
+        std::make_shared<osmium::memory::Buffer>(std::move(buffer));
 #pragma omp task
     { osmium::apply(*buff, *_locationHandler, _relationHandler, *this); }
 
   // multipolygon manager requires that ways are given in sorted order
     osmium::apply(*buff, *_locationHandler,
                   mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
-                    areaBuffs[areaBufferPos] = std::move(buffer);
-                    areaBufferPos++;
-                    if (areaBufferPos == areaBuffs.size()) {
-                      handleAreaBuffers(areaBuffs, areaBufferPos);
-                      areaBufferPos = 0;
-                    }
+                   handleAreaBuffers(buffer);
                   }));
-  }
-
 }
 
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::OsmiumHandler<W>::handleAreaBuffers(
-    std::vector<osmium::memory::Buffer>& buffers, size_t len) {
-  for (size_t jj = 0; jj < len; jj++) {
+    osmium::memory::Buffer& buffer) {
     const auto buff =
-        std::make_shared<osmium::memory::Buffer>(std::move(buffers[jj]));
+        std::make_shared<osmium::memory::Buffer>(std::move(buffer));
 #pragma omp task
     { osmium::apply(*buff, *this); }
-  }
 }
 
 // ____________________________________________________________________________

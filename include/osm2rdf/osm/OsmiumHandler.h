@@ -86,11 +86,9 @@ class OsmiumHandler : public osmium::handler::Handler {
 
  private:
   void handleBuffers(
-      std::vector<osmium::memory::Buffer>& buffers, size_t len,
-      std::vector<osmium::memory::Buffer>& areaBuffers, size_t& ai,
+      osmium::memory::Buffer& buffer,
       osmium::area::MultipolygonManager<osmium::area::Assembler>& mp_manager);
-  void handleAreaBuffers(std::vector<osmium::memory::Buffer>& areaBuffers,
-                         size_t len);
+  void handleAreaBuffers(osmium::memory::Buffer& areaBuffer);
 };
 }  // namespace osm2rdf::osm
 
