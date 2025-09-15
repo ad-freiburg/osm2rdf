@@ -204,10 +204,7 @@ TEST(OSM_FactHandler, node) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag("city", "Freiburg"));
 
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
-
-  dh.node(n);
+  dh.node(osmiumBuffer.get<osmium::Node>(0));
   output.flush();
   output.close();
 
@@ -521,7 +518,6 @@ TEST(OSM_FactHandler, way) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
-  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -588,7 +584,6 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
-  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -657,7 +652,6 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
-  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -727,7 +721,6 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
-  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -801,7 +794,6 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
-  w.finalize();
 
   dh.way(w);
   output.flush();
@@ -1118,7 +1110,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1157,7 +1149,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(tagValue, "");
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1196,7 +1188,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger3) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(tagValue, "");
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1236,7 +1228,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_Integer) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1276,7 +1268,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerPositive) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
       "5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1316,7 +1308,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerNegative) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
       "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1356,7 +1348,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
       "-5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1396,7 +1388,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_IntegerWS2) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(
       "5", "^^" + osm2rdf::ttl::constants::IRI__XSD__INTEGER);
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1435,7 +1427,7 @@ TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(tagValue, "");
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1474,7 +1466,7 @@ TEST(OSM_FactHandler, writeTag_KeyIRI) {
   const std::string predicate =
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object = writer.generateLiteral(tagValue, "");
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected =
       subject + " " + predicate + " " + object + " .\n";
   output.flush();
@@ -1510,7 +1502,7 @@ TEST(OSM_FactHandler, writeTag_KeyNotIRI) {
   const std::string tagValue = "value";
 
   const std::string subject = "subject";
-  dh.writeTag(subject, osm2rdf::osm::Tag{tagKey, tagValue});
+  dh.writeTag(subject, tagKey.c_str(), tagValue.c_str());
   const std::string expected = subject +
                                " osm:tag _:0_0 .\n"
                                "_:0_0 osmkey:key \"" +

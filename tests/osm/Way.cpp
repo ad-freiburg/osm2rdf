@@ -44,19 +44,14 @@ TEST(OSM_Way, FromWay) {
   ASSERT_EQ(0, w.tags().size());
 
   ASSERT_EQ(2, w.nodes().size());
-  ASSERT_EQ(1, w.nodes().at(0).id());
-  ASSERT_EQ(2, w.nodes().at(1).id());
+  ASSERT_EQ(1, w.nodes()[0].positive_ref());
+  ASSERT_EQ(2, w.nodes()[1].positive_ref());
 
   ASSERT_EQ(2, w.geom().size());
   ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
   ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).getY());
   ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).getX());
   ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
-
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -78,23 +73,17 @@ TEST(OSM_Way, FromWayWithTags) {
   ASSERT_FALSE(w.closed());
 
   ASSERT_EQ(1, w.tags().size());
-  ASSERT_EQ("city", w.tags()[0].first);
-  ASSERT_EQ("Freiburg", w.tags()[0].second);
+  ASSERT_EQ("Freiburg", w.tags()["city"]);
 
   ASSERT_EQ(2, w.nodes().size());
-  ASSERT_EQ(1, w.nodes().at(0).id());
-  ASSERT_EQ(2, w.nodes().at(1).id());
+  ASSERT_EQ(1, w.nodes()[0].positive_ref());
+  ASSERT_EQ(2, w.nodes()[1].positive_ref());
 
   ASSERT_EQ(2, w.geom().size());
   ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
   ASSERT_DOUBLE_EQ(7.51, w.geom().at(0).getY());
   ASSERT_DOUBLE_EQ(48.1, w.geom().at(1).getX());
   ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
-
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -118,9 +107,9 @@ TEST(OSM_Way, FromClosedWay) {
   ASSERT_EQ(0, w.tags().size());
 
   ASSERT_EQ(3, w.nodes().size());
-  ASSERT_EQ(1, w.nodes().at(0).id());
-  ASSERT_EQ(2, w.nodes().at(1).id());
-  ASSERT_EQ(1, w.nodes().at(2).id());
+  ASSERT_EQ(1, w.nodes()[0].positive_ref());
+  ASSERT_EQ(2, w.nodes()[1].positive_ref());
+  ASSERT_EQ(1, w.nodes()[2].positive_ref());
 
   ASSERT_EQ(3, w.geom().size());
   ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
@@ -129,11 +118,6 @@ TEST(OSM_Way, FromClosedWay) {
   ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
   ASSERT_DOUBLE_EQ(48.0, w.geom().at(2).getX());
   ASSERT_DOUBLE_EQ(7.51, w.geom().at(2).getY());
-
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -159,11 +143,11 @@ TEST(OSM_Way, FromClosedWayWithDuplicateNodes) {
   ASSERT_EQ(0, w.tags().size());
 
   ASSERT_EQ(5, w.nodes().size());
-  ASSERT_EQ(1, w.nodes().at(0).id());
-  ASSERT_EQ(2, w.nodes().at(1).id());
-  ASSERT_EQ(2, w.nodes().at(2).id());
-  ASSERT_EQ(2, w.nodes().at(3).id());
-  ASSERT_EQ(1, w.nodes().at(4).id());
+  ASSERT_EQ(1, w.nodes()[0].positive_ref());
+  ASSERT_EQ(2, w.nodes()[1].positive_ref());
+  ASSERT_EQ(2, w.nodes()[2].positive_ref());
+  ASSERT_EQ(2, w.nodes()[3].positive_ref());
+  ASSERT_EQ(1, w.nodes()[4].positive_ref());
 
   ASSERT_EQ(3, w.geom().size());
   ASSERT_DOUBLE_EQ(48.0, w.geom().at(0).getX());
@@ -172,11 +156,6 @@ TEST(OSM_Way, FromClosedWayWithDuplicateNodes) {
   ASSERT_DOUBLE_EQ(7.61, w.geom().at(1).getY());
   ASSERT_DOUBLE_EQ(48.0, w.geom().at(2).getX());
   ASSERT_DOUBLE_EQ(7.51, w.geom().at(2).getY());
-
-  ASSERT_DOUBLE_EQ(48.0, w.envelope().getLowerLeft().getX());
-  ASSERT_DOUBLE_EQ(7.51, w.envelope().getLowerLeft().getY());
-  ASSERT_DOUBLE_EQ(48.1, w.envelope().getUpperRight().getX());
-  ASSERT_DOUBLE_EQ(7.61, w.envelope().getUpperRight().getY());
 }
 
 // ____________________________________________________________________________
@@ -236,7 +215,6 @@ TEST(OSM_Way, isAreaTrueForTriangle) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{buffer.get<osmium::Way>(0)};
-  w.finalize();
   ASSERT_TRUE(w.closed());
 
   ASSERT_TRUE(w.isArea());
@@ -262,98 +240,6 @@ TEST(OSM_Way, isAreaFalseForTriangleMarkedAsNoArea) {
   ASSERT_TRUE(w.closed());
 
   ASSERT_FALSE(w.isArea());
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Way, equalsOperator) {
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(osmiumBuffer1, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.51}},
-                               {2, {48.1, 7.61}},
-                           }),
-                           osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_way(osmiumBuffer2, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.52}},
-                               {2, {48.1, 7.61}},
-                           }),
-                           osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_way(osmiumBuffer3, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.51}},
-                               {2, {48.1, 7.61}},
-                           }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way o1{osmiumBuffer1.get<osmium::Way>(0)};
-  const osm2rdf::osm::Way o2{osmiumBuffer2.get<osmium::Way>(0)};
-  const osm2rdf::osm::Way o3{osmiumBuffer3.get<osmium::Way>(0)};
-
-  ASSERT_TRUE(o1 == o1);
-  ASSERT_FALSE(o1 == o2);
-  ASSERT_FALSE(o1 == o3);
-
-  ASSERT_FALSE(o2 == o1);
-  ASSERT_TRUE(o2 == o2);
-  ASSERT_FALSE(o2 == o3);
-
-  ASSERT_FALSE(o3 == o1);
-  ASSERT_FALSE(o3 == o2);
-  ASSERT_TRUE(o3 == o3);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Way, notEqualsOperator) {
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_way(osmiumBuffer1, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.51}},
-                               {2, {48.1, 7.61}},
-                           }),
-                           osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_way(osmiumBuffer2, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.52}},
-                               {2, {48.1, 7.61}},
-                           }),
-                           osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_way(osmiumBuffer3, osmium::builder::attr::_id(42),
-                           osmium::builder::attr::_nodes({
-                               {1, {48.0, 7.51}},
-                               {2, {48.1, 7.61}},
-                           }));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Way o1{osmiumBuffer1.get<osmium::Way>(0)};
-  const osm2rdf::osm::Way o2{osmiumBuffer2.get<osmium::Way>(0)};
-  const osm2rdf::osm::Way o3{osmiumBuffer3.get<osmium::Way>(0)};
-
-  ASSERT_FALSE(o1 != o1);
-  ASSERT_TRUE(o1 != o2);
-  ASSERT_TRUE(o1 != o3);
-
-  ASSERT_TRUE(o2 != o1);
-  ASSERT_FALSE(o2 != o2);
-  ASSERT_TRUE(o2 != o3);
-
-  ASSERT_TRUE(o3 != o1);
-  ASSERT_TRUE(o3 != o2);
-  ASSERT_FALSE(o3 != o3);
 }
 
 }  // namespace osm2rdf::osm

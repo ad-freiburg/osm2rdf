@@ -169,10 +169,7 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)));
 
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
-
-  dh.node(n);
+  dh.node(osmiumBuffer.get<osmium::Node>(0));
   output.flush();
   output.close();
 
@@ -324,7 +321,6 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
-  w.finalize();
 
   dh.way(w);
   output.flush();

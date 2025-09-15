@@ -28,58 +28,6 @@ namespace osm2rdf::util {
 const static std::regex regTs("\\[[0-9,.:\\s-]+\\] ");
 
 // ____________________________________________________________________________
-TEST(UTIL_ProgressBar, countWidth) {
-  {
-    osm2rdf::util::ProgressBar pg{0, false};
-    ASSERT_EQ(1, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{1, false};
-    ASSERT_EQ(1, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{9, false};
-    ASSERT_EQ(1, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{10, false};
-    ASSERT_EQ(2, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{99, false};
-    ASSERT_EQ(2, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{100, false};
-    ASSERT_EQ(3, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{999, false};
-    ASSERT_EQ(3, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{1000, false};
-    ASSERT_EQ(4, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{10000, false};
-    ASSERT_EQ(5, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{100000, false};
-    ASSERT_EQ(6, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{1000000, false};
-    ASSERT_EQ(7, pg.countWidth());
-  }
-  {
-    osm2rdf::util::ProgressBar pg{10000000, false};
-    ASSERT_EQ(8, pg.countWidth());
-  }
-}
-
-// ____________________________________________________________________________
 TEST(UTIL_ProgressBar, hidden) {
   std::stringstream buffer;
   std::streambuf* sbuf = std::cerr.rdbuf();

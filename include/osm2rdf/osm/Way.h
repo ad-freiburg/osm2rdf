@@ -34,7 +34,6 @@ class Way {
  public:
   typedef uint32_t id_t;
   Way();
-  void finalize();
   explicit Way(const osmium::Way& way);
   [[nodiscard]] id_t id() const noexcept;
   [[nodiscard]] osm2rdf::osm::generic::changeset_id_t changeset() const noexcept;
