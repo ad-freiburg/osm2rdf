@@ -59,8 +59,6 @@ osm2rdf::util::Output::~Output() { close(); }
 bool osm2rdf::util::Output::open() {
   assert(_partCount > 0);
 
-  std::cerr << zlibVersion() << std::endl;
-
   _rawFiles.resize(_partCount);
   _gzFiles.resize(_partCount);
   _files.resize(_partCount);

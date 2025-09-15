@@ -44,6 +44,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enable" 0)
 
+# Force static libraries
+set(BUILD_SHARED_LIBS OFF)
+
 # Enable verbose makefile
 if (ENABLE_GEOMETRY_STATISTIC)
 	# Enable geometry statistics
@@ -66,10 +69,14 @@ find_package(BZip2 REQUIRED)
 find_package(OpenMP)
 
 # zlib-ng
-option(ZLIB_COMPAT ON)
-option(WITH_GTEST OFF)
-option(ZLIB_ENABLE_TESTS OFF)
+set(ZLIB_COMPAT ON)
+set(WITH_GTEST OFF)
+set(ZLIB_ENABLE_TESTS OFF)
 add_subdirectory(vendor/zlib-ng/zlib-ng)
+
+set(ZLIB_USE_STATIC_LIBS ON)
+set(ZLIB_INCLUDE_DIR "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng")
+set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng/libz.a")
 
 # Disable installation of google stuff
 set(INSTALL_GMOCK OFF)
