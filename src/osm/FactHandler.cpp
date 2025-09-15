@@ -27,6 +27,7 @@
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
+#include "osm2rdf/osm/LocationHandler.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/Way.h"
@@ -74,6 +75,7 @@ using osm2rdf::ttl::constants::IRI__XSD__DOUBLE;
 using osm2rdf::ttl::constants::IRI__XSD__INTEGER;
 using osm2rdf::ttl::constants::IRI__XSD__YEAR;
 using osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH;
+using osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_TAGGED;
 using osm2rdf::ttl::constants::LITERAL__FALSE;
 using osm2rdf::ttl::constants::LITERAL__TRUE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF;
@@ -81,6 +83,8 @@ using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
+using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_TAGGED;
+using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_UNTAGGED;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
@@ -93,7 +97,14 @@ using osm2rdf::ttl::constants::WAY_NAMESPACE;
 template <typename W>
 osm2rdf::osm::FactHandler<W>::FactHandler(const osm2rdf::config::Config& config,
                                           osm2rdf::ttl::Writer<W>* writer)
-    : _config(config), _writer(writer) {}
+    : _config(config), _writer(writer), _locationHandler(nullptr) {}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::FactHandler<W>::setLocationHandler(
+    osm2rdf::osm::LocationHandler* locationHandler) {
+  _locationHandler = locationHandler;
+}
 
 // ____________________________________________________________________________
 template <typename W>
@@ -148,8 +159,15 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 // ____________________________________________________________________________
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::node(const osmium::Node& node) {
+  bool untagged = node.tags().empty();
+  bool separatePrefixes =
+      (_config.iriPrefixForUntaggedNodes != IRI_PREFIX__OSM_NODE_TAGGED);
   const std::string& subj =
-      _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset], node.id());
+      !separatePrefixes
+          ? _writer->generateIRI(NAMESPACE__OSM_NODE, node.id())
+          : (untagged
+                 ? _writer->generateIRI(NAMESPACE__OSM_NODE_UNTAGGED, node.id())
+                 : _writer->generateIRI(NAMESPACE__OSM_NODE_TAGGED, node.id()));
 
   _writer->writeTriple(subj, IRI__RDF__TYPE, IRI__OSM__NODE);
 
@@ -157,8 +175,11 @@ void osm2rdf::osm::FactHandler<W>::node(const osmium::Node& node) {
   writeTagList(subj, node.tags());
 
   const std::string& geomObj = _writer->generateIRIUnsafe(
-      NAMESPACE__OSM2RDF_GEOM,
-      DATASET_ID[_config.sourceDataset] + "_node_" + std::to_string(node.id()));
+      NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
+                                   (!separatePrefixes ? "_node_"
+                                    : untagged        ? "_node_untagged_"
+                                                      : "_node_tagged_") +
+                                   std::to_string(node.id()));
 
   auto geom = ::util::geo::DPoint{node.location().lon(), node.location().lat()};
 
@@ -212,7 +233,14 @@ void osm2rdf::osm::FactHandler<W>::relation(
       std::string type;
       switch (member.type()) {
         case osm2rdf::osm::RelationMemberType::NODE:
-          type = NODE_NAMESPACE[_config.sourceDataset];
+          if (_config.iriPrefixForUntaggedNodes ==
+              IRI_PREFIX__OSM_NODE_TAGGED) {
+            type = NAMESPACE__OSM_NODE;
+          } else if (_locationHandler->get_node_is_tagged(member.id())) {
+            type = NAMESPACE__OSM_NODE_TAGGED;
+          } else {
+            type = NAMESPACE__OSM_NODE_UNTAGGED;
+          }
           break;
         case osm2rdf::osm::RelationMemberType::RELATION:
           type = RELATION_NAMESPACE[_config.sourceDataset];
@@ -302,20 +330,26 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       const std::string& blankNode = _writer->generateBlankNode();
       _writer->writeTriple(subj, IRI__OSMWAY__NODE, blankNode);
 
-      _writer->writeTriple(
-          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
-          _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
-                               node.positive_ref()));
+      std::string nodeNamespace;
+      if (_config.iriPrefixForUntaggedNodes == IRI_PREFIX__OSM_NODE_TAGGED) {
+        nodeNamespace = NAMESPACE__OSM_NODE;
+      } else if (_locationHandler->get_node_is_tagged(node.positive_ref())) {
+        nodeNamespace = NAMESPACE__OSM_NODE_TAGGED;
+      } else {
+        nodeNamespace = NAMESPACE__OSM_NODE_UNTAGGED;
+      }
+
+      _writer->writeTriple(blankNode,
+                           osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
+                           _writer->generateIRI(nodeNamespace, node.positive_ref()));
 
       _writer->writeLiteralTripleUnsafe(
           blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_POS,
           std::to_string(wayOrder++), "^^" + IRI__XSD__INTEGER);
 
       if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
-        _writer->writeTriple(
-            lastBlankNode, IRI__OSMWAY__NEXT_NODE,
-            _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
-                                 node.positive_ref()));
+        _writer->writeTriple(lastBlankNode, IRI__OSMWAY__NEXT_NODE,
+                             _writer->generateIRI(nodeNamespace, node.positive_ref()));
         // Haversine distance
         const double distanceLat =
             (node.location().lat() - lastNode.location().lat()) *

@@ -29,6 +29,8 @@
 
 namespace osm2rdf::osm {
 
+class LocationHandler;
+
 enum DateTimeType {
   invalid = 0,
   date_yyyy = 1,
@@ -42,6 +44,7 @@ class FactHandler {
  public:
   FactHandler(const osm2rdf::config::Config& config,
               osm2rdf::ttl::Writer<W>* writer);
+  void setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler);
   // Add data
   void area(const osm2rdf::osm::Area& area);
   void node(const osmium::Node& node);
@@ -135,6 +138,7 @@ class FactHandler {
 
   const osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
+  osm2rdf::osm::LocationHandler* _locationHandler;
 };
 
 }  // namespace osm2rdf::osm

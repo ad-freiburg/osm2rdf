@@ -95,7 +95,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       _locationHandler = osm2rdf::osm::LocationHandler::create(
           _config, countHandler.minNodeId(), countHandler.maxNodeId());
       _relationHandler.setLocationHandler(_locationHandler);
-
+      _factHandler->setLocationHandler(_locationHandler);
 
       size_t numTasks = 0;
 

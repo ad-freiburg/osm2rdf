@@ -17,6 +17,7 @@
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "osm2rdf/osm/DenseMemIndex.h"
+#include "osm2rdf/osm/Location.h"
 #include "osmium/osm/node.hpp"
 #include <iostream>
 
@@ -69,4 +70,4 @@ void osm2rdf::osm::DenseMemIndex<TId, TValue>::clear() {
 }
 
 template class osm2rdf::osm::DenseMemIndex<osmium::unsigned_object_id_type,
-                                           osmium::Location>;
+                                           osm2rdf::osm::Location>;

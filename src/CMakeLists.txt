@@ -32,6 +32,7 @@ target_include_directories(osm2rdf_library PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../
 target_link_libraries(osm2rdf_library PRIVATE
 	    spatialjoin-dev
 		pb_util
+		pb_util_geo
         Threads::Threads
         ${EXPAT_LIBRARIES}
         ${BZIP2_LIBRARIES}

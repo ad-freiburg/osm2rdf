@@ -41,7 +41,7 @@ osm2rdf::osm::Relation::Relation(const osmium::Relation& relation) {
   _uid = relation.uid();
   _version = relation.version();
   _visible = relation.visible();
-  _tags = std::move(osm2rdf::osm::convertTagList(relation.tags()));
+  _tags = osm2rdf::osm::convertTagList(relation.tags());
   _members.reserve(relation.cmembers().size());
   for (const auto& member : relation.cmembers()) {
     _members.emplace_back(member);
