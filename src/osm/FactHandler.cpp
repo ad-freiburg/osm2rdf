@@ -174,43 +174,47 @@ void osm2rdf::osm::FactHandler<W>::node(const osmium::Node& node) {
   // Tags
   writeTagList(subj, node.tags());
 
-  const std::string& geomObj = _writer->generateIRIUnsafe(
-      NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                   (!separatePrefixes ? "_node_"
-                                    : untagged        ? "_node_untagged_"
-                                                      : "_node_tagged_") +
-                                   std::to_string(node.id()));
-
-  auto geom = ::util::geo::DPoint{node.location().lon(), node.location().lat()};
-
-  _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
-  writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, geom);
-
-  if (_config.addCentroid) {
-    const std::string& centroidObj = _writer->generateIRIUnsafe(
+  if (node.location().valid()) {
+    const std::string& geomObj = _writer->generateIRIUnsafe(
         NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                     "_node_centroid_" +
+                                     (!separatePrefixes ? "_node_"
+                                      : untagged        ? "_node_untagged_"
+                                                        : "_node_tagged_") +
                                      std::to_string(node.id()));
-    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
-    writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, geom);
-  }
 
-  if (_config.addObb || _config.addConvexHull) {
-    const auto& hullWKT = ::util::geo::getWKT(::util::geo::DPolygon{{geom}, {}},
-                                              _config.wktPrecision);
-    if (_config.addObb) {
-      _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__OBB, hullWKT,
-                                        "^^" + IRI__GEOSPARQL__WKT_LITERAL);
-    }
-    if (_config.addConvexHull) {
-      _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
-                                        hullWKT,
-                                        "^^" + IRI__GEOSPARQL__WKT_LITERAL);
-    }
-  }
+    auto geom = ::util::geo::DPoint{node.location().lon_without_check(),
+                                    node.location().lat_without_check()};
 
-  if (_config.addEnvelope) {
-    writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE, ::util::geo::DBox{geom, geom});
+    _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
+    writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, geom);
+
+    if (_config.addCentroid) {
+      const std::string& centroidObj = _writer->generateIRIUnsafe(
+          NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
+                                       "_node_centroid_" +
+                                       std::to_string(node.id()));
+      _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
+      writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, geom);
+    }
+
+    if (_config.addObb || _config.addConvexHull) {
+      const auto& hullWKT = ::util::geo::getWKT(
+          ::util::geo::DPolygon{{geom}, {}}, _config.wktPrecision);
+      if (_config.addObb) {
+        _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__OBB, hullWKT,
+                                          "^^" + IRI__GEOSPARQL__WKT_LITERAL);
+      }
+      if (_config.addConvexHull) {
+        _writer->writeLiteralTripleUnsafe(subj, IRI__OSM2RDF_GEOM__CONVEX_HULL,
+                                          hullWKT,
+                                          "^^" + IRI__GEOSPARQL__WKT_LITERAL);
+      }
+    }
+
+    if (_config.addEnvelope) {
+      writeBox(subj, IRI__OSM2RDF_GEOM__ENVELOPE,
+               ::util::geo::DBox{geom, geom});
+    }
   }
 }
 
@@ -339,24 +343,26 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
         nodeNamespace = NAMESPACE__OSM_NODE_UNTAGGED;
       }
 
-      _writer->writeTriple(blankNode,
-                           osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
-                           _writer->generateIRI(nodeNamespace, node.positive_ref()));
+      _writer->writeTriple(
+          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
+          _writer->generateIRI(nodeNamespace, node.positive_ref()));
 
       _writer->writeLiteralTripleUnsafe(
           blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_POS,
           std::to_string(wayOrder++), "^^" + IRI__XSD__INTEGER);
 
-      if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty()) {
-        _writer->writeTriple(lastBlankNode, IRI__OSMWAY__NEXT_NODE,
-                             _writer->generateIRI(nodeNamespace, node.positive_ref()));
+      if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty() &&
+          node.location().valid() && lastNode.location().valid()) {
+        _writer->writeTriple(
+            lastBlankNode, IRI__OSMWAY__NEXT_NODE,
+            _writer->generateIRI(nodeNamespace, node.positive_ref()));
         // Haversine distance
-        const double distanceLat =
-            (node.location().lat() - lastNode.location().lat()) *
-            osm2rdf::osm::constants::DEGREE;
-        const double distanceLon =
-            (node.location().lon() - lastNode.location().lon()) *
-            osm2rdf::osm::constants::DEGREE;
+        const double distanceLat = (node.location().lat_without_check() -
+                                    lastNode.location().lat_without_check()) *
+                                   osm2rdf::osm::constants::DEGREE;
+        const double distanceLon = (node.location().lon_without_check() -
+                                    lastNode.location().lon_without_check()) *
+                                   osm2rdf::osm::constants::DEGREE;
         const double haversine =
             (sin(distanceLat / 2) * sin(distanceLat / 2)) +
             (sin(distanceLon / 2) * sin(distanceLon / 2) *

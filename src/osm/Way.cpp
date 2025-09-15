@@ -17,25 +17,26 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/Way.h"
+
 #include <vector>
 
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/TagList.h"
-#include "osm2rdf/osm/Way.h"
 #include "osmium/osm/way.hpp"
 
 // ____________________________________________________________________________
-osm2rdf::osm::Way::Way() {
-}
+osm2rdf::osm::Way::Way() {}
 
 // ____________________________________________________________________________
 osm2rdf::osm::Way::Way(const osmium::Way& way) : _w(&way) {}
 
 // ____________________________________________________________________________
 osm2rdf::osm::Way::id_t osm2rdf::osm::Way::id() const noexcept {
- if (!_w) return std::numeric_limits<osm2rdf::osm::Way::id_t>::max();
- return _w->id(); }
+  if (!_w) return std::numeric_limits<osm2rdf::osm::Way::id_t>::max();
+  return _w->id();
+}
 
 // ____________________________________________________________________________
 osm2rdf::osm::generic::changeset_id_t osm2rdf::osm::Way::changeset()
@@ -44,7 +45,9 @@ osm2rdf::osm::generic::changeset_id_t osm2rdf::osm::Way::changeset()
 }
 
 // ____________________________________________________________________________
-std::time_t osm2rdf::osm::Way::timestamp() const noexcept { return _w->timestamp().seconds_since_epoch(); }
+std::time_t osm2rdf::osm::Way::timestamp() const noexcept {
+  return _w->timestamp().seconds_since_epoch();
+}
 
 // ____________________________________________________________________________
 std::string osm2rdf::osm::Way::user() const noexcept { return _w->user(); }
@@ -65,8 +68,7 @@ const osmium::TagList& osm2rdf::osm::Way::tags() const noexcept {
 }
 
 // ____________________________________________________________________________
-const osmium::WayNodeList& osm2rdf::osm::Way::nodes()
-    const noexcept {
+const osmium::WayNodeList& osm2rdf::osm::Way::nodes() const noexcept {
   return _w->nodes();
 }
 
@@ -74,16 +76,25 @@ const osmium::WayNodeList& osm2rdf::osm::Way::nodes()
 const ::util::geo::DLine osm2rdf::osm::Way::geom() const noexcept {
   ::util::geo::DLine ret;
   for (const auto& nodeRef : _w->nodes()) {
-    if (ret.empty() || (nodeRef.lon() != ret.back().getX() ||
-                          nodeRef.lat() != ret.back().getY())) {
-      ret.push_back({nodeRef.lon(), nodeRef.lat()}); }
+    if (!nodeRef.location().valid()) continue;
+    if (ret.empty() ||
+        (nodeRef.location().lon_without_check() != ret.back().getX() ||
+         nodeRef.location().lat_without_check() != ret.back().getY())) {
+      ret.push_back({nodeRef.location().lon_without_check(),
+                     nodeRef.location().lat_without_check()});
+    }
   }
   return ret;
 }
 
 // ____________________________________________________________________________
 bool osm2rdf::osm::Way::closed() const noexcept {
-  return _w->nodes().size() > 0 && _w->nodes().front().lon() == _w->nodes().back().lon() && _w->nodes().front().lat() == _w->nodes().back().lat();
+  return _w->nodes().size() > 1 && _w->nodes().front().location().valid() &&
+         _w->nodes().back().location().valid() &&
+         _w->nodes().front().location().lon_without_check() ==
+             _w->nodes().back().location().lon_without_check() &&
+         _w->nodes().front().location().lat_without_check() ==
+             _w->nodes().back().location().lat_without_check();
 }
 
 // ____________________________________________________________________________

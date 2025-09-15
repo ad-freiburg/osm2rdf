@@ -85,9 +85,9 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
            false,
            [this](size_t t, const std::string& a, const std::string& b,
                   const std::string& pred) { this->writeRelCb(t, a, b, pred); },
-           {},
-           {},
-           [this](size_t progr) { this->progressCb(progr); },
+					 {},
+					 {},
+					 [this](size_t progr) { this->progressCb(progr); },
            {}},
           config.cache, ""),
       _parseBatches(config.numThreads) {}
@@ -224,6 +224,7 @@ template <typename W>
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::node(const osmium::Node& node) {
+  if (!node.location().valid()) return;
   std::string id = getSweeperId(node.id(), 1);
   _sweeper.add(transform(::util::geo::DPoint{node.location().lon(),
                                              node.location().lat()}),
