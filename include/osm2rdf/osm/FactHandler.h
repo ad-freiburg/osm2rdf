@@ -61,6 +61,8 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
 
+  void writeMeta(const std::string& s, const osmium::Node& object);
+
   template <typename T>
   void writeMeta(const std::string& s, const T& object);
 
@@ -78,34 +80,6 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
 
   void writeTagList(const std::string& s, const osmium::TagList& tags);
-  FRIEND_TEST(OSM_FactHandler, writeTagList);
-  FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
-  FRIEND_TEST(OSM_FactHandler, writeTagListRefSingle);
-  FRIEND_TEST(OSM_FactHandler, writeTagListRefDouble);
-  FRIEND_TEST(OSM_FactHandler, writeTagListRefMultiple);
-  FRIEND_TEST(OSM_FactHandler, writeTagListWikidataMultiple);
-  FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithLang);
-  FRIEND_TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang);
-  FRIEND_TEST(OSM_FactHandler, writeTagListSkipWikiLinks);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateInvalid);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateInvalid2);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateInvalid3);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear1);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear2);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear3);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYear4);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth1);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth2);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth3);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth4);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonth5);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4);
-  FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5);
-
-  void writeTagList(const std::string& s, const osm2rdf::osm::TagList& tags);
   FRIEND_TEST(OSM_FactHandler, writeTagList);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
   FRIEND_TEST(OSM_FactHandler, writeTagListRefSingle);

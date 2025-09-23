@@ -56,8 +56,7 @@ TEST(OSM_Relation, FromRelationWithTags) {
   ASSERT_EQ(42, r.id());
 
   ASSERT_EQ(1, r.tags().size());
-  ASSERT_STREQ("city", r.tags()[0].first.c_str());
-  ASSERT_STREQ("Freiburg", r.tags()[0].second.c_str());
+  ASSERT_STREQ("Freiburg", r.tags()["city"]);
 
   ASSERT_EQ(0, r.members().size());
 }
@@ -80,12 +79,12 @@ TEST(OSM_Relation, FromRelationWithMembers) {
   ASSERT_EQ(0, r.tags().size());
 
   ASSERT_EQ(2, r.members().size());
-  ASSERT_EQ(osm2rdf::osm::RelationMemberType::NODE, r.members().at(0).type());
-  ASSERT_EQ(1, r.members().at(0).id());
-  ASSERT_EQ("label", r.members().at(0).role());
-  ASSERT_EQ(osm2rdf::osm::RelationMemberType::WAY, r.members().at(1).type());
-  ASSERT_EQ(1, r.members().at(1).id());
-  ASSERT_EQ("outer", r.members().at(1).role());
+  ASSERT_EQ(osmium::item_type::node, r.members().begin()->type());
+  ASSERT_EQ(1, r.members().begin()->positive_ref());
+  ASSERT_STREQ("label", r.members().begin()->role());
+  ASSERT_EQ(osmium::item_type::way, (++r.members().begin())->type());
+  ASSERT_EQ(1, (r.members().begin()++)->positive_ref());
+  ASSERT_STREQ("outer", (++r.members().begin())->role());
 }
 
 // ____________________________________________________________________________
@@ -105,104 +104,15 @@ TEST(OSM_Relation, FromRelationWithMembersAndTags) {
   ASSERT_EQ(42, r.id());
 
   ASSERT_EQ(1, r.tags().size());
-  ASSERT_STREQ("city", r.tags()[0].first.c_str());
-  ASSERT_STREQ("Freiburg", r.tags()[0].second.c_str());
+  ASSERT_STREQ("Freiburg", r.tags()["city"]);
 
   ASSERT_EQ(2, r.members().size());
-  ASSERT_EQ(osm2rdf::osm::RelationMemberType::NODE, r.members().at(0).type());
-  ASSERT_EQ(1, r.members().at(0).id());
-  ASSERT_EQ("label", r.members().at(0).role());
-  ASSERT_EQ(osm2rdf::osm::RelationMemberType::WAY, r.members().at(1).type());
-  ASSERT_EQ(1, r.members().at(1).id());
-  ASSERT_EQ("outer", r.members().at(1).role());
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Relation, equalsOperator) {
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_relation(
-      osmiumBuffer1, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_relation(
-      osmiumBuffer2, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 2, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_relation(
-      osmiumBuffer3, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg i. Brsg."));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Relation o1{osmiumBuffer1.get<osmium::Relation>(0)};
-  const osm2rdf::osm::Relation o2{osmiumBuffer2.get<osmium::Relation>(0)};
-  const osm2rdf::osm::Relation o3{osmiumBuffer3.get<osmium::Relation>(0)};
-
-  ASSERT_TRUE(o1 == o1);
-  ASSERT_FALSE(o1 == o2);
-  ASSERT_FALSE(o1 == o3);
-
-  ASSERT_FALSE(o2 == o1);
-  ASSERT_TRUE(o2 == o2);
-  ASSERT_FALSE(o2 == o3);
-
-  ASSERT_FALSE(o3 == o1);
-  ASSERT_FALSE(o3 == o2);
-  ASSERT_TRUE(o3 == o3);
-}
-
-// ____________________________________________________________________________
-TEST(OSM_Relation, notEqualsOperator) {
-  // Create osmium object
-  const size_t initial_buffer_size = 10000;
-  osmium::memory::Buffer osmiumBuffer1{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer2{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::memory::Buffer osmiumBuffer3{initial_buffer_size,
-                                       osmium::memory::Buffer::auto_grow::yes};
-  osmium::builder::add_relation(
-      osmiumBuffer1, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_relation(
-      osmiumBuffer2, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 2, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg"));
-  osmium::builder::add_relation(
-      osmiumBuffer3, osmium::builder::attr::_id(42),
-      osmium::builder::attr::_member(osmium::item_type::node, 1, "label"),
-      osmium::builder::attr::_member(osmium::item_type::way, 1, "outer"),
-      osmium::builder::attr::_tag("city", "Freiburg i. Brsg."));
-
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Relation o1{osmiumBuffer1.get<osmium::Relation>(0)};
-  const osm2rdf::osm::Relation o2{osmiumBuffer2.get<osmium::Relation>(0)};
-  const osm2rdf::osm::Relation o3{osmiumBuffer3.get<osmium::Relation>(0)};
-
-  ASSERT_FALSE(o1 != o1);
-  ASSERT_TRUE(o1 != o2);
-  ASSERT_TRUE(o1 != o3);
-
-  ASSERT_TRUE(o2 != o1);
-  ASSERT_FALSE(o2 != o2);
-  ASSERT_TRUE(o2 != o3);
-
-  ASSERT_TRUE(o3 != o1);
-  ASSERT_TRUE(o3 != o2);
-  ASSERT_FALSE(o3 != o3);
+  ASSERT_EQ(osmium::item_type::node, r.members().begin()->type());
+  ASSERT_EQ(1, r.members().begin()->positive_ref());
+  ASSERT_STREQ("label", r.members().begin()->role());
+  ASSERT_EQ(osmium::item_type::way, (++r.members().begin())->type());
+  ASSERT_EQ(1, (++r.members().begin())->positive_ref());
+  ASSERT_STREQ("outer", (++r.members().begin())->role());
 }
 
 }  // namespace osm2rdf::osm

@@ -48,7 +48,6 @@
 
 using osm2rdf::osm::Area;
 using osm2rdf::osm::GeometryHandler;
-using osm2rdf::osm::Node;
 using osm2rdf::osm::Relation;
 using osm2rdf::osm::Way;
 
@@ -110,19 +109,19 @@ void GeometryHandler<W>::relation(const Relation& rel) {
   if (rel.geom().size() > 1) subId = 1;
 
   for (const auto& m : rel.members()) {
-    if (m.type() == osm2rdf::osm::RelationMemberType::NODE) {
+    if (m.type() == osmium::item_type::node) {
       std::string pid = _writer->generateIRI(
           osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
-          m.id());
-      _sweeper.add(pid, transform(rel.envelope()), id, subId, false,
+          m.positive_ref());
+      _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id, subId, false,
                    _parseBatches[omp_get_thread_num()]);
     }
 
-    if (m.type() == osm2rdf::osm::RelationMemberType::WAY) {
+    if (m.type() == osmium::item_type::way) {
       std::string pid = _writer->generateIRI(
           osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset],
-          m.id());
-      _sweeper.add(pid, transform(rel.envelope()), id, subId, false,
+          m.positive_ref());
+      _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id, subId, false,
                    _parseBatches[omp_get_thread_num()]);
     }
 

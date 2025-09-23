@@ -20,7 +20,6 @@
 
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
-#include "osm2rdf/osm/Node.h"
 #include "osmium/builder/attr.hpp"
 #include "osmium/builder/osm_object_builder.hpp"
 
@@ -1553,11 +1552,18 @@ TEST(OSM_FactHandler, writeTagList) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tag2Key);
   const std::string object2 = writer.generateLiteral(tag2Value, "");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tag1Key, tag1Value});
-  tagList.push_back({tag2Key, tag2Value});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tag1Key, tag1Value),
+      osmium::builder::attr::_tag(tag2Key, tag2Value));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1599,10 +1605,17 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1644,10 +1657,17 @@ TEST(OSM_FactHandler, writeTagListRefDouble) {
   const std::string object1 = writer.generateLiteral("B 3", "");
   const std::string object2 = writer.generateLiteral("B 294", "");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1692,10 +1712,17 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
   const std::string object2 = writer.generateLiteral("B 294", "");
   const std::string object3 = writer.generateLiteral("K 4917", "");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1743,10 +1770,17 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
   const std::string object2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1792,10 +1826,17 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
   const std::string object2 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY, "Q42");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1841,10 +1882,17 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tagKey);
   const std::string object2 = "<https://de.wikipedia.org/wiki/" + value + ">";
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1890,10 +1938,17 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
   const std::string object2 =
       "<https://www.wikipedia.org/wiki/" + tagValue + ">";
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1943,11 +1998,18 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
   const std::string predicate3 = writer.generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG, tag1Key);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tag1Key, tag1Value});
-  tagList.push_back({tag2Key, tag2Value});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tag1Key, tag1Value),
+      osmium::builder::attr::_tag(tag2Key, tag2Value));
 
-  dh.writeTagList("subject", tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -1990,10 +2052,17 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2034,10 +2103,17 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2078,10 +2154,17 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
       writer.generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM_TAG, tagKey);
   const std::string object1 = writer.generateLiteral(tagValue, "");
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2126,10 +2209,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
   const std::string object2 = writer.generateLiteral(
       "0011", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2175,10 +2265,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
   const std::string object2 = writer.generateLiteral(
       "-0011", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2224,10 +2321,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2273,10 +2377,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2322,10 +2433,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
   const std::string object2 = writer.generateLiteral(
       "0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2371,10 +2489,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
   const std::string object2 = writer.generateLiteral(
       "-0011-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2420,10 +2545,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2469,10 +2601,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2518,10 +2657,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth5) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2568,10 +2714,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
   const std::string object2 = writer.generateLiteral(
       "0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2617,10 +2770,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
   const std::string object2 = writer.generateLiteral(
       "-0011-01-01", "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2666,10 +2826,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2715,10 +2882,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 
@@ -2764,10 +2938,17 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5) {
   const std::string object2 = writer.generateLiteral(
       tagValue, "^^" + osm2rdf::ttl::constants::IRI__XSD__DATE);
 
-  osm2rdf::osm::TagList tagList;
-  tagList.push_back({tagKey, tagValue});
+  // Create osmium object
+  const size_t initial_buffer_size = 10000;
+  osmium::memory::Buffer osmiumBuffer{initial_buffer_size,
+                                      osmium::memory::Buffer::auto_grow::yes};
+  osmium::builder::add_node(
+      osmiumBuffer, osmium::builder::attr::_id(42),
+      osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
+      osmium::builder::attr::_tag(tagKey, tagValue));
 
-  dh.writeTagList(subject, tagList);
+
+  dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
 

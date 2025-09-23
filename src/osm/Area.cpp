@@ -22,7 +22,6 @@
 
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
-#include "osm2rdf/osm/Node.h"
 #include "osmium/osm/area.hpp"
 #include "util/geo/Geo.h"
 

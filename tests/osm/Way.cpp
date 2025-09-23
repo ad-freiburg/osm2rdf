@@ -73,7 +73,7 @@ TEST(OSM_Way, FromWayWithTags) {
   ASSERT_FALSE(w.closed());
 
   ASSERT_EQ(1, w.tags().size());
-  ASSERT_EQ("Freiburg", w.tags()["city"]);
+  ASSERT_STREQ("Freiburg", w.tags()["city"]);
 
   ASSERT_EQ(2, w.nodes().size());
   ASSERT_EQ(1, w.nodes()[0].positive_ref());

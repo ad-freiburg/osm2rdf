@@ -22,8 +22,6 @@
 #include <vector>
 
 #include "osm2rdf/osm/Box.h"
-#include "osm2rdf/osm/Node.h"
-#include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/way.hpp"
 
 // ____________________________________________________________________________
