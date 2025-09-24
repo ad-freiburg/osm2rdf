@@ -128,8 +128,10 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 .\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double .\n"
-      ,
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relationarea_10 "
+      ".\nosm2rdfgeom:osm_relationarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
+      "osm2rdf:area \"0.01\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -174,7 +176,15 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version \"0\"^^xsd:integer .\nosmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
+      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version "
+      "\"0\"^^xsd:integer .\nosmnode:42 osm2rdf:facts \"0\"^^xsd:integer "
+      ".\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 "
+      ".\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral "
+      ".\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral "
+      ".\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 "
+      "48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope "
+      "\"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -331,8 +341,8 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
       "osmway:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\n"
       "osmway:42 osmmeta:version \"0\"^^xsd:integer .\n"
       "osmway:42 osm2rdf:facts "
-      "\"0\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdf:way_42 "
-      ".\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "\"0\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdfgeom:way_42 "
+      ".\nosm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull "
       "\"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
       "osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "

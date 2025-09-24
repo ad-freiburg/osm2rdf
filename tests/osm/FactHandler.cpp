@@ -154,9 +154,9 @@ TEST(OSM_FactHandler, areaFromRelation) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relarea_10 "
-      ".\nosm2rdfgeom:osm_relarea_10 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 "
-      "7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relationarea_10 "
+      ".\nosm2rdfgeom:osm_relationarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:convex_hull \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
@@ -528,8 +528,8 @@ TEST(OSM_FactHandler, way) {
       "osmway:42 osmmeta:version \"0\"^^xsd:integer .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
-      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdfgeom:way_42 .\n"
+      "osm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\n"
@@ -597,8 +597,8 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
       "osmway:member _:0_0 .\n_:0_0 osmway:member_id osmnode:1 .\n_:0_0 "
       "osmway:member_pos \"0\"^^xsd:integer .\nosmway:42 osmway:member _:0_1 "
       ".\n_:0_1 osmway:member_id osmnode:2 .\n_:0_1 osmway:member_pos "
-      "\"1\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdf:way_42 "
-      ".\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "\"1\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdfgeom:way_42 "
+      ".\nosm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull "
       "\"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
       "osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
@@ -667,7 +667,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
       ".\n_:0_1 osmway:member_id osmnode:2 .\n_:0_1 osmway:member_pos "
       "\"1\"^^xsd:integer .\n_:0_0 osmway:next_node osmnode:2 .\n_:0_0 "
       "osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\nosmway:42 "
-      "geo:hasGeometry osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT "
+      "geo:hasGeometry osm2rdfgeom:way_42 .\nosm2rdfgeom:way_42 geo:asWKT "
       "\"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
@@ -744,7 +744,8 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
       "\"3\"^^xsd:integer "
       ".\n_:0_2 osmway:next_node osmnode:3 .\n_:0_2 osmway:next_node_distance "
       "\"11024.108103\"^^xsd:decimal .\nosmway:42 geo:hasGeometry "
-      "osm2rdf:way_42 .\nosm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "osm2rdfgeom:way_42 .\nosm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 "
+      "7.5,48.1 "
       "7.6,48.1 7.5,48 7.5)\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
       "\"0.341421\"^^xsd:double .\n",
       buffer.str());
@@ -804,8 +805,8 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
       "osmway:42 osmmeta:version \"0\"^^xsd:integer .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry osm2rdf:way_42 .\n"
-      "osm2rdf:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdfgeom:way_42 .\n"
+      "osm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\n"
@@ -1562,7 +1563,6 @@ TEST(OSM_FactHandler, writeTagList) {
       osmium::builder::attr::_tag(tag1Key, tag1Value),
       osmium::builder::attr::_tag(tag2Key, tag2Value));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -1614,7 +1614,6 @@ TEST(OSM_FactHandler, writeTagListRefSingle) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -1665,7 +1664,6 @@ TEST(OSM_FactHandler, writeTagListRefDouble) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -1720,7 +1718,6 @@ TEST(OSM_FactHandler, writeTagListRefMultiple) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -1779,7 +1776,6 @@ TEST(OSM_FactHandler, writeTagListWikidata) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -1834,7 +1830,6 @@ TEST(OSM_FactHandler, writeTagListWikidataMultiple) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -1891,7 +1886,6 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithLang) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -1946,7 +1940,6 @@ TEST(OSM_FactHandler, writeTagListWikipediaWithoutLang) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2008,7 +2001,6 @@ TEST(OSM_FactHandler, writeTagListSkipWikiLinks) {
       osmium::builder::attr::_tag(tag1Key, tag1Value),
       osmium::builder::attr::_tag(tag2Key, tag2Value));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2061,7 +2053,6 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2112,7 +2103,6 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid2) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2162,7 +2152,6 @@ TEST(OSM_FactHandler, writeTagListStartDateInvalid3) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2217,7 +2206,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear1) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2274,7 +2262,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear2) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2329,7 +2316,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear3) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2386,7 +2372,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYear4) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2441,7 +2426,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth1) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2498,7 +2482,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth2) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2553,7 +2536,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth3) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2610,7 +2592,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth4) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2665,7 +2646,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonth5) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2723,7 +2703,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay1) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2778,7 +2757,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay2) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
@@ -2835,7 +2813,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay3) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2891,7 +2868,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay4) {
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
 
-
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
   output.close();
@@ -2946,7 +2922,6 @@ TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)),
       osmium::builder::attr::_tag(tagKey, tagValue));
-
 
   dh.writeTagList(subject, osmiumBuffer.get<osmium::Node>(0).tags());
   output.flush();
