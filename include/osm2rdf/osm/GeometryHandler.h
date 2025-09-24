@@ -65,8 +65,6 @@ class GeometryHandler {
   sj::Sweeper _sweeper;
   std::vector<sj::WriteBatch> _parseBatches;
 
-  std::string areaNS(AreaFromType type) const;
-
   static ::util::geo::I32Point transform(const ::util::geo::DPoint& loc);
 
   static ::util::geo::I32Box transform(const ::util::geo::DBox& box);
