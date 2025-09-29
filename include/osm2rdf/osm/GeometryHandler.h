@@ -74,10 +74,10 @@ class GeometryHandler {
       const ::util::geo::DMultiPolygon& area);
 
   std::string getSweeperId(uint64_t oid, char type);
-  std::string getFullID(const std::string& id);
+  std::string getFullID(const char* id, size_t n);
 
-  void writeRelCb(size_t t, const std::string& a, const std::string& b,
-                  const std::string& pred);
+  void writeRelCb(size_t t, const char* a, size_t an, const char* b, size_t bn,
+                  const char* pred, size_t predn);
   void progressCb(size_t progr);
 
   osm2rdf::util::ProgressBar _progressBar;

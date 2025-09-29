@@ -59,36 +59,37 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                                     osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
       _writer(writer),
-      _sweeper(
-          {static_cast<size_t>(config.numThreads),
-           static_cast<size_t>(config.numThreads),
-           300 * 1000 * 1000 * 5,
-           10000,
-           "",
-           osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS,
-           osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS,
-           osm2rdf::ttl::constants::IRI__OPENGIS__COVERS,
-           osm2rdf::ttl::constants::IRI__OPENGIS__TOUCHES,
-           osm2rdf::ttl::constants::IRI__OPENGIS__EQUALS,
-           osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS,
-           osm2rdf::ttl::constants::IRI__OPENGIS__CROSSES,
-           "\n",
-           true,
-           true,
-           false,
-           true,
-           true,
-           false,
-           false,
-           -1,
-           false,
-           [this](size_t t, const std::string& a, const std::string& b,
-                  const std::string& pred) { this->writeRelCb(t, a, b, pred); },
-           {},
-           {},
-           [this](size_t progr) { this->progressCb(progr); },
-           {}},
-          config.cache, ""),
+      _sweeper({static_cast<size_t>(config.numThreads),
+                static_cast<size_t>(config.numThreads),
+                300 * 1000 * 1000 * 5,
+                10000,
+                "",
+                osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS,
+                osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS,
+                osm2rdf::ttl::constants::IRI__OPENGIS__COVERS,
+                osm2rdf::ttl::constants::IRI__OPENGIS__TOUCHES,
+                osm2rdf::ttl::constants::IRI__OPENGIS__EQUALS,
+                osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS,
+                osm2rdf::ttl::constants::IRI__OPENGIS__CROSSES,
+                "\n",
+                true,
+                true,
+                false,
+                true,
+                true,
+                false,
+                false,
+                -1,
+                false,
+                [this](size_t t, const char* a, size_t an, const char* b,
+                       size_t bn, const char* pred, size_t predn) {
+                  this->writeRelCb(t, a, an, b, bn, pred, predn);
+                },
+                {},
+                {},
+                [this](size_t progr) { this->progressCb(progr); },
+                {}},
+               config.cache, ""),
       _parseBatches(config.numThreads) {}
 
 // ___________________________________________________________________________
@@ -102,7 +103,7 @@ void GeometryHandler<W>::relation(const Relation& rel) {
 
   if (!rel.hasGeometry()) return;
 
-  const std::string id = getSweeperId(rel.id(), 5);
+  const std::string id = getSweeperId(rel.id(), 3);
 
   size_t subId = 0;
 
@@ -111,6 +112,7 @@ void GeometryHandler<W>::relation(const Relation& rel) {
   for (const auto& m : rel.members()) {
     if (m.type() == osmium::item_type::node) {
       std::string pid = getSweeperId(m.positive_ref(), 1);
+
       _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id,
                    subId, false, _parseBatches[omp_get_thread_num()]);
     }
@@ -132,10 +134,11 @@ void GeometryHandler<W>::relation(const Relation& rel) {
 
 // ____________________________________________________________________________
 template <typename W>
-void GeometryHandler<W>::writeRelCb(size_t t, const std::string& a,
-                                    const std::string& b,
-                                    const std::string& pred) {
-  _writer->writeTriple(getFullID(a), pred, getFullID(b), t);
+void GeometryHandler<W>::writeRelCb(size_t t, const char* a, size_t an,
+                                    const char* b, size_t bn, const char* pred,
+                                    size_t predn) {
+  _writer->writeTriple(getFullID(a, an), std::string(pred, predn),
+                       getFullID(b, bn), t);
 }
 
 // ____________________________________________________________________________
@@ -195,7 +198,7 @@ template <typename W>
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::area(const Area& area) {
-  const std::string id = getSweeperId(area.objId(), area.fromWay() ? 2 : 4);
+  const std::string id = getSweeperId(area.objId(), area.fromWay() ? 2 : 3);
 
   _sweeper.add(transform(area.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
@@ -221,6 +224,7 @@ template <typename W>
 void GeometryHandler<W>::node(const osmium::Node& node) {
   if (!node.location().valid()) return;
   std::string id = getSweeperId(node.id(), 1);
+
   _sweeper.add(transform(::util::geo::DPoint{node.location().lon(),
                                              node.location().lat()}),
                id, false, _parseBatches[omp_get_thread_num()]);
@@ -293,13 +297,13 @@ void GeometryHandler<W>::calculateRelations() {
 
 // ____________________________________________________________________________
 template <typename W>
-std::string GeometryHandler<W>::getFullID(const std::string& strid) {
+std::string GeometryHandler<W>::getFullID(const char* strid, size_t n) {
   uint64_t id = 0;
 
-  for (size_t i = strid.size() - 1; i > 0; i--) {
+  for (size_t i = n - 1; i > 0; i--) {
     id |=
-        static_cast<uint64_t>(reinterpret_cast<const unsigned char&>(strid[i]))
-        << (8 * (strid.size() - 1 - i));
+        static_cast<uint64_t>(static_cast<unsigned char>(strid[i]))
+        << (8 * (n - 1 - i));
   }
 
   if (strid[0] == 1) {
@@ -312,17 +316,10 @@ std::string GeometryHandler<W>::getFullID(const std::string& strid) {
         osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset], id);
   }
 
-  if (strid[0] == 4) {
-    return _writer->generateIRI(
-        osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset], id);
-  }
+  return _writer->generateIRI(
+      osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset], id);
 
-  if (strid[0] == 5) {
-    return _writer->generateIRI(
-        osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset], id);
-  }
-
-  return strid;
+  throw std::runtime_error("Unknown geometry id!");
 }
 
 // ____________________________________________________________________________
@@ -332,7 +329,7 @@ std::string GeometryHandler<W>::getSweeperId(uint64_t oid, char type) {
   int a = 0;
   uint64_t tmp;
 
-  while ((oid >> (a * 8))) {
+  while (a < 8 && (oid >> (a * 8))) {
     tmp = (oid & (0xFFLL << (a * 8)));
     id[8 - a] = tmp >> (a * 8);
     a++;
@@ -341,7 +338,7 @@ std::string GeometryHandler<W>::getSweeperId(uint64_t oid, char type) {
   id[8 - a] = type;
 
   return std::string{reinterpret_cast<char*>(id + (8 - a)),
-                     static_cast<size_t>(a + 1)};
+                         static_cast<size_t>(a + 1)};
 }
 
 // ____________________________________________________________________________
