@@ -45,7 +45,6 @@ TEST(OSM_Area, FromAreaVirtualWay) {
   ASSERT_EQ(42, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_TRUE(a.fromWay());
-  ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
   ASSERT_NEAR(48.0, a.envelope().getLowerLeft().getX(), 0.01);
   ASSERT_NEAR(7.51, a.envelope().getLowerLeft().getY(), 0.01);
   ASSERT_NEAR(48.1, a.envelope().getUpperRight().getX(), 0.01);
@@ -73,7 +72,6 @@ TEST(OSM_Area, FromAreaVirtualRelation) {
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_FALSE(a.fromWay());
-  ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
   ASSERT_NEAR(48.0, a.envelope().getLowerLeft().getX(), 0.01);
   ASSERT_NEAR(7.51, a.envelope().getLowerLeft().getY(), 0.01);
   ASSERT_NEAR(48.1, a.envelope().getUpperRight().getX(), 0.01);
@@ -104,7 +102,6 @@ TEST(OSM_Area, BoundaryWithAdminLevel) {
   ASSERT_EQ(43, a.id());
   ASSERT_EQ(21, a.objId());
   ASSERT_FALSE(a.fromWay());
-  ASSERT_NEAR(a.envelopeArea(), a.geomArea(), 0.01);
   ASSERT_NEAR(48.0, a.envelope().getLowerLeft().getX(), 0.01);
   ASSERT_NEAR(7.51, a.envelope().getLowerLeft().getY(), 0.01);
   ASSERT_NEAR(48.1, a.envelope().getUpperRight().getX(), 0.01);

@@ -51,6 +51,8 @@ class FactHandler {
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
+  void writeGeometry(const std::string& s, const std::string& p,
+                          const ::util::geo::DPoint& g);
   template <typename G>
   void writeGeometry(const std::string& s, const std::string& p,
                           const G& g);
@@ -113,6 +115,8 @@ class FactHandler {
   const osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
   osm2rdf::osm::LocationHandler* _locationHandler;
+  bool _separateUntaggedNodePrefixes = false;
+  std::string _datasetId, _relNamespace, _wayNamespace, _changesetNamespace, _iriXSDDouble, _iriWKTLiteral, _iriXSDInteger, _tagTripleCountIRI, _areaIRI;
 };
 
 }  // namespace osm2rdf::osm

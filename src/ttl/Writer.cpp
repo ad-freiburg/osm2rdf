@@ -579,12 +579,11 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
 
   return ret;
 }
-
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
-    const std::string& s, const std::string& p, const std::string& v,
-    const std::string& o) {
+    const char* s, const char* p, const char* v,
+    const char* o) {
   size_t part = 0;
 
 #if defined(_OPENMP)
@@ -596,10 +595,10 @@ void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(const std::string& s,
-                                                          const std::string& p,
-                                                          const std::string& v,
-                                                          const std::string& o,
+void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(const char* s,
+                                                          const char* p,
+                                                          const char* v,
+                                                          const char* o,
                                                           size_t part) {
   _out->write(s, part);
   _out->write(' ', part);
@@ -1480,6 +1479,82 @@ void osm2rdf::ttl::Writer<T>::writeSecondsAsISO(const std::string& subj,
 
   writeLiteralTripleUnsafe(subj, pred, out,
                            "^^" + constants::IRI__XSD__DATE_TIME);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeNewLine(size_t part) {
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeNewLine() {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char c, size_t part) {
+  _out->write(c, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(std::string_view s, size_t part) {
+  _out->write(s, part);
+}
+
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char* s, size_t part) {
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char c) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(c, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(std::string_view s) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(s, part);
+}
+
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char* s) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(s, part);
 }
 
 // ____________________________________________________________________________

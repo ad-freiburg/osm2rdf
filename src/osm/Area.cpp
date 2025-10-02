@@ -34,9 +34,6 @@ osm2rdf::osm::Area::Area() {
 // ____________________________________________________________________________
 void osm2rdf::osm::Area::finalize() noexcept {
   _geomArea = ::util::geo::area(_geom);
-  _envelopeArea = ::util::geo::area(_envelope);
-  _convexHull = ::util::geo::convexHull(_geom);
-  _obb = ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
 }
 
 // ____________________________________________________________________________
@@ -113,19 +110,14 @@ const ::util::geo::DBox& osm2rdf::osm::Area::envelope() const noexcept {
 double osm2rdf::osm::Area::geomArea() const noexcept { return _geomArea; }
 
 // ____________________________________________________________________________
-double osm2rdf::osm::Area::envelopeArea() const noexcept {
-  return _envelopeArea;
+::util::geo::DPolygon osm2rdf::osm::Area::convexHull() const noexcept {
+  return ::util::geo::convexHull(_geom);
 }
 
 // ____________________________________________________________________________
-const ::util::geo::DPolygon& osm2rdf::osm::Area::convexHull() const noexcept {
-  return _convexHull;
-}
-
-// ____________________________________________________________________________
-const ::util::geo::DPolygon& osm2rdf::osm::Area::orientedBoundingBox()
+::util::geo::DPolygon osm2rdf::osm::Area::orientedBoundingBox()
     const noexcept {
-  return _obb;
+  return ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
 }
 
 // ____________________________________________________________________________
@@ -138,7 +130,7 @@ bool osm2rdf::osm::Area::operator==(
     const osm2rdf::osm::Area& other) const noexcept {
   return _id == other._id && _objId == other._objId &&
          _geomArea == other._geomArea &&
-         _envelopeArea == other._envelopeArea && _envelope == other._envelope &&
+         _envelope == other._envelope &&
          _geom == other._geom;
 }
 

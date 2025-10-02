@@ -44,9 +44,8 @@ struct Area {
   [[nodiscard]] const ::util::geo::DMultiPolygon& geom() const noexcept;
   [[nodiscard]] double geomArea() const noexcept;
   [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
-  [[nodiscard]] double envelopeArea() const noexcept;
-  [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
-  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox() const noexcept;
+  [[nodiscard]] ::util::geo::DPolygon convexHull() const noexcept;
+  [[nodiscard]] ::util::geo::DPolygon orientedBoundingBox() const noexcept;
   [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
   [[nodiscard]] bool fromWay() const noexcept;
   [[nodiscard]] bool hasName() const noexcept;
@@ -61,13 +60,9 @@ struct Area {
   id_t _id;
   // The OSM id
   id_t _objId;
-  bool _hasName = false;
   double _geomArea = 0;
-  double _envelopeArea = 0;
   ::util::geo::DMultiPolygon _geom;
   ::util::geo::DBox _envelope;
-  ::util::geo::DPolygon _convexHull;
-  ::util::geo::DPolygon _obb;
 };
 
 }  // namespace osm2rdf::osm
