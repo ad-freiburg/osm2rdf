@@ -562,7 +562,7 @@ TEST(E2E, building51NT) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "<https://osm2rdf.cs.uni-freiburg.de/rdf/geom#way_98284318> "
+          "<https://osm2rdf.cs.uni-freiburg.de/rdf/geom#osmway_98284318> "
           "<http://www.opengis.net/ont/geosparql#asWKT> \"LINESTRING(7"));
   ASSERT_THAT(
       printedData,
