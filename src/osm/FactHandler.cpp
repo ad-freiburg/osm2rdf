@@ -103,9 +103,9 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
       area.objId());
 
   const std::string& geomObj = _writer->generateIRIUnsafe(
-      NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] + "_" +
-                           (area.fromWay() ? "way" : "relation") + "area_" +
-                           std::to_string(area.objId()));
+      NAMESPACE__OSM2RDF_GEOM,
+      DATASET_ID[_config.sourceDataset] + (area.fromWay() ? "way_" : "rel_")
+      + std::to_string(area.objId()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
 
@@ -117,9 +117,9 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 
   if (_config.addCentroid) {
     const std::string& centroidObj = _writer->generateIRIUnsafe(
-        NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                     "_area_centroid_" +
-                                     std::to_string(area.id()));
+        NAMESPACE__OSM2RDF_GEOM,
+        DATASET_ID[_config.sourceDataset] + (area.fromWay() ? "way_" : "rel_")
+        + "centroid_" + std::to_string(area.id()));
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
     writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, area.centroid());
   }
@@ -159,16 +159,16 @@ void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
 
   const std::string& geomObj = _writer->generateIRIUnsafe(
       NAMESPACE__OSM2RDF_GEOM,
-      DATASET_ID[_config.sourceDataset] + "_node_" + std::to_string(node.id()));
+      DATASET_ID[_config.sourceDataset] + "node_" + std::to_string(node.id()));
 
   _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
   writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, node.geom());
 
   if (_config.addCentroid) {
     const std::string& centroidObj = _writer->generateIRIUnsafe(
-        NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                     "_node_centroid_" +
-                                     std::to_string(node.id()));
+        NAMESPACE__OSM2RDF_GEOM,
+        DATASET_ID[_config.sourceDataset] + "node_"
+        + "centroid_" + std::to_string(node.id()));
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
     writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, node.geom());
   }
@@ -243,18 +243,18 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
   if (relation.hasGeometry()) {
     const std::string& geomObj = _writer->generateIRIUnsafe(
-        NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                     "_relation_" +
-                                     std::to_string(relation.id()));
+        NAMESPACE__OSM2RDF_GEOM,
+        DATASET_ID[_config.sourceDataset] + "rel_"
+        + std::to_string(relation.id()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, relation.geom());
 
     if (_config.addCentroid) {
       const std::string& centroidObj = _writer->generateIRIUnsafe(
-          NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                       "_relation_centroid_" +
-                                       std::to_string(relation.id()));
+          NAMESPACE__OSM2RDF_GEOM,
+          DATASET_ID[_config.sourceDataset] + "rel_"
+          + "centroid_" + std::to_string(relation.id()));
       _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
       writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, relation.centroid());
     }
@@ -345,7 +345,9 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
   if (_config.addAreaWayLinestrings || !way.isArea()) {
     const std::string& geomObj = _writer->generateIRIUnsafe(
-        NAMESPACE__OSM2RDF_GEOM, "way_" + std::to_string(way.id()));
+        NAMESPACE__OSM2RDF_GEOM,
+        DATASET_ID[_config.sourceDataset] + "way_"
+        + std::to_string(way.id()));
 
     _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_GEOMETRY, geomObj);
     writeGeometry(geomObj, IRI__GEOSPARQL__AS_WKT, way.geom());
@@ -356,9 +358,9 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
     // are already written in the area handler
     if (_config.addCentroid) {
       const std::string& centroidObj = _writer->generateIRIUnsafe(
-          NAMESPACE__OSM2RDF_GEOM, DATASET_ID[_config.sourceDataset] +
-                                       "_way_centroid_" +
-                                       std::to_string(way.id()));
+          NAMESPACE__OSM2RDF_GEOM,
+          DATASET_ID[_config.sourceDataset] + "way_"
+          + "centroid_" + std::to_string(way.id()));
       _writer->writeTriple(subj, IRI__GEOSPARQL__HAS_CENTROID, centroidObj);
       writeGeometry(centroidObj, IRI__GEOSPARQL__AS_WKT, way.centroid());
     }

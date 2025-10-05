@@ -91,8 +91,8 @@ TEST(OSM_FactHandler, areaFromWay) {
   output.close();
 
   ASSERT_EQ(
-      "osmway:21 geo:hasGeometry osm2rdfgeom:osm_wayarea_21 "
-      ".\nosm2rdfgeom:osm_wayarea_21 geo:asWKT \"POLYGON((48 7.5,48 "
+      "osmway:21 geo:hasGeometry osm2rdfgeom:osmway_21 "
+      ".\nosm2rdfgeom:osmway_21 geo:asWKT \"POLYGON((48 7.5,48 "
       "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:envelope \"POLYGON((48 "
@@ -211,7 +211,7 @@ TEST(OSM_FactHandler, node) {
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version \"0\"^^xsd:integer .\nosmnode:42 osmkey:city \"Freiburg\" .\nosmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osm_node_42 .\nosm2rdfgeom:osm_node_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
+      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version \"0\"^^xsd:integer .\nosmnode:42 osmkey:city \"Freiburg\" .\nosmnode:42 osm2rdf:facts \"1\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osmnode_42 .\nosm2rdfgeom:osmnode_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -456,8 +456,8 @@ TEST(OSM_FactHandler, relationWithGeometry) {
       "\"0\"^^xsd:integer .\nosmrel:42 osmrel:member _:0_1 .\n_:0_1 "
       "osmrel:member_id osmway:55 .\n_:0_1 osmrel:member_role \"outer\" "
       ".\n_:0_1 osmrel:member_pos \"1\"^^xsd:integer .\nosmrel:42 "
-      "geo:hasGeometry osm2rdfgeom:osm_relation_42 "
-      ".\nosm2rdfgeom:osm_relation_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
+      "geo:hasGeometry osm2rdfgeom:osmrel_42 "
+      ".\nosm2rdfgeom:osmrel_42 geo:asWKT \"GEOMETRYCOLLECTION(POINT(7.5 "
       "48),LINESTRING(7.5 48,7.6 48))\"^^geo:wktLiteral .\nosmrel:42 "
       "osm2rdfgeom:convex_hull \"POLYGON((7.5 48,7.6 48,7.5 "
       "48))\"^^geo:wktLiteral .\nosmrel:42 osm2rdfgeom:envelope \"POLYGON((7.5 "
@@ -522,8 +522,8 @@ TEST(OSM_FactHandler, way) {
       "osmway:42 osmmeta:version \"0\"^^xsd:integer .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry osm2rdfgeom:way_42 .\n"
-      "osm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdfgeom:osmway_42 .\n"
+      "osm2rdfgeom:osmway_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\n"
@@ -592,8 +592,8 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
       "osmway:member _:0_0 .\n_:0_0 osmway:member_id osmnode:1 .\n_:0_0 "
       "osmway:member_pos \"0\"^^xsd:integer .\nosmway:42 osmway:member _:0_1 "
       ".\n_:0_1 osmway:member_id osmnode:2 .\n_:0_1 osmway:member_pos "
-      "\"1\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdfgeom:way_42 "
-      ".\nosm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "\"1\"^^xsd:integer .\nosmway:42 geo:hasGeometry osm2rdfgeom:osmway_42 "
+      ".\nosm2rdfgeom:osmway_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:convex_hull "
       "\"POLYGON((48 7.5,48.1 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
       "osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
@@ -663,7 +663,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
       ".\n_:0_1 osmway:member_id osmnode:2 .\n_:0_1 osmway:member_pos "
       "\"1\"^^xsd:integer .\n_:0_0 osmway:next_node osmnode:2 .\n_:0_0 "
       "osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\nosmway:42 "
-      "geo:hasGeometry osm2rdfgeom:way_42 .\nosm2rdfgeom:way_42 geo:asWKT "
+      "geo:hasGeometry osm2rdfgeom:osmway_42 .\nosm2rdfgeom:osmway_42 geo:asWKT "
       "\"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
@@ -740,7 +740,7 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
       "osmway:member_id osmnode:3 .\n_:0_3 osmway:member_pos \"3\"^^xsd:integer "
       ".\n_:0_2 osmway:next_node osmnode:3 .\n_:0_2 osmway:next_node_distance "
       "\"11024.108103\"^^xsd:decimal .\nosmway:42 geo:hasGeometry "
-      "osm2rdfgeom:way_42 .\nosm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "osm2rdfgeom:osmway_42 .\nosm2rdfgeom:osmway_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6,48.1 7.5,48 7.5)\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
       "\"0.341421\"^^xsd:double .\n",
       buffer.str());
@@ -801,8 +801,8 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
       "osmway:42 osmmeta:version \"0\"^^xsd:integer .\n"
       "osmway:42 osmkey:city \"Freiburg\" .\n"
       "osmway:42 osm2rdf:facts \"1\"^^xsd:integer .\n"
-      "osmway:42 geo:hasGeometry osm2rdfgeom:way_42 .\n"
-      "osm2rdfgeom:way_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
+      "osmway:42 geo:hasGeometry osm2rdfgeom:osmway_42 .\n"
+      "osm2rdfgeom:osmway_42 geo:asWKT \"LINESTRING(48 7.5,48.1 "
       "7.6)\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\n"
