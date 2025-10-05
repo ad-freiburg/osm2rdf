@@ -154,8 +154,8 @@ TEST(OSM_FactHandler, areaFromRelation) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:osm_relationarea_10 "
-      ".\nosm2rdfgeom:osm_relationarea_10 geo:asWKT \"POLYGON((48 7.5,48 "
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osmrel_10 "
+      ".\nosm2rdfgeom:osmrel_10 geo:asWKT \"POLYGON((48 7.5,48 "
       "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 "
