@@ -57,9 +57,13 @@ class GeometryHandler {
   // Calculate data
   void calculateRelations();
 
+  // Set the location handler
+  void setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler);
+
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
+  osm2rdf::osm::LocationHandler* _locationHandler;
 
  private:
   sj::Sweeper _sweeper;
