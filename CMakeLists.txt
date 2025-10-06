@@ -57,9 +57,6 @@ add_compile_options(-march=native)
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined")
 
-# Enable fast-math
-add_compile_options(-ffast-math)
-
 # ----------------------------------------------------------------------------
 # Configure dependencies
 # ----------------------------------------------------------------------------
@@ -95,6 +92,7 @@ find_package(POPL REQUIRED)
 include_directories(SYSTEM ${POPL_INCLUDE_DIR})
 find_package(Protozero REQUIRED)
 include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIR})
+set(OSMIUM_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/vendor/osmcode/libosmium/include")
 find_package(Osmium REQUIRED COMPONENTS pbf xml)
 include_directories(SYSTEM ${OSMIUM_INCLUDE_DIRS})
 

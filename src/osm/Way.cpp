@@ -39,7 +39,7 @@ osm2rdf::osm::Way::Way(const osmium::Way& way) {
   _uid = way.uid();
   _version = way.version();
   _visible = way.visible();
-  _tags = std::move(osm2rdf::osm::convertTagList(way.tags()));
+  _tags = osm2rdf::osm::convertTagList(way.tags());
   _nodes.reserve(way.nodes().size());
   _geom.reserve(way.nodes().size());
 

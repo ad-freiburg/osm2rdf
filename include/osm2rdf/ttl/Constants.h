@@ -32,6 +32,8 @@ const static inline std::string NAMESPACE__OHM_CHANGESET = "ohmchangeset";
 const static inline std::string NAMESPACE__OHM = "ohm";
 const static inline std::string NAMESPACE__OPENGIS = "ogc";
 const static inline std::string NAMESPACE__OSM_NODE = "osmnode";
+const static inline std::string NAMESPACE__OSM_NODE_TAGGED = "osmnode_tagged";
+const static inline std::string NAMESPACE__OSM_NODE_UNTAGGED = "osmnode_untagged";
 const static inline std::string NAMESPACE__OSM_RELATION = "osmrel";
 const static inline std::string NAMESPACE__OSM_TAG = "osmkey";
 const static inline std::string NAMESPACE__OSM_WAY = "osmway";
@@ -45,6 +47,10 @@ const static inline std::string NAMESPACE__OSM2RDF_TAG = "osm2rdfkey";
 const static inline std::string NAMESPACE__RDF = "rdf";
 const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
+
+// IRI Prefixes
+const static inline std::string IRI_PREFIX__OSM_NODE_TAGGED = "https://www.openstreetmap.org/node/";
+const static inline std::string IRI_PREFIX__OSM_NODE_UNTAGGED = "https://www.openstreetmap.org/node/";
 
 // Generated constants (depending on output format)
 inline std::string IRI__GEOSPARQL__AS_WKT;
