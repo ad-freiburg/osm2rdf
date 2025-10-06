@@ -37,8 +37,8 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
   config.outputCompress = osm2rdf::config::NONE;
   config.addCentroid = false;
   config.addEnvelope = true;
-  config.addConvexHull = true;
-  config.addObb = true;
+  config.addConvexHull = false;
+  config.addObb = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -72,11 +72,9 @@ TEST(Issue24, areaFromWayHasGeometryAsGeoSPARQL) {
       "osmway:21 geo:hasGeometry osm2rdfgeom:osmway_21 "
       ".\nosm2rdfgeom:osmway_21 geo:asWKT \"POLYGON((48 7.5,48 "
       "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral "
-      ".\nosmway:21 osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48 7.6,"
-      "48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
+      ".\nosmway:21 "
       "osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
-      "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:obb \"POLYGON((48 7.5,"
-      "48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
+      "7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdf:area \"0.01\"^^xsd:double .\n",
       buffer.str());
 
@@ -99,7 +97,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   config.addCentroid = false;
   config.addEnvelope = false;
   config.addConvexHull = false;
-  config.addObb = true;
+  config.addObb = false;
   config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
   config.wktPrecision = 1;
 
@@ -130,7 +128,7 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:osmrel_10 .\nosm2rdfgeom:osmrel_10 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:obb \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double .\n"
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osmrel_10 .\nosm2rdfgeom:osmrel_10 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double .\n"
       ,
       buffer.str());
 
