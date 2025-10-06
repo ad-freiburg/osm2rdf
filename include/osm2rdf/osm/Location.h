@@ -7,6 +7,12 @@ This file is part of Osmium (https://osmcode.org/libosmium).
 
 Copyright 2013-2025 Jochen Topf <jochen@topf.org> and others (see README).
 
+This file was modified by Hannah Bast <bast@cs.uni-freiburg.de> and Patrick
+Brosi <brosi@cs.uni-freiburg.de> for osm2rdf to store information on whether the
+node the location was obtained from was tagged in the MSB of the y-coordinate
+(see TAG_BIT). Two methods set_tagged(bool tagged) and is_tagged() were added to
+read and write this extra bit.
+
 Boost Software License - Version 1.0 - August 17th, 2003
 
 Permission is hereby granted, free of charge, to any person or organization
