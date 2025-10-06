@@ -26,6 +26,8 @@ namespace osm2rdf::ttl::constants {
 // Real constants
 const static inline std::string NAMESPACE__GEOSPARQL = "geo";
 const static inline std::string NAMESPACE__OHM_NODE = "ohmnode";
+const static inline std::string NAMESPACE__OHM_NODE_TAGGED = "ohmnode_tagged";
+const static inline std::string NAMESPACE__OHM_NODE_UNTAGGED = "ohmnode_untagged";
 const static inline std::string NAMESPACE__OHM_RELATION = "ohmrel";
 const static inline std::string NAMESPACE__OHM_WAY = "ohmway";
 const static inline std::string NAMESPACE__OHM_CHANGESET = "ohmchangeset";
@@ -122,6 +124,10 @@ inline std::string LITERAL__TRUE;
 const static inline std::vector<std::string> DATASET_ID = {"osm", "ohm"};
 const static inline std::vector<std::string> NODE_NAMESPACE = {
     NAMESPACE__OSM_NODE, NAMESPACE__OHM_NODE};
+const static inline std::vector<std::string> NODE_NAMESPACE_TAGGED = {
+    NAMESPACE__OSM_NODE_TAGGED, NAMESPACE__OHM_NODE_TAGGED};
+const static inline std::vector<std::string> NODE_NAMESPACE_UNTAGGED = {
+    NAMESPACE__OSM_NODE_UNTAGGED, NAMESPACE__OHM_NODE_UNTAGGED};
 const static inline std::vector<std::string> RELATION_NAMESPACE = {
     NAMESPACE__OSM_RELATION, NAMESPACE__OHM_RELATION};
 const static inline std::vector<std::string> WAY_NAMESPACE = {
