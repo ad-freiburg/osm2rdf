@@ -42,7 +42,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
-option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enable" 0)
+option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enabled" 0)
 
 # Force static libraries
 set(BUILD_SHARED_LIBS OFF)
@@ -53,7 +53,7 @@ if (ENABLE_GEOMETRY_STATISTIC)
 	add_definitions(-DENABLE_GEOMETRY_STATISTIC)
 endif()
 
-add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
+add_compile_options(-Wall -Wextra -Wno-missing-field-initializers -Wno-stringop-overread)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 
 add_compile_options(-march=native)
