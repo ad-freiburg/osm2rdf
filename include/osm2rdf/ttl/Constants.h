@@ -53,6 +53,8 @@ const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
 // IRI Prefixes
 const static inline std::string IRI_PREFIX__OSM_NODE_TAGGED = "https://www.openstreetmap.org/node/";
 const static inline std::string IRI_PREFIX__OSM_NODE_UNTAGGED = "https://www.openstreetmap.org/node/";
+const static inline std::string IRI_PREFIX__OHM_NODE_TAGGED = "https://www.openhistoricalmap.org/node/";
+const static inline std::string IRI_PREFIX__OHM_NODE_UNTAGGED = "https://www.openhistoricalmap.org/node/";
 
 // Generated constants (depending on output format)
 inline std::string IRI__GEOSPARQL__AS_WKT;
@@ -122,6 +124,8 @@ inline std::string LITERAL__TRUE;
 
 // Arrays holding values depending on the used dataset
 const static inline std::vector<std::string> DATASET_ID = {"osm", "ohm"};
+const static inline std::vector<std::string> IRI_PREFIX_NODE_TAGGED = {
+    IRI_PREFIX__OSM_NODE_TAGGED, IRI_PREFIX__OHM_NODE_TAGGED};
 const static inline std::vector<std::string> NODE_NAMESPACE = {
     NAMESPACE__OSM_NODE, NAMESPACE__OHM_NODE};
 const static inline std::vector<std::string> NODE_NAMESPACE_TAGGED = {

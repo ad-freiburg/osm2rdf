@@ -51,7 +51,7 @@ using osm2rdf::osm::GeometryHandler;
 using osm2rdf::osm::Node;
 using osm2rdf::osm::Relation;
 using osm2rdf::osm::Way;
-using osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_TAGGED;
+using osm2rdf::ttl::constants::IRI_PREFIX_NODE_TAGGED;
 using osm2rdf::ttl::constants::NODE_NAMESPACE;
 using osm2rdf::ttl::constants::NODE_NAMESPACE_TAGGED;
 using osm2rdf::ttl::constants::NODE_NAMESPACE_UNTAGGED;
@@ -60,11 +60,10 @@ const static size_t BATCH_SIZE = 10000;
 
 // ____________________________________________________________________________
 template <typename W>
-GeometryHandler<W>::GeometryHandler(
-    const osm2rdf::config::Config& config, osm2rdf::ttl::Writer<W>* writer)
+GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
+                                    osm2rdf::ttl::Writer<W>* writer)
     : _config(config),
       _writer(writer),
-      _locationHandler(nullptr),
       _sweeper(
           {static_cast<size_t>(config.numThreads),
            static_cast<size_t>(config.numThreads),
@@ -103,7 +102,7 @@ GeometryHandler<W>::~GeometryHandler() = default;
 
 // ____________________________________________________________________________
 template <typename W>
-void osm2rdf::osm::GeometryHandler<W>::setLocationHandler(
+void GeometryHandler<W>::setLocationHandler(
     osm2rdf::osm::LocationHandler* locationHandler) {
   _locationHandler = locationHandler;
 }
@@ -126,7 +125,8 @@ void GeometryHandler<W>::relation(const Relation& rel) {
   for (const auto& m : rel.members()) {
     if (m.type() == osm2rdf::osm::RelationMemberType::NODE) {
       std::string type;
-      if (_config.iriPrefixForUntaggedNodes == IRI_PREFIX__OSM_NODE_TAGGED) {
+      if (_config.iriPrefixForUntaggedNodes ==
+          IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]) {
         type = NODE_NAMESPACE[_config.sourceDataset];
       } else if (_locationHandler->get_node_is_tagged(m.id())) {
         type = NODE_NAMESPACE_TAGGED[_config.sourceDataset];
@@ -247,8 +247,9 @@ template <typename W>
 template <typename W>
 void GeometryHandler<W>::node(const Node& node) {
   bool untagged = node.tags().empty();
-  bool separatePrefixes =
-      (_config.iriPrefixForUntaggedNodes != IRI_PREFIX__OSM_NODE_TAGGED);
+  bool separatePrefixes = (_config.iriPrefixForUntaggedNodes !=
+                           IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]);
+
   const std::string& id =
       !separatePrefixes
           ? _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],

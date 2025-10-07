@@ -215,7 +215,7 @@ const static inline std::string IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_SHORT = "";
 const static inline std::string IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_LONG =
     "iri-prefix-for-untagged-nodes";
 const static inline std::string IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_HELP =
-    "IRI prefix for untagged nodes";
+    "IRI prefix for untagged nodes, if empty, use same as for tagged nodes";
 
 const static inline std::string NO_UNTAGGED_WAYS_INFO =
     "Do not output untagged ways";

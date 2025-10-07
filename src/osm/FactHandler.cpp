@@ -75,7 +75,7 @@ using osm2rdf::ttl::constants::IRI__XSD__DOUBLE;
 using osm2rdf::ttl::constants::IRI__XSD__INTEGER;
 using osm2rdf::ttl::constants::IRI__XSD__YEAR;
 using osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH;
-using osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_TAGGED;
+using osm2rdf::ttl::constants::IRI_PREFIX_NODE_TAGGED;
 using osm2rdf::ttl::constants::LITERAL__FALSE;
 using osm2rdf::ttl::constants::LITERAL__TRUE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF;
@@ -159,8 +159,8 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
 template <typename W>
 void osm2rdf::osm::FactHandler<W>::node(const osm2rdf::osm::Node& node) {
   bool untagged = node.tags().empty();
-  bool separatePrefixes =
-      (_config.iriPrefixForUntaggedNodes != IRI_PREFIX__OSM_NODE_TAGGED);
+  bool separatePrefixes = (_config.iriPrefixForUntaggedNodes !=
+                           IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]);
   const std::string& subj =
       !separatePrefixes
           ? _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
@@ -237,7 +237,7 @@ void osm2rdf::osm::FactHandler<W>::relation(
       switch (member.type()) {
         case osm2rdf::osm::RelationMemberType::NODE:
           if (_config.iriPrefixForUntaggedNodes ==
-              IRI_PREFIX__OSM_NODE_TAGGED) {
+              IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]) {
             type = NODE_NAMESPACE[_config.sourceDataset];
           } else if (_locationHandler->get_node_is_tagged(member.id())) {
             type = NODE_NAMESPACE_TAGGED[_config.sourceDataset];
@@ -333,7 +333,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       _writer->writeTriple(subj, IRI__OSMWAY__NODE, blankNode);
 
       std::string nodeNamespace;
-      if (_config.iriPrefixForUntaggedNodes == IRI_PREFIX__OSM_NODE_TAGGED) {
+      if (_config.iriPrefixForUntaggedNodes ==
+          IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]) {
         nodeNamespace = NODE_NAMESPACE[_config.sourceDataset];
       } else if (_locationHandler->get_node_is_tagged(node.id())) {
         nodeNamespace = NODE_NAMESPACE_TAGGED[_config.sourceDataset];
