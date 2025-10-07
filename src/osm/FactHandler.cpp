@@ -531,9 +531,9 @@ void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
 
   // avoid writing empty user IDs, drop entire triple
   if (object.uid() != 0) {
-    _writer->writeTriple(
-        subj, IRI__OSMMETA__UID,
-        _writer->generateLiteral(std::to_string(object.uid()), _iriXSDInteger));
+    _writer->writeTriple(subj, IRI__OSMMETA__UID,
+                         _writer->generateLiteralUnsafe(
+                             std::to_string(object.uid()), _iriXSDInteger));
   }
 
   _writer->writeTriple(subj, IRI__OSMMETA__VERSION,
@@ -573,9 +573,9 @@ void osm2rdf::osm::FactHandler<W>::writeMeta(const std::string& subj,
 
   // avoid writing empty user IDs, drop entire triple
   if (object.uid() != 0) {
-    _writer->writeTriple(
-        subj, IRI__OSMMETA__UID,
-        _writer->generateLiteral(std::to_string(object.uid()), _iriXSDInteger));
+    _writer->writeTriple(subj, IRI__OSMMETA__UID,
+                         _writer->generateLiteralUnsafe(
+                             std::to_string(object.uid()), _iriXSDInteger));
   }
 
   _writer->writeTriple(subj, IRI__OSMMETA__VERSION,

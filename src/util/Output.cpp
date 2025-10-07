@@ -21,7 +21,6 @@
 #include <bzlib.h>
 #include <zlib.h>
 
-#include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -57,7 +56,6 @@ osm2rdf::util::Output::~Output() { close(); }
 
 // ____________________________________________________________________________
 bool osm2rdf::util::Output::open() {
-  assert(_partCount > 0);
 
   _rawFiles.resize(_partCount);
   _gzFiles.resize(_partCount);
@@ -255,7 +253,6 @@ void osm2rdf::util::Output::writeToFile(unsigned char* from, size_t len, size_t 
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(const std::string_view strv, size_t t) {
-  assert(t < _partCount);
   if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
     if (!_toStdOut) {
       writeToFile(_outBuffers[t], _outBufPos[t], t);
@@ -284,7 +281,6 @@ void osm2rdf::util::Output::write(const std::string_view strv, size_t t) {
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(const char c, size_t t) {
-  assert(t < _partCount);
   if (_outBufPos[t] + 2 >= BUFFER_S) {
     if (!_toStdOut) {
       writeToFile(_outBuffers[t], _outBufPos[t], t);
