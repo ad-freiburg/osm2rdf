@@ -33,8 +33,7 @@ osm2rdf::util::ProgressBar::ProgressBar(std::size_t maxValue, bool show)
       _percent(k100Percent + 1),
       _last(std::time(nullptr)),
       _show(show) {
-  // Handle special case of 0 elements
-  _width = kTerminalWidth - - 4 - 5 - 2 - 4 - 20;
+  _width = kTerminalWidth - 5 - 2 - 20;
 }
 
 // ____________________________________________________________________________

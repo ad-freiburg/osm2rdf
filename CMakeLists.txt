@@ -65,7 +65,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined
 # ----------------------------------------------------------------------------
 find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
-#find_package(ZLIB REQUIRED)
 find_package(OpenMP)
 
 # zlib-ng
