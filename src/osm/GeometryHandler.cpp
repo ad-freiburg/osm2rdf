@@ -51,6 +51,10 @@ using osm2rdf::osm::GeometryHandler;
 using osm2rdf::osm::Node;
 using osm2rdf::osm::Relation;
 using osm2rdf::osm::Way;
+using osm2rdf::ttl::constants::IRI_PREFIX_NODE_TAGGED;
+using osm2rdf::ttl::constants::NODE_NAMESPACE;
+using osm2rdf::ttl::constants::NODE_NAMESPACE_TAGGED;
+using osm2rdf::ttl::constants::NODE_NAMESPACE_UNTAGGED;
 
 const static size_t BATCH_SIZE = 10000;
 
@@ -98,6 +102,13 @@ GeometryHandler<W>::~GeometryHandler() = default;
 
 // ____________________________________________________________________________
 template <typename W>
+void GeometryHandler<W>::setLocationHandler(
+    osm2rdf::osm::LocationHandler* locationHandler) {
+  _locationHandler = locationHandler;
+}
+
+// ____________________________________________________________________________
+template <typename W>
 void GeometryHandler<W>::relation(const Relation& rel) {
   if (rel.isArea()) return;  // skip area relations, will be handled by area()
 
@@ -113,9 +124,16 @@ void GeometryHandler<W>::relation(const Relation& rel) {
 
   for (const auto& m : rel.members()) {
     if (m.type() == osm2rdf::osm::RelationMemberType::NODE) {
-      std::string pid = _writer->generateIRI(
-          osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
-          m.id());
+      std::string type;
+      if (_config.iriPrefixForUntaggedNodes ==
+          IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]) {
+        type = NODE_NAMESPACE[_config.sourceDataset];
+      } else if (_locationHandler->get_node_is_tagged(m.id())) {
+        type = NODE_NAMESPACE_TAGGED[_config.sourceDataset];
+      } else {
+        type = NODE_NAMESPACE_UNTAGGED[_config.sourceDataset];
+      }
+      std::string pid = _writer->generateIRI(type, m.id());
       _sweeper.add(pid, transform(rel.envelope()), id, subId, false,
                    _parseBatches[omp_get_thread_num()]);
     }
@@ -228,9 +246,20 @@ template <typename W>
 // ____________________________________________________________________________
 template <typename W>
 void GeometryHandler<W>::node(const Node& node) {
-  std::string id = _writer->generateIRI(
-      osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset],
-      node.id());
+  bool untagged = node.tags().empty();
+  bool separatePrefixes = (_config.iriPrefixForUntaggedNodes !=
+                           IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]);
+
+  const std::string& id =
+      !separatePrefixes
+          ? _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset],
+                                 node.id())
+          : (untagged ? _writer->generateIRI(
+                            NODE_NAMESPACE_UNTAGGED[_config.sourceDataset],
+                            node.id())
+                      : _writer->generateIRI(
+                            NODE_NAMESPACE_TAGGED[_config.sourceDataset],
+                            node.id()));
 
   _sweeper.add(transform(node.geom()), id, false,
                _parseBatches[omp_get_thread_num()]);
