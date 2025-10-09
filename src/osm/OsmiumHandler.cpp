@@ -96,6 +96,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
           _config, countHandler.minNodeId(), countHandler.maxNodeId());
       _relationHandler.setLocationHandler(_locationHandler);
       _factHandler->setLocationHandler(_locationHandler);
+      _geometryHandler->setLocationHandler(_locationHandler);
 
       size_t numTasks = 0;
 

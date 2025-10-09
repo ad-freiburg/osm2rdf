@@ -7,6 +7,10 @@ This file is part of Osmium (https://osmcode.org/libosmium).
 
 Copyright 2013-2025 Jochen Topf <jochen@topf.org> and others (see README).
 
+It was modified by Hannah Bast <bast@cs.uni-freiburg.de> and Patrick Brosi
+<brosi@cs.uni-freiburg.de> for osm2rdf to write and receive information on
+whether a node was tagged to the (correspondently modified) Location object.
+
 Boost Software License - Version 1.0 - August 17th, 2003
 
 Permission is hereby granted, free of charge, to any person or organization

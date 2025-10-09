@@ -50,6 +50,10 @@ using osm2rdf::osm::Area;
 using osm2rdf::osm::GeometryHandler;
 using osm2rdf::osm::Relation;
 using osm2rdf::osm::Way;
+using osm2rdf::ttl::constants::IRI_PREFIX_NODE_TAGGED;
+using osm2rdf::ttl::constants::NODE_NAMESPACE;
+using osm2rdf::ttl::constants::NODE_NAMESPACE_TAGGED;
+using osm2rdf::ttl::constants::NODE_NAMESPACE_UNTAGGED;
 
 const static size_t BATCH_SIZE = 10000;
 
@@ -90,11 +94,21 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                 [this](size_t progr) { this->progressCb(progr); },
                 {}},
                config.cache, ""),
-      _parseBatches(config.numThreads) {}
+      _parseBatches(config.numThreads) {
+  _separateUntaggedNodePrefixes = _config.iriPrefixForUntaggedNodes !=
+                                  IRI_PREFIX_NODE_TAGGED[_config.sourceDataset];
+}
 
 // ___________________________________________________________________________
 template <typename W>
 GeometryHandler<W>::~GeometryHandler() = default;
+
+// ____________________________________________________________________________
+template <typename W>
+void GeometryHandler<W>::setLocationHandler(
+    osm2rdf::osm::LocationHandler* locationHandler) {
+  _locationHandler = locationHandler;
+}
 
 // ____________________________________________________________________________
 template <typename W>
@@ -111,7 +125,15 @@ void GeometryHandler<W>::relation(const Relation& rel) {
 
   for (const auto& m : rel.members()) {
     if (m.type() == osmium::item_type::node) {
-      std::string pid = getSweeperId(m.positive_ref(), 1);
+      std::string pid;
+
+      if (!_separateUntaggedNodePrefixes) {
+        pid = getSweeperId(m.positive_ref(), 1);
+      } else if (_locationHandler->get_node_is_tagged(m.positive_ref())) {
+        pid = getSweeperId(m.positive_ref(), 4);
+      } else {
+        pid = getSweeperId(m.positive_ref(), 5);
+      }
 
       _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id,
                    subId, false, _parseBatches[omp_get_thread_num()]);
@@ -223,7 +245,16 @@ template <typename W>
 template <typename W>
 void GeometryHandler<W>::node(const osmium::Node& node) {
   if (!node.location().valid()) return;
-  std::string id = getSweeperId(node.id(), 1);
+  std::string id;
+  bool untagged = node.tags().empty();
+
+  if (!_separateUntaggedNodePrefixes) {
+    id = getSweeperId(node.id(), 1);
+  } else if (!untagged) {
+    id = getSweeperId(node.id(), 4);
+  } else {
+    id = getSweeperId(node.id(), 5);
+  }
 
   _sweeper.add(transform(::util::geo::DPoint{node.location().lon(),
                                              node.location().lat()}),
@@ -301,14 +332,28 @@ std::string GeometryHandler<W>::getFullID(const char* strid, size_t n) {
   uint64_t id = 0;
 
   for (size_t i = n - 1; i > 0; i--) {
-    id |=
-        static_cast<uint64_t>(static_cast<unsigned char>(strid[i]))
-        << (8 * (n - 1 - i));
+    id |= static_cast<uint64_t>(static_cast<unsigned char>(strid[i]))
+          << (8 * (n - 1 - i));
   }
 
   if (strid[0] == 1) {
+    // normal node
     return _writer->generateIRI(
         osm2rdf::ttl::constants::NODE_NAMESPACE[_config.sourceDataset], id);
+  }
+
+  if (strid[0] == 4) {
+    // tagged node
+    return _writer->generateIRI(
+        osm2rdf::ttl::constants::NODE_NAMESPACE_TAGGED[_config.sourceDataset],
+        id);
+  }
+
+  if (strid[0] == 5) {
+    // untagged node
+    return _writer->generateIRI(
+        osm2rdf::ttl::constants::NODE_NAMESPACE_UNTAGGED[_config.sourceDataset],
+        id);
   }
 
   if (strid[0] == 2) {
@@ -316,8 +361,10 @@ std::string GeometryHandler<W>::getFullID(const char* strid, size_t n) {
         osm2rdf::ttl::constants::WAY_NAMESPACE[_config.sourceDataset], id);
   }
 
-  return _writer->generateIRI(
-      osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset], id);
+  if (strid[0] == 3) {
+    return _writer->generateIRI(
+        osm2rdf::ttl::constants::RELATION_NAMESPACE[_config.sourceDataset], id);
+  }
 
   throw std::runtime_error("Unknown geometry id!");
 }
@@ -338,7 +385,7 @@ std::string GeometryHandler<W>::getSweeperId(uint64_t oid, char type) {
   id[8 - a] = type;
 
   return std::string{reinterpret_cast<char*>(id + (8 - a)),
-                         static_cast<size_t>(a + 1)};
+                     static_cast<size_t>(a + 1)};
 }
 
 // ____________________________________________________________________________

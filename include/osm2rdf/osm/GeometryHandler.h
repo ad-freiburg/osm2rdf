@@ -57,9 +57,13 @@ class GeometryHandler {
   // Calculate data
   void calculateRelations();
 
+  // Set the location handler
+  void setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler);
+
   // Global config
   osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
+  osm2rdf::osm::LocationHandler* _locationHandler;
 
  private:
   sj::Sweeper _sweeper;
@@ -81,6 +85,7 @@ class GeometryHandler {
   void progressCb(size_t progr);
 
   osm2rdf::util::ProgressBar _progressBar;
+  bool _separateUntaggedNodePrefixes = false;
 };
 
 }  // namespace osm2rdf::osm

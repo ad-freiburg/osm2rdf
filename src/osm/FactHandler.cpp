@@ -74,21 +74,20 @@ using osm2rdf::ttl::constants::IRI__XSD__DOUBLE;
 using osm2rdf::ttl::constants::IRI__XSD__INTEGER;
 using osm2rdf::ttl::constants::IRI__XSD__YEAR;
 using osm2rdf::ttl::constants::IRI__XSD__YEAR_MONTH;
-using osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_TAGGED;
+using osm2rdf::ttl::constants::IRI_PREFIX_NODE_TAGGED;
 using osm2rdf::ttl::constants::LITERAL__FALSE;
 using osm2rdf::ttl::constants::LITERAL__TRUE;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META;
 using osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_TAG;
-using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE;
-using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_TAGGED;
-using osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_UNTAGGED;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_TAG;
 using osm2rdf::ttl::constants::NAMESPACE__OSM_WAY;
 using osm2rdf::ttl::constants::NAMESPACE__WIKIDATA_ENTITY;
 using osm2rdf::ttl::constants::NODE_NAMESPACE;
+using osm2rdf::ttl::constants::NODE_NAMESPACE_TAGGED;
+using osm2rdf::ttl::constants::NODE_NAMESPACE_UNTAGGED;
 using osm2rdf::ttl::constants::RELATION_NAMESPACE;
 using osm2rdf::ttl::constants::WAY_NAMESPACE;
 
@@ -97,8 +96,8 @@ template <typename W>
 osm2rdf::osm::FactHandler<W>::FactHandler(const osm2rdf::config::Config& config,
                                           osm2rdf::ttl::Writer<W>* writer)
     : _config(config), _writer(writer), _locationHandler(nullptr) {
-  _separateUntaggedNodePrefixes =
-      _config.iriPrefixForUntaggedNodes != IRI_PREFIX__OSM_NODE_TAGGED;
+  _separateUntaggedNodePrefixes = _config.iriPrefixForUntaggedNodes !=
+                                  IRI_PREFIX_NODE_TAGGED[_config.sourceDataset];
   _datasetId = DATASET_ID[_config.sourceDataset];
   _relNamespace = RELATION_NAMESPACE[_config.sourceDataset];
   _wayNamespace = WAY_NAMESPACE[_config.sourceDataset];
@@ -171,10 +170,11 @@ void osm2rdf::osm::FactHandler<W>::node(const osmium::Node& node) {
 
   const std::string& subj =
       !_separateUntaggedNodePrefixes
-          ? _writer->generateIRIUnsafe(NAMESPACE__OSM_NODE, sid)
-          : (untagged
-                 ? _writer->generateIRIUnsafe(NAMESPACE__OSM_NODE_UNTAGGED, sid)
-                 : _writer->generateIRIUnsafe(NAMESPACE__OSM_NODE_TAGGED, sid));
+          ? _writer->generateIRI(NODE_NAMESPACE[_config.sourceDataset], sid)
+          : (untagged ? _writer->generateIRI(
+                            NODE_NAMESPACE_UNTAGGED[_config.sourceDataset], sid)
+                      : _writer->generateIRI(
+                            NODE_NAMESPACE_TAGGED[_config.sourceDataset], sid));
 
   _writer->writeTriple(subj, IRI__RDF__TYPE, IRI__OSM__NODE);
 
@@ -245,14 +245,13 @@ void osm2rdf::osm::FactHandler<W>::relation(
       std::string type;
       switch (member.type()) {
         case osmium::item_type::node:
-          if (_config.iriPrefixForUntaggedNodes ==
-              IRI_PREFIX__OSM_NODE_TAGGED) {
-            type = NAMESPACE__OSM_NODE;
+          if (!_separateUntaggedNodePrefixes) {
+            type = NODE_NAMESPACE[_config.sourceDataset];
           } else if (_locationHandler->get_node_is_tagged(
                          member.positive_ref())) {
-            type = NAMESPACE__OSM_NODE_TAGGED;
+            type = NODE_NAMESPACE_TAGGED[_config.sourceDataset];
           } else {
-            type = NAMESPACE__OSM_NODE_UNTAGGED;
+            type = NODE_NAMESPACE_UNTAGGED[_config.sourceDataset];
           }
           break;
         case osmium::item_type::relation:
@@ -345,12 +344,13 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       _writer->writeTriple(subj, IRI__OSMWAY__NODE, blankNode);
 
       std::string nodeNamespace;
-      if (_config.iriPrefixForUntaggedNodes == IRI_PREFIX__OSM_NODE_TAGGED) {
-        nodeNamespace = NAMESPACE__OSM_NODE;
+      if (_config.iriPrefixForUntaggedNodes ==
+          IRI_PREFIX_NODE_TAGGED[_config.sourceDataset]) {
+        nodeNamespace = NODE_NAMESPACE[_config.sourceDataset];
       } else if (_locationHandler->get_node_is_tagged(node.positive_ref())) {
-        nodeNamespace = NAMESPACE__OSM_NODE_TAGGED;
+        nodeNamespace = NODE_NAMESPACE_TAGGED[_config.sourceDataset];
       } else {
-        nodeNamespace = NAMESPACE__OSM_NODE_UNTAGGED;
+        nodeNamespace = NODE_NAMESPACE_UNTAGGED[_config.sourceDataset];
       }
 
       _writer->writeTriple(
