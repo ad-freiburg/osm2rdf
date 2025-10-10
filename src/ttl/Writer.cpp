@@ -398,6 +398,9 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
       generateBooleanLiteral(!_config.addUntaggedRelations));
   writeOptionTriple(osm2rdf::config::constants::NO_UNTAGGED_AREAS_OPTION_LONG,
                     generateBooleanLiteral(!_config.addUntaggedAreas));
+  writeOptionTriple(
+      osm2rdf::config::constants::IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_LONG,
+      generateLiteral(_config.iriPrefixForUntaggedNodes));
 
   _out->flush();
 }
