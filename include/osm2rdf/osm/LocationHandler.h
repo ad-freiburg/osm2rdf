@@ -41,6 +41,7 @@ class LocationHandler : public osmium::handler::Handler {
   virtual ~LocationHandler() {}
   virtual void node(const osmium::Node& node) = 0;
   virtual void way(osmium::Way& way) = 0;
+  virtual void finalizeNodes() = 0;
   [[nodiscard]] virtual osmium::Location get_node_location(
       const osmium::object_id_type id) const = 0;
   [[nodiscard]] virtual bool get_node_is_tagged(
@@ -57,6 +58,7 @@ class LocationHandlerImpl : public LocationHandler {
                                size_t nodeIdMin, size_t nodeIdMax);
   void node(const osmium::Node& node);
   void way(osmium::Way& way);
+  void finalizeNodes() {_nodesFinalized = true; };
   [[nodiscard]] osmium::Location get_node_location(
       const osmium::object_id_type nodeId) const;
   [[nodiscard]] bool get_node_is_tagged(
@@ -65,6 +67,7 @@ class LocationHandlerImpl : public LocationHandler {
  protected:
   T _index;
   osm2rdf::osm::handler::NodeLocationsForWays<T> _handler;
+  bool _nodesFinalized = false;
 };
 
 template <>
@@ -76,6 +79,7 @@ class LocationHandlerImpl<osmium::index::map::SparseFileArray<
                                size_t nodeIdMin, size_t nodeIdMax);
   void node(const osmium::Node& node);
   void way(osmium::Way& way);
+  void finalizeNodes() {_nodesFinalized = true; };
   [[nodiscard]] osmium::Location get_node_location(
       const osmium::object_id_type nodeId) const;
   [[nodiscard]] bool get_node_is_tagged(
@@ -90,6 +94,7 @@ class LocationHandlerImpl<osmium::index::map::SparseFileArray<
       osmium::index::map::SparseFileArray<osmium::unsigned_object_id_type,
                                           osm2rdf::osm::Location>>
       _handler;
+  bool _nodesFinalized = false;
 };
 
 template <>
@@ -101,6 +106,7 @@ class LocationHandlerImpl<osmium::index::map::DenseFileArray<
                                size_t nodeIdMin, size_t nodeIdMax);
   void node(const osmium::Node& node);
   void way(osmium::Way& way);
+  void finalizeNodes() {_nodesFinalized = true; };
   [[nodiscard]] osmium::Location get_node_location(
       const osmium::object_id_type nodeId) const;
   [[nodiscard]] bool get_node_is_tagged(
@@ -115,6 +121,7 @@ class LocationHandlerImpl<osmium::index::map::DenseFileArray<
       osmium::index::map::DenseFileArray<osmium::unsigned_object_id_type,
                                          osm2rdf::osm::Location>>
       _handler;
+  bool _nodesFinalized = false;
 };
 
 template <>
@@ -126,6 +133,7 @@ class LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
                                size_t nodeIdMin, size_t nodeIdMax);
   void node(const osmium::Node& node);
   void way(osmium::Way& way);
+  void finalizeNodes() {_nodesFinalized = true; };
   [[nodiscard]] osmium::Location get_node_location(
       const osmium::object_id_type nodeId) const;
   [[nodiscard]] bool get_node_is_tagged(
@@ -138,6 +146,7 @@ class LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
   osm2rdf::osm::handler::NodeLocationsForWays<osm2rdf::osm::DenseMemIndex<
       osmium::unsigned_object_id_type, osm2rdf::osm::Location>>
       _handler;
+  bool _nodesFinalized = false;
 };
 
 using LocationHandlerRAMDense = LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<

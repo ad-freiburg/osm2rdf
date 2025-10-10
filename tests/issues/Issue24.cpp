@@ -128,8 +128,10 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
   output.close();
 
   ASSERT_EQ(
-      "osmrel:10 geo:hasGeometry osm2rdfgeom:osmrel_10 .\nosm2rdfgeom:osmrel_10 geo:asWKT \"POLYGON((48 7.5,48 7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double .\n"
-      ,
+      "osmrel:10 geo:hasGeometry osm2rdfgeom:osmrel_10 "
+      ".\nosm2rdfgeom:osmrel_10 geo:asWKT \"POLYGON((48 7.5,48 "
+      "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
+      "osm2rdf:area \"0.01\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -169,15 +171,20 @@ TEST(Issue24, nodeHasGeometryAsGeoSPARQL) {
       osmiumBuffer, osmium::builder::attr::_id(42),
       osmium::builder::attr::_location(osmium::Location(7.51, 48.0)));
 
-  // Create osm2rdf object from osmium object
-  const osm2rdf::osm::Node n{osmiumBuffer.get<osmium::Node>(0)};
-
-  dh.node(n);
+  dh.node(osmiumBuffer.get<osmium::Node>(0));
   output.flush();
   output.close();
 
   ASSERT_EQ(
-      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp \"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version \"0\"^^xsd:integer .\nosmnode:42 osm2rdf:facts \"0\"^^xsd:integer .\nosmnode:42 geo:hasGeometry osm2rdfgeom:osmnode_42 .\nosm2rdfgeom:osmnode_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope \"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
+      "osmnode:42 rdf:type osm:node .\nosmnode:42 osmmeta:timestamp "
+      "\"1970-01-01T00:00:00\"^^xsd:dateTime .\nosmnode:42 osmmeta:version "
+      "\"0\"^^xsd:integer .\nosmnode:42 osm2rdf:facts \"0\"^^xsd:integer "
+      ".\nosmnode:42 geo:hasGeometry osm2rdfgeom:osmnode_42 "
+      ".\nosm2rdfgeom:osmnode_42 geo:asWKT \"POINT(7.5 48)\"^^geo:wktLiteral "
+      ".\nosmnode:42 osm2rdfgeom:obb \"POLYGON((7.5 48))\"^^geo:wktLiteral "
+      ".\nosmnode:42 osm2rdfgeom:convex_hull \"POLYGON((7.5 "
+      "48))\"^^geo:wktLiteral .\nosmnode:42 osm2rdfgeom:envelope "
+      "\"POLYGON((7.5 48,7.5 48,7.5 48,7.5 48,7.5 48))\"^^geo:wktLiteral .\n",
       buffer.str());
 
   // Cleanup
@@ -324,7 +331,6 @@ TEST(Issue24, wayHasGeometryAsGeoSPARQL) {
 
   // Create osm2rdf object from osmium object
   osm2rdf::osm::Way w{osmiumBuffer.get<osmium::Way>(0)};
-  w.finalize();
 
   dh.way(w);
   output.flush();

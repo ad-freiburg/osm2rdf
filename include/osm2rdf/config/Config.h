@@ -82,8 +82,6 @@ struct Config {
 
   bool addSpatialRelsForUntaggedNodes = true;
 
-  bool separate = true;
-
   std::string iriPrefixForUntaggedNodes =
       osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_UNTAGGED;
 

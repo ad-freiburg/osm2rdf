@@ -16,10 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/util/Output.h"
+
 #include <bzlib.h>
 #include <zlib.h>
 
-#include <cassert>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -27,10 +28,8 @@
 #include <thread>
 #include <vector>
 
-#include "osm2rdf/util/Time.h"
-
 #include "osm2rdf/config/Config.h"
-#include "osm2rdf/util/Output.h"
+#include "osm2rdf/util/Time.h"
 
 using osm2rdf::config::BZ2;
 using osm2rdf::config::GZ;
@@ -39,8 +38,7 @@ using osm2rdf::config::NONE;
 // ____________________________________________________________________________
 osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
                               const std::string& prefix)
-    : Output(config, prefix, config.numThreads + 1) {
-}
+    : Output(config, prefix, config.numThreads + 1) {}
 
 // ____________________________________________________________________________
 osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
@@ -58,7 +56,6 @@ osm2rdf::util::Output::~Output() { close(); }
 
 // ____________________________________________________________________________
 bool osm2rdf::util::Output::open() {
-  assert(_partCount > 0);
 
   _rawFiles.resize(_partCount);
   _gzFiles.resize(_partCount);
@@ -71,8 +68,7 @@ bool osm2rdf::util::Output::open() {
 
       if (_rawFiles[i] == NULL) {
         std::stringstream ss;
-        ss << "Could not open file '" << partFilename(i)
-           << "' for writing:\n";
+        ss << "Could not open file '" << partFilename(i) << "' for writing:\n";
         ss << strerror(errno) << std::endl;
         throw std::runtime_error(ss.str());
       }
@@ -131,45 +127,21 @@ void osm2rdf::util::Output::close() {
   } else if (_config.outputCompress == BZ2) {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
-      int err = 0;
-      BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
-      if (err == BZ_IO_ERROR) {
-        BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
-        std::stringstream ss;
-        ss << "Could not write to bzip2 file '"
-           << partFilename(i) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
+      writeToFile(_outBuffers[i], _outBufPos[i], i);
+      int err;
       BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
       fclose(_rawFiles[i]);
     }
   } else if (_config.outputCompress == GZ) {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
-      int r = gzwrite(_gzFiles[i], _outBuffers[i], _outBufPos[i]);
-      if (r != (int)_outBufPos[i]) {
-        gzclose(_gzFiles[i]);
-        std::stringstream ss;
-        ss << "Could not write to gz file '"
-           << partFilename(i) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
+      writeToFile(_outBuffers[i], _outBufPos[i], i);
       gzclose(_gzFiles[i]);
     }
   } else {
 #pragma omp parallel for
     for (size_t i = 0; i < _partCount; ++i) {
-      size_t r =
-          fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
-      if (r != _outBufPos[i]) {
-        std::stringstream ss;
-        ss << "Could not write to file '"
-           << partFilename(i) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
+      writeToFile(_outBuffers[i], _outBufPos[i], i);
       fclose(_rawFiles[i]);
     }
   }
@@ -239,66 +211,66 @@ void osm2rdf::util::Output::writeNewLine(size_t part) {
   write('\n', part);
   _lines[part]++;
   if (_toStdOut) {
-    if (_lines[part] > 50) flush(part);
+    // flush as soon as only half of the buffer is available
+		if (_outBufPos[part] >= BUFFER_S / 2) flush(part);
   }
 }
 
 // ____________________________________________________________________________
-void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
-  assert(t < _partCount);
-  if (_toStdOut) {
-    // on output to stdout, we only flush on newlines
-  } else if (_config.outputCompress == BZ2) {
-    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
-      int err = 0;
-      BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
-      if (err == BZ_IO_ERROR) {
-        BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
-        std::stringstream ss;
-        ss << "Could not write to bzip2 file '"
-           << partFilename(t) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
-      _outBufPos[t] = 0;
+void osm2rdf::util::Output::writeToFile(unsigned char* from, size_t len, size_t t) {
+  if (_config.outputCompress == BZ2) {
+    int err = 0;
+    BZ2_bzWrite(&err, _files[t], from, len);
+    if (err == BZ_IO_ERROR) {
+      BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
+      std::stringstream ss;
+      ss << "Could not write to bzip2 file '" << partFilename(t) << "':\n";
+      ss << strerror(errno) << std::endl;
+      throw std::runtime_error(ss.str());
     }
+    _outBufPos[t] = 0;
   } else if (_config.outputCompress == GZ) {
-    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
-      int r = gzwrite(_gzFiles[t], _outBuffers[t], _outBufPos[t]);
-      if (r != (int)_outBufPos[t]) {
-        gzclose(_gzFiles[t]);
-        std::stringstream ss;
-        ss << "Could not write to gz file '"
-           << partFilename(t) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
-      _outBufPos[t] = 0;
+    int r = gzwrite(_gzFiles[t], from, len);
+    if (r != (int)len) {
+      gzclose(_gzFiles[t]);
+      std::stringstream ss;
+      ss << "Could not write to gz file '" << partFilename(t) << "':\n";
+      ss << strerror(errno) << std::endl;
+      throw std::runtime_error(ss.str());
     }
-  } else {
-    if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
-      size_t r =
-          fwrite(_outBuffers[t], sizeof(char), _outBufPos[t], _rawFiles[t]);
-      if (r != _outBufPos[t]) {
-        std::stringstream ss;
-        ss << "Could not write to file '"
-           << partFilename(t) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
+    _outBufPos[t] = 0;
+  } else if (_config.outputCompress == NONE) {
+    size_t r = fwrite(from, sizeof(char), len, _rawFiles[t]);
+    if (r != len) {
+      std::stringstream ss;
+      ss << "Could not write to file '" << partFilename(t) << "':\n";
+      ss << strerror(errno) << std::endl;
+      throw std::runtime_error(ss.str());
+    }
+    _outBufPos[t] = 0;
+  }
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::Output::write(const std::string_view strv, size_t t) {
+  if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
+    if (!_toStdOut) {
+      writeToFile(_outBuffers[t], _outBufPos[t], t);
       _outBufPos[t] = 0;
     }
   }
 
-  if (_outBufPos[t] + strv.size() + 1 >= BUFFER_S) {
-    std::cerr << osm2rdf::util::currentTimeFormatted()
-              << "String to write: " << strv << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted()
-              << "String size: " << strv.size() << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted()
-              << "Buffer size: " << BUFFER_S << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted()
-              << "Buffer pos: " << _outBufPos[t] << std::endl;
+  if (strv.size() + 1 >= BUFFER_S) {
+    if (!_toStdOut) {
+      // if we output to file, write directly to it and return!
+      writeToFile(const_cast<unsigned char*>(
+                reinterpret_cast<const unsigned char*>(strv.data())),
+            strv.size(), t);
+      return;
+    }
+
+    // if we did not output to a file, we flush'ed per line to stdout,
+    // in this case the buffer was too small to hold 50 lines
     throw std::runtime_error("Write buffer too small to write " +
                              std::to_string(strv.size()) + " bytes");
   }
@@ -309,56 +281,16 @@ void osm2rdf::util::Output::write(std::string_view strv, size_t t) {
 
 // ____________________________________________________________________________
 void osm2rdf::util::Output::write(const char c, size_t t) {
-  assert(t < _partCount);
-  if (_toStdOut) {
-    // on output to stdout, we only flush on newlines
-  } else if (_config.outputCompress == BZ2) {
-    if (_outBufPos[t] + 2 >= BUFFER_S) {
-      int err = 0;
-      BZ2_bzWrite(&err, _files[t], _outBuffers[t], _outBufPos[t]);
-      if (err == BZ_IO_ERROR) {
-        BZ2_bzWriteClose(&err, _files[t], 0, 0, 0);
-        std::stringstream ss;
-        ss << "Could not write to bzip2 file '"
-           << partFilename(t) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
-      _outBufPos[t] = 0;
-    }
-  } else if (_config.outputCompress == GZ) {
-    if (_outBufPos[t] + 2 >= BUFFER_S) {
-      int r = gzwrite(_gzFiles[t], _outBuffers[t], _outBufPos[t]);
-      if (r != (int)_outBufPos[t]) {
-        gzclose(_gzFiles[t]);
-        std::stringstream ss;
-        ss << "Could not write to gz file '"
-           << partFilename(t) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
-      _outBufPos[t] = 0;
-    }
-  } else {
-    if (_outBufPos[t] + 2 >= BUFFER_S) {
-      size_t r =
-          fwrite(_outBuffers[t], sizeof(char), _outBufPos[t], _rawFiles[t]);
-      if (r != _outBufPos[t]) {
-        std::stringstream ss;
-        ss << "Could not write to file '"
-           << partFilename(t) << "':\n";
-        ss << strerror(errno) << std::endl;
-        throw std::runtime_error(ss.str());
-      }
+  if (_outBufPos[t] + 2 >= BUFFER_S) {
+    if (!_toStdOut) {
+      writeToFile(_outBuffers[t], _outBufPos[t], t);
       _outBufPos[t] = 0;
     }
   }
 
   if (_outBufPos[t] + 2 >= BUFFER_S) {
-    std::cerr << osm2rdf::util::currentTimeFormatted()
-              << "Buffer size: " << BUFFER_S << std::endl;
-    std::cerr << osm2rdf::util::currentTimeFormatted()
-              << "Buffer pos: " << _outBufPos[t] << std::endl;
+    // if we did not output to a file, we flush'ed per line to stdout,
+    // in this case the buffer was too small to hold a single line
     throw std::runtime_error("Write buffer too small to write 1 byte");
   }
 
@@ -379,37 +311,8 @@ void osm2rdf::util::Output::flush(size_t i) {
     _lines[i] = 0;
     _outBuffers[i][_outBufPos[i]] = '\0';
     std::cout << reinterpret_cast<const char*>(_outBuffers[i]);
-  } else if (_config.outputCompress == BZ2) {
-    int err = 0;
-    BZ2_bzWrite(&err, _files[i], _outBuffers[i], _outBufPos[i]);
-    if (err == BZ_IO_ERROR) {
-      BZ2_bzWriteClose(&err, _files[i], 0, 0, 0);
-      std::stringstream ss;
-      ss << "Could not write to bzip2 file '"
-         << partFilename(i) << "':\n";
-      ss << strerror(errno) << std::endl;
-      throw std::runtime_error(ss.str());
-    }
-  } else if (_config.outputCompress == GZ) {
-    int r = gzwrite(_gzFiles[i], _outBuffers[i], _outBufPos[i]);
-    if (r != (int)_outBufPos[i]) {
-          gzclose(_gzFiles[i]);
-      std::stringstream ss;
-      ss << "Could not write to gz file '"
-         << partFilename(i) << "':\n";
-      ss << strerror(errno) << std::endl;
-      throw std::runtime_error(ss.str());
-    }
   } else {
-    size_t r =
-        fwrite(_outBuffers[i], sizeof(char), _outBufPos[i], _rawFiles[i]);
-    if (r != _outBufPos[i]) {
-      std::stringstream ss;
-      ss << "Could not write to file '"
-         << partFilename(i) << "':\n";
-      ss << strerror(errno) << std::endl;
-      throw std::runtime_error(ss.str());
-    }
+		writeToFile(_outBuffers[i], _outBufPos[i], i);
   }
   _outBufPos[i] = 0;
 }

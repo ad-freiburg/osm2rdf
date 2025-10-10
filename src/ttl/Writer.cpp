@@ -587,18 +587,16 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
 
   return ret;
 }
-
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
-    const std::string& s, const std::string& p, const std::string& v,
-    const std::string& o) {
+void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(const char* s,
+                                                          const char* p,
+                                                          const char* v,
+                                                          const char* o) {
   size_t part = 0;
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
 
   writeUnsafeIRILiteralTriple(s, p, v, o, part);
@@ -606,11 +604,8 @@ void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(const std::string& s,
-                                                          const std::string& p,
-                                                          const std::string& v,
-                                                          const std::string& o,
-                                                          size_t part) {
+void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
+    const char* s, const char* p, const char* v, const char* o, size_t part) {
   _out->write(s, part);
   _out->write(' ', part);
   writeIRIUnsafe(p, v, part);
@@ -664,8 +659,6 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
 
   writeTriple(s, p, o, part);
@@ -696,8 +689,6 @@ void osm2rdf::ttl::Writer<T>::writeLiteralTripleUnsafe(const std::string& s,
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
   writeLiteralTripleUnsafe(s, p, a, b, part);
 }
@@ -1487,13 +1478,131 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeSecondsAsISO(const std::string& subj,
                                                 const std::string& pred,
                                                 const std::time_t& time) {
-  char out[25];
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(subj, part);
+  _out->write(' ', part);
+  _out->write(pred, part);
+  _out->write(' ', part);
+
+  _out->write('"', part);
 
   struct tm t;
-  strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
+  gmtime_r(&time, &t);
 
-  writeLiteralTripleUnsafe(subj, pred, out,
-                           "^^" + constants::IRI__XSD__DATE_TIME);
+  int year = t.tm_year + 1900;
+  int month = t.tm_mon + 1;
+
+  // 4 digit year
+  _out->write('0' + (year / 1000) % 10, part);
+  _out->write('0' + (year / 100) % 10, part);
+  _out->write('0' + (year / 10) % 10, part);
+  _out->write('0' + (year % 10), part);
+  _out->write('-', part);
+
+  _out->write('0' + (month / 10) % 10, part);
+  _out->write('0' + (month % 10), part);
+  _out->write('-', part);
+
+  _out->write('0' + (t.tm_mday / 10) % 10, part);
+  _out->write('0' + (t.tm_mday % 10), part);
+  _out->write('T', part);
+
+  _out->write('0' + (t.tm_hour / 10) % 10, part);
+  _out->write('0' + (t.tm_hour % 10), part);
+  _out->write(':', part);
+
+  _out->write('0' + (t.tm_min / 10) % 10, part);
+  _out->write('0' + (t.tm_min % 10), part);
+  _out->write(':', part);
+
+  _out->write('0' + (t.tm_sec / 10) % 10, part);
+  _out->write('0' + (t.tm_sec % 10), part);
+
+  _out->write("\"^^", part);
+  _out->write(constants::IRI__XSD__DATE_TIME, part);
+
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeNewLine(size_t part) {
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeNewLine() {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char c, size_t part) {
+  _out->write(c, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(std::string_view s, size_t part) {
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char* s, size_t part) {
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char c) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(c, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(std::string_view s) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char* s) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(s, part);
 }
 
 // ____________________________________________________________________________

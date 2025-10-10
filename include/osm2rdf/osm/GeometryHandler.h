@@ -50,7 +50,7 @@ class GeometryHandler {
 
   // Add data
   void area(const osm2rdf::osm::Area& area);
-  void node(const osm2rdf::osm::Node& node);
+  void node(const osmium::Node& node);
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
@@ -69,8 +69,6 @@ class GeometryHandler {
   sj::Sweeper _sweeper;
   std::vector<sj::WriteBatch> _parseBatches;
 
-  std::string areaNS(AreaFromType type) const;
-
   static ::util::geo::I32Point transform(const ::util::geo::DPoint& loc);
 
   static ::util::geo::I32Box transform(const ::util::geo::DBox& box);
@@ -79,11 +77,15 @@ class GeometryHandler {
   static ::util::geo::I32MultiPolygon transform(
       const ::util::geo::DMultiPolygon& area);
 
-  void writeRelCb(size_t t, const std::string& a, const std::string& b,
-                  const std::string& pred);
+  std::string getSweeperId(uint64_t oid, char type);
+  std::string getFullID(const char* id, size_t n);
+
+  void writeRelCb(size_t t, const char* a, size_t an, const char* b, size_t bn,
+                  const char* pred, size_t predn);
   void progressCb(size_t progr);
 
   osm2rdf::util::ProgressBar _progressBar;
+  bool _separateUntaggedNodePrefixes = false;
 };
 
 }  // namespace osm2rdf::osm

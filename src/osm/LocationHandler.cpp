@@ -64,6 +64,7 @@ bool osm2rdf::osm::LocationHandlerImpl<T>::get_node_is_tagged(
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::osm::LocationHandlerImpl<T>::node(const osmium::Node& node) {
+  if (_nodesFinalized) return;
   _handler.node(node);
 }
 
@@ -110,6 +111,7 @@ bool osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
 void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::SparseFileArray<
     osmium::unsigned_object_id_type,
     osm2rdf::osm::Location>>::node(const osmium::Node& node) {
+  if (_nodesFinalized) return;
   _handler.node(node);
 }
 
@@ -134,6 +136,7 @@ osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
 void osm2rdf::osm::LocationHandlerImpl<osmium::index::map::DenseFileArray<
     osmium::unsigned_object_id_type,
     osm2rdf::osm::Location>>::node(const osmium::Node& node) {
+  if (_nodesFinalized) return;
   _handler.node(node);
 }
 
@@ -172,6 +175,7 @@ osm2rdf::osm::LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
 void osm2rdf::osm::LocationHandlerImpl<osm2rdf::osm::DenseMemIndex<
     osmium::unsigned_object_id_type,
     osm2rdf::osm::Location>>::node(const osmium::Node& node) {
+  if (_nodesFinalized) return;
   _handler.node(node);
 }
 

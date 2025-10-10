@@ -81,10 +81,8 @@ static const int UTF8_BYTES_SHORT = 4;
 #include "osm2rdf/config/Config.h"
 #include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Box.h"
-#include "osm2rdf/osm/Node.h"
 #include "osm2rdf/osm/Relation.h"
 #include "osm2rdf/osm/Tag.h"
-#include "osm2rdf/osm/TagList.h"
 #include "osm2rdf/osm/Way.h"
 #include "osm2rdf/ttl/Constants.h"
 #include "osm2rdf/util/Output.h"
@@ -122,10 +120,10 @@ class Writer {
                              const std::string& v, const std::string& o,
                              size_t part);
 
-  void writeUnsafeIRILiteralTriple(const std::string& s, const std::string& p,
-                                   const std::string& v, const std::string& o);
-  void writeUnsafeIRILiteralTriple(const std::string& s, const std::string& p,
-                                   const std::string& v, const std::string& o,
+  void writeUnsafeIRILiteralTriple(const char* s, const char* p,
+                                   const char* v, const char* o);
+  void writeUnsafeIRILiteralTriple(const char* s, const char* p,
+                                   const char* v, const char* o,
                                    size_t part);
 
   // Write a single RDF line with a literal. The contents of s, p, a and b are
@@ -135,6 +133,30 @@ class Writer {
   void writeLiteralTripleUnsafe(const std::string& s, const std::string& p,
                                 const std::string& a, const std::string& b,
                                 size_t part);
+
+  // write a string_view directly to the output
+  void write(std::string_view value);
+
+  // write a const char directly to the output
+  void write(const char*);
+
+  // write a char directly to the output
+  void write(const char);
+
+  // write a string_view directly to the output
+  void write(std::string_view value, size_t part);
+
+  // write a const char directly to the output
+  void write(const char*, size_t part);
+
+  // write a char directly to the output
+  void write(const char, size_t part);
+
+  // write a newline
+  void writeNewLine();
+
+  // write a newline
+  void writeNewLine(size_t part);
 
   // addPrefix adds the given prefix and value. If the prefix already exists
   // false is returned.

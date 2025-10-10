@@ -42,16 +42,11 @@ class ProgressBar {
   // Marks progress bar as done (calling update with _maxValue).
   void done();
 
-  // Returns number of digits required to print _maxValue.
-  std::size_t countWidth() const;
-
  protected:
   // Maximal value for this progress bar.
   std::size_t _maxValue;
   // Current absolute value.
   std::size_t _oldValue;
-  // Number of digits required for _maxValue.
-  std::size_t _countWidth;
   // Width of whole progress bar.
   std::size_t _width;
   // Current percent value.

@@ -42,7 +42,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
-option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enable" 0)
+option(ENABLE_GEOMETRY_STATISTIC "Write geometry statistics if enabled" 0)
+
+# Force static libraries
+set(BUILD_SHARED_LIBS OFF)
 
 # Enable verbose makefile
 if (ENABLE_GEOMETRY_STATISTIC)
@@ -50,7 +53,7 @@ if (ENABLE_GEOMETRY_STATISTIC)
 	add_definitions(-DENABLE_GEOMETRY_STATISTIC)
 endif()
 
-add_compile_options(-Wall -Wextra -Wno-missing-field-initializers)
+add_compile_options(-Wall -Wextra -Wno-missing-field-initializers -Wno-stringop-overread)
 add_compile_options(-DGTEST_HAS_TR1_TUPLE=0 -DGTEST_USE_OWN_TR1_TUPLE=0)
 
 add_compile_options(-march=native)
@@ -62,8 +65,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,undefined
 # ----------------------------------------------------------------------------
 find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
-find_package(ZLIB REQUIRED)
 find_package(OpenMP)
+
+# zlib-ng
+set(ZLIB_COMPAT ON)
+set(WITH_GTEST OFF)
+set(ZLIB_ENABLE_TESTS OFF)
+add_subdirectory(vendor/zlib-ng/zlib-ng)
+
+set(ZLIB_USE_STATIC_LIBS ON)
+set(ZLIB_INCLUDE_DIR "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng")
+set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng/libz.a")
 
 # Disable installation of google stuff
 set(INSTALL_GMOCK OFF)

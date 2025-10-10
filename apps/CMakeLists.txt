@@ -17,6 +17,7 @@
 # along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
 add_executable(osm2rdf osm2rdf.cpp)
+
 target_link_libraries(osm2rdf PRIVATE osm2rdf_library spatialjoin-dev pb_util)
 
 add_executable(osm2rdf-stats osm2rdf-stats.cpp)
