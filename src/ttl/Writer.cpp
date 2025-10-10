@@ -400,7 +400,7 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
                     generateBooleanLiteral(!_config.addUntaggedAreas));
   writeOptionTriple(
       osm2rdf::config::constants::IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_LONG,
-      _config.iriPrefixForUntaggedNodes);
+      generateLiteral(_config.iriPrefixForUntaggedNodes));
 
   _out->flush();
 }
