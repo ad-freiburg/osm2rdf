@@ -1,4 +1,4 @@
-// Copyright 2020 - 2022, University of Freiburg
+// Copyright 2020 - 2025, University of Freiburg
 // Authors: Axel Lehmann <lehmann@cs.uni-freiburg.de>
 //          Patrick Brosi <brosi@cs.uni-freiburg.de>
 //          Hannah Bast <bast@cs.uni-freiburg.de>
@@ -208,6 +208,14 @@ const static inline std::string NO_UNTAGGED_NODES_OPTION_LONG =
     "no-untagged-nodes";
 const static inline std::string NO_UNTAGGED_NODES_OPTION_HELP =
     "Do not output untagged nodes";
+
+const static inline std::string IRI_PREFIX_FOR_UNTAGGED_NODES_INFO =
+    "IRI prefix for untagged nodes: ";
+const static inline std::string IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_SHORT = "";
+const static inline std::string IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_LONG =
+    "iri-prefix-for-untagged-nodes";
+const static inline std::string IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_HELP =
+    "IRI prefix for untagged nodes; when empty, use same as for tagged nodes";
 
 const static inline std::string NO_UNTAGGED_WAYS_INFO =
     "Do not output untagged ways";

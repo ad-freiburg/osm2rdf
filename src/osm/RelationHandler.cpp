@@ -143,11 +143,11 @@ void osm2rdf::osm::RelationHandler::way(const osmium::Way& way) {
 
   if (way.positive_id() > std::numeric_limits<uint32_t>::max()) {
     if (_ways64.find(way.positive_id()) != _ways64.end()) {
-      _ways64[way.positive_id()] = std::move(getCompressedIDs(way));
+      _ways64[way.positive_id()] = getCompressedIDs(way);
     }
   } else {
     if (_ways32.find(way.positive_id()) != _ways32.end()) {
-      _ways32[way.positive_id()] = std::move(getCompressedIDs(way));
+      _ways32[way.positive_id()] = getCompressedIDs(way);
     }
   }
 }

@@ -25,8 +25,6 @@
 #include "osm2rdf/osm/Box.h"
 #include "osm2rdf/osm/Generic.h"
 #include "osm2rdf/osm/RelationHandler.h"
-#include "osm2rdf/osm/RelationMember.h"
-#include "osm2rdf/osm/TagList.h"
 #include "osmium/osm/relation.hpp"
 #include "util/geo/Geo.h"
 
@@ -44,37 +42,18 @@ class Relation {
   [[nodiscard]] id_t uid() const noexcept;
   [[nodiscard]] osm2rdf::osm::generic::version_t version() const noexcept;
   [[nodiscard]] bool visible() const noexcept;
-  [[nodiscard]] const std::vector<osm2rdf::osm::RelationMember>& members()
+  [[nodiscard]] const osmium::RelationMemberList& members()
       const noexcept;
-  [[nodiscard]] const osm2rdf::osm::TagList& tags() const noexcept;
+  [[nodiscard]] const osmium::TagList& tags() const noexcept;
   [[nodiscard]] bool hasCompleteGeometry() const noexcept;
   [[nodiscard]] bool isArea() const noexcept;
   [[nodiscard]] bool hasGeometry() const noexcept;
-  [[nodiscard]] const ::util::geo::DBox& envelope() const noexcept;
   [[nodiscard]] const ::util::geo::DCollection& geom() const noexcept;
-  [[nodiscard]] const ::util::geo::DPolygon& convexHull() const noexcept;
-  [[nodiscard]] const ::util::geo::DPolygon& orientedBoundingBox()
-      const noexcept;
-  [[nodiscard]] const ::util::geo::DPoint centroid() const noexcept;
   void buildGeometry(osm2rdf::osm::RelationHandler& relationHandler);
 
-  bool operator==(const osm2rdf::osm::Relation& other) const noexcept;
-  bool operator!=(const osm2rdf::osm::Relation& other) const noexcept;
-
  protected:
-  id_t _id;
-  osm2rdf::osm::generic::changeset_id_t _changeset;
-  std::time_t _timestamp;
-  std::string _user;
-  id_t _uid;
-  osm2rdf::osm::generic::version_t _version;
-  bool _visible;
-  std::vector<osm2rdf::osm::RelationMember> _members;
-  osm2rdf::osm::TagList _tags;
-  ::util::geo::DBox _envelope;
+  const osmium::Relation* _r = 0;
   ::util::geo::DCollection _geom;
-  ::util::geo::DPolygon _convexHull;
-  ::util::geo::DPolygon _obb;
   bool _hasCompleteGeometry;
   bool _isArea;
 };

@@ -73,7 +73,7 @@ TEST(Issue15, Relation_8291361_expected) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_relarea_8291361 geo:asWKT \"MULTIPOLYGON(((14"));
+          "osm2rdfgeom:osmrel_8291361 geo:asWKT \"MULTIPOLYGON(((14"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -126,7 +126,7 @@ TEST(Issue15, Relation_8291361_failed) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_relarea_8291361 geo:asWKT \"MULTIPOLYGON(((14"));
+          "osm2rdfgeom:osmrel_8291361 geo:asWKT \"MULTIPOLYGON(((14"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -180,7 +180,7 @@ TEST(Issue15, Way_201387026_expected) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"POLYGON((1"));
+          "osm2rdfgeom:osmway_201387026 geo:asWKT \"POLYGON((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);
@@ -233,7 +233,7 @@ TEST(Issue15, Way_201387026_failed) {
   ASSERT_THAT(
       printedData,
       ::testing::HasSubstr(
-          "osm2rdfgeom:osm_wayarea_201387026 geo:asWKT \"POLYGON((1"));
+          "osm2rdfgeom:osmway_201387026 geo:asWKT \"POLYGON((1"));
 
   // Reset std::cerr and std::cout
   std::cerr.rdbuf(cerrBufferOrig);

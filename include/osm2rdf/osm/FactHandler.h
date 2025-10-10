@@ -29,6 +29,8 @@
 
 namespace osm2rdf::osm {
 
+class LocationHandler;
+
 enum DateTimeType {
   invalid = 0,
   date_yyyy = 1,
@@ -42,15 +44,17 @@ class FactHandler {
  public:
   FactHandler(const osm2rdf::config::Config& config,
               osm2rdf::ttl::Writer<W>* writer);
+  void setLocationHandler(osm2rdf::osm::LocationHandler* locationHandler);
   // Add data
   void area(const osm2rdf::osm::Area& area);
-  void node(const osm2rdf::osm::Node& node);
+  void node(const osmium::Node& node);
   void relation(const osm2rdf::osm::Relation& relation);
   void way(const osm2rdf::osm::Way& way);
 
-  template <typename G>
   void writeGeometry(const std::string& s, const std::string& p,
-                          const G& g);
+                     const ::util::geo::DPoint& g);
+  template <typename G>
+  void writeGeometry(const std::string& s, const std::string& p, const G& g);
 
  protected:
   void writeBox(const std::string& s, const std::string& p,
@@ -58,10 +62,12 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision1);
   FRIEND_TEST(OSM_FactHandler, writeBoxPrecision2);
 
+  void writeMeta(const std::string& s, const osmium::Node& object);
+
   template <typename T>
   void writeMeta(const std::string& s, const T& object);
 
-  void writeTag(const std::string& s, const osm2rdf::osm::Tag& tag);
+  void writeTag(const std::string& s, const char* key, const char* val);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger);
   FRIEND_TEST(OSM_FactHandler, writeTag_AdminLevel_nonInteger2);
@@ -74,7 +80,7 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyIRI);
   FRIEND_TEST(OSM_FactHandler, writeTag_KeyNotIRI);
 
-  void writeTagList(const std::string& s, const osm2rdf::osm::TagList& tags);
+  void writeTagList(const std::string& s, const osmium::TagList& tags);
   FRIEND_TEST(OSM_FactHandler, writeTagList);
   FRIEND_TEST(OSM_FactHandler, writeTagListWikidata);
   FRIEND_TEST(OSM_FactHandler, writeTagListRefSingle);
@@ -103,9 +109,15 @@ class FactHandler {
   FRIEND_TEST(OSM_FactHandler, writeTagListStartDateYearMonthDay5);
 
   bool hasSuffix(const std::string& s, const std::string& suffix) const;
+  bool hasSuffix(const char* s, const char* suffix, size_t suffixSize) const;
 
   const osm2rdf::config::Config _config;
   osm2rdf::ttl::Writer<W>* _writer;
+  osm2rdf::osm::LocationHandler* _locationHandler;
+  bool _separateUntaggedNodePrefixes = false;
+  std::string _datasetId, _relNamespace, _wayNamespace, _changesetNamespace,
+      _iriXSDDouble, _iriWKTLiteral, _iriXSDInteger, _tagTripleCountIRI,
+      _areaIRI;
 };
 
 }  // namespace osm2rdf::osm

@@ -14,3 +14,6 @@
 [submodule "vendor/spatialjoin"]
 	path = vendor/spatialjoin
 	url = https://github.com/ad-freiburg/spatialjoin.git
+[submodule "vendor/zlib-ng/zlib-ng"]
+	path = vendor/zlib-ng/zlib-ng
+	url = https://github.com/zlib-ng/zlib-ng.git

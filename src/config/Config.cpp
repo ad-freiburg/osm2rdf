@@ -28,6 +28,7 @@
 #endif
 #include "osm2rdf/config/Constants.h"
 #include "osm2rdf/config/ExitCode.h"
+#include "osm2rdf/ttl/Constants.h"
 #include "popl.hpp"
 
 // ____________________________________________________________________________
@@ -90,6 +91,11 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     if (!addUntaggedNodes) {
       oss << "\n"
           << prefix << osm2rdf::config::constants::NO_UNTAGGED_NODES_INFO;
+    } else {
+      oss << "\n"
+          << prefix
+          << osm2rdf::config::constants::IRI_PREFIX_FOR_UNTAGGED_NODES_INFO
+          << iriPrefixForUntaggedNodes;
     }
     if (!addUntaggedWays) {
       oss << "\n"
@@ -323,6 +329,13 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_LONG,
       osm2rdf::config::constants::NO_UNTAGGED_NODES_OPTION_HELP);
 
+  auto iriPrefixForUntaggedNodesOp = parser.add<popl::Value<std::string>,
+                                                popl::Attribute::expert>(
+      osm2rdf::config::constants::IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_SHORT,
+      osm2rdf::config::constants::IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_LONG,
+      osm2rdf::config::constants::IRI_PREFIX_FOR_UNTAGGED_NODES_OPTION_HELP,
+      "");
+
   auto noUntaggedWaysOp = parser.add<popl::Switch, popl::Attribute::expert>(
       osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_SHORT,
       osm2rdf::config::constants::NO_UNTAGGED_WAYS_OPTION_LONG,
@@ -537,6 +550,13 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     noBlankNodes = noBlankNodesOp->is_set();
 
     addUntaggedNodes = !noUntaggedNodesOp->is_set();
+    if (iriPrefixForUntaggedNodesOp->is_set() &&
+        iriPrefixForUntaggedNodesOp->value().size() > 0) {
+      iriPrefixForUntaggedNodes = iriPrefixForUntaggedNodesOp->value();
+    } else {
+      iriPrefixForUntaggedNodes =
+          osm2rdf::ttl::constants::IRI_PREFIX_NODE_TAGGED[sourceDataset];
+    }
     addUntaggedWays = !noUntaggedWaysOp->is_set();
     addUntaggedRelations = !noUntaggedRelationsOp->is_set();
     addUntaggedAreas = !noUntaggedAreasOp->is_set();

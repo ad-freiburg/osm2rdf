@@ -26,7 +26,6 @@
 #include "osm2rdf/config/ExitCode.h"
 #include "osm2rdf/osm/OsmiumHandler.h"
 #include "osm2rdf/ttl/Writer.h"
-#include "osm2rdf/util/Ram.h"
 #include "osm2rdf/util/Time.h"
 #include "osmium/util/memory.hpp"
 
@@ -88,14 +87,6 @@ int main(int argc, char** argv) {
   osm2rdf::config::Config config;
   config.fromArgs(argc, argv);
   std::cerr << config.getInfo(osm2rdf::util::formattedTimeSpacer) << std::endl;
-
-  std::cerr << osm2rdf::util::currentTimeFormatted() << "Free ram: "
-            << osm2rdf::util::ram::available() /
-                   (osm2rdf::util::ram::GIGA * 1.0)
-            << "G/"
-            << osm2rdf::util::ram::physPages() /
-                   (osm2rdf::util::ram::GIGA * 1.0)
-            << "G" << std::endl;
 
 #if defined(_OPENMP)
   omp_set_num_threads(config.numThreads);

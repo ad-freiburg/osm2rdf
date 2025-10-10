@@ -17,14 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/ttl/Writer.h"
+
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <thread>
 #include <vector>
-
-#include "osm2rdf/ttl/Writer.h"
 #if defined(_OPENMP)
 #include "omp.h"
 #endif
@@ -73,7 +73,13 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       {osm2rdf::ttl::constants::NAMESPACE__OSM_TAG,
        "https://www.openstreetmap.org/wiki/Key:"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE,
-       "https://www.openstreetmap.org/node/"},
+       osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_TAGGED},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_TAGGED,
+       osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_TAGGED},
+      {osm2rdf::ttl::constants::NAMESPACE__OSM_NODE_UNTAGGED,
+       config.sourceDataset == osm2rdf::config::OSM
+           ? config.iriPrefixForUntaggedNodes
+           : osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_UNTAGGED},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_RELATION,
        "https://www.openstreetmap.org/relation/"},
       {osm2rdf::ttl::constants::NAMESPACE__OSM_WAY,
@@ -84,7 +90,13 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
       {osm2rdf::ttl::constants::NAMESPACE__OHM,
        "https://www.openhistoricalmap.org/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE,
-       "https://www.openhistoricalmap.org/node/"},
+       osm2rdf::ttl::constants::IRI_PREFIX__OHM_NODE_TAGGED},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE_TAGGED,
+       osm2rdf::ttl::constants::IRI_PREFIX__OHM_NODE_TAGGED},
+      {osm2rdf::ttl::constants::NAMESPACE__OHM_NODE_UNTAGGED,
+       config.sourceDataset == osm2rdf::config::OHM
+           ? config.iriPrefixForUntaggedNodes
+           : osm2rdf::ttl::constants::IRI_PREFIX__OHM_NODE_UNTAGGED},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_RELATION,
        "https://www.openhistoricalmap.org/relation/"},
       {osm2rdf::ttl::constants::NAMESPACE__OHM_WAY,
@@ -120,10 +132,10 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
   osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS =
       generateIRI(osm2rdf::ttl::constants::NAMESPACE__OPENGIS, "sfOverlaps");
 
-  osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "info");
-  osm2rdf::ttl::constants::IRI__OSM2RDF_META__OPTION = generateIRI(
-      osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "option");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "info");
+  osm2rdf::ttl::constants::IRI__OSM2RDF_META__OPTION =
+      generateIRI(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "option");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__CONVEX_HULL = generateIRI(
       osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_GEOM, "convex_hull");
   osm2rdf::ttl::constants::IRI__OSM2RDF_GEOM__ENVELOPE =
@@ -202,8 +214,8 @@ osm2rdf::ttl::Writer<T>::Writer(const osm2rdf::config::Config& config,
 
   osm2rdf::ttl::constants::LITERAL__FALSE = generateLiteral(
       "false", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
-  osm2rdf::ttl::constants::LITERAL__TRUE =
-      generateLiteral("true", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
+  osm2rdf::ttl::constants::LITERAL__TRUE = generateLiteral(
+      "true", "^^" + osm2rdf::ttl::constants::IRI__XSD__BOOLEAN);
 
   // Prepare statistic variables
   _numOuts = config.numThreads + 1;
@@ -291,9 +303,9 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeMetadata() {
   // Write osm2rdf version to metadata.
   writeTriple(osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO,
-            generateIRIUnsafe(
-                osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "version"),
-            generateLiteral(osm2rdf::version::GIT_INFO, ""));
+              generateIRIUnsafe(
+                  osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META, "version"),
+              generateLiteral(osm2rdf::version::GIT_INFO, ""));
 
   // Write dump time to metadata.
   const auto n = std::chrono::system_clock::now();
@@ -301,7 +313,7 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeSecondsAsISO(
       osm2rdf::ttl::constants::IRI__OSM2RDF_META__INFO,
       generateIRIUnsafe(osm2rdf::ttl::constants::NAMESPACE__OSM2RDF_META,
-                             "dateDumped"),
+                        "dateDumped"),
       time);
 
   // Write used osm2rdf options to metadata.
@@ -313,18 +325,22 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
                     generateBooleanLiteral(_config.noRelationFacts));
   writeOptionTriple(osm2rdf::config::constants::NO_WAY_FACTS_OPTION_LONG,
                     generateBooleanLiteral(_config.noWayFacts));
-  writeOptionTriple(osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
-                    generateBooleanLiteral(_config.addZeroFactNumber));
+  writeOptionTriple(
+      osm2rdf::config::constants::ADD_ZERO_FACT_NUMBER_OPTION_LONG,
+      generateBooleanLiteral(_config.addZeroFactNumber));
 
-  writeOptionTriple(osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
-                    generateBooleanLiteral(_config.noAreaGeometricRelations));
-  writeOptionTriple(osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
-                    generateBooleanLiteral(_config.noNodeGeometricRelations));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_AREA_GEOM_RELATIONS_OPTION_LONG,
+      generateBooleanLiteral(_config.noAreaGeometricRelations));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_NODE_GEOM_RELATIONS_OPTION_LONG,
+      generateBooleanLiteral(_config.noNodeGeometricRelations));
   writeOptionTriple(
       osm2rdf::config::constants::NO_RELATION_GEOM_RELATIONS_OPTION_LONG,
       generateBooleanLiteral(_config.noRelationGeometricRelations));
-  writeOptionTriple(osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
-                    generateBooleanLiteral(_config.noWayGeometricRelations));
+  writeOptionTriple(
+      osm2rdf::config::constants::NO_WAY_GEOM_RELATIONS_OPTION_LONG,
+      generateBooleanLiteral(_config.noWayGeometricRelations));
 
   writeOptionTriple(
       osm2rdf::config::constants::OGC_GEO_TRIPLES_OPTION_LONG,
@@ -361,12 +377,15 @@ void osm2rdf::ttl::Writer<T>::writeMetadata() {
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_GEOMETRIES_OPTION_LONG,
                     generateBooleanLiteral(_config.simplifyGeometries));
   writeOptionTriple(osm2rdf::config::constants::SIMPLIFY_WKT_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.simplifyWKT), "^^" + constants::IRI__XSD__INTEGER));
+                    generateLiteral(std::to_string(_config.simplifyWKT),
+                                    "^^" + constants::IRI__XSD__INTEGER));
   writeOptionTriple(
       osm2rdf::config::constants::SIMPLIFY_WKT_DEVIATION_OPTION_LONG,
-      generateLiteral(std::to_string(_config.wktDeviation), "^^" + constants::IRI__XSD__DOUBLE));
+      generateLiteral(std::to_string(_config.wktDeviation),
+                      "^^" + constants::IRI__XSD__DOUBLE));
   writeOptionTriple(osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
-                    generateLiteral(std::to_string(_config.wktPrecision), "^^" + constants::IRI__XSD__INTEGER));
+                    generateLiteral(std::to_string(_config.wktPrecision),
+                                    "^^" + constants::IRI__XSD__INTEGER));
 
   writeOptionTriple(
       osm2rdf::config::constants::UNTAGGED_NODES_SPATIAL_RELS_OPTION_LONG,
@@ -579,7 +598,7 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteral(std::string_view v) {
 
 // ____________________________________________________________________________
 template <typename T>
-std::string osm2rdf::ttl::Writer<T>::generateBooleanLiteral(const bool &b) {
+std::string osm2rdf::ttl::Writer<T>::generateBooleanLiteral(const bool& b) {
   return b ? constants::LITERAL__TRUE : constants::LITERAL__FALSE;
 }
 
@@ -604,18 +623,16 @@ std::string osm2rdf::ttl::Writer<T>::generateLiteralUnsafe(std::string_view v,
 
   return ret;
 }
-
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
-    const std::string& s, const std::string& p, const std::string& v,
-    const std::string& o) {
+void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(const char* s,
+                                                          const char* p,
+                                                          const char* v,
+                                                          const char* o) {
   size_t part = 0;
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
 
   writeUnsafeIRILiteralTriple(s, p, v, o, part);
@@ -623,11 +640,8 @@ void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
 
 // ____________________________________________________________________________
 template <typename T>
-void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(const std::string& s,
-                                                          const std::string& p,
-                                                          const std::string& v,
-                                                          const std::string& o,
-                                                          size_t part) {
+void osm2rdf::ttl::Writer<T>::writeUnsafeIRILiteralTriple(
+    const char* s, const char* p, const char* v, const char* o, size_t part) {
   _out->write(s, part);
   _out->write(' ', part);
   writeIRIUnsafe(p, v, part);
@@ -681,8 +695,6 @@ void osm2rdf::ttl::Writer<T>::writeTriple(const std::string& s,
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
 
   writeTriple(s, p, o, part);
@@ -713,8 +725,6 @@ void osm2rdf::ttl::Writer<T>::writeLiteralTripleUnsafe(const std::string& s,
 
 #if defined(_OPENMP)
   part = omp_get_thread_num();
-#else
-  part = 0;
 #endif
   writeLiteralTripleUnsafe(s, p, a, b, part);
 }
@@ -1504,13 +1514,131 @@ template <typename T>
 void osm2rdf::ttl::Writer<T>::writeSecondsAsISO(const std::string& subj,
                                                 const std::string& pred,
                                                 const std::time_t& time) {
-  char out[25];
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(subj, part);
+  _out->write(' ', part);
+  _out->write(pred, part);
+  _out->write(' ', part);
+
+  _out->write('"', part);
 
   struct tm t;
-  strftime(out, 25, "%Y-%m-%dT%X", gmtime_r(&time, &t));
+  gmtime_r(&time, &t);
 
-  writeLiteralTripleUnsafe(
-      subj, pred, out, "^^" + constants::IRI__XSD__DATE_TIME);
+  int year = t.tm_year + 1900;
+  int month = t.tm_mon + 1;
+
+  // 4 digit year
+  _out->write('0' + (year / 1000) % 10, part);
+  _out->write('0' + (year / 100) % 10, part);
+  _out->write('0' + (year / 10) % 10, part);
+  _out->write('0' + (year % 10), part);
+  _out->write('-', part);
+
+  _out->write('0' + (month / 10) % 10, part);
+  _out->write('0' + (month % 10), part);
+  _out->write('-', part);
+
+  _out->write('0' + (t.tm_mday / 10) % 10, part);
+  _out->write('0' + (t.tm_mday % 10), part);
+  _out->write('T', part);
+
+  _out->write('0' + (t.tm_hour / 10) % 10, part);
+  _out->write('0' + (t.tm_hour % 10), part);
+  _out->write(':', part);
+
+  _out->write('0' + (t.tm_min / 10) % 10, part);
+  _out->write('0' + (t.tm_min % 10), part);
+  _out->write(':', part);
+
+  _out->write('0' + (t.tm_sec / 10) % 10, part);
+  _out->write('0' + (t.tm_sec % 10), part);
+
+  _out->write("\"^^", part);
+  _out->write(constants::IRI__XSD__DATE_TIME, part);
+
+  _out->write(" .", part);
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeNewLine(size_t part) {
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::writeNewLine() {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->writeNewLine(part);
+  _lineCount[part]++;
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char c, size_t part) {
+  _out->write(c, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(std::string_view s, size_t part) {
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char* s, size_t part) {
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char c) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(c, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(std::string_view s) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(s, part);
+}
+
+// ____________________________________________________________________________
+template <typename T>
+void osm2rdf::ttl::Writer<T>::write(const char* s) {
+  size_t part = 0;
+
+#if defined(_OPENMP)
+  part = omp_get_thread_num();
+#endif
+
+  _out->write(s, part);
 }
 
 // ____________________________________________________________________________
