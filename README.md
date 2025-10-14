@@ -4,7 +4,7 @@
 
 It also pre-computes the spatial relations `sfIntersects`, `sfContains`, `sfCovers`, `sfTouches`, `sfCrosses`, `sfOverlaps`, and `sfEquals` between all OSM objects.
 
-## Accompanying services and materials
+## Services and materials
 
 Weekly updated downloads for the complete OSM as well as for individual countries are provided [here](https://osm2rdf.cs.uni-freiburg.de).
 
