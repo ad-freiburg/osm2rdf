@@ -1,6 +1,6 @@
 # osm2rdf
 
-`osm2rdf` is a tool for converting the complete [OpenStreetMap](https://www.openstreetmap.org) (OSM) data to [RDF Turtle](https://www.w3.org/TR/turtle) (TTL).
+`osm2rdf` is a tool for converting [OpenStreetMap](https://www.openstreetmap.org) (OSM) data to [RDF Turtle](https://www.w3.org/TR/turtle) (TTL).
 
 It also pre-computes the spatial relations `sfIntersects`, `sfContains`, `sfCovers`, `sfTouches`, `sfCrosses`, `sfOverlaps`, and `sfEquals` between all OSM objects.
 
@@ -14,7 +14,7 @@ The UI provides more example queries (click "Examples").
 
 The basic method behind `osm2rdf` is described in [this SIGSPATIAL'21 paper](https://ad-publications.cs.uni-freiburg.de/SIGSPATIAL_osm2rdf_BBKL_2021.pdf).
 
-The method behind computing the spatial relations is described in [this SIGSPATIAL'25 paper](https://ad-publications.cs.uni-freiburg.de/SIGSPATIAL_spatialjoin_BBK_2025.pdf).
+The methods behind computing the spatial relations is described in [this SIGSPATIAL'25 paper](https://ad-publications.cs.uni-freiburg.de/SIGSPATIAL_spatialjoin_BBK_2025.pdf).
 
 ## Requirements
 
