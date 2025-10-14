@@ -14,7 +14,7 @@ The UI provides more example queries (click "Examples").
 
 The basic method behind `osm2rdf` is described in [this SIGSPATIAL'21 paper](https://ad-publications.cs.uni-freiburg.de/SIGSPATIAL_osm2rdf_BBKL_2021.pdf).
 
-The method behind computing the geospatial predicates is described in [this SIGSPATIAL'25 paper](https://ad-publications.cs.uni-freiburg.de/SIGSPATIAL_spatialjoin_BBK_2025.pdf).
+The method behind computing the spatial relations is described in [this SIGSPATIAL'25 paper](https://ad-publications.cs.uni-freiburg.de/SIGSPATIAL_spatialjoin_BBK_2025.pdf).
 
 ## Requirements
 
