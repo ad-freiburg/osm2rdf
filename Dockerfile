@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y git clang clang-tidy g++ libboost-dev libboost-serialization-dev libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y git g++ libexpat1-dev cmake libbz2-dev libomp-dev zlib1g-dev
 COPY . /app/
-RUN cd /app/ && make
+RUN cd /app/ && mkdir -p build && cd build && cmake .. && make -j
 ENTRYPOINT ["/app/build/apps/osm2rdf"]

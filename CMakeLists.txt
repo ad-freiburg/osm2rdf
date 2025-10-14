@@ -67,20 +67,6 @@ find_package(EXPAT REQUIRED)
 find_package(BZip2 REQUIRED)
 find_package(OpenMP)
 
-# zlib-ng
-set(ZLIB_COMPAT ON)
-set(WITH_GTEST OFF)
-set(ZLIB_ENABLE_TESTS OFF)
-add_subdirectory(vendor/zlib-ng/zlib-ng)
-
-set(ZLIB_USE_STATIC_LIBS ON)
-set(ZLIB_INCLUDE_DIR "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng")
-set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng/libz.a")
-
-# Disable installation of google stuff
-set(INSTALL_GMOCK OFF)
-set(INSTALL_GTEST OFF)
-
 find_package(Git QUIET)
 if (GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git")
 	# Update submodules as needed
@@ -99,6 +85,21 @@ endif ()
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/vendor/google/googletest/CMakeLists.txt")
     message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
 endif ()
+
+# zlib-ng
+set(ZLIB_COMPAT ON)
+set(WITH_GTEST OFF)
+set(ZLIB_ENABLE_TESTS OFF)
+add_subdirectory(vendor/zlib-ng/zlib-ng)
+
+set(ZLIB_USE_STATIC_LIBS ON)
+set(ZLIB_INCLUDE_DIR "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng")
+set(ZLIB_LIBRARY "${CMAKE_BINARY_DIR}/vendor/zlib-ng/zlib-ng/libz.a")
+
+# Disable installation of google stuff
+set(INSTALL_GMOCK OFF)
+set(INSTALL_GTEST OFF)
+
 
 find_package(POPL REQUIRED)
 include_directories(SYSTEM ${POPL_INCLUDE_DIR})
