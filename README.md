@@ -47,7 +47,7 @@ $ ./apps/osm2rdf freiburg-regbex-latest.osm.pbf
 For more options, see `--help`, `-h`, `-hh`, and `-hhh`.
 
 
-### Docker
+## Docker
 
 Alternatively you may use the provided `Dockerfile` to compile and run `osm2rdf`:
 ```
