@@ -6,7 +6,7 @@ It also pre-computes the spatial relations `sfIntersects`, `sfContains`, `sfCove
 
 ## Accompanying services and materials
 
-Weekly updated downloads for the complete OSM as well as for individual countries are provided on https://osm2rdf.cs.uni-freiburg.de .
+Weekly updated downloads for the complete OSM as well as for individual countries are provided [here](https://osm2rdf.cs.uni-freiburg.de).
 
 A SPARQL endpoint (based on [the QLever SPARQL engine](https://github.com/ad-freiburg/qlever)) for the complete OSM data is available under https://qlever.dev/osm-planet.
 Example: [all buildings under a powerline][https://qlever.dev/osm-planet/Wd07W1].
