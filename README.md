@@ -20,7 +20,7 @@ The method behind computing the spatial relations is described in [this SIGSPATI
 
   * cmake
   * Compiler for C++17
-  * lbexpat1
+  * libexpat1
   * libbz2
   * libomp (optional, for multithreading)
 
