@@ -12,7 +12,7 @@ jobs:
       - name: update apt
         run: sudo apt update
       - name: install dependencies
-        run: sudo apt install -y gcc g++ libboost-dev libboost-serialization-dev libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
+        run: sudo apt install -y gcc g++ libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
       - name: make
@@ -29,7 +29,7 @@ jobs:
       - name: update apt
         run: sudo apt update
       - name: install dependencies
-        run: sudo apt install -y clang libboost-dev libboost-serialization-dev libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
+        run: sudo apt install -y clang libexpat1-dev cmake libbz2-dev zlib1g-dev libomp-dev
       - name: cmake
         run: mkdir build && cd build && cmake ..
         shell: bash
