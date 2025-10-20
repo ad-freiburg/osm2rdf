@@ -17,10 +17,11 @@
 // You should have received a copy of the GNU General Public License
 // along with osm2rdf.  If not, see <https://www.gnu.org/licenses/>.
 
+#include "osm2rdf/osm/Area.h"
+
 #include <iostream>
 #include <limits>
 
-#include "osm2rdf/osm/Area.h"
 #include "osm2rdf/osm/Constants.h"
 #include "osmium/osm/area.hpp"
 #include "util/geo/Geo.h"
@@ -33,7 +34,35 @@ osm2rdf::osm::Area::Area() {
 
 // ____________________________________________________________________________
 void osm2rdf::osm::Area::finalize() noexcept {
-  _geomArea = ::util::geo::area(_geom);
+  // poly in area preserving projection
+  ::util::geo::DMultiPolygon lambertPoly;
+  lambertPoly.resize(_geom.size());
+
+  double EARTH_RAD = 6371008.7714;  // mean radius
+
+  for (size_t i = 0; i < _geom.size(); i++) {
+    const auto& poly = _geom[i];
+    lambertPoly[i].getOuter().reserve(poly.getOuter().size());
+    for (const auto& p : poly.getOuter()) {
+      lambertPoly[i].getOuter().push_back(
+          ::util::geo::DPoint{EARTH_RAD * (p.getX() * util::geo::RAD),
+                              EARTH_RAD * (sin(p.getY() * util::geo::RAD))});
+    }
+
+    lambertPoly[i].getInners().reserve(poly.getInners().size());
+
+    for (const auto& inner : poly.getInners()) {
+      lambertPoly[i].getInners().push_back({});
+      lambertPoly[i].getInners().back().reserve(inner.size());
+      for (const auto& p : inner) {
+        lambertPoly[i].getInners().back().push_back(
+            ::util::geo::DPoint{EARTH_RAD * (p.getX() * util::geo::RAD),
+                                EARTH_RAD * (sin(p.getY() * util::geo::RAD))});
+      }
+    }
+  }
+
+  _geomArea = ::util::geo::area(lambertPoly);
 }
 
 // ____________________________________________________________________________
@@ -115,8 +144,7 @@ double osm2rdf::osm::Area::geomArea() const noexcept { return _geomArea; }
 }
 
 // ____________________________________________________________________________
-::util::geo::DPolygon osm2rdf::osm::Area::orientedBoundingBox()
-    const noexcept {
+::util::geo::DPolygon osm2rdf::osm::Area::orientedBoundingBox() const noexcept {
   return ::util::geo::convexHull(::util::geo::getOrientedEnvelope(_geom));
 }
 
@@ -129,8 +157,7 @@ const ::util::geo::DPoint osm2rdf::osm::Area::centroid() const noexcept {
 bool osm2rdf::osm::Area::operator==(
     const osm2rdf::osm::Area& other) const noexcept {
   return _id == other._id && _objId == other._objId &&
-         _geomArea == other._geomArea &&
-         _envelope == other._envelope &&
+         _geomArea == other._geomArea && _envelope == other._envelope &&
          _geom == other._geom;
 }
 
