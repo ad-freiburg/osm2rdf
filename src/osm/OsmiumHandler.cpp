@@ -138,7 +138,7 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       prepReader.close();
       _locationHandler->finalizeNodes();
 
-      osmium::io::Reader dumpReader{input_file, osmium::osm_entity_bits::object,
+      osmium::io::Reader dumpReader{input_file, osmium::osm_entity_bits::nwa,
                                     osmium::io::read_meta::yes};
 
 #pragma omp parallel
@@ -152,6 +152,21 @@ void osm2rdf::osm::OsmiumHandler<W>::handle() {
       }
 
       dumpReader.close();
+
+      osmium::io::Reader relReader{input_file, osmium::osm_entity_bits::relation,
+                                    osmium::io::read_meta::yes};
+
+#pragma omp parallel
+      {
+#pragma omp single
+        {
+          while (auto buf = relReader.read()) {
+            handleRelBuffers(buf);
+          }
+        }
+      }
+
+      relReader.close();
 
       delete _locationHandler;
       _progressBar.done();
@@ -217,6 +232,17 @@ void osm2rdf::osm::OsmiumHandler<W>::handleBuffers(
                 mp_manager.handler([&](osmium::memory::Buffer&& buffer) {
                   handleAreaBuffers(buffer);
                 }));
+}
+
+// ____________________________________________________________________________
+template <typename W>
+void osm2rdf::osm::OsmiumHandler<W>::handleRelBuffers(
+    osmium::memory::Buffer& buffer) {
+  // handlers which do not care about the order in which the
+  // elements are given to them
+  const auto buff = std::make_shared<osmium::memory::Buffer>(std::move(buffer));
+#pragma omp task
+  { osmium::apply(*buff, _relationHandler, *this); }
 }
 
 // ____________________________________________________________________________

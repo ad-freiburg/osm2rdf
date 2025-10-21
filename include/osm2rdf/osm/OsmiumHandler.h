@@ -88,6 +88,8 @@ class OsmiumHandler : public osmium::handler::Handler {
   void handleBuffers(
       osmium::memory::Buffer& buffer,
       osmium::area::MultipolygonManager<osmium::area::Assembler>& mp_manager);
+  void handleRelBuffers(
+      osmium::memory::Buffer& buffer);
   void handleAreaBuffers(osmium::memory::Buffer& areaBuffer);
 };
 }  // namespace osm2rdf::osm
