@@ -162,7 +162,7 @@ TEST(OSM_FactHandler, areaFromRelation) {
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:obb \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double "
-      ".\n",
+      ".\nosmrel:10 osm2rdf:hasCompleteGeometry \"true\"^^xsd:boolean .\n",
       buffer.str());
 
   // Cleanup
