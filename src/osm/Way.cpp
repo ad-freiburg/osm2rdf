@@ -19,6 +19,8 @@
 
 #include "osm2rdf/osm/Way.h"
 
+#include <osmium/tags/taglist.hpp>
+#include <osmium/tags/tags_filter.hpp>
 #include <vector>
 
 #include "osm2rdf/osm/Box.h"
@@ -104,6 +106,13 @@ bool osm2rdf::osm::Way::isArea() const noexcept {
   if (!closed()) {
     return false;
   }
-  auto areaTag = _w->tags()["area"];
-  return areaTag == nullptr || strcmp(areaTag, "no") != 0;
+  if (_w->tags().has_tag("area", "no")) {
+    return false;
+  }
+
+  if (osmium::tags::match_none_of(_w->tags(), osmium::TagsFilter{true})) {
+    return false;
+  }
+
+  return true;
 }

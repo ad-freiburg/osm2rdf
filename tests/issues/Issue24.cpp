@@ -131,7 +131,8 @@ TEST(Issue24, areaFromRelationHasGeometryAsGeoSPARQL) {
       "osmrel:10 geo:hasGeometry osm2rdfgeom:osmrel_10 "
       ".\nosm2rdfgeom:osmrel_10 geo:asWKT \"POLYGON((48 7.5,48 "
       "7.6,48.1 7.6,48.1 7.5,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
-      "osm2rdf:area \"122568687.4654\"^^xsd:double .\n",
+      "osm2rdf:area \"122568687.4654\"^^xsd:double .\nosmrel:10 "
+      "osm2rdf:hasCompleteGeometry \"true\"^^xsd:boolean .\n",
       buffer.str());
 
   // Cleanup

@@ -161,6 +161,16 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   _writer->writeLiteralTripleUnsafe(
       subj, _areaIRI, ::util::formatFloat(area.geomArea(), AREA_PRECISION),
       _iriXSDDouble);
+
+  if (!area.fromWay()) {
+    // for areas from relations, always write hasCompleteGeometry true for
+    // consistency with non-area relations
+    _writer->writeTriple(
+        subj,
+        _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "hasCompleteGeometry"),
+            osm2rdf::ttl::constants::LITERAL__TRUE
+            );
+  }
 }
 
 // ____________________________________________________________________________
