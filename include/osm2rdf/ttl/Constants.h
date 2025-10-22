@@ -49,6 +49,7 @@ const static inline std::string NAMESPACE__OSM2RDF_TAG = "osm2rdfkey";
 const static inline std::string NAMESPACE__RDF = "rdf";
 const static inline std::string NAMESPACE__WIKIDATA_ENTITY = "wd";
 const static inline std::string NAMESPACE__XML_SCHEMA = "xsd";
+const static inline std::string NAMESPACE__GENID = "genid";
 
 // IRI Prefixes
 const static inline std::string IRI_PREFIX__OSM_NODE_TAGGED = "https://www.openstreetmap.org/node/";

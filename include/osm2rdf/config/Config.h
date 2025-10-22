@@ -85,6 +85,8 @@ struct Config {
   std::string iriPrefixForUntaggedNodes =
       osm2rdf::ttl::constants::IRI_PREFIX__OSM_NODE_UNTAGGED;
 
+  bool noBlankNodes = false;
+
   int numThreads = std::thread::hardware_concurrency();
 
   // Default settings for data
