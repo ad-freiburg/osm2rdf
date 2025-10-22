@@ -98,7 +98,8 @@ TEST(OSM_FactHandler, areaFromWay) {
       "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:21 "
       "osm2rdfgeom:obb \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
-      "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area \"0.01\"^^xsd:double "
+      "7.5))\"^^geo:wktLiteral .\nosmway:21 osm2rdf:area "
+      "\"122568687.4654\"^^xsd:double "
       ".\n",
       buffer.str());
 
@@ -161,7 +162,8 @@ TEST(OSM_FactHandler, areaFromRelation) {
       "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmrel:10 "
       "osm2rdfgeom:obb \"POLYGON((48.1 7.5,48.1 7.6,48 7.6,48 7.5,48.1 "
-      "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area \"0.01\"^^xsd:double "
+      "7.5))\"^^geo:wktLiteral .\nosmrel:10 osm2rdf:area "
+      "\"122568687.4654\"^^xsd:double "
       ".\nosmrel:10 osm2rdf:hasCompleteGeometry \"true\"^^xsd:boolean .\n",
       buffer.str());
 
@@ -537,7 +539,7 @@ TEST(OSM_FactHandler, way) {
       "7.6,48 7.5))\"^^geo:wktLiteral .\n"
       "osmway:42 osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 "
       "7.5,48.1 7.6))\"^^geo:wktLiteral .\n"
-      "osmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n",
+      "osmway:42 osm2rdf:length \"15674.68\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -604,7 +606,7 @@ TEST(OSM_FactHandler, wayAddWayNodeOrder) {
       "osm2rdfgeom:envelope \"POLYGON((48 7.5,48.1 7.5,48.1 7.6,48 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:obb \"POLYGON((48.1 "
       "7.6,48.1 7.6,48 7.5,48 7.5,48.1 7.6))\"^^geo:wktLiteral .\nosmway:42 "
-      "osm2rdf:length \"0.141421\"^^xsd:double .\n",
+      "osm2rdf:length \"15674.68\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -667,14 +669,15 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataShortWay) {
       ".\n_:0_1 osmway:member_id osmnode:2 .\n_:0_1 osmway:member_pos "
       "\"1\"^^xsd:integer .\n_:0_0 osmway:next_node osmnode:2 .\n_:0_0 "
       "osmway:next_node_distance \"15657.137001\"^^xsd:decimal .\nosmway:42 "
-      "geo:hasGeometry osm2rdfgeom:osmway_42 .\nosm2rdfgeom:osmway_42 geo:asWKT "
+      "geo:hasGeometry osm2rdfgeom:osmway_42 .\nosm2rdfgeom:osmway_42 "
+      "geo:asWKT "
       "\"LINESTRING(48 7.5,48.1 7.6)\"^^geo:wktLiteral .\nosmway:42 "
       "osm2rdfgeom:convex_hull \"POLYGON((48 7.5,48.1 7.6,48 "
       "7.5))\"^^geo:wktLiteral .\nosmway:42 osm2rdfgeom:envelope \"POLYGON((48 "
       "7.5,48.1 7.5,48.1 7.6,48 7.6,48 7.5))\"^^geo:wktLiteral .\nosmway:42 "
       "osm2rdfgeom:obb \"POLYGON((48.1 7.6,48.1 7.6,48 7.5,48 7.5,48.1 "
       "7.6))\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
-      "\"0.141421\"^^xsd:double .\n",
+      "\"15674.68\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -744,10 +747,11 @@ TEST(OSM_FactHandler, wayAddWayNodeSpatialMetadataLongerWay) {
       "\"3\"^^xsd:integer "
       ".\n_:0_2 osmway:next_node osmnode:3 .\n_:0_2 osmway:next_node_distance "
       "\"11024.108103\"^^xsd:decimal .\nosmway:42 geo:hasGeometry "
-      "osm2rdfgeom:osmway_42 .\nosm2rdfgeom:osmway_42 geo:asWKT \"LINESTRING(48 "
+      "osm2rdfgeom:osmway_42 .\nosm2rdfgeom:osmway_42 geo:asWKT "
+      "\"LINESTRING(48 "
       "7.5,48.1 "
       "7.6,48.1 7.5,48 7.5)\"^^geo:wktLiteral .\nosmway:42 osm2rdf:length "
-      "\"0.341421\"^^xsd:double .\n",
+      "\"37843.09\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup
@@ -817,7 +821,7 @@ TEST(OSM_FactHandler, wayAddWayMetaData) {
       "osmway:42 osmway:is_closed \"false\"^^xsd:boolean .\n"
       "osmway:42 osmway:nodeCount \"2\"^^xsd:integer .\n"
       "osmway:42 osmway:uniqueNodeCount \"2\"^^xsd:integer .\n"
-      "osmway:42 osm2rdf:length \"0.141421\"^^xsd:double .\n",
+      "osmway:42 osm2rdf:length \"15674.68\"^^xsd:double .\n",
       buffer.str());
 
   // Cleanup

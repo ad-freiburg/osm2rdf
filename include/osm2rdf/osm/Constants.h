@@ -21,7 +21,8 @@
 
 namespace osm2rdf::osm::constants {
 
-static const int AREA_PRECISION = 12;
+static const int AREA_PRECISION = 4;
+static const int LENGTH_PRECISION = 2;
 static const int BASE10_BASE = 10;
 static const double BASE_SIMPLIFICATION_FACTOR = 0.001;
 
