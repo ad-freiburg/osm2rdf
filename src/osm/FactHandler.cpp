@@ -33,6 +33,7 @@
 #include "osm2rdf/ttl/Writer.h"
 
 using osm2rdf::osm::constants::AREA_PRECISION;
+using osm2rdf::osm::constants::LENGTH_PRECISION;
 using osm2rdf::osm::constants::BASE_SIMPLIFICATION_FACTOR;
 using osm2rdf::ttl::constants::CHANGESET_NAMESPACE;
 using osm2rdf::ttl::constants::DATASET_ID;
@@ -160,6 +161,16 @@ void osm2rdf::osm::FactHandler<W>::area(const osm2rdf::osm::Area& area) {
   _writer->writeLiteralTripleUnsafe(
       subj, _areaIRI, ::util::formatFloat(area.geomArea(), AREA_PRECISION),
       _iriXSDDouble);
+
+  if (!area.fromWay()) {
+    // for areas from relations, always write hasCompleteGeometry true for
+    // consistency with non-area relations
+    _writer->writeTriple(
+        subj,
+        _writer->generateIRIUnsafe(NAMESPACE__OSM2RDF, "hasCompleteGeometry"),
+            osm2rdf::ttl::constants::LITERAL__TRUE
+            );
+  }
 }
 
 // ____________________________________________________________________________
@@ -451,7 +462,8 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
   }
 
   _writer->writeLiteralTripleUnsafe(
-      subj, IRI__OSM2RDF__LENGTH, std::to_string(::util::geo::len(way.geom())),
+      subj, IRI__OSM2RDF__LENGTH,
+      ::util::formatFloat(::util::geo::latLngLen(way.geom()), LENGTH_PRECISION),
       _iriXSDDouble);
 }
 
