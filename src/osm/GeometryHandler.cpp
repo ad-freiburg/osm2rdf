@@ -133,12 +133,17 @@ void GeometryHandler<W>::relation(const Relation& rel) {
         pid = getSweeperId(m.positive_ref(), 5);
       }
 
+      // wrong bounding box here doesn't matter, as long as it is big enough.
+      // only used for multigeometry out in spatialjoin
       _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id,
                    subId, false, _parseBatches[omp_get_thread_num()]);
     }
 
     if (m.type() == osmium::item_type::way) {
       std::string pid = getSweeperId(m.positive_ref(), 2);
+
+      // wrong bounding box here doesn't matter, as long as it is big enough.
+      // only used for multigeometry out in spatialjoin
       _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id,
                    subId, false, _parseBatches[omp_get_thread_num()]);
     }
