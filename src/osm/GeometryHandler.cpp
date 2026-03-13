@@ -67,7 +67,6 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                 static_cast<size_t>(config.numThreads),
                 300 * 1000 * 1000 * 5,
                 10000,
-                "",
                 osm2rdf::ttl::constants::IRI__OPENGIS__INTERSECTS,
                 osm2rdf::ttl::constants::IRI__OPENGIS__CONTAINS,
                 osm2rdf::ttl::constants::IRI__OPENGIS__COVERS,
@@ -75,7 +74,6 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                 osm2rdf::ttl::constants::IRI__OPENGIS__EQUALS,
                 osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS,
                 osm2rdf::ttl::constants::IRI__OPENGIS__CROSSES,
-                "\n",
                 true,
                 true,
                 false,
@@ -135,12 +133,17 @@ void GeometryHandler<W>::relation(const Relation& rel) {
         pid = getSweeperId(m.positive_ref(), 5);
       }
 
+      // wrong bounding box here doesn't matter, as long as it is big enough.
+      // only used for multigeometry out in spatialjoin
       _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id,
                    subId, false, _parseBatches[omp_get_thread_num()]);
     }
 
     if (m.type() == osmium::item_type::way) {
       std::string pid = getSweeperId(m.positive_ref(), 2);
+
+      // wrong bounding box here doesn't matter, as long as it is big enough.
+      // only used for multigeometry out in spatialjoin
       _sweeper.add(pid, transform(::util::geo::getBoundingBox(rel.geom())), id,
                    subId, false, _parseBatches[omp_get_thread_num()]);
     }
