@@ -175,6 +175,12 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_MISCELLANEOUS;
   oss << "\n" << prefix << "Num Threads: " << numThreads;
 
+  if (noBlankNodes) {
+    oss << "\n"
+        << prefix
+        << osm2rdf::config::constants::BLANK_NODES_INFO;
+  }
+
   if (!storeLocations.empty()) {
     oss << "\n"
         << prefix << osm2rdf::config::constants::STORE_LOCATIONS_INFO << " "
@@ -408,6 +414,12 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
           osm2rdf::config::constants::WKT_PRECISION_OPTION_LONG,
           osm2rdf::config::constants::WKT_PRECISION_OPTION_HELP, wktPrecision);
 
+  auto noBlankNodesOp =
+      parser.add<popl::Switch, popl::Attribute::advanced>(
+          osm2rdf::config::constants::BLANK_NODES_OPTION_SHORT,
+          osm2rdf::config::constants::BLANK_NODES_OPTION_LONG,
+          osm2rdf::config::constants::BLANK_NODES_OPTION_HELP);
+
   auto writeRDFStatisticsOp =
       parser.add<popl::Switch, popl::Attribute::advanced>(
           osm2rdf::config::constants::WRITE_RDF_STATISTICS_OPTION_SHORT,
@@ -534,6 +546,8 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     wktPrecision = wktPrecisionOp->value();
 
     addSpatialRelsForUntaggedNodes = untaggedNodesSpatialRelsOp->is_set();
+
+    noBlankNodes = noBlankNodesOp->is_set();
 
     addUntaggedNodes = !noUntaggedNodesOp->is_set();
     if (iriPrefixForUntaggedNodesOp->is_set() &&

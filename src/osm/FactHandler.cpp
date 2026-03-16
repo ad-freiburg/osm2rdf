@@ -277,16 +277,22 @@ void osm2rdf::osm::FactHandler<W>::relation(
 
       std::string role = member.role();
       if (role.empty()) role = "member";
-      const std::string& blankNode = _writer->generateBlankNode();
+
+      const std::string memberIRI = _config.noBlankNodes
+                          ? _writer->generateSkolemForRelationMember(
+                              relation.id(), member.positive_ref(),
+                              type, inRelPos)
+                          : _writer->generateBlankNode();
+
       _writer->writeTriple(
           subj, _writer->generateIRIUnsafe(NAMESPACE__OSM_RELATION, "member"),
-          blankNode);
+          memberIRI);
 
-      _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ID,
+      _writer->writeTriple(memberIRI, IRI__OSMREL__MEMBER_ID,
                            _writer->generateIRI(type, member.positive_ref()));
-      _writer->writeTriple(blankNode, IRI__OSMREL__MEMBER_ROLE,
+      _writer->writeTriple(memberIRI, IRI__OSMREL__MEMBER_ROLE,
                            _writer->generateLiteral(role));
-      _writer->writeLiteralTripleUnsafe(blankNode, IRI__OSMREL__MEMBER_POS,
+      _writer->writeLiteralTripleUnsafe(memberIRI, IRI__OSMREL__MEMBER_POS,
                                         std::to_string(inRelPos++),
                                         _iriXSDInteger);
     }
@@ -348,11 +354,15 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
 
   if (_config.addMemberTriples && way.nodes().size()) {
     size_t wayOrder = 0;
-    std::string lastBlankNode;
+    std::string lastMemberIRI;
     auto lastNode = way.nodes().front();
     for (const auto& node : way.nodes()) {
-      const std::string& blankNode = _writer->generateBlankNode();
-      _writer->writeTriple(subj, IRI__OSMWAY__NODE, blankNode);
+      const std::string memberIRI = _config.noBlankNodes
+                                ? _writer->generateSkolemForWayMember(
+                                    way.id(), node.positive_ref(), wayOrder)
+                                : _writer->generateBlankNode();
+
+      _writer->writeTriple(subj, IRI__OSMWAY__NODE, memberIRI);
 
       std::string nodeNamespace;
       if (_config.iriPrefixForUntaggedNodes ==
@@ -365,17 +375,17 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
       }
 
       _writer->writeTriple(
-          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
+          memberIRI, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_ID,
           _writer->generateIRI(nodeNamespace, node.positive_ref()));
 
       _writer->writeLiteralTripleUnsafe(
-          blankNode, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_POS,
+          memberIRI, osm2rdf::ttl::constants::IRI__OSMWAY__MEMBER_POS,
           std::to_string(wayOrder++), _iriXSDInteger);
 
-      if (_config.addWayNodeSpatialMetadata && !lastBlankNode.empty() &&
+      if (_config.addWayNodeSpatialMetadata && !lastMemberIRI.empty() &&
           node.location().valid() && lastNode.location().valid()) {
         _writer->writeTriple(
-            lastBlankNode, IRI__OSMWAY__NEXT_NODE,
+            lastMemberIRI, IRI__OSMWAY__NEXT_NODE,
             _writer->generateIRI(nodeNamespace, node.positive_ref()));
         // Haversine distance
         const double distanceLat = (node.location().lat_without_check() -
@@ -393,10 +403,10 @@ void osm2rdf::osm::FactHandler<W>::way(const osm2rdf::osm::Way& way) {
                                 osm2rdf::osm::constants::METERS_IN_KM * 2 *
                                 asin(sqrt(haversine));
         _writer->writeLiteralTripleUnsafe(
-            lastBlankNode, IRI__OSMWAY__NEXT_NODE_DISTANCE,
+            lastMemberIRI, IRI__OSMWAY__NEXT_NODE_DISTANCE,
             std::to_string(distance), "^^" + IRI__XSD__DECIMAL);
       }
-      lastBlankNode = blankNode;
+      lastMemberIRI = memberIRI;
       lastNode = node;
     }
   }
