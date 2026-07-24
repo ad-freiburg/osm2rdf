@@ -83,6 +83,7 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                 false,
                 -1,
                 false,
+                false,
                 [this](size_t t, const char* a, size_t an, const char* b,
                        size_t bn, const char* pred, size_t predn) {
                   this->writeRelCb(t, a, an, b, bn, pred, predn);
