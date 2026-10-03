@@ -18,6 +18,9 @@
 
 #include "osm2rdf/ttl/Writer.h"
 
+#include <filesystem>
+#include <fstream>
+
 #include "gmock/gmock-matchers.h"
 #include "gtest/gtest.h"
 #include "osm2rdf/config/Config.h"
@@ -168,6 +171,71 @@ TEST(TTL_WriterTTL, writeHeader) {
 
   // Cleanup
   std::cout.rdbuf(sbuf);
+}
+
+// Test that the prefix header is written into every part if the parts are not
+// merged (each part is then a file of its own), and only into the first part
+// otherwise.
+TEST(TTL_WriterTTL, writeHeaderIntoAllPartsIfNotMerged) {
+  const std::string xsdPrefix =
+      "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
+  auto countOccurrences = [](const std::filesystem::path& file,
+                             const std::string& needle) {
+    std::ifstream in{file};
+    std::string content{std::istreambuf_iterator<char>(in), {}};
+    size_t count = 0;
+    for (size_t pos = content.find(needle); pos != std::string::npos;
+         pos = content.find(needle, pos + 1)) {
+      ++count;
+    }
+    return count;
+  };
+  auto makeConfig = [](osm2rdf::util::OutputMergeMode mergeMode,
+                       const std::filesystem::path& outputPath) {
+    osm2rdf::config::Config config;
+    config.output = outputPath;
+    config.outputCompress = osm2rdf::config::NONE;
+    config.mergeOutput = mergeMode;
+    config.numThreads = 2;
+    return config;
+  };
+  auto writeHeader = [](const osm2rdf::config::Config& config,
+                        osm2rdf::util::Output& output) {
+    output.open();
+    osm2rdf::ttl::Writer<osm2rdf::ttl::format::TTL> w{config, &output};
+    w.writeHeader();
+    output.flush();
+    output.close();
+  };
+
+  // Without merging, there are three parts (one per thread plus one), each with
+  // the header, and no merged file.
+  {
+    const std::filesystem::path path =
+        std::filesystem::temp_directory_path() / "osm2rdf-headerNoMerge.ttl";
+    auto config = makeConfig(util::OutputMergeMode::NONE, path);
+    osm2rdf::util::Output output{config, config.output};
+    writeHeader(config, output);
+    ASSERT_FALSE(std::filesystem::exists(path));
+    for (int part = 0; part < 3; ++part) {
+      const std::filesystem::path partFile = output.partFilename(part);
+      ASSERT_TRUE(std::filesystem::exists(partFile)) << partFile;
+      ASSERT_EQ(1u, countOccurrences(partFile, xsdPrefix)) << partFile;
+      std::filesystem::remove(partFile);
+    }
+  }
+
+  // With merging, the header occurs exactly once in the merged file.
+  {
+    const std::filesystem::path path =
+        std::filesystem::temp_directory_path() / "osm2rdf-headerMerge.ttl";
+    auto config = makeConfig(util::OutputMergeMode::CONCATENATE, path);
+    osm2rdf::util::Output output{config, config.output};
+    writeHeader(config, output);
+    ASSERT_TRUE(std::filesystem::exists(path));
+    ASSERT_EQ(1u, countOccurrences(path, xsdPrefix));
+    std::filesystem::remove(path);
+  }
 }
 
 // ____________________________________________________________________________

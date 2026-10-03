@@ -76,6 +76,14 @@ const static inline std::string OUTPUT_KEEP_FILES_OPTION_HELP =
 const static inline std::string OUTPUT_KEEP_FILES_OPTION_INFO =
     "Keeping temporary output files";
 
+const static inline std::string OUTPUT_NO_MERGE_OPTION_SHORT = "";
+const static inline std::string OUTPUT_NO_MERGE_OPTION_LONG = "output-no-merge";
+const static inline std::string OUTPUT_NO_MERGE_OPTION_HELP =
+    "Do not merge the output files of the threads into a single file, but "
+    "keep one file per thread (each with the complete prefix header)";
+const static inline std::string OUTPUT_NO_MERGE_OPTION_INFO =
+    "Writing one output file per thread (no merging)";
+
 const static inline std::string OUTPUT_COMPRESS_OPTION_SHORT = "";
 const static inline std::string OUTPUT_COMPRESS_OPTION_LONG =
     "output-compression";

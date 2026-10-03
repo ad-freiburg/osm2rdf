@@ -285,9 +285,18 @@ void osm2rdf::ttl::Writer<T>::writeStatisticJson(
 // ____________________________________________________________________________
 template <typename T>
 void osm2rdf::ttl::Writer<T>::writeHeader() {
-  for (const auto& [prefix, iriref] : _prefixes) {
-    writeTriple("@prefix", prefix + ":", "<" + iriref + ">", 0);
-    _headerLines[0]++;
+  // If the parts are merged into a single file in the end (or all written to
+  // stdout), the header is only needed in the first part. Otherwise, each part
+  // is a file of its own and needs the complete header.
+  bool headerInAllParts =
+      _config.mergeOutput == osm2rdf::util::OutputMergeMode::NONE &&
+      !_config.output.empty();
+  size_t numParts = headerInAllParts ? _numOuts : 1;
+  for (size_t part = 0; part < numParts; ++part) {
+    for (const auto& [prefix, iriref] : _prefixes) {
+      writeTriple("@prefix", prefix + ":", "<" + iriref + ">", part);
+      _headerLines[part]++;
+    }
   }
   _out->flush();
 }
