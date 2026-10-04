@@ -80,8 +80,9 @@ const static inline std::string OUTPUT_NO_MERGE_OPTION_SHORT = "";
 const static inline std::string OUTPUT_NO_MERGE_OPTION_LONG = "output-no-merge";
 const static inline std::string OUTPUT_NO_MERGE_OPTION_HELP =
     "Do not merge the output files of the threads into a single file, but "
-    "keep them as separate files <output>.part_* (each with the complete "
-    "prefix header)";
+    "keep them as separate files, with the part number before the extensions "
+    "of <output> (for example, planet.part_07.ttl.gz for planet.ttl.gz), each "
+    "with the complete prefix header";
 const static inline std::string OUTPUT_NO_MERGE_OPTION_INFO =
     "Keeping the output files of the threads as separate files (no merging)";
 
