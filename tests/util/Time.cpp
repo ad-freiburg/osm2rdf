@@ -19,6 +19,7 @@
 #include "osm2rdf/util/Time.h"
 
 #include <ctime>
+#include <limits>
 
 #include "gtest/gtest.h"
 
@@ -71,6 +72,10 @@ TEST(UTIL_Time, secondsToUtcEdgeDates) {
   expectUtc(1767225599, 2025, 12, 31, 23, 59, 59);
   // The timestamp of the test of `writeSecondsAsISO`.
   expectUtc(1555936496, 2019, 4, 22, 12, 34, 56);
+  // The minimum `time_t` (no intermediate overflow; `gmtime_r` cannot
+  // represent this year, the expected values are from exact arithmetic).
+  expectUtc(std::numeric_limits<std::time_t>::min(), -292277022657, 1, 27, 8,
+            29, 52);
 }
 
 // Test that `secondsToUtc` agrees with `gmtime_r` over a range of more than

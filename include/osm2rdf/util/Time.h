@@ -65,10 +65,15 @@ struct UtcTime {
 inline UtcTime secondsToUtc(std::time_t seconds) {
   constexpr int64_t secondsPerDay = 86400;
   const auto t = static_cast<int64_t>(seconds);
-  // Split into days and the seconds within the day (rounding towards minus
-  // infinity, so that times before 1970 work as well).
-  const int64_t days = (t >= 0 ? t : t - (secondsPerDay - 1)) / secondsPerDay;
-  const int64_t secondsOfDay = t - days * secondsPerDay;
+  // Split into days and the seconds within the day. For times before 1970,
+  // the remainder is negative, then move one day back (this way, no
+  // intermediate value can overflow, not even for the minimum `time_t`).
+  int64_t days = t / secondsPerDay;
+  int64_t secondsOfDay = t % secondsPerDay;
+  if (secondsOfDay < 0) {
+    secondsOfDay += secondsPerDay;
+    --days;
+  }
 
   // Convert the days to a date, with eras of 400 years starting at March 1.
   const int64_t z = days + 719468;
