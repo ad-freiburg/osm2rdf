@@ -1503,11 +1503,10 @@ void osm2rdf::ttl::Writer<T>::writeSecondsAsISO(const std::string& subj,
 
   _out->write('"', part);
 
-  struct tm t;
-  gmtime_r(&time, &t);
-
-  int year = t.tm_year + 1900;
-  int month = t.tm_mon + 1;
+  // Not `gmtime_r`, which serializes the threads (see `secondsToUtc`).
+  const osm2rdf::util::UtcTime t = osm2rdf::util::secondsToUtc(time);
+  const int64_t year = t.year;
+  const unsigned month = t.month;
 
   // 4 digit year
   _out->write('0' + (year / 1000) % 10, part);
@@ -1520,20 +1519,20 @@ void osm2rdf::ttl::Writer<T>::writeSecondsAsISO(const std::string& subj,
   _out->write('0' + (month % 10), part);
   _out->write('-', part);
 
-  _out->write('0' + (t.tm_mday / 10) % 10, part);
-  _out->write('0' + (t.tm_mday % 10), part);
+  _out->write('0' + (t.day / 10) % 10, part);
+  _out->write('0' + (t.day % 10), part);
   _out->write('T', part);
 
-  _out->write('0' + (t.tm_hour / 10) % 10, part);
-  _out->write('0' + (t.tm_hour % 10), part);
+  _out->write('0' + (t.hour / 10) % 10, part);
+  _out->write('0' + (t.hour % 10), part);
   _out->write(':', part);
 
-  _out->write('0' + (t.tm_min / 10) % 10, part);
-  _out->write('0' + (t.tm_min % 10), part);
+  _out->write('0' + (t.minute / 10) % 10, part);
+  _out->write('0' + (t.minute % 10), part);
   _out->write(':', part);
 
-  _out->write('0' + (t.tm_sec / 10) % 10, part);
-  _out->write('0' + (t.tm_sec % 10), part);
+  _out->write('0' + (t.second / 10) % 10, part);
+  _out->write('0' + (t.second % 10), part);
 
   _out->write("\"^^", part);
   _out->write(constants::IRI__XSD__DATE_TIME, part);
