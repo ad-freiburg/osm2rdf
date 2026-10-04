@@ -18,6 +18,7 @@
 
 #include "osm2rdf/util/Output.h"
 
+#include <fstream>
 #include <iostream>
 
 #include "gtest/gtest.h"
@@ -164,6 +165,41 @@ TEST(UTIL_OutputMergeMode, NONE) {
 
   std::filesystem::remove_all(config.output);
   ASSERT_FALSE(std::filesystem::exists(config.output));
+}
+
+// ____________________________________________________________________________
+// Without merging, the merged file and the parts of an earlier run with the
+// same prefix (here with more parts, so with two-digit part numbers) are
+// removed, unrelated files are kept.
+TEST(UTIL_OutputMergeMode, NONERemovesStaleFiles) {
+  osm2rdf::config::Config config;
+  config.output =
+      config.getTempPath("TEST_UTIL_OutputMergeMode", "NONERemovesStaleFiles");
+  std::filesystem::remove_all(config.output);
+  config.mergeOutput = OutputMergeMode::NONE;
+  std::filesystem::create_directories(config.output);
+  std::filesystem::path dir{config.output};
+  std::filesystem::path output = dir / "file";
+
+  for (const auto& name : {"file", "file.part_00", "file.part_15", "other"}) {
+    std::ofstream{dir / name} << "stale";
+  }
+  ASSERT_EQ(4, countFilesInPath(dir));
+
+  size_t parts = 4;
+  osm2rdf::util::Output o{config, output, parts};
+  o.open();
+  // The 4 new parts and the unrelated file.
+  ASSERT_EQ(parts + 1, countFilesInPath(dir));
+  ASSERT_FALSE(std::filesystem::exists(output));
+  ASSERT_FALSE(std::filesystem::exists(dir / "file.part_00"));
+  ASSERT_FALSE(std::filesystem::exists(dir / "file.part_15"));
+  ASSERT_TRUE(std::filesystem::exists(dir / "file.part_0"));
+  ASSERT_TRUE(std::filesystem::exists(dir / "other"));
+  o.close();
+
+  std::filesystem::remove_all(dir);
+  ASSERT_FALSE(std::filesystem::exists(dir));
 }
 
 // ____________________________________________________________________________

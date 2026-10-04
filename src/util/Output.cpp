@@ -24,6 +24,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <iostream>
 #include <thread>
 #include <vector>
@@ -56,6 +57,15 @@ osm2rdf::util::Output::~Output() { close(); }
 
 // ____________________________________________________________________________
 bool osm2rdf::util::Output::open() {
+  // Without merging, first remove the merged file and the parts of an earlier
+  // run with the same prefix.
+  //
+  // NOTE: Nothing else overwrites them in this mode. The merged file is only
+  // truncated when merging, and the part names depend on the number of
+  // threads, so a run with another number of threads leaves its parts behind.
+  if (!_toStdOut && _config.mergeOutput == OutputMergeMode::NONE) {
+    removeStaleFiles();
+  }
 
   _rawFiles.resize(_partCount);
   _gzFiles.resize(_partCount);
@@ -204,6 +214,21 @@ void osm2rdf::util::Output::concatenate() {
   }
 
   _outFile.flush();
+}
+
+// ____________________________________________________________________________
+void osm2rdf::util::Output::removeStaleFiles() {
+  const std::filesystem::path prefix{_prefix};
+  const std::string partPrefix = prefix.filename().string() + ".part_";
+  const auto dir = prefix.has_parent_path() ? prefix.parent_path()
+                                            : std::filesystem::path{"."};
+  std::error_code ec;
+  std::filesystem::remove(prefix, ec);
+  for (const auto& entry : std::filesystem::directory_iterator(dir, ec)) {
+    if (entry.path().filename().string().rfind(partPrefix, 0) == 0) {
+      std::filesystem::remove(entry.path(), ec);
+    }
+  }
 }
 
 // ____________________________________________________________________________

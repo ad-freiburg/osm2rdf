@@ -60,6 +60,10 @@ class Output { public:
   // streams.
   void concatenate();
 
+  // Remove the merged file and the parts of an earlier run with the same
+  // prefix (only used if the parts are not merged).
+  void removeStaleFiles();
+
   void writeToFile(unsigned char* from, size_t len, size_t t);
   // Config instance.
   const osm2rdf::config::Config _config;
