@@ -52,7 +52,10 @@ class Output { public:
   void flush();
   // Flush the given part.
   void flush(size_t part);
-  // Filename for given part. Special handling for -1 (prefix) and -2 (suffix).
+  // Filename for the given part. The part number goes before the extensions of
+  // the output file, so that the format of a part is clear from its name. For
+  // example, the parts of `planet.ttl.gz` are `planet.part_00.ttl.gz`,
+  // `planet.part_01.ttl.gz`, and so on.
   std::string partFilename(int part);
 
  protected:
@@ -69,6 +72,10 @@ class Output { public:
   const osm2rdf::config::Config _config;
   // Prefix for all filenames.
   const std::string _prefix;
+  // The `_prefix` without its extensions, and its extensions (see
+  // `partFilename`).
+  const std::string _partNameStem;
+  const std::string _partNameExtensions;
   // Number of parts.
   std::size_t _partCount;
   // Number of temporary output streams.

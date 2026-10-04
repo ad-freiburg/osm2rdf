@@ -69,6 +69,29 @@ TEST(UTIL_Output, partFilenameMultipleDigits) {
   ASSERT_EQ("test.part_15", o.partFilename(15));
 }
 
+// Test that the part number goes before the extensions of the output file.
+TEST(UTIL_Output, partFilenameBeforeExtensions) {
+  osm2rdf::config::Config config;
+  auto partName = [&config](const std::string& prefix, size_t parts, int part) {
+    osm2rdf::util::Output o{config, prefix, parts};
+    return o.partFilename(part);
+  };
+  // A format and a compression extension.
+  ASSERT_EQ("planet.part_07.ttl.gz", partName("planet.ttl.gz", 33, 7));
+  ASSERT_EQ("planet.part_7.ttl.bz2", partName("planet.ttl.bz2", 8, 7));
+  // Only a format extension, or only a compression extension.
+  ASSERT_EQ("planet.part_3.ttl", partName("planet.ttl", 4, 3));
+  ASSERT_EQ("planet.part_3.gz", partName("planet.gz", 4, 3));
+  // Only the last extension before the compression extension counts.
+  ASSERT_EQ("planet-2026.09.28.part_3.ttl.gz",
+            partName("planet-2026.09.28.ttl.gz", 4, 3));
+  // Dots in directory names or at the start of the name do not start an
+  // extension.
+  ASSERT_EQ("dir.v2/planet.part_3", partName("dir.v2/planet", 4, 3));
+  ASSERT_EQ("dir/.planet.part_3", partName("dir/.planet", 4, 3));
+  ASSERT_EQ("dir/.planet.part_3.gz", partName("dir/.planet.gz", 4, 3));
+}
+
 // ____________________________________________________________________________
 TEST(UTIL_Output, WriteIntoCurrentPartFile) {
   osm2rdf::config::Config config;
@@ -198,6 +221,46 @@ TEST(UTIL_OutputMergeMode, NONERemovesStaleFiles) {
   ASSERT_FALSE(std::filesystem::exists(dir / "file.part_15"));
   ASSERT_TRUE(std::filesystem::exists(dir / "file.part_0"));
   ASSERT_TRUE(std::filesystem::exists(dir / "other"));
+  o.close();
+
+  std::filesystem::remove_all(dir);
+  ASSERT_FALSE(std::filesystem::exists(dir));
+}
+
+// Test the removal of stale files for an output file with extensions: the
+// part number is before the extensions, and files that only look similar to a
+// part are kept.
+TEST(UTIL_OutputMergeMode, NONERemovesStaleFilesWithExtensions) {
+  osm2rdf::config::Config config;
+  config.output = config.getTempPath("TEST_UTIL_OutputMergeMode",
+                                     "NONERemovesStaleFilesWithExtensions");
+  std::filesystem::remove_all(config.output);
+  config.mergeOutput = OutputMergeMode::NONE;
+  std::filesystem::create_directories(config.output);
+  std::filesystem::path dir{config.output};
+  std::filesystem::path output = dir / "file.ttl.gz";
+
+  // Stale files of an earlier run with 16 parts, plus files that are no parts:
+  // another extension, no part number, a non-digit in the part number.
+  for (const auto& name :
+       {"file.ttl.gz", "file.part_00.ttl.gz", "file.part_15.ttl.gz",
+        "file.part_00.nt.gz", "file.part_.ttl.gz", "file.part_1a.ttl.gz"}) {
+    std::ofstream{dir / name} << "stale";
+  }
+  ASSERT_EQ(6, countFilesInPath(dir));
+
+  size_t parts = 4;
+  osm2rdf::util::Output o{config, output, parts};
+  o.open();
+  ASSERT_FALSE(std::filesystem::exists(output));
+  ASSERT_FALSE(std::filesystem::exists(dir / "file.part_00.ttl.gz"));
+  ASSERT_FALSE(std::filesystem::exists(dir / "file.part_15.ttl.gz"));
+  ASSERT_TRUE(std::filesystem::exists(dir / "file.part_0.ttl.gz"));
+  ASSERT_TRUE(std::filesystem::exists(dir / "file.part_3.ttl.gz"));
+  ASSERT_TRUE(std::filesystem::exists(dir / "file.part_00.nt.gz"));
+  ASSERT_TRUE(std::filesystem::exists(dir / "file.part_.ttl.gz"));
+  ASSERT_TRUE(std::filesystem::exists(dir / "file.part_1a.ttl.gz"));
+  ASSERT_EQ(parts + 3, countFilesInPath(dir));
   o.close();
 
   std::filesystem::remove_all(dir);

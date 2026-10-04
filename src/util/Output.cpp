@@ -21,6 +21,7 @@
 #include <bzlib.h>
 #include <zlib.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -36,6 +37,35 @@ using osm2rdf::config::BZ2;
 using osm2rdf::config::GZ;
 using osm2rdf::config::NONE;
 
+namespace {
+// Split a filename into its stem and its extensions, where the extensions are
+// a compression extension (`.gz` or `.bz2`) if present, and the extension
+// before it. For example, `dir/planet.ttl.gz` is split into `dir/planet` and
+// `.ttl.gz`, and `dir/planet` into `dir/planet` and the empty string. A dot at
+// the start of the name (of a hidden file) does not start an extension.
+std::pair<std::string, std::string> splitExtensions(const std::string& path) {
+  const size_t slash = path.find_last_of('/');
+  const size_t nameStart = slash == std::string::npos ? 0 : slash + 1;
+  // Return the start of the last extension before `end`, or `end` if there is
+  // none.
+  auto extensionStart = [&path, nameStart](size_t end) {
+    if (end <= nameStart) {
+      return end;
+    }
+    const size_t dot = path.rfind('.', end - 1);
+    return dot == std::string::npos || dot <= nameStart ? end : dot;
+  };
+  size_t end = path.size();
+  size_t start = extensionStart(end);
+  const std::string_view last{path.data() + start, end - start};
+  if (last == ".gz" || last == ".bz2") {
+    end = start;
+    start = extensionStart(end);
+  }
+  return {path.substr(0, start), path.substr(start)};
+}
+}  // namespace
+
 // ____________________________________________________________________________
 osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
                               const std::string& prefix)
@@ -46,6 +76,8 @@ osm2rdf::util::Output::Output(const osm2rdf::config::Config& config,
                               const std::string& prefix, size_t partCount)
     : _config(config),
       _prefix(prefix),
+      _partNameStem(splitExtensions(prefix).first),
+      _partNameExtensions(splitExtensions(prefix).second),
       _partCount(partCount),
       _partCountDigits(std::floor(std::log10(partCount)) + 1),
       _outBuffers(_partCount),
@@ -180,9 +212,9 @@ void osm2rdf::util::Output::close() {
 // ____________________________________________________________________________
 std::string osm2rdf::util::Output::partFilename(int part) {
   std::ostringstream oss;
-  oss << _prefix << ".part_" << std::setfill('0')
+  oss << _partNameStem << ".part_" << std::setfill('0')
       << std::setw(_partCountDigits);
-  oss << (part);
+  oss << (part) << _partNameExtensions;
   return oss.str();
 }
 
@@ -219,13 +251,28 @@ void osm2rdf::util::Output::concatenate() {
 // ____________________________________________________________________________
 void osm2rdf::util::Output::removeStaleFiles() {
   const std::filesystem::path prefix{_prefix};
-  const std::string partPrefix = prefix.filename().string() + ".part_";
+  const std::string partStart =
+      std::filesystem::path{_partNameStem}.filename().string() + ".part_";
+  const std::string& partEnd = _partNameExtensions;
   const auto dir = prefix.has_parent_path() ? prefix.parent_path()
                                             : std::filesystem::path{"."};
+  // A part of an earlier run is `partStart`, then a part number (of any number
+  // of digits), then `partEnd`.
+  auto isPartName = [&partStart, &partEnd](const std::string& name) {
+    if (name.size() <= partStart.size() + partEnd.size() ||
+        name.compare(0, partStart.size(), partStart) != 0 ||
+        name.compare(name.size() - partEnd.size(), partEnd.size(), partEnd) !=
+            0) {
+      return false;
+    }
+    return std::all_of(name.begin() + partStart.size(),
+                       name.end() - partEnd.size(),
+                       [](char c) { return c >= '0' && c <= '9'; });
+  };
   std::error_code ec;
   std::filesystem::remove(prefix, ec);
   for (const auto& entry : std::filesystem::directory_iterator(dir, ec)) {
-    if (entry.path().filename().string().rfind(partPrefix, 0) == 0) {
+    if (isPartName(entry.path().filename().string())) {
       std::filesystem::remove(entry.path(), ec);
     }
   }
