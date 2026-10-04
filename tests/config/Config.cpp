@@ -986,6 +986,39 @@ TEST(CONFIG_Config, getInfoWriteRDFStatistics) {
                        osm2rdf::config::constants::WRITE_RDF_STATISTICS_INFO));
 }
 
+// Test that `--output-no-merge` selects the merge mode `NONE` (the output
+// file still gets the suffix of the default compression).
+TEST(CONFIG_Config, fromArgsOutputNoMerge) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg =
+      "--" + osm2rdf::config::constants::OUTPUT_NO_MERGE_OPTION_LONG;
+  const int argc = 5;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("-o"),
+                      const_cast<char*>("/tmp/dummyOutput"),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("/tmp/dummyOutput.bz2", config.output.string());
+  ASSERT_EQ(osm2rdf::util::OutputMergeMode::NONE, config.mergeOutput);
+}
+
+// Test that the info block reports the merge mode `NONE` for a file output.
+TEST(CONFIG_Config, getInfoOutputNoMerge) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.output = "/tmp/dummyOutput";
+  config.mergeOutput = osm2rdf::util::OutputMergeMode::NONE;
+
+  const std::string res = config.getInfo("");
+
+  ASSERT_THAT(res,
+              ::testing::HasSubstr(
+                  osm2rdf::config::constants::OUTPUT_NO_MERGE_OPTION_INFO));
+}
+
 // ____________________________________________________________________________
 TEST(CONFIG_Config, getInfoOutputKeepFiles) {
   osm2rdf::config::Config config;

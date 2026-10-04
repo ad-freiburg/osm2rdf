@@ -189,6 +189,10 @@ std::string osm2rdf::config::Config::getInfo(std::string_view prefix) const {
     oss << "\n"
         << prefix << osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_INFO;
   }
+  if (!output.empty() && mergeOutput == util::OutputMergeMode::NONE) {
+    oss << "\n"
+        << prefix << osm2rdf::config::constants::OUTPUT_NO_MERGE_OPTION_INFO;
+  }
 #if defined(_OPENMP)
   oss << "\n" << prefix << osm2rdf::config::constants::SECTION_OPENMP;
   oss << "\n" << prefix << "Max Threads: " << omp_get_max_threads();
@@ -427,6 +431,10 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_SHORT,
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_LONG,
       osm2rdf::config::constants::OUTPUT_KEEP_FILES_OPTION_HELP);
+  auto outputNoMergeOp = parser.add<popl::Switch>(
+      osm2rdf::config::constants::OUTPUT_NO_MERGE_OPTION_SHORT,
+      osm2rdf::config::constants::OUTPUT_NO_MERGE_OPTION_LONG,
+      osm2rdf::config::constants::OUTPUT_NO_MERGE_OPTION_HELP);
   auto outputCompressOp =
       parser.add<popl::Value<std::string>, popl::Attribute::advanced>(
           osm2rdf::config::constants::OUTPUT_COMPRESS_OPTION_SHORT,
@@ -580,6 +588,9 @@ void osm2rdf::config::Config::fromArgs(int argc, char** argv) {
     }
 
     outputKeepFiles = outputKeepFilesOp->is_set();
+    if (outputNoMergeOp->is_set()) {
+      mergeOutput = util::OutputMergeMode::NONE;
+    }
     if (output.empty()) {
       outputCompress = NONE;
       mergeOutput = util::OutputMergeMode::NONE;
