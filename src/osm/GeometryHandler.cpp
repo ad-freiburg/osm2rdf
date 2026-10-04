@@ -74,16 +74,18 @@ GeometryHandler<W>::GeometryHandler(const osm2rdf::config::Config& config,
                 osm2rdf::ttl::constants::IRI__OPENGIS__EQUALS,
                 osm2rdf::ttl::constants::IRI__OPENGIS__OVERLAPS,
                 osm2rdf::ttl::constants::IRI__OPENGIS__CROSSES,
-                true,   // useBoxIds
-                true,   // useArea
-                false,  // useOBB
-                true,   // useDiagBox
-                true,   // useFastSweepSkip
-                false,  // useInnerOuter
-                false,  // noGeometryChecks
-                -1,     // withinDist
-                false,  // computeDE9IM
-                false,  // forceTwoSided
+                true,               // useBoxIds
+                true,               // useArea
+                false,              // useOBB
+                true,               // useDiagBox
+                true,               // useFastSweepSkip
+                false,              // noGeometryChecks
+                -1,                 // withinDist
+                false,              // euclideanDist
+                false,              // haversineApprox
+                false,              // computeDE9IM
+                ::util::geo::FANY,  // de9imFilter
+                false,              // forceTwoSided
                 [this](size_t t, const char* a, size_t an, const char* b,
                        size_t bn, const char* pred, size_t predn) {
                   this->writeRelCb(t, a, an, b, bn, pred, predn);
