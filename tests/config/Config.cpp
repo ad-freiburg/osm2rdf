@@ -51,6 +51,8 @@ void assertDefaultConfig(const osm2rdf::config::Config& config) {
 
   ASSERT_FALSE(config.writeRDFStatistics);
 
+  ASSERT_FALSE(config.noBlankNodes);
+
   ASSERT_EQ(0, config.simplifyGeometries);
   ASSERT_EQ(0, config.simplifyWKT);
   ASSERT_EQ(5, config.wktDeviation);
@@ -659,6 +661,21 @@ TEST(CONFIG_Config, fromArgsSimplifyWKTLong) {
 }
 
 // ____________________________________________________________________________
+TEST(CONFIG_Config, fromArgsNoBlankNodesLong) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  osm2rdf::util::CacheFile cf("/tmp/dummyInput");
+
+  const auto arg = "--" + osm2rdf::config::constants::BLANK_NODES_OPTION_LONG;
+  const int argc = 3;
+  char* argv[argc] = {const_cast<char*>(""), const_cast<char*>(arg.c_str()),
+                      const_cast<char*>("/tmp/dummyInput")};
+  config.fromArgs(argc, argv);
+  ASSERT_EQ("", config.output.string());
+  ASSERT_TRUE(config.noBlankNodes);
+}
+
+// ____________________________________________________________________________
 TEST(CONFIG_Config, fromArgsSimplifyWKTDeviationLong) {
   osm2rdf::config::Config config;
   assertDefaultConfig(config);
@@ -926,6 +943,17 @@ TEST(CONFIG_Config, getInfoSimplifyWKT) {
   const std::string res = config.getInfo("");
   ASSERT_THAT(
       res, ::testing::HasSubstr(osm2rdf::config::constants::SIMPLIFY_WKT_INFO));
+}
+
+// ____________________________________________________________________________
+TEST(CONFIG_Config, getInfoNoBlankNodes) {
+  osm2rdf::config::Config config;
+  assertDefaultConfig(config);
+  config.noBlankNodes = true;
+
+  const std::string res = config.getInfo("");
+  ASSERT_THAT(
+      res, ::testing::HasSubstr(osm2rdf::config::constants::BLANK_NODES_INFO));
 }
 
 // ____________________________________________________________________________
